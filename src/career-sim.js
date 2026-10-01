@@ -510,7 +510,7 @@ function hireFactors(post) {
   const lvl = careerLevel();
   F.push(['Job level', post.odd && !t.cat ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
   if (post.tier === 0 && M.school) F.push(['You\'re a student', .7]);
-  if (post.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
+  if (post.agent && M.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
   if (M.freeRef) F.push(['A word from your old teacher', .8]);
   const sc = subScore(t), req = postReq(t);
   F.push(['Your skills for it', post.tier <= 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
@@ -984,7 +984,7 @@ function applyAct(a) {
     case 'enrol': return enrol(a);
     case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${PROGRAMS[S.me.school.prog].label.toLowerCase()}.`); S.me.school = null; return true;
     case 'query': return queryAgency(a);
-    case 'fireagent': if (!S.me.agent) return false; inbox('note', 'You leave your agent', `You and ${S.me.agent.name} part ways.`); if (S.me.known[S.me.agent.id]) addTie(ME(), P(S.me.agent.id), -10); S.me.agent = null; return true;
+    case 'fireagent': if (!S.me.agent) return false; inbox('note', 'You leave your agent', `You and ${S.me.agent.name} part ways.`); if (S.me.known[S.me.agent.id]) addTie(ME(), P(S.me.agent.id), -10); S.me.agent = null; S.me.board = S.me.board.filter(p => !p.agent); return true;
   }
   return false;
 }

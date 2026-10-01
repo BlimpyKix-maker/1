@@ -164,7 +164,7 @@ function agentBoard(films) {
 function agentWeek() {
   const M = S.me; if (!M.agent) return;
   if (M.jobs.length) M.agent.lastBook = S.week;
-  if (S.week - M.agent.lastBook > 30) { inbox('note', 'Your agent lets you go', `${M.agent.name} drops you: thirty weeks without a booking. It isn't personal. It feels personal.`); M.agent = null; }
+  if (S.week - M.agent.lastBook > 30) { inbox('note', 'Your agent lets you go', `${M.agent.name} drops you: thirty weeks without a booking. It isn't personal. It feels personal.`); M.agent = null; M.board = M.board.filter(p => !p.agent); }
 }
 function agentApproach() {
   const M = S.me, me = ME();
