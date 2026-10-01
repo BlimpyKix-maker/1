@@ -65,6 +65,7 @@ function finishDraft(sc, L) {
   sc.stage = 'done'; M.spec.drafts++; (sc.history = sc.history || []).push(sc.grade + ' ' + score);
   const v = voiceOf(); v[sc.theme] = (v[sc.theme] || 0) + 3; v[(GENRE_THEMES[sc.genre] || [])[0]] = (v[(GENRE_THEMES[sc.genre] || [])[0]] || 0) + 1;
   me.standing = clamp(me.standing + (score >= 70 ? .6 : .2), 0, 100);
+  milestone(`Finished draft ${sc.draft} of ${sc.title} (${sc.grade})`, 'write');
   L.push(`You type FADE OUT on draft ${sc.draft} of ${sc.title}. Reading it back, you'd give it a ${sc.grade}.`);
   inbox('note', `Draft finished: ${sc.title}`, `${sc.logline} Draft ${sc.draft}, ${sc.target} pages. Your own verdict: ${sc.grade} (${score}/100). Rewrite it, show it to people you trust, or send it to a contest.`);
 }
@@ -125,7 +126,7 @@ function contestWeek() {
     const C = CONTESTS.find(c => c.k === e.c), sc = M.scripts.find(x => x.id === e.script), roll = sc.score + (prnd() - .5) * 18;
     if (roll >= C.bar) { M.cash += usd(C.prize); me.standing = clamp(me.standing + 4, 0, 100); me.fame = clamp((me.fame || 0) + 4, 0, 100); sc.won = (sc.won || []).concat(C.name);
       inbox('news', `${C.name}: you're in`, `${sc.title} is selected. ${C.d}${C.prize ? ' A cheque for ' + fmtCash(usd(C.prize)) + ' follows.' : ''} Agents start returning your calls.`);
-      (M.milestones = M.milestones || []).push({ w: S.week, t: `${sc.title} won a place at ${C.name}` }); }
+      milestone(`${sc.title} won a place at ${C.name}`, 'prize'); }
     else if (roll >= C.bar - 12) inbox('note', `${C.name}: quarter-finals`, `${sc.title} made the quarter-finals. Not this year, but someone noticed.`);
     else inbox('note', `${C.name}: not selected`, `${sc.title} wasn't selected. Thousands enter.`);
   }

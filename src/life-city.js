@@ -43,7 +43,7 @@ function moveHome(a) {
   M.life = L.life; M.hood = L.hood; M.hoodWhere = L.where; M.rentOverride = L.rent;
   M.home.layout = {};
   inbox('note', 'Moving day', `${ORIGIN.life[L.life].label} in ${L.where}. ${L.life === 'couch' ? 'Your things fit in two bags.' : `Two weeks' rent as a deposit, a borrowed van, and a pizza on the floor.`}`);
-  (M.milestones = M.milestones || []).push({ w: S.week, t: `Moved to ${ORIGIN.life[L.life].label.toLowerCase()} in ${L.where}` });
+  milestone(`Moved to ${ORIGIN.life[L.life].label.toLowerCase()} in ${L.where}`, 'home');
   return true;
 }
 function buyVehicle(a) {
@@ -54,7 +54,7 @@ function buyVehicle(a) {
   M.vehicle = a.v;
   if (V.standing) ME().standing = clamp(ME().standing + V.standing, 0, 100);
   inbox('note', 'New wheels', `${V.label}. ${V.d}`);
-  (M.milestones = M.milestones || []).push({ w: S.week, t: `Got ${V.label.toLowerCase()}` });
+  milestone(`Got ${V.label.toLowerCase()}`, 'home');
   return true;
 }
 // ---- venues and this week's listings ----

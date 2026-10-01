@@ -114,6 +114,7 @@ function schoolWeek(L, gain) {
   if (sc.done >= P0.weeks) {
     if (P0.deg && !M.degrees.includes(P0.deg)) M.degrees.push(P0.deg);
     me.standing = clamp(me.standing + (P0.deg === 'mfa' ? 3 : 1), 0, 100);
+    milestone(`Graduated: ${P0.label.toLowerCase()} in ${CRAFTS[sc.craft].label.toLowerCase()}`, 'school');
     inbox('news', 'Graduation', `You finish ${P0.label.toLowerCase()} in ${CRAFTS[sc.craft].label.toLowerCase()}.${P0.deg ? ' The certificate goes on the wall, and on every application.' : ''}`);
     M.school = null;
   }
@@ -145,6 +146,7 @@ function signAgent(ag, why) {
   q.occ = 'Talent agent'; q.agency = ag.name;
   M.agent = { ag: ag.i, name: ag.name, tier: ag.tier, id: q.id, since: S.week, lastBook: S.week, cut: .1 };
   meet(q.id, 'Your agent', 15); trust(q.id, 20);
+  milestone(`Signed with ${q.name} at ${ag.name}`, 'agent');
   inbox('news', `You have an agent: ${q.name}`, `${why} ${q.name} at ${ag.name} takes 10% of what you earn, sends you up for better jobs and argues for better money.`, { person: q.id });
 }
 // Extra listings your agent finds, a level above where you'd look yourself, with their pitch behind them.

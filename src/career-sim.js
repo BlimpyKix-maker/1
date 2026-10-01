@@ -143,6 +143,7 @@ function startCareer(c) {
   if (c.quirk === 'ex') { const x = youngNPC(hub, ppick(['actor', 'director', 'writer', 'producer', 'dp'])); meet(x.id, 'Your ex', -6); trust(x.id, 10); }
   M.party = makeParty(c);
   diary('You arrive in ' + HUBS[hub].name + ' with ' + fmtCash(M.cash) + (M.debt ? ' and ' + fmtCash(M.debt) + ' of student debt' : '') + '.');
+  milestone(`Arrived in ${HUBS[hub].name} to become a ${ROLE_LABEL[c.role].toLowerCase()}, with ${fmtCash(M.cash)} to your name`, 'start');
 }
 
 // Someone at the start of their career: a pool member with no credits, or a new arrival.
@@ -620,6 +621,7 @@ function closeWeek(a) {
   if (rival !== undefined && noes.length && prnd() < .2) { const p = ppick(noes); addTie(me, P(rival), -3); inbox('note', `${P(rival).name} again`, `You hear who got the ${p.t.toLowerCase()} job you wanted${p.film !== null ? ' on ' + S.films[p.film].title : ''}: ${P(rival).name}.`, { person: rival }); stress += 3; }
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
+  storyWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
@@ -661,6 +663,8 @@ function takeJob(post) {
   if (post.head !== null) meet(post.head, 'Hired you');
   for (const id of mates) meet(id, 'Worked together');
   diary(`You start as ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}.`);
+  if (!M.past.length && M.jobs.length === 1) milestone(`First job in the business: ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`, 'work');
+  else if (post.tier >= 2 && f) milestone(`Hired as ${post.t.toLowerCase()} on ${f.title}`, 'work');
 }
 function finishJob(j, L, quit) {
   const M = S.me, me = ME();
@@ -668,7 +672,7 @@ function finishJob(j, L, quit) {
   const f = j.film !== null ? S.films[j.film] : null;
   const t = tmplOf(j);
   const credited = !quit && f && t.cr && j.done >= Math.min(2, j.weeks) && f.stage >= 0;
-  if (credited) { f.xc = f.xc || {}; f.xc[me.id] = j.t; }
+  if (credited) { f.xc = f.xc || {}; f.xc[me.id] = j.t; milestone(`${me.credits.length || M.past.some(p => p.credited) ? 'Screen credit' : 'First screen credit'}: ${j.t.toLowerCase()} on ${f.title}`, 'credit'); }
   M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit });
   if (j.head !== null && !quit) {
     const o = opinion(j.head), k = M.known[j.head];
@@ -866,6 +870,7 @@ function sceneResolve(it, k) {
   if (fx.fire && job && prnd() < fx.fire) { finishJob(job, null, true); t += ' You are let go.'; me.standing = Math.max(0, me.standing - 1); }
   recalc(me);
   const lr = o.check ? S.me.lastRoll : null;
+  if (lr && lr.crit > 0 && lr.DC >= 13) milestone(`A natural 20 when it counted: ${it.title.toLowerCase()}`, 'luck');
   if (lr && lr.crit > 0) { me.standing = clamp(me.standing + .5, 0, 100); if (ctx.head !== null && ctx.head !== undefined) addTie(me, P(ctx.head), 3); t += ' People will talk about it.'; }
   if (lr && lr.crit < 0) { M.stress = clamp(M.stress + 5, 0, 100); t += ' It could hardly have gone worse.'; }
   it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null };
