@@ -56,7 +56,7 @@ function npcLook(p) {
 function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : npcLook(p); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
 let PORTRAIT_UID = 0;
-function portraitSVG(L, age, size = 96) {
+function portraitSVG(L, age, size = 96, bare = false) {
   L = Object.assign(defaultLook(), migrateLook(Object.assign({}, L)));
   const uid = 'pc' + (++PORTRAIT_UID);
   const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#000000', .18), line = mixHex(skin, '#000000', .38);
@@ -67,7 +67,7 @@ function portraitSVG(L, age, size = 96) {
   const recede = L.hairline === 1 ? clamp((age - 32) / 30, 0, 1) : 0;
   const cx = 60, cy = 52, top = cy - fh / 2;
   const o = [];
-  o.push(`<rect width="120" height="120" rx="10" fill="var(--accent-soft)"/>`);
+  if (!bare) o.push(`<rect width="120" height="120" rx="10" fill="var(--accent-soft)"/>`);
   // how far the hair reaches, so headwear sits on top of it rather than inside it
   const hairTop0 = top - 3 + recede * 10;
   const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 ? fw / 2 : fw / 2 + 2;

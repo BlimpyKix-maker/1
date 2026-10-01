@@ -53,7 +53,7 @@ function lookControls(c, owned = []) {
 function wardrobeShop() {
   const M = S.me;
   return `<h4>Wardrobe shop</h4><div class="shop">${Object.entries(WARDROBE).map(([id, W]) => { const own = M.owned.includes(id), nm = LOOK[W.slot].opts[W.opt];
-    return `<div class="shop-item${own ? ' owned' : ''}">${portraitSVG(Object.assign(defaultLook(), M.look, { [W.slot]: W.opt }), S.year - ME().born, 56)}<div><b>${esc(nm)}</b> <span class="muted">${esc(LOOK[W.slot].label.toLowerCase())}</span><p class="muted">${esc(W.d)}</p>${own ? '<span class="chip t-Award">Owned</span>' : `<button class="btn-s" data-buy="${id}"${M.cash < W.price ? ' disabled' : ''}>Buy ${usd(W.price)}</button>`}</div></div>`; }).join('')}</div>`;
+    return `<div class="shop-item${own ? ' owned' : ''}">${portraitSVG(Object.assign(defaultLook(), M.look, { [W.slot]: W.opt }), S.year - ME().born, 56)}<div><b>${esc(nm)}</b> <span class="muted">${esc(LOOK[W.slot].label.toLowerCase())}</span><p class="muted">${esc(W.d)}</p><p>${fxBadges(W)}</p>${own ? '<span class="chip t-Award">Owned</span>' : `<button class="btn-s" data-buy="${id}"${M.cash < W.price ? ' disabled' : ''}>Buy ${usd(W.price)}</button>`}</div></div>`; }).join('')}</div>`;
 }
 function viewCreator() {
   const c = UI.cc = UI.cc || ccDefaults();
@@ -62,8 +62,8 @@ function viewCreator() {
   const fc = filmChoices();
   const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title…" aria-label="Favourite film ${i + 1}">`}</li>`; };
   const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
-  const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span></button>`; };
-  return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p></div>
+  const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span> ${fxBadges(TRAITS[t])}</button>`; };
+  return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
   <section class="panel cc"><h3>The basics</h3>
    <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 150)}</div><div>
    <div class="ccrow"><label>Name <input id="cc-name" type="text" maxlength="40" value="${esc(c.name)}"></label><button class="linkish" data-cc="rename">Suggest another</button></div>
@@ -94,18 +94,107 @@ function viewCreator() {
 }
 
 function rollChip(r) { return r ? `<span class="roll ${r.ok ? 'good' : 'bad'}">${esc(rollText(r))}</span>` : ''; }
+// A roll you can feel: the d20 itself, a track from 1 to 25 with the target marked, and a verdict. The newest roll
+// tumbles in once; old ones sit still.
+function d20SVG(n, cls) {
+  return `<svg class="d20 ${cls || ''}" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,2 37,11 37,29 20,38 3,29 3,11" class="d20-body"/><polygon points="20,8 32,29 8,29" class="d20-face"/><path d="M20 2 L20 8 M37 11 L32 29 M3 11 L8 29 M37 29 L32 29 M3 29 L8 29 M20 38 L20 34" class="d20-edge"/><text x="20" y="25" text-anchor="middle">${n}</text></svg>`;
+}
+function rollCard(r, small) {
+  if (!r) return '';
+  const fresh = r.n && r.n > (UI.seenRoll || 0);
+  if (fresh) UI.pendingSeen = Math.max(UI.pendingSeen || 0, r.n);
+  const tot = r.d + r.mod, lo = 1, hi = 25, pos = v => clamp((v - lo) / (hi - lo) * 100, 0, 100);
+  const verdict = r.crit > 0 ? 'Natural 20!' : r.crit < 0 ? 'Natural 1' : r.ok ? (tot - r.DC >= 5 ? 'Comfortably' : 'Made it') : (r.DC - tot <= 2 ? 'So close' : 'Missed');
+  const dice = (r.dice || [r.d]).map((d, i, a) => d20SVG(d, a.length > 1 && d !== r.d ? 'spent' : (a.length > 1 && i > 0 && a[0] === d ? 'spent' : ''))).join('');
+  const why = (r.why || []).length ? ` · ${r.why.join(', ')}` : '';
+  return `<div class="rollcard ${r.ok ? 'win' : 'lose'}${r.crit > 0 ? ' crit' : r.crit < 0 ? ' fumble' : ''}${fresh ? ' fresh' : ''}${small ? ' small' : ''}">
+    <div class="dice">${dice}</div>
+    <div class="rc-body"><div class="verdict">${verdict}</div>
+     <div class="track" title="${esc(rollText(r))}"><span class="need" style="left:${pos(r.DC)}%"><i>needs ${r.DC}</i></span><span class="got" style="left:${pos(tot)}%"><i>${tot}</i></span></div>
+     <small>${esc(statLabel(r.stat))}: rolled ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${tot}, needed ${r.DC}${r.adv > 0 ? ' · advantage' : r.adv < 0 ? ' · disadvantage' : ''}${esc(why)}</small></div></div>`;
+}
+// The odds before you commit: a bar, a number and the reasons.
+function oddsBar(stat, dc) {
+  const c = checkInfo(stat, dc), p = Math.round(c.p * 100);
+  return `<span class="oddsbar" title="${esc(checkLabel(stat, dc) + (c.why.length ? ' · ' + c.why.join(', ') : ''))}"><span class="ob-l">${esc(statLabel(stat))}</span><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b>${c.adv > 0 ? '<em class="adv">▲ adv</em>' : c.adv < 0 ? '<em class="dis">▼ dis</em>' : ''}</span>`;
+}
+// What a trait, garment or piece of furniture does, as badges.
+function fxBadges(o) {
+  const b = [];
+  for (const k of o.adv || []) b.push(`<span class="fx up">▲ ${esc(statLabel(k))}</span>`);
+  for (const k of o.dis || []) b.push(`<span class="fx down">▼ ${esc(statLabel(k))}</span>`);
+  for (const k in o.bonus || {}) b.push(`<span class="fx ${o.bonus[k] > 0 ? 'up' : 'down'}">${o.bonus[k] > 0 ? '+' : ''}${o.bonus[k]} ${esc(statLabel(k))}</span>`);
+  const f = o.fx || {};
+  if (f.energy) b.push(`<span class="fx up">+${f.energy} energy/wk</span>`);
+  if (f.stress) b.push(`<span class="fx ${f.stress < 0 ? 'up' : 'down'}">${f.stress > 0 ? '+' : '−'}${Math.abs(f.stress)} stress/wk</span>`);
+  if (f.pages) b.push(`<span class="fx up">+${f.pages} pages/day</span>`);
+  if (f.standing) b.push(`<span class="fx up">standing ↑</span>`);
+  for (const k in f.grow || {}) b.push(`<span class="fx up">${esc(statLabel(k))} ↑</span>`);
+  if (f.train) b.push(`<span class="fx up">${esc(CRAFTS[f.train].label)} classes ×1.4</span>`);
+  if (o.lucky) b.push('<span class="fx up">reroll a natural 1</span>');
+  return b.join(' ');
+}
 function viewParty() {
   const M = S.me, pt = M.party;
   const sc = partyScene(pt);
   const opts = sc.rooms ? `<div class="rooms">${sc.rooms.map(r => `<button class="opt" data-party="${r.k}"><b>${esc(r.where)}</b><span>${esc(r.who)} is there</span></button>`).join('')}</div>`
-    : `<div class="choices">${sc.opts.map(o => `<button class="choice" data-party="${o.k}"><b>${esc(o.label)}</b>${o.check ? `<span class="odds">${esc(checkLabel(o.check[0], o.check[1]))}</span>` : ''}</button>`).join('')}</div>`;
+    : `<div class="choices">${sc.opts.map(o => `<button class="choice" data-party="${o.k}"><b>${esc(o.label)}</b>${o.check ? oddsBar(o.check[0], o.check[1]) : ''}</button>`).join('')}</div>`;
   return `<div class="head partyhead"><div class="pf">${portraitOf(ME(), 72)}</div><div><p class="eyebrow">New Year's Eve · ${S.startYear - 1}</p><h2>${esc(sc.title)}</h2></div></div>
-  ${(pt.log || []).map(l => `<div class="plog"><span class="muted">${esc(l.title)}.</span> ${esc(l.choice)} ${rollChip(l.roll)}<p>${esc(l.t)}</p></div>`).join('')}
+  ${(pt.log || []).map(l => `<div class="plog"><span class="muted">${esc(l.title)}.</span> ${esc(l.choice)}${rollCard(l.roll, true)}<p>${esc(l.t)}</p></div>`).join('')}
   <section class="panel scene"><p class="big-p">${esc(sc.text)}</p>${sc.sys ? `<p class="sys"><b>How it works</b> ${esc(sc.sys)}</p>` : ''}${opts}</section>
   <p class="note">${pt.drinks >= 3 ? 'You have had a few: disadvantage on your rolls until you sober up.' : 'Rolls are a d20 plus your modifier against the difficulty. A natural 20 always works; a natural 1 never does.'}</p>`;
 }
 
 function meter(label, v, cls, txt) { return `<div class="rep"><span>${label}</span>${bar(v, 100, cls)}<b>${txt ?? Math.round(v)}</b></div>`; }
+const ACT_ICON = { work: '🎬', hunt: '📋', network: '🥂', catchup: '☕', write: '✍️', train: '🎓', hustle: '🛵', rest: '🛋️' };
+const DAY_FLAVOUR = {
+  work: ['A long day on set. You learn three things nobody wrote down.', 'Call time at six. Wrap at eight. Worth it.', 'You keep your head down and your ears open.'],
+  hunt: ['You comb the board, rewrite your cover note twice, and send nothing you\'re ashamed of.', 'Emails, calls, a coffee with a stranger who knows a guy.', 'You trawl the trades for anything hiring.'],
+  write: ['The pages come slowly, then all at once.', 'You write a scene you love and a scene you\'ll cut.', 'Blank page, cold coffee, four decent pages.'],
+  train: ['A class full of people as hungry as you.', 'You practise until it stops feeling like practice.', 'The teacher notices you. Small victories.'],
+  hustle: ['A bar shift. The tips are fine; the stories are better.', 'Deliveries across town. Rent is rent.', 'You pour drinks for people who make films.'],
+  rest: ['You sleep late and call home.', 'A long walk, a cheap meal, no screens.', 'Friends outside the business remind you there is an outside.']
+};
+// The week as a strip of days: lived days show what happened, today's card has the button, later days can still change.
+function weekStrip(actOpts) {
+  const M = S.me, W = M.wk, plan = effectivePlan(), cur = W ? W.day : 0;
+  return `<div class="strip">${DAY_NAMES.map((dn, i) => {
+    if (W && i < W.day) { const r = W.days[i], lines = r.lines.length ? r.lines : [DAY_FLAVOUR[r.act] ? DAY_FLAVOUR[r.act][(S.week + i) % 3] : ''];
+      return `<div class="day done"><div class="dh"><span class="di">${ACT_ICON[r.act] || ''}</span><b>${dn}</b><span class="muted">${esc(ACTIVITIES[r.act].label)}</span></div>${lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(r.roll, true)}<span class="den">energy ${r.energy}</span></div>`; }
+    const a = plan[i], now = i === cur;
+    return `<div class="day${now ? ' now' : ''}"><div class="dh"><span class="di">${ACT_ICON[a] || ''}</span><b>${dn}</b>${now ? '<span class="chip t-Award">Today</span>' : ''}</div>
+      ${a === 'work' ? `<p><span class="chip">Work</span> <span class="muted">${esc(M.jobs.map(j => j.t).join(', '))}</span></p>` : M.burnout && !W ? '<p class="bad">Rest (burnt out)</p>' : sel('pl-' + i, actOpts, M.plan[i])}
+      ${now ? `<button class="btn-s" data-day="1">${i === 5 ? 'Live the weekend' : 'Live ' + dn}</button>` : ''}</div>`;
+  }).join('')}</div>
+  <div class="skip"><span class="muted">Skip ahead with this plan:</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
+}
+// How the game works, in one place. Opens by itself the first time you reach your desk.
+function guidePanel() {
+  const ex = { stat: 'cha', d: 14, dice: [14], mod: 1, DC: 12, adv: 0, ok: true, crit: 0, why: ['Charming'] };
+  return `<section class="panel guide"><h3>How this works <button class="linkish" data-guide="">Close</button></h3>
+   <div class="g-grid">
+    <div><h4>It's your world</h4><p>There is no script. A whole film industry runs around you week by week: studios rise and fall, films open and flop, people you met at a party become famous or vanish. You're one more person in it. Pick a dream and chase it, change your mind, build a circle of collaborators and grow your own corner of the business into something you're proud of.</p>
+     <p class="muted">Some goals people set themselves: a first screen credit · a film of your own · a festival prize · a home worth coming back to · a crew who follows you from job to job · a studio with your name on it.</p></div>
+    <div><h4>A week</h4><p>Plan six slots: Monday to Friday and the weekend. Press <b>Next day</b> to live one day at a time and see how it goes, or <b>End week</b> to live the rest. The week closes with pay, replies to your applications, rent and the news. <b>Skip ahead</b> repeats your plan for longer.</p>
+     <p class="muted">Energy drains with work and returns with rest. Stress builds with rejection and bills. Let either run too far and you'll burn out for a week.</p></div>
+    <div><h4>Rolls</h4><p>Risky moments roll a twenty-sided die. Your stat adds or subtracts; traits, clothes and the state you're in can give <span class="fx up">▲ advantage</span> (roll twice, keep the best) or <span class="fx down">▼ disadvantage</span>. A natural 20 always works and a natural 1 always fails. Before you choose, the bar shows your odds.</p>${rollCard(ex, true)}</div>
+    <div><h4>Work and people</h4><p>The board lists jobs on real productions around you. Your odds depend on your skills, who you know, your standing and luck; hover them to see why. Everyone you meet remembers you: opinion is whether they like you, trust is whether they believe you, and favours are what they owe.</p></div>
+    <div><h4>Money and things</h4><p>Money pays the rent first. After that it buys clothes, a better place and things for it. Some help: a desk means more pages, a proper bed better rest, a vintage watch advantage on work ethic. Look for the green and red badges.</p></div>
+    <div><h4>Real history</h4><p>The films and people of real film history are here under new names, with their real credits, trivia and rumours (switch on <i>Cinephile notes</i> on any film or person). From the day you arrive, history is yours to change.</p></div>
+   </div></section>`;
+}
+// Your place: the furniture shop and where things go.
+function homePanel() {
+  const M = S.me, H = M.home, lay = homeLayout(), spots = HOME_SPOTS[M.life] || [];
+  const spotName = { wallL: 'Left wall', wallL2: 'Left wall, by the door', wallR: 'Right wall', floorL: 'Left corner', floorC: 'By the window', floorR: 'Right corner', corner: 'Back corner', sill: 'Windowsill' };
+  return `<section class="panel"><h3>Your place <button class="linkish" data-homep="">Close</button></h3>
+   <p class="muted">${M.life === 'couch' ? 'You\'re on a friend\'s couch: there\'s a windowsill and that\'s it. Anything bigger waits in a box until you have a room of your own.' : M.life === 'shared' ? 'One room in a shared flat: two walls, two corners and a windowsill.' : 'A place of your own: plenty of wall and floor to fill.'} Things only help once they're in the room.</p>
+   ${H.items.length ? `<h4>Arrange</h4><div class="arr">${H.items.map(id => { const F = FURNITURE[id], ok = spots.filter(s => fits(F.kind, s.kind));
+     return `<label>${esc(F.name)} <select data-place="${id}"><option value="">${lay[id] ? 'Wherever there\'s room' : 'In a box (no room)'}</option>${ok.map(s => `<option value="${s.id}"${H.layout[id] === s.id ? ' selected' : ''}>${esc(spotName[s.id] || s.id)}</option>`).join('')}</select></label>`; }).join('')}</div>
+     <p><button class="btn-s ghost" data-arrange="auto">Let the game arrange it</button> <button class="btn-s ghost" data-arrange="shuffle">Shuffle it</button></p>` : ''}
+   <h4>Furniture and things</h4><div class="shop">${Object.entries(FURNITURE).map(([id, F]) => { const own = H.items.includes(id);
+     return `<div class="shop-item${own ? ' owned' : ''}"><svg viewBox="-30 -84 120 92" width="64" height="50">${furnitureSVG(id, 0, 0)}</svg><div><b>${esc(F.name)}</b><p class="muted">${esc(F.d)}</p><p>${fxBadges(F)}</p>${own ? `<span class="chip t-Award">${lay[id] ? 'In the room' : 'In a box'}</span>` : `<button class="btn-s" data-furnish="${id}"${M.cash < F.price ? ' disabled' : ''}>Buy ${usd(F.price)}</button>`}</div></div>`; }).join('')}</div></section>`;
+}
 function viewDesk() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
   const pend = pending();
@@ -117,8 +206,8 @@ function viewDesk() {
   const actOpts = Object.entries(ACTIVITIES).filter(([k]) => k !== 'work').map(([k, a]) => [k, a.label]);
   const lastDiary = M.diary.filter(d => d.w >= S.week - 1);
   const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}"><div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
-    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => { return `<button class="choice" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? `<span class="odds">${esc(checkLabel(c.check[0], c.check[1]))}</span>` : ''}</button>`; }).join('')}</div>` : ''}
-    ${it.result ? `<p class="res">${rollChip(it.result.roll)} ${esc(it.result.t)}</p>` : ''}</li>`;
+    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => { return `<button class="choice" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : ''}</button>`; }).join('')}</div>` : ''}
+    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p></div>` : ''}</li>`;
   const boardRow = p => {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
@@ -131,18 +220,21 @@ function viewDesk() {
     return `<tr><td>${pl(id)}</td><td>${esc(ROLE_LABEL[q.role])}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
       <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
   }).join('');
-  return `<div class="head partyhead"><div class="pf">${portraitOf(me, 96)}</div><div><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
-   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button></p></div></div>
-  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
-  <div class="kpis"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)} to a lender` : ''}</small></div>
-   <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div>
+  return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
+   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'}</p>
+   <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
+   <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
+    <div><span>Energy</span>${meter('', M.wk ? clamp(M.wk.energy, 0, 100) : M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
+  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own. Pieces marked ★ were bought.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
+  ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
+  ${UI.homep ? homePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
   <div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
     <ul class="inbox">${pend.map(card).join('')}${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
    <div>
     <section class="panel"><h3>This week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
-     <table class="atts plan">${SLOT_NAMES.map((d, i) => `<tr><td>${d}</td><td>${plan[i] === 'work' ? `<span class="chip">Work</span> <span class="muted">${esc(M.jobs.map(j => j.t).join(', '))}</span>` : sel('pl-' + i, actOpts, M.plan[i])}</td></tr>`).join('')}</table>
+     ${weekStrip(actOpts)}
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(ACTIVITIES).filter(([k]) => plan.includes(k) && k !== 'work').map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))})` : ''}`).join(' ')}</p>
@@ -175,7 +267,15 @@ function viewYou() {
 
 // ---------- Career: controls ----------
 function careerActive() { return S && S.me && S.me.party && S.me.party.done && !S.me.over; }
-function endWeekAct() { return { t: 'end', plan: S.me.plan.slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
+function endWeekAct(t = 'end') { return { t, plan: S.me.plan.slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
+function playDay() {
+  if (UI.busy || !careerActive()) return;
+  if (pending().length) { UI.tab = 'you'; UI.stack = []; render(); return; }
+  const closing = S.me.wk && S.me.wk.day === 5;
+  doAct(endWeekAct('day'));
+  if (closing) UI.apps = new Set();
+  UI.tab = 'you'; UI.stack = []; render();
+}
 function playWeeks(n) {
   if (UI.busy || !careerActive()) return;
   if (pending().length) { UI.tab = 'you'; UI.stack = []; render(); return; }
@@ -208,6 +308,16 @@ function careerClick(t) {
     render(true); return true;
   }
   if (t.dataset.look) { const [k, v] = t.dataset.look.split(':'); setLook(k, +v); return true; }
+  if (t.dataset.guide !== undefined) { UI.guide = !!t.dataset.guide && !UI.guide; render(true); return true; }
+  if (t.dataset.homep !== undefined) { UI.homep = !!t.dataset.homep && !UI.homep; render(true); return true; }
+  if (t.dataset.furnish) { doAct({ t: 'furnish', id: t.dataset.furnish }); render(true); return true; }
+  if (t.dataset.arrange) {
+    if (t.dataset.arrange === 'auto') doAct({ t: 'arrange', layout: {} });
+    else { const spots = (HOME_SPOTS[S.me.life] || []).slice().sort(() => Math.random() - .5), lay = {}, used = new Set();   // the shuffle is logged, so replays match
+      for (const id of S.me.home.items.slice().sort(() => Math.random() - .5)) { const sp = spots.find(s => !used.has(s.id) && fits(FURNITURE[id].kind, s.kind)); if (sp) { lay[id] = sp.id; used.add(sp.id); } }
+      doAct({ t: 'arrange', layout: lay }); }
+    render(true); return true;
+  }
   if (t.dataset.buy) { doAct({ t: 'buy', id: t.dataset.buy }); render(true); return true; }
   if (t.dataset.restyle) { UI.restyle = !UI.restyle; render(true); return true; }
   if (t.dataset.party) { doAct({ t: 'party', k: t.dataset.party }); render(true); return true; }
@@ -215,13 +325,14 @@ function careerClick(t) {
   if (t.dataset.quit) { doAct({ t: 'quit', id: +t.dataset.quit }); render(true); return true; }
   if (t.dataset.favour) { doAct({ t: 'favour', id: +t.dataset.favour }); render(true); return true; }
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
+  if (t.dataset.day) { playDay(); return true; }
   if (t.dataset.jobinfo !== undefined) { UI.jobinfo = t.dataset.jobinfo || null; render(true); return true; }
   if (t.dataset.abandon) { if (!UI.abandon) { UI.abandon = true; render(true); return true; } UI.abandon = false; clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -229,6 +340,7 @@ function setLook(k, v) {
 }
 function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
+  if (e.target.dataset.place) { doAct({ t: 'place', id: e.target.dataset.place, sp: v || null }); render(true); return true; }
   if (e.target.dataset.lookk) { setLook(e.target.dataset.lookk, +v); return true; }
   if (e.target.dataset.fav !== undefined) { const fid = filmChoices().byLabel[v]; if (fid && !c.favs.includes(fid)) c.favs.push(fid); render(true); return true; }
   if (id.startsWith('cc-')) {
@@ -258,7 +370,7 @@ function replayCareer(log, done) {
     UI.replaying = `${i} of ${log.length} actions · ${fmtDate(S.week, true)}`;
     $('#main').innerHTML = viewYou();
     if (i < log.length) setTimeout(step, 0);
-    else { UI.replaying = null; done(); }
+    else { UI.replaying = null; UI.seenRoll = UI.pendingSeen = S.me ? S.me.rollN || 0 : 0; done(); }
   };
   setTimeout(step, 0);
 }

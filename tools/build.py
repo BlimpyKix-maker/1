@@ -6,6 +6,7 @@ root = pathlib.Path(__file__).resolve().parent.parent
 html = (root / 'index.html').read_text()
 for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('portrait', '// ================= Apple Box — World Core UI ================='),
+                     ('home', '// ================= Apple Box — World Core UI ================='),
                      ('career-sim', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
