@@ -8176,7 +8176,7 @@ function archiveFilm(hub, Y, relW, ros, cos) {
     const L = ros[role]; let b = null, bs = -1e9;
     for (let i = 0; i < 7; i++) {
       const id = L[Math.floor(rnd() * L.length)], p = P(id);
-      if (ex.has(id) || (p._y === Y && p._n >= CAP[role]) || (p.catId && rnd() < .9)) continue;
+      if (ex.has(id) || (p._y === Y && p._n >= CAP[role]) || p.catId) continue;   // real people keep only their real credits
       const s = score(p); if (s > bs) { bs = s; b = id; }
     }
     if (b === null) { b = makeHistorical(hub, role, Y).id; L.push(b); }
@@ -8253,8 +8253,9 @@ function pickPerson(hub, role, score, exclude, allowForeign) {
   if (allowForeign && rnd() < .12) hubs = HUB_IDS.filter(h => HUBS[h].lang === HUBS[hub].lang);
   if (allowForeign && rnd() < .04) hubs = hubs.concat(['hollywood', 'london']);
   let best = null, bs = -1e9;
+  const history = warming();   // before the start date, real people appear only in their real films
   for (const h of hubs) for (const id of S.pool[h][role]) {
-    if (exclude.has(id) || !available(id)) continue;
+    if (exclude.has(id) || !available(id) || (history && P(id).catId)) continue;
     const s = score(P(id));
     if (s > bs) { bs = s; best = id; }
   }
@@ -9788,8 +9789,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 1 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 2 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
