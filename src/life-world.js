@@ -85,14 +85,16 @@ const WORLD_EVENTS = [
   { k: 'storm', t: 'A big storm', d: 'Power cuts, flooded streets, a week of chaos.', wk: [1, 1], fx: { commute: 4, sleep: -2, stress: 2 } },
   { k: 'spring', t: 'The first warm week', d: 'Everyone is outside. The city remembers how to be happy.', wk: [1, 2], months: [2, 3, 4], fx: { stress: -2, sleep: 2 } },
   { k: 'rents', t: 'A housing squeeze', d: 'Landlords smell blood. Rents are up across the city.', wk: [8, 20], rare: 1, fx: { rent: 1.15, stress: 1 } },
+  { k: 'walkout', t: 'An industry strike', d: 'The crew and writers\' unions walk out. Productions shut down across the city: nobody shoots until there\'s a deal. Film jobs stop paying; only work outside the business carries on.', wk: [6, 16], rare: 1, fx: { jobs: 0, stress: 1.5, halt: 1 } },
+  { k: 'credits', t: 'A production tax credit', d: 'The city announces generous tax breaks for filming. Productions pour in and every crew list is short.', wk: [12, 30], rare: 1, fx: { jobs: 1.4 } },
   { k: 'refund', t: 'A tax rebate', d: 'The government sends everyone a little money back.', wk: [1, 1], rare: 1, fx: { gift: 150 } }
 ];
 const SMALL_NEWS = ['On the radio: a local bakery has won a national prize and the queue is round the block.', 'The morning paper says the zoo has a new baby giraffe.', 'Your neighbour is learning the trumpet. Badly.', 'A street you walk every day is suddenly full of scaffolding.', 'Someone has painted a mural of a famous actor near the station. It looks nothing like them.', 'The coffee place on the corner has closed. A new one opens the same week.', 'The trains are running on time today. Nobody trusts it.', 'A film shoot has taken over your street. You watch for a while, professionally.', 'The local team won last night; the whole bus is singing.', 'There\'s a petition about the park. You sign it.'];
 function worldOn() { const M = S.me; return ((M.world || {}).ev || []).filter(e => e.to > S.week); }
 function worldFx() {
-  const f = { rent: 1, hustle: 1, commute: 0, sleep: 0, stress: 0, out: 0, jobs: 1, gift: 0 };
+  const f = { rent: 1, hustle: 1, commute: 0, sleep: 0, stress: 0, out: 0, jobs: 1, gift: 0, halt: 0 };
   if (!S.me) return f;
-  for (const e of worldOn()) { const x = (WORLD_EVENTS.find(w => w.k === e.k) || {}).fx || {}; for (const k in x) f[k] = k === 'rent' || k === 'hustle' || k === 'jobs' ? f[k] * x[k] : f[k] + x[k]; }
+  for (const e of worldOn().filter(e => e.from <= S.week)) { const x = (WORLD_EVENTS.find(w => w.k === e.k) || {}).fx || {}; for (const k in x) f[k] = k === 'rent' || k === 'hustle' || k === 'jobs' ? f[k] * x[k] : f[k] + x[k]; }
   return f;
 }
 // Once a week: maybe something starts; what's going on sets this week's stress. Returns stress to add.
@@ -106,8 +108,12 @@ function worldWeek() {
       W.ev.push({ k: e.k, from: S.week + 1, to: S.week + 1 + len });
       inbox('note', `In the world: ${e.t.toLowerCase()}`, `${e.d}${len > 1 ? ` It looks set to last ${len > 4 ? 'months' : 'a few weeks'}.` : ''}`, { world: e.k });
       if (e.fx.gift) M.cash += usd(e.fx.gift);
+      if (e.k === 'walkout') { const s = SCENES.find(y => y.id === 'ev_picket'); inbox('scene', s.title, s.text, { scene: s.id, ctx: { head: null, film: null, mates: M.jobs.flatMap(j => j.mates || []), contact: null }, choices: s.opts.map(o => ({ k: o.k, label: o.label, check: o.check })) }); }
     }
   }
+  // a strike stops the clock on every production in the city; when it ends, everyone goes back
+  if (worldFx().halt) for (const id of S.active) { const f = S.films[id]; if (f.hub === M.hub && f.stage >= 0 && f.stage < 4) f.stageEnd++; }
+  for (const e of W.ev) if (e.k === 'walkout' && e.to === S.week + 1) inbox('note', 'The strike is over', 'A deal is signed in the small hours. Productions restart on Monday; the board fills up again.');
   return worldFx().stress;
 }
 function smallNews() { return prnd() < .25 ? pickLine(SMALL_NEWS, S.week + S.me.wk.day * 5) : null; }
@@ -117,3 +123,7 @@ function worldStrip() {
 }
 // Called from closeWeek. Returns stress to add for the week.
 function livingWorldWeek() { npcLivesWeek(); return worldWeek(); }
+SCENES.push({ event: 1, jobs: [], id: 'ev_picket', title: 'The picket line', teach: 'Film unions bargain for whole crafts at once: when a contract runs out without a deal they strike, and crossing a picket line can follow a person for a career.', text: 'The strike is on. Outside the studio gates there\'s a picket line, a folding table of coffee and a lot of people you\'d like to work with one day.', opts: [
+  { k: 'walk', label: 'Walk the line with them', check: ['col', 10], ok: { tie: { mates: 4 }, meet: 1, stand: .3, stress: -2 }, bad: { tie: { mates: 2 }, energy: -6 }, t: 'Twelve hours, two blisters and a dozen new numbers. Solidarity is a network too.', tb: 'Long, cold and dull, but you showed up.' },
+  { k: 'organise', label: 'Help organise the strike fund', check: ['cha', 13], ok: { meet: 1, stand: .8, xp: { cha: .1 } }, bad: { stress: 4 }, t: 'The union reps learn your name. That kind of thing gets remembered.', tb: 'Meetings, spreadsheets, arguments. You burn out on it.' },
+  { k: 'cross', label: 'Take non-union work across town', ok: { cash: 400, stand: -1.5 }, t: 'The money helps. Someone takes a photo of you going in. It does the rounds.' }] });

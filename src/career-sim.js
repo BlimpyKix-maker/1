@@ -497,6 +497,7 @@ function refreshBoard() {
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), odd);
+  if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
 }
 function makePost(t, f) {
   const head = f ? headOf(f, t.head) : null;
@@ -575,8 +576,10 @@ function closeWeek(a) {
   M.wk = null; M.closing = true;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
   // jobs
+  const halted = worldFx().halt;
+  if (halted && M.jobs.some(j => j.film !== null)) L.push('The strike holds. Your production is shut down, and nobody is paid until it ends.');
   for (const j of M.jobs.slice()) {
-    if (burnt) continue;
+    if (burnt || (halted && j.film !== null)) continue;
     const t = tmplOf(j);
     const days = j.days;
     const pay = j.rate * days;
