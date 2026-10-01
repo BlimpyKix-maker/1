@@ -232,7 +232,7 @@ function lifeDayEvent(act) {
   const M = S.me;
   if (act === 'work') {
     const j = M.jobs.length ? M.jobs[(S.week + M.wk.day) % M.jobs.length] : null;
-    if (!j || prnd() > .38) return;
+    if (!j || prnd() > .2) return;
     const f = j.film !== null ? S.films[j.film] : null;
     const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : []);
     const recent = new Set(M.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 6).map(x => x.scene));
@@ -244,19 +244,17 @@ function lifeDayEvent(act) {
     inbox('scene', s.title, fillScene(s.text, ctx), { job: j.id, scene: s.id, ctx, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
     return;
   }
-  if (LIFE_SCENES[act] && prnd() < .2) lifeScene(LIFE_SCENES[act]);
+  if (act.startsWith('evening:')) { if (act === 'evening:out' && prnd() < .2) lifeScene(LIFE_SCENES.out); else if (prnd() < .03) maybeEvent(); return; }
+  if (LIFE_SCENES[act] && prnd() < .12) lifeScene(LIFE_SCENES[act]);
 }
-function lifeMorningEvent() { const n = pending().length; interviewToday(); if (pending().length === n && typeof roadEvent === 'function') roadEvent(); }
-function lifeEveningEvent(k) { if (k === 'out' && prnd() < .2) lifeScene(LIFE_SCENES.out); else if (prnd() < .03) maybeEvent(); }
+function lifeMorningEvent() { if (typeof roadEvent === 'function') roadEvent(); }
 
 // ---- interviews ----
 // An application now goes to a shortlist; the interview is a scene where how you play it decides the offer.
 function shortlistOdds(post) { return Math.min(.95, Math.sqrt(hireOdds(post)) * 1.05); }
-function interviewToday() {
-  const M = S.me, d = M.wk.day, iv = d < 5 && (M.interviews || []).find(x => x.day <= d && !x.done);
-  if (!iv) return;
-  iv.done = true;
-  const post = iv.post, t = tmplOf(post), target = clamp(hireOdds(post) / shortlistOdds(post), .1, .95);
+// Held as an appointment in your diary (life-social.js).
+function holdInterview(post) {
+  const M = S.me, t = tmplOf(post), target = clamp(hireOdds(post) / shortlistOdds(post), .1, .95);
   const sub = t.subs[0], dc = st => { const m = checkMods(st).mod; return clamp(Math.round(20 - 20 * target + m), 4, 19); };
   const f = post.film !== null ? S.films[post.film] : null;
   const who = post.head !== null ? P(post.head).name : 'the hiring manager';
@@ -264,12 +262,12 @@ function interviewToday() {
     { k: 'craft', label: `Talk about the work: ${statLabel(sub).toLowerCase()}`, check: [sub, dc(sub)] },
     { k: 'charm', label: 'Charm them', check: ['cha', dc('cha')] },
     { k: 'honest', label: 'Be straight about what you don\'t know yet', check: ['com', dc('com') - 1] },
-    ...(M.spec.drafts || ME().credits.length ? [{ k: 'show', label: ME().credits.length ? 'Talk them through your credits' : 'Leave them your spec script', check: ['tas', dc('tas') - 2] }] : [])] });
+    ...(M.spec.drafts || (M.scripts || []).some(x => x.grade) || ME().credits.length ? [{ k: 'show', label: ME().credits.length ? 'Talk them through your credits' : 'Leave them your spec script', check: ['tas', dc('tas') - 2] }] : [])] });
 }
 function resolveInterview(it, k) {
   const c = it.choices.find(x => x.k === k), ok = roll(c.check[0], c.check[1]), post = it.post;
   it.done = true;
   if (ok) { inbox('offer', `Offer: ${post.t}`, offerText(post), { post, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); S.me.stats.offers++; }
-  else S.me.wk.stress += 2;
+  else if (S.me.wk) S.me.wk.stress += 2; else S.me.stress = clamp(S.me.stress + 2, 0, 100);
   it.result = { ok, roll: S.me.lastRoll, t: ok ? 'They call that evening. It\'s yours if you want it.' : pickLine(['They thank you for your time. You know what that means.', 'They went with someone with more experience.', 'You hear nothing, which is also an answer.'], post.id) };
 }

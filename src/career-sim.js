@@ -96,7 +96,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13 + (c.salt | 0)) >>> 0;   // the salt makes every run's party and luck different
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'hunt', 'rest', 'rest'], eve: ['home', 'home', 'home', 'home', 'out', 'home', 'home'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', cal: [['hunt', 'network', 'home'], ['hunt', 'write', 'home'], ['hunt', 'write', 'read'], ['hunt', 'write', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']], phone: [], appts: [], rel: {}, train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -164,6 +164,7 @@ function meet(id, tag, opinion = 0) {
   if (id === M.id) return;
   if (!M.known[id]) M.known[id] = { met: S.week, trust: 30 + traitSum(me, 'trust0'), due: 0, owe: 0, tags: [] };
   if (tag && !M.known[id].tags.includes(tag)) M.known[id].tags.push(tag);
+  M.known[id].seen = S.week;
   if (opinion) addTie(me, P(id), opinion);
 }
 function trust(id, v) { const k = S.me.known[id]; if (k) k.trust = clamp(k.trust + v, 0, 100); }
@@ -550,15 +551,8 @@ const ACTIVITIES = {
 const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 function jobDays() { return S.me.jobs.reduce((s, j) => s + j.days, 0); }
 // The plan as it will actually run: job days fill the weekdays first.
-function effectivePlan() {
-  const M = S.me, out = M.plan.slice(0, 7);
-  while (out.length < 7) out.push('rest');   // older six-slot plans
-  for (let i = 0; i < 7; i++) if (!ACTIVITIES[out[i]]) out[i] = 'rest';
-  let need = jobDays();
-  for (let i = 0; i < 5 && need > 0; i++, need--) out[i] = 'work';
-  return out;
-}
-function appSlots() { return effectivePlan().filter(a => a === 'hunt').length * 3; }
+// effectivePlan and appSlots live in life.js (the diary of blocks).
+
 
 function growSub(me, k, amt) {
   if (k in me.mind) { me.mind[k] = clamp(me.mind[k] + amt * .4, 1, 20); return amt * .4; }
@@ -603,20 +597,19 @@ function closeWeek(a) {
     if (j.done >= j.weeks || (j.film !== null && jobOver(j))) finishJob(j, L);
   }
   // applications
-  const apps = (a.apps || []).slice(0, hunted * 3);
+  const apps = (a.apps || []).slice(0, Math.floor(hunted * 1.5));
   const offers = [], noes = [], shortlisted = [];
-  M.interviews = (M.interviews || []).filter(x => !x.done);
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
     if (!post || blockedFrom(tmplOf(post))) continue;
     M.stats.apps++;
     if (post.odd && !tmplOf(post).cat) { if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post); }
-    else if (prnd() < shortlistOdds(post)) { (M.interviews = M.interviews || []).push({ post, day: Math.floor(prnd() * 5) }); shortlisted.push(post); }
+    else if (prnd() < shortlistOdds(post)) { post.appt = bookInterview(post); shortlisted.push(post); }
     else noes.push(post);
     if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
-  if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${DAYS7[M.interviews.find(x => x.post === p).day]})`).join('; ')}. The interview decides it.`);
+  if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${slotLabel(p.appt)})`).join('; ')}. It's in your diary; the interview decides it.`); for (const p of shortlisted) delete p.appt;
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
   // a rival in the same line of work sometimes gets there first
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
@@ -624,11 +617,12 @@ function closeWeek(a) {
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
   storyWeek();
+  stress += socialWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
-  cashOut += Math.round(usd(M.rentOverride && M.life !== 'couch' ? M.rentOverride : life.rent) * traitMul(me, 'living')) + M.upkeep + usd(VEHICLES[M.vehicle || 'transit'].upkeep);
+  cashOut += Math.round(usd(M.rentOverride && M.life !== 'couch' ? M.rentOverride : life.rent) * traitMul(me, 'living') * (M.cohab != null ? .6 : 1)) + M.upkeep + usd(VEHICLES[M.vehicle || 'transit'].upkeep);
   stress += hoodFx().stress || 0;
   if (M.debt > 0) { const p = Math.min(M.debt, M.debtPay); M.debt -= p; cashOut += p; }
   if (M.shark > 0) M.shark = Math.round(M.shark * 1.01);
@@ -862,6 +856,8 @@ function sceneResolve(it, k) {
   if (fx.cash) M.cash += usd(fx.cash);
   if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
   if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
+  if (fx.rel && ctx.contact != null) setRel(ctx.contact, fx.rel === 'none' ? null : fx.rel);
+  if (fx.cohab && ctx.contact != null) { M.cohab = ctx.contact; milestone(`Moved in with ${P(ctx.contact).name}`, 'love'); }
   if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
   if (fx.meet) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = ` You meet ${q.name}, ${ROLE_LABEL[q.role].toLowerCase()}.`; } }
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
@@ -882,6 +878,7 @@ function resolvePick(it, k) {
   const M = S.me, me = ME(), c = it.choices.find(x => x.k === k);
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
+  if (socialPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -953,6 +950,7 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
+    case 'text': return textSomeone(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);
     case 'share': return shareScript(a);

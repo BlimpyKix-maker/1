@@ -1,19 +1,28 @@
-// ---------------- A life, day by day ----------------
-// Seven days, each in three beats: morning, the day itself, and the evening. The advance button lives one beat at a
-// time and stops whenever something needs a decision, the way a day in the business is really a string of small
-// events. Energy is a daily thing now: work spends it, evenings and sleep give it back, and only a week of work plus
-// late nights plus a side hustle wears you right down. How tired and how stressed you are changes your rolls.
+// ---------------- A life, block by block ----------------
+// Each day has three blocks, morning, afternoon and evening, planned ahead like a real diary. A job fills the
+// working blocks; interviews, coffees, dates and invitations land in a block as appointments. The space bar (or
+// Next) lives on until the next thing worth your attention: a decision, a message, a roll, someone new. Routine
+// blocks pass quietly into the log. Energy is spent block by block and restored by sleep; how tired and stressed
+// you are changes your rolls.
 const DAYS7 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const BEAT_NAMES = ['Morning', 'Day', 'Evening'];
-const DAY_COST = { work: 28, hunt: 14, network: 18, catchup: 10, write: 18, train: 18, hustle: 32, rest: -22, study: 18 };
-const DAY_STRESS = { work: 3, hunt: 2, network: 1, catchup: -1, write: .5, train: .5, hustle: 3, rest: -6, study: 1 };
-// What you do with your evenings. Venues in the city add more (life-city.js).
-const EVENINGS = {
-  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night. Restores a little energy.' },
-  out: { label: 'Out with friends', icon: '🍻', e: 14, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
-  latewrite: { label: 'Write late', icon: '🌙', e: 12, stress: 1, d: 'A few more pages while the city sleeps.' },
-  read: { label: 'Read scripts and watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. A little taste every time.' }
+const BLOCKS = ['Morning', 'Afternoon', 'Evening'], BEAT_NAMES = BLOCKS;
+// What a block can hold. e: energy it costs (negative restores); stress likewise. Venues add more (life-city.js).
+const BLOCK_ACTS = {
+  work: { label: 'Work', icon: '🎬', e: 14, stress: 1.5 },
+  hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Every two blocks let you send three applications from the board.' },
+  write: { label: 'Write', icon: '✍️', e: 9, stress: .3, d: 'Work on your script. Your traits shape how it goes.' },
+  train: { label: 'Take a class', icon: '🎓', e: 9, stress: .3, cost: 35, d: 'A class in one craft. Steady, always available.' },
+  study: { label: 'Study', icon: '📚', e: 9, stress: .5, d: 'Classes for the course you\'re enrolled in.' },
+  network: { label: 'Industry mixer', icon: '🥂', e: 9, stress: .5, cost: 40, d: 'Meet new people in the business. Charisma decides how it goes.' },
+  catchup: { label: 'Catch up with a contact', icon: '☕', e: 5, stress: -1, cost: 15, d: 'Coffee with someone you know; or text them from your phone to fix a time.' },
+  hustle: { label: 'Side hustle', icon: '🛵', e: 16, stress: 1.5, d: 'Bar shifts and deliveries: $75 a block. Teaches nothing.' },
+  rest: { label: 'Rest', icon: '🛋️', e: -11, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
+  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night.' },
+  out: { label: 'Out with friends', icon: '🍻', e: 12, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
+  read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' }
 };
+const EVENINGS = { home: BLOCK_ACTS.home, out: BLOCK_ACTS.out, latewrite: Object.assign({}, BLOCK_ACTS.write, { label: 'Write late' }), read: BLOCK_ACTS.read };
+const OLD_EVE = { latewrite: 'write' };
 // How you're doing, and what it does to you. Shown on the desk and counted in every roll.
 function conditionsOf() {
   const M = S.me, out = [];
@@ -23,90 +32,108 @@ function conditionsOf() {
   if (M.stress >= 75) out.push({ k: 'frayed', label: 'Frayed', dis: ['cha', 'col', 'com'], d: 'Disadvantage with people. You might snap at someone. Burnout is close.' });
   else if (M.stress >= 50) out.push({ k: 'stressed', label: 'Stressed', dis: ['com'], d: 'Disadvantage on Composure. Sleep comes harder.' });
   if (M.energy >= 75 && M.stress < 15) out.push({ k: 'zone', label: 'In the zone', adv: Object.keys(SUB2C), d: 'Advantage on craft checks and faster learning.' });
+  if (typeof relConditions === 'function') out.push(...relConditions());
   return out;
 }
 function condMul() { const c = conditionsOf().map(x => x.k); return c.includes('exhausted') ? .5 : c.includes('tired') ? .75 : c.includes('zone') ? 1.2 : 1; }
+// The diary: 7 days x 3 blocks. Older saves planned a day activity and an evening; those become blocks.
+function calOf() {
+  const M = S.me;
+  if (!M.cal) M.cal = Array.from({ length: 7 }, (_, d) => { const a = (M.plan || [])[d] || 'rest', e = (M.eve || [])[d] || 'home'; return [a, a, OLD_EVE[e] || e]; });
+  return M.cal;
+}
+// The plan as it will run: job days take the morning and afternoon of the first weekdays; burnout makes it all rest.
+function planBlocks() {
+  const M = S.me, cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
+  let need = jobDays();
+  for (let d = 0; d < 5 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }
+  return M.wk && M.wk.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal;
+}
+function effectivePlan() { return planBlocks().map(r => r[1]); }   // the day's main activity, for older callers
+function countBlocks(k) { return planBlocks().reduce((n, r) => n + r.filter(x => x === k).length, 0); }
+function appSlots() { return Math.floor(countBlocks('hunt') * 1.5); }
 function setPlan(a) {
-  const M = S.me, from = M.wk ? M.wk.day + (M.wk.beat > 1 ? 1 : 0) : 0;
-  if (a.plan) for (let i = from; i < 7; i++) if (a.plan[i]) M.plan[i] = a.plan[i];
-  if (a.eve) for (let i = M.wk ? M.wk.day + (M.wk.beat > 2 ? 1 : 0) : 0; i < 7; i++) if (a.eve[i]) M.eve[i] = a.eve[i];
+  const M = S.me, W = M.wk, cal = calOf();
+  const fromAbs = W ? W.day * 3 + W.block : 0;
+  if (a.cal) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= fromAbs && a.cal[d] && a.cal[d][b]) cal[d][b] = a.cal[d][b];
+  if (a.plan && !a.cal) for (let d = 0; d < 7; d++) for (let b = 0; b < 2; b++) if (d * 3 + b >= fromAbs && a.plan[d]) cal[d][b] = a.plan[d];
+  if (a.eve && !a.cal) for (let d = 0; d < 7; d++) if (d * 3 + 2 >= fromAbs && a.eve[d]) cal[d][2] = OLD_EVE[a.eve[d]] || a.eve[d];
   if (a.train) M.train = a.train;
   if (a.catchWith !== undefined) M.catchWith = a.catchWith ?? null;
 }
 function startWeek() {
   const M = S.me, me = ME(), burnt = M.burnout > 0;
   if (burnt) { for (const j of M.jobs) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4); } M.burnout--; }
-  M.wk = { day: 0, beat: 0, burnt, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, L: [], cards: [] };
+  M.wk = { day: 0, block: 0, burnt, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, studied: 0, L: [], cards: [], out: -1 };
 }
-// Advance: one beat ('next'), to the end of the day ('day'), or to the end of the week ('end'). Always stops at a decision.
+// Live on: 'next' until the next notable thing, 'day' to the end of the day, 'end' to the end of the week.
+// All of them stop the moment something needs a decision.
 function liveOn(a) {
   setPlan(a);
   const M = S.me;
   if (!M.wk) startWeek();
   const day0 = M.wk.day, mode = a.t;
-  for (let guard = 0; guard < 30; guard++) {
-    const closed = beatStep(a);
-    if (closed || pending().length || mode === 'next') return;
+  for (let guard = 0; guard < 40; guard++) {
+    const n0 = M.wk.cards.length, closed = blockStep(a);
+    if (closed || pending().length) return;
+    if (mode === 'next' && M.wk.cards.slice(n0).some(c => c.notable)) return;
+    if (mode === 'next' && M.wk.day !== day0) return;   // a new day is worth a look
     if (mode === 'day' && M.wk.day !== day0) return;
   }
 }
-function card(icon, title, lines, extra = {}) { S.me.wk.cards.push({ d: S.me.wk.day, b: S.me.wk.beat, icon, title, lines: lines.filter(Boolean), ...extra }); }
+function card(icon, title, lines, extra = {}) { const W = S.me.wk; W.cards.push({ d: W.day, b: W.block, icon, title, lines: lines.filter(Boolean), ...extra }); if (W.cards.length > 60) W.cards.splice(0, W.cards.length - 60); }
 function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g) W.gains[k] = (W.gains[k] || 0) + g; }
-function dayPlan() { const p = effectivePlan(); return S.me.wk && S.me.wk.burnt ? p.map(() => 'rest') : p; }
-function beatStep(a) {
-  const M = S.me, W = M.wk;
+function dayPlan() { return effectivePlan(); }
+function blockStep(a) {
+  const M = S.me, W = M.wk, d = W.day, b = W.block;
   M.lastRoll = null;
-  if (W.beat === 0) morningBeat(); else if (W.beat === 1) dayBeat(); else eveningBeat();
-  W.beat++;
-  if (W.beat > 2) { sleepNight(); W.beat = 0; W.day++; }
+  const n0 = pending().length, ph0 = M.phoneN || 0;
+  const appt = typeof apptAt === 'function' ? apptAt(d, b) : null;
+  if (appt) runAppointment(appt); else runBlock(planBlocks()[d][b]);
+  if (b === 0 && typeof lifeMorningEvent === 'function') lifeMorningEvent();
+  if (typeof phoneTick === 'function') phoneTick(d, b);
+  const last = W.cards[W.cards.length - 1];
+  if (last && (pending().length > n0 || (M.phoneN || 0) > ph0 || last.roll || last.notable)) last.notable = true;
+  W.block++;
+  if (W.block > 2) { sleepNight(); W.block = 0; W.day++; }
   if (W.day >= 7) { closeWeek(a); return true; }
   return false;
 }
-// ---- morning: getting there ----
-function morningBeat() {
-  const M = S.me, W = M.wk, act = dayPlan()[W.day], weekend = W.day >= 5;
+// Getting out of the house costs a commute, once a day.
+function commute() {
+  const M = S.me, W = M.wk;
+  if (W.out === W.day) return null;
+  W.out = W.day;
   const v = vehicleOf();
-  if (act === 'rest' || weekend && act !== 'work') { card('☀️', 'A free morning', [pickLine(MORNING_FREE, W.day)]); return; }
-  const commute = v.commute[(S.week + W.day) % v.commute.length];
   M.energy = clamp(M.energy - Math.max(0, v.e + (typeof hoodFx === 'function' ? hoodFx().commute || 0 : 0)), 0, 100);
   W.stress += v.stress || 0;
-  card(v.icon, v.label || 'Getting there', [commute]);
-  morningEvent();
+  return v.commute[(S.week + W.day) % v.commute.length];
 }
-// ---- the day: the plan slot ----
-function dayBeat() {
-  const M = S.me, me = ME(), W = M.wk, act = dayPlan()[W.day], A = ACTIVITIES[act];
-  M.energy = clamp(M.energy - (DAY_COST[act] ?? 8), 0, 100);
-  W.stress += DAY_STRESS[act] ?? 0;
+const AT_HOME = new Set(['rest', 'home', 'write', 'read']);
+function runBlock(k) {
+  const M = S.me, me = ME(), W = M.wk, A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest;
+  M.energy = clamp(M.energy - (A.e || 0), 0, 100);
+  W.stress += A.stress || 0;
   if (A.cost) W.cashOut += usd(A.cost);
   const L = [], n0 = W.L.length;
-  switch (act) {
-    case 'hunt': W.hunted++; L.push(pickLine(HUNT_LINES, W.day)); break;
+  const c = AT_HOME.has(k) || W.block === 2 ? null : commute();
+  switch (k) {
+    case 'work': L.push(...workDay()); break;
+    case 'hunt': W.hunted++; L.push(pickLine(HUNT_LINES, W.day + W.block)); break;
     case 'network': networkDay(W.L); break;
     case 'catchup': catchupDay(W.L); break;
-    case 'write': writeSession(L); break;
-    case 'train': for (const k in CRAFTS[M.train].subs) weekGain(k, .02 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day)}`); break;
-    case 'study': if (M.school) { for (const k in CRAFTS[M.school.craft].subs) weekGain(k, PROGRAMS[M.school.prog].grow); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
-    case 'hustle': W.cashIn += usd(150); L.push(pickLine(HUSTLE_LINES, W.day)); break;
-    case 'rest': L.push(pickLine(REST_LINES, W.day)); break;
-    case 'work': L.push(...workDay()); break;
+    case 'write': writeSession(L, .5); break;
+    case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
+    case 'study': W.studied++; if (M.school) { for (const s in CRAFTS[M.school.craft].subs) weekGain(s, PROGRAMS[M.school.prog].grow / 2); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
+    case 'hustle': W.cashIn += usd(75); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
+    case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
+    case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
+    case 'out': L.push(pickLine(OUT_LINES, W.day)); break;
+    case 'read': weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); break;
+    default: if (A.venue && typeof venueEvening === 'function') L.push(...venueEvening(A));
   }
-  card(ACT_ICON[act] || '•', A.label, L.concat(W.L.slice(n0)), { roll: M.lastRoll });
-  dayEvent(act);
-}
-// ---- evening ----
-function eveningBeat() {
-  const M = S.me, W = M.wk, k = M.eve[W.day] || 'home', E = eveningOf(k);
-  M.energy = clamp(M.energy - E.e, 0, 100);
-  W.stress += E.stress || 0;
-  if (E.cost) W.cashOut += usd(E.cost);
-  const L = [];
-  if (k === 'latewrite') writeSession(L, .5);
-  else if (k === 'read') { weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); }
-  else if (E.venue && typeof venueEvening === 'function') L.push(...venueEvening(E));
-  else L.push(pickLine(k === 'out' ? OUT_LINES : HOME_LINES, W.day));
-  card(E.icon, E.label, L, { roll: M.lastRoll });
-  eveningEvent(k);
+  card(A.icon || '•', A.label, (c && W.block < 2 ? [c] : []).concat(L, W.L.slice(n0)), { roll: M.lastRoll, notable: k === 'network' || !!A.venue && W.L.length > n0 });
+  if (typeof lifeDayEvent === 'function') lifeDayEvent(k === 'out' || A.venue ? 'evening:' + k : k);
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
@@ -120,7 +147,7 @@ function workDay() {
   const M = S.me, me = ME(), out = [];
   for (const j of M.jobs) {
     const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
-    out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day + j.id)}`);
+    out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day * 3 + M.wk.block + j.id)}`);
     if (M.energy < 20 && prnd() < .35) { mistakeAtWork(j); out.push('You\'re running on empty, and it shows.'); }
   }
   return out;
@@ -146,9 +173,6 @@ const HOME_LINES = ['Pasta, a film, bed by eleven.', 'You call home. They ask wh
 const JOB_DAY_LINES = { 0: ['Meetings, coverage, notes on notes.', 'The script changes again. You keep up.', 'Budget top-sheets and phone calls.'], 1: ['Recces, schedules, a hundred questions.', 'The prep office hums. Everything is urgent.', 'Fittings, tests, locations, lists.'], 2: ['Call time at six, wrap at eight.', 'A long day on set. You learn three things nobody wrote down.', 'Setups, resets, coffee, more setups.', 'You keep your head down and your ears open.'], 3: ['A dark room, a timeline, the film finding itself.', 'Notes from the director, notes from the producers.', 'Hours on one scene. It\'s better for it.'] };
 const OFFICE_LINES = ['Emails, meetings, a deadline that moves.', 'You learn how the business side really works.', 'A quiet day at the desk. You listen to every call.'];
 // Hooks for the other life modules, defined there; safe if they aren't loaded.
-function morningEvent() { if (typeof lifeMorningEvent === 'function') lifeMorningEvent(); }
-function dayEvent(act) { if (typeof lifeDayEvent === 'function') lifeDayEvent(act); }
-function eveningEvent(k) { if (typeof lifeEveningEvent === 'function') lifeEveningEvent(k); }
-function eveningOf(k) { return EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || EVENINGS.home; }
+function eveningOf(k) { return BLOCK_ACTS[k] || EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.home; }
 function vehicleOf() { return typeof VEHICLES !== 'undefined' ? VEHICLES[S.me.vehicle || 'transit'] : { icon: '🚌', e: 2, commute: ['The bus, a podcast, a seat if you\'re lucky.'] }; }
 function writeSession(L, scale = 1) { if (typeof writeOnScript === 'function') return writeOnScript(L, scale); S.me.spec.pages += Math.round((4 + ME().mind.eth / 4) * scale * condMul()); L.push('You write.'); }

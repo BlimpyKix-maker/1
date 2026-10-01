@@ -93,7 +93,7 @@ const PROGRAMS = {
   mfa: { label: 'Film school (MFA)', d: 'Two years, four days a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
   union: { label: 'Union training programme', d: 'Paid on-set training for assistant directors. Hard to get into; the jobs that follow pay well.', weeks: 40, days: 4, fee: -260, grow: .04, deg: 'union', craft: 'dir', apply: ['eth', 13] }
 };
-function schoolDays() { return effectivePlan().filter(a => a === 'study').length; }
+function schoolDays() { return Math.floor(countBlocks('study') / 2); }
 function enrol(a) {
   const M = S.me, P0 = PROGRAMS[a.prog];
   if (!P0 || M.school || !CRAFTS[a.craft || P0.craft]) return false;

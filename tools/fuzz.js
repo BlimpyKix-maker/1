@@ -11,7 +11,7 @@ for (let c = 0; c < N; c++) {
     const roles = ['director', 'actor', 'writer', 'dp', 'editor', 'producer', 'composer', 'designer'];
     r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Fuzz', role: '${roles[c % roles.length]}' }) })`);
     for (let i = 0; i < 30 && !r('S.me.party.done'); i++) r(`(() => { const sc = partyScene(S.me.party); const L = sc.rooms || sc.opts; return doAct({ t: 'party', k: L[${Math.floor(rnd() * 9)} % L.length].k }); })()`);
-    const acts = ['hunt', 'hunt', 'network', 'write', 'rest', 'train', 'study', 'catchup', 'hustle'], eves = ['home', 'out', 'latewrite', 'read', 'v:rep', 'v:bar', 'v:openmic', 'v:gym'];
+    const acts = ['hunt', 'hunt', 'network', 'write', 'rest', 'train', 'study', 'catchup', 'hustle', 'home', 'out', 'read'], eves = ['home', 'out', 'write', 'read', 'v:rep', 'v:bar', 'v:openmic', 'v:gym'];
     for (let w = 0; w < WEEKS && !r('S.me.over'); w++) {
       r(`for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[${Math.floor(rnd() * 3)} % it.choices.length].k })`);
       if (rnd() < .05) r(`doAct({ t: 'enrol', prog: '${['short', 'cc', 'ba', 'mfa', 'union'][Math.floor(rnd() * 5)]}', craft: 'cam' })`);
@@ -22,8 +22,10 @@ for (let c = 0; c < N; c++) {
       if (rnd() < .03) r(`doAct({ t: 'vehicle', v: '${['bike', 'scooter', 'car', 'transit'][Math.floor(rnd() * 4)]}' })`);
       if (rnd() < .05) r(`doAct({ t: 'newscript', genre: 'Drama', theme: 'family', tone: 'dark' })`);
       if (rnd() < .05) r(`doAct({ t: 'furnish', id: '${['bed', 'desk', 'plant', 'poster', 'camera'][Math.floor(rnd() * 5)]}' })`);
-      const plan = JSON.stringify(Array.from({ length: 7 }, () => acts[Math.floor(rnd() * acts.length)])), eve = JSON.stringify(Array.from({ length: 7 }, () => eves[Math.floor(rnd() * eves.length)]));
-      r(`S.me.plan = ${plan}; S.me.eve = ${eve}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
+      const cal = JSON.stringify(Array.from({ length: 7 }, () => [acts[Math.floor(rnd() * acts.length)], acts[Math.floor(rnd() * acts.length)], eves[Math.floor(rnd() * eves.length)]]));
+      r(`S.me.cal = ${cal}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
+      if (rnd() < .3) r(`(() => { const ids = aliveKnown(); const s = upcomingSlots(10)[${Math.floor(rnd() * 10)}]; if (ids.length) doAct(Object.assign({ t: 'text', id: ids[${Math.floor(rnd() * 50)} % ids.length], kind: '${['hi', 'coffee', 'drinks', 'date', 'mentor'][Math.floor(rnd() * 5)]}' }, s || {})); })()`);
+      if (rnd() < .1) r(`(UI.txt = { id: String(aliveKnown()[0] ?? ''), kind: 'date', slot: 0 }, phonePanel())`);
       r(`(() => { const w0 = S.week; for (let g = 0; g < 80 && S.week === w0 && !S.me.over; g++) { for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[g % it.choices.length].k }); doAct(endWeekAct(g % 3 ? 'next' : 'day')); } })()`);
       r('viewDesk(); viewYou();');   // rendering must never throw
     }

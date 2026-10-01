@@ -272,6 +272,31 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .beat > div { flex: 1; min-width: 0; }
 .beat.decide { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--panel)); }
 .beat.next { border-style: dashed; }
+kbd { font: 600 10px/1 var(--mono, ui-monospace, monospace); padding: 2px 5px; border-radius: 4px; border: 1px solid currentColor; opacity: .7; margin-left: 4px; vertical-align: 1px; }
+table.cal { width: 100%; border-collapse: separate; border-spacing: 3px; table-layout: fixed; min-width: 640px; }
+table.cal th { font-size: 12px; font-weight: 600; color: var(--muted); text-align: center; padding: 2px; }
+table.cal th small { display: block; font-weight: 400; }
+table.cal tbody th { text-align: left; width: 74px; }
+table.cal td { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 3px; font-size: 12px; vertical-align: middle; }
+table.cal td select { width: 100%; font-size: 12px; padding: 2px; }
+table.cal td.past { opacity: .6; background: transparent; }
+table.cal td.now, table.cal th.now { outline: 2px solid var(--accent); outline-offset: -1px; }
+table.cal td .chip { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.calquick { margin: 6px 0; }
+.phone .ph-cols { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; }
+@media (max-width: 700px) { .phone .ph-cols { grid-template-columns: 1fr; } }
+.sms { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 340px; overflow-y: auto; }
+.sms li { background: var(--bg); border: 1px solid var(--line); border-radius: 12px 12px 12px 3px; padding: 6px 10px; max-width: 92%; }
+.sms li.me { justify-self: end; background: var(--accent-soft); border-radius: 12px 12px 3px 12px; }
+.sms li.love { border-color: #d9536f; }
+.sms li.gossip p { font-style: italic; }
+.sms li time { font-size: 11px; color: var(--muted); }
+.sms li p { margin: 2px 0 0; font-size: 14px; }
+.compose { display: flex; flex-wrap: wrap; gap: 6px; align-items: end; margin-top: 8px; }
+.compose label { display: grid; font-size: 12px; color: var(--muted); }
+.relrow { margin: 4px 0; font-size: 14px; }
+.relk { display: inline-block; min-width: 120px; font-weight: 600; }
+.appts li { margin: 3px 0; }
 .conds { display: grid; gap: 4px; margin-top: 10px; }
 .cond { font-size: 12px; padding: 5px 8px; border-radius: 4px; }
 .cond.down { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--ink); } .cond.down b { color: var(--bad); }
@@ -10205,7 +10230,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13 + (c.salt | 0)) >>> 0;   // the salt makes every run's party and luck different
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'hunt', 'rest', 'rest'], eve: ['home', 'home', 'home', 'home', 'out', 'home', 'home'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', cal: [['hunt', 'network', 'home'], ['hunt', 'write', 'home'], ['hunt', 'write', 'read'], ['hunt', 'write', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']], phone: [], appts: [], rel: {}, train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -10273,6 +10298,7 @@ function meet(id, tag, opinion = 0) {
   if (id === M.id) return;
   if (!M.known[id]) M.known[id] = { met: S.week, trust: 30 + traitSum(me, 'trust0'), due: 0, owe: 0, tags: [] };
   if (tag && !M.known[id].tags.includes(tag)) M.known[id].tags.push(tag);
+  M.known[id].seen = S.week;
   if (opinion) addTie(me, P(id), opinion);
 }
 function trust(id, v) { const k = S.me.known[id]; if (k) k.trust = clamp(k.trust + v, 0, 100); }
@@ -10659,15 +10685,8 @@ const ACTIVITIES = {
 const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 function jobDays() { return S.me.jobs.reduce((s, j) => s + j.days, 0); }
 // The plan as it will actually run: job days fill the weekdays first.
-function effectivePlan() {
-  const M = S.me, out = M.plan.slice(0, 7);
-  while (out.length < 7) out.push('rest');   // older six-slot plans
-  for (let i = 0; i < 7; i++) if (!ACTIVITIES[out[i]]) out[i] = 'rest';
-  let need = jobDays();
-  for (let i = 0; i < 5 && need > 0; i++, need--) out[i] = 'work';
-  return out;
-}
-function appSlots() { return effectivePlan().filter(a => a === 'hunt').length * 3; }
+// effectivePlan and appSlots live in life.js (the diary of blocks).
+
 
 function growSub(me, k, amt) {
   if (k in me.mind) { me.mind[k] = clamp(me.mind[k] + amt * .4, 1, 20); return amt * .4; }
@@ -10712,20 +10731,19 @@ function closeWeek(a) {
     if (j.done >= j.weeks || (j.film !== null && jobOver(j))) finishJob(j, L);
   }
   // applications
-  const apps = (a.apps || []).slice(0, hunted * 3);
+  const apps = (a.apps || []).slice(0, Math.floor(hunted * 1.5));
   const offers = [], noes = [], shortlisted = [];
-  M.interviews = (M.interviews || []).filter(x => !x.done);
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
     if (!post || blockedFrom(tmplOf(post))) continue;
     M.stats.apps++;
     if (post.odd && !tmplOf(post).cat) { if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post); }
-    else if (prnd() < shortlistOdds(post)) { (M.interviews = M.interviews || []).push({ post, day: Math.floor(prnd() * 5) }); shortlisted.push(post); }
+    else if (prnd() < shortlistOdds(post)) { post.appt = bookInterview(post); shortlisted.push(post); }
     else noes.push(post);
     if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
-  if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${DAYS7[M.interviews.find(x => x.post === p).day]})`).join('; ')}. The interview decides it.`);
+  if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${slotLabel(p.appt)})`).join('; ')}. It's in your diary; the interview decides it.`); for (const p of shortlisted) delete p.appt;
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
   // a rival in the same line of work sometimes gets there first
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
@@ -10733,11 +10751,12 @@ function closeWeek(a) {
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
   storyWeek();
+  stress += socialWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
-  cashOut += Math.round(usd(M.rentOverride && M.life !== 'couch' ? M.rentOverride : life.rent) * traitMul(me, 'living')) + M.upkeep + usd(VEHICLES[M.vehicle || 'transit'].upkeep);
+  cashOut += Math.round(usd(M.rentOverride && M.life !== 'couch' ? M.rentOverride : life.rent) * traitMul(me, 'living') * (M.cohab != null ? .6 : 1)) + M.upkeep + usd(VEHICLES[M.vehicle || 'transit'].upkeep);
   stress += hoodFx().stress || 0;
   if (M.debt > 0) { const p = Math.min(M.debt, M.debtPay); M.debt -= p; cashOut += p; }
   if (M.shark > 0) M.shark = Math.round(M.shark * 1.01);
@@ -10971,6 +10990,8 @@ function sceneResolve(it, k) {
   if (fx.cash) M.cash += usd(fx.cash);
   if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
   if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
+  if (fx.rel && ctx.contact != null) setRel(ctx.contact, fx.rel === 'none' ? null : fx.rel);
+  if (fx.cohab && ctx.contact != null) { M.cohab = ctx.contact; milestone(`Moved in with ${P(ctx.contact).name}`, 'love'); }
   if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
   if (fx.meet) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = ` You meet ${q.name}, ${ROLE_LABEL[q.role].toLowerCase()}.`; } }
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
@@ -10991,6 +11012,7 @@ function resolvePick(it, k) {
   const M = S.me, me = ME(), c = it.choices.find(x => x.k === k);
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
+  if (socialPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -11062,6 +11084,7 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
+    case 'text': return textSomeone(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);
     case 'share': return shareScript(a);
@@ -11416,7 +11439,7 @@ const PROGRAMS = {
   mfa: { label: 'Film school (MFA)', d: 'Two years, four days a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
   union: { label: 'Union training programme', d: 'Paid on-set training for assistant directors. Hard to get into; the jobs that follow pay well.', weeks: 40, days: 4, fee: -260, grow: .04, deg: 'union', craft: 'dir', apply: ['eth', 13] }
 };
-function schoolDays() { return effectivePlan().filter(a => a === 'study').length; }
+function schoolDays() { return Math.floor(countBlocks('study') / 2); }
 function enrol(a) {
   const M = S.me, P0 = PROGRAMS[a.prog];
   if (!P0 || M.school || !CRAFTS[a.craft || P0.craft]) return false;
@@ -11573,22 +11596,31 @@ function maybeEvent() {
 }
 // </career-depth>
 // <life>
-// ---------------- A life, day by day ----------------
-// Seven days, each in three beats: morning, the day itself, and the evening. The advance button lives one beat at a
-// time and stops whenever something needs a decision, the way a day in the business is really a string of small
-// events. Energy is a daily thing now: work spends it, evenings and sleep give it back, and only a week of work plus
-// late nights plus a side hustle wears you right down. How tired and how stressed you are changes your rolls.
+// ---------------- A life, block by block ----------------
+// Each day has three blocks, morning, afternoon and evening, planned ahead like a real diary. A job fills the
+// working blocks; interviews, coffees, dates and invitations land in a block as appointments. The space bar (or
+// Next) lives on until the next thing worth your attention: a decision, a message, a roll, someone new. Routine
+// blocks pass quietly into the log. Energy is spent block by block and restored by sleep; how tired and stressed
+// you are changes your rolls.
 const DAYS7 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-const BEAT_NAMES = ['Morning', 'Day', 'Evening'];
-const DAY_COST = { work: 28, hunt: 14, network: 18, catchup: 10, write: 18, train: 18, hustle: 32, rest: -22, study: 18 };
-const DAY_STRESS = { work: 3, hunt: 2, network: 1, catchup: -1, write: .5, train: .5, hustle: 3, rest: -6, study: 1 };
-// What you do with your evenings. Venues in the city add more (life-city.js).
-const EVENINGS = {
-  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night. Restores a little energy.' },
-  out: { label: 'Out with friends', icon: '🍻', e: 14, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
-  latewrite: { label: 'Write late', icon: '🌙', e: 12, stress: 1, d: 'A few more pages while the city sleeps.' },
-  read: { label: 'Read scripts and watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. A little taste every time.' }
+const BLOCKS = ['Morning', 'Afternoon', 'Evening'], BEAT_NAMES = BLOCKS;
+// What a block can hold. e: energy it costs (negative restores); stress likewise. Venues add more (life-city.js).
+const BLOCK_ACTS = {
+  work: { label: 'Work', icon: '🎬', e: 14, stress: 1.5 },
+  hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Every two blocks let you send three applications from the board.' },
+  write: { label: 'Write', icon: '✍️', e: 9, stress: .3, d: 'Work on your script. Your traits shape how it goes.' },
+  train: { label: 'Take a class', icon: '🎓', e: 9, stress: .3, cost: 35, d: 'A class in one craft. Steady, always available.' },
+  study: { label: 'Study', icon: '📚', e: 9, stress: .5, d: 'Classes for the course you\'re enrolled in.' },
+  network: { label: 'Industry mixer', icon: '🥂', e: 9, stress: .5, cost: 40, d: 'Meet new people in the business. Charisma decides how it goes.' },
+  catchup: { label: 'Catch up with a contact', icon: '☕', e: 5, stress: -1, cost: 15, d: 'Coffee with someone you know; or text them from your phone to fix a time.' },
+  hustle: { label: 'Side hustle', icon: '🛵', e: 16, stress: 1.5, d: 'Bar shifts and deliveries: $75 a block. Teaches nothing.' },
+  rest: { label: 'Rest', icon: '🛋️', e: -11, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
+  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night.' },
+  out: { label: 'Out with friends', icon: '🍻', e: 12, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
+  read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' }
 };
+const EVENINGS = { home: BLOCK_ACTS.home, out: BLOCK_ACTS.out, latewrite: Object.assign({}, BLOCK_ACTS.write, { label: 'Write late' }), read: BLOCK_ACTS.read };
+const OLD_EVE = { latewrite: 'write' };
 // How you're doing, and what it does to you. Shown on the desk and counted in every roll.
 function conditionsOf() {
   const M = S.me, out = [];
@@ -11598,90 +11630,108 @@ function conditionsOf() {
   if (M.stress >= 75) out.push({ k: 'frayed', label: 'Frayed', dis: ['cha', 'col', 'com'], d: 'Disadvantage with people. You might snap at someone. Burnout is close.' });
   else if (M.stress >= 50) out.push({ k: 'stressed', label: 'Stressed', dis: ['com'], d: 'Disadvantage on Composure. Sleep comes harder.' });
   if (M.energy >= 75 && M.stress < 15) out.push({ k: 'zone', label: 'In the zone', adv: Object.keys(SUB2C), d: 'Advantage on craft checks and faster learning.' });
+  if (typeof relConditions === 'function') out.push(...relConditions());
   return out;
 }
 function condMul() { const c = conditionsOf().map(x => x.k); return c.includes('exhausted') ? .5 : c.includes('tired') ? .75 : c.includes('zone') ? 1.2 : 1; }
+// The diary: 7 days x 3 blocks. Older saves planned a day activity and an evening; those become blocks.
+function calOf() {
+  const M = S.me;
+  if (!M.cal) M.cal = Array.from({ length: 7 }, (_, d) => { const a = (M.plan || [])[d] || 'rest', e = (M.eve || [])[d] || 'home'; return [a, a, OLD_EVE[e] || e]; });
+  return M.cal;
+}
+// The plan as it will run: job days take the morning and afternoon of the first weekdays; burnout makes it all rest.
+function planBlocks() {
+  const M = S.me, cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
+  let need = jobDays();
+  for (let d = 0; d < 5 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }
+  return M.wk && M.wk.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal;
+}
+function effectivePlan() { return planBlocks().map(r => r[1]); }   // the day's main activity, for older callers
+function countBlocks(k) { return planBlocks().reduce((n, r) => n + r.filter(x => x === k).length, 0); }
+function appSlots() { return Math.floor(countBlocks('hunt') * 1.5); }
 function setPlan(a) {
-  const M = S.me, from = M.wk ? M.wk.day + (M.wk.beat > 1 ? 1 : 0) : 0;
-  if (a.plan) for (let i = from; i < 7; i++) if (a.plan[i]) M.plan[i] = a.plan[i];
-  if (a.eve) for (let i = M.wk ? M.wk.day + (M.wk.beat > 2 ? 1 : 0) : 0; i < 7; i++) if (a.eve[i]) M.eve[i] = a.eve[i];
+  const M = S.me, W = M.wk, cal = calOf();
+  const fromAbs = W ? W.day * 3 + W.block : 0;
+  if (a.cal) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= fromAbs && a.cal[d] && a.cal[d][b]) cal[d][b] = a.cal[d][b];
+  if (a.plan && !a.cal) for (let d = 0; d < 7; d++) for (let b = 0; b < 2; b++) if (d * 3 + b >= fromAbs && a.plan[d]) cal[d][b] = a.plan[d];
+  if (a.eve && !a.cal) for (let d = 0; d < 7; d++) if (d * 3 + 2 >= fromAbs && a.eve[d]) cal[d][2] = OLD_EVE[a.eve[d]] || a.eve[d];
   if (a.train) M.train = a.train;
   if (a.catchWith !== undefined) M.catchWith = a.catchWith ?? null;
 }
 function startWeek() {
   const M = S.me, me = ME(), burnt = M.burnout > 0;
   if (burnt) { for (const j of M.jobs) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4); } M.burnout--; }
-  M.wk = { day: 0, beat: 0, burnt, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, L: [], cards: [] };
+  M.wk = { day: 0, block: 0, burnt, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, studied: 0, L: [], cards: [], out: -1 };
 }
-// Advance: one beat ('next'), to the end of the day ('day'), or to the end of the week ('end'). Always stops at a decision.
+// Live on: 'next' until the next notable thing, 'day' to the end of the day, 'end' to the end of the week.
+// All of them stop the moment something needs a decision.
 function liveOn(a) {
   setPlan(a);
   const M = S.me;
   if (!M.wk) startWeek();
   const day0 = M.wk.day, mode = a.t;
-  for (let guard = 0; guard < 30; guard++) {
-    const closed = beatStep(a);
-    if (closed || pending().length || mode === 'next') return;
+  for (let guard = 0; guard < 40; guard++) {
+    const n0 = M.wk.cards.length, closed = blockStep(a);
+    if (closed || pending().length) return;
+    if (mode === 'next' && M.wk.cards.slice(n0).some(c => c.notable)) return;
+    if (mode === 'next' && M.wk.day !== day0) return;   // a new day is worth a look
     if (mode === 'day' && M.wk.day !== day0) return;
   }
 }
-function card(icon, title, lines, extra = {}) { S.me.wk.cards.push({ d: S.me.wk.day, b: S.me.wk.beat, icon, title, lines: lines.filter(Boolean), ...extra }); }
+function card(icon, title, lines, extra = {}) { const W = S.me.wk; W.cards.push({ d: W.day, b: W.block, icon, title, lines: lines.filter(Boolean), ...extra }); if (W.cards.length > 60) W.cards.splice(0, W.cards.length - 60); }
 function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g) W.gains[k] = (W.gains[k] || 0) + g; }
-function dayPlan() { const p = effectivePlan(); return S.me.wk && S.me.wk.burnt ? p.map(() => 'rest') : p; }
-function beatStep(a) {
-  const M = S.me, W = M.wk;
+function dayPlan() { return effectivePlan(); }
+function blockStep(a) {
+  const M = S.me, W = M.wk, d = W.day, b = W.block;
   M.lastRoll = null;
-  if (W.beat === 0) morningBeat(); else if (W.beat === 1) dayBeat(); else eveningBeat();
-  W.beat++;
-  if (W.beat > 2) { sleepNight(); W.beat = 0; W.day++; }
+  const n0 = pending().length, ph0 = M.phoneN || 0;
+  const appt = typeof apptAt === 'function' ? apptAt(d, b) : null;
+  if (appt) runAppointment(appt); else runBlock(planBlocks()[d][b]);
+  if (b === 0 && typeof lifeMorningEvent === 'function') lifeMorningEvent();
+  if (typeof phoneTick === 'function') phoneTick(d, b);
+  const last = W.cards[W.cards.length - 1];
+  if (last && (pending().length > n0 || (M.phoneN || 0) > ph0 || last.roll || last.notable)) last.notable = true;
+  W.block++;
+  if (W.block > 2) { sleepNight(); W.block = 0; W.day++; }
   if (W.day >= 7) { closeWeek(a); return true; }
   return false;
 }
-// ---- morning: getting there ----
-function morningBeat() {
-  const M = S.me, W = M.wk, act = dayPlan()[W.day], weekend = W.day >= 5;
+// Getting out of the house costs a commute, once a day.
+function commute() {
+  const M = S.me, W = M.wk;
+  if (W.out === W.day) return null;
+  W.out = W.day;
   const v = vehicleOf();
-  if (act === 'rest' || weekend && act !== 'work') { card('☀️', 'A free morning', [pickLine(MORNING_FREE, W.day)]); return; }
-  const commute = v.commute[(S.week + W.day) % v.commute.length];
   M.energy = clamp(M.energy - Math.max(0, v.e + (typeof hoodFx === 'function' ? hoodFx().commute || 0 : 0)), 0, 100);
   W.stress += v.stress || 0;
-  card(v.icon, v.label || 'Getting there', [commute]);
-  morningEvent();
+  return v.commute[(S.week + W.day) % v.commute.length];
 }
-// ---- the day: the plan slot ----
-function dayBeat() {
-  const M = S.me, me = ME(), W = M.wk, act = dayPlan()[W.day], A = ACTIVITIES[act];
-  M.energy = clamp(M.energy - (DAY_COST[act] ?? 8), 0, 100);
-  W.stress += DAY_STRESS[act] ?? 0;
+const AT_HOME = new Set(['rest', 'home', 'write', 'read']);
+function runBlock(k) {
+  const M = S.me, me = ME(), W = M.wk, A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest;
+  M.energy = clamp(M.energy - (A.e || 0), 0, 100);
+  W.stress += A.stress || 0;
   if (A.cost) W.cashOut += usd(A.cost);
   const L = [], n0 = W.L.length;
-  switch (act) {
-    case 'hunt': W.hunted++; L.push(pickLine(HUNT_LINES, W.day)); break;
+  const c = AT_HOME.has(k) || W.block === 2 ? null : commute();
+  switch (k) {
+    case 'work': L.push(...workDay()); break;
+    case 'hunt': W.hunted++; L.push(pickLine(HUNT_LINES, W.day + W.block)); break;
     case 'network': networkDay(W.L); break;
     case 'catchup': catchupDay(W.L); break;
-    case 'write': writeSession(L); break;
-    case 'train': for (const k in CRAFTS[M.train].subs) weekGain(k, .02 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day)}`); break;
-    case 'study': if (M.school) { for (const k in CRAFTS[M.school.craft].subs) weekGain(k, PROGRAMS[M.school.prog].grow); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
-    case 'hustle': W.cashIn += usd(150); L.push(pickLine(HUSTLE_LINES, W.day)); break;
-    case 'rest': L.push(pickLine(REST_LINES, W.day)); break;
-    case 'work': L.push(...workDay()); break;
+    case 'write': writeSession(L, .5); break;
+    case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
+    case 'study': W.studied++; if (M.school) { for (const s in CRAFTS[M.school.craft].subs) weekGain(s, PROGRAMS[M.school.prog].grow / 2); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
+    case 'hustle': W.cashIn += usd(75); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
+    case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
+    case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
+    case 'out': L.push(pickLine(OUT_LINES, W.day)); break;
+    case 'read': weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); break;
+    default: if (A.venue && typeof venueEvening === 'function') L.push(...venueEvening(A));
   }
-  card(ACT_ICON[act] || '•', A.label, L.concat(W.L.slice(n0)), { roll: M.lastRoll });
-  dayEvent(act);
-}
-// ---- evening ----
-function eveningBeat() {
-  const M = S.me, W = M.wk, k = M.eve[W.day] || 'home', E = eveningOf(k);
-  M.energy = clamp(M.energy - E.e, 0, 100);
-  W.stress += E.stress || 0;
-  if (E.cost) W.cashOut += usd(E.cost);
-  const L = [];
-  if (k === 'latewrite') writeSession(L, .5);
-  else if (k === 'read') { weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); }
-  else if (E.venue && typeof venueEvening === 'function') L.push(...venueEvening(E));
-  else L.push(pickLine(k === 'out' ? OUT_LINES : HOME_LINES, W.day));
-  card(E.icon, E.label, L, { roll: M.lastRoll });
-  eveningEvent(k);
+  card(A.icon || '•', A.label, (c && W.block < 2 ? [c] : []).concat(L, W.L.slice(n0)), { roll: M.lastRoll, notable: k === 'network' || !!A.venue && W.L.length > n0 });
+  if (typeof lifeDayEvent === 'function') lifeDayEvent(k === 'out' || A.venue ? 'evening:' + k : k);
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
@@ -11695,7 +11745,7 @@ function workDay() {
   const M = S.me, me = ME(), out = [];
   for (const j of M.jobs) {
     const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
-    out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day + j.id)}`);
+    out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day * 3 + M.wk.block + j.id)}`);
     if (M.energy < 20 && prnd() < .35) { mistakeAtWork(j); out.push('You\'re running on empty, and it shows.'); }
   }
   return out;
@@ -11721,10 +11771,7 @@ const HOME_LINES = ['Pasta, a film, bed by eleven.', 'You call home. They ask wh
 const JOB_DAY_LINES = { 0: ['Meetings, coverage, notes on notes.', 'The script changes again. You keep up.', 'Budget top-sheets and phone calls.'], 1: ['Recces, schedules, a hundred questions.', 'The prep office hums. Everything is urgent.', 'Fittings, tests, locations, lists.'], 2: ['Call time at six, wrap at eight.', 'A long day on set. You learn three things nobody wrote down.', 'Setups, resets, coffee, more setups.', 'You keep your head down and your ears open.'], 3: ['A dark room, a timeline, the film finding itself.', 'Notes from the director, notes from the producers.', 'Hours on one scene. It\'s better for it.'] };
 const OFFICE_LINES = ['Emails, meetings, a deadline that moves.', 'You learn how the business side really works.', 'A quiet day at the desk. You listen to every call.'];
 // Hooks for the other life modules, defined there; safe if they aren't loaded.
-function morningEvent() { if (typeof lifeMorningEvent === 'function') lifeMorningEvent(); }
-function dayEvent(act) { if (typeof lifeDayEvent === 'function') lifeDayEvent(act); }
-function eveningEvent(k) { if (typeof lifeEveningEvent === 'function') lifeEveningEvent(k); }
-function eveningOf(k) { return EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || EVENINGS.home; }
+function eveningOf(k) { return BLOCK_ACTS[k] || EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.home; }
 function vehicleOf() { return typeof VEHICLES !== 'undefined' ? VEHICLES[S.me.vehicle || 'transit'] : { icon: '🚌', e: 2, commute: ['The bus, a podcast, a seat if you\'re lucky.'] }; }
 function writeSession(L, scale = 1) { if (typeof writeOnScript === 'function') return writeOnScript(L, scale); S.me.spec.pages += Math.round((4 + ME().mind.eth / 4) * scale * condMul()); L.push('You write.'); }
 // </life>
@@ -11963,7 +12010,7 @@ function lifeDayEvent(act) {
   const M = S.me;
   if (act === 'work') {
     const j = M.jobs.length ? M.jobs[(S.week + M.wk.day) % M.jobs.length] : null;
-    if (!j || prnd() > .38) return;
+    if (!j || prnd() > .2) return;
     const f = j.film !== null ? S.films[j.film] : null;
     const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : []);
     const recent = new Set(M.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 6).map(x => x.scene));
@@ -11975,19 +12022,17 @@ function lifeDayEvent(act) {
     inbox('scene', s.title, fillScene(s.text, ctx), { job: j.id, scene: s.id, ctx, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
     return;
   }
-  if (LIFE_SCENES[act] && prnd() < .2) lifeScene(LIFE_SCENES[act]);
+  if (act.startsWith('evening:')) { if (act === 'evening:out' && prnd() < .2) lifeScene(LIFE_SCENES.out); else if (prnd() < .03) maybeEvent(); return; }
+  if (LIFE_SCENES[act] && prnd() < .12) lifeScene(LIFE_SCENES[act]);
 }
-function lifeMorningEvent() { const n = pending().length; interviewToday(); if (pending().length === n && typeof roadEvent === 'function') roadEvent(); }
-function lifeEveningEvent(k) { if (k === 'out' && prnd() < .2) lifeScene(LIFE_SCENES.out); else if (prnd() < .03) maybeEvent(); }
+function lifeMorningEvent() { if (typeof roadEvent === 'function') roadEvent(); }
 
 // ---- interviews ----
 // An application now goes to a shortlist; the interview is a scene where how you play it decides the offer.
 function shortlistOdds(post) { return Math.min(.95, Math.sqrt(hireOdds(post)) * 1.05); }
-function interviewToday() {
-  const M = S.me, d = M.wk.day, iv = d < 5 && (M.interviews || []).find(x => x.day <= d && !x.done);
-  if (!iv) return;
-  iv.done = true;
-  const post = iv.post, t = tmplOf(post), target = clamp(hireOdds(post) / shortlistOdds(post), .1, .95);
+// Held as an appointment in your diary (life-social.js).
+function holdInterview(post) {
+  const M = S.me, t = tmplOf(post), target = clamp(hireOdds(post) / shortlistOdds(post), .1, .95);
   const sub = t.subs[0], dc = st => { const m = checkMods(st).mod; return clamp(Math.round(20 - 20 * target + m), 4, 19); };
   const f = post.film !== null ? S.films[post.film] : null;
   const who = post.head !== null ? P(post.head).name : 'the hiring manager';
@@ -11995,13 +12040,13 @@ function interviewToday() {
     { k: 'craft', label: `Talk about the work: ${statLabel(sub).toLowerCase()}`, check: [sub, dc(sub)] },
     { k: 'charm', label: 'Charm them', check: ['cha', dc('cha')] },
     { k: 'honest', label: 'Be straight about what you don\'t know yet', check: ['com', dc('com') - 1] },
-    ...(M.spec.drafts || ME().credits.length ? [{ k: 'show', label: ME().credits.length ? 'Talk them through your credits' : 'Leave them your spec script', check: ['tas', dc('tas') - 2] }] : [])] });
+    ...(M.spec.drafts || (M.scripts || []).some(x => x.grade) || ME().credits.length ? [{ k: 'show', label: ME().credits.length ? 'Talk them through your credits' : 'Leave them your spec script', check: ['tas', dc('tas') - 2] }] : [])] });
 }
 function resolveInterview(it, k) {
   const c = it.choices.find(x => x.k === k), ok = roll(c.check[0], c.check[1]), post = it.post;
   it.done = true;
   if (ok) { inbox('offer', `Offer: ${post.t}`, offerText(post), { post, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); S.me.stats.offers++; }
-  else S.me.wk.stress += 2;
+  else if (S.me.wk) S.me.wk.stress += 2; else S.me.stress = clamp(S.me.stress + 2, 0, 100);
   it.result = { ok, roll: S.me.lastRoll, t: ok ? 'They call that evening. It\'s yours if you want it.' : pickLine(['They thank you for your time. You know what that means.', 'They went with someone with more experience.', 'You hear nothing, which is also an answer.'], post.id) };
 }
 // </life-scenes>
@@ -12295,6 +12340,388 @@ function storyHTML() {
    <h4>Timeline</h4><ol class="timeline">${ms.length ? ms.map(m => `<li class="tl-${m.kind || 'life'}"><time>${fmtDate(m.w, true)}</time><span>${esc(m.t)}</span></li>`).join('') : '<li class="muted">Your story starts here.</li>'}</ol></section>`;
 }
 // </life-story>
+// <life-social>
+// ---------------- People in your life: the phone, appointments and relationships ----------------
+// Your phone buzzes as the week goes on: friends inviting you out, gossip, tips, someone who needs a hand. You can
+// text anyone you know to fix a coffee, drinks, a date or a session with your mentor; the meeting lands in your
+// diary as an appointment and takes that block. People drift if you never see them; friends become close friends,
+// a coffee can turn into something more, a senior contact can take you under their wing. Who's in your corner shows
+// up in your rolls.
+const APPT_KINDS = {
+  interview: { icon: '🤝', label: 'Interview', e: 6, stress: 2 },
+  coffee: { icon: '☕', label: 'Coffee', e: 4, cost: 8, stress: -1 },
+  drinks: { icon: '🍸', label: 'Drinks', e: 8, cost: 30, stress: -3 },
+  date: { icon: '🌹', label: 'Date', e: 8, cost: 45, stress: -4 },
+  mentor: { icon: '🧭', label: 'Mentor session', e: 5, stress: -1 },
+  invite: { icon: '🎟️', label: 'Invitation', e: 9, stress: -2 },
+  help: { icon: '📦', label: 'Helping a friend', e: 14, stress: 0 }
+};
+const REL = {
+  partner: { label: 'Partner', icon: '❤️' }, close: { label: 'Close friend', icon: '🤞' }, mentor: { label: 'Mentor', icon: '🧭' },
+  friend: { label: 'Friend', icon: '🙂' }, contact: { label: 'Contact', icon: '·' }, rival: { label: 'Rival', icon: '⚔️' },
+  ex: { label: 'Ex', icon: '💔' }, cold: { label: 'On bad terms', icon: '❄️' }
+};
+const REL_ORDER = ['partner', 'close', 'mentor', 'friend', 'rival', 'ex', 'contact', 'cold'];
+function aliveKnown() { const M = S.me; return Object.keys(M.known).map(Number).filter(id => !P(id).dead && !P(id).retired && id !== M.id); }
+function relOf(id) {
+  const M = S.me, r = (M.rel || {})[id];
+  if (r && r.s) return r.s;
+  const k = M.known[id];
+  if (!k) return null;
+  if (k.tags.includes('Rival')) return 'rival';
+  const o = opinion(id);
+  return o >= 55 && k.trust >= 55 ? 'close' : o >= 22 ? 'friend' : o <= -20 ? 'cold' : 'contact';
+}
+function setRel(id, s) {
+  const M = S.me, q = P(id);
+  M.rel = M.rel || {};
+  if (!s) { delete M.rel[id]; return; }
+  M.rel[id] = Object.assign(M.rel[id] || {}, { s, since: S.week, last: S.week });
+  if (s === 'partner') milestone(`You and ${q.name} got together`, 'love');
+  if (s === 'ex') { milestone(`You and ${q.name} split up`, 'love'); if (M.cohab === id) M.cohab = null; }
+  if (s === 'mentor') milestone(`${q.name} became your mentor`, 'work');
+}
+function partnerOf() { const M = S.me; for (const id in M.rel || {}) if (M.rel[id].s === 'partner' && !P(+id).dead) return +id; return null; }
+function mentorOf() { const M = S.me; for (const id in M.rel || {}) if (M.rel[id].s === 'mentor' && !P(+id).dead) return +id; return null; }
+function canRomance(id) {
+  const M = S.me, q = P(id), r = (M.rel || {})[id];
+  if (q.dead || partnerOf() !== null || (r && r.s === 'ex' && S.week - r.since < 26) || (r && r.s === 'mentor')) return false;
+  if (M.known[id].tags.includes('Your parent')) return false;
+  return Math.abs(ageOf(q) - ageOf(ME())) <= 10 && ageOf(q) >= 18;
+}
+function seniorTo(id) { return P(id).standing - ME().standing >= 20; }
+
+// ---- the phone ----
+function sms(from, t, kind = 'text', extra = {}) {
+  const M = S.me, W = M.wk;
+  M.phone = M.phone || [];
+  M.phone.push({ w: S.week, d: W ? W.day : 0, b: W ? W.block : 0, from, t, kind, ...extra });
+  if (M.phone.length > 120) M.phone.splice(0, M.phone.length - 120);
+  M.phoneN = (M.phoneN || 0) + 1;
+}
+const HI_LINES = ['saw something today that made me think of you. how are you??', 'are you still alive? asking for me', 'ok who told you that you could disappear for a month', 'thinking about that night. we should do it again', 'how\'s the hustle', 'you\'ll never guess who I just stood behind in a coffee queue'];
+const PARTNER_LINES = ['missing you today', 'home late, save me some of whatever that was', 'I told my mum about you. she has questions', 'you were brilliant this morning. just saying', 'pick up milk? and also me, at 8', 'proud of you. that\'s all.'];
+const HOME_CALLS = ['Home calls. They want to know if you\'re eating properly.', 'Your family calls: a cousin is getting married, and are you coming?', 'A call from home. Everyone\'s fine. You feel lighter after.', 'A voicemail from home: "We saw a film. It was terrible. Call us."'];
+const GOSSIP_LINES = ['{a} and {b} aren\'t speaking since the wrap party. nobody will say why', 'did you hear {a} walked off a job on Tuesday?', '{a} is apparently writing something. everyone is writing something', 'heard {a} is up for something big. don\'t say I said', '{a} turned up to a meeting in a tuxedo. no explanation', 'apparently {a} and {b} are an item now??'];
+const MENTOR_TIPS = [
+  'Arrive early, leave late, and never be the reason a setup waits.',
+  'Learn everyone\'s name on day one. The grips remember who did.',
+  'Your reel should be two minutes of your best work, not ten of all of it.',
+  'Say yes to the small job with the good people over the big job with the bad ones.',
+  'When you don\'t know, say so, then find out before anyone asks again.',
+  'Every department is talking to every other one. Gossip travels faster than call sheets.',
+  'Write down what went wrong every night. In a year it\'s a manual.',
+  'The work you turn down shapes you as much as the work you take.'
+];
+// Each block, the phone might go. Gossip the world has queued comes first.
+function phoneTick(d, b) {
+  const M = S.me, known = aliveKnown();
+  if (!M.party || !M.party.done) return;
+  if ((M.gossipQ || []).length && prnd() < .35) { const g = M.gossipQ.shift(); sms(g.from ?? null, g.t, 'gossip', g.person !== undefined ? { person: g.person } : {}); return; }
+  if (!known.length || prnd() > (b === 2 ? .16 : .07)) return;
+  const friends = known.filter(id => ['friend', 'close', 'partner', 'mentor'].includes(relOf(id)));
+  const onFilms = known.filter(id => S.active.some(i => keyIds(S.films[i]).includes(id) && S.films[i].hub === M.hub));
+  const part = partnerOf(), men = mentorOf();
+  const opts = [['gossip', 3], ['home', 1]];
+  if (friends.length) opts.push(['invite', 4], ['hi', 2], ['ask', 1]);
+  if (onFilms.length) opts.push(['tip', 1]);
+  if (part !== null) opts.push(['partner', 3]);
+  if (men !== null) opts.push(['mentor', 1]);
+  let r = prnd() * opts.reduce((s, o) => s + o[1], 0), kind = opts[0][0];
+  for (const [k, w] of opts) { r -= w; if (r <= 0) { kind = k; break; } }
+  switch (kind) {
+    case 'gossip': {
+      if (known.length < 2) return;
+      const a = ppick(known), b2 = ppick(known.filter(x => x !== a)), from = ppick(known.filter(x => x !== a && x !== b2).concat([null]));
+      sms(from, pickLine(GOSSIP_LINES, a + b2).replace('{a}', P(a).name).replace('{b}', P(b2).name), 'gossip', { person: a });
+      return;
+    }
+    case 'home': sms(null, pickLine(HOME_CALLS, d + b), 'home'); M.wk.stress -= 1; return;
+    case 'hi': { const id = ppick(friends); sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
+    case 'partner': sms(part, pickLine(PARTNER_LINES, d + b), 'love'); return;
+    case 'mentor': { sms(men, pickLine(MENTOR_TIPS, men + S.week), 'tip'); for (const s of Object.keys(CRAFTS[MAIN[P(men).role]].subs).slice(0, 2)) weekGain(s, .01); return; }
+    case 'tip': {
+      const id = ppick(onFilms), f = S.active.map(i => S.films[i]).find(x => keyIds(x).includes(id));
+      if (opinion(id) < 5) { sms(id, `crazy week on ${f.title}. talk soon`, 'text'); return; }
+      M.refs[id] = (M.refs[id] || 0) + 1;
+      sms(id, `we're hiring on ${f.title}. put your name in and I'll mention you`, 'tip');
+      return;
+    }
+    case 'invite': return inviteFrom(ppick(friends));
+    case 'ask': return askFrom(ppick(friends));
+  }
+}
+// Invitations: something to go to, a time, yes or no.
+const INVITES = [
+  { k: 'birthday', t: '{who}\'s birthday drinks', meet: 1, tie: 5, stress: -4, cost: 25 },
+  { k: 'dinner', t: 'a dinner party at {who}\'s', meet: 1, tie: 6, stress: -3, cost: 15 },
+  { k: 'screening', t: 'a cast-and-crew screening of {film}', film: 1, meet: 2, tie: 4, xp: { tas: .06 }, stand: .2 },
+  { k: 'premiere', t: 'the premiere of {film}', film: 1, senior: 1, meet: 2, tie: 4, stand: .5, cost: 40 },
+  { k: 'tableread', t: 'a table read of {who}\'s new script', meet: 1, tie: 5, xp: { dial: .04, struc: .03 } },
+  { k: 'football', t: 'a Sunday five-a-side game', meet: 1, tie: 3, stress: -5, e: 6 },
+  { k: 'gallery', t: 'a gallery opening with {who}', meet: 1, tie: 3, xp: { vis: .05 } },
+  { k: 'karaoke', t: 'karaoke with {who}\'s crew', meet: 2, tie: 5, stress: -6, cost: 20 },
+  { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 }
+];
+function inviteFrom(id) {
+  const M = S.me, q = P(id);
+  const film = S.films.find && S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
+  const pool = INVITES.filter(v => (!v.film || film) && (!v.senior || q.standing > 40));
+  const v = ppick(pool), slot = freeSlot({ days: [1, 2, 3, 4], blocks: [2], from: 1 });
+  if (!slot) return;
+  const what = v.t.replace('{who}', q.name).replace('{film}', film ? film.title : 'the film');
+  const mine = v.t.replace("{who}'s", 'my').replace(' with {who}', '').replace('{film}', film ? film.title : 'the film');
+  sms(id, `${pickLine(['are you free for', 'come to', 'you HAVE to come to', 'any chance you can make'], id + S.week)} ${mine}? ${slotLabel(slot)}`, 'invite');
+  inbox('invite', `${q.name} invites you`, `${q.name} asks you to ${what}, ${slotLabel(slot)}.`, { person: id, ev: v.k, film: film ? film.id : undefined, slot, what, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Make an excuse' }] });
+}
+function askFrom(id) {
+  const q = P(id), slot = freeSlot({ days: [5, 6], blocks: [0, 1], from: 1 });
+  if (!slot) return;
+  const what = pickLine(['help moving flat', 'a hand painting a set for their short', 'someone to run lines with before an audition', 'a lift to the airport at dawn', 'help building a bookcase that came in 140 pieces'], id + S.week);
+  sms(id, `huge favour... ${what}? ${slotLabel(slot)}`, 'ask');
+  inbox('ask', `${q.name} needs a favour`, `${q.name} asks for ${what}, ${slotLabel(slot)}. It'll eat the block and some energy.`, { person: id, slot, what, choices: [{ k: 'yes', label: 'Of course' }, { k: 'no', label: 'Say you can\'t' }] });
+}
+// Picks on the phone's decisions. Returns true if it handled the item.
+function socialPick(it, k) {
+  const M = S.me, me = ME();
+  if (it.kind === 'invite' || it.kind === 'ask') {
+    const q = P(it.person);
+    if (k === 'yes') {
+      if (!slotFree(it.slot)) { it.result = { t: 'You already have something then. You tell them, and they understand.' }; }
+      else { bookAppt(Object.assign({ kind: it.kind === 'invite' ? 'invite' : 'help', who: it.person, ev: it.ev, film: it.film, what: it.what }, it.slot)); sms(-1, it.kind === 'invite' ? 'yes! see you there' : 'of course. I\'ll be there', 'text'); it.result = { t: `In your diary: ${it.what}, ${slotLabel(it.slot)}.` }; }
+    } else { addTie(me, q, it.kind === 'ask' ? -3 : -1); sms(-1, pickLine(['so sorry, can\'t that night', 'ah, I\'m slammed. next time?', 'can\'t, sorry!! have fun'], it.id), 'text'); it.result = { t: it.kind === 'ask' ? `${q.name} says it's fine. It isn't quite.` : 'Next time.' }; }
+    it.done = true; it.picked = k; return true;
+  }
+  return false;
+}
+
+// ---- the diary of appointments ----
+// A slot is { w, d, b }: a week, a day (0 = Monday) and a block (0 morning, 1 afternoon, 2 evening).
+function nowAbs() { const W = S.me.wk; return S.week * 21 + (W ? W.day * 3 + W.block : 0); }
+function slotAbs(s) { return s.w * 21 + s.d * 3 + s.b; }
+function slotFree(s) {
+  const M = S.me;
+  if (slotAbs(s) <= nowAbs() - (S.me.wk ? 0 : 1)) return false;
+  if ((M.appts || []).some(x => !x.done && x.w === s.w && x.d === s.d && x.b === s.b)) return false;
+  if (s.b < 2 && s.d < 5 && s.d < jobDays()) return false;   // the job has those blocks
+  return true;
+}
+function slotLabel(s) {
+  const W = S.me.wk, today = s.w === S.week && W && s.d === W.day;
+  return `${today ? (s.b === 2 ? 'tonight' : 'today, ' + BLOCKS[s.b].toLowerCase()) : (s.w > S.week ? 'next ' : '') + DAYS7[s.d] + ' ' + BLOCKS[s.b].toLowerCase()}`;
+}
+// The first free slot from now (or `from` days on), within this week and next.
+function freeSlot(o = {}) {
+  const W = S.me.wk, d0 = (W ? W.day : 0) + (o.from || 0);
+  for (let w = S.week; w <= S.week + 1; w++) for (const d of o.days || [0, 1, 2, 3, 4, 5, 6]) for (const b of o.blocks || [0, 1, 2]) {
+    const s = { w, d, b };
+    if (w === S.week && d < d0) continue;
+    if (slotFree(s)) return s;
+  }
+  return null;
+}
+function upcomingSlots(n = 14) {
+  const out = [];
+  for (let w = S.week; w <= S.week + 1 && out.length < n; w++) for (let d = 0; d < 7 && out.length < n; d++) for (let b = 0; b < 3 && out.length < n; b++) { const s = { w, d, b }; if (slotFree(s)) out.push(s); }
+  return out;
+}
+function bookAppt(o) { const M = S.me; M.appts = M.appts || []; const x = Object.assign({ id: M.seq++, done: false }, o); M.appts.push(x); return x; }
+function apptAt(d, b) { const M = S.me; if (M.wk && M.wk.burnt) return null; return (M.appts || []).find(x => !x.done && x.w === S.week && x.d === d && x.b === b) || null; }
+function apptsAhead() { const M = S.me, now = nowAbs(); return (M.appts || []).filter(x => !x.done && slotAbs(x) >= now).sort((a, b) => slotAbs(a) - slotAbs(b)); }
+// An interview lands in next week's diary, in a weekday block the job doesn't already take.
+function bookInterview(post) {
+  const M = S.me, w = S.week + 1;
+  for (const d of [0, 1, 2, 3, 4].sort(() => prnd() - .5)) for (const b of [0, 1]) {
+    if ((M.appts || []).some(x => !x.done && x.w === w && x.d === d && x.b === b)) continue;
+    if (d < jobDays()) continue;
+    return bookAppt({ w, d, b, kind: 'interview', post, who: post.head });
+  }
+  return bookAppt({ w, d: 4, b: 2, kind: 'interview', post, who: post.head });
+}
+function runAppointment(x) {
+  const M = S.me, me = ME(), W = M.wk, A = APPT_KINDS[x.kind] || APPT_KINDS.coffee;
+  x.done = true;
+  const q = x.who !== null && x.who !== undefined ? P(x.who) : null;
+  if (q && (q.dead || (x.kind !== 'interview' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
+  M.energy = clamp(M.energy - (A.e || 0), 0, 100);
+  W.stress += A.stress || 0;
+  if (A.cost) W.cashOut += usd(A.cost);
+  const c = W.block < 2 ? commute() : null, L = [];
+  if (q && x.kind !== 'interview') { meet(q.id, null); if (M.rel && M.rel[q.id]) M.rel[q.id].last = S.week; }
+  switch (x.kind) {
+    case 'interview': holdInterview(x.post); L.push(`You go in to see ${q ? q.name : 'them'} about ${x.post.t.toLowerCase()}.`); break;
+    case 'coffee': case 'drinks': meetUp(q.id, L, x.kind === 'drinks'); break;
+    case 'date': dateNight(q.id, L, x); break;
+    case 'mentor': {
+      const cr = MAIN[q.role], subs = Object.keys(CRAFTS[cr].subs);
+      for (const s of subs.slice(0, 3)) weekGain(s, .03);
+      addTie(me, q, 2);
+      L.push(`An hour with ${q.name}. ${pickLine(MENTOR_TIPS, q.id + S.week)}`, `You come away a little better at ${CRAFTS[cr].label.toLowerCase()}.`);
+      break;
+    }
+    case 'invite': goToInvite(x, q, L); break;
+    case 'help': addTie(me, q, 8); trust(q.id, 6); L.push(`You give up the ${BLOCKS[W.block].toLowerCase()} for ${x.what}. ${q.name} won't forget it.`); M.known[q.id].due++; break;
+  }
+  card(A.icon, `${A.label}${q ? ' with ' + q.name : ''}`, (c ? [c] : []).concat(L), { roll: M.lastRoll, notable: true });
+}
+function meetUp(id, L, drinks) {
+  const M = S.me, me = ME(), q = P(id), k = M.known[id];
+  const ok = roll('cha', 9 - k.trust / 25 - (drinks ? 1 : 0));
+  addTie(me, q, (ok ? 6 : 1) + tasteMatch(q) * 2); trust(id, ok ? 4 : 1);
+  const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id) && f.hub === M.hub);
+  if (film && opinion(id) > 10 && prnd() < .5) { M.refs[id] = (M.refs[id] || 0) + 1; L.push(`${drinks ? 'Drinks' : 'Coffee'} with ${q.name}: they're on ${film.title} and promise to put your name forward.`); }
+  else L.push(`${drinks ? 'Drinks' : 'Coffee'} with ${q.name}. ${ok ? pickLine(['It goes well: two hours vanish.', 'You laugh more than you expected to.', 'You talk about films until they stack the chairs.'], id) : pickLine(['They seem distracted.', 'It\'s a bit stiff. Next time.', 'They keep checking their phone.'], id)}`);
+  relStory(id);
+}
+function dateNight(id, L, x) {
+  const M = S.me, r = (M.rel || {})[id];
+  if (!r || r.s !== 'partner') { relScene(id, 'rs_spark'); L.push(`A first date with ${P(id).name}. Or is it?`); return; }
+  r.last = S.week; r.dates = (r.dates || 0) + 1;
+  relScene(id, ppick(['rs_dinner', 'rs_walk', 'rs_film', 'rs_cook']));
+  L.push(`An evening with ${P(id).name}.`);
+}
+function goToInvite(x, q, L) {
+  const M = S.me, me = ME(), v = INVITES.find(i => i.k === x.ev) || INVITES[0];
+  if (v.cost) M.wk.cashOut += usd(v.cost);
+  if (v.e) M.energy = clamp(M.energy - v.e, 0, 100);
+  if (v.stress) M.wk.stress += v.stress;
+  addTie(me, q, v.tie || 3);
+  for (const s in v.xp || {}) weekGain(s, v.xp[s]);
+  if (v.stand) me.standing = clamp(me.standing + v.stand, 0, 100);
+  const met = [];
+  for (let i = 0; i < (v.meet || 0); i++) {
+    const nq = bestIn(M.hub, ROLES, p => -Math.abs(p.standing - me.standing - (v.senior ? 25 : 8)) + tie(q, p) * .3 + prnd() * 30);
+    if (nq) { meet(nq.id, `Met through ${q.name}`, 4 + pri(0, 4)); met.push(`${nq.name} (${ROLE_LABEL[nq.role].toLowerCase()})`); }
+  }
+  L.push(`${x.what[0].toUpperCase() + x.what.slice(1)}.${met.length ? ' You meet ' + met.join(' and ') + '.' : ''}`);
+  if (prnd() < .25) lifeScene(LIFE_SCENES.out);
+}
+
+// ---- relationships ----
+// After you see someone, their story with you might move on: a spark, a mentor, a confidence, an old wound.
+function relStory(id) {
+  const M = S.me, rel = relOf(id), o = opinion(id), r = (M.rel || {})[id] || {};
+  if (r.storyW && S.week - r.storyW < 4) return;
+  let sid = null;
+  if (rel === 'ex' && !r.metEx) { sid = 'rs_exmeet'; }
+  else if (canRomance(id) && o >= 35 && prnd() < .22) sid = 'rs_spark';
+  else if (seniorTo(id) && o >= 30 && mentorOf() === null && rel !== 'partner' && prnd() < .3) sid = 'rs_mentor';
+  else if (rel === 'close' && prnd() < .2) sid = 'rs_confide';
+  else if (rel === 'partner' && (r.dates || 0) >= 4 && S.week - r.since > 16 && M.cohab !== id && M.life !== 'couch' && prnd() < .3) sid = 'rs_movein';
+  if (!sid) return;
+  M.rel = M.rel || {};
+  M.rel[id] = Object.assign(M.rel[id] || {}, { storyW: S.week }, sid === 'rs_exmeet' ? { metEx: 1 } : {});
+  if (!M.rel[id].s) delete M.rel[id].s;
+  relScene(id, sid);
+}
+function relScene(id, sid) {
+  const s = SCENES.find(x => x.id === sid);
+  if (!s) return;
+  const ctx = { head: null, film: null, mates: [], contact: id };
+  inbox('scene', fillScene(s.title, ctx), fillScene(s.text, ctx), { scene: s.id, ctx, person: id, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
+}
+const REL_SCENES = [
+  { id: 'rs_spark', title: 'Something more?', text: 'Two hours pass like twenty minutes. Outside, {contact} lingers at the corner like neither of you wants to be the first to leave.', opts: [
+    { k: 'ask', label: 'Ask them out properly', check: ['cha', 12], ok: { rel: 'partner', tie: { contact: 8 }, stress: -4 }, bad: { tie: { contact: -2 }, stress: 3 }, t: '{contact} says yes before you finish the sentence.', tb: 'They let you down gently: they like you, just not like that. It stings, then it doesn\'t.' },
+    { k: 'friend', label: 'Keep it a friendship', ok: { tie: { contact: 3 } }, t: 'Some friendships are worth more than a maybe.' }] },
+  { id: 'rs_dinner', title: 'Dinner for two', text: '{contact} has booked somewhere with candles and a wine list you\'re scared of.', opts: [
+    { k: 'listen', label: 'Ask about their week, and listen', check: ['cha', 10], ok: { tie: { contact: 6 }, stress: -3 }, bad: { tie: { contact: 1 } }, t: 'You hear things about {contact} you never knew. It\'s a lovely night.', tb: 'You drift back to your own week twice. They notice.' },
+    { k: 'shop', label: 'Talk about the business all night', ok: { tie: { contact: -1 }, xp: { tas: .03 } }, t: 'They\'re patient. Mostly.' },
+    { k: 'splurge', label: 'Order the good wine', ok: { cash: -60, tie: { contact: 5 }, stress: -2 }, t: 'Worth every penny you don\'t have.' }] },
+  { id: 'rs_walk', title: 'A long walk', text: 'You and {contact} walk by the water until the streetlights come on. It\'s the kind of night for saying things.', opts: [
+    { k: 'honest', label: 'Tell them what scares you about this business', check: ['com', 11], ok: { tie: { contact: 7 }, trust: { contact: 6 }, stress: -4 }, bad: { tie: { contact: 2 }, stress: 2 }, t: 'They take your hand. "Me too, about mine."', tb: 'It comes out wrong, more complaint than confession.' },
+    { k: 'light', label: 'Keep it light', ok: { tie: { contact: 3 }, stress: -3 }, t: 'Ice cream, bad jokes, a good night.' }] },
+  { id: 'rs_film', title: 'Their pick', text: '{contact} picks the film tonight. It\'s one you would never, ever choose.', opts: [
+    { k: 'open', label: 'Give it a real chance', check: ['tas', 10], ok: { tie: { contact: 5 }, xp: { tas: .05 } }, bad: { tie: { contact: 2 } }, t: 'It\'s better than you thought. You see what they see in it.', tb: 'It\'s exactly as bad as you thought. You laugh about it all the way home.' },
+    { k: 'critic', label: 'Tell them what you really think', check: ['cha', 13], ok: { tie: { contact: 4 } }, bad: { tie: { contact: -4 } }, t: 'A glorious argument. You both win.', tb: 'They go quiet. It was their favourite.' }] },
+  { id: 'rs_cook', title: 'Staying in', text: '{contact} wants to cook together. Your kitchen has one good knife.', opts: [
+    { k: 'cook', label: 'Take charge of the sauce', check: ['eth', 10], ok: { tie: { contact: 5 }, stress: -3 }, bad: { tie: { contact: 2 }, stress: -1 }, t: 'It\'s actually good. They eat a second plate.', tb: 'You burn it. Takeaway, laughing.' },
+    { k: 'sous', label: 'Be the sous-chef', ok: { tie: { contact: 4 }, stress: -4 }, t: 'Chopping onions and talking. Nothing better.' }] },
+  { id: 'rs_distant', title: '"We need to talk"', text: '{contact}: "I feel like I only see you between call sheets."', opts: [
+    { k: 'promise', label: 'Promise a real weekend, and mean it', check: ['com', 11], ok: { tie: { contact: 6 }, stress: -2 }, bad: { tie: { contact: -3 } }, t: 'They believe you. Now keep it.', tb: '"You said that last time."' },
+    { k: 'job', label: 'Tell them this is the job', check: ['cha', 14], ok: { tie: { contact: 2 }, trust: { contact: 4 } }, bad: { tie: { contact: -8 }, stress: 4 }, t: 'They understand. They chose someone in film, after all.', tb: 'They go quiet. Something has changed.' },
+    { k: 'end', label: 'Maybe this isn\'t working', ok: { rel: 'ex', stress: 6 }, t: 'You end it. The flat is very quiet afterwards.' }] },
+  { id: 'rs_movein', title: 'Your place or mine?', text: '{contact} has a drawer at yours, a toothbrush, opinions about your sofa. "Should we just... live together?"', opts: [
+    { k: 'yes', label: 'Move in together', ok: { cohab: 1, tie: { contact: 6 }, stress: -3 }, t: 'Boxes, an argument about shelves, then home. Rent splits two ways.' },
+    { k: 'notyet', label: 'Not yet', check: ['com', 10], ok: {}, bad: { tie: { contact: -5 } }, t: 'They understand. They say they do, and they mean it.', tb: 'They say they understand. They don\'t.' }] },
+  { id: 'rs_mentor', title: 'Ask for help', text: 'Over coffee, {contact} gives you one piece of advice that rearranges your whole year. You could ask for more.', opts: [
+    { k: 'ask', label: 'Ask {contact} to mentor you', check: ['cha', 13], ok: { rel: 'mentor', tie: { contact: 4 } }, bad: { tie: { contact: -1 } }, t: '"Call me every few weeks. Bring questions, not complaints."', tb: '"I\'m stretched too thin right now." At least you asked.' },
+    { k: 'no', label: 'Just enjoy the coffee', ok: { tie: { contact: 2 } }, t: 'You write the advice on a napkin and keep it.' }] },
+  { id: 'rs_confide', title: 'A late call', text: '{contact} calls late. A job fell through and the rent is due. They don\'t ask for anything, which is how you know.', opts: [
+    { k: 'listen', label: 'Stay on the phone till they\'re OK', check: ['com', 10], ok: { trust: { contact: 10 }, tie: { contact: 5 } }, bad: { trust: { contact: 3 } }, t: 'Two hours. By the end they\'re laughing.', tb: 'You say the wrong thing once, but you stay on the line.' },
+    { k: 'lend', label: 'Lend them $300', ok: { cash: -300, tie: { contact: 10 }, due: 'contact' }, t: 'They pay you back in a month, and owe you a great deal more.' }] },
+  { id: 'rs_exmeet', title: 'Across the room', text: 'You see {contact} across the room. The last time you spoke was not your finest hour.', opts: [
+    { k: 'friendly', label: 'Go over and say hello', check: ['com', 12], ok: { rel: 'none', tie: { contact: 8 } }, bad: { stress: 4 }, t: 'It\'s easier than you feared. Maybe you can be friends.', tb: 'Stiff smiles. You leave early.' },
+    { k: 'avoid', label: 'Leave before they see you', ok: { stress: 2 }, t: 'You make it out. Your heart is going like a drum.' }] }
+];
+for (const s of REL_SCENES) SCENES.push(Object.assign({ event: 1, jobs: [] }, s));
+// What the people around you do to your rolls.
+function relConditions() {
+  const M = S.me, out = [];
+  if (!M.known) return out;
+  const part = partnerOf(), lastEx = Object.keys(M.rel || {}).map(Number).filter(id => M.rel[id].s === 'ex').map(id => M.rel[id].since).sort((a, b) => b - a)[0];
+  if (part !== null && opinion(part) >= 40) out.push({ k: 'love', label: 'In love', adv: ['com'], d: `${P(part).name} is in your corner. Advantage on Composure.` });
+  if (lastEx !== undefined && S.week - lastEx <= 4) out.push({ k: 'heartbroken', label: 'Heartbroken', dis: ['cha'], d: 'A recent break-up. Disadvantage on Charisma for a few weeks.' });
+  const known = aliveKnown(), close = known.filter(id => relOf(id) === 'close').length, friends = known.filter(id => ['friend', 'close', 'partner'].includes(relOf(id))).length;
+  if (close >= 2) out.push({ k: 'circle', label: 'Good friends', adv: ['col'], d: 'People who have your back. Advantage on Collaboration.' });
+  if (!friends && S.week - M.startW > 10) out.push({ k: 'lonely', label: 'Lonely', dis: ['col'], d: 'Nobody to call. Disadvantage on Collaboration. Catch up with someone.' });
+  return out;
+}
+// Each week: ties drift without contact, partners notice when you vanish, mentors check in, friends steady you.
+function socialWeek() {
+  const M = S.me, me = ME(), known = aliveKnown();
+  let stress = 0;
+  for (const id of known) {
+    const k = M.known[id], o = opinion(id);
+    if (S.week - (k.seen ?? k.met) > 8 && o > 15 && !k.tags.includes('Your parent')) addTie(me, P(id), -1);   // out of sight
+  }
+  const part = partnerOf();
+  if (part !== null) {
+    const r = M.rel[part], o = opinion(part);
+    if (o < 0) { setRel(part, 'ex'); stress += 10; sms(part, 'I think we both know this isn\'t working. I\'m sorry.', 'love'); inbox('note', `You and ${P(part).name} are over`, 'It ends by text, which somehow makes it worse.', { person: part }); }
+    else {
+      if (o >= 40) stress -= 3;
+      if (S.week - r.last >= 3 && (!r.distW || S.week - r.distW >= 4)) { r.distW = S.week; addTie(me, P(part), -4); relScene(part, 'rs_distant'); }
+    }
+  }
+  for (const id in M.rel || {}) if (M.rel[id].s === 'mentor' && (P(+id).dead || opinion(+id) < 0)) { delete M.rel[id]; inbox('note', 'No longer your mentor', `${P(+id).name} ${P(+id).dead ? 'has died. You keep their advice on a napkin by the door.' : 'stops returning your calls.'}`); }
+  stress -= Math.min(3, known.filter(id => relOf(id) === 'close').length);
+  for (const x of M.appts || []) if (!x.done && slotAbs(x) < (S.week + 1) * 21) { x.done = true; if (x.who !== null && x.who !== undefined && M.known[x.who]) addTie(me, P(x.who), -3); }   // missed
+  M.appts = (M.appts || []).filter(x => !x.done || S.week - x.w < 2);
+  if (M.cohab !== null && M.cohab !== undefined && partnerOf() !== M.cohab) M.cohab = null;
+  return stress;
+}
+// Text someone to fix a time. The logged action carries the slot, so replays agree.
+function textSomeone(a) {
+  const M = S.me, me = ME(), id = a.id, k = M.known[id];
+  if (!k || P(id).dead) return false;
+  const q = P(id), rel = relOf(id), o = opinion(id);
+  if (a.kind === 'hi') {
+    sms(-1, a.msg || pickLine(['how are you doing?', 'thinking of you, how\'s things', 'coffee soon?', 'saw this and thought of you'], id + S.week), 'mine', { to: id });
+    if (k.hiW !== S.week) { k.hiW = S.week; addTie(me, q, o > 0 ? 1.5 : .5); k.seen = S.week; }
+    sms(id, o > 20 ? pickLine(['!!! hi! all good, crazy busy, you?', 'aw. miss you. soon?', 'ha I was literally about to text you'], id) : o > -10 ? pickLine(['hey! good thanks', 'all fine here, you?', 'busy busy'], id) : '...', 'text');
+    return true;
+  }
+  const s = { w: a.w, d: a.d, b: a.b };
+  if (!APPT_KINDS[a.kind] || a.kind === 'interview' || a.kind === 'invite' || a.kind === 'help' || !slotFree(s)) return false;
+  if (a.kind === 'mentor' && rel !== 'mentor') return false;
+  if (a.kind === 'date' && rel !== 'partner' && !canRomance(id)) return false;
+  if ((M.appts || []).some(x => !x.done && x.who === id)) return false;
+  const ask = { coffee: 'coffee', drinks: 'a drink', date: rel === 'partner' ? 'a proper date' : 'dinner, just the two of us', mentor: 'an hour of your time' }[a.kind];
+  sms(-1, `${ask} ${slotLabel(s)}?`, 'mine', { to: id });
+  let p = clamp(.3 + o / 70 + k.trust / 250 - (seniorTo(id) ? .2 : 0), .05, .95);
+  if (a.kind === 'date' && rel !== 'partner') p = clamp((o - 20) / 45, .03, .8);
+  if (rel === 'partner' || rel === 'mentor') p = Math.max(p, .8);
+  if (prnd() < p) {
+    bookAppt(Object.assign({ kind: a.kind, who: id }, s));
+    sms(id, pickLine(a.kind === 'date' && rel !== 'partner' ? ['...yes. I\'d like that', 'oh! yes. ok. yes', 'I was wondering when you\'d ask'] : ['perfect, see you then', 'yes! been too long', 'done. you\'re buying', 'I\'ll be there'], id + S.week), 'text');
+  } else {
+    sms(id, a.kind === 'date' && rel !== 'partner' ? pickLine(['that\'s sweet, but I think we\'re better as friends', 'ah, I\'m seeing someone. but thank you'], id) : pickLine(['can\'t then, sorry! another time', 'slammed this week, rain check?', 'ugh, I\'m away. soon?'], id + S.week), 'text');
+    if (a.kind === 'date' && rel !== 'partner') M.wk ? M.wk.stress += 2 : M.stress = clamp(M.stress + 2, 0, 100);
+  }
+  return true;
+}
+// </life-social>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -12613,8 +13040,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 6, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 6 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 7, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 7 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -12813,34 +13240,74 @@ function inboxCard(it) {
     ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
     ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}`;
 }
-// Today, as it happens: a card for each beat lived so far, any decision waiting, and what's next.
+// Today, as it happens: a card for each block lived so far, any decision waiting, and what's next.
+function blockLabel(d, b) {
+  const ap = apptAt(d, b);
+  if (ap) { const A = APPT_KINDS[ap.kind]; return [A.icon, `${A.label}${ap.who != null ? ' with ' + P(ap.who).name : ''}`]; }
+  const k = planBlocks()[d][b], A = eveningOf(k);
+  return [A.icon || '•', A.label];
+}
 function todayPanel() {
-  const M = S.me, W = M.wk, d = W ? W.day : 0, b = W ? W.beat : 0, plan = effectivePlan();
+  const M = S.me, W = M.wk, d = W ? W.day : 0, b = W ? W.block : 0;
   const cards = W ? W.cards.filter(c => c.d === d) : [];
   const pend = pending();
-  const nextLabel = b === 0 ? `Morning, then ${ACTIVITIES[plan[d]].label.toLowerCase()}` : b === 1 ? ACTIVITIES[plan[d]].label : eveningOf(M.eve[d] || 'home').label;
+  const [ic, lab] = blockLabel(d, b);
+  const rest = [b + 1, b + 2].filter(x => x < 3).map(x => { const [i, l] = blockLabel(d, x); return `<span class="chip">${i} ${esc(BLOCKS[x])}: ${esc(l)}</span>`; }).join(' ');
   return `<section class="panel today"><h3>${esc(fmtDay(d))}</h3>
-   <ol class="beats">${cards.map(c => `<li class="beat done"><span class="bi">${c.icon}</span><div><b>${BEAT_NAMES[c.b]} · ${esc(c.title)}</b>${c.lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(c.roll, true)}</div></li>`).join('')}
+   <ol class="beats">${cards.map(c => `<li class="beat done"><span class="bi">${c.icon}</span><div><b>${BLOCKS[c.b]} · ${esc(c.title)}</b>${c.lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(c.roll, true)}</div></li>`).join('')}
     ${pend.map(it => `<li class="beat decide"><span class="bi">❗</span><div>${inboxCard(it)}</div></li>`).join('')}
-    ${pend.length ? '' : `<li class="beat next"><span class="bi">${BEAT_NAMES[b] === 'Evening' ? '🌆' : b === 0 ? '🌅' : ACT_ICON[plan[d]] || '•'}</span><div><b>Next: ${BEAT_NAMES[b]}</b><p class="muted">${esc(nextLabel)}</p><p><button class="btn-s" data-next="1">Live it</button> <button class="btn-s ghost" data-day="1">Rest of the day</button></p></div></li>`}</ol>
+    ${pend.length ? '' : `<li class="beat next"><span class="bi">${ic}</span><div><b>Next: ${BLOCKS[b]} · ${esc(lab)}</b>${rest ? `<p class="muted small">Later: ${rest}</p>` : ''}<p><button class="btn-s" data-next="1">Live on <kbd>space</kbd></button> <button class="btn-s ghost" data-day="1">Rest of the day</button></p></div></li>`}</ol>
    ${conditionsHTML()}</section>`;
 }
 function conditionsHTML() {
   const C = conditionsOf();
   return C.length ? `<div class="conds">${C.map(c => `<span class="cond ${c.adv ? 'up' : 'down'}" title="${esc(c.d)}"><b>${esc(c.label)}</b> ${esc(c.d)}</span>`).join('')}</div>` : '<p class="muted small">You feel fine: no effects on your rolls.</p>';
 }
-// The week ahead: what you do each day and each evening. Days already lived are fixed.
-function weekGrid(actOpts) {
-  const M = S.me, W = M.wk, plan = effectivePlan(), d0 = W ? W.day : 0, b0 = W ? W.beat : 0;
-  const eveOpts = Object.entries(EVENINGS).map(([k, e]) => [k, e.label]).concat(typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
-  return `<div class="wgrid">${DAYS7.map((dn, i) => {
-    const pastDay = i < d0 || (i === d0 && b0 > 1), pastEve = i < d0;
-    const a = plan[i];
-    const dayCell = pastDay ? `<span class="muted">${ACT_ICON[a] || ''} ${esc(ACTIVITIES[a].label)}</span>` : a === 'work' ? `<span class="chip">Work</span>` : M.burnout && W && W.burnt ? '<span class="bad">Rest</span>' : sel('pl-' + i, actOpts, M.plan[i]);
-    const eveCell = pastEve ? `<span class="muted">${esc(eveningOf(M.eve[i] || 'home').label)}</span>` : sel('ev-' + i, eveOpts, M.eve[i] || 'home');
-    return `<div class="wd${i === d0 ? ' now' : ''}${pastEve ? ' past' : ''}"><b>${dn.slice(0, 3)}</b><label>Day ${dayCell}</label><label>Evening ${eveCell}</label></div>`;
-  }).join('')}</div>
+// The week ahead as a diary: seven days, three blocks each. Lived blocks are fixed; job days are taken;
+// appointments show where they land. Everything else you can change until it happens.
+function weekGrid() {
+  const M = S.me, W = M.wk, cal = calOf(), run = planBlocks(), now = W ? W.day * 3 + W.block : 0, burnt = M.burnout && W && W.burnt;
+  const opts = b => Object.entries(BLOCK_ACTS).filter(([k]) => k !== 'work' && (k !== 'study' || M.school)).map(([k, A]) => [k, `${A.icon} ${A.label}${A.cost ? ' ($' + usd(A.cost) + ')' : ''}`]).concat(b === 2 && typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
+  const cell = (d, b) => {
+    const abs = d * 3 + b, ap = (M.appts || []).find(x => x.w === S.week && x.d === d && x.b === b && (!x.done || abs < now)), k = run[d][b];
+    if (abs < now) { const c = W.cards.filter(x => x.d === d && x.b === b).pop(); return `<td class="past"><span class="muted">${c ? c.icon + ' ' + esc(c.title) : ''}</span></td>`; }
+    if (ap) { const A = APPT_KINDS[ap.kind]; return `<td class="appt${abs === now ? ' now' : ''}"><span class="chip good">${A.icon} ${esc(A.label)}${ap.who != null ? ' · ' + esc(P(ap.who).name.split(' ')[0]) : ''}</span></td>`; }
+    if (burnt) return '<td><span class="bad">Rest</span></td>';
+    if (k === 'work') return `<td class="${abs === now ? 'now' : ''}"><span class="chip">🎬 Work</span></td>`;
+    return `<td class="${abs === now ? 'now' : ''}">${sel(`cal-${d}-${b}`, opts(b), cal[d][b])}</td>`;
+  };
+  return `<div class="tw"><table class="cal"><thead><tr><th></th>${DAYS7.map((dn, i) => `<th class="${W && i === W.day ? 'now' : ''}">${dn.slice(0, 3)}<small>${dayDate(i).getUTCDate()}</small></th>`).join('')}</tr></thead>
+   <tbody>${BLOCKS.map((bn, b) => `<tr><th>${bn}</th>${DAYS7.map((_, d) => cell(d, b)).join('')}</tr>`).join('')}</tbody></table></div>
+  <p class="calquick muted small">Quick plans: <button class="linkish" data-calfill="grind">Job hunt all week</button> · <button class="linkish" data-calfill="craft">Craft week</button> · <button class="linkish" data-calfill="writer">Writing week</button> · <button class="linkish" data-calfill="balance">Balanced</button> · <button class="linkish" data-calfill="recover">Recover</button></p>
   <div class="skip"><span class="muted">Skip ahead with this plan (stops at any decision):</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
+}
+const CAL_PRESETS = {
+  grind: [['hunt', 'hunt', 'home'], ['hunt', 'network', 'home'], ['hunt', 'hunt', 'read'], ['hunt', 'network', 'home'], ['hunt', 'hunt', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']],
+  craft: [['train', 'hunt', 'home'], ['train', 'hunt', 'read'], ['train', 'hunt', 'home'], ['train', 'network', 'home'], ['hunt', 'hunt', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']],
+  writer: [['write', 'write', 'read'], ['write', 'hunt', 'home'], ['write', 'write', 'read'], ['write', 'hunt', 'home'], ['write', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'write', 'home']],
+  balance: [['hunt', 'write', 'home'], ['hunt', 'network', 'home'], ['hunt', 'write', 'read'], ['train', 'hunt', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']],
+  recover: [['rest', 'read', 'home'], ['rest', 'hunt', 'home'], ['rest', 'read', 'home'], ['rest', 'hunt', 'home'], ['rest', 'read', 'out'], ['rest', 'rest', 'home'], ['rest', 'home', 'home']]
+};
+// Your phone: messages as they arrive, a way to text anyone you know, your diary of appointments, and your people.
+function phonePanel() {
+  const M = S.me, msgs = (M.phone || []).slice(-14).reverse(), known = aliveKnown();
+  const T = UI.txt = UI.txt || { id: '', kind: 'coffee', slot: 0 };
+  const who = id => id === -1 ? 'You' : id === null || id === undefined ? 'Home' : P(id).name;
+  const when = m => m.w === S.week ? `${DAYS7[m.d].slice(0, 3)} ${BLOCKS[m.b].toLowerCase()}` : `${S.week - m.w}w ago`;
+  const byRel = {};
+  for (const id of known) { const r = relOf(id); (byRel[r] = byRel[r] || []).push(id); }
+  const tid = T.id === '' ? null : +T.id, trel = tid !== null && M.known[tid] ? relOf(tid) : null;
+  const kinds = [['hi', 'Just say hi'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
+  if (!kinds.some(k => k[0] === T.kind)) T.kind = 'coffee';
+  const slots = upcomingSlots(16);
+  const ahead = apptsAhead();
+  return `<section class="panel phone"><h3>📱 Your phone</h3>
+   <div class="ph-cols"><div><ul class="sms">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><b>${m.from !== -1 && m.from !== null && m.from !== undefined ? pl(m.from) : esc(who(m.from))}${m.to !== undefined ? ' → ' + esc(P(m.to).name) : ''}</b> <time>${when(m)}</time><p>${esc(m.t)}</p></li>`).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>
+    <div class="compose"><label>Text ${sel('tx-id', [['', 'Someone…']].concat(REL_ORDER.flatMap(r => (byRel[r] || []).map(id => [id, `${REL[r].icon} ${P(id).name}`]))), T.id)}</label>
+     ${tid !== null ? `<label>About ${sel('tx-kind', kinds, T.kind)}</label>${T.kind !== 'hi' ? `<label>When ${sel('tx-slot', slots.map((s, i) => [i, slotLabel(s)]), T.slot)}</label>` : ''}<button class="btn-s" data-sendtext="1">Send</button>` : ''}</div></div>
+    <div><h4>Coming up</h4>${ahead.length ? `<ul class="plain appts">${ahead.slice(0, 8).map(x => `<li>${APPT_KINDS[x.kind].icon} <b>${esc(slotLabel(x))}</b>: ${esc(APPT_KINDS[x.kind].label)}${x.who != null ? ' with ' + pl(x.who) : ''}${x.what ? ` <span class="muted">(${esc(x.what)})</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted small">Nothing booked. Text someone, or say yes to the next invitation.</p>'}
+     <h4>Your people</h4>${REL_ORDER.filter(r => byRel[r] && r !== 'contact').map(r => `<p class="relrow"><span class="relk">${REL[r].icon} ${esc(REL[r].label)}${byRel[r].length > 1 && r !== 'partner' ? 's' : ''}</span> ${byRel[r].slice(0, 8).map(id => pl(id)).join(', ')}${byRel[r].length > 8 ? ` <span class="muted">+${byRel[r].length - 8}</span>` : ''}</p>`).join('') || '<p class="muted small">Nobody close yet. It takes time: see people, and keep seeing them.</p>'}
+     ${byRel.contact ? `<p class="muted small">${byRel.contact.length} other contacts. People you don't see for a couple of months drift.</p>` : ''}</div></div></section>`;
 }
 // How the game works, in one place. Opens by itself the first time you reach your desk.
 function guidePanel() {
@@ -12849,8 +13316,9 @@ function guidePanel() {
    <div class="g-grid">
     <div><h4>It's your world</h4><p>There is no script. A whole film industry runs around you week by week: studios rise and fall, films open and flop, people you met at a party become famous or vanish. You're one more person in it. Pick a dream and chase it, change your mind, build a circle of collaborators and grow your own corner of the business into something you're proud of.</p>
      <p class="muted">Some goals people set themselves: a first screen credit · a film of your own · a festival prize · a home worth coming back to · a crew who follows you from job to job · a studio with your name on it.</p></div>
-    <div><h4>A week</h4><p>Plan six slots: Monday to Friday and the weekend. Press <b>Next day</b> to live one day at a time and see how it goes, or <b>End week</b> to live the rest. The week closes with pay, replies to your applications, rent and the news. <b>Skip ahead</b> repeats your plan for longer.</p>
-     <p class="muted">Energy drains with work and returns with rest. Stress builds with rejection and bills. Let either run too far and you'll burn out for a week.</p></div>
+    <div><h4>A week</h4><p>Your week is a diary: seven days, each with a morning, an afternoon and an evening. Fill the blocks yourself or pick a quick plan. A job takes the working blocks; interviews, coffees, dates and invitations land in the diary as appointments. Press <b>Next</b> or the <kbd>space</kbd> bar to live on until something worth your attention happens: a decision, a text, a roll. <b>End day</b> and <b>End week</b> go further. The week closes with pay, replies, rent and the news.</p>
+     <p class="muted">Energy drains with work and returns with sleep. Stress builds with rejection and bills. Let either run too far and you'll burn out for a week.</p></div>
+    <div><h4>Your phone and your people</h4><p>Friends text, invite you out, ask for favours and pass on gossip. Text anyone to fix a coffee or drinks; see people often and they become friends, close friends, maybe more. A senior contact might mentor you. Ignore people for a couple of months and they drift. A partner, good friends or a lonely spell all show up in your rolls.</p></div>
     <div><h4>Rolls</h4><p>Risky moments roll a twenty-sided die. Your stat adds or subtracts; traits, clothes and the state you're in can give <span class="fx up">▲ advantage</span> (roll twice, keep the best) or <span class="fx down">▼ disadvantage</span>. A natural 20 always works and a natural 1 always fails. Before you choose, the bar shows your odds.</p>${rollCard(ex, true)}</div>
     <div><h4>Work and people</h4><p>The board lists jobs on real productions around you. Your odds depend on your skills, who you know, your standing and luck; hover them to see why. Everyone you meet remembers you: opinion is whether they like you, trust is whether they believe you, and favours are what they owe.</p></div>
     <div><h4>Money and things</h4><p>Money pays the rent first. After that it buys clothes, a better place and things for it. Some help: a desk means more pages, a proper bed better rest, a vintage watch advantage on work ethic. Look for the green and red badges.</p></div>
@@ -12922,12 +13390,11 @@ function homePanel() {
 function viewDesk() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
   const pend = pending();
-  const plan = effectivePlan(), jd = jobDays();
+  const plan = [].concat(...planBlocks()), jd = jobDays();
   const rent = usd(life.rent) + (M.debt > 0 ? Math.min(M.debt, M.debtPay) : 0) - M.allowance;
   const recent = M.inbox.filter(x => !(x.choices && !x.done)).slice(-14).reverse();
   const known = Object.keys(M.known).map(Number).filter(id => !P(id).dead || M.known[id].tags.includes('Your parent'));
   const slots = appSlots(), picked = [...UI.apps].filter(id => M.board.some(p => p.id === id));
-  const actOpts = Object.entries(ACTIVITIES).filter(([k]) => k !== 'work').map(([k, a]) => [k, a.label]);
   const lastDiary = M.diary.filter(d => d.w >= S.week - 1);
   const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}">${inboxCard(it)}</li>`;
   const boardRow = p => {
@@ -12954,18 +13421,19 @@ function viewDesk() {
   ${UI.story ? storyHTML() : ''}
   ${UI.homep ? homePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
+    <section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
+     ${weekGrid()}
+     ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
+     ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
+     <p class="note">${Object.entries(BLOCK_ACTS).filter(([k, a]) => plan.includes(k) && a.d).map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))} a block)` : ''}`).join(' ')}</p>
+     <p class="note">A block of work costs about 14 energy; a night's sleep gives back 20 to 40 depending on your bed, your home, your neighbourhood and your stress. Nights out cost energy but melt stress. Appointments you make on your phone take over the block they're in.</p>
+     <p class="note">You live in ${esc(ORIGIN.life[M.life].label.toLowerCase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-homep="1">Move or change how you travel</button></p></section>
   <div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
     <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
    <div>
     ${todayPanel()}
-    <section class="panel"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
-     ${weekGrid(actOpts)}
-     ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
-     ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
-     <p class="note">${Object.entries(ACTIVITIES).filter(([k]) => plan.includes(k) && k !== 'work').map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))})` : ''}`).join(' ')}</p>
-     <p class="note">A work day costs about 28 energy; a night's sleep gives back 20 to 40 depending on your bed, your home, your neighbourhood and your stress. Evenings out cost energy but melt stress.</p>
-     <p class="note">You live in ${esc(ORIGIN.life[M.life].label.toLowerCase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-homep="1">Move or change how you travel</button></p></section>
+    ${phonePanel()}
     ${cityPanel()}
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
@@ -12974,7 +13442,7 @@ function viewDesk() {
     ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
    </div></div>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
-  <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${slots / 3} job-hunting day${slots > 3 ? 's' : ''} let you send ${slots} applications.` : 'Plan at least one day to look for work to apply.'} Hover the odds to see why.</p>
+  <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
   <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}
   <h3>Contacts <span class="count">${known.length}</span></h3>
@@ -12996,7 +13464,7 @@ function viewYou() {
 
 // ---------- Career: controls ----------
 function careerActive() { return S && S.me && S.me.party && S.me.party.done && !S.me.over; }
-function endWeekAct(t = 'end') { return { t, plan: S.me.plan.slice(), eve: (S.me.eve || []).slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
+function endWeekAct(t = 'end') { return { t, cal: calOf().map(r => r.slice()), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
 function playStep(t) {
   if (UI.busy || !careerActive()) return;
   if (pending().length) { UI.tab = 'you'; UI.stack = []; render(); return; }
@@ -13064,7 +13532,9 @@ function careerClick(t) {
   if (t.dataset.story !== undefined) { UI.story = !!t.dataset.story && !UI.story; render(true); return true; }
   if (t.dataset.move) { doAct({ t: 'move', i: +t.dataset.move }); render(true); return true; }
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
-  if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day + (W.beat > 2 ? 1 : 0) : 0; if (d < 7) S.me.eve[d] = t.dataset.tonight; render(true); return true; }
+  if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
+  if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
+  if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; const a = { t: 'text', id: +T.id, kind: T.kind }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0 }; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript; f.title = ($('#ns-title') || {}).value || ''; doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone }); UI.newScript = null; render(true); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
   if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
@@ -13076,7 +13546,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -13099,8 +13569,8 @@ function careerChange(e) {
     if (k === 'age' && c.age < 26) c.traits = c.traits.filter(t => t !== 'Late bloomer');
     render(true); return true;
   }
-  if (/^pl-\d$/.test(id)) { S.me.plan[+id.slice(3)] = v; render(true); return true; }
-  if (/^ev-\d$/.test(id)) { S.me.eve[+id.slice(3)] = v; render(true); return true; }
+  if (/^cal-\d-\d$/.test(id)) { calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (/^tx-(id|kind|slot)$/.test(id)) { UI.txt[id.slice(3)] = v; if (id === 'tx-id') UI.txt.slot = 0; render(true); return true; }
   if (id === 'pl-train') { S.me.train = v; return true; }
   if (id === 'pl-catch') { S.me.catchWith = v === '' ? null : +v; return true; }
   if (id === 'pl-life') { doAct({ t: 'life', v }); render(true); return true; }
@@ -13122,12 +13592,25 @@ function replayCareer(log, done) {
   };
   setTimeout(step, 0);
 }
+
+// The space bar lives on to the next thing worth seeing, as long as you aren't typing.
+if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
+  if (e.key !== ' ' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  const tg = e.target, tn = tg && tg.tagName;
+  if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT' || tn === 'BUTTON' || (tg && tg.isContentEditable)) return;
+  const ov = document.getElementById('rollov');
+  if (ov) { e.preventDefault(); const b = ov.querySelector('.ro-ok'); if (b) b.click(); return; }
+  if (typeof careerActive !== 'function' || !careerActive() || UI.busy) return;
+  e.preventDefault();
+  if (pending().length) { const d = document.querySelector('.beat.decide'); if (d) d.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  playStep('next');
+});
 // </career-ui>
 // ---------- render & routing ----------
 function render(keepScroll) {
   const top = document.scrollingElement.scrollTop;
   const d = dateOf(S.week);
-  $('#date').innerHTML = `<span class="wk">Week ${Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 6048e5) + 1}${careerActive() ? ' · ' + BEAT_NAMES[S.me.wk ? S.me.wk.beat : 0].toLowerCase() : ''}</span><span class="dt">${careerActive() ? fmtDay(S.me.wk ? S.me.wk.day : 0) : fmtDate(S.week)}</span>`;
+  $('#date').innerHTML = `<span class="wk">Week ${Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 6048e5) + 1}${careerActive() ? ' · ' + BLOCKS[S.me.wk ? S.me.wk.block : 0].toLowerCase() : ''}</span><span class="dt">${careerActive() ? fmtDay(S.me.wk ? S.me.wk.day : 0) : fmtDate(S.week)}</span>`;
   $('#pulse').innerHTML = `${S.people.filter(p => !p.retired).length.toLocaleString()} working · ${S.active.length} films in production · ${S.companies.filter(c => c.closed === null).length} companies <span class="pals" title="Colour scheme">${Object.entries(PALETTES).map(([k, c]) => `<button class="pal${palette() === k ? ' on' : ''}" data-pal="${k}" style="background:${c}" aria-label="${k} colours"></button>`).join('')}</span>`;
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
@@ -13140,7 +13623,7 @@ function render(keepScroll) {
   const adv = $('#adv'), mode = careerActive() ? 'career' : S.me && !S.me.over ? 'setup' : 'watch';
   if (adv.dataset.mode !== mode) {
     adv.dataset.mode = mode;
-    adv.innerHTML = mode === 'setup' ? '' : mode === 'career' ? `<button class="btn primary" data-next="1">Next</button><button class="btn" data-day="1">End day</button><button class="btn" data-endweek="1">End week</button>` : '<button class="btn" data-adv="1">Next week</button><button class="btn" data-adv="4">Next month</button><button class="btn primary" data-adv="52">Next year</button>';
+    adv.innerHTML = mode === 'setup' ? '' : mode === 'career' ? `<button class="btn primary" data-next="1" title="Live on to the next thing worth seeing (space bar)">Next <kbd>space</kbd></button><button class="btn" data-day="1">End day</button><button class="btn" data-endweek="1">End week</button>` : '<button class="btn" data-adv="1">Next week</button><button class="btn" data-adv="4">Next month</button><button class="btn primary" data-adv="52">Next year</button>';
   }
   if (mode === 'career') { const n = pending().length; adv.querySelectorAll('[data-endweek],[data-day],[data-next]').forEach(b => { b.disabled = UI.busy; b.title = n ? `Decide on ${n} inbox item${n > 1 ? 's' : ''} first` : ''; }); }
   if (keepScroll) document.scrollingElement.scrollTop = top; else window.scrollTo(0, 0);

@@ -20,12 +20,13 @@ for (let w = 0; w < weeks; w++) {
   // decide everything pending: accept offers that fit, first choice otherwise
   r(`for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }`);
   // plan: job hunt when not fully employed, otherwise write/rest
-  r(`S.me.plan = jobDays() >= 5 ? ['hunt','hunt','hunt','hunt','hunt','rest','rest'] : ['hunt','hunt','network','train','hustle','rest','rest']; S.me.train = 'cam';`);
+  r(`S.me.cal = (jobDays() >= 5 ? [['hunt','hunt','home'],['hunt','hunt','home'],['hunt','hunt','read'],['hunt','hunt','home'],['hunt','hunt','out'],['rest','rest','out'],['rest','home','home']] : [['hunt','hunt','home'],['hunt','network','home'],['hunt','train','read'],['hunt','hustle','home'],['hunt','write','out'],['rest','read','out'],['rest','home','home']]).map(r => r.slice()); S.me.train = 'cam';
+  if (S.week % 3 === 0) { const ids = aliveKnown().sort((a, b) => opinion(b) - opinion(a)); const s = upcomingSlots(8)[2]; if (ids.length && s) doAct(Object.assign({ t: 'text', id: ids[S.week % Math.min(3, ids.length)], kind: S.week % 2 ? 'coffee' : 'drinks' }, s)); }`);
   // live the week; answer anything that comes up on the way
   const ok = r(`(() => { const apps = S.me.board.slice().sort((a, b) => (hireOdds(b) + (b.odd ? -.5 : 0)) - (hireOdds(a) + (a.odd ? -.5 : 0))).slice(0, appSlots()).map(p => p.id); const w0 = S.week;
     for (let g = 0; g < 40 && S.week === w0 && !S.me.over; g++) {
       for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }
-      doAct({ t: 'end', plan: S.me.plan.slice(), apps, train: S.me.train, catchWith: null }); }
+      doAct({ t: 'end', cal: S.me.cal.map(r => r.slice()), apps, train: S.me.train, catchWith: null }); }
     return S.week !== w0 || S.me.over; })()`);
   if (!ok) { console.log('week stuck at', w, r(`JSON.stringify(pending().map(x => x.kind))`), r('S.me.over')); break; }
 }
@@ -46,3 +47,6 @@ console.log('inbox kinds:', r(`JSON.stringify(S.me.inbox.reduce((a, x) => (a[x.k
 console.log('scenes seen:', r(`S.me.inbox.filter(x => x.kind === 'scene').map(x => x.scene + (x.result ? (x.result.ok === false ? '✗' : '✓') : '')).join(' ')`));
 console.log('sample scene:', r(`(() => { const x = S.me.inbox.filter(x => x.kind === 'scene').pop(); return x ? x.title + ' — ' + x.text + ' → ' + (x.result && x.result.t) : 'none'; })()`));
 console.log('known tags:', r(`JSON.stringify(Object.values(S.me.known).flatMap(k => k.tags).reduce((a, t) => (a[t] = (a[t] || 0) + 1, a), {}))`));
+console.log('relationships:', r(`JSON.stringify(aliveKnown().reduce((a, id) => (a[relOf(id)] = (a[relOf(id)] || 0) + 1, a), {}))`), 'phone:', r('S.me.phoneN'), 'appts:', r(`JSON.stringify((S.me.appts || []).map(x => x.kind))`));
+console.log('last texts:', r(`S.me.phone.slice(-6).map(m => (m.from === -1 ? 'me' : m.from === null ? 'home' : P(m.from).name) + ': ' + m.t).join(' | ')`));
+console.log('milestones:', r(`(S.me.milestones || []).map(m => m.t).join(' | ')`));
