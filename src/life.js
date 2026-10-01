@@ -105,7 +105,7 @@ function commute() {
   if (W.out === W.day) return null;
   W.out = W.day;
   const v = vehicleOf();
-  M.energy = clamp(M.energy - Math.max(0, v.e + (typeof hoodFx === 'function' ? hoodFx().commute || 0 : 0)), 0, 100);
+  M.energy = clamp(M.energy - Math.max(0, v.e + (typeof hoodFx === 'function' ? hoodFx().commute || 0 : 0) + worldFx().commute), 0, 100);
   W.stress += v.stress || 0;
   return v.commute[(S.week + W.day) % v.commute.length];
 }
@@ -125,19 +125,20 @@ function runBlock(k) {
     case 'write': writeSession(L, .5); break;
     case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
     case 'study': W.studied++; if (M.school) { for (const s in CRAFTS[M.school.craft].subs) weekGain(s, PROGRAMS[M.school.prog].grow / 2); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
-    case 'hustle': W.cashIn += usd(75); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
+    case 'hustle': W.cashIn += usd(Math.round(75 * worldFx().hustle)); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
     case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
     case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
-    case 'out': L.push(pickLine(OUT_LINES, W.day)); break;
+    case 'out': W.stress += worldFx().out; L.push(pickLine(OUT_LINES, W.day)); break;
     case 'read': weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); break;
     default: if (A.venue && typeof venueEvening === 'function') L.push(...venueEvening(A));
   }
-  card(A.icon || '•', A.label, (c && W.block < 2 ? [c] : []).concat(L, W.L.slice(n0)), { roll: M.lastRoll, notable: k === 'network' || !!A.venue && W.L.length > n0 });
+  const sn = W.block === 0 ? smallNews() : null;
+  card(A.icon || '•', A.label, (c && W.block < 2 ? [c] : []).concat(sn ? [sn] : [], L, W.L.slice(n0)), { roll: M.lastRoll, notable: k === 'network' || !!A.venue && W.L.length > n0 });
   if (typeof lifeDayEvent === 'function') lifeDayEvent(k === 'out' || A.venue ? 'evening:' + k : k);
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
-  const sleep = 19 + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
+  const sleep = 19 + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
   M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
   const stressNow = M.stress + M.wk.stress;
   if (stressNow >= 96 && !M.burnout) { M.burnout = 1; inbox('note', 'You hit the wall', 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }

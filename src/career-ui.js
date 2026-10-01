@@ -220,7 +220,7 @@ function todayPanel() {
   const pend = pending();
   const [ic, lab] = blockLabel(d, b);
   const rest = [b + 1, b + 2].filter(x => x < 3).map(x => { const [i, l] = blockLabel(d, x); return `<span class="chip">${i} ${esc(BLOCKS[x])}: ${esc(l)}</span>`; }).join(' ');
-  return `<section class="panel today"><h3>${esc(fmtDay(d))}</h3>
+  return `<section class="panel today"><h3>${esc(fmtDay(d))}</h3>${worldStrip()}
    <ol class="beats">${cards.map(c => `<li class="beat done"><span class="bi">${c.icon}</span><div><b>${BLOCKS[c.b]} · ${esc(c.title)}</b>${c.lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(c.roll, true)}</div></li>`).join('')}
     ${pend.map(it => `<li class="beat decide"><span class="bi">❗</span><div>${inboxCard(it)}</div></li>`).join('')}
     ${pend.length ? '' : `<li class="beat next"><span class="bi">${ic}</span><div><b>Next: ${BLOCKS[b]} · ${esc(lab)}</b>${rest ? `<p class="muted small">Later: ${rest}</p>` : ''}<p><button class="btn-s" data-next="1">Live on <kbd>space</kbd></button> <button class="btn-s ghost" data-day="1">Rest of the day</button></p></div></li>`}</ol>

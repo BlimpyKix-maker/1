@@ -50,3 +50,4 @@ console.log('known tags:', r(`JSON.stringify(Object.values(S.me.known).flatMap(k
 console.log('relationships:', r(`JSON.stringify(aliveKnown().reduce((a, id) => (a[relOf(id)] = (a[relOf(id)] || 0) + 1, a), {}))`), 'phone:', r('S.me.phoneN'), 'appts:', r(`JSON.stringify((S.me.appts || []).map(x => x.kind))`));
 console.log('last texts:', r(`S.me.phone.slice(-6).map(m => (m.from === -1 ? 'me' : m.from === null ? 'home' : P(m.from).name) + ': ' + m.t).join(' | ')`));
 console.log('milestones:', r(`(S.me.milestones || []).map(m => m.t).join(' | ')`));
+console.log('world:', r(`JSON.stringify((S.me.world || {}).ev || [])`), 'npc lives:', r(`aliveKnown().flatMap(id => (P(id).life || []).map(e => P(id).name + ' ' + e.t)).slice(-6).join(' | ')`));

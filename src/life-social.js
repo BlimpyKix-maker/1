@@ -118,12 +118,13 @@ const INVITES = [
   { k: 'football', t: 'a Sunday five-a-side game', meet: 1, tie: 3, stress: -5, e: 6 },
   { k: 'gallery', t: 'a gallery opening with {who}', meet: 1, tie: 3, xp: { vis: .05 } },
   { k: 'karaoke', t: 'karaoke with {who}\'s crew', meet: 2, tie: 5, stress: -6, cost: 20 },
-  { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 }
+  { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 },
+  { k: 'wedding', t: 'a wedding', never: 1, meet: 3, tie: 10, stress: -4, cost: 80 }
 ];
 function inviteFrom(id) {
   const M = S.me, q = P(id);
   const film = S.films.find && S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
-  const pool = INVITES.filter(v => (!v.film || film) && (!v.senior || q.standing > 40));
+  const pool = INVITES.filter(v => !v.never && (!v.film || film) && (!v.senior || q.standing > 40));
   const v = ppick(pool), slot = freeSlot({ days: [1, 2, 3, 4], blocks: [2], from: 1 });
   if (!slot) return;
   const what = v.t.replace('{who}', q.name).replace('{film}', film ? film.title : 'the film');
