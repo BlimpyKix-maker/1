@@ -78,3 +78,52 @@ function contestMayOption(sc) {
   const pr = bestIn(S.me.hub, ['producer'], q => q.standing + prnd() * 30);
   if (pr && prnd() < .6) optionOffer(sc, pr.id, `${pr.name} saw ${sc.title} on the contest list.`);
 }
+// ---- Awards night ----
+// Each February your market's Film Awards hold their ceremony. If you worked on a nominee, wrote one, know a
+// nominee well or have the standing, you're invited; otherwise you watch it on television like everyone else.
+function awardsMarket() { return HUBS[S.me.hub].m; }
+function awardsThisYear() { const mk = MARKETS[awardsMarket()].name; return (S.awards || []).filter(a => a.y === S.year && a.name.startsWith(mk + ' Film Awards')); }
+function awardsNominees() {
+  const m = awardsMarket(), L = S.films.filter(f => f.rel !== null && f.ry === S.year - 1 && f.m === m).sort((a, b) => b.q - a.q).slice(0, 5);
+  for (const a of awardsThisYear()) if (!L.some(f => f.id === a.film)) L.push(S.films[a.film]);
+  return L;
+}
+function awardsWeek() {
+  const M = S.me, me = ME(), mo = dateOf(S.week).getUTCMonth();
+  if (mo !== 1 || M.awardsY === S.year) return;
+  const wins = awardsThisYear();
+  if (!wins.length) return;
+  M.awardsY = S.year;
+  const noms = awardsNominees(), mine = noms.filter(f => M.past.some(p => p.film === f.id) || f.wri.includes(me.id) || keyIds(f).includes(me.id));
+  const friend = noms.flatMap(f => [f.dir, f.prod, f.cast[0]]).find(id => M.known[id] && ['friend', 'close', 'partner', 'mentor'].includes(relOf(id)));
+  const host = mine.length ? mine[0].prod : friend;
+  const slot = freeSlot({ days: [5], blocks: [2], from: 0 });
+  const mk = MARKETS[awardsMarket()].name;
+  // the night itself is a week away: a nominee's team, a friend's plus-one, or a ticket your standing earns
+  if (slot && (mine.length || friend !== undefined || me.standing >= 30 || (M.agent && M.agent.tier >= 2))) {
+    const why = mine.length ? `${mine[0].title}, which you worked on, is nominated.` : friend !== undefined ? `${P(friend).name} is nominated and wants you as their plus-one.` : 'Your name is on the list now.';
+    inbox('invite', `The ${mk} Film Awards`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
+  } else {
+    const best = wins.find(a => /Best Film/.test(a.name));
+    inbox('note', `The ${mk} Film Awards`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
+  }
+}
+function awardsNight(x, L) {
+  const M = S.me, me = ME(), wins = awardsThisYear();
+  for (const a of wins) L.push(`${a.name.replace(/^.* Film Awards: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
+  const mineWon = wins.filter(a => M.past.some(p => p.film === a.film && p.credited) || a.people.includes(me.id));
+  for (const a of mineWon) {
+    const self = a.people.includes(me.id);
+    milestone(self ? `Won ${a.name} for ${S.films[a.film].title}` : `${S.films[a.film].title}, which you worked on, won ${a.name.replace(/^.* Film Awards: /, '')}`, 'prize');
+    if (self) { me.fame = clamp((me.fame || 0) + 6, 0, 100); L.push('They call your name. You don\'t remember walking to the stage.'); }
+    else me.standing = clamp(me.standing + 1, 0, 100);
+  }
+  const star = wins.length ? wins[0].people[0] : null;
+  const ctx = { head: null, film: wins.length ? wins[0].film : null, mates: [], contact: x.who ?? null, star: star !== undefined && star !== me.id ? star : null };
+  const s = SCENES.find(y => y.id === 'aw_night');
+  inbox('scene', s.title, fillScene(s.text, ctx), { scene: s.id, ctx, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
+}
+SCENES.push({ event: 1, jobs: [], id: 'aw_night', title: 'After the envelopes', text: 'The ceremony is over. {star} walks past your table holding the statue like it might bite. The after-party is starting upstairs.', opts: [
+  { k: 'room', label: 'Work the after-party', check: ['cha', 13], ok: { meet: 1, stand: .6, tie: { contact: 2 } }, bad: { stress: 4 }, t: 'Three conversations that matter and one you\'ll be telling for years.', tb: 'You end up by the coat check talking to a waiter. A lovely waiter.' },
+  { k: 'star', label: 'Congratulate {star}', check: ['com', 12], ok: { tie: { star: 8 }, tag: { star: 'Met at the awards' } }, bad: { tie: { star: 1 } }, t: '{star} actually stops. "Thank you. Who are you?" You tell them.', tb: 'A handshake, a glazed smile, gone.' },
+  { k: 'table', label: 'Stay with the people who brought you', ok: { tie: { contact: 6 }, stress: -3 }, t: 'Loyalty, champagne and a long walk home in uncomfortable shoes.' }] });

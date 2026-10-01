@@ -10084,6 +10084,8 @@ function nationalAwards(films) {
     award(best, `${MARKETS[m].name} Film Awards: Best Film`, [best.dir, best.prod]);
     const act = L.reduce((a, b) => (P(b.cast[0]).c.act + b.q / 10 > P(a.cast[0]).c.act + a.q / 10 ? b : a));
     award(act, `${MARKETS[m].name} Film Awards: Best Performance`, [act.cast[0]]);
+    const scr = L.reduce((a, b) => ((b.bd ? b.bd.S : 0) > (a.bd ? a.bd.S : 0) ? b : a));   // the best-written film
+    award(scr, `${MARKETS[m].name} Film Awards: Best Screenplay`, scr.wri);
     if (['US', 'UK', 'FR', 'JP', 'IN', 'HK', 'IT'].includes(m)) news('Award', `${best.title} wins Best Film at the ${MARKETS[m].name} Film Awards.`, { film: best.id });
   }
 }
@@ -10736,7 +10738,7 @@ function closeWeek(a) {
   const M = S.me, me = ME(), W = M.wk, burnt = W.burnt, L = W.L, gains = W.gains, hunted = W.hunted;
   let energy = M.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
   const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) gains[k] = (gains[k] || 0) + g; };
-  M.wk = null;
+  M.wk = null; M.closing = true;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
   // jobs
   for (const j of M.jobs.slice()) {
@@ -10781,6 +10783,7 @@ function closeWeek(a) {
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
   dealsWeek();
+  awardsWeek();
   storyWeek();
   stress += socialWeek();
   stress += livingWorldWeek();
@@ -10810,6 +10813,7 @@ function closeWeek(a) {
   const before = S.news.length;
   tick();
   M.week = S.week;
+  M.closing = false;
   afterTick(S.news.slice(before));
 }
 function jobOver(j) { const f = S.films[j.film]; return f.stage < 0 || f.stage >= 4 || !POST_BY[j.k].st.includes(f.stage) && f.stage > Math.max(...POST_BY[j.k].st); }
@@ -12554,7 +12558,8 @@ const INVITES = [
   { k: 'gallery', t: 'a gallery opening with {who}', meet: 1, tie: 3, xp: { vis: .05 } },
   { k: 'karaoke', t: 'karaoke with {who}\'s crew', meet: 2, tie: 5, stress: -6, cost: 20 },
   { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 },
-  { k: 'wedding', t: 'a wedding', never: 1, meet: 3, tie: 10, stress: -4, cost: 80 }
+  { k: 'wedding', t: 'a wedding', never: 1, meet: 3, tie: 10, stress: -4, cost: 80 },
+  { k: 'awards', t: 'the awards', never: 1, senior: 1, meet: 2, tie: 4, stand: .6, cost: 120, stress: -2 }
 ];
 function inviteFrom(id) {
   const M = S.me, q = P(id);
@@ -12590,7 +12595,9 @@ function socialPick(it, k) {
 
 // ---- the diary of appointments ----
 // A slot is { w, d, b }: a week, a day (0 = Monday) and a block (0 morning, 1 afternoon, 2 evening).
-function nowAbs() { const W = S.me.wk; return S.week * 21 + (W ? W.day * 3 + W.block : 0); }
+// While a week is closing, "now" is already the start of the next one.
+function curW() { return S.week + (S.me.closing ? 1 : 0); }
+function nowAbs() { const W = S.me.wk; return curW() * 21 + (W ? W.day * 3 + W.block : 0); }
 function slotAbs(s) { return s.w * 21 + s.d * 3 + s.b; }
 function slotFree(s) {
   const M = S.me;
@@ -12601,21 +12608,21 @@ function slotFree(s) {
 }
 function slotLabel(s) {
   const W = S.me.wk, today = s.w === S.week && W && s.d === W.day;
-  return `${today ? (s.b === 2 ? 'tonight' : 'today, ' + BLOCKS[s.b].toLowerCase()) : (s.w > S.week ? 'next ' : '') + DAYS7[s.d] + ' ' + BLOCKS[s.b].toLowerCase()}`;
+  return `${today ? (s.b === 2 ? 'tonight' : 'today, ' + BLOCKS[s.b].toLowerCase()) : (s.w > curW() ? 'next ' : '') + DAYS7[s.d] + ' ' + BLOCKS[s.b].toLowerCase()}`;
 }
 // The first free slot from now (or `from` days on), within this week and next.
 function freeSlot(o = {}) {
   const W = S.me.wk, d0 = (W ? W.day : 0) + (o.from || 0);
-  for (let w = S.week; w <= S.week + 1; w++) for (const d of o.days || [0, 1, 2, 3, 4, 5, 6]) for (const b of o.blocks || [0, 1, 2]) {
+  for (let w = curW(); w <= curW() + 1; w++) for (const d of o.days || [0, 1, 2, 3, 4, 5, 6]) for (const b of o.blocks || [0, 1, 2]) {
     const s = { w, d, b };
-    if (w === S.week && d < d0) continue;
+    if (w === curW() && d < d0) continue;
     if (slotFree(s)) return s;
   }
   return null;
 }
 function upcomingSlots(n = 14) {
   const out = [];
-  for (let w = S.week; w <= S.week + 1 && out.length < n; w++) for (let d = 0; d < 7 && out.length < n; d++) for (let b = 0; b < 3 && out.length < n; b++) { const s = { w, d, b }; if (slotFree(s)) out.push(s); }
+  for (let w = curW(); w <= curW() + 1 && out.length < n; w++) for (let d = 0; d < 7 && out.length < n; d++) for (let b = 0; b < 3 && out.length < n; b++) { const s = { w, d, b }; if (slotFree(s)) out.push(s); }
   return out;
 }
 function bookAppt(o) { const M = S.me; M.appts = M.appts || []; const x = Object.assign({ id: M.seq++, done: false }, o); M.appts.push(x); return x; }
@@ -12635,12 +12642,12 @@ function runAppointment(x) {
   const M = S.me, me = ME(), W = M.wk, A = APPT_KINDS[x.kind] || APPT_KINDS.coffee;
   x.done = true;
   const q = x.who !== null && x.who !== undefined ? P(x.who) : null;
-  if (q && (q.dead || (x.kind !== 'interview' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
+  if (q && (q.dead || (x.kind !== 'interview' && x.ev !== 'awards' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
   M.energy = clamp(M.energy - (A.e || 0), 0, 100);
   W.stress += A.stress || 0;
   if (A.cost) W.cashOut += usd(A.cost);
   const c = W.block < 2 ? commute() : null, L = [];
-  if (q && x.kind !== 'interview') { meet(q.id, null); if (M.rel && M.rel[q.id]) M.rel[q.id].last = S.week; }
+  if (q && x.kind !== 'interview') { meet(q.id, x.ev === 'awards' && !M.known[q.id] ? 'Met at the awards' : null); if (M.rel && M.rel[q.id]) M.rel[q.id].last = S.week; }
   switch (x.kind) {
     case 'interview': holdInterview(x.post); L.push(`You go in to see ${q ? q.name : 'them'} about ${x.post.t.toLowerCase()}.`); break;
     case 'coffee': case 'drinks': meetUp(q.id, L, x.kind === 'drinks'); break;
@@ -12687,7 +12694,8 @@ function goToInvite(x, q, L) {
     if (nq) { meet(nq.id, `Met through ${q.name}`, 4 + pri(0, 4)); met.push(`${nq.name} (${ROLE_LABEL[nq.role].toLowerCase()})`); }
   }
   L.push(`${x.what[0].toUpperCase() + x.what.slice(1)}.${met.length ? ' You meet ' + met.join(' and ') + '.' : ''}`);
-  if (prnd() < .25) lifeScene(LIFE_SCENES.out);
+  if (v.k === 'awards' && typeof awardsNight === 'function') awardsNight(x, L);
+  else if (prnd() < .25) lifeScene(LIFE_SCENES.out);
 }
 
 // ---- relationships ----
@@ -13267,6 +13275,55 @@ function contestMayOption(sc) {
   const pr = bestIn(S.me.hub, ['producer'], q => q.standing + prnd() * 30);
   if (pr && prnd() < .6) optionOffer(sc, pr.id, `${pr.name} saw ${sc.title} on the contest list.`);
 }
+// ---- Awards night ----
+// Each February your market's Film Awards hold their ceremony. If you worked on a nominee, wrote one, know a
+// nominee well or have the standing, you're invited; otherwise you watch it on television like everyone else.
+function awardsMarket() { return HUBS[S.me.hub].m; }
+function awardsThisYear() { const mk = MARKETS[awardsMarket()].name; return (S.awards || []).filter(a => a.y === S.year && a.name.startsWith(mk + ' Film Awards')); }
+function awardsNominees() {
+  const m = awardsMarket(), L = S.films.filter(f => f.rel !== null && f.ry === S.year - 1 && f.m === m).sort((a, b) => b.q - a.q).slice(0, 5);
+  for (const a of awardsThisYear()) if (!L.some(f => f.id === a.film)) L.push(S.films[a.film]);
+  return L;
+}
+function awardsWeek() {
+  const M = S.me, me = ME(), mo = dateOf(S.week).getUTCMonth();
+  if (mo !== 1 || M.awardsY === S.year) return;
+  const wins = awardsThisYear();
+  if (!wins.length) return;
+  M.awardsY = S.year;
+  const noms = awardsNominees(), mine = noms.filter(f => M.past.some(p => p.film === f.id) || f.wri.includes(me.id) || keyIds(f).includes(me.id));
+  const friend = noms.flatMap(f => [f.dir, f.prod, f.cast[0]]).find(id => M.known[id] && ['friend', 'close', 'partner', 'mentor'].includes(relOf(id)));
+  const host = mine.length ? mine[0].prod : friend;
+  const slot = freeSlot({ days: [5], blocks: [2], from: 0 });
+  const mk = MARKETS[awardsMarket()].name;
+  // the night itself is a week away: a nominee's team, a friend's plus-one, or a ticket your standing earns
+  if (slot && (mine.length || friend !== undefined || me.standing >= 30 || (M.agent && M.agent.tier >= 2))) {
+    const why = mine.length ? `${mine[0].title}, which you worked on, is nominated.` : friend !== undefined ? `${P(friend).name} is nominated and wants you as their plus-one.` : 'Your name is on the list now.';
+    inbox('invite', `The ${mk} Film Awards`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
+  } else {
+    const best = wins.find(a => /Best Film/.test(a.name));
+    inbox('note', `The ${mk} Film Awards`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
+  }
+}
+function awardsNight(x, L) {
+  const M = S.me, me = ME(), wins = awardsThisYear();
+  for (const a of wins) L.push(`${a.name.replace(/^.* Film Awards: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
+  const mineWon = wins.filter(a => M.past.some(p => p.film === a.film && p.credited) || a.people.includes(me.id));
+  for (const a of mineWon) {
+    const self = a.people.includes(me.id);
+    milestone(self ? `Won ${a.name} for ${S.films[a.film].title}` : `${S.films[a.film].title}, which you worked on, won ${a.name.replace(/^.* Film Awards: /, '')}`, 'prize');
+    if (self) { me.fame = clamp((me.fame || 0) + 6, 0, 100); L.push('They call your name. You don\'t remember walking to the stage.'); }
+    else me.standing = clamp(me.standing + 1, 0, 100);
+  }
+  const star = wins.length ? wins[0].people[0] : null;
+  const ctx = { head: null, film: wins.length ? wins[0].film : null, mates: [], contact: x.who ?? null, star: star !== undefined && star !== me.id ? star : null };
+  const s = SCENES.find(y => y.id === 'aw_night');
+  inbox('scene', s.title, fillScene(s.text, ctx), { scene: s.id, ctx, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
+}
+SCENES.push({ event: 1, jobs: [], id: 'aw_night', title: 'After the envelopes', text: 'The ceremony is over. {star} walks past your table holding the statue like it might bite. The after-party is starting upstairs.', opts: [
+  { k: 'room', label: 'Work the after-party', check: ['cha', 13], ok: { meet: 1, stand: .6, tie: { contact: 2 } }, bad: { stress: 4 }, t: 'Three conversations that matter and one you\'ll be telling for years.', tb: 'You end up by the coat check talking to a waiter. A lovely waiter.' },
+  { k: 'star', label: 'Congratulate {star}', check: ['com', 12], ok: { tie: { star: 8 }, tag: { star: 'Met at the awards' } }, bad: { tie: { star: 1 } }, t: '{star} actually stops. "Thank you. Who are you?" You tell them.', tb: 'A handshake, a glazed smile, gone.' },
+  { k: 'table', label: 'Stay with the people who brought you', ok: { tie: { contact: 6 }, stress: -3 }, t: 'Loyalty, champagne and a long walk home in uncomfortable shoes.' }] });
 // </life-deals>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);

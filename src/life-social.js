@@ -119,7 +119,8 @@ const INVITES = [
   { k: 'gallery', t: 'a gallery opening with {who}', meet: 1, tie: 3, xp: { vis: .05 } },
   { k: 'karaoke', t: 'karaoke with {who}\'s crew', meet: 2, tie: 5, stress: -6, cost: 20 },
   { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 },
-  { k: 'wedding', t: 'a wedding', never: 1, meet: 3, tie: 10, stress: -4, cost: 80 }
+  { k: 'wedding', t: 'a wedding', never: 1, meet: 3, tie: 10, stress: -4, cost: 80 },
+  { k: 'awards', t: 'the awards', never: 1, senior: 1, meet: 2, tie: 4, stand: .6, cost: 120, stress: -2 }
 ];
 function inviteFrom(id) {
   const M = S.me, q = P(id);
@@ -155,7 +156,9 @@ function socialPick(it, k) {
 
 // ---- the diary of appointments ----
 // A slot is { w, d, b }: a week, a day (0 = Monday) and a block (0 morning, 1 afternoon, 2 evening).
-function nowAbs() { const W = S.me.wk; return S.week * 21 + (W ? W.day * 3 + W.block : 0); }
+// While a week is closing, "now" is already the start of the next one.
+function curW() { return S.week + (S.me.closing ? 1 : 0); }
+function nowAbs() { const W = S.me.wk; return curW() * 21 + (W ? W.day * 3 + W.block : 0); }
 function slotAbs(s) { return s.w * 21 + s.d * 3 + s.b; }
 function slotFree(s) {
   const M = S.me;
@@ -166,21 +169,21 @@ function slotFree(s) {
 }
 function slotLabel(s) {
   const W = S.me.wk, today = s.w === S.week && W && s.d === W.day;
-  return `${today ? (s.b === 2 ? 'tonight' : 'today, ' + BLOCKS[s.b].toLowerCase()) : (s.w > S.week ? 'next ' : '') + DAYS7[s.d] + ' ' + BLOCKS[s.b].toLowerCase()}`;
+  return `${today ? (s.b === 2 ? 'tonight' : 'today, ' + BLOCKS[s.b].toLowerCase()) : (s.w > curW() ? 'next ' : '') + DAYS7[s.d] + ' ' + BLOCKS[s.b].toLowerCase()}`;
 }
 // The first free slot from now (or `from` days on), within this week and next.
 function freeSlot(o = {}) {
   const W = S.me.wk, d0 = (W ? W.day : 0) + (o.from || 0);
-  for (let w = S.week; w <= S.week + 1; w++) for (const d of o.days || [0, 1, 2, 3, 4, 5, 6]) for (const b of o.blocks || [0, 1, 2]) {
+  for (let w = curW(); w <= curW() + 1; w++) for (const d of o.days || [0, 1, 2, 3, 4, 5, 6]) for (const b of o.blocks || [0, 1, 2]) {
     const s = { w, d, b };
-    if (w === S.week && d < d0) continue;
+    if (w === curW() && d < d0) continue;
     if (slotFree(s)) return s;
   }
   return null;
 }
 function upcomingSlots(n = 14) {
   const out = [];
-  for (let w = S.week; w <= S.week + 1 && out.length < n; w++) for (let d = 0; d < 7 && out.length < n; d++) for (let b = 0; b < 3 && out.length < n; b++) { const s = { w, d, b }; if (slotFree(s)) out.push(s); }
+  for (let w = curW(); w <= curW() + 1 && out.length < n; w++) for (let d = 0; d < 7 && out.length < n; d++) for (let b = 0; b < 3 && out.length < n; b++) { const s = { w, d, b }; if (slotFree(s)) out.push(s); }
   return out;
 }
 function bookAppt(o) { const M = S.me; M.appts = M.appts || []; const x = Object.assign({ id: M.seq++, done: false }, o); M.appts.push(x); return x; }
@@ -200,12 +203,12 @@ function runAppointment(x) {
   const M = S.me, me = ME(), W = M.wk, A = APPT_KINDS[x.kind] || APPT_KINDS.coffee;
   x.done = true;
   const q = x.who !== null && x.who !== undefined ? P(x.who) : null;
-  if (q && (q.dead || (x.kind !== 'interview' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
+  if (q && (q.dead || (x.kind !== 'interview' && x.ev !== 'awards' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
   M.energy = clamp(M.energy - (A.e || 0), 0, 100);
   W.stress += A.stress || 0;
   if (A.cost) W.cashOut += usd(A.cost);
   const c = W.block < 2 ? commute() : null, L = [];
-  if (q && x.kind !== 'interview') { meet(q.id, null); if (M.rel && M.rel[q.id]) M.rel[q.id].last = S.week; }
+  if (q && x.kind !== 'interview') { meet(q.id, x.ev === 'awards' && !M.known[q.id] ? 'Met at the awards' : null); if (M.rel && M.rel[q.id]) M.rel[q.id].last = S.week; }
   switch (x.kind) {
     case 'interview': holdInterview(x.post); L.push(`You go in to see ${q ? q.name : 'them'} about ${x.post.t.toLowerCase()}.`); break;
     case 'coffee': case 'drinks': meetUp(q.id, L, x.kind === 'drinks'); break;
@@ -252,7 +255,8 @@ function goToInvite(x, q, L) {
     if (nq) { meet(nq.id, `Met through ${q.name}`, 4 + pri(0, 4)); met.push(`${nq.name} (${ROLE_LABEL[nq.role].toLowerCase()})`); }
   }
   L.push(`${x.what[0].toUpperCase() + x.what.slice(1)}.${met.length ? ' You meet ' + met.join(' and ') + '.' : ''}`);
-  if (prnd() < .25) lifeScene(LIFE_SCENES.out);
+  if (v.k === 'awards' && typeof awardsNight === 'function') awardsNight(x, L);
+  else if (prnd() < .25) lifeScene(LIFE_SCENES.out);
 }
 
 // ---- relationships ----

@@ -572,7 +572,7 @@ function closeWeek(a) {
   const M = S.me, me = ME(), W = M.wk, burnt = W.burnt, L = W.L, gains = W.gains, hunted = W.hunted;
   let energy = M.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
   const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) gains[k] = (gains[k] || 0) + g; };
-  M.wk = null;
+  M.wk = null; M.closing = true;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
   // jobs
   for (const j of M.jobs.slice()) {
@@ -617,6 +617,7 @@ function closeWeek(a) {
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
   dealsWeek();
+  awardsWeek();
   storyWeek();
   stress += socialWeek();
   stress += livingWorldWeek();
@@ -646,6 +647,7 @@ function closeWeek(a) {
   const before = S.news.length;
   tick();
   M.week = S.week;
+  M.closing = false;
   afterTick(S.news.slice(before));
 }
 function jobOver(j) { const f = S.films[j.film]; return f.stage < 0 || f.stage >= 4 || !POST_BY[j.k].st.includes(f.stage) && f.stage > Math.max(...POST_BY[j.k].st); }
