@@ -8022,14 +8022,34 @@ function newWorld(startYear, seed, depth = 'standard') {
   }
   loadCatalogue();
   S.archY = Math.max(1888, y0 - DEPTHS[depth]);
+  S.priorY = 1888; S.priorEnd = S.archY; S.priorPools = {};
   S.saveCash = S.companies.map(c => c.cash);
   S.archiving = true;
 }
 function archiving() { return S.archY < S.y0; }
+// Real films from before the simulated history still happened: they are recorded with their real credits, so every
+// real person's filmography is complete whatever the depth. Unnamed extras come from a small pool per hub and generation.
+function priorStep() {
+  const pools = S.priorPools;
+  for (let made = 0; S.priorY < S.priorEnd && made < 100; S.priorY++) {
+    const Y = S.priorY, L = S.cat.byYear[Y];
+    if (!L) continue;
+    S.year = Y;
+    for (const cf of L) {
+      const key = cf.hub + Math.floor(Y / 25);
+      if (!pools[key]) { const o = pools[key] = {}, hub = cf.hub; for (const r of ROLES) { let L = null; Object.defineProperty(o, r, { get: () => L || (L = Array.from({ length: 4 }, () => makeHistorical(hub, r, Y).id)) }); } }
+      catalogueFilm(cf, Y, weekOfYear(Y) + ri(0, 51), pools[key]);
+    }
+    made += L.length;
+  }
+  S.year = S.y0;
+  if (S.priorY >= S.priorEnd) delete S.priorPools;
+}
 
 // Forty years of history, made quickly, one year per call: films are cast from the people
 // alive at the time, released through the same model, and earn through the windows of their era.
 function archiveStep() {
+  if (S.priorY < S.priorEnd) return priorStep();
   const Y = S.archY++;
   S.year = Y;
   const w0 = weekOfYear(Y);
@@ -10119,8 +10139,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 3, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 3 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 4, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 4 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -10416,9 +10436,11 @@ function build(year, seed, depth) {
   const total = (Date.UTC(year, 0, 1) - Date.UTC(S.y0, 0, 1)) / 6048e5;
   const step = () => {
     if (archiving()) {
+      const prior = S.priorY < S.priorEnd;
       archiveStep();
-      $('#prog').style.width = ((S.archY - a0) / aN * 60).toFixed(1) + '%';
-      $('#progtxt').textContent = `${S.archY - 1} · ${S.films.length.toLocaleString()} films so far`;
+      const pN = a0 - 1888;
+      $('#prog').style.width = ((S.priorY - 1888 + S.archY - a0) / (pN + aN) * 60).toFixed(1) + '%';
+      $('#progtxt').textContent = prior ? `Recording the real films of ${S.priorY - 1} and earlier` : `${S.archY - 1} · ${S.films.length.toLocaleString()} films so far`;
     } else {
       for (let i = 0; i < 6 && warming(); i++) tick();
       $('#prog').style.width = (60 + S.week / total * 40).toFixed(1) + '%';
