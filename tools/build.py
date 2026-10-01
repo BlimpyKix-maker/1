@@ -4,7 +4,8 @@ Run after editing either file: python3 tools/build.py"""
 import pathlib, re
 root = pathlib.Path(__file__).resolve().parent.parent
 html = (root / 'index.html').read_text()
-for name, anchor in [('career-sim', '// ================= Apple Box — World Core UI ================='),
+for name, anchor in [('portrait', '// ================= Apple Box — World Core UI ================='),
+                     ('career-sim', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

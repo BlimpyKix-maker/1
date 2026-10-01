@@ -7,8 +7,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 2, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 2 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 3, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 3 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -21,44 +21,80 @@ function suggestName(hub, g) {
   return EAST[HUBS[hub].lang] ? `${l} ${f}` : `${f} ${l}`;
 }
 function ccDefaults() {
-  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: S.startYear >= 2000 ? 'hollywood' : 'hollywood', role: 'director', wealth: 'gettingby', edu: 'film', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama', 'Horror'], hate: 'Musical' };
+  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', role: 'director', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], look: defaultLook() };
 }
 function ccSpent(c) { return Object.values(c.points).reduce((s, v) => s + v, 0); }
 const optCard = (group, key, o, on) => `<button class="opt${on ? ' on' : ''}" data-cc="${group}" data-v="${esc(key)}" aria-pressed="${on}"><b>${esc(o.label)}</b><span>${esc(o.d)}</span></button>`;
-
+// favourite films: every catalogue film made before the start, searchable by title
+function filmChoices() {
+  if (UI.filmIdx && UI.filmIdx.y === S.startYear) return UI.filmIdx;
+  const list = Object.values(S.cat.allFilms).filter(f => f.y < S.startYear).sort((a, b) => a.t.localeCompare(b.t));
+  const byLabel = {};
+  for (const f of list) byLabel[`${f.t} (${f.y})`] = f.id;
+  return (UI.filmIdx = { y: S.startYear, list, byLabel });
+}
+// Random favourite: leans hard toward the genres you love, but almost anything can come up, weighted by how
+// widely seen and how cherished a film is.
+function randomFav(c) {
+  const { list } = filmChoices(), have = new Set(c.favs);
+  const w = f => have.has(f.id) ? 0 : (c.love.includes(f.g) ? 5 : c.hate.includes(f.g) ? .08 : 1) * (.25 + (f.dr ? Math.log10(1 + f.dr * cpi(2027) / cpi(f.y)) : 0) + Math.max(0, f.q - 40) / 25 + (f.cult || 0) / 30 + (f.list ? 1.2 : 0));
+  let t = 0; const ws = list.map(f => { const x = w(f); t += x; return x; });
+  let r = Math.random() * t;
+  for (let i = 0; i < list.length; i++) { r -= ws[i]; if (r <= 0) return list[i].id; }
+  return null;
+}
+function lookControls(c) {
+  return `<div class="looks">${LOOK_KEYS.map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
+    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`}</div>`; }).join('')}</div>`;
+}
 function viewCreator() {
   const c = UI.cc = UI.cc || ccDefaults();
   const left = SKILL_POINTS - ccSpent(c);
   const grid = (group, src) => `<div class="opts">${Object.entries(src).map(([k, o]) => optCard(group, k, o, c[group] === k)).join('')}</div>`;
-  const sel2 = (id, val, list) => `<select id="${id}">${list.map(g => `<option${g === val ? ' selected' : ''}>${esc(g)}</option>`).join('')}</select>`;
-  return `<div class="head"><p class="eyebrow">Phase 2 · Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p></div>
+  const fc = filmChoices();
+  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title…" aria-label="Favourite film ${i + 1}">`}</li>`; };
+  const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
+  const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span></button>`; };
+  return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p></div>
   <section class="panel cc"><h3>The basics</h3>
+   <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 150)}</div><div>
    <div class="ccrow"><label>Name <input id="cc-name" type="text" maxlength="40" value="${esc(c.name)}"></label><button class="linkish" data-cc="rename">Suggest another</button></div>
-   <div class="ccrow"><label>Pronouns ${`<select id="cc-g">${[['X', 'they/them'], ['F', 'she/her'], ['M', 'he/him']].map(([v, t]) => `<option value="${v}"${c.g === v ? ' selected' : ''}>${t}</option>`).join('')}</select>`}</label>
+   <div class="ccrow"><label>Pronouns <select id="cc-g">${[['X', 'they/them'], ['F', 'she/her'], ['M', 'he/him']].map(([v, t]) => `<option value="${v}"${c.g === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
    <label>Age <input id="cc-age" type="number" min="18" max="45" value="${c.age}"></label>
    <label>Home hub ${sel('cc-hub', MAJOR_HUBS.map(h => [h, HUBS[h].name]), c.hub)}</label>
    <label>Dream job ${sel('cc-role', DREAM_ROLES.map(r => [r, ROLE_LABEL[r]]), c.role)}</label></div>
-   <p class="note">Living costs and pay follow the hub's economy in ${S.startYear}. Younger characters have more room to grow; older ones start more skilled.</p></section>
-  <section class="panel cc"><h3>Origin</h3><h4>Family money</h4>${grid('wealth', ORIGIN.wealth)}<h4>Education</h4>${grid('edu', ORIGIN.edu)}<h4>How you got to the party</h4>${grid('arrival', ORIGIN.arrival)}</section>
-  <section class="panel cc"><h3>Body</h3>${grid('build', ORIGIN.build)}</section>
+   <p class="note">Living costs and pay follow the hub's economy in ${S.startYear}. Younger characters have more room to grow; older ones start more skilled. Your portrait ages with you, and you can change your style later.</p></div></div>
+   <h4>Your look</h4>${lookControls(c)}</section>
+  <section class="panel cc"><h3>Origin</h3><h4>Family money</h4>${grid('wealth', ORIGIN.wealth)}<h4>Education</h4><p class="muted">Degrees count later: some jobs and internships ask for them.</p>${grid('edu', ORIGIN.edu)}<h4>How you got to the party</h4>${grid('arrival', ORIGIN.arrival)}</section>
+  <section class="panel cc"><h3>Build</h3>${grid('build', ORIGIN.build)}</section>
   <section class="panel cc"><h3>Skills <span class="count">${left} of ${SKILL_POINTS} points left</span></h3>
-   <p class="muted">Everyone starts near the bottom (around 3 to 5 out of 20; 10 is a working professional). Each point raises every part of a craft by about three quarters of a point. Education adds more on top. Your hidden ceiling in each skill is set when you begin.</p>
+   <p class="muted">Everyone starts near the bottom (around 3 to 5 out of 20; 10 is a working professional). Each point raises every part of a craft by about three quarters of a point. Your education adds more. Your hidden ceiling in each skill is set when you begin.</p>
    <table class="atts">${Object.keys(CRAFTS).map(cr => { const v = c.points[cr] || 0; return `<tr><td>${CRAFTS[cr].label}${cr === MAIN[c.role] ? ' <span class="muted">(dream job +1)</span>' : ''}</td><td class="n"><button class="pm-b" data-cc="pt" data-v="${cr}:-1" ${v <= 0 ? 'disabled' : ''} aria-label="Less ${CRAFTS[cr].label}">−</button> <b>${v}</b> <button class="pm-b" data-cc="pt" data-v="${cr}:1" ${v >= SKILL_MAX || left <= 0 ? 'disabled' : ''} aria-label="More ${CRAFTS[cr].label}">+</button></td><td class="bc">${bar(v, SKILL_MAX, 'accent')}</td></tr>`; }).join('')}</table></section>
-  <section class="panel cc"><h3>Personality <span class="count">${c.traits.length} of 3</span></h3><p class="muted">Pick up to three. Most cut both ways.</p>
-   <div class="traits">${PLAYER_TRAITS.filter(t => t !== 'Late bloomer' || c.age >= 26).map(t => `<button class="chip trait tbtn${c.traits.includes(t) ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${c.traits.includes(t)}" title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span></button>`).join('')}</div></section>
-  <section class="panel cc"><h3>Taste</h3><div class="ccrow"><label>You love ${sel2('cc-love0', c.love[0], GENRES)}</label><label>and ${sel2('cc-love1', c.love[1], GENRES)}</label><label>You can't stand ${sel2('cc-hate', c.hate, GENRES)}</label></div>
-   <p class="note">Taste shapes which jobs feel worth it and how you talk about films.</p></section>
+  <section class="panel cc"><h3>Personality <span class="count">${c.traits.length} of 3</span></h3><p class="muted">Pick up to three. Most cut both ways; some give advantage on certain rolls, some disadvantage. Contradictory traits can't be combined.</p>
+   <div class="traits">${PLAYER_TRAITS.filter(t => t !== 'Late bloomer' || c.age >= 26).map(traitBtn).join('')}</div></section>
+  <section class="panel cc"><h3>Taste</h3>
+   <h4>Favourite genres <span class="count">${c.love.length} of 3</span></h4><div class="traits">${GENRES.map(g => genreChip(g, 'love')).join('')}</div>
+   <h4>Genres you can't stand <span class="count">optional, ${c.hate.length} of 2</span></h4><div class="traits">${GENRES.map(g => genreChip(g, 'hate')).join('')}</div>
+   <p class="note">Jobs on films in a genre you love lower your stress and teach you faster; genres you hate wear you down.</p>
+   <h4>Five favourite films <span class="count">optional</span></h4>
+   <ol class="favs">${[0, 1, 2, 3, 4].map(favRow).join('')}</ol>
+   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y})">`).join('')}</datalist>
+   <div class="ccrow"><button class="btn" data-cc="randfav">${c.favs.length >= 5 ? 'Reroll all five' : 'Fill the rest at random'}</button><span class="muted">Random picks lean toward your favourite genres, weighted by how widely seen and loved a film is.</span></div>
+   <p class="note">Films you love sharpen the skills their genre leans on, and they come up in conversation.</p></section>
   <section class="panel cc"><h3>Something from your past</h3>${grid('quirk', ORIGIN.quirk)}</section>
   <div class="ccgo"><button class="btn primary big-btn" data-cc="go">Go to the party</button><p class="muted">Or just watch the industry run: use the other tabs and the buttons up top.</p></div>`;
 }
 
+function rollChip(r) { return r ? `<span class="roll ${r.ok ? 'good' : 'bad'}">${esc(rollText(r))}</span>` : ''; }
 function viewParty() {
   const M = S.me, pt = M.party;
-  const sc = PARTY[pt.step](pt);
-  return `<div class="head"><p class="eyebrow">New Year's Eve · ${S.startYear - 1}</p><h2>${esc(sc.title)}</h2></div>
-  ${(pt.log || []).map(l => `<div class="plog"><span class="muted">${esc(l.title)}.</span> ${esc(l.choice)}${l.ok === null ? '' : l.ok ? ' <span class="chip good">It works</span>' : ' <span class="chip bad">It doesn’t</span>'}<p>${esc(l.t)}</p></div>`).join('')}
-  <section class="panel scene"><p class="big-p">${esc(sc.text)}</p><div class="choices">${sc.opts.map(o => { const p = o.check ? checkP(o.check[0], o.check[1]) : null; return `<button class="choice" data-party="${o.k}"><b>${esc(o.label)}</b>${p !== null ? `<span class="odds">${oddsBand(p)} · ${esc(o.hint)}</span>` : ''}</button>`; }).join('')}</div></section>
-  <p class="note">Your odds come from your character's stats. ${pt.drinks >= 3 ? 'You have had a few; it shows.' : ''}</p>`;
+  const sc = partyScene(pt);
+  const opts = sc.rooms ? `<div class="rooms">${sc.rooms.map(r => `<button class="opt" data-party="${r.k}"><b>${esc(r.where)}</b><span>${esc(r.who)} is there</span></button>`).join('')}</div>`
+    : `<div class="choices">${sc.opts.map(o => `<button class="choice" data-party="${o.k}"><b>${esc(o.label)}</b>${o.check ? `<span class="odds">${esc(checkLabel(o.check[0], o.check[1]))}</span>` : ''}</button>`).join('')}</div>`;
+  return `<div class="head partyhead"><div class="pf">${portraitOf(ME(), 72)}</div><div><p class="eyebrow">New Year's Eve · ${S.startYear - 1}</p><h2>${esc(sc.title)}</h2></div></div>
+  ${(pt.log || []).map(l => `<div class="plog"><span class="muted">${esc(l.title)}.</span> ${esc(l.choice)} ${rollChip(l.roll)}<p>${esc(l.t)}</p></div>`).join('')}
+  <section class="panel scene"><p class="big-p">${esc(sc.text)}</p>${sc.sys ? `<p class="sys"><b>How it works</b> ${esc(sc.sys)}</p>` : ''}${opts}</section>
+  <p class="note">${pt.drinks >= 3 ? 'You have had a few: disadvantage on your rolls until you sober up.' : 'Rolls are a d20 plus your modifier against the difficulty. A natural 20 always works; a natural 1 never does.'}</p>`;
 }
 
 function meter(label, v, cls, txt) { return `<div class="rep"><span>${label}</span>${bar(v, 100, cls)}<b>${txt ?? Math.round(v)}</b></div>`; }
@@ -73,8 +109,8 @@ function viewDesk() {
   const actOpts = Object.entries(ACTIVITIES).filter(([k]) => k !== 'work').map(([k, a]) => [k, a.label]);
   const lastDiary = M.diary.filter(d => d.w >= S.week - 1);
   const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}"><div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
-    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => { const p = c.check ? checkP(c.check[0], c.check[1]) : null; return `<button class="choice" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : p !== null ? `<span class="odds">${oddsBand(p)} · ${esc(c.hint || statLabel(c.check[0]))}</span>` : ''}</button>`; }).join('')}</div>` : ''}
-    ${it.result ? `<p class="res">${it.result.ok === true ? chip('It works', 'good') + ' ' : it.result.ok === false ? chip('It doesn’t', 'bad') + ' ' : ''}${esc(it.result.t)}</p>` : ''}</li>`;
+    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => { return `<button class="choice" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? `<span class="odds">${esc(checkLabel(c.check[0], c.check[1]))}</span>` : ''}</button>`; }).join('')}</div>` : ''}
+    ${it.result ? `<p class="res">${rollChip(it.result.roll)} ${esc(it.result.t)}</p>` : ''}</li>`;
   const boardRow = p => {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
@@ -87,8 +123,9 @@ function viewDesk() {
     return `<tr><td>${pl(id)}</td><td>${esc(ROLE_LABEL[q.role])}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
       <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
   }).join('');
-  return `<div class="head"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
-   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a></p></div>
+  return `<div class="head partyhead"><div class="pf">${portraitOf(me, 96)}</div><div><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
+   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button></p></div></div>
+  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) })}</section>` : ''}
   <div class="kpis"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)} to a lender` : ''}</small></div>
    <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div>
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
@@ -151,7 +188,10 @@ function careerClick(t) {
     const g = t.dataset.cc, v = t.dataset.v;
     if (g === 'rename') c.name = suggestName(c.hub, c.g);
     else if (g === 'pt') { const [cr, d] = v.split(':'); const nv = clamp((c.points[cr] || 0) + +d, 0, SKILL_MAX); if (+d < 0 || ccSpent(c) < SKILL_POINTS) c.points[cr] = nv; }
-    else if (g === 'trait') { if (c.traits.includes(v)) c.traits = c.traits.filter(x => x !== v); else if (c.traits.length < 3 && !(v === 'Lazy' && c.traits.includes('Workhorse')) && !(v === 'Workhorse' && c.traits.includes('Lazy')) && !(v === 'Beloved' && c.traits.includes('Difficult')) && !(v === 'Difficult' && c.traits.includes('Beloved'))) c.traits.push(v); }
+    else if (g === 'trait') { if (c.traits.includes(v)) c.traits = c.traits.filter(x => x !== v); else if (c.traits.length < 3 && !traitClash(c.traits, v)) c.traits.push(v); }
+    else if (g === 'love' || g === 'hate') { const L = c[g]; if (L.includes(v)) c[g] = L.filter(x => x !== v); else if (L.length < (g === 'love' ? 3 : 2)) L.push(v); }
+    else if (g === 'unfav') c.favs.splice(+v, 1);
+    else if (g === 'randfav') { if (c.favs.length >= 5) c.favs = []; while (c.favs.length < 5) { const id = randomFav(c); if (!id) break; c.favs.push(id); } }
     else if (g === 'go') {
       c.name = ($('#cc-name').value || '').trim() || suggestName(c.hub, c.g);
       doAct({ t: 'create', c: JSON.parse(JSON.stringify(c)) });
@@ -159,6 +199,8 @@ function careerClick(t) {
     } else c[g] = v;
     render(true); return true;
   }
+  if (t.dataset.look) { const [k, v] = t.dataset.look.split(':'); setLook(k, +v); return true; }
+  if (t.dataset.restyle) { UI.restyle = !UI.restyle; render(true); return true; }
   if (t.dataset.party) { doAct({ t: 'party', k: t.dataset.party }); render(true); return true; }
   if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'); doAct({ t: 'pick', id: +id, k }); render(true); return true; }
   if (t.dataset.quit) { doAct({ t: 'quit', id: +t.dataset.quit }); render(true); return true; }
@@ -169,12 +211,18 @@ function careerClick(t) {
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
+function setLook(k, v) {
+  if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
+  if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
+  UI.cc.look[k] = v; render(true);
+}
 function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
+  if (e.target.dataset.lookk) { setLook(e.target.dataset.lookk, +v); return true; }
+  if (e.target.dataset.fav !== undefined) { const fid = filmChoices().byLabel[v]; if (fid && !c.favs.includes(fid)) c.favs.push(fid); render(true); return true; }
   if (id.startsWith('cc-')) {
     const k = id.slice(3);
     if (k === 'age') c.age = clamp(+v || 23, 18, 45);
-    else if (k === 'love0') c.love[0] = v; else if (k === 'love1') c.love[1] = v;
     else if (k === 'name') c.name = v;
     else c[k] = v;
     if (k === 'hub' || k === 'g') c.name = $('#cc-name') && $('#cc-name').value.trim() ? $('#cc-name').value : suggestName(c.hub, c.g);

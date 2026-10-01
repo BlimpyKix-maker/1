@@ -10,8 +10,9 @@ function fresh() {
 }
 const h = fresh();
 const r = c => h.run(c);
-r(`doAct({ t: 'create', c: { name: 'Test Person', g: 'X', age: 23, hub: 'hollywood', role: 'dp', wealth: 'gettingby', edu: 'film', arrival: 'plusone', build: 'rugged', quirk: 'rival', points: { cam: 4, edt: 2, dir: 2, act: 1, pro: 1 }, traits: ['Workhorse', 'Charming'], love: ['Horror', 'Sci-fi'], hate: 'Musical' } })`);
-for (let i = 0; i < 5; i++) r(`doAct({ t: 'party', k: PARTY[S.me.party.step](S.me.party).opts[${i % 2}].k })`);
+r(`doAct({ t: 'create', c: { name: 'Test Person', g: 'X', age: 23, hub: 'hollywood', role: 'dp', wealth: 'gettingby', edu: 'filmcam', arrival: 'plusone', build: 'rugged', quirk: 'rival', points: { cam: 4, edt: 2, dir: 2, act: 1, pro: 1 }, traits: ['Workhorse', 'Charming', 'Lucky'], love: ['Horror', 'Sci-fi'], hate: ['Musical'], favs: Object.keys(S.cat.allFilms).filter(id => S.cat.allFilms[id].g === 'Horror').slice(0, 3), look: defaultLook() } })`);
+for (let i = 0; i < 20 && !r('S.me.party.done'); i++) r(`(() => { const sc = partyScene(S.me.party); return doAct({ t: 'party', k: sc.rooms ? sc.rooms[0].k : sc.opts[${i % 2}].k }); })()`);
+console.log('party:', r(`S.me.party.log.map(l => l.title + ': ' + l.choice + (l.roll ? ' [' + rollText(l.roll) + ']' : '')).join(' | ')`));
 console.log(r(`S.me.inbox.map(x => x.title + ': ' + x.text).join('\\n')`));
 console.log('contacts after party:', r(`Object.keys(S.me.known).map(id => P(+id).name + ' [' + S.me.known[id].tags.join(', ') + '] ' + Math.round(opinion(+id))).join('; ')`));
 const t0 = Date.now();

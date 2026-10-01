@@ -14,6 +14,7 @@ const pgauss = () => { let u = 0, v = 0; while (!u) u = prnd(); while (!v) v = p
 const logistic = x => 1 / (1 + Math.exp(-x));
 function oddsBand(p) { return p < .3 ? 'Long shot' : p < .65 ? 'Even odds' : 'Safe bet'; }
 const ME = () => S.me && P(S.me.id);
+const me0 = () => P(S.me.id);
 
 // Money in the player's world: 2027 US dollars scaled by the era's prices and the hub's cost of living.
 function wageF(hub) { const y = S.year; return cpi(y) / 330 * Math.max(.12, era(MARKETS[HUBS[hub].m].cost, y)); }
@@ -24,33 +25,62 @@ function fmtCash(v) { return (v < 0 ? '−$' : '$') + Math.round(Math.abs(v)).to
 const ORIGIN = {
   wealth: {
     broke: { label: 'Broke', d: 'Every dollar is borrowed. Hungry for any job.', cash: 400, mind: { eth: 2 } },
+    scraping: { label: 'Scraping by', d: 'Two jobs back home paid for the bus ticket. Nothing more.', cash: 1200, mind: { col: 1 } },
     gettingby: { label: 'Getting by', d: 'A little saved from years of other work.', cash: 2500 },
-    comfortable: { label: 'Comfortable', d: 'Parents who can help in a pinch, and taste formed by a house full of books and films.', cash: 9000, mind: { tas: 2 } },
-    trust: { label: 'Trust fund', d: 'A monthly allowance and no rush. Insiders can tell, and some hold it against you.', cash: 40000, allowance: 250, mind: { eth: -2 }, standing: -3 }
+    savings: { label: 'Working-class savings', d: 'Five years of tips in a coffee tin, and a stubborn streak.', cash: 5000, mind: { eth: 1 } },
+    comfortable: { label: 'Comfortable', d: 'Parents who can help in a pinch, and a house full of books and films.', cash: 9000, mind: { tas: 2 } },
+    welloff: { label: 'Well-off', d: 'Private school, summers abroad, a car. People assume things.', cash: 18000, mind: { cha: 1 }, standing: -1 },
+    inheritance: { label: 'A small inheritance', d: 'A grandparent left you enough for one serious try. Spend it well.', cash: 25000, mind: { com: 1 } },
+    trust: { label: 'Trust fund', d: 'A monthly allowance and no rush. Insiders can tell, and some hold it against you.', cash: 40000, allowance: 250, mind: { eth: -2 }, standing: -3 },
+    estranged: { label: 'Rich, but cut off', d: 'You grew up with money and walked away from it. You kept the manners and one useful family friend.', cash: 1500, mind: { cha: 1, tas: 1 }, stress: 10, friend: 1 },
+    family: { label: 'Supporting family', d: 'You send money home every week. It keeps you sharp, and tired.', cash: 2000, upkeep: 90, mind: { eth: 2, com: 1 } }
   },
   edu: {
-    self: { label: 'Self-taught', d: 'Learned by shooting and cutting anything you could. No debt.', craft: { cam: 1, edt: 1 }, mind: { eth: 1 } },
-    film: { label: 'Film school', d: 'Two years of short films and a debt to show for it. Two classmates are already working.', craft: { dir: 2, cam: 2, edt: 2, wri: 1 }, debt: 15000, mates: ['director', 'dp'] },
-    drama: { label: 'Drama school', d: 'Voice, movement, Chekhov. A showcase that went nowhere, yet.', craft: { act: 3 }, mind: { cha: 1 }, debt: 8000, mates: ['actor', 'actor'] },
-    uni: { label: 'University', d: 'A literature degree, a short story in a small magazine, and a roommate who writes too.', craft: { wri: 2, pro: 1 }, mind: { tas: 1 }, debt: 10000, mates: ['writer'] }
+    self: { label: 'Self-taught', d: 'Learned by shooting and cutting anything you could. No debt, no degree.', craft: { cam: 1, edt: 1 }, mind: { eth: 1 } },
+    filmdir: { label: 'Film school: directing', d: 'Two years of short films and a debt to show for it. Your classmates are already working.', craft: { dir: 3, wri: 1, edt: 1 }, debt: 16000, mates: ['director', 'dp'], degree: 'film' },
+    filmcam: { label: 'Film school: cinematography', d: 'You lit every thesis film in your year. The camera crew all know you.', craft: { cam: 3, edt: 1 }, debt: 16000, mates: ['dp', 'director'], degree: 'film' },
+    filmpost: { label: 'Film school: editing and sound', d: 'Nights in the edit suite. You can save a film in post, and you know it.', craft: { edt: 3, fx: 1 }, debt: 15000, mates: ['editor', 'sound'], degree: 'film' },
+    filmprod: { label: 'Film school: producing', d: 'Budgets, schedules and a thesis film you actually got made on time.', craft: { pro: 3, wri: 1 }, debt: 15000, mates: ['producer', 'director'], degree: 'film' },
+    drama: { label: 'Drama school', d: 'Voice, movement, Chekhov. A showcase that went nowhere, yet.', craft: { act: 3 }, mind: { cha: 1 }, debt: 9000, mates: ['actor', 'actor'], degree: 'drama' },
+    music: { label: 'Music conservatory', d: 'Orchestration, ear training and a portfolio of student-film scores.', craft: { mus: 3 }, mind: { tas: 1 }, debt: 12000, mates: ['composer'], degree: 'music' },
+    art: { label: 'Art and design school', d: 'Sets, costumes, concept art. Your sketchbooks are full of other worlds.', craft: { des: 3, cam: 1 }, debt: 12000, mates: ['designer', 'costume'], degree: 'art' },
+    uni: { label: 'University: literature', d: 'A short story in a small magazine, and a roommate who writes too.', craft: { wri: 2, pro: 1 }, mind: { tas: 1 }, debt: 10000, mates: ['writer'], degree: 'ba' },
+    business: { label: 'Business school', d: 'Spreadsheets, deal structures and a network of people who will be running things.', craft: { pro: 2 }, mind: { cha: 1 }, debt: 30000, mates: ['producer'], degree: 'mba' }
   },
   arrival: {
     plusone: { label: "A friend's plus-one", d: 'A friend who works on sets brought you. You know one person in the room.' },
-    bar: { label: 'Working the bar', d: 'You are being paid to pour drinks. You will see everyone, and they will see the help.' },
+    bar: { label: 'Working the bar', d: 'You are being paid to pour drinks. You will see everyone, and they will see the help.', cash: 200 },
+    catering: { label: 'With the caterers', d: 'Carrying trays tonight. Nobody notices you, which means you hear everything.', cash: 150 },
+    photographer: { label: 'The hired photographer', d: 'Everyone wants a flattering photo. A good reason to talk to anyone.', cash: 300 },
+    date: { label: "Someone's date", d: 'You came with an actor you have been seeing for three weeks. They know people.' },
+    neighbour: { label: 'The neighbour', d: 'You came over to complain about the noise and got handed a drink instead.' },
+    band: { label: 'With the band', d: 'You play in the band hired for the night. Musicians get fed and ignored, then remembered.', cash: 250 },
+    viral: { label: 'Invited after a viral video', d: 'A short you made went around the internet. Someone here wants to meet you.' },
     crash: { label: 'Crashed it', d: 'You heard the address and walked in like you belonged. Bold, and risky.' },
     family: { label: 'Invited through family', d: 'Your family knows the host. Doors are open; expectations too.' }
   },
   build: {
     striking: { label: 'Striking', d: 'People look twice. Cameras too.', looks: 15, stamina: 9 },
+    elegant: { label: 'Elegant', d: 'Poised in any room; clothes hang right on you.', looks: 14, stamina: 10, mind: { cha: 1 } },
+    youthful: { label: 'Youthful', d: 'You will be playing students for another decade.', looks: 13, stamina: 12 },
+    athletic: { label: 'Athletic', d: 'You can run, climb and fall well. Stunt coordinators notice.', looks: 12, stamina: 14, subs: { phys: 2, stunt: 1 } },
     rugged: { label: 'Rugged', d: 'You can work a 16-hour day and still lift a sandbag.', looks: 11, stamina: 15 },
+    slight: { label: 'Slight', d: 'Easy to overlook, quick on your feet, and you fit in any camera car.', looks: 11, stamina: 10, subs: { speed: 1 } },
     everyday: { label: 'Everyday', d: 'You blend in, which is useful more often than you would think.', looks: 10, stamina: 12, mind: { col: 1 } },
+    imposing: { label: 'Imposing', d: 'Tall, broad, a voice that carries. People step aside.', looks: 10, stamina: 13, subs: { pres: 1.5, voice: 1 } },
+    weathered: { label: 'Weathered', d: 'You look like you have lived. Casting calls it character.', looks: 9, stamina: 12, subs: { range: 1 } },
     distinctive: { label: 'Distinctive', d: 'A face nobody forgets, for better or worse. Character-actor material.', looks: 8, stamina: 11, subs: { range: 1.5, pres: 1 } }
   },
   quirk: {
     none: { label: 'None', d: 'Nothing in your past is waiting to catch up with you.' },
     parent: { label: 'Famous parent', d: 'Your parent is a name in this town. Every door opens a crack; every success is doubted.' },
-    debt: { label: 'A debt', d: 'You owe a loan shark $6,000, and he knows where you live.' },
+    mentor: { label: 'A mentor', d: 'An old teacher of yours now works in the business, and still believes in you.' },
+    ex: { label: 'An ex in the business', d: 'You dated someone who now works here. It ended badly-ish.' },
     rival: { label: 'A rival', d: 'Someone from your past wants exactly what you want, and they are already here.' },
+    viral: { label: 'Internet famous', d: 'A video of yours had millions of views once. Strangers know your face; insiders roll their eyes.' },
+    debt: { label: 'A debt', d: 'You owe a loan shark $6,000, and he knows where you live.' },
+    sick: { label: 'A sick parent', d: 'Medical bills back home, every week, and calls you dread.' },
+    record: { label: 'A criminal record', d: 'An old conviction. Studios run background checks; independents mostly don’t.' },
     secret: { label: 'A secret', d: 'Something you did before you came here. It will come out one day.' }
   },
   life: {
@@ -59,26 +89,39 @@ const ORIGIN = {
     own: { label: 'Own place', d: 'Quiet, private, expensive.', rent: 820, rest: 6, stress: -2 }
   }
 };
-const DREAM_ROLES = ['director', 'actor', 'writer', 'dp', 'editor', 'producer', 'designer', 'composer'];
+const DREAM_ROLES = ['director', 'actor', 'writer', 'producer', 'dp', 'editor', 'designer', 'costume', 'composer', 'casting'];
 const SKILL_POINTS = 10, SKILL_MAX = 4;
 const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love: c.love, hate: c.hate, body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, energy: 100, stress: 10, life: c.wealth === 'trust' ? 'own' : c.wealth === 'broke' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
-  const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build];
+  const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: Object.assign({}, c.look || {}), degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
+  const traits = [];
+  for (const t of c.traits || []) if (TRAITS[t] && t !== 'Prodigy' && !traits.includes(t) && !traitClash(traits, t) && traits.length < 3) traits.push(t);
+  // favourite films: each one studied closely nudges the skills its genre leans on
+  const favBonus = {};
+  for (const fid of (c.favs || []).slice(0, 5)) {
+    const cf = S.cat.allFilms && S.cat.allFilms[fid];
+    if (!cf) continue;
+    M.favs.push(fid);
+    const W2 = Object.entries(GENRE_W[cf.g] || {}).sort((a, b) => b[1] - a[1]).slice(0, 2);
+    for (const [k] of W2) favBonus[k] = (favBonus[k] || 0) + .3;
+  }
   const sk = {}, pot = {};
   for (const cr in CRAFTS) for (const k in CRAFTS[cr].subs) {
     const pts = (c.points[cr] || 0) + (E.craft && E.craft[cr] || 0) + (cr === MAIN[c.role] ? 1 : 0);
-    sk[k] = clamp(2.5 + prnd() * 2 + (age - 18) * .08 + pts * .75 + ((B.subs && B.subs[k]) || 0), 1, 12);
+    sk[k] = clamp(2.5 + prnd() * 2 + (age - 18) * .08 + pts * .75 + ((B.subs && B.subs[k]) || 0) + (favBonus[k] || 0), 1, 12);
     const head = age < 24 ? 6 + prnd() * 7 : age < 30 ? 4 + prnd() * 6 : age < 38 ? 2.5 + prnd() * 5 : 1 + prnd() * 4;
-    pot[k] = clamp(sk[k] + head + (c.traits.includes('Late bloomer') ? 2 : 0), sk[k], 20);
+    pot[k] = clamp(sk[k] + head + (traits.includes('Late bloomer') ? 2 : 0), sk[k], 20);
   }
   const mind = {};
   for (const k in MINDS) mind[k] = clamp(8 + prnd() * 4 + ((W.mind && W.mind[k]) || 0) + ((E.mind && E.mind[k]) || 0) + ((B.mind && B.mind[k]) || 0), 1, 20);
+  if (M.favs.length >= 3 && new Set(M.favs.map(f => S.cat.allFilms[f].g)).size >= 3) mind.tas = clamp(mind.tas + 1, 1, 20);
   const p = {
-    id: S.people.length, name: c.name.trim().slice(0, 40) || 'You', g: c.g, born: y - age, hub, role: c.role, sk, pot, mind, traits: c.traits.slice(0, 3),
+    id: S.people.length, name: c.name.trim().slice(0, 40) || 'You', g: ['F', 'M', 'X'].includes(c.g) ? c.g : 'X', born: y - age, hub, role: c.role, sk, pot, mind, traits,
     standing: clamp(4 + prnd() * 4 + (W.standing || 0), 0, 100), fame: 0, intl: 0, heat: 0, busy: -1, credits: [], ties: {}, lastWork: -999,
     retired: false, dead: false, awards: [], debut: S.week, player: true
   };
@@ -86,11 +129,18 @@ function startCareer(c) {
   S.people.push(p);
   M.id = p.id;
   M.body = { looks: B.looks, stamina: B.stamina };
-  M.cash = usd(W.cash, hub) + (c.arrival === 'bar' ? usd(200, hub) : 0);
+  M.cash = usd(W.cash, hub) + usd(A.cash || 0, hub);
   M.allowance = W.allowance ? usd(W.allowance, hub) : 0;
+  M.upkeep = (W.upkeep ? usd(W.upkeep, hub) : 0) + (c.quirk === 'sick' ? usd(110, hub) : 0);
+  M.stress += (W.stress || 0) + (c.quirk === 'sick' ? 8 : 0);
   if (E.debt) { M.debt = usd(E.debt, hub); M.debtPay = Math.max(5, Math.round(M.debt / 180)); }
+  if (E.degree) M.degrees.push(E.degree);
   if (c.quirk === 'debt') M.shark = usd(6000, hub);
+  if (c.quirk === 'viral') { p.fame = 9; p.standing = Math.max(0, p.standing - 2); }
   for (const r of E.mates || []) { const m = youngNPC(hub, r); meet(m.id, 'Classmate', 18 + pri(0, 12)); }
+  if (W.friend) { const f = bestIn(hub, ['producer', 'director'], q => q.standing + prnd() * 20 + (S.year - q.born > 45 ? 10 : 0)); if (f) { meet(f.id, 'Family friend', 22); trust(f.id, 20); } }
+  if (c.quirk === 'mentor') { const m = bestIn(hub, [c.role], q => q.standing * .7 + (S.year - q.born > 40 ? 20 : -30) + prnd() * 15); if (m) { meet(m.id, 'Your mentor', 40); trust(m.id, 35); M.refs[m.id] = 1; } }
+  if (c.quirk === 'ex') { const x = youngNPC(hub, ppick(['actor', 'director', 'writer', 'producer', 'dp'])); meet(x.id, 'Your ex', -6); trust(x.id, 10); }
   M.party = makeParty(c);
   diary('You arrive in ' + HUBS[hub].name + ' with ' + fmtCash(M.cash) + (M.debt ? ' and ' + fmtCash(M.debt) + ' of student debt' : '') + '.');
 }
@@ -111,7 +161,7 @@ function bestIn(hub, roles, score) {
 function meet(id, tag, opinion = 0) {
   const M = S.me, me = ME();
   if (id === M.id) return;
-  if (!M.known[id]) M.known[id] = { met: S.week, trust: 30, due: 0, owe: 0, tags: [] };
+  if (!M.known[id]) M.known[id] = { met: S.week, trust: 30 + traitSum(me, 'trust0'), due: 0, owe: 0, tags: [] };
   if (tag && !M.known[id].tags.includes(tag)) M.known[id].tags.push(tag);
   if (opinion) addTie(me, P(id), opinion);
 }
@@ -127,106 +177,216 @@ function makeParty(c) {
   g.host = bestIn(hub, ['producer'], q => -Math.abs(q.standing - 55) + q.fame * .1 + prnd() * 10);
   g.star = bestIn(hub, ['actor'], q => q.fame + prnd() * 8);
   g.dir = bestIn(hub, ['director'], q => -Math.abs(q.standing - 62) + prnd() * 15);
-  g.vet = bestIn(hub, ['dp', 'editor', 'designer'], q => q.standing * .6 + (S.year - q.born > 45 ? 15 : 0) + prnd() * 15);
-  g.peer = youngNPC(hub, role === 'producer' ? 'producer' : role);
-  for (const k in g) if (!g[k]) g[k] = makePerson(hub, { host: 'producer', star: 'actor', dir: 'director', vet: 'dp', peer: role }[k], {});
+  g.vet = bestIn(hub, ['dp', 'editor', 'designer', 'sound'], q => q.standing * .6 + (S.year - q.born > 45 ? 15 : 0) + prnd() * 15);
+  g.writer = bestIn(hub, ['writer'], q => -Math.abs(q.standing - 45) + prnd() * 20);
+  g.coord = bestIn(hub, ['casting', 'producer', 'ad'], q => -Math.abs(q.standing - 35) + prnd() * 20);
+  g.reporter = bestIn(hub, ['writer'], q => -Math.abs(q.standing - 25) + prnd() * 20);
+  g.peer = youngNPC(hub, role);
+  for (const k in g) if (!g[k]) g[k] = makePerson(hub, { host: 'producer', star: 'actor', dir: 'director', vet: 'dp', writer: 'writer', coord: 'casting', reporter: 'writer', peer: role }[k], {});
   const ids = {};
   for (const k in g) ids[k] = g[k].id;
   if (c.quirk === 'parent') {
-    const par = bestIn(hub, [role === 'actor' ? 'actor' : role, 'director', 'producer'], q => q.standing + q.fame * .5 + (S.year - q.born > 46 ? 30 : -50) + prnd() * 10);
+    const par = bestIn(hub, [role, 'director', 'producer'], q => q.standing + q.fame * .5 + (S.year - q.born > 46 ? 30 : -50) + prnd() * 10);
     if (par) { ids.parent = par.id; meet(par.id, 'Your parent', 60); trust(par.id, 40); }
   }
   if (c.quirk === 'rival') { const r = youngNPC(hub, role); ids.rival = r.id; meet(r.id, 'Rival', -35); }
-  if (c.arrival === 'plusone') { const f = youngNPC(hub, pick2(['ad', 'dp', 'designer', 'editor'])); ids.friend = f.id; meet(f.id, 'Old friend', 35); trust(f.id, 30); }
-  if (c.arrival === 'family') meet(ids.host, 'Family friend', 18);
-  if (c.arrival === 'bar') meet(ids.host, 'Hired you for the bar', 4);
-  return { step: 0, ids, drinks: 0, leads: [], flags: {} };
+  const arr = c.arrival;
+  if (arr === 'plusone') { const f = youngNPC(hub, pick2(['ad', 'dp', 'designer', 'editor'])); ids.friend = f.id; meet(f.id, 'Old friend', 35); trust(f.id, 30); }
+  if (arr === 'date') { const f = youngNPC(hub, 'actor'); ids.friend = f.id; meet(f.id, 'Your date', 30); trust(f.id, 20); }
+  if (arr === 'band') { const f = youngNPC(hub, 'composer'); ids.friend = f.id; meet(f.id, 'Your bandmate', 30); trust(f.id, 30); }
+  if (arr === 'family') meet(ids.host, 'Family friend', 18);
+  if (arr === 'bar' || arr === 'catering') meet(ids.host, 'Hired you for the night', 4);
+  if (arr === 'photographer') meet(ids.host, 'Hired you for the night', 6);
+  if (arr === 'viral') { meet(ids.star, 'Saw your video', 10); }
+  return { step: 'arrive', ids, drinks: 0, leads: [], flags: {}, seen: [], visits: 0 };
 }
 function pick2(a) { return a[Math.floor(prnd() * a.length)]; }
-
 function partyGuest(k) { return P(S.me.party.ids[k]); }
-// Every scene is a function of the party so far; it returns text and options. Each option resolves to an outcome.
-const PARTY = [
-  pt => {
-    const M = S.me, h = partyGuest('host');
-    const open = { plusone: `Your friend ${P(pt.ids.friend).name} squeezes your arm and vanishes toward the kitchen.`, bar: `You're behind the bar in a borrowed waistcoat. ${h.name}, the host, nods at you without seeing you.`, crash: `Nobody stopped you at the door. Yet. ${h.name}, the host, is scanning the room.`, family: `${h.name}, the host, greets you by name: your family's name, really.` }[M.arrival];
-    return { title: 'Ten o’clock, New Year’s Eve', text: `A house in the hills above ${HUBS[M.hub].name}, a pool nobody swims in, and every third person works in film. ${open}`, opts: [
-      { k: 'mingle', label: 'Grab a drink and work the room', check: ['cha', 11], hint: 'Charisma' },
-      { k: 'food', label: 'Head for the food table, where the nervous people are' },
-      { k: 'host', label: `Introduce yourself to ${h.name}`, check: ['cha', M.arrival === 'family' ? 7 : M.arrival === 'crash' ? 14 : 12], hint: 'Charisma' }
-    ] };
-  },
-  pt => {
-    const s = partyGuest('star');
-    return { title: 'Eleven o’clock', text: `${s.name} is here, the most famous face in the room${s.credits.length ? `, fresh from ${S.films[s.credits[s.credits.length - 1]].title}` : ''}, holding court by the fireplace. There's a gap in the circle.`, opts: [
-      { k: 'praise', label: 'Tell them which of their scenes you love, specifically', check: ['tas', 11], hint: 'Taste' },
-      { k: 'pitch', label: 'Pitch yourself: you’d be perfect for their next project', check: ['cha', 16], hint: 'Charisma' },
-      { k: 'leave', label: 'Leave them be; famous people get enough of this' }
-    ] };
-  },
-  pt => {
-    const v = partyGuest('vet');
-    return { title: 'Half past eleven, the kitchen', text: `${v.name}, a ${ROLE_LABEL[v.role].toLowerCase()} with ${v.credits.length} credits, is telling war stories about a shoot that went wrong in every possible way. A small crowd is laughing.`, opts: [
-      { k: 'listen', label: 'Listen, and ask good questions', check: ['col', 9], hint: 'Collaboration' },
-      { k: 'ask', label: 'Wait for a gap and ask if they need anyone on their next job', check: ['cha', 13], hint: 'Charisma' },
-      { k: 'story', label: 'Top their story with one of your own', check: ['cha', 15], hint: 'Charisma' }
-    ] };
-  },
-  pt => ({ title: 'Midnight', text: 'The countdown. Champagne everywhere, strangers hugging, someone crying by the pool. The night could go on until dawn.', opts: [
-    { k: 'party', label: 'Keep going. It’s New Year’s Eve' },
-    { k: 'one', label: 'One glass for the toast, then water' },
-    { k: 'home', label: 'Slip out after the toast and get some sleep' }
-  ] }),
-  pt => {
-    const d = partyGuest('dir'), peer = partyGuest('peer');
-    const gone = pt.flags.home;
-    return gone ? { title: 'Half past twelve, the taxi home', text: `On the way out you pass ${peer.name}, who is your age and wants exactly what you want. They're waiting for a ride too.`, opts: [
-      { k: 'share', label: 'Offer to share the taxi', check: ['cha', 8], hint: 'Charisma' },
-      { k: 'alone', label: 'Ride home alone and think about the year ahead' }
-    ] } : { title: 'Three in the morning', text: `The stragglers are by the pool. ${d.name}, a director, is arguing with ${peer.name} about the best film of the year. They look to you to settle it.`, opts: [
-      { k: 'settle', label: 'Make your case for a film you love', check: ['tas', 12], hint: 'Taste' },
-      { k: 'joke', label: 'Make them both laugh and change the subject', check: ['cha', 12], hint: 'Charisma' },
-      { k: 'side', label: `Back ${d.name}; they have more power` }
-    ] };
+const PARTY_VISITS = 4;
+
+// The party is a map of the evening. Each corner introduces one of the game's systems through a person you can
+// connect with. sys = the one-line lesson; opts = what you can do; res(k, ok) = what happens.
+const PARTY_ARRIVE = {
+  plusone: n => `Your friend ${n('friend')} squeezes your arm and vanishes toward the kitchen.`,
+  bar: n => `You're behind the bar in a borrowed waistcoat. ${n('host')}, the host, nods at you without seeing you.`,
+  catering: n => `You're carrying a tray of tiny tacos. In the kitchen you heard ${n('host')} complaining about a budget.`,
+  photographer: n => `${n('host')} hired you to shoot the party. Everyone in the room wants a good picture of themselves.`,
+  date: n => `${n('friend')}, the actor you came with, is already waving at someone across the room.`,
+  neighbour: n => `You came next door to complain about the music. ${n('host')} put a glass in your hand before you finished.`,
+  band: n => `You're setting up with the band. ${n('friend')} tunes beside you; the first set is at ten.`,
+  viral: n => `A stranger recognises you from the video before you're through the door. ${n('star')} wants to meet you.`,
+  crash: n => `Nobody stopped you at the door. Yet. ${n('host')}, the host, is scanning the room.`,
+  family: n => `${n('host')}, the host, greets you by name: your family's name, really.`
+};
+const STATIONS = {
+  star: { where: 'The fireplace', sys: 'Reputation: fame (who knows you), standing (what insiders think) and heat (recent buzz) are tracked separately in every market.',
+    scene: n => ({ text: `${n('star')}, the most famous face here, is holding court. There's a gap in the circle.`, opts: [
+      { k: 'praise', label: 'Tell them which of their scenes you love, specifically', check: ['tas', 11] },
+      { k: 'pitch', label: 'Pitch yourself for their next project', check: ['cha', 16] },
+      { k: 'photo', label: 'Offer to take their photo with the host', check: ['comp', 9] }] }),
+    res: (k, ok, g, n) => k === 'praise' ? (ok ? (meet(g.star, 'Met at the party', 10), `${n('star')} stops performing for a second. "Nobody ever mentions that scene." They ask your name.`) : (meet(g.star, 'Met at the party', -2), 'You praise the wrong film. It wasn’t theirs. The circle closes.'))
+      : k === 'pitch' ? (ok ? (meet(g.star, 'Met at the party', 6), lead(g.star), `Against all odds, ${n('star')} laughs and tells you to send something to their manager.`) : (meet(g.star, 'Met at the party', -8), me0().standing = Math.max(0, me0().standing - 1), S.me.stress += 6, `${n('star')}'s manager steers you away. Somebody films it.`))
+      : (ok ? (meet(g.star, 'Met at the party', 5), meet(g.host, 'Met at the party', 5), 'The photo is lovely. Both of them want a copy, which means both of them want your number.') : (meet(g.star, 'Met at the party', 1), 'The photo is blurry. They are gracious about it.')) },
+  host: { where: "The host's study", sys: 'Money: producers find financing, control budgets and decide who gets hired. Every film has a profit-and-loss sheet, and so do you.',
+    scene: n => ({ text: `${n('host')} has slipped away from the party to argue on the phone about a budget. They hang up and see you.`, opts: [
+      { k: 'ask', label: 'Ask what the fight was about', check: ['cha', 10] },
+      { k: 'fix', label: 'Suggest where they could save the money', check: ['bud', 12] },
+      { k: 'leave', label: 'Apologise and leave them to it' }] }),
+    res: (k, ok, g, n) => k === 'ask' ? (ok ? (meet(g.host, 'Met at the party', 8), `${n('host')} explains how a film gets financed: presales, a bank loan, a tax credit and a prayer. You understand about half.`) : (meet(g.host, 'Met at the party', -3), `${n('host')} is in no mood.`))
+      : k === 'fix' ? (ok ? (meet(g.host, 'Met at the party', 12), lead(g.host), `${n('host')} looks at you properly. "Call my office after the holiday."`) : (meet(g.host, 'Met at the party', -5), 'Your idea would cost twice as much. They tell you so.'))
+      : (meet(g.host, 'Met at the party', 1), 'You back out. They nod; at least you have manners.') },
+  kitchen: { where: 'The kitchen', sys: 'Crafts: skills grow by doing, fastest under people better than you. Working near a great cinematographer teaches camera.',
+    scene: n => ({ text: `${n('vet')}, a ${ROLE_LABEL[partyGuest('vet').role].toLowerCase()} with ${partyGuest('vet').credits.length} credits, is telling war stories. A small crowd is laughing.`, opts: [
+      { k: 'listen', label: 'Listen, and ask good questions', check: ['col', 9] },
+      { k: 'ask', label: 'Ask if they need anyone on their next job', check: ['cha', 13] },
+      { k: 'story', label: 'Top their story with one of your own', check: ['cha', 15] }] }),
+    res: (k, ok, g, n) => k === 'listen' ? (ok ? (meet(g.vet, 'Met at the party', 12), learnFrom(g.vet, .3), `${n('vet')} warms to you and explains how they actually got the shot. You learn more in twenty minutes than in a semester.`) : (meet(g.vet, 'Met at the party', 3), 'Your questions are the wrong kind of clever.'))
+      : k === 'ask' ? (ok ? (meet(g.vet, 'Met at the party', 6), lead(g.vet), `${n('vet')} looks you over. "Maybe. Find me in the new year."`) : (meet(g.vet, 'Met at the party', -5), `${n('vet')} has heard that question a thousand times tonight.`))
+      : (ok ? (meet(g.vet, 'Met at the party', 10), 'Your story kills. People who weren’t listening start listening.') : (meet(g.vet, 'Met at the party', -10), 'Your story dies in the silence.')) },
+  pool: { where: 'By the pool', sys: 'Ideas: later in the game you write pitches and loglines yourself, and they are judged on originality, clarity and fit with the listener.',
+    scene: n => ({ text: `${n('writer')}, a screenwriter, is sitting on a lounger with their shoes off. "Tell me an idea," they say. "Any idea. I'm out of them."`, opts: [
+      { k: 'wild', label: 'Pitch something strange and original', check: ['orig', 12] },
+      { k: 'safe', label: 'Pitch a crowd-pleaser with a twist', check: ['struc', 10] },
+      { k: 'turn', label: 'Ask them about theirs instead', check: ['cha', 8] }] }),
+    res: (k, ok, g, n) => k === 'turn' ? (ok ? (meet(g.writer, 'Met at the party', 9), `${n('writer')} talks for an hour about the script nobody will make. You'd watch it.`) : (meet(g.writer, 'Met at the party', 2), 'They wave it away. "Too depressing to explain."'))
+      : (ok ? (meet(g.writer, 'Met at the party', 10), S.me.spec.pages += 10, `${n('writer')} sits up. "That's a film." You start writing it in your head on the drive home.`) : (meet(g.writer, 'Met at the party', 0), `${n('writer')} smiles politely. "Mm. It's been done."`)) },
+  garden: { where: 'The garden', sys: 'Schooling and internships: some jobs ask for a degree, and studios take interns who often become staff. Your education already counts.',
+    scene: n => ({ text: `${n('coord')} runs the interns at a production company and is smoking by the hedge with two of them, who are trading horror stories.`, opts: [
+      { k: 'ask', label: 'Ask how their internship program works', check: ['cha', 9] },
+      { k: 'creds', label: 'Mention your training and what you can do', check: ['com', 11] },
+      { k: 'joke', label: 'Swap horror stories with the interns' }] }),
+    res: (k, ok, g, n) => k === 'ask' ? (ok ? (meet(g.coord, 'Met at the party', 8), lead(g.coord), `${n('coord')} says they take applications in the spring. "Remind me you're the one from the party."`) : (meet(g.coord, 'Met at the party', 1), 'They give you a website. Everyone gets the website.'))
+      : k === 'creds' ? (ok ? (meet(g.coord, 'Met at the party', 8), S.me.degrees.length ? `${n('coord')} perks up at your ${ORIGIN.edu[S.me.edu].label.toLowerCase()}. "We need people who already know the basics."` : `${n('coord')} likes that you taught yourself. "Scrappy is good."`) : (meet(g.coord, 'Met at the party', -2), 'You oversell it. They notice.'))
+      : (meet(g.peer, 'Met at the party', 8), `One of the interns is ${n('peer')}, who wants exactly what you want. You end up laughing together.`) },
+  dance: { where: 'The dance floor', sys: 'Favours: help someone and they owe you; owe someone and they will ask. Favours turn into referrals when it counts.',
+    scene: n => ({ text: `${n('peer')}, who is your age and wants what you want, has spilled red wine down the host's sofa and is panicking.`, opts: [
+      { k: 'help', label: 'Help them clean it up before anyone sees', check: ['eth', 9] },
+      { k: 'cover', label: 'Take the blame yourself', check: ['cha', 12] },
+      { k: 'leave', label: 'Pretend you saw nothing' }] }),
+    res: (k, ok, g, n) => k === 'help' ? (ok ? (meet(g.peer, 'Met at the party', 12), S.me.known[g.peer].due++, 'The stain is gone. They owe you, and say so.') : (meet(g.peer, 'Met at the party', 6), 'The stain gets bigger. At least you tried together.'))
+      : k === 'cover' ? (ok ? (meet(g.peer, 'Met at the party', 16), S.me.known[g.peer].due += 2, meet(g.host, null, 2), `You charm ${n('host')} into laughing it off. ${n('peer')} won't forget this.`) : (meet(g.peer, 'Met at the party', 10), S.me.known[g.peer].due++, meet(g.host, null, -6), `${n('host')} is not amused, with you.`))
+      : (meet(g.peer, 'Met at the party', -2), 'You drift away. They saw you see it.') },
+  hall: { where: 'The hallway', sys: 'The rumour mill: the trade press and the tabloids run on gossip. Feeding it wins friends in the press and enemies everywhere else.',
+    scene: n => ({ text: `${n('reporter')}, who writes for the trades, corners you. "Seen anything interesting tonight?"`, opts: [
+      { k: 'feed', label: `Tell them about ${n('star')}'s manager drama`, check: ['com', 10] },
+      { k: 'charm', label: 'Charm them without giving anything away', check: ['cha', 12] },
+      { k: 'no', label: '"I only just got here."' }] }),
+    res: (k, ok, g, n) => k === 'feed' ? (ok ? (meet(g.reporter, 'A source', 12), 'They write it down, and you never appear in the story. You have a friend in the press now.') : (meet(g.reporter, 'A source', 8), meet(g.star, null, -10), `Your name ends up attached to the item. ${n('star')} hears about it.`))
+      : k === 'charm' ? (ok ? (meet(g.reporter, 'Met at the party', 8), 'They like you more for saying nothing. Sources who talk are cheap.') : (meet(g.reporter, 'Met at the party', 1), 'They lose interest quickly.'))
+      : (meet(g.reporter, 'Met at the party', 0), 'They move on to the next person.') },
+  balcony: { where: 'The balcony', sys: 'The job board: films in production post jobs for whatever stage they are in. A referral from someone inside changes your odds.',
+    scene: n => ({ text: `${n('dir')}, a director, is on the balcony looking at the city lights and not at their phone.`, opts: [
+      { k: 'ask', label: 'Ask what they are shooting next', check: ['cha', 11] },
+      { k: 'quiet', label: 'Stand beside them and say nothing for a while', check: ['tas', 10] },
+      { k: 'pitch', label: 'Tell them you want to work for them', check: ['cha', 15] }] }),
+    res: (k, ok, g, n) => k === 'ask' ? (ok ? (meet(g.dir, 'Met at the party', 8), `${n('dir')} tells you about the film, the budget and the actor they can't get. You now know more than the trades.`) : (meet(g.dir, 'Met at the party', -2), `${n('dir')} is tired of talking about it.`))
+      : k === 'quiet' ? (ok ? (meet(g.dir, 'Met at the party', 12), `After a long while ${n('dir')} says, "Thank you." You talk about everything but film.`) : (meet(g.dir, 'Met at the party', 1), 'The silence gets awkward.'))
+      : (ok ? (meet(g.dir, 'Met at the party', 6), lead(g.dir), `${n('dir')} grins. "Everybody says that. You said it well. Call the production office."`) : (meet(g.dir, 'Met at the party', -6), `${n('dir')} goes back inside.`)) }
+};
+function lead(id) { const pt = S.me.party; if (!pt.leads.includes(id)) pt.leads.push(id); S.me.refs[id] = (S.me.refs[id] || 0) + 1; }
+function learnFrom(id, amt) { const me = me0(), cr = MAIN[P(id).role]; for (const s in CRAFTS[cr].subs) me.sk[s] = Math.min(me.pot[s], me.sk[s] + amt); recalc(me); }
+// (drawn while rendering, so it must not touch the random stream)
+function favTitle() { const f = S.me.favs.length ? S.cat.allFilms[S.me.favs[0]] : null; return f ? f.t : null; }
+// The scene in front of the player, whatever step the party is at.
+function partyScene(pt) {
+  const n = k => (pt.ids[k] !== undefined ? P(pt.ids[k]).name : 'someone');
+  if (pt.step === 'arrive') return { title: 'Ten o’clock, New Year’s Eve', text: `A house in the hills above ${HUBS[S.me.hub].name}, a pool nobody swims in, and every third person works in film. ${PARTY_ARRIVE[S.me.arrival](n)}`, sys: 'Every choice that depends on your character shows a d20 roll: the difficulty, your modifier and your chance. Traits, drink and stress can give advantage or disadvantage.', opts: [
+    { k: 'mingle', label: 'Grab a drink and work the room', check: ['cha', 11] },
+    { k: 'watch', label: 'Find a wall and watch who talks to whom', check: ['tas', 10] },
+    { k: 'work', label: S.me.arrival === 'photographer' || S.me.arrival === 'bar' || S.me.arrival === 'catering' || S.me.arrival === 'band' ? 'Do your job, and do it well' : `Introduce yourself to ${n('host')}`, check: ['cha', S.me.arrival === 'family' ? 7 : S.me.arrival === 'crash' ? 14 : 11] }] };
+  if (pt.step === 'rooms') return { title: `Where next? (${PARTY_VISITS - pt.visits} before midnight)`, text: 'The party spreads through the house. You have time for a few more conversations before the countdown.', rooms: Object.keys(STATIONS).filter(k => !pt.seen.includes(k)).map(k => ({ k, where: STATIONS[k].where, who: n({ star: 'star', host: 'host', kitchen: 'vet', pool: 'writer', garden: 'coord', dance: 'peer', hall: 'reporter', balcony: 'dir' }[k]) })) };
+  if (pt.step in STATIONS) { const st = STATIONS[pt.step], sc = st.scene(n); return { title: st.where, text: sc.text, sys: st.sys, opts: sc.opts }; }
+  if (pt.step === 'midnight') return { title: 'Midnight', text: 'The countdown. Champagne everywhere, strangers hugging, someone crying by the pool. The night could go on until dawn.', sys: 'Energy and stress: energy limits what you can do each week; stress builds from overwork, rejection and conflict, and too much of it burns you out.', opts: [
+    { k: 'party', label: 'Keep going. It’s New Year’s Eve' }, { k: 'one', label: 'One glass for the toast, then water' }, { k: 'home', label: 'Slip out after the toast and get some sleep' }] };
+  if (pt.step === 'late') {
+    const fav = favTitle();
+    return pt.flags.home ? { title: 'Half past twelve, the taxi home', text: `On the way out you pass ${n('peer')}, who is waiting for a ride too.`, sys: 'Contacts: everyone you meet is a full person living their own career. Opinion, trust and favours run both ways.', opts: [
+      { k: 'share', label: 'Offer to share the taxi', check: ['cha', 8] }, { k: 'alone', label: 'Ride home alone and think about the year ahead' }] }
+      : { title: 'Three in the morning', text: `The stragglers are by the pool. ${n('dir')} is arguing with ${n('peer')} about the best film ever made. They look to you to settle it.`, sys: 'Taste: what you love shapes the jobs that energise you and the ones that grind you down.', opts: [
+      { k: 'settle', label: fav ? `Make the case for ${fav}` : 'Make your case for a film you love', check: ['tas', fav ? 10 : 12] },
+      { k: 'joke', label: 'Make them both laugh and change the subject', check: ['cha', 12] },
+      { k: 'side', label: `Back ${n('dir')}; they have more power` }] };
   }
-];
-function checkP(stat, dc) {
-  const me = ME();
-  const v = stat in me.mind ? me.mind[stat] : stat in me.sk ? me.sk[stat] : me.c[stat] ?? 10;
-  return clamp(logistic((v - dc) * .45 - (S.me.party && S.me.party.drinks >= 3 ? .4 : 0) - S.me.stress / 120), .03, .97);
+  return null;
 }
-function roll(stat, dc) { return prnd() < checkP(stat, dc); }
+
+// ---------------- Checks: a d20 plus your modifier against a difficulty ----------------
+// Stats run 1-20 like Football Manager; the modifier is D&D's: (stat - 10) / 2, rounded down. A natural 20 always
+// succeeds and a natural 1 always fails. Traits, drink, stress and exhaustion give advantage (roll twice, keep the
+// better) or disadvantage (keep the worse). Content writes difficulty on the stat scale; the roll needs one more.
+function statVal(stat) { const me = ME(); return stat in me.mind ? me.mind[stat] : stat in me.sk ? me.sk[stat] : me.c[stat] ?? 10; }
+function checkMods(stat) {
+  const me = ME(), M = S.me, why = [];
+  const v = statVal(stat), mod = Math.floor((v - 10) / 2);
+  let adv = 0;
+  for (const t of me.traits) { const T = TRAITS[t]; if (T.adv && T.adv.includes(stat)) { adv++; why.push(t); } if (T.dis && T.dis.includes(stat)) { adv--; why.push(t + ' (against)'); } }
+  if (M.party && !M.party.done && M.party.drinks >= 3) { adv--; why.push('drunk'); }
+  if (M.stress >= 70) { adv--; why.push('stressed'); }
+  if (M.party && M.party.done && M.energy < 15) { adv--; why.push('exhausted'); }
+  return { v, mod, adv: Math.sign(adv), why };
+}
+function checkInfo(stat, dc) {
+  const { mod, adv, why } = checkMods(stat), DC = dc + 1;
+  let p = clamp((21 - (DC - mod)) / 20, .05, .95);
+  if (has(ME(), 'Lucky')) p = p + (1 - p) * .05 * p;   // a natural 1 is rerolled once
+  const pa = adv > 0 ? 1 - (1 - p) * (1 - p) : adv < 0 ? p * p : p;
+  return { p: pa, mod, adv, DC, why };
+}
+function checkP(stat, dc) { return checkInfo(stat, dc).p; }
+const d20 = () => 1 + Math.floor(prnd() * 20);
+function roll(stat, dc) {
+  const { mod, adv, DC } = checkInfo(stat, dc);
+  const one = () => { let d = d20(); if (d === 1 && has(ME(), 'Lucky')) d = d20(); return d; };
+  let d = one();
+  if (adv) { const e = one(); d = adv > 0 ? Math.max(d, e) : Math.min(d, e); }
+  const ok = d === 20 || (d !== 1 && d + mod >= DC);
+  S.me.lastRoll = { stat, d, mod, DC, adv, ok, crit: d === 20 ? 1 : d === 1 ? -1 : 0 };
+  return ok;
+}
+function rollText(r) { if (!r) return ''; return `d20 ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${r.d + r.mod} vs DC ${r.DC}${r.adv > 0 ? ' (advantage)' : r.adv < 0 ? ' (disadvantage)' : ''}${r.crit > 0 ? ' · natural 20' : r.crit < 0 ? ' · natural 1' : ''}`; }
+function checkLabel(stat, dc) { const c = checkInfo(stat, dc); return `DC ${c.DC} · ${statLabel(stat)} ${c.mod >= 0 ? '+' : '−'}${Math.abs(c.mod)}${c.adv > 0 ? ' · advantage' : c.adv < 0 ? ' · disadvantage' : ''} · ${Math.round(c.p * 100)}%`; }
 
 function partyPick(k) {
-  const pt = S.me.party, scene = PARTY[pt.step](pt), opt = scene.opts.find(o => o.k === k);
+  const pt = S.me.party, M = S.me, g = pt.ids, n = x => (g[x] !== undefined ? P(g[x]).name : 'someone');
+  if (pt.step === 'rooms') {
+    if (!STATIONS[k] || pt.seen.includes(k)) return false;
+    pt.seen.push(k); pt.step = k; return true;
+  }
+  const scene = partyScene(pt), opt = scene && scene.opts.find(o => o.k === k);
   if (!opt) return false;
   const ok = opt.check ? roll(opt.check[0], opt.check[1]) : true;
-  const g = pt.ids, M = S.me;
   let t = '';
-  const lead = (id, why) => { if (!pt.leads.includes(id)) pt.leads.push(id); M.refs[id] = (M.refs[id] || 0) + 1; return why; };
-  switch (pt.step * 10 + scene.opts.indexOf(opt)) {
-    case 0: pt.drinks++; if (ok) { meet(g.host, 'Met at the party', 8); meet(g.dir, 'Met at the party', 6); t = `You float from group to group. ${P(g.host).name} and ${P(g.dir).name} both remember your name.`; } else { meet(g.dir, 'Met at the party', -3); t = `You cut into a conversation at the wrong moment. ${P(g.dir).name} gives you a look and turns away.`; } break;
-    case 1: meet(g.peer, 'Met at the party', 14); t = `${P(g.peer).name} is hiding by the dips too. You talk for an hour about the films that made you want to do this.`; break;
-    case 2: if (ok) { meet(g.host, 'Met at the party', 12); t = lead(g.host, `${P(g.host).name} likes you. "Call my office after the holiday. We're always short of hands."`); } else { meet(g.host, 'Met at the party', -6); t = M.arrival === 'crash' ? `${P(g.host).name} asks who invited you. You don't have a good answer, and security walks you to the garden.` : `${P(g.host).name} is polite and busy. You lose them to someone more important.`; if (M.arrival === 'crash') pt.flags.thrown = 1; } break;
-    case 10: if (ok) { meet(g.star, 'Met at the party', 10); t = `${P(g.star).name} stops performing for a second. "Nobody ever mentions that scene." They ask your name.`; } else { meet(g.star, 'Met at the party', -2); t = `You praise the wrong film. It wasn't theirs. The circle closes.`; } break;
-    case 11: if (ok) { meet(g.star, 'Met at the party', 6); t = lead(g.star, `Against all odds, ${P(g.star).name} laughs and tells you to send something to their manager.`); } else { meet(g.star, 'Met at the party', -8); ME().standing = Math.max(0, ME().standing - 1); t = `${P(g.star).name}'s manager steers you away. Somebody films it. By morning it's a story people tell.`; M.stress += 6; } break;
-    case 12: t = 'You watch from across the room. Some nights the smartest move is not to make one.'; break;
-    case 20: if (ok) { meet(g.vet, 'Met at the party', 12); const me = ME(), cr = MAIN[P(g.vet).role]; for (const s in CRAFTS[cr].subs) me.sk[s] = Math.min(me.pot[s], me.sk[s] + .25); recalc(me); t = `${P(g.vet).name} warms to you and explains how they actually got the shot. You learn more in twenty minutes than in a semester.`; } else { meet(g.vet, 'Met at the party', 3); t = `Your questions are the wrong kind of clever. ${P(g.vet).name} answers politely and moves on.`; } break;
-    case 21: if (ok) { meet(g.vet, 'Met at the party', 6); t = lead(g.vet, `${P(g.vet).name} looks you over. "Maybe. Find me in the new year."`); } else { meet(g.vet, 'Met at the party', -5); t = `${P(g.vet).name} has heard that question a thousand times tonight.`; } break;
-    case 22: if (ok) { meet(g.vet, 'Met at the party', 10); for (const k in g) if (k !== 'star') meet(g[k], 'Met at the party', 2); t = `Your story kills. People who weren't listening start listening.`; } else { meet(g.vet, 'Met at the party', -10); t = `Your story dies in the silence. ${P(g.vet).name} raises an eyebrow and goes back to theirs.`; } break;
-    case 30: pt.drinks += 3; for (const k of ['host', 'peer', 'dir']) if (M.known[g[k]]) addTie(ME(), P(g[k]), 5); t = 'You dance, you hug strangers, you tell someone your dreams by the pool. It is a wonderful night.'; break;
-    case 31: pt.drinks++; t = 'One glass, then water. You watch the night go soft around you and keep your head.'; break;
-    case 32: pt.flags.home = 1; t = 'You leave as the fireworks start, and you are asleep by one.'; break;
-    case 40: if (pt.flags.home) { if (ok) { meet(g.peer, 'Shared a taxi home', 12); t = `${P(g.peer).name} talks the whole way home. You trade numbers and plans.`; } else { meet(g.peer, 'Met at the party', 2); t = 'An awkward ride. You both pretend to look at your phones.'; } } else { if (ok) { meet(g.dir, 'Met at the party', 10); meet(g.peer, 'Met at the party', 4); t = lead(g.dir, `${P(g.dir).name} goes quiet, then grins. "Good answer. What do you do?"`); } else { meet(g.dir, 'Met at the party', -4); meet(g.peer, 'Met at the party', 6); t = `${P(g.dir).name} thinks your pick is sentimental and says so. ${P(g.peer).name} sticks up for you.`; } } break;
-    case 41: if (pt.flags.home) t = 'You ride home alone and make a list of everyone you want to work with.'; else if (ok) { meet(g.dir, 'Met at the party', 6); meet(g.peer, 'Met at the party', 8); t = 'Both of them are laughing. The argument is forgotten; you are not.'; } else { meet(g.peer, 'Met at the party', 2); t = 'The joke lands badly. The argument goes on without you.'; } break;
-    case 42: meet(g.dir, 'Met at the party', 5); meet(g.peer, 'Met at the party', -8); t = `${P(g.dir).name} approves. ${P(g.peer).name} remembers.`; break;
+  if (pt.step === 'arrive') {
+    pt.drinks += k === 'mingle' ? 1 : 0;
+    if (k === 'mingle') t = ok ? (meet(g.host, 'Met at the party', 6), meet(g.dir, 'Met at the party', 4), `You float from group to group. ${n('host')} and ${n('dir')} both remember your name.`) : (meet(g.dir, 'Met at the party', -3), `You cut into a conversation at the wrong moment. ${n('dir')} turns away.`);
+    else if (k === 'watch') t = ok ? (learnTaste(), `Within an hour you know who's rising, who's sinking and who's sleeping with whom. Knowledge is power here.`) : 'You mostly watch people refill their drinks.';
+    else if (ok) { meet(g.host, 'Met at the party', 10); M.cash += ['photographer', 'bar', 'catering', 'band'].includes(M.arrival) ? usd(60) : 0; t = ['photographer', 'bar', 'catering', 'band'].includes(M.arrival) ? `You're good at this, and ${n('host')} notices. A tip, and a nod that means more.` : `${n('host')} likes you. "Make yourself at home."`; }
+    else if (M.arrival === 'crash') { meet(g.host, 'Met at the party', -6); pt.flags.thrown = 1; t = `${n('host')} asks who invited you. Security walks you to the garden, where the party turns out to be better anyway.`; }
+    else { meet(g.host, 'Met at the party', -2); t = `${n('host')} is polite and busy. You lose them to someone more important.`; }
+    pt.step = 'rooms';
+    if (pt.flags.thrown) { pt.seen.push('host', 'star', 'kitchen', 'hall'); }
+  } else if (pt.step in STATIONS) {
+    t = STATIONS[pt.step].res(k, ok, g, n);
+    pt.visits++;
+    pt.step = pt.visits >= PARTY_VISITS || Object.keys(STATIONS).every(s => pt.seen.includes(s)) ? 'midnight' : 'rooms';
+  } else if (pt.step === 'midnight') {
+    if (k === 'party') { pt.drinks += 3; for (const x of ['host', 'peer', 'dir']) if (M.known[g[x]]) addTie(me0(), P(g[x]), 5); t = 'You dance, you hug strangers, you tell someone your dreams by the pool. It is a wonderful night.'; }
+    else if (k === 'one') { pt.drinks++; t = 'One glass, then water. You keep your head.'; }
+    else { pt.flags.home = 1; t = 'You leave as the fireworks start, and you are asleep by one.'; }
+    pt.step = 'late';
+  } else if (pt.step === 'late') {
+    if (pt.flags.home) t = k === 'share' ? (ok ? (meet(g.peer, 'Shared a taxi home', 12), `${n('peer')} talks the whole way home. You trade numbers and plans.`) : (meet(g.peer, 'Met at the party', 2), 'An awkward ride.')) : 'You ride home alone and make a list of everyone you want to work with.';
+    else if (k === 'settle') t = ok ? (meet(g.dir, 'Met at the party', 10), meet(g.peer, 'Met at the party', 4), lead(g.dir), `${n('dir')} goes quiet, then grins. "Good answer. What do you do?"`) : (meet(g.dir, 'Met at the party', -4), meet(g.peer, 'Met at the party', 6), `${n('dir')} thinks your pick is sentimental and says so. ${n('peer')} sticks up for you.`);
+    else if (k === 'joke') t = ok ? (meet(g.dir, 'Met at the party', 6), meet(g.peer, 'Met at the party', 8), 'Both of them are laughing. The argument is forgotten; you are not.') : (meet(g.peer, 'Met at the party', 2), 'The joke lands badly.');
+    else { meet(g.dir, 'Met at the party', 5); meet(g.peer, 'Met at the party', -8); t = `${n('dir')} approves. ${n('peer')} remembers.`; }
+    pt.step = 'done';
   }
-  pt.log = (pt.log || []).concat([{ title: scene.title, choice: opt.label, ok: opt.check ? ok : null, t }]);
-  pt.step++;
-  if (pt.flags.thrown && pt.step < 3) pt.step = 3;
-  if (pt.step >= PARTY.length) endParty();
+  if (opt.check && S.me.lastRoll.crit > 0) { me0().standing += .5; t += ' A moment people will retell.'; }
+  pt.log = (pt.log || []).concat([{ title: scene.title, choice: opt.label, ok: opt.check ? ok : null, roll: opt.check ? S.me.lastRoll : null, t }]);
+  if (pt.step === 'done') endParty();
   return true;
 }
+function learnTaste() { const me = me0(); me.mind.tas = clamp(me.mind.tas + .5, 1, 20); }
 function endParty() {
   const M = S.me, pt = M.party;
   M.energy = clamp(100 - pt.drinks * 14, 25, 100);
@@ -236,7 +396,6 @@ function endParty() {
   }
   pt.done = true;
   inbox('note', 'New Year’s Day', `You wake up ${pt.drinks >= 4 ? 'at noon with a pounding head' : pt.drinks >= 2 ? 'a little slow' : 'clear-headed'}. ${Object.keys(M.known).length} names in your phone${pt.forgot != null ? ', and one you can’t place at all' : ''}. ${pt.leads.length ? `${pt.leads.length === 1 ? 'One person' : pt.leads.length + ' people'} said to get in touch: worth following up while they remember you.` : 'Nobody promised you anything. That is normal.'} Plan your first week below.`);
-  for (const id of pt.leads) M.refs[id] = Math.max(M.refs[id] || 0, 1);
   refreshBoard();
 }
 
@@ -351,6 +510,9 @@ function hireFactors(post) {
   }
   if (M.quirk === 'parent' && post.film !== null) F.push(['Your family name', .45]);
   if (M.wealth === 'trust') F.push(['Seen as a dabbler', -.25]);
+  if (M.quirk === 'record' && post.film !== null && S.films[post.film].tier === 1) F.push(['Studio background check', -.8]);
+  if (M.quirk === 'viral') F.push(['Internet fame', t.actor ? .4 : -.15]);
+  if (M.degrees.length && post.tier === 2) F.push(['Your degree', .25]);
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   return F;
@@ -433,7 +595,9 @@ function endWeek(a) {
     me.lastWork = S.week;
     const head = j.head !== null ? P(j.head) : null;
     const teach = head ? clamp(1 + (avg(t.subs.map(s => head.sk[s] ?? head.mind[s] ?? 10)) - subScore(t)) / 14, .7, 1.7) : 1;
-    for (const s of t.subs) gain(s, .04 * days / 5 * teach * (j.shadow ? 1.8 : 1));
+    const fg = j.film !== null ? S.films[j.film].genre : null, loved = fg && S.me.love.includes(fg), hated = fg && S.me.hate.includes(fg);
+    if (loved) stress -= 2; if (hated) stress += 3;
+    for (const s of t.subs) gain(s, .04 * days / 5 * teach * (j.shadow ? 1.8 : 1) * (loved ? 1.15 : hated ? .9 : 1));
     j.shadow = 0;
     if (head) { meet(head.id, null); addTie(me, head, 1.5 + (me.mind.col - 10) * .15 + traitSum(me, 'tie') * .2); }
     for (const id of j.mates || []) addTie(me, P(id), .8);
@@ -454,19 +618,19 @@ function endWeek(a) {
   // a rival in the same line of work sometimes gets there first
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
   if (rival !== undefined && noes.length && prnd() < .2) { const p = ppick(noes); addTie(me, P(rival), -3); inbox('note', `${P(rival).name} again`, `You hear who got the ${p.t.toLowerCase()} job you wanted${p.film !== null ? ' on ' + S.films[p.film].title : ''}: ${P(rival).name}.`, { person: rival }); stress += 3; }
-  if (noes.length) { stress += 2 * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
+  if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   // living
   const life = ORIGIN.life[M.life];
-  cashOut += usd(life.rent);
+  cashOut += Math.round(usd(life.rent) * traitMul(me, 'living')) + M.upkeep;
   if (M.debt > 0) { const p = Math.min(M.debt, M.debtPay); M.debt -= p; cashOut += p; }
   if (M.shark > 0) M.shark = Math.round(M.shark * 1.01);
   cashIn += M.allowance;
   M.cash += cashIn - cashOut;
   if (M.cash < 0) { M.broke++; stress += 6; } else M.broke = 0;
-  energy += 28 + (M.body.stamina - 10) * 1.5 + life.rest;
+  energy += 28 + (M.body.stamina - 10) * 1.5 + life.rest + traitSum(me, 'energy');
   stress += life.stress - 3 + (energy < 0 ? 8 : 0);
   M.energy = clamp(energy, 0, 100);
-  M.stress = clamp(M.stress + stress * (has(me, 'Volatile') ? 1.2 : 1) * (1.1 - me.mind.com / 40), 0, 100);
+  M.stress = clamp(M.stress + stress * (stress > 0 ? traitMul(me, 'stress') * (has(me, 'Volatile') ? 1.2 : 1) : 1) * (1.1 - me.mind.com / 40), 0, 100);
   recalc(me);
   const gl = Object.entries(gains).filter(([, v]) => v >= .04).sort((x, y) => y[1] - x[1]).slice(0, 3);
   L.unshift(`Money: ${fmtCash(cashIn)} in, ${fmtCash(cashOut)} out.${gl.length ? ' You got better at ' + gl.map(([k]) => (CRAFTS[SUB2C[k]] ? CRAFTS[SUB2C[k]].subs[k] : MINDS[k]).toLowerCase()).join(', ') + '.' : ''}`);
@@ -514,7 +678,7 @@ function networkDay(L) {
   const M = S.me, me = ME();
   const ok = roll('cha', 11);
   const roles = ROLES.filter(r => S.pool[M.hub][r].length);
-  const n = ok ? 2 : 1;
+  const n = (ok ? 2 : 1) + traitSum(me, 'net');
   const names = [];
   for (let i = 0; i < n; i++) {
     const r = ppick(roles);
@@ -685,7 +849,10 @@ function sceneResolve(it, k) {
   if (fx.risk && prnd() < fx.risk) { M.energy = Math.max(0, M.energy - 25); M.stress = clamp(M.stress + 8, 0, 100); t += ' It comes back to bite you: a rough few days.'; }
   if (fx.fire && job && prnd() < fx.fire) { finishJob(job, null, true); t += ' You are let go.'; me.standing = Math.max(0, me.standing - 1); }
   recalc(me);
-  it.result = { ok: o.check ? ok : null, t };
+  const lr = o.check ? S.me.lastRoll : null;
+  if (lr && lr.crit > 0) { me.standing = clamp(me.standing + .5, 0, 100); if (ctx.head !== null && ctx.head !== undefined) addTie(me, P(ctx.head), 3); t += ' People will talk about it.'; }
+  if (lr && lr.crit < 0) { M.stress = clamp(M.stress + 5, 0, 100); t += ' It could hardly have gone worse.'; }
+  it.result = { ok: o.check ? ok : null, roll: lr, t };
 }
 
 function resolvePick(it, k) {
@@ -710,7 +877,7 @@ function resolvePick(it, k) {
   } else if (it.kind === 'secret') {
     const who = it.person;
     if (k === 'pay') { M.cash -= usd(1500); M.known[who].tags.push('Knows your secret'); it.result = { t: 'They take the money. You will always wonder if it was enough.' }; }
-    else { const ok = roll(c.check[0], c.check[1]); if (ok) { addTie(me, P(who), k === 'confide' ? 10 : 0); M.known[who].tags.push(k === 'confide' ? 'Keeps your secret' : 'Believed your denial'); it.result = { ok, t: k === 'confide' ? 'They listen, and they keep it. A strange kind of bond.' : 'They seem to believe you.' }; } else { me.standing = Math.max(0, me.standing - 4); me.fame = clamp(me.fame + 2, 0, 100); addTie(me, P(who), -15); it.result = { ok, t: 'It gets out anyway. For a few weeks people look at you differently.' }; } }
+    else { const ok = roll(c.check[0], c.check[1]); if (ok) { addTie(me, P(who), k === 'confide' ? 10 : 0); M.known[who].tags.push(k === 'confide' ? 'Keeps your secret' : 'Believed your denial'); it.result = { ok, roll: S.me.lastRoll, t: k === 'confide' ? 'They listen, and they keep it. A strange kind of bond.' : 'They seem to believe you.' }; } else { me.standing = Math.max(0, me.standing - 4); me.fame = clamp(me.fame + 2, 0, 100); addTie(me, P(who), -15); it.result = { ok, roll: S.me.lastRoll, t: 'It gets out anyway. For a few weeks people look at you differently.' }; } }
   }
   it.done = true; it.picked = k;
   return true;
@@ -735,6 +902,7 @@ function applyAct(a) {
     case 'end': if (pending().length || !S.me.party.done || S.me.over) return false; endWeek(a); return true;
     case 'quit': { const j = S.me.jobs.find(x => x.id === a.id); if (!j) return false; if (j.head !== null) addTie(ME(), P(j.head), -6); finishJob(j, null, true); refreshBoard(); return true; }
     case 'life': if (!ORIGIN.life[a.v]) return false; S.me.life = a.v; return true;
+    case 'look': if (!LOOK[a.k] || !(a.v >= 0 && a.v < LOOK[a.k].opts.length)) return false; S.me.look[a.k] = a.v; return true;
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
   }
   return false;

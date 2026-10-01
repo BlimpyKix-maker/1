@@ -1,0 +1,103 @@
+// ---------------- Portraits ----------------
+// A drawn face for every person. The player builds theirs; everyone else's is generated from their id, era and
+// hub. Faces age: hair greys from the mid-forties, lines arrive, some hairlines retreat. Style can change any time.
+const LOOK = {
+  skin: { label: 'Skin', opts: ['#F6D7C3', '#EFC3A4', '#E2AE8A', '#D19A72', '#BC8459', '#A26D45', '#8A5A37', '#714629', '#57351E', '#3E2614'] },
+  face: { label: 'Face', opts: ['Oval', 'Round', 'Square', 'Long', 'Heart', 'Diamond', 'Soft', 'Angular', 'Wide', 'Narrow'] },
+  build: { label: 'Body', opts: ['Slim', 'Lean', 'Average', 'Sturdy', 'Broad', 'Heavy', 'Petite', 'Tall and thin', 'Muscular', 'Curvy'] },
+  hair: { label: 'Hair', opts: ['Shaved', 'Buzz cut', 'Short', 'Side part', 'Quiff', 'Curly', 'Afro', 'Bob', 'Long', 'Locs'] },
+  hairColor: { label: 'Hair colour', opts: ['#16110D', '#3A2618', '#5C3A21', '#8A5A2B', '#A0522D', '#C48A4A', '#E3C27A', '#B9B5AE', '#4566B0', '#C2577F'] },
+  eyes: { label: 'Eyes', opts: ['#3B2716', '#5A3B1E', '#6E5A2E', '#4E6B3A', '#3F6E7A', '#5579A8', '#7A8A99', '#2F2A26', '#8B6B3D', '#6B4E7A'] },
+  facial: { label: 'Facial hair', opts: ['None', 'Stubble', 'Moustache', 'Goatee', 'Short beard', 'Full beard', 'Sideburns', 'Chin strap', 'Handlebar', 'Soul patch'] },
+  glasses: { label: 'Glasses', opts: ['None', 'Round', 'Square', 'Thick frames', 'Wire rims', 'Cat-eye', 'Aviators', 'Sunglasses', 'Half-moons', 'Tinted'] },
+  outfit: { label: 'Clothes', opts: ['T-shirt', 'Hoodie', 'Flannel', 'Denim jacket', 'Leather jacket', 'Turtleneck', 'Sweater', 'Dress shirt', 'Blazer', 'Suit and tie'] },
+  colour: { label: 'Clothes colour', opts: ['#1E2A38', '#3B3B3B', '#7A2E2E', '#2E5A3A', '#2C4F7C', '#8C6A2E', '#5B3A6E', '#B5B0A6', '#C8553D', '#E8E4DA'] },
+  extra: { label: 'Accessory', opts: ['None', 'Earrings', 'Cap', 'Beanie', 'Scarf', 'Headphones', 'Nose ring', 'Bandana', 'Necklace', 'Hat'] },
+  hairline: { label: 'Hairline with age', opts: ['Keeps it', 'Recedes'] }
+};
+const LOOK_KEYS = Object.keys(LOOK);
+function defaultLook() { return { skin: 3, face: 0, build: 2, hair: 2, hairColor: 2, eyes: 1, facial: 0, glasses: 0, outfit: 0, colour: 0, extra: 0, hairline: 0 }; }
+// Region-weighted skin tones, kept broad: every hub draws from the whole range.
+const SKIN_BIAS = { 'North America': 3.5, Europe: 1.5, 'East Asia': 2, 'South Asia': 5, 'Southeast Asia': 4.5, Africa: 7.5, 'South America': 4, Oceania: 2.5, 'Middle East': 4 };
+function hashRand(seed) { let a = (seed * 2654435761) >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function npcLook(p) {
+  const r = hashRand(p.id * 7 + 3), pk = n => Math.floor(r() * n), y = p.born + 30;
+  const region = HUBS[p.hub] ? HUBS[p.hub].region : 'Europe';
+  const skin = clamp(Math.round((SKIN_BIAS[region] ?? 3) + (r() + r() + r() - 1.5) * 3), 0, 9);
+  const F = p.g === 'F';
+  const hair = F ? [2, 3, 5, 6, 7, 8, 8, 9][pk(8)] : [0, 1, 2, 2, 3, 4, 5, 6, 8, 9][pk(10)];
+  const dark = skin >= 5 || ['East Asia', 'South Asia', 'Southeast Asia', 'Africa', 'Middle East'].includes(region);
+  const hairColor = dark ? [0, 0, 1, 1, 2][pk(5)] : [0, 1, 2, 2, 3, 4, 5, 6][pk(8)];
+  const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
+  return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), extra: r() < .2 ? 1 + pk(9) : 0, hairline: !F && r() < .45 ? 1 : 0 };
+}
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), S.me.look) : npcLook(p); }
+function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
+function portraitSVG(L, age, size = 96) {
+  L = Object.assign(defaultLook(), L);
+  const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#000000', .18), line = mixHex(skin, '#000000', .38);
+  const grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
+  const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
+  const jaw = [0, 4, -3, 0, 6, 3, 4, -4, 0, 1][L.face];
+  const bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build], neck = 9 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build];
+  const recede = L.hairline === 1 ? clamp((age - 32) / 30, 0, 1) : 0;
+  const cx = 60, cy = 52, top = cy - fh / 2;
+  const o = [];
+  o.push(`<rect width="120" height="120" rx="10" fill="var(--accent-soft)"/>`);
+  // hair behind the head
+  if ([7, 8, 9].includes(L.hair)) o.push(`<path d="M${cx - fw / 2 - 4} ${cy - 8} Q${cx - fw / 2 - 8} ${cy + 30} ${cx - fw / 2 + (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} L${cx + fw / 2 - (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} Q${cx + fw / 2 + 8} ${cy + 30} ${cx + fw / 2 + 4} ${cy - 8} Z" fill="${hc}"/>`);
+  if (L.hair === 6) o.push(`<circle cx="${cx}" cy="${top + 10}" r="${fw / 2 + 12}" fill="${hc}"/>`);
+  // body and clothes
+  o.push(`<path d="M${cx - bw} 120 Q${cx - bw} 88 ${cx - neck - 8} 84 L${cx + neck + 8} 84 Q${cx + bw} 88 ${cx + bw} 120 Z" fill="${cloth}"/>`);
+  o.push(`<rect x="${cx - neck}" y="${cy + fh / 2 - 6}" width="${neck * 2}" height="${16}" fill="${shade}"/>`);
+  const collar = { 1: `<path d="M${cx - 16} 86 Q${cx} 100 ${cx + 16} 86" fill="none" stroke="${mixHex(cloth, '#000', .3)}" stroke-width="3"/>`, 2: `<path d="M${cx - 30} 100 L${cx + 30} 100 M${cx - 34} 110 L${cx + 34} 110" stroke="${mixHex(cloth, '#fff', .25)}" stroke-width="2"/>`, 3: `<path d="M${cx - 12} 85 L${cx} 98 L${cx + 12} 85" fill="none" stroke="${mixHex(cloth, '#fff', .3)}" stroke-width="2"/>`, 4: `<path d="M${cx - 14} 85 L${cx - 2} 110 M${cx + 14} 85 L${cx + 2} 110" stroke="${mixHex(cloth, '#000', .4)}" stroke-width="3"/>`, 5: `<rect x="${cx - neck - 3}" y="80" width="${neck * 2 + 6}" height="9" rx="3" fill="${cloth}"/>`, 7: `<path d="M${cx - 10} 85 L${cx} 95 L${cx + 10} 85" fill="#F1EEE8"/>`, 8: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 14} 86 L${cx - 4} 112 M${cx + 14} 86 L${cx + 4} 112" stroke="${mixHex(cloth, '#000', .35)}" stroke-width="3"/>`, 9: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 3} 92 L${cx + 3} 92 L${cx + 4} 112 L${cx} 116 L${cx - 4} 112 Z" fill="#8C2E2E"/>` }[L.outfit];
+  if (collar) o.push(collar);
+  if (L.extra === 4) o.push(`<path d="M${cx - 20} 84 Q${cx} 96 ${cx + 20} 84 L${cx + 18} 92 Q${cx} 104 ${cx - 18} 92 Z" fill="#B8533A"/>`);
+  if (L.extra === 8) o.push(`<path d="M${cx - 10} 87 Q${cx} 97 ${cx + 10} 87" fill="none" stroke="#C9A646" stroke-width="1.5"/>`);
+  // head
+  o.push(`<ellipse cx="${cx - fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/><ellipse cx="${cx + fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/>`);
+  o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="${skin}"/>`);
+  if (L.extra === 1) o.push(`<circle cx="${cx - fw / 2 - 1}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/><circle cx="${cx + fw / 2 + 1}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/>`);
+  // eyes, brows, nose, mouth
+  const ey = cy - 1, ex = fw * .2, ec = LOOK.eyes.opts[L.eyes];
+  o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><circle cx="${cx - ex}" cy="${ey}" r="1.7" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey}" r="1.7" fill="${ec}"/>`);
+  o.push(`<path d="M${cx - ex - 4} ${ey - 5} Q${cx - ex} ${ey - 7} ${cx - ex + 4} ${ey - 5} M${cx + ex - 4} ${ey - 5} Q${cx + ex} ${ey - 7} ${cx + ex + 4} ${ey - 5}" stroke="${mixHex(hc, '#000', .2)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
+  o.push(`<path d="M${cx} ${ey + 2} Q${cx - 2.5} ${ey + 9} ${cx + 1} ${ey + 10}" stroke="${line}" stroke-width="1.2" fill="none"/>`);
+  o.push(`<path d="M${cx - 6} ${ey + 15} Q${cx} ${ey + 18} ${cx + 6} ${ey + 15}" stroke="${mixHex(skin, '#7A2F2F', .55)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
+  if (L.extra === 6) o.push(`<circle cx="${cx + 3}" cy="${ey + 10}" r="1.4" fill="none" stroke="#C0C0C0" stroke-width="1"/>`);
+  // age lines
+  if (age >= 40) o.push(`<path d="M${cx - ex - 6} ${ey + 1} l-2 1.5 M${cx + ex + 6} ${ey + 1} l2 1.5" stroke="${line}" stroke-width=".8"/>`);
+  if (age >= 52) o.push(`<path d="M${cx - 8} ${top + 9} Q${cx} ${top + 7} ${cx + 8} ${top + 9} M${cx - 9} ${ey + 11} q-2 4 0 6 M${cx + 9} ${ey + 11} q2 4 0 6" stroke="${line}" stroke-width=".8" fill="none"/>`);
+  // facial hair
+  const fh2 = mixHex(hc, '#000', .05);
+  const beard = { 1: `<path d="M${cx - fw / 2 + 3} ${cy + 8} Q${cx} ${cy + fh / 2 + 3} ${cx + fw / 2 - 3} ${cy + 8}" stroke="${fh2}" stroke-width="5" opacity=".3" fill="none"/>`, 2: `<path d="M${cx - 8} ${ey + 13} Q${cx} ${ey + 10} ${cx + 8} ${ey + 13}" stroke="${fh2}" stroke-width="3" fill="none" stroke-linecap="round"/>`, 3: `<path d="M${cx - 6} ${ey + 13} Q${cx} ${ey + 11} ${cx + 6} ${ey + 13} M${cx - 4} ${ey + 19} Q${cx} ${ey + 26} ${cx + 4} ${ey + 19}" stroke="${fh2}" stroke-width="3" fill="none"/>`, 4: `<path d="M${cx - fw / 2 + 2} ${cy + 6} Q${cx - fw / 2 + 4} ${cy + fh / 2 + 2} ${cx} ${cy + fh / 2 + 3} Q${cx + fw / 2 - 4} ${cy + fh / 2 + 2} ${cx + fw / 2 - 2} ${cy + 6} Q${cx} ${cy + 24} ${cx - fw / 2 + 2} ${cy + 6} Z" fill="${fh2}" opacity=".85"/>`, 5: `<path d="M${cx - fw / 2} ${cy + 2} Q${cx - fw / 2} ${cy + fh / 2 + 10} ${cx} ${cy + fh / 2 + 12} Q${cx + fw / 2} ${cy + fh / 2 + 10} ${cx + fw / 2} ${cy + 2} Q${cx} ${cy + 22} ${cx - fw / 2} ${cy + 2} Z" fill="${fh2}"/>`, 6: `<path d="M${cx - fw / 2 + 1} ${cy - 4} L${cx - fw / 2 + 2} ${cy + 12} M${cx + fw / 2 - 1} ${cy - 4} L${cx + fw / 2 - 2} ${cy + 12}" stroke="${fh2}" stroke-width="4"/>`, 7: `<path d="M${cx - fw / 2 + 1} ${cy + 2} Q${cx} ${cy + fh / 2 + 6} ${cx + fw / 2 - 1} ${cy + 2}" stroke="${fh2}" stroke-width="3" fill="none"/>`, 8: `<path d="M${cx - 10} ${ey + 18} Q${cx - 9} ${ey + 11} ${cx} ${ey + 12} Q${cx + 9} ${ey + 11} ${cx + 10} ${ey + 18}" stroke="${fh2}" stroke-width="2.6" fill="none"/>`, 9: `<path d="M${cx - 1.5} ${ey + 19} l3 0 l-1.5 4 z" fill="${fh2}"/>` }[L.facial];
+  if (beard) o.push(beard);
+  // hair on top
+  const hairTop = top - 3 + recede * 10;
+  const hairs = {
+    1: `<path d="M${cx - fw / 2 + 1} ${cy - 6} Q${cx - fw / 2} ${hairTop} ${cx} ${hairTop} Q${cx + fw / 2} ${hairTop} ${cx + fw / 2 - 1} ${cy - 6} Q${cx} ${hairTop + 5} ${cx - fw / 2 + 1} ${cy - 6} Z" fill="${hc}" opacity=".55"/>`,
+    2: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx + 8} ${hairTop + 6} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/>`,
+    3: `<path d="M${cx - fw / 2 - 1} ${cy - 2} Q${cx - fw / 2 - 3} ${hairTop - 4} ${cx - 2} ${hairTop - 4} Q${cx + fw / 2 + 3} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 3} Q${cx + fw / 2 - 4} ${hairTop + 5} ${cx - 6} ${hairTop + 6} Q${cx - fw / 2 + 2} ${hairTop + 9} ${cx - fw / 2 - 1} ${cy - 2} Z" fill="${hc}"/>`,
+    4: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2} ${hairTop - 10} ${cx + 4} ${hairTop - 12} Q${cx + fw / 2 + 4} ${hairTop - 6} ${cx + fw / 2 + 1} ${cy - 4} Q${cx} ${hairTop + 4} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/>`,
+    5: Array.from({ length: 9 }, (_, i) => `<circle cx="${cx - fw / 2 + 2 + i * (fw - 4) / 8}" cy="${hairTop + (i % 2) * 3}" r="6" fill="${hc}"/>`).join(''),
+    6: '',
+    7: `<path d="M${cx - fw / 2 - 3} ${cy + 6} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy + 6} Q${cx + fw / 2 - 2} ${hairTop + 6} ${cx} ${hairTop + 8} Q${cx - fw / 2 + 2} ${hairTop + 6} ${cx - fw / 2 - 3} ${cy + 6} Z" fill="${hc}"/>`,
+    8: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>`,
+    9: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-12, -4, 4, 12].map(d => `<path d="M${cx + d} ${hairTop} L${cx + d * 1.6} ${cy + 34}" stroke="${hc}" stroke-width="5" stroke-linecap="round"/>`).join('')
+  };
+  if (hairs[L.hair]) o.push(hairs[L.hair]);
+  // headwear
+  if (L.extra === 2) o.push(`<path d="M${cx - fw / 2 - 2} ${top + 8} Q${cx} ${top - 14} ${cx + fw / 2 + 2} ${top + 8} Z" fill="${cloth}"/><rect x="${cx}" y="${top + 4}" width="${fw / 2 + 12}" height="5" rx="2" fill="${mixHex(cloth, '#000', .3)}"/>`);
+  if (L.extra === 3) o.push(`<path d="M${cx - fw / 2 - 2} ${top + 10} Q${cx} ${top - 18} ${cx + fw / 2 + 2} ${top + 10} Z" fill="${mixHex(cloth, '#fff', .15)}"/><rect x="${cx - fw / 2 - 3}" y="${top + 6}" width="${fw + 6}" height="6" rx="3" fill="${mixHex(cloth, '#000', .2)}"/>`);
+  if (L.extra === 5) o.push(`<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 2} ${top - 6} ${cx} ${top - 6} Q${cx + fw / 2 + 2} ${top - 6} ${cx + fw / 2 + 3} ${cy}" stroke="#2B2B2B" stroke-width="3" fill="none"/><rect x="${cx - fw / 2 - 7}" y="${cy - 5}" width="7" height="12" rx="3" fill="#2B2B2B"/><rect x="${cx + fw / 2}" y="${cy - 5}" width="7" height="12" rx="3" fill="#2B2B2B"/>`);
+  if (L.extra === 7) o.push(`<path d="M${cx - fw / 2 - 2} ${top + 9} Q${cx} ${top - 6} ${cx + fw / 2 + 2} ${top + 9} L${cx + fw / 2} ${top + 13} Q${cx} ${top + 2} ${cx - fw / 2} ${top + 13} Z" fill="#9C2B2B"/>`);
+  if (L.extra === 9) o.push(`<ellipse cx="${cx}" cy="${top + 6}" rx="${fw / 2 + 10}" ry="4" fill="${mixHex(cloth, '#000', .25)}"/><path d="M${cx - fw / 2 + 1} ${top + 6} Q${cx} ${top - 16} ${cx + fw / 2 - 1} ${top + 6} Z" fill="${mixHex(cloth, '#000', .25)}"/>`);
+  // glasses
+  if (L.glasses) {
+    const g = L.glasses, gc = g === 4 ? '#B9A06A' : g === 7 || g === 9 ? '#222' : '#2A2A2A', fill = g === 7 ? '#1D1D1D' : g === 9 ? 'rgba(80,60,120,.35)' : 'none';
+    const lens = g === 1 || g === 8 ? (x => `<circle cx="${x}" cy="${ey}" r="5" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : g === 5 ? (x => `<path d="M${x - 6} ${ey - 2} L${x + 6} ${ey - 4} L${x + 5} ${ey + 3} L${x - 5} ${ey + 3} Z" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : g === 6 ? (x => `<path d="M${x - 6} ${ey - 3} L${x + 6} ${ey - 3} L${x + 5} ${ey + 4} Q${x} ${ey + 7} ${x - 5} ${ey + 4} Z" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : (x => `<rect x="${x - 6}" y="${ey - 4}" width="12" height="${g === 8 ? 5 : 8}" rx="${g === 3 ? 1 : 2}" fill="${fill}" stroke="${gc}" stroke-width="${g === 3 ? 2.4 : 1.4}"/>`);
+    o.push(lens(cx - ex) + lens(cx + ex) + `<path d="M${cx - ex + 5} ${ey - 1} L${cx + ex - 5} ${ey - 1}" stroke="${gc}" stroke-width="1.3"/>`);
+  }
+  return `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
+}
+function portraitOf(p, size) { return portraitSVG(lookOf(p), (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born, size); }

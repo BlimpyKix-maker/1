@@ -18,14 +18,20 @@ const out = process.argv[2] || '.';
   await page.waitForSelector('.cc', { timeout: 120000 });
   await page.screenshot({ path: out + '/1-creator.png', fullPage: true });
   await page.fill('#cc-name', 'Sam Tester');
-  await page.click('[data-cc="edu"][data-v="film"]');
+  await page.click('[data-cc="edu"][data-v="filmcam"]');
+  await page.click('[data-cc="love"][data-v="Horror"]');
+  await page.click('[data-cc="hate"][data-v="Musical"]');
+  await page.click('[data-cc="randfav"]');
+  await page.click('[data-look="skin:6"]');
+  await page.selectOption('[data-lookk="hair"]', '6');
+  await page.selectOption('[data-lookk="glasses"]', '1');
   await page.click('[data-cc="quirk"][data-v="rival"]');
   for (let i = 0; i < 4; i++) await page.click('[data-cc="pt"][data-v="cam:1"]');
   await page.click('[data-cc="trait"][data-v="Charming"]');
   await page.click('[data-cc="go"]');
   await page.waitForSelector('[data-party]');
   await page.screenshot({ path: out + '/2-party.png', fullPage: true });
-  for (let i = 0; i < 5; i++) { await page.click('[data-party] >> nth=0'); }
+  for (let i = 0; i < 12; i++) { const b = await page.$('[data-party]'); if (!b) break; await b.click(); if (i === 2) await page.screenshot({ path: out + '/2b-rooms.png', fullPage: true }); }
   await page.waitForSelector('.desk');
   await page.screenshot({ path: out + '/3-desk.png', fullPage: true });
   // plan: two hunting days, apply to the first two jobs
