@@ -34,9 +34,14 @@ function newScript(a) {
   const M = S.me;
   if ((M.scripts || []).filter(x => x.stage === 'writing').length >= 2) return false;
   const g = GENRES.includes(a.genre) ? a.genre : ppick(M.love.length ? M.love : GENRES), th = THEMES[a.theme] ? a.theme : ppick(GENRE_THEMES[g] || THEME_KEYS), tone = TONES[a.tone] ? a.tone : 'bittersweet';
-  const title = (a.title || '').trim().slice(0, 60) || ppick(SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama);
-  const log = `${ppick(WHO).replace(/^./, c => c.toUpperCase())} ${WANTS[th]}.`;
-  const sc = { id: M.seq++, title, genre: g, theme: th, tone, logline: log, pages: 0, target: g === 'Comedy' || g === 'Horror' ? 95 : g === 'Period' || g === 'War' ? 125 : 110, draft: 1, q: 0, sessions: 0, stage: 'writing', started: S.week, grade: null, shared: [] };
+  const used = new Set((M.scripts || []).map(x => x.title)), pool = (SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama).filter(t => !used.has(t));
+  const title = (a.title || '').trim().slice(0, 60) || (pool.length ? ppick(pool) : ppick(SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama) + ' ' + ((M.scripts || []).length + 1));
+  const clip = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
+  const premise = clip(a.premise, 400), hero = clip(a.hero, 120), setting = clip(a.setting, 120), notes = String(a.notes || '').trim().slice(0, 6000);
+  const log = premise || `${hero ? hero.replace(/^./, c => c.toUpperCase()) : ppick(WHO).replace(/^./, c => c.toUpperCase())} ${WANTS[th]}${setting ? ', ' + setting : ''}.`;
+  // preparation pays: a premise, a hero, a world and pages of notes all lift the writing a little
+  const prep = Math.min(4, (premise ? 1 : 0) + (hero ? .5 : 0) + (setting ? .5 : 0) + notes.length / 600);
+  const sc = { id: M.seq++, title, genre: g, theme: th, tone, logline: log, premise, hero, setting, notes, prep, pages: 0, target: g === 'Comedy' || g === 'Horror' ? 95 : g === 'Period' || g === 'War' ? 125 : 110, draft: 1, q: 0, sessions: 0, stage: 'writing', started: S.week, grade: null, shared: [] };
   (M.scripts = M.scripts || []).push(sc);
   M.activeScript = sc.id;
   diary(`You start a new script: ${title} (${g.toLowerCase()}). ${log}`);
@@ -46,15 +51,15 @@ function activeScript() { const M = S.me; return (M.scripts || []).find(x => x.i
 function writeOnScript(L, scale = 1) {
   const M = S.me, me = ME(), sc = activeScript();
   if (!sc) { L.push('You sit down to write but there\'s no project. Start a script on your writing desk.'); return; }
-  const pages = Math.max(1, Math.round((3 + me.mind.eth / 4 + prnd() * 3 + homeFx().pages) * scale * condMul()));
+  const W = writerStyle(), pages = Math.max(1, Math.round((3 + me.mind.eth / 4 + prnd() * 3 + homeFx().pages) * scale * condMul() * W.pages));
   const act = sc.pages < sc.target * .25 ? 0 : sc.pages < sc.target * .75 ? 1 : 2;
   sc.pages = Math.min(sc.target, sc.pages + pages); sc.sessions++;
   // each session adds craft: your writing skills, how you feel, and whether the subject is close to your heart
   const skill = avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k]));
   const heart = (M.love.includes(sc.genre) ? 1 : 0) + (topThemes(voiceOf()).includes(sc.theme) ? 1 : 0) - ((M.hate || []).includes(sc.genre) ? 1.5 : 0);
-  sc.q += (skill + heart * 1.5 + (condMul() - 1) * 6 + (prnd() - .5) * 4) * pages;
+  sc.q += (skill + heart * 1.5 + (condMul() - 1) * 6 + (prnd() - .5) * 4 * W.swing + W.q + (sc.prep || 0) * .5 + (me.mind.vis - 10) * .08) * pages;
   for (const k of ['struc', 'dial', 'char', 'orig']) weekGain(k, .012 * scale);
-  L.push(`${pages} pages of ${sc.title}: ${ppick(BEATS[act])}.`);
+  L.push(`${pages} pages of ${sc.title}: ${ppick(BEATS[act])}.${W.lines.length && prnd() < .5 ? ' ' + ppick(W.lines) : ''}`);
   if (sc.pages >= sc.target) finishDraft(sc, L);
   else if (prnd() < .12) writingEvent(sc);
 }
@@ -65,9 +70,45 @@ function finishDraft(sc, L) {
   sc.stage = 'done'; M.spec.drafts++; (sc.history = sc.history || []).push(sc.grade + ' ' + score);
   const v = voiceOf(); v[sc.theme] = (v[sc.theme] || 0) + 3; v[(GENRE_THEMES[sc.genre] || [])[0]] = (v[(GENRE_THEMES[sc.genre] || [])[0]] || 0) + 1;
   me.standing = clamp(me.standing + (score >= 70 ? .6 : .2), 0, 100);
+  // finishing teaches: every draft makes you a better writer, a good one more so
+  for (const k of ['struc', 'dial', 'char', 'orig']) growSub(me, k, .08 + score / 1000);
+  me.mind.tas = clamp(me.mind.tas + .1, 1, 20);
+  M.stress = clamp(M.stress - 4, 0, 100);
+  const n = (M.scripts || []).filter(x => x.grade).length;
+  if (n === 1 && sc.draft === 1) milestone('Your first finished script', 'write');
+  if (n === 3 && sc.draft === 1) milestone('Three scripts in the drawer: a portfolio', 'write');
   milestone(`Finished draft ${sc.draft} of ${sc.title} (${sc.grade})`, 'write');
   L.push(`You type FADE OUT on draft ${sc.draft} of ${sc.title}. Reading it back, you'd give it a ${sc.grade}.`);
   inbox('note', `Draft finished: ${sc.title}`, `${sc.logline} Draft ${sc.draft}, ${sc.target} pages. Your own verdict: ${sc.grade} (${score}/100). Rewrite it, show it to people you trust, or send it to a contest.`);
+}
+// How you write, from who you are. Pages and quality per session, how wild the swings, and what it feels like.
+const WRITER_TRAITS = {
+  Perfectionist: { pages: .75, q: 1.2, line: 'You rewrite one line eleven times. It is now perfect.' },
+  Visionary: { swing: 2, q: .6, line: 'An image arrives fully formed and you build a scene around it.' },
+  Auteur: { q: .8, line: 'You ignore every rule you were taught, on purpose.' },
+  Commercial: { pages: 1.1, line: 'You can feel where the audience will laugh.' },
+  Workhorse: { pages: 1.3, line: 'You don\'t wait for inspiration. You clock in.' },
+  Disciplined: { pages: 1.15, swing: .7, line: 'Same desk, same hour, same word count.' },
+  Lazy: { pages: .7, line: 'You reorganise your desk instead. Then you write a little.' },
+  Anxious: { swing: 1.4, q: -.3, line: 'You delete more than you keep.' },
+  Calm: { swing: .7, line: 'The pages come steadily, without drama.' },
+  Witty: { q: .5, line: 'The dialogue crackles. You laugh at your own joke.' },
+  Shy: { q: .3, line: 'On the page you say everything you never say out loud.' },
+  Curious: { q: .4, line: 'You fall down a research hole and come back with a better scene.' },
+  Cynical: { q: .2, line: 'Your villain makes some very good points.' },
+  Optimist: { line: 'Even the dark scenes have a crack of light in them.' },
+  Reckless: { swing: 1.8, line: 'You blow up the second act to see what happens.' },
+  Cautious: { swing: .6, q: -.1, line: 'You outline everything first. It holds.' },
+  Stubborn: { q: .2, line: 'You refuse to cut the scene everyone would cut.' },
+  'Night owl': { pages: 1.1, line: 'Three a.m. and the words are finally flowing.' },
+  Method: { q: .4, line: 'You talk out loud as your characters until the neighbours knock.' },
+  Prodigy: { q: .8, line: 'It comes easily, almost too easily.' },
+  Ambitious: { pages: 1.1, line: 'You can already see the poster.' }
+};
+function writerStyle() {
+  const me = ME(), out = { pages: 1, q: 0, swing: 1, lines: [] };
+  for (const t of me.traits) { const W = WRITER_TRAITS[t]; if (!W) continue; out.pages *= W.pages || 1; out.q += W.q || 0; out.swing *= W.swing || 1; if (W.line) out.lines.push(W.line); }
+  return out;
 }
 // Writing has its moments too.
 const WRITE_SCENES = [

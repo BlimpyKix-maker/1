@@ -299,7 +299,8 @@ function writingDesk() {
   const row = sc => {
     const pct = Math.round(sc.pages / sc.target * 100);
     return `<div class="script"><div class="sh"><b>${esc(sc.title)}</b> <span class="muted">${esc(sc.genre)} · ${esc(THEMES[sc.theme])} · ${esc(TONES[sc.tone])} · draft ${sc.draft}</span>${sc.grade ? ` <span class="grade g${sc.grade}">${sc.grade}</span>` : ''}${sc.won ? ' ' + chip('Prize', 'good') : ''}</div>
-      <p class="muted">${esc(sc.logline)}</p>
+      <p class="muted">${esc(sc.logline)}</p>${sc.hero || sc.setting || sc.notes ? `<details class="scnotes"><summary>Your notes</summary>${sc.hero ? `<p><b>Hero:</b> ${esc(sc.hero)}</p>` : ''}${sc.setting ? `<p><b>World:</b> ${esc(sc.setting)}</p>` : ''}${sc.notes ? `<p class="notes">${esc(sc.notes)}</p>` : ''}</details>` : ''}
+      ${UI.sample && (sc.grade || sc.pages >= 10) ? `<p class="small"><button class="btn-s ghost" data-readpages="${sc.id}">📄 Read the pages</button> <span class="muted">Claude writes the opening as well, or as badly, as ${sc.grade ? 'your ' + sc.grade : 'this draft so far'} deserves.</span></p>` : ''}
       ${sc.stage === 'writing' ? `<div class="pbar"><i style="width:${pct}%"></i></div><p class="small">${sc.pages} of ${sc.target} pages${M.activeScript === sc.id ? ' · <b>writing this one</b>' : ` · <button class="linkish" data-activescript="${sc.id}">Write this one</button>`}</p>`
         : `<p class="small"><button class="btn-s ghost" data-rewrite="${sc.id}">Rewrite (draft ${sc.draft + 1})</button>
           <select data-share="${sc.id}"><option value="">Show it to…</option>${known.filter(id => !sc.shared.includes(id)).map(id => { const t = tasteOf(P(id)); return `<option value="${id}">${esc(P(id).name)}${t.genres.includes(sc.genre) ? ' ♥ ' + esc(sc.genre.toLowerCase()) : ''}</option>`; }).join('')}</select>
@@ -310,9 +311,13 @@ function writingDesk() {
     <div class="ns"><label>Title <input id="ns-title" value="${esc(f.title)}" placeholder="Leave blank for a working title"></label>
     <label>Genre ${sel('ns-genre', GENRES.map(g => [g, g + (M.love.includes(g) ? ' ♥' : (M.hate || []).includes(g) ? ' ✗' : '')]), f.genre)}</label>
     <label>Theme ${sel('ns-theme', THEME_KEYS.map(k => [k, THEMES[k] + (topThemes(voiceOf()).includes(k) ? ' ★' : '')]), f.theme)}</label>
-    <label>Tone ${sel('ns-tone', Object.entries(TONES), f.tone)}</label>
-    <button class="btn-s" data-newscript="1">Begin</button></div>
-    <p class="muted small">♥ genres you love write better; ✗ genres you hate write worse. ★ themes are already part of your voice. Plan writing days (or late-night writing) to make progress.</p></details>` : ''}</section>`;
+    <label>Tone ${sel('ns-tone', Object.entries(TONES), f.tone)}</label></div>
+    <div class="ns2"><label>Premise <span class="muted small">(one or two sentences: who wants what, and what's in the way)</span><textarea id="ns-premise" rows="2" maxlength="400" placeholder="A night-shift nurse discovers her hospital is quietly selling patients' memories…">${esc(f.premise || '')}</textarea></label>
+     <label>Your hero <input id="ns-hero" maxlength="120" value="${esc(f.hero || '')}" placeholder="an ageing magician with one trick left"></label>
+     <label>The world <input id="ns-setting" maxlength="120" value="${esc(f.setting || '')}" placeholder="a seaside town in the off-season"></label>
+     <label>Background and notes <span class="muted small">(as much as you like: characters, scenes you can see, the ending, why it matters to you)</span><textarea id="ns-notes" rows="5" maxlength="6000">${esc(f.notes || '')}</textarea></label>
+     <button class="btn-s" data-newscript="1">Begin</button></div>
+    <p class="muted small">♥ genres you love write better; ✗ genres you hate write worse. ★ themes are already part of your voice. Preparation helps: a premise, a hero, a world and real notes all lift the draft a little. How you write depends on who you are: ${esc(writerStyle().lines.slice(0, 2).join(' ') || 'your traits will shape the process.')} Plan writing blocks to make progress.</p></details>` : ''}</section>`;
 }
 // School and representation: the two longer roads.
 function pathsPanel() {
@@ -502,7 +507,8 @@ function careerClick(t) {
   if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; const a = { t: 'text', id: +T.id, kind: T.kind }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0 }; render(true); return true; }
-  if (t.dataset.newscript) { const f = UI.newScript; f.title = ($('#ns-title') || {}).value || ''; doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone }); UI.newScript = null; render(true); return true; }
+  if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
+  if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
   if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
   if (t.dataset.activescript) { doAct({ t: 'activescript', id: +t.dataset.activescript }); render(true); return true; }
@@ -513,7 +519,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -523,6 +529,7 @@ function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
   if (e.target.dataset.share && v) { doAct({ t: 'share', id: +e.target.dataset.share, to: +v }); render(true); return true; }
   if (/^ns-(genre|theme|tone)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
+  if (/^ns-(premise|hero|setting|notes)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
   if (id === 'ns-title') { UI.newScript.title = v; return true; }
   if (e.target.dataset.place) { doAct({ t: 'place', id: e.target.dataset.place, sp: v || null }); render(true); return true; }
   if (e.target.dataset.lookk) { setLook(e.target.dataset.lookk, +v); return true; }
@@ -572,3 +579,58 @@ if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
   if (pending().length) { const d = document.querySelector('.beat.decide'); if (d) d.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
   playStep('next');
 });
+
+// ---- Reading your pages ----
+// Claude writes the opening of your script at the quality the game says it has: an A reads like a professional
+// draft, an F like the earnest mess it is. It runs on the viewer's own Claude account (the page's `sample`
+// capability), is kept in this browser so a reread is free, and never touches the save or the simulation.
+const GRADE_VOICE = {
+  A: 'superb: precise, surprising and alive, with real subtext, specific images and dialogue nobody else would write. Professional, award-calibre work.',
+  B: 'strong and assured, with a distinct voice, but a few soft spots: a line or two that explains too much, one familiar beat.',
+  C: 'competent but conventional: clear and properly formatted, yet the dialogue is often on the nose and the beats are ones we have seen before.',
+  D: 'weak: clunky exposition, characters announcing their feelings, stock phrases, an uneven rhythm and a scene that goes on too long. Sincere, though, with one moment that almost works.',
+  F: 'bad: overwritten, melodramatic and cliché-ridden, with confused staging, wooden dialogue and formatting mistakes. The kind of amateur first draft that makes readers wince, but still recognisably trying.'
+};
+if (typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function') window.claude.use('sample').then(s => { UI.sample = s || null; if (s && typeof careerActive === 'function' && careerActive()) render(true); }).catch(() => { UI.sample = null; });
+function pagesPrompt(sc) {
+  const me = ME(), M = S.me, grade = sc.grade || (sc.pages >= 10 ? 'unfinished' : null);
+  const est = sc.grade ? sc.score : clamp(Math.round(38 + (sc.q / Math.max(1, sc.pages) - 6) * 5 + (sc.draft - 1) * 7), 5, 98);
+  const g = sc.grade || (est >= 85 ? 'A' : est >= 70 ? 'B' : est >= 55 ? 'C' : est >= 40 ? 'D' : 'F');
+  return `You are ghost-writing pages for a character in a film-industry life simulation game. Write the OPENING of their screenplay, about three pages (600 to 900 words), in standard screenplay format (scene headings, action, character cues, dialogue) as plain text.
+
+THE QUALITY MUST HONESTLY MATCH THE GRADE. This draft is graded ${g} (${est}/100): ${GRADE_VOICE[g]} Do not write better than that grade. Do not write worse either.${grade === 'unfinished' ? ' The draft is unfinished; write only its opening.' : ''}
+
+Title: ${sc.title}
+Genre: ${sc.genre}. Tone: ${TONES[sc.tone]}. Theme: ${THEMES[sc.theme]}.
+Logline: ${sc.logline}
+${sc.hero ? 'Hero: ' + sc.hero + '\n' : ''}${sc.setting ? 'World: ' + sc.setting + '\n' : ''}${sc.notes ? 'The writer\'s own notes (use what helps, honour their intentions):\n' + sc.notes.slice(0, 4000) + '\n' : ''}
+The writer: ${esc(me.name)}, ${ageOf(me)}, traits ${me.traits.join(', ')}; their voice keeps returning to ${topThemes(voiceOf()).map(k => THEMES[k].toLowerCase()).join(', ') || 'nothing yet'}. Draft ${sc.draft}. Let their traits show in the writing.
+Rules: invent everything; do not mention or imitate any real film, real person or brand. Reply with the pages only, no preamble or commentary.`;
+}
+async function readPages(id) {
+  const sc = (S.me.scripts || []).find(x => x.id === id);
+  if (!sc || !UI.sample) return;
+  const key = `applebox-pages-${S.seed}-${S.me.id}-${sc.id}-${sc.draft}-${sc.grade || sc.pages}`;
+  const old = document.getElementById('pagesov'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'pagesov';
+  el.innerHTML = `<div class="pg-box"><div class="pg-head"><b>${esc(sc.title)}</b> <span class="muted">draft ${sc.draft}${sc.grade ? ' · ' + sc.grade : ''}</span><span class="pg-btns"><button class="btn-s ghost pg-stop">Stop</button> <button class="btn-s pg-close">Close</button></span></div><pre class="pg-text">Thinking…</pre><p class="pg-note muted small"></p></div>`;
+  document.body.appendChild(el);
+  const out = el.querySelector('.pg-text'), note = el.querySelector('.pg-note'), ctl = new AbortController();
+  el.querySelector('.pg-close').onclick = () => { ctl.abort(); el.remove(); };
+  el.querySelector('.pg-stop').onclick = () => ctl.abort();
+  let saved = null; try { saved = localStorage.getItem(key); } catch (e) { /* storage unavailable */ }
+  if (saved) { out.textContent = saved; note.textContent = 'Kept from the last time you read it.'; el.querySelector('.pg-stop').remove(); return; }
+  try {
+    const { text, truncated } = await UI.sample(pagesPrompt(sc), { signal: ctl.signal, onText: ({ text }) => { out.textContent = text; } });
+    out.textContent = text;
+    if (truncated) note.textContent = 'Cut short.';
+    try { localStorage.setItem(key, text); } catch (e) { /* storage unavailable */ }
+  } catch (e) {
+    out.textContent = e.text || '';
+    const msg = { cancelled: '', not_granted: 'Reading pages needs permission to use Claude.', sampling_disabled: 'Claude isn\'t available on this account.', rate_limited: 'Too many requests just now. Try again in a little while.', refused: 'Claude wouldn\'t write these pages. Try changing the notes.' }[e.code];
+    note.textContent = msg ?? 'Something went wrong. Try again.';
+    if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) { UI.sample = null; }
+  }
+  const st = el.querySelector('.pg-stop'); if (st) st.remove();
+}

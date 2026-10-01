@@ -20,7 +20,7 @@ for (let c = 0; c < N; c++) {
       if (rnd() < .03) r(`S.me.agent || signAgent(agenciesIn(S.me.hub)[0], 'fuzz')`);
       if (rnd() < .04) r(`doAct({ t: 'move', i: ${Math.floor(rnd() * 6)} })`);
       if (rnd() < .03) r(`doAct({ t: 'vehicle', v: '${['bike', 'scooter', 'car', 'transit'][Math.floor(rnd() * 4)]}' })`);
-      if (rnd() < .05) r(`doAct({ t: 'newscript', genre: 'Drama', theme: 'family', tone: 'dark' })`);
+      if (rnd() < .05) r(`doAct({ t: 'newscript', genre: 'Drama', theme: 'family', tone: 'dark', premise: 'A ferryman refuses one last crossing.', hero: 'an old ferryman', setting: 'a flooded valley', notes: 'He is afraid of the water. The ending: he swims. '.repeat(${Math.floor(rnd() * 20)}) }); for (const sc of S.me.scripts || []) pagesPrompt(sc);`);
       if (rnd() < .05) r(`doAct({ t: 'furnish', id: '${['bed', 'desk', 'plant', 'poster', 'camera'][Math.floor(rnd() * 5)]}' })`);
       const cal = JSON.stringify(Array.from({ length: 7 }, () => [acts[Math.floor(rnd() * acts.length)], acts[Math.floor(rnd() * acts.length)], eves[Math.floor(rnd() * eves.length)]]));
       r(`S.me.cal = ${cal}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
