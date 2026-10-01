@@ -222,7 +222,6 @@ abrahams	Jim Abrahams	director	2	1944	2024	1	Airplane! 1980
 zucker_d	David Zucker	director	2	1947		1	Airplane! 1980
 nimoy	Leonard Nimoy	actor	2	1931	2015	1	Three Men and a Baby 1987
 streisand	Barbra Streisand	actor	3	1942		3	Funny Girl 1968; Hello, Dolly! 1969; What's Up, Doc? 1972
-duvall	Robert Duvall	actor	3	1931		3	The Godfather 1972; The Godfather Part II 1974; Apocalypse Now 1979
 matthau	Walter Matthau	actor	2	1920	2000	1	The Odd Couple 1968
 mostel	Zero Mostel	actor	2	1915	1977	1	The Producers 1968
 martin_d	Dean Martin	actor	2	1917	1995	1	Airport 1970
@@ -235,7 +234,7 @@ minnelli_l	Liza Minnelli	actor	2	1946		1	Cabaret 1972
 divine	Divine	actor	2	1945	1988	1	Pink Flamingos 1972
 norris	Chuck Norris	actor	2	1940		1	The Way of the Dragon 1972
 lange	Jessica Lange	actor	3	1949		3	King Kong 1976; Tootsie 1982; Cape Fear 1991
-foster	Jodie Foster	actor	3	1962		2	Taxi Driver 1976; The Silence of the Lambs 1991
+foster	Jodie Foster	actor	3	1962		3	Taxi Driver 1976; The Silence of the Lambs 1991; Contact 1997
 newtonjohn	Olivia Newton-John	actor	2	1948	2022	1	Grease 1978
 reeve	Christopher Reeve	actor	2	1952	2004	1	Superman 1978
 martin_s	Steve Martin	actor	3	1945		2	The Jerk 1979; Cheaper by the Dozen 2003
@@ -249,16 +248,13 @@ gossett	Louis Gossett Jr.	actor	2	1936	2024	1	An Officer and a Gentleman 1982
 lewis_j	Jerry Lewis	actor	3	1926	2017	2	The King of Comedy 1983; Arizona Dream 1993
 abraham	F. Murray Abraham	actor	2	1939		1	Amadeus 1984
 guest	Christopher Guest	actor	2	1948		1	This Is Spinal Tap 1984
-fox_mj	Michael J. Fox	actor	2	1961		1	Back to the Future 1985
 winfrey	Oprah Winfrey	actor	2	1954		1	The Color Purple 1985
-maclachlan	Kyle MacLachlan	actor	2	1959		1	Blue Velvet 1986
 selleck	Tom Selleck	actor	2	1945		1	Three Men and a Baby 1987
 close	Glenn Close	actor	3	1947		1	Fatal Attraction 1987
 donofrio	Vincent D'Onofrio	actor	2	1959		1	Full Metal Jacket 1987
 davis_o	Ossie Davis	actor	2	1917	2005	1	Do the Right Thing 1989
 julia	Raul Julia	actor	2	1940	1994	1	Kiss of the Spider Woman 1985
 hurt_w	William Hurt	actor	2	1950	2022	1	Kiss of the Spider Woman 1985
-sarandon	Susan Sarandon	actor	3	1946		3	The Rocky Horror Picture Show 1975; Atlantic City 1980; Thelma & Louise 1991
 clarke_a	Arthur C. Clarke	writer	2	1917	2008	1	2001: A Space Odyssey 1968
 russell_k	Ken Russell	director	2	1927	2011	1	Women in Love 1969
 jackson_g	Glenda Jackson	actor	3	1936	2023	1	Women in Love 1969
@@ -295,7 +291,6 @@ rosi	Francesco Rosi	director	2	1922	2015	1	The Mattei Affair 1972
 taviani	Paolo and Vittorio Taviani	director	2	1929	2024	1	Padre Padrone 1977
 tognazzi	Ugo Tognazzi	actor	2	1922	1990	1	La Cage aux Folles 1978
 tornatore	Giuseppe Tornatore	director	2	1956		1	Cinema Paradiso 1988
-kinski_n	Nastassja Kinski	actor	2	1961		1	Paris, Texas 1984
 trotta	Margarethe von Trotta	director	2	1942		1	Marianne and Juliane 1981
 brandauer	Klaus Maria Brandauer	actor	2	1943		1	Mephisto 1981
 troell	Jan Troell	director	2	1931		1	The Emigrants 1971
@@ -412,10 +407,8 @@ francis_f	Freddie Francis	dp	2	1917	2007	1	Cape Fear 1991
 khouri	Callie Khouri	writer	2	1957		1	Thelma & Louise 1991
 singleton	John Singleton	director	2	1968	2019	1	Boyz n the Hood 1991
 icecube	Ice Cube	actor	2	1969		1	Boyz n the Hood 1991
-snipes	Wesley Snipes	actor	2	1962		1	New Jack City 1991
 palance	Jack Palance	actor	2	1919	2006	1	City Slickers 1991
 bening	Annette Bening	actor	3	1958		3	Bugsy 1991; American Beauty 1999; 20th Century Women 2016
-devito	Danny DeVito	actor	2	1944		1	Batman Returns 1992
 houston	Whitney Houston	actor	3	1963	2012	1	The Bodyguard 1992
 eszterhas	Joe Eszterhas	writer	2	1944		1	Basic Instinct 1992
 peoples	David Webb Peoples	writer	2	1940		1	Unforgiven 1992
@@ -479,7 +472,7 @@ weaving	Hugo Weaving	actor	2	1960		1	The Matrix 1999
 gaeta	John Gaeta	vfx	2	1965		1	The Matrix 1999
 ball_a	Alan Ball	writer	2	1957		1	American Beauty 1999
 cusack	John Cusack	actor	2	1966		1	Being John Malkovich 1999
-witherspoon	Reese Witherspoon	actor	3	1976		1	Election 1999
+witherspoon	Reese Witherspoon	actor	3	1976		2	Election 1999; Walk the Line 2005
 judge	Mike Judge	director	2	1962		1	Office Space 1999
 michell	Roger Michell	director	2	1956	2021	1	Notting Hill 1999
 mathieson	John Mathieson	dp	2	1958		1	Gladiator 2000
@@ -544,7 +537,7 @@ egoyan	Atom Egoyan	director	2	1960		1	The Sweet Hereafter 1997
 zhao_f	Zhao Fei	dp	2	1961		1	Raise the Red Lantern 1991
 zhangfengyi	Zhang Fengyi	actor	2	1956		1	Farewell My Concubine 1993
 faye	Faye Wong	actor	2	1969		1	Chungking Express 1994
-brigittelin	Brigitte Lin	actor	3	1954		2	Chungking Express 1994; Ashes of Time 1994
+brigittelin	Brigitte Lin	actor	3	1954		3	Chungking Express 1994; Ashes of Time 1994; Peking Opera Blues 1986
 tsai	Tsai Ming-liang	director	2	1957		1	Vive L'Amour 1994
 leonlai	Leon Lai	actor	2	1966		1	Fallen Angels 1995
 pau	Peter Pau	dp	2	1952		1	Crouching Tiger, Hidden Dragon 2000
@@ -650,7 +643,6 @@ burnham	Bo Burnham	director	2	1990		1	Eighth Grade 2018
 butler_a	Austin Butler	actor	3	1991		2	Elvis 2022; Dune: Part Two 2024
 butler_g	Gerard Butler	actor	2	1969		1	How to Train Your Dragon 2025
 butterfield	Asa Butterfield	actor	2	1997		1	Hugo 2011
-byrne_r	Rose Byrne	actor	2	1979		1	Neighbors 2: Sorority Rising 2016
 campillo	Robin Campillo	director	2	1962		1	BPM (Beats per Minute) 2017
 cave_n	Nick Cave	composer	2	1957		1	Blonde 2022
 caveellis	Nick Cave and Warren Ellis	composer	2	1957		1	Hell or High Water 2016
@@ -707,7 +699,6 @@ foster_b	Ben Foster	actor	2	1980		1	Hell or High Water 2016
 franco_d	Dave Franco	actor	2	1985		1	The Disaster Artist 2017
 fukunaga	Cary Joji Fukunaga	director	2	1977		1	No Time to Die 2021
 gaga	Lady Gaga	actor	3	1986		1	A Star Is Born 2018
-gainsbourg	Charlotte Gainsbourg	actor	2	1971		1	Melancholia 2011
 gangdongwon	Gang Dong-won	actor	2	1981		1	Broker 2022
 garfield	Andrew Garfield	actor	3	1983		2	The Social Network 2010; The Amazing Spider-Man 2012
 garner_j	Julia Garner	actor	2	1994		1	Weapons 2025
@@ -717,7 +708,7 @@ glover_d	Donald Glover	actor	2	1983		1	The Lion King 2019
 gomes_m	Miguel Gomes	director	2	1972		1	Grand Tour 2024
 gomez_s	Selena Gomez	actor	3	1992		1	Emilia Pérez 2024
 gongyoo	Gong Yoo	actor	3	1979		1	Train to Busan 2016
-gordonlevitt	Joseph Gordon-Levitt	actor	3	1981		2	Inception 2010; Looper 2012
+gordonlevitt	Joseph Gordon-Levitt	actor	3	1981		3	Inception 2010; Looper 2012; Brick 2005
 grande	Ariana Grande	actor	3	1993		2	Wicked 2024; Wicked: For Good 2025
 granik	Debra Granik	director	2	1963		1	Winter's Bone 2010
 gray_f	F. Gary Gray	director	2	1969		1	Straight Outta Compton 2015
@@ -804,7 +795,6 @@ laurie	Hugh Laurie	actor	3	1959		1	The Personal History of David Copperfield 201
 laustsen	Dan Laustsen	dp	2	1954		1	John Wick: Chapter 4 2023
 lautner	Taylor Lautner	actor	2	1992		1	The Twilight Saga: Eclipse 2010
 laverty	Paul Laverty	writer	2	1957		1	I, Daniel Blake 2016
-lawrence_m	Martin Lawrence	actor	3	1965		2	Bad Boys for Life 2020; Bad Boys: Ride or Die 2024
 laxe	Oliver Laxe	director	2	1982		1	Sirāt 2025
 laxton	James Laxton	dp	2	1981		1	Moonlight 2016
 lee_greta	Greta Lee	actor	2	1983		1	Past Lives 2023
@@ -904,7 +894,7 @@ ramcharan	Ram Charan	actor	3	1985		2	RRR 2022; Magadheera 2009
 ramirez_e	Édgar Ramírez	actor	2	1977		1	Carlos 2010
 ramos_a	Anthony Ramos	actor	2	1991		1	Transformers: Rise of the Beasts 2023
 rampling	Charlotte Rampling	actor	3	1946		1	Father Mother Sister Brother 2025
-ranbir	Ranbir Kapoor	actor	3	1982		2	Brahmāstra: Part One – Shiva 2022; Animal 2023
+ranbir	Ranbir Kapoor	actor	3	1982		3	Brahmāstra: Part One – Shiva 2022; Animal 2023; Sanju 2018
 raokummar	Rajkummar Rao	actor	2	1984		1	Stree 2 2024
 rasoulof	Mohammad Rasoulof	director	2	1972		1	The Seed of the Sacred Fig 2024
 redmayne	Eddie Redmayne	actor	3	1982		2	The Trial of the Chicago 7 2020; Fantastic Beasts: The Secrets of Dumbledore 2022
@@ -936,7 +926,7 @@ seydoux	Léa Seydoux	actor	3	1985		2	Blue Is the Warmest Colour 2013; No Time to
 shahidk	Shahid Kapoor	actor	2	1981		1	Padmaavat 2018
 sheridan_t	Taylor Sheridan	writer	3	1970		1	Hell or High Water 2016
 shraddha	Shraddha Kapoor	actor	2	1987		1	Stree 2 2024
-shuqi	Shu Qi	actor	3	1976		2	Journey to the West: Conquering the Demons 2013; The Assassin 2015
+shuqi	Shu Qi	actor	3	1976		3	Journey to the West: Conquering the Demons 2013; The Assassin 2015; Millennium Mambo 2001
 siddique	Siddique	director	2	1956	2023	1	Bodyguard 2011
 simon_c	Carla Simón	director	2	1986		1	Alcarràs 2022
 sissako	Abderrahmane Sissako	director	2	1961		1	Timbuktu 2014
@@ -1020,12 +1010,11 @@ zylberstein	Elsa Zylberstein	actor	2	1968		1	Simone: Woman of the Century 2022
 balfe_l	Lorne Balfe	composer	2	1976		1	Top Gun: Maverick 2022
 shetty_ro	Rohit Shetty	director	2	1973		1	Chennai Express 2013
 menzel_i	Idina Menzel	actor	2	1971		1	Frozen 2013
-colman_o	Olivia Colman	actor	3	1974		3	The Favourite 2018; The Father 2020; Wonka 2023
 gillespie_c	Craig Gillespie	director	2	1967		1	Supergirl 2026
 bingbing_fan	Fan Bingbing	actor	2	1981		1	I Am Not Madame Bovary 2016
 huston_anj	Anjelica Huston	actor	3	1951		1	The Witches 1990
 nyongo_lup	Lupita Nyong'o	actor	2	1983		1	Us 2019
-jolie_ang	Angelina Jolie	actor	3	1975		1	Eternals 2021
+jolie_ang	Angelina Jolie	actor	3	1975		2	Eternals 2021; Girl, Interrupted 1999
 fresnay_pie	Pierre Fresnay	actor	2	1897	1975	0	
 jouvet_lou	Louis Jouvet	actor	2	1887	1951	1	Quai des Orfèvres 1947
 gielgud_joh	John Gielgud	actor	3	1904	2000	1	Providence 1977
@@ -1037,6 +1026,20 @@ wiest_dia	Dianne Wiest	actor	2	1948		1	Hannah and Her Sisters 1986
 dutt_sun	Sunil Dutt	actor	2	1929	2005	1	Waqt 1965
 phoenix_riv	River Phoenix	actor	2	1970	1993	1	My Own Private Idaho 1991
 lambert_chr	Christopher Lambert	actor	2	1957		1	Subway 1985
+richardson_ral	Ralph Richardson	actor	3	1902	1983	1	Long Day's Journey into Night 1962
+turner_kat	Kathleen Turner	actor	2	1954		1	Romancing the Stone 1984
+hawn_gol	Goldie Hawn	actor	3	1945		1	Death Becomes Her 1992
+lake_ver	Veronica Lake	actor	2	1922	1973	1	I Married a Witch 1942
+widmark_ric	Richard Widmark	actor	2	1914	2008	1	Panic in the Streets 1950
+quinn_ant	Anthony Quinn	actor	3	1915	2001	1	Viva Zapata! 1952
+malden_kar	Karl Malden	actor	2	1912	2009	1	Baby Doll 1956
+griffith_and	Andy Griffith	actor	2	1926	2012	1	A Face in the Crowd 1957
+harrison_rex	Rex Harrison	actor	2	1908	1990	1	Night Train to Munich 1940
+lockwood_mar	Margaret Lockwood	actor	2	1916	1990	1	Night Train to Munich 1940
+vyjayanthimala_vyj	Vyjayanthimala	actor	2	1933		1	Sangam 1964
+ryan_rob	Robert Ryan	actor	2	1909	1973	1	The Set-Up 1949
+hayward_sus	Susan Hayward	actor	2	1917	1975	1	I Want to Live! 1958
+harris_jul	Julie Harris	actor	2	1925	2013	1	The Haunting 1963
 steiner	Max Steiner	composer	3	1888	1971	0	
 korngold	Erich Wolfgang Korngold	composer	3	1897	1957	0	
 newman_a	Alfred Newman	composer	3	1900	1970	0	

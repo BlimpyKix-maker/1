@@ -5,7 +5,7 @@ const h = require('./harness.js');
 const C = h.run('CATALOGUES');
 const ROLES = ['dir', 'wri', 'cast', 'dp', 'mus', 'prod', 'pd', 'vfx', 'ed', 'cos'];
 // credits that really did come after death (a score reused in a remake, say)
-const POSTHUMOUS = new Set(['capefear91:herrmann']);
+const POSTHUMOUS = new Set(['capefear91:herrmann', 'ivantheterriblepar58:eisenstein']);
 const MIN_AGE = { dir: 17, wri: 16, cast: 2, dp: 17, mus: 14, prod: 18, pd: 18, vfx: 17, ed: 17, cos: 17 };
 const people = {}, films = [], fseen = new Set();
 for (const c of C) {
