@@ -20,7 +20,7 @@ for (let w = 0; w < weeks; w++) {
   // decide everything pending: accept offers that fit, first choice otherwise
   r(`for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }`);
   // plan: job hunt when not fully employed, otherwise write/rest
-  r(`S.me.plan = jobDays() >= 5 ? ['hunt','hunt','hunt','hunt','hunt','rest'] : ['hunt','hunt','network','train','hustle','rest']; S.me.train = 'cam';`);
+  r(`S.me.plan = jobDays() >= 5 ? ['hunt','hunt','hunt','hunt','hunt','rest','rest'] : ['hunt','hunt','network','train','hustle','rest','rest']; S.me.train = 'cam';`);
   const ok = r(`(() => { const apps = S.me.board.slice().sort((a, b) => (hireOdds(b) + (b.odd ? -.5 : 0)) - (hireOdds(a) + (a.odd ? -.5 : 0))).slice(0, appSlots()).map(p => p.id); return doAct({ t: 'end', plan: S.me.plan.slice(), apps, train: S.me.train, catchWith: null }); })()`);
   if (!ok) { console.log('end refused at week', w, r(`JSON.stringify(pending().map(x => x.kind))`), r('S.me.over')); break; }
 }

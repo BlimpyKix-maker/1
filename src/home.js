@@ -68,8 +68,8 @@ function furnitureSVG(id, x, y) {
 // The scene. day: 0–5 for the light through the window.
 function homeSceneSVG(day) {
   const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [];
-  const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#9E7FC9', '#4B2683'][clamp(day ?? 0, 0, 5)];
-  const wall = { couch: '#E6DCCB', shared: '#ECE4F4', own: '#F7F3FB' }[life], floor = { couch: '#B59A7A', shared: '#A8865F', own: '#8E6B4A' }[life];
+  const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#E8A36B', '#1E2A44'][clamp(day ?? 0, 0, 5)];
+  const wall = { couch: '#E6DCCB', shared: '#EDE4D3', own: '#F6F0E4' }[life], floor = { couch: '#B59A7A', shared: '#A8865F', own: '#8E6B4A' }[life];
   const o = [`<rect width="400" height="180" fill="${wall}"/><rect y="130" width="400" height="50" fill="${floor}"/><rect y="128" width="400" height="3" fill="#FFFFFF" opacity=".6"/>`];
   const wx = life === 'couch' ? 268 : 160, ww = life === 'own' ? 110 : 80;
   o.push(`<rect x="${wx}" y="18" width="${ww}" height="76" fill="${sky}"/><g transform="translate(${wx} 18)">${homeSkyline(M.hub, ww, 76)}</g><rect x="${wx - 4}" y="14" width="${ww + 8}" height="84" fill="none" stroke="#FFFFFF" stroke-width="6"/><path d="M${wx + ww / 2} 18 L${wx + ww / 2} 94" stroke="#FFFFFF" stroke-width="3"/><rect x="${wx - 8}" y="94" width="${ww + 16}" height="5" fill="#FFFFFF"/>`);

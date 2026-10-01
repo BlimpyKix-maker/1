@@ -40,14 +40,13 @@ const out = process.argv[2] || '.';
   for (let i = 0; i < 4; i++) { const b = page.locator('[data-apply]').nth(i); if (await b.isEnabled()) await b.check(); }
   // live the first three days one at a time; the mixer on Wednesday rolls a die
   await page.selectOption('#pl-2', 'network');
-  for (let d = 0; d < 3; d++) await page.click('.day.now [data-day]');
+  for (let d = 0; d < 7; d++) { const c = await page.$('.beat.decide [data-pick]:not([disabled])'); if (c) { await c.click(); await page.waitForTimeout(150); continue; } await page.click('.beat.next [data-next]'); }
   await page.waitForTimeout(1300);
   await page.screenshot({ path: out + '/3b-days.png', fullPage: true });
-  console.log('mid-week day', await page.evaluate(() => S.me.wk && S.me.wk.day));
+  console.log('mid-week day/beat', await page.evaluate(() => S.me.wk && [S.me.wk.day, S.me.wk.beat]));
   for (let w = 0; w < 6; w++) {
     // answer anything pending
-    for (let k = 0; k < 6; k++) { const c = await page.$('.msg.open [data-pick]:not([disabled])'); if (!c) break; await c.click(); }
-    await page.click('[data-endweek="1"]');
+    for (let k = 0; k < 30; k++) { const c = await page.$('.beat.decide [data-pick]:not([disabled])'); if (c) { await c.click(); continue; } const w = await page.evaluate(() => S.week); await page.click('header [data-endweek="1"]'); await page.waitForFunction(() => !UI.busy); if (await page.evaluate(w0 => S.week !== w0, w)) break; }
     await page.waitForFunction(() => !UI.busy);
   }
   await page.screenshot({ path: out + '/4-desk-later.png', fullPage: true });

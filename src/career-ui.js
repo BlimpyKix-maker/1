@@ -7,8 +7,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 5, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 5 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 6, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 6 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -156,17 +156,40 @@ const DAY_FLAVOUR = {
   rest: ['You sleep late and call home.', 'A long walk, a cheap meal, no screens.', 'Friends outside the business remind you there is an outside.']
 };
 // The week as a strip of days: lived days show what happened, today's card has the button, later days can still change.
-function weekStrip(actOpts) {
-  const M = S.me, W = M.wk, plan = effectivePlan(), cur = W ? W.day : 0;
-  return `<div class="strip">${DAY_NAMES.map((dn, i) => {
-    if (W && i < W.day) { const r = W.days[i], lines = r.lines.length ? r.lines : [DAY_FLAVOUR[r.act] ? DAY_FLAVOUR[r.act][(S.week + i) % 3] : ''];
-      return `<div class="day done"><div class="dh"><span class="di">${ACT_ICON[r.act] || ''}</span><b>${dn}</b><span class="muted">${esc(ACTIVITIES[r.act].label)}</span></div>${lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(r.roll, true)}<span class="den">energy ${r.energy}</span></div>`; }
-    const a = plan[i], now = i === cur;
-    return `<div class="day${now ? ' now' : ''}"><div class="dh"><span class="di">${ACT_ICON[a] || ''}</span><b>${dn}</b>${now ? '<span class="chip t-Award">Today</span>' : ''}</div>
-      ${a === 'work' ? `<p><span class="chip">Work</span> <span class="muted">${esc(M.jobs.map(j => j.t).join(', '))}</span></p>` : M.burnout && !W ? '<p class="bad">Rest (burnt out)</p>' : sel('pl-' + i, actOpts, M.plan[i])}
-      ${now ? `<button class="btn-s" data-day="1">${i === 5 ? 'Live the weekend' : 'Live ' + dn}</button>` : ''}</div>`;
+// One inbox item: what happened, the choices if it's waiting on you, and how it turned out.
+function inboxCard(it) {
+  return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
+    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
+    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p></div>` : ''}`;
+}
+// Today, as it happens: a card for each beat lived so far, any decision waiting, and what's next.
+function todayPanel() {
+  const M = S.me, W = M.wk, d = W ? W.day : 0, b = W ? W.beat : 0, plan = effectivePlan();
+  const cards = W ? W.cards.filter(c => c.d === d) : [];
+  const pend = pending();
+  const nextLabel = b === 0 ? `Morning, then ${ACTIVITIES[plan[d]].label.toLowerCase()}` : b === 1 ? ACTIVITIES[plan[d]].label : eveningOf(M.eve[d] || 'home').label;
+  return `<section class="panel today"><h3>${esc(fmtDay(d))}</h3>
+   <ol class="beats">${cards.map(c => `<li class="beat done"><span class="bi">${c.icon}</span><div><b>${BEAT_NAMES[c.b]} · ${esc(c.title)}</b>${c.lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(c.roll, true)}</div></li>`).join('')}
+    ${pend.map(it => `<li class="beat decide"><span class="bi">❗</span><div>${inboxCard(it)}</div></li>`).join('')}
+    ${pend.length ? '' : `<li class="beat next"><span class="bi">${BEAT_NAMES[b] === 'Evening' ? '🌆' : b === 0 ? '🌅' : ACT_ICON[plan[d]] || '•'}</span><div><b>Next: ${BEAT_NAMES[b]}</b><p class="muted">${esc(nextLabel)}</p><p><button class="btn-s" data-next="1">Live it</button> <button class="btn-s ghost" data-day="1">Rest of the day</button></p></div></li>`}</ol>
+   ${conditionsHTML()}</section>`;
+}
+function conditionsHTML() {
+  const C = conditionsOf();
+  return C.length ? `<div class="conds">${C.map(c => `<span class="cond ${c.adv ? 'up' : 'down'}" title="${esc(c.d)}"><b>${esc(c.label)}</b> ${esc(c.d)}</span>`).join('')}</div>` : '<p class="muted small">You feel fine: no effects on your rolls.</p>';
+}
+// The week ahead: what you do each day and each evening. Days already lived are fixed.
+function weekGrid(actOpts) {
+  const M = S.me, W = M.wk, plan = effectivePlan(), d0 = W ? W.day : 0, b0 = W ? W.beat : 0;
+  const eveOpts = Object.entries(EVENINGS).map(([k, e]) => [k, e.label]).concat(typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
+  return `<div class="wgrid">${DAYS7.map((dn, i) => {
+    const pastDay = i < d0 || (i === d0 && b0 > 1), pastEve = i < d0;
+    const a = plan[i];
+    const dayCell = pastDay ? `<span class="muted">${ACT_ICON[a] || ''} ${esc(ACTIVITIES[a].label)}</span>` : a === 'work' ? `<span class="chip">Work</span>` : M.burnout && W && W.burnt ? '<span class="bad">Rest</span>' : sel('pl-' + i, actOpts, M.plan[i]);
+    const eveCell = pastEve ? `<span class="muted">${esc(eveningOf(M.eve[i] || 'home').label)}</span>` : sel('ev-' + i, eveOpts, M.eve[i] || 'home');
+    return `<div class="wd${i === d0 ? ' now' : ''}${pastEve ? ' past' : ''}"><b>${dn.slice(0, 3)}</b><label>Day ${dayCell}</label><label>Evening ${eveCell}</label></div>`;
   }).join('')}</div>
-  <div class="skip"><span class="muted">Skip ahead with this plan:</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
+  <div class="skip"><span class="muted">Skip ahead with this plan (stops at any decision):</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
 }
 // How the game works, in one place. Opens by itself the first time you reach your desk.
 function guidePanel() {
@@ -188,7 +211,8 @@ function pathsPanel() {
   const M = S.me, ags = agenciesIn(M.hub);
   const sc = M.school, P0 = sc ? PROGRAMS[sc.prog] : null;
   const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. Plan <b>${P0.days} study day${P0.days > 1 ? 's' : ''}</b> a week${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
-    : `<p class="muted">Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
+    : !UI.courses ? `<p class="muted">Courses grow one craft fast; degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p><p><button class="btn-s ghost" data-courses="1">Browse courses</button></p>`
+    : `<p class="muted"><button class="linkish" data-courses="">Hide courses</button> Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
       <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} day${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
   const agent = M.agent ? `<p>${pl(M.agent.id)} at <b>${esc(M.agent.name)}</b> ${'★'.repeat(M.agent.tier)} represents you: takes 10%, pitches you for jobs a level up and pushes your rate. Last booking ${S.week - M.agent.lastBook} weeks ago${S.week - M.agent.lastBook > 20 ? ' <span class="bad">(they get restless after thirty)</span>' : ''}.</p><p><button class="linkish" data-fireagent="1">Leave your agent</button></p>`
     : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
@@ -216,9 +240,7 @@ function viewDesk() {
   const slots = appSlots(), picked = [...UI.apps].filter(id => M.board.some(p => p.id === id));
   const actOpts = Object.entries(ACTIVITIES).filter(([k]) => k !== 'work').map(([k, a]) => [k, a.label]);
   const lastDiary = M.diary.filter(d => d.w >= S.week - 1);
-  const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}"><div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
-    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => { return `<button class="choice" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : ''}</button>`; }).join('')}</div>` : ''}
-    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p></div>` : ''}</li>`;
+  const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}">${inboxCard(it)}</li>`;
   const boardRow = p => {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
@@ -236,21 +258,22 @@ function viewDesk() {
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
-    <div><span>Energy</span>${meter('', M.wk ? clamp(M.wk.energy, 0, 100) : M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
+    <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
   ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own. Pieces marked ★ were bought.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${UI.homep ? homePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
   <div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
-    <ul class="inbox">${pend.map(card).join('')}${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
+    <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
    <div>
-    <section class="panel"><h3>This week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
-     ${weekStrip(actOpts)}
+    ${todayPanel()}
+    <section class="panel"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
+     ${weekGrid(actOpts)}
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(ACTIVITIES).filter(([k]) => plan.includes(k) && k !== 'work').map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))})` : ''}`).join(' ')}</p>
-     <p class="note">Energy left after this plan: about ${Math.round(clamp(M.energy - plan.reduce((s, a) => s + ACTIVITIES[a].e, 0), -50, 100))}. Below 15 you start to fray.</p>
+     <p class="note">Work costs about 15 energy a day; a night's sleep gives back 20 to 40 depending on your bed, your place and your stress. Evenings out cost energy but melt stress.</p>
      <div class="ccrow"><label>Living ${sel('pl-life', Object.entries(ORIGIN.life).map(([k, l]) => [k, `${l.label} (${fmtCash(usd(l.rent))}/wk)`]), M.life)}</label></div></section>
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
@@ -280,14 +303,14 @@ function viewYou() {
 
 // ---------- Career: controls ----------
 function careerActive() { return S && S.me && S.me.party && S.me.party.done && !S.me.over; }
-function endWeekAct(t = 'end') { return { t, plan: S.me.plan.slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
-function playDay() {
+function endWeekAct(t = 'end') { return { t, plan: S.me.plan.slice(), eve: (S.me.eve || []).slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
+function playStep(t) {
   if (UI.busy || !careerActive()) return;
   if (pending().length) { UI.tab = 'you'; UI.stack = []; render(); return; }
-  const closing = S.me.wk && S.me.wk.day === 5;
-  doAct(endWeekAct('day'));
-  if (closing) UI.apps = new Set();
-  UI.tab = 'you'; UI.stack = []; render();
+  const w0 = S.week;
+  doAct(endWeekAct(t));
+  if (S.week !== w0) UI.apps = new Set();
+  UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
   if (UI.busy || !careerActive()) return;
@@ -342,14 +365,16 @@ function careerClick(t) {
   if (t.dataset.quit) { doAct({ t: 'quit', id: +t.dataset.quit }); render(true); return true; }
   if (t.dataset.favour) { doAct({ t: 'favour', id: +t.dataset.favour }); render(true); return true; }
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
-  if (t.dataset.day) { playDay(); return true; }
+  if (t.dataset.day) { playStep('day'); return true; }
+  if (t.dataset.next) { playStep('next'); return true; }
+  if (t.dataset.courses !== undefined) { UI.courses = !!t.dataset.courses; render(true); return true; }
   if (t.dataset.jobinfo !== undefined) { UI.jobinfo = t.dataset.jobinfo || null; render(true); return true; }
   if (t.dataset.abandon) { if (!UI.abandon) { UI.abandon = true; render(true); return true; } UI.abandon = false; clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -370,6 +395,7 @@ function careerChange(e) {
     render(true); return true;
   }
   if (/^pl-\d$/.test(id)) { S.me.plan[+id.slice(3)] = v; render(true); return true; }
+  if (/^ev-\d$/.test(id)) { S.me.eve[+id.slice(3)] = v; render(true); return true; }
   if (id === 'pl-train') { S.me.train = v; return true; }
   if (id === 'pl-catch') { S.me.catchWith = v === '' ? null : +v; return true; }
   if (id === 'pl-life') { doAct({ t: 'life', v }); render(true); return true; }

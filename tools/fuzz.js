@@ -11,7 +11,7 @@ for (let c = 0; c < N; c++) {
     const roles = ['director', 'actor', 'writer', 'dp', 'editor', 'producer', 'composer', 'designer'];
     r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Fuzz', role: '${roles[c % roles.length]}' }) })`);
     for (let i = 0; i < 30 && !r('S.me.party.done'); i++) r(`(() => { const sc = partyScene(S.me.party); const L = sc.rooms || sc.opts; return doAct({ t: 'party', k: L[${Math.floor(rnd() * 9)} % L.length].k }); })()`);
-    const acts = ['hunt', 'hunt', 'network', 'write', 'rest', 'train', 'study', 'catchup', 'hustle'];
+    const acts = ['hunt', 'hunt', 'network', 'write', 'rest', 'train', 'study', 'catchup', 'hustle'], eves = ['home', 'out', 'latewrite', 'read'];
     for (let w = 0; w < WEEKS && !r('S.me.over'); w++) {
       r(`for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[${Math.floor(rnd() * 3)} % it.choices.length].k })`);
       if (rnd() < .05) r(`doAct({ t: 'enrol', prog: '${['short', 'cc', 'ba', 'mfa', 'union'][Math.floor(rnd() * 5)]}', craft: 'cam' })`);
@@ -19,9 +19,9 @@ for (let c = 0; c < N; c++) {
       if (rnd() < .03) r(`doAct({ t: 'fireagent' })`);
       if (rnd() < .03) r(`S.me.agent || signAgent(agenciesIn(S.me.hub)[0], 'fuzz')`);
       if (rnd() < .05) r(`doAct({ t: 'furnish', id: '${['bed', 'desk', 'plant', 'poster', 'camera'][Math.floor(rnd() * 5)]}' })`);
-      const plan = JSON.stringify(Array.from({ length: 6 }, () => acts[Math.floor(rnd() * acts.length)]));
-      r(`S.me.plan = ${plan}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
-      for (let d = 0; d < 6; d++) r(`(() => { for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[0].k }); return doAct(endWeekAct('day')); })()`);
+      const plan = JSON.stringify(Array.from({ length: 7 }, () => acts[Math.floor(rnd() * acts.length)])), eve = JSON.stringify(Array.from({ length: 7 }, () => eves[Math.floor(rnd() * eves.length)]));
+      r(`S.me.plan = ${plan}; S.me.eve = ${eve}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
+      r(`(() => { const w0 = S.week; for (let g = 0; g < 80 && S.week === w0 && !S.me.over; g++) { for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[g % it.choices.length].k }); doAct(endWeekAct(g % 3 ? 'next' : 'day')); } })()`);
       r('viewDesk(); viewYou();');   // rendering must never throw
     }
     console.log(`career ${c}: ok, week ${r('S.week')}, cash ${r('S.me.cash')}, level ${r('careerLevel()')}, agent ${r('!!S.me.agent')}`);

@@ -4,36 +4,38 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a production-office console in Florentine colours: viola for the slate and the data, white for the
-   paper, the red of the city's lily as the accent that spices things up. */
+/* Layout: a production-office console in picture-palace colours: deep petrol teal for the slate, cream paper,
+   marquee gold for what matters and curtain red for what's urgent. */
 :root {
-  --bg: #F3EFF8;
-  --panel: #FFFFFF;
-  --ink: #1F1430;
-  --muted: #6A5E80;
-  --line: #DCD2EA;
-  --accent: #C8102E;      /* giglio red */
-  --accent-soft: #FADCE1;
-  --data: #5B2D90;        /* viola */
-  --data-soft: #E9E0F5;
+  --bg: #F4EFE4;
+  --panel: #FFFCF5;
+  --ink: #1B2423;
+  --muted: #5F6B68;
+  --line: #DDD4C2;
+  --accent: #B3261E;      /* curtain red */
+  --accent-soft: #F6DCD6;
+  --data: #0E5E5C;        /* petrol teal */
+  --data-soft: #D6E8E4;
+  --gold: #C8901A;        /* marquee gold */
+  --gold-soft: #F4E3BC;
   --good: #2D7A4C;
   --bad: #B0362A;
-  --slate: #4B2683;
-  --slate-2: #3A1D66;
-  --slate-ink: #FFFFFF;
-  --slate-muted: #CDBEE8;
+  --slate: #0F3B3A;
+  --slate-2: #0A2928;
+  --slate-ink: #FFF8E8;
+  --slate-muted: #A9C4BF;
   --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
   --f-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
   --f-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #130D1D; --panel: #1C1429; --ink: #EEE8F6; --muted: #A497BC; --line: #33284A;
-  --accent: #F04A61; --accent-soft: #3D1520; --data: #B796EA; --data-soft: #2A1F44;
-  --good: #5DBB85; --bad: #E47B6F; --slate: #2C1650; --slate-2: #22113F; --slate-ink: #FFFFFF; --slate-muted: #BBA8DE; color-scheme: dark; } }
+  --bg: #0E1515; --panel: #152020; --ink: #EDE6D6; --muted: #9AA9A5; --line: #283736;
+  --accent: #E8574B; --accent-soft: #3A1714; --data: #5FC0B6; --data-soft: #17302E; --gold: #E8B44A; --gold-soft: #3A2E12;
+  --good: #5DBB85; --bad: #E47B6F; --slate: #0A2423; --slate-2: #061918; --slate-ink: #FFF8E8; --slate-muted: #8FB0AA; color-scheme: dark; } }
 :root[data-theme="dark"] {
-  --bg: #130D1D; --panel: #1C1429; --ink: #EEE8F6; --muted: #A497BC; --line: #33284A;
-  --accent: #F04A61; --accent-soft: #3D1520; --data: #B796EA; --data-soft: #2A1F44;
-  --good: #5DBB85; --bad: #E47B6F; --slate: #2C1650; --slate-2: #22113F; --slate-ink: #FFFFFF; --slate-muted: #BBA8DE; color-scheme: dark; }
+  --bg: #0E1515; --panel: #152020; --ink: #EDE6D6; --muted: #9AA9A5; --line: #283736;
+  --accent: #E8574B; --accent-soft: #3A1714; --data: #5FC0B6; --data-soft: #17302E; --gold: #E8B44A; --gold-soft: #3A2E12;
+  --good: #5DBB85; --bad: #E47B6F; --slate: #0A2423; --slate-2: #061918; --slate-ink: #FFF8E8; --slate-muted: #8FB0AA; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
@@ -46,7 +48,7 @@ header.slate { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
 .brand b { font: 700 22px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
 .brand span { font: 500 13px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--slate-muted); }
 /* clapper stripes: the one flourish */
-.brand::before { content: ""; width: 26px; height: 14px; align-self: center; background: repeating-linear-gradient(135deg, #FFFFFF 0 5px, var(--accent) 5px 10px); border-radius: 2px; }
+.brand::before { content: ""; width: 26px; height: 14px; align-self: center; background: repeating-linear-gradient(135deg, #FFF8E8 0 5px, var(--gold) 5px 10px); border-radius: 2px; }
 #date { display: flex; flex-direction: column; font-family: var(--f-data); line-height: 1.2; margin-left: auto; text-align: right; }
 #date .wk { font-size: 11px; color: var(--slate-muted); letter-spacing: .08em; text-transform: uppercase; }
 #date .dt { font-size: 15px; }
@@ -232,7 +234,7 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .btn-s:disabled { opacity: .45; cursor: default; }
 .btn-s.ghost { background: transparent; color: var(--data); }
 /* home: the player's room across the top of the desk */
-:root { --hs-city: #7E6AA6; --hs-lit: #FFE9A8; }
+:root { --hs-city: #5E7C78; --hs-lit: #FFE9A8; }
 .hero { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: center; margin: 10px 0 16px; }
 .hero .hs { border-radius: 12px; overflow: hidden; border: 1px solid var(--line); box-shadow: 0 6px 24px -12px color-mix(in srgb, var(--data) 60%, transparent); }
 .home-scene { display: block; width: 100%; height: auto; }
@@ -251,6 +253,26 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .dh b { font: 700 15px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
 .di { font-size: 18px; }
 .den { font: 10px/1 var(--f-data); color: var(--muted); }
+.today .beats { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.beat { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
+.beat p { margin: 3px 0; font-size: 14px; }
+.beat .bi { font-size: 22px; line-height: 1; width: 28px; text-align: center; flex: none; }
+.beat > div { flex: 1; min-width: 0; }
+.beat.decide { border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent-soft) 40%, var(--panel)); }
+.beat.next { border-style: dashed; }
+.conds { display: grid; gap: 4px; margin-top: 10px; }
+.cond { font-size: 12px; padding: 5px 8px; border-radius: 4px; }
+.cond.down { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--ink); } .cond.down b { color: var(--bad); }
+.cond.up { background: color-mix(in srgb, var(--good) 14%, transparent); } .cond.up b { color: var(--good); }
+.choice.hard { border-color: var(--gold); }
+.wgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.wd { border: 1px solid var(--line); border-radius: 6px; padding: 6px; font-size: 12px; display: grid; gap: 4px; min-width: 0; }
+.wd b { font: 700 14px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
+.wd label { display: grid; gap: 2px; color: var(--muted); }
+.wd select { width: 100%; font-size: 12px; }
+.wd.now { border: 2px solid var(--gold); }
+.wd.past { opacity: .6; }
+@media (max-width: 900px) { .wgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .day .rollcard { padding: 6px; gap: 4px; flex-direction: column; align-items: stretch; }
 .day .rollcard .dice { justify-content: center; }
 .day .rollcard .verdict { text-align: center; }
@@ -10126,7 +10148,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'hunt', 'rest', 'rest'], eve: ['home', 'home', 'home', 'home', 'out', 'home', 'home'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -10351,8 +10373,7 @@ function checkMods(stat) {
   let adv = 0;
   for (const t of me.traits) { const T = TRAITS[t]; if (T.adv && T.adv.includes(stat)) { adv++; why.push(t); } if (T.dis && T.dis.includes(stat)) { adv--; why.push(t + ' (against)'); } }
   if (M.party && !M.party.done && M.party.drinks >= 3) { adv--; why.push('drunk'); }
-  if (M.stress >= 70) { adv--; why.push('stressed'); }
-  if (M.party && M.party.done && M.energy < 15) { adv--; why.push('exhausted'); }
+  if (M.party && M.party.done) for (const c of conditionsOf()) { if (c.adv && (c.adv === 'all' || c.adv.includes(stat))) { adv++; why.push(c.label); } if (c.dis && (c.dis === 'all' || c.dis.includes(stat))) { adv--; why.push(c.label); } }
   let bonus = 0;
   for (const id of worn()) { const W = WARDROBE[id], nm = LOOK[W.slot].opts[W.opt];
     if (W.adv && W.adv.includes(stat)) { adv++; why.push(nm); }
@@ -10575,11 +10596,13 @@ const ACTIVITIES = {
   rest: { label: 'Rest', e: -20, d: 'Sleep, see friends outside the business. Restores energy, lowers stress.' },
   study: { label: 'Study', e: 9, d: 'Classes for the course you\'re enrolled in. Miss too many and they\'ll drop you.' }
 };
-const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Weekend'];
+const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 function jobDays() { return S.me.jobs.reduce((s, j) => s + j.days, 0); }
 // The plan as it will actually run: job days fill the weekdays first.
 function effectivePlan() {
-  const M = S.me, out = M.plan.slice();
+  const M = S.me, out = M.plan.slice(0, 7);
+  while (out.length < 7) out.push('rest');   // older six-slot plans
+  for (let i = 0; i < 7; i++) if (!ACTIVITIES[out[i]]) out[i] = 'rest';
   let need = jobDays();
   for (let i = 0; i < 5 && need > 0; i++, need--) out[i] = 'work';
   return out;
@@ -10599,57 +10622,10 @@ function learnRate(me) {
   return (a < 25 ? 1.25 : a < 32 ? 1.05 : a < 42 ? .85 : .6) * traitMul(me, 'grow') * (.6 + me.mind.eth / 25);
 }
 
-// A week is lived a day at a time: six plan slots (Monday to Friday, then the weekend), each resolved by dayStep,
-// then closeWeek pays the jobs, settles the applications and the bills, and moves the world on a week.
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'The weekend'];
-function setPlan(a) {
-  const M = S.me;
-  if (a.plan) for (let i = M.wk ? M.wk.day : 0; i < 6; i++) M.plan[i] = a.plan[i];
-  if (a.train) M.train = a.train; if (a.catchWith !== undefined) M.catchWith = a.catchWith ?? null;
-  if (M.wk && !M.wk.burnt) { const ep = effectivePlan(); for (let i = M.wk.day; i < 6; i++) M.wk.plan[i] = ep[i]; }   // days not yet lived follow the plan
-}
-function startWeek() {
-  const M = S.me, me = ME();
-  const burnt = M.burnout > 0;
-  if (burnt) { for (const j of M.jobs) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4); } M.burnout--; }
-  M.wk = { day: 0, burnt, plan: burnt ? ['rest', 'rest', 'rest', 'rest', 'rest', 'rest'] : effectivePlan(), energy: M.energy, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, L: [], days: [] };
-}
-function dayStep() {
-  const M = S.me, me = ME(), W = M.wk, act = W.plan[W.day], A = ACTIVITIES[act];
-  const n0 = W.L.length;
-  const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) W.gains[k] = (W.gains[k] || 0) + g; };
-  M.lastRoll = null;
-  W.energy -= A.e;
-  if (A.cost) W.cashOut += usd(A.cost);
-  if (W.energy < 15 && A.e > 0) W.stress += 4;
-  switch (act) {
-    case 'hunt': W.hunted++; break;
-    case 'network': networkDay(W.L); break;
-    case 'catchup': catchupDay(W.L); break;
-    case 'write': M.spec.pages += 4 + Math.round(me.mind.eth / 4 + prnd() * 4) + homeFx().pages; for (const k of ['struc', 'dial', 'char', 'orig']) gain(k, .016); break;
-    case 'train': { const boost = homeFx().train.includes(M.train) ? 1.4 : 1; for (const k in CRAFTS[M.train].subs) gain(k, .02 * boost); break; }
-    case 'hustle': W.cashIn += usd(150); W.stress += 1; break;
-    case 'rest': W.stress -= 8; break;
-    case 'work': break;
-  }
-  W.days.push({ act, lines: W.L.slice(n0), roll: M.lastRoll, energy: Math.round(W.energy) });
-  W.day++;
-}
-function endWeek(a) {
-  setPlan(a);
-  if (!S.me.wk) startWeek();
-  while (S.me.wk.day < 6) dayStep();
-  closeWeek(a);
-}
-function liveDay(a) {
-  setPlan(a);
-  if (!S.me.wk) startWeek();
-  dayStep();
-  if (S.me.wk.day >= 6) closeWeek(a);
-}
+// The week is lived in src/life.js (days, beats and sleep); closeWeek settles it.
 function closeWeek(a) {
   const M = S.me, me = ME(), W = M.wk, burnt = W.burnt, L = W.L, gains = W.gains, hunted = W.hunted;
-  let energy = W.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
+  let energy = M.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
   const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) gains[k] = (gains[k] || 0) + g; };
   M.wk = null;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
@@ -10705,8 +10681,7 @@ function closeWeek(a) {
   for (const k in hf.grow) gain(k, hf.grow[k]);
   if (hf.standing) me.standing = clamp(me.standing + hf.standing, 0, 100);
   stress += hf.stress;
-  energy += 28 + (M.body.stamina - 10) * 1.5 + life.rest + traitSum(me, 'energy') + hf.energy;
-  stress += life.stress - 3 + (energy < 0 ? 8 : 0);
+  stress += life.stress - 2 + (energy < 10 ? 6 : 0) + (M.cash < usd(life.rent) * 3 ? 4 : 0) + (M.debt > 0 ? 1 : 0);   // money worries weigh   // energy itself is restored night by night (life.js)
   M.energy = clamp(energy, 0, 100);
   M.stress = clamp(M.stress + stress * (stress > 0 ? traitMul(me, 'stress') * (has(me, 'Volatile') ? 1.2 : 1) : 1) * (1.1 - me.mind.com / 40), 0, 100);
   recalc(me);
@@ -10984,8 +10959,7 @@ function applyAct(a) {
     case 'create': startCareer(a.c); return true;
     case 'party': return partyPick(a.k);
     case 'pick': { const it = S.me.inbox.find(x => x.id === a.id); return it && !it.done ? resolvePick(it, a.k) : false; }
-    case 'end': if (pending().length || !S.me.party.done || S.me.over) return false; endWeek(a); return true;
-    case 'day': if (pending().length || !S.me.party.done || S.me.over) return false; liveDay(a); return true;
+    case 'end': case 'day': case 'next': if (pending().length || !S.me.party.done || S.me.over) return false; liveOn(a); return true;
     case 'quit': { const j = S.me.jobs.find(x => x.id === a.id); if (!j) return false; if (j.head !== null) addTie(ME(), P(j.head), -6); finishJob(j, null, true); refreshBoard(); return true; }
     case 'life': if (!ORIGIN.life[a.v]) return false; S.me.life = a.v; return true;
     case 'look': {
@@ -11247,8 +11221,8 @@ function furnitureSVG(id, x, y) {
 // The scene. day: 0–5 for the light through the window.
 function homeSceneSVG(day) {
   const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [];
-  const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#9E7FC9', '#4B2683'][clamp(day ?? 0, 0, 5)];
-  const wall = { couch: '#E6DCCB', shared: '#ECE4F4', own: '#F7F3FB' }[life], floor = { couch: '#B59A7A', shared: '#A8865F', own: '#8E6B4A' }[life];
+  const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#E8A36B', '#1E2A44'][clamp(day ?? 0, 0, 5)];
+  const wall = { couch: '#E6DCCB', shared: '#EDE4D3', own: '#F6F0E4' }[life], floor = { couch: '#B59A7A', shared: '#A8865F', own: '#8E6B4A' }[life];
   const o = [`<rect width="400" height="180" fill="${wall}"/><rect y="130" width="400" height="50" fill="${floor}"/><rect y="128" width="400" height="3" fill="#FFFFFF" opacity=".6"/>`];
   const wx = life === 'couch' ? 268 : 160, ww = life === 'own' ? 110 : 80;
   o.push(`<rect x="${wx}" y="18" width="${ww}" height="76" fill="${sky}"/><g transform="translate(${wx} 18)">${homeSkyline(M.hub, ww, 76)}</g><rect x="${wx - 4}" y="14" width="${ww + 8}" height="84" fill="none" stroke="#FFFFFF" stroke-width="6"/><path d="M${wx + ww / 2} 18 L${wx + ww / 2} 94" stroke="#FFFFFF" stroke-width="3"/><rect x="${wx - 8}" y="94" width="${ww + 16}" height="5" fill="#FFFFFF"/>`);
@@ -11510,6 +11484,162 @@ function maybeEvent() {
   inbox('scene', ev.title, fillScene(ev.text, ctx), { scene: ev.id, ctx, ev: ev.kind, choices: ev.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
 }
 // </career-depth>
+// <life>
+// ---------------- A life, day by day ----------------
+// Seven days, each in three beats: morning, the day itself, and the evening. The advance button lives one beat at a
+// time and stops whenever something needs a decision, the way a day in the business is really a string of small
+// events. Energy is a daily thing now: work spends it, evenings and sleep give it back, and only a week of work plus
+// late nights plus a side hustle wears you right down. How tired and how stressed you are changes your rolls.
+const DAYS7 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const BEAT_NAMES = ['Morning', 'Day', 'Evening'];
+const DAY_COST = { work: 28, hunt: 14, network: 18, catchup: 10, write: 18, train: 18, hustle: 32, rest: -22, study: 18 };
+const DAY_STRESS = { work: 3, hunt: 2, network: 1, catchup: -1, write: .5, train: .5, hustle: 3, rest: -6, study: 1 };
+// What you do with your evenings. Venues in the city add more (life-city.js).
+const EVENINGS = {
+  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night. Restores a little energy.' },
+  out: { label: 'Out with friends', icon: '🍻', e: 14, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
+  latewrite: { label: 'Write late', icon: '🌙', e: 12, stress: 1, d: 'A few more pages while the city sleeps.' },
+  read: { label: 'Read scripts and watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. A little taste every time.' }
+};
+// How you're doing, and what it does to you. Shown on the desk and counted in every roll.
+function conditionsOf() {
+  const M = S.me, out = [];
+  if (!M || !M.party || !M.party.done) return out;
+  if (M.energy < 20) out.push({ k: 'exhausted', label: 'Exhausted', dis: 'all', d: 'Disadvantage on everything. Mistakes at work become likely; pages come slowly.' });
+  else if (M.energy < 40) out.push({ k: 'tired', label: 'Tired', dis: ['eth', 'com', 'vis'], d: 'Disadvantage on Work ethic, Composure and Vision. Fewer pages, slower learning.' });
+  if (M.stress >= 75) out.push({ k: 'frayed', label: 'Frayed', dis: ['cha', 'col', 'com'], d: 'Disadvantage with people. You might snap at someone. Burnout is close.' });
+  else if (M.stress >= 50) out.push({ k: 'stressed', label: 'Stressed', dis: ['com'], d: 'Disadvantage on Composure. Sleep comes harder.' });
+  if (M.energy >= 75 && M.stress < 15) out.push({ k: 'zone', label: 'In the zone', adv: Object.keys(SUB2C), d: 'Advantage on craft checks and faster learning.' });
+  return out;
+}
+function condMul() { const c = conditionsOf().map(x => x.k); return c.includes('exhausted') ? .5 : c.includes('tired') ? .75 : c.includes('zone') ? 1.2 : 1; }
+function setPlan(a) {
+  const M = S.me, from = M.wk ? M.wk.day + (M.wk.beat > 1 ? 1 : 0) : 0;
+  if (a.plan) for (let i = from; i < 7; i++) if (a.plan[i]) M.plan[i] = a.plan[i];
+  if (a.eve) for (let i = M.wk ? M.wk.day + (M.wk.beat > 2 ? 1 : 0) : 0; i < 7; i++) if (a.eve[i]) M.eve[i] = a.eve[i];
+  if (a.train) M.train = a.train;
+  if (a.catchWith !== undefined) M.catchWith = a.catchWith ?? null;
+}
+function startWeek() {
+  const M = S.me, me = ME(), burnt = M.burnout > 0;
+  if (burnt) { for (const j of M.jobs) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4); } M.burnout--; }
+  M.wk = { day: 0, beat: 0, burnt, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, L: [], cards: [] };
+}
+// Advance: one beat ('next'), to the end of the day ('day'), or to the end of the week ('end'). Always stops at a decision.
+function liveOn(a) {
+  setPlan(a);
+  const M = S.me;
+  if (!M.wk) startWeek();
+  const day0 = M.wk.day, mode = a.t;
+  for (let guard = 0; guard < 30; guard++) {
+    const closed = beatStep(a);
+    if (closed || pending().length || mode === 'next') return;
+    if (mode === 'day' && M.wk.day !== day0) return;
+  }
+}
+function card(icon, title, lines, extra = {}) { S.me.wk.cards.push({ d: S.me.wk.day, b: S.me.wk.beat, icon, title, lines: lines.filter(Boolean), ...extra }); }
+function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g) W.gains[k] = (W.gains[k] || 0) + g; }
+function dayPlan() { const p = effectivePlan(); return S.me.wk && S.me.wk.burnt ? p.map(() => 'rest') : p; }
+function beatStep(a) {
+  const M = S.me, W = M.wk;
+  M.lastRoll = null;
+  if (W.beat === 0) morningBeat(); else if (W.beat === 1) dayBeat(); else eveningBeat();
+  W.beat++;
+  if (W.beat > 2) { sleepNight(); W.beat = 0; W.day++; }
+  if (W.day >= 7) { closeWeek(a); return true; }
+  return false;
+}
+// ---- morning: getting there ----
+function morningBeat() {
+  const M = S.me, W = M.wk, act = dayPlan()[W.day], weekend = W.day >= 5;
+  const v = vehicleOf();
+  if (act === 'rest' || weekend && act !== 'work') { card('☀️', 'A free morning', [pickLine(MORNING_FREE, W.day)]); return; }
+  const commute = v.commute[(S.week + W.day) % v.commute.length];
+  M.energy = clamp(M.energy - v.e, 0, 100);
+  card(v.icon, v.label || 'Getting there', [commute]);
+  morningEvent();
+}
+// ---- the day: the plan slot ----
+function dayBeat() {
+  const M = S.me, me = ME(), W = M.wk, act = dayPlan()[W.day], A = ACTIVITIES[act];
+  M.energy = clamp(M.energy - (DAY_COST[act] ?? 8), 0, 100);
+  W.stress += DAY_STRESS[act] ?? 0;
+  if (A.cost) W.cashOut += usd(A.cost);
+  const L = [], n0 = W.L.length;
+  switch (act) {
+    case 'hunt': W.hunted++; L.push(pickLine(HUNT_LINES, W.day)); break;
+    case 'network': networkDay(W.L); break;
+    case 'catchup': catchupDay(W.L); break;
+    case 'write': writeSession(L); break;
+    case 'train': for (const k in CRAFTS[M.train].subs) weekGain(k, .02 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day)}`); break;
+    case 'study': if (M.school) { for (const k in CRAFTS[M.school.craft].subs) weekGain(k, PROGRAMS[M.school.prog].grow); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
+    case 'hustle': W.cashIn += usd(150); L.push(pickLine(HUSTLE_LINES, W.day)); break;
+    case 'rest': L.push(pickLine(REST_LINES, W.day)); break;
+    case 'work': L.push(...workDay()); break;
+  }
+  card(ACT_ICON[act] || '•', A.label, L.concat(W.L.slice(n0)), { roll: M.lastRoll });
+  dayEvent(act);
+}
+// ---- evening ----
+function eveningBeat() {
+  const M = S.me, W = M.wk, k = M.eve[W.day] || 'home', E = eveningOf(k);
+  M.energy = clamp(M.energy - E.e, 0, 100);
+  W.stress += E.stress || 0;
+  if (E.cost) W.cashOut += usd(E.cost);
+  const L = [];
+  if (k === 'latewrite') writeSession(L, .5);
+  else if (k === 'read') { weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); }
+  else if (E.venue) L.push(...venueEvening(E));
+  else L.push(pickLine(k === 'out' ? OUT_LINES : HOME_LINES, W.day));
+  card(E.icon, E.label, L, { roll: M.lastRoll });
+  eveningEvent(k);
+}
+function sleepNight() {
+  const M = S.me, me = ME(), life = ORIGIN.life[M.life];
+  const sleep = 19 + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
+  M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
+  const stressNow = M.stress + M.wk.stress;
+  if (stressNow >= 96 && !M.burnout) { M.burnout = 1; inbox('note', 'You hit the wall', 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
+}
+// ---- work days ----
+function workDay() {
+  const M = S.me, me = ME(), out = [];
+  for (const j of M.jobs) {
+    const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
+    out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day + j.id)}`);
+    if (M.energy < 20 && prnd() < .35) { mistakeAtWork(j); out.push('You\'re running on empty, and it shows.'); }
+  }
+  return out;
+}
+function mistakeAtWork(j) {
+  const M = S.me, me = ME();
+  if (j.head !== null) addTie(me, P(j.head), -3);
+  M.wk.stress += 4;
+  inbox('note', 'A mistake', `Exhausted, you ${pickLine(['mislabel a whole day\'s footage', 'forget the call sheet changes', 'send the wrong version to the producer', 'miss your cue', 'lose the keys to the truck'], S.week + j.id)}. ${j.head !== null ? P(j.head).name + ' notices.' : 'Someone notices.'}`);
+}
+// The calendar date of a day in the current week (weeks are counted from their Monday).
+function dayDate(d) { const t = dateOf(S.week); const mon = new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5); return new Date(mon.getTime() + d * 864e5); }
+function fmtDay(d) { const x = dayDate(d); return `${DAYS7[d]} ${x.getUTCDate()} ${MON[x.getUTCMonth()]} ${x.getUTCFullYear()}`; }
+const pickLine = (L, i) => L[Math.abs(Math.floor(i * 7 + S.week * 3)) % L.length];
+const MORNING_FREE = ['A slow morning: coffee, the trades, the window.', 'You sleep in and feel human again.', 'Laundry, groceries, the small business of a life.', 'A run along the water before the heat.'];
+const HUNT_LINES = ['Emails, calls, a coffee with someone who knows someone.', 'You rewrite your cover note three times and send it anyway.', 'You trawl the trades and the crew lists for anything hiring.', 'You update your reel and send it to every name in your phone.'];
+const CLASS_LINES = ['The teacher is a working professional and it shows.', 'You practise until it stops feeling like practice.', 'A class full of people as hungry as you.', 'Notes, exercises, and one idea you\'ll use for years.'];
+const HUSTLE_LINES = ['A bar shift. The tips are fine; the stories are better.', 'Deliveries across town. Rent is rent.', 'You pour drinks for people who make films.', 'Catering a corporate lunch. You smile a lot.'];
+const REST_LINES = ['You sleep late and call home.', 'A long walk, a cheap meal, no screens.', 'Friends outside the business remind you there is an outside.', 'You do absolutely nothing, magnificently.'];
+const READ_LINES = ['You read a produced script and watch the film straight after. You notice what changed.', 'A double bill from the library. Your notebook fills up.', 'An old classic you\'d never seen. You see why.'];
+const OUT_LINES = ['Cheap dinner, loud bar, old friends.', 'Karaoke. Nobody films it, thankfully.', 'A friend\'s birthday in a back room somewhere.', 'Tacos at midnight and a long walk home.'];
+const HOME_LINES = ['Pasta, a film, bed by eleven.', 'You call home. They ask when you\'ll be on TV.', 'You tidy the flat and feel briefly in control.', 'An early night. Your body thanks you.'];
+const JOB_DAY_LINES = { 0: ['Meetings, coverage, notes on notes.', 'The script changes again. You keep up.', 'Budget top-sheets and phone calls.'], 1: ['Recces, schedules, a hundred questions.', 'The prep office hums. Everything is urgent.', 'Fittings, tests, locations, lists.'], 2: ['Call time at six, wrap at eight.', 'A long day on set. You learn three things nobody wrote down.', 'Setups, resets, coffee, more setups.', 'You keep your head down and your ears open.'], 3: ['A dark room, a timeline, the film finding itself.', 'Notes from the director, notes from the producers.', 'Hours on one scene. It\'s better for it.'] };
+const OFFICE_LINES = ['Emails, meetings, a deadline that moves.', 'You learn how the business side really works.', 'A quiet day at the desk. You listen to every call.'];
+// Hooks for the other life modules, defined there; safe if they aren't loaded.
+function morningEvent() { if (typeof lifeMorningEvent === 'function') lifeMorningEvent(); }
+function dayEvent(act) { if (typeof lifeDayEvent === 'function') lifeDayEvent(act); }
+function eveningEvent(k) { if (typeof lifeEveningEvent === 'function') lifeEveningEvent(k); }
+function eveningOf(k) { return EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || EVENINGS.home; }
+function vehicleOf() { return typeof VEHICLES !== 'undefined' ? VEHICLES[S.me.vehicle || 'transit'] : { icon: '🚌', e: 2, commute: ['The bus, a podcast, a seat if you\'re lucky.'] }; }
+function writeSession(L, scale = 1) { if (typeof writeOnScript === 'function') return writeOnScript(L, scale); S.me.spec.pages += Math.round((4 + ME().mind.eth / 4) * scale * condMul()); L.push('You write.'); }
+function venueEvening(E) { return []; }
+// </life>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -11828,8 +11958,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 5, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 5 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 6, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 6 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -11977,17 +12107,40 @@ const DAY_FLAVOUR = {
   rest: ['You sleep late and call home.', 'A long walk, a cheap meal, no screens.', 'Friends outside the business remind you there is an outside.']
 };
 // The week as a strip of days: lived days show what happened, today's card has the button, later days can still change.
-function weekStrip(actOpts) {
-  const M = S.me, W = M.wk, plan = effectivePlan(), cur = W ? W.day : 0;
-  return `<div class="strip">${DAY_NAMES.map((dn, i) => {
-    if (W && i < W.day) { const r = W.days[i], lines = r.lines.length ? r.lines : [DAY_FLAVOUR[r.act] ? DAY_FLAVOUR[r.act][(S.week + i) % 3] : ''];
-      return `<div class="day done"><div class="dh"><span class="di">${ACT_ICON[r.act] || ''}</span><b>${dn}</b><span class="muted">${esc(ACTIVITIES[r.act].label)}</span></div>${lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(r.roll, true)}<span class="den">energy ${r.energy}</span></div>`; }
-    const a = plan[i], now = i === cur;
-    return `<div class="day${now ? ' now' : ''}"><div class="dh"><span class="di">${ACT_ICON[a] || ''}</span><b>${dn}</b>${now ? '<span class="chip t-Award">Today</span>' : ''}</div>
-      ${a === 'work' ? `<p><span class="chip">Work</span> <span class="muted">${esc(M.jobs.map(j => j.t).join(', '))}</span></p>` : M.burnout && !W ? '<p class="bad">Rest (burnt out)</p>' : sel('pl-' + i, actOpts, M.plan[i])}
-      ${now ? `<button class="btn-s" data-day="1">${i === 5 ? 'Live the weekend' : 'Live ' + dn}</button>` : ''}</div>`;
+// One inbox item: what happened, the choices if it's waiting on you, and how it turned out.
+function inboxCard(it) {
+  return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
+    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
+    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p></div>` : ''}`;
+}
+// Today, as it happens: a card for each beat lived so far, any decision waiting, and what's next.
+function todayPanel() {
+  const M = S.me, W = M.wk, d = W ? W.day : 0, b = W ? W.beat : 0, plan = effectivePlan();
+  const cards = W ? W.cards.filter(c => c.d === d) : [];
+  const pend = pending();
+  const nextLabel = b === 0 ? `Morning, then ${ACTIVITIES[plan[d]].label.toLowerCase()}` : b === 1 ? ACTIVITIES[plan[d]].label : eveningOf(M.eve[d] || 'home').label;
+  return `<section class="panel today"><h3>${esc(fmtDay(d))}</h3>
+   <ol class="beats">${cards.map(c => `<li class="beat done"><span class="bi">${c.icon}</span><div><b>${BEAT_NAMES[c.b]} · ${esc(c.title)}</b>${c.lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(c.roll, true)}</div></li>`).join('')}
+    ${pend.map(it => `<li class="beat decide"><span class="bi">❗</span><div>${inboxCard(it)}</div></li>`).join('')}
+    ${pend.length ? '' : `<li class="beat next"><span class="bi">${BEAT_NAMES[b] === 'Evening' ? '🌆' : b === 0 ? '🌅' : ACT_ICON[plan[d]] || '•'}</span><div><b>Next: ${BEAT_NAMES[b]}</b><p class="muted">${esc(nextLabel)}</p><p><button class="btn-s" data-next="1">Live it</button> <button class="btn-s ghost" data-day="1">Rest of the day</button></p></div></li>`}</ol>
+   ${conditionsHTML()}</section>`;
+}
+function conditionsHTML() {
+  const C = conditionsOf();
+  return C.length ? `<div class="conds">${C.map(c => `<span class="cond ${c.adv ? 'up' : 'down'}" title="${esc(c.d)}"><b>${esc(c.label)}</b> ${esc(c.d)}</span>`).join('')}</div>` : '<p class="muted small">You feel fine: no effects on your rolls.</p>';
+}
+// The week ahead: what you do each day and each evening. Days already lived are fixed.
+function weekGrid(actOpts) {
+  const M = S.me, W = M.wk, plan = effectivePlan(), d0 = W ? W.day : 0, b0 = W ? W.beat : 0;
+  const eveOpts = Object.entries(EVENINGS).map(([k, e]) => [k, e.label]).concat(typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
+  return `<div class="wgrid">${DAYS7.map((dn, i) => {
+    const pastDay = i < d0 || (i === d0 && b0 > 1), pastEve = i < d0;
+    const a = plan[i];
+    const dayCell = pastDay ? `<span class="muted">${ACT_ICON[a] || ''} ${esc(ACTIVITIES[a].label)}</span>` : a === 'work' ? `<span class="chip">Work</span>` : M.burnout && W && W.burnt ? '<span class="bad">Rest</span>' : sel('pl-' + i, actOpts, M.plan[i]);
+    const eveCell = pastEve ? `<span class="muted">${esc(eveningOf(M.eve[i] || 'home').label)}</span>` : sel('ev-' + i, eveOpts, M.eve[i] || 'home');
+    return `<div class="wd${i === d0 ? ' now' : ''}${pastEve ? ' past' : ''}"><b>${dn.slice(0, 3)}</b><label>Day ${dayCell}</label><label>Evening ${eveCell}</label></div>`;
   }).join('')}</div>
-  <div class="skip"><span class="muted">Skip ahead with this plan:</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
+  <div class="skip"><span class="muted">Skip ahead with this plan (stops at any decision):</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
 }
 // How the game works, in one place. Opens by itself the first time you reach your desk.
 function guidePanel() {
@@ -12009,7 +12162,8 @@ function pathsPanel() {
   const M = S.me, ags = agenciesIn(M.hub);
   const sc = M.school, P0 = sc ? PROGRAMS[sc.prog] : null;
   const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. Plan <b>${P0.days} study day${P0.days > 1 ? 's' : ''}</b> a week${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
-    : `<p class="muted">Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
+    : !UI.courses ? `<p class="muted">Courses grow one craft fast; degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p><p><button class="btn-s ghost" data-courses="1">Browse courses</button></p>`
+    : `<p class="muted"><button class="linkish" data-courses="">Hide courses</button> Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
       <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} day${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
   const agent = M.agent ? `<p>${pl(M.agent.id)} at <b>${esc(M.agent.name)}</b> ${'★'.repeat(M.agent.tier)} represents you: takes 10%, pitches you for jobs a level up and pushes your rate. Last booking ${S.week - M.agent.lastBook} weeks ago${S.week - M.agent.lastBook > 20 ? ' <span class="bad">(they get restless after thirty)</span>' : ''}.</p><p><button class="linkish" data-fireagent="1">Leave your agent</button></p>`
     : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
@@ -12037,9 +12191,7 @@ function viewDesk() {
   const slots = appSlots(), picked = [...UI.apps].filter(id => M.board.some(p => p.id === id));
   const actOpts = Object.entries(ACTIVITIES).filter(([k]) => k !== 'work').map(([k, a]) => [k, a.label]);
   const lastDiary = M.diary.filter(d => d.w >= S.week - 1);
-  const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}"><div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
-    ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => { return `<button class="choice" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : ''}</button>`; }).join('')}</div>` : ''}
-    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p></div>` : ''}</li>`;
+  const card = it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}">${inboxCard(it)}</li>`;
   const boardRow = p => {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
@@ -12057,21 +12209,22 @@ function viewDesk() {
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
-    <div><span>Energy</span>${meter('', M.wk ? clamp(M.wk.energy, 0, 100) : M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
+    <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
   ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own. Pieces marked ★ were bought.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${UI.homep ? homePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
   <div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
-    <ul class="inbox">${pend.map(card).join('')}${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
+    <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
    <div>
-    <section class="panel"><h3>This week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
-     ${weekStrip(actOpts)}
+    ${todayPanel()}
+    <section class="panel"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
+     ${weekGrid(actOpts)}
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(ACTIVITIES).filter(([k]) => plan.includes(k) && k !== 'work').map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))})` : ''}`).join(' ')}</p>
-     <p class="note">Energy left after this plan: about ${Math.round(clamp(M.energy - plan.reduce((s, a) => s + ACTIVITIES[a].e, 0), -50, 100))}. Below 15 you start to fray.</p>
+     <p class="note">Work costs about 15 energy a day; a night's sleep gives back 20 to 40 depending on your bed, your place and your stress. Evenings out cost energy but melt stress.</p>
      <div class="ccrow"><label>Living ${sel('pl-life', Object.entries(ORIGIN.life).map(([k, l]) => [k, `${l.label} (${fmtCash(usd(l.rent))}/wk)`]), M.life)}</label></div></section>
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
@@ -12101,14 +12254,14 @@ function viewYou() {
 
 // ---------- Career: controls ----------
 function careerActive() { return S && S.me && S.me.party && S.me.party.done && !S.me.over; }
-function endWeekAct(t = 'end') { return { t, plan: S.me.plan.slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
-function playDay() {
+function endWeekAct(t = 'end') { return { t, plan: S.me.plan.slice(), eve: (S.me.eve || []).slice(), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
+function playStep(t) {
   if (UI.busy || !careerActive()) return;
   if (pending().length) { UI.tab = 'you'; UI.stack = []; render(); return; }
-  const closing = S.me.wk && S.me.wk.day === 5;
-  doAct(endWeekAct('day'));
-  if (closing) UI.apps = new Set();
-  UI.tab = 'you'; UI.stack = []; render();
+  const w0 = S.week;
+  doAct(endWeekAct(t));
+  if (S.week !== w0) UI.apps = new Set();
+  UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
   if (UI.busy || !careerActive()) return;
@@ -12163,14 +12316,16 @@ function careerClick(t) {
   if (t.dataset.quit) { doAct({ t: 'quit', id: +t.dataset.quit }); render(true); return true; }
   if (t.dataset.favour) { doAct({ t: 'favour', id: +t.dataset.favour }); render(true); return true; }
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
-  if (t.dataset.day) { playDay(); return true; }
+  if (t.dataset.day) { playStep('day'); return true; }
+  if (t.dataset.next) { playStep('next'); return true; }
+  if (t.dataset.courses !== undefined) { UI.courses = !!t.dataset.courses; render(true); return true; }
   if (t.dataset.jobinfo !== undefined) { UI.jobinfo = t.dataset.jobinfo || null; render(true); return true; }
   if (t.dataset.abandon) { if (!UI.abandon) { UI.abandon = true; render(true); return true; } UI.abandon = false; clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -12191,6 +12346,7 @@ function careerChange(e) {
     render(true); return true;
   }
   if (/^pl-\d$/.test(id)) { S.me.plan[+id.slice(3)] = v; render(true); return true; }
+  if (/^ev-\d$/.test(id)) { S.me.eve[+id.slice(3)] = v; render(true); return true; }
   if (id === 'pl-train') { S.me.train = v; return true; }
   if (id === 'pl-catch') { S.me.catchWith = v === '' ? null : +v; return true; }
   if (id === 'pl-life') { doAct({ t: 'life', v }); render(true); return true; }
@@ -12217,7 +12373,7 @@ function replayCareer(log, done) {
 function render(keepScroll) {
   const top = document.scrollingElement.scrollTop;
   const d = dateOf(S.week);
-  $('#date').innerHTML = `<span class="wk">Week ${Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 6048e5) + 1}${careerActive() ? ' · ' + DAY_NAMES[S.me.wk ? S.me.wk.day : 0] : ''}</span><span class="dt">${fmtDate(S.week)}</span>`;
+  $('#date').innerHTML = `<span class="wk">Week ${Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 6048e5) + 1}${careerActive() ? ' · ' + BEAT_NAMES[S.me.wk ? S.me.wk.beat : 0].toLowerCase() : ''}</span><span class="dt">${careerActive() ? fmtDay(S.me.wk ? S.me.wk.day : 0) : fmtDate(S.week)}</span>`;
   $('#pulse').textContent = `${S.people.filter(p => !p.retired).length.toLocaleString()} working · ${S.active.length} films in production · ${S.companies.filter(c => c.closed === null).length} companies`;
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
@@ -12230,15 +12386,15 @@ function render(keepScroll) {
   const adv = $('#adv'), mode = careerActive() ? 'career' : 'watch';
   if (adv.dataset.mode !== mode) {
     adv.dataset.mode = mode;
-    adv.innerHTML = mode === 'career' ? `<button class="btn" data-day="1">${S.me.wk && S.me.wk.day === 5 ? 'Weekend' : 'Next day'}</button><button class="btn primary" data-endweek="1">End week</button>` : '<button class="btn" data-adv="1">Next week</button><button class="btn" data-adv="4">Next month</button><button class="btn primary" data-adv="52">Next year</button>';
+    adv.innerHTML = mode === 'career' ? `<button class="btn primary" data-next="1">Next</button><button class="btn" data-day="1">End day</button><button class="btn" data-endweek="1">End week</button>` : '<button class="btn" data-adv="1">Next week</button><button class="btn" data-adv="4">Next month</button><button class="btn primary" data-adv="52">Next year</button>';
   }
-  if (mode === 'career') { const n = pending().length, db = adv.querySelector('[data-day]'); if (db) db.textContent = S.me.wk && S.me.wk.day === 5 ? 'Weekend' : 'Next day'; adv.querySelectorAll('[data-endweek],[data-day]').forEach(b => { b.disabled = UI.busy; b.title = n ? `Decide on ${n} inbox item${n > 1 ? 's' : ''} first` : ''; }); }
+  if (mode === 'career') { const n = pending().length; adv.querySelectorAll('[data-endweek],[data-day],[data-next]').forEach(b => { b.disabled = UI.busy; b.title = n ? `Decide on ${n} inbox item${n > 1 ? 's' : ''} first` : ''; }); }
   if (keepScroll) document.scrollingElement.scrollTop = top; else window.scrollTo(0, 0);
 }
 
 function setBusy(on, msg) {
   UI.busy = on;
-  document.querySelectorAll('[data-adv],[data-endweek],[data-day]').forEach(b => b.disabled = on);
+  document.querySelectorAll('[data-adv],[data-endweek],[data-day],[data-next]').forEach(b => b.disabled = on);
   $('#status').textContent = msg || '';
   $('#status').hidden = !msg;
 }

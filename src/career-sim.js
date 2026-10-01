@@ -96,7 +96,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'hunt', 'rest', 'rest'], eve: ['home', 'home', 'home', 'home', 'out', 'home', 'home'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -321,8 +321,7 @@ function checkMods(stat) {
   let adv = 0;
   for (const t of me.traits) { const T = TRAITS[t]; if (T.adv && T.adv.includes(stat)) { adv++; why.push(t); } if (T.dis && T.dis.includes(stat)) { adv--; why.push(t + ' (against)'); } }
   if (M.party && !M.party.done && M.party.drinks >= 3) { adv--; why.push('drunk'); }
-  if (M.stress >= 70) { adv--; why.push('stressed'); }
-  if (M.party && M.party.done && M.energy < 15) { adv--; why.push('exhausted'); }
+  if (M.party && M.party.done) for (const c of conditionsOf()) { if (c.adv && (c.adv === 'all' || c.adv.includes(stat))) { adv++; why.push(c.label); } if (c.dis && (c.dis === 'all' || c.dis.includes(stat))) { adv--; why.push(c.label); } }
   let bonus = 0;
   for (const id of worn()) { const W = WARDROBE[id], nm = LOOK[W.slot].opts[W.opt];
     if (W.adv && W.adv.includes(stat)) { adv++; why.push(nm); }
@@ -545,11 +544,13 @@ const ACTIVITIES = {
   rest: { label: 'Rest', e: -20, d: 'Sleep, see friends outside the business. Restores energy, lowers stress.' },
   study: { label: 'Study', e: 9, d: 'Classes for the course you\'re enrolled in. Miss too many and they\'ll drop you.' }
 };
-const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Weekend'];
+const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 function jobDays() { return S.me.jobs.reduce((s, j) => s + j.days, 0); }
 // The plan as it will actually run: job days fill the weekdays first.
 function effectivePlan() {
-  const M = S.me, out = M.plan.slice();
+  const M = S.me, out = M.plan.slice(0, 7);
+  while (out.length < 7) out.push('rest');   // older six-slot plans
+  for (let i = 0; i < 7; i++) if (!ACTIVITIES[out[i]]) out[i] = 'rest';
   let need = jobDays();
   for (let i = 0; i < 5 && need > 0; i++, need--) out[i] = 'work';
   return out;
@@ -569,57 +570,10 @@ function learnRate(me) {
   return (a < 25 ? 1.25 : a < 32 ? 1.05 : a < 42 ? .85 : .6) * traitMul(me, 'grow') * (.6 + me.mind.eth / 25);
 }
 
-// A week is lived a day at a time: six plan slots (Monday to Friday, then the weekend), each resolved by dayStep,
-// then closeWeek pays the jobs, settles the applications and the bills, and moves the world on a week.
-const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'The weekend'];
-function setPlan(a) {
-  const M = S.me;
-  if (a.plan) for (let i = M.wk ? M.wk.day : 0; i < 6; i++) M.plan[i] = a.plan[i];
-  if (a.train) M.train = a.train; if (a.catchWith !== undefined) M.catchWith = a.catchWith ?? null;
-  if (M.wk && !M.wk.burnt) { const ep = effectivePlan(); for (let i = M.wk.day; i < 6; i++) M.wk.plan[i] = ep[i]; }   // days not yet lived follow the plan
-}
-function startWeek() {
-  const M = S.me, me = ME();
-  const burnt = M.burnout > 0;
-  if (burnt) { for (const j of M.jobs) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4); } M.burnout--; }
-  M.wk = { day: 0, burnt, plan: burnt ? ['rest', 'rest', 'rest', 'rest', 'rest', 'rest'] : effectivePlan(), energy: M.energy, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, L: [], days: [] };
-}
-function dayStep() {
-  const M = S.me, me = ME(), W = M.wk, act = W.plan[W.day], A = ACTIVITIES[act];
-  const n0 = W.L.length;
-  const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) W.gains[k] = (W.gains[k] || 0) + g; };
-  M.lastRoll = null;
-  W.energy -= A.e;
-  if (A.cost) W.cashOut += usd(A.cost);
-  if (W.energy < 15 && A.e > 0) W.stress += 4;
-  switch (act) {
-    case 'hunt': W.hunted++; break;
-    case 'network': networkDay(W.L); break;
-    case 'catchup': catchupDay(W.L); break;
-    case 'write': M.spec.pages += 4 + Math.round(me.mind.eth / 4 + prnd() * 4) + homeFx().pages; for (const k of ['struc', 'dial', 'char', 'orig']) gain(k, .016); break;
-    case 'train': { const boost = homeFx().train.includes(M.train) ? 1.4 : 1; for (const k in CRAFTS[M.train].subs) gain(k, .02 * boost); break; }
-    case 'hustle': W.cashIn += usd(150); W.stress += 1; break;
-    case 'rest': W.stress -= 8; break;
-    case 'work': break;
-  }
-  W.days.push({ act, lines: W.L.slice(n0), roll: M.lastRoll, energy: Math.round(W.energy) });
-  W.day++;
-}
-function endWeek(a) {
-  setPlan(a);
-  if (!S.me.wk) startWeek();
-  while (S.me.wk.day < 6) dayStep();
-  closeWeek(a);
-}
-function liveDay(a) {
-  setPlan(a);
-  if (!S.me.wk) startWeek();
-  dayStep();
-  if (S.me.wk.day >= 6) closeWeek(a);
-}
+// The week is lived in src/life.js (days, beats and sleep); closeWeek settles it.
 function closeWeek(a) {
   const M = S.me, me = ME(), W = M.wk, burnt = W.burnt, L = W.L, gains = W.gains, hunted = W.hunted;
-  let energy = W.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
+  let energy = M.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
   const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) gains[k] = (gains[k] || 0) + g; };
   M.wk = null;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
@@ -675,8 +629,7 @@ function closeWeek(a) {
   for (const k in hf.grow) gain(k, hf.grow[k]);
   if (hf.standing) me.standing = clamp(me.standing + hf.standing, 0, 100);
   stress += hf.stress;
-  energy += 28 + (M.body.stamina - 10) * 1.5 + life.rest + traitSum(me, 'energy') + hf.energy;
-  stress += life.stress - 3 + (energy < 0 ? 8 : 0);
+  stress += life.stress - 2 + (energy < 10 ? 6 : 0) + (M.cash < usd(life.rent) * 3 ? 4 : 0) + (M.debt > 0 ? 1 : 0);   // money worries weigh   // energy itself is restored night by night (life.js)
   M.energy = clamp(energy, 0, 100);
   M.stress = clamp(M.stress + stress * (stress > 0 ? traitMul(me, 'stress') * (has(me, 'Volatile') ? 1.2 : 1) : 1) * (1.1 - me.mind.com / 40), 0, 100);
   recalc(me);
@@ -954,8 +907,7 @@ function applyAct(a) {
     case 'create': startCareer(a.c); return true;
     case 'party': return partyPick(a.k);
     case 'pick': { const it = S.me.inbox.find(x => x.id === a.id); return it && !it.done ? resolvePick(it, a.k) : false; }
-    case 'end': if (pending().length || !S.me.party.done || S.me.over) return false; endWeek(a); return true;
-    case 'day': if (pending().length || !S.me.party.done || S.me.over) return false; liveDay(a); return true;
+    case 'end': case 'day': case 'next': if (pending().length || !S.me.party.done || S.me.over) return false; liveOn(a); return true;
     case 'quit': { const j = S.me.jobs.find(x => x.id === a.id); if (!j) return false; if (j.head !== null) addTie(ME(), P(j.head), -6); finishJob(j, null, true); refreshBoard(); return true; }
     case 'life': if (!ORIGIN.life[a.v]) return false; S.me.life = a.v; return true;
     case 'look': {
