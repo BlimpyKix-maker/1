@@ -260,6 +260,13 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .guide { border-top: 3px solid var(--data); }
 .g-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 4px 22px; }
 .g-grid p { margin: 4px 0 8px; font-size: 14px; }
+.lvl { color: var(--accent); font-size: 11px; letter-spacing: 1px; }
+.lvlchip { display: inline-block; margin-left: 6px; font: 600 12px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px 3px; border-radius: 3px; background: var(--data-soft); color: var(--data); }
+tr.blocked td { opacity: .55; }
+.small { font-size: 12px; }
+.pbar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; } .pbar i { display: block; height: 100%; background: var(--data); }
+.courses { display: grid; gap: 8px; } .course { border: 1px solid var(--line); border-radius: 6px; padding: 8px; background: var(--bg); } .course p { margin: 3px 0; }
+.enrolrow { display: flex; flex-wrap: wrap; gap: 4px; }
 .arr { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 12px; font-size: 13px; }
 .arr select { width: 100%; }
 .shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
@@ -10501,7 +10508,7 @@ function refreshBoard() {
   const films = S.active.map(i => S.films[i]).filter(f => f.hub === hub && f.stage >= 0 && f.stage < 4 && f.stageEnd - S.week >= 1);
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   for (const f of films) {
-    const opts = POSTS.filter(t => t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
+    const opts = POSTS.filter(t => !t.cat && t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
     const n = Math.min(opts.length, prnd() < .5 ? 1 : prnd() < .6 ? 2 : 0);
     const chosen = new Set();
     // a contact in charge of a department makes their own job easier to hear about
@@ -10515,14 +10522,14 @@ function refreshBoard() {
   out.sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0));
   const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, 14);
   const m = dateOf(S.week).getUTCMonth();
-  const odd = ODD_JOBS.filter(t => (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
-  M.board = film.concat(odd);
+  const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
+  M.board = agentBoard(films).concat(film, depthBoard(films), odd);
 }
 function makePost(t, f) {
   const head = f ? headOf(f, t.head) : null;
   const weeks = t.weeks || (f ? Math.max(1, Math.min(14, f.stageEnd - S.week + (t.st.length > 1 && f.stage === t.st[0] ? f.dur[f.stage + 1] : 0))) : 4);
   const hubComp = clamp(hubProd(S.me.hub, S.year) / 40, .3, 1.4);
-  const comp = !f ? .1 : (t.tier === 2 ? .8 : .6) * hubComp + (f.tier === 1 ? .6 : f.tier === 3 ? -.2 : 0);
+  const comp = !f ? (t.cat ? .3 + t.tier * .3 : .1) : (t.tier >= 2 ? .8 : .6) * hubComp + (f.tier === 1 ? .6 : f.tier === 3 ? -.2 : 0);
   return { id: S.me.seq++, k: t.k, odd: !f, t: t.t, jid: t.jid, tier: t.tier, film: f ? f.id : null, head, days: t.days, weeks, rate: usd(t.rate), comp, ref: head !== null && (S.me.refs[head] || 0) > 0, w: S.week };
 }
 function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
@@ -10530,9 +10537,13 @@ function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
 // How likely an application is to land, and why: a list of named factors in logit units.
 function hireFactors(post) {
   const M = S.me, me = ME(), t = tmplOf(post), F = [];
-  F.push(['Job level', post.odd ? 1 : post.tier === 1 ? .25 : -1.2]);
+  const lvl = careerLevel();
+  F.push(['Job level', post.odd && !t.cat ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
+  if (post.tier === 0 && M.school) F.push(['You\'re a student', .7]);
+  if (post.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
+  if (M.freeRef) F.push(['A word from your old teacher', .8]);
   const sc = subScore(t), req = postReq(t);
-  F.push(['Your skills for it', post.tier === 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
+  F.push(['Your skills for it', post.tier <= 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
   if (t.actor) F.push(['Looks and presence', (M.body.looks - 10) * .06 + (me.sk.pres - 10) * .05]);
   F.push(['Track record', Math.min(1.1, me.credits.length * .18 + M.stats.weeks * .01)]);
   F.push(['Standing', (me.standing - 10) * .035]);
@@ -10545,7 +10556,7 @@ function hireFactors(post) {
   if (M.wealth === 'trust') F.push(['Seen as a dabbler', -.25]);
   if (M.quirk === 'record' && post.film !== null && S.films[post.film].tier === 1) F.push(['Studio background check', -.8]);
   if (M.quirk === 'viral') F.push(['Internet fame', t.actor ? .4 : -.15]);
-  if (M.degrees.length && post.tier === 2) F.push(['Your degree', .25]);
+  if (M.degrees.length && post.tier >= 2) F.push(['Your degree', M.degrees.includes('mfa') ? .4 : .25]);
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   return F;
@@ -10561,7 +10572,8 @@ const ACTIVITIES = {
   write: { label: 'Write', e: 9, d: 'Work on a spec script. Slow, and it grows your writing.' },
   train: { label: 'Take a class', e: 9, cost: 70, d: 'Classes and practice in one craft. Slower than work, always available.' },
   hustle: { label: 'Side hustle', e: 13, d: 'Bar shifts and deliveries. Pays the rent; teaches nothing.' },
-  rest: { label: 'Rest', e: -20, d: 'Sleep, see friends outside the business. Restores energy, lowers stress.' }
+  rest: { label: 'Rest', e: -20, d: 'Sleep, see friends outside the business. Restores energy, lowers stress.' },
+  study: { label: 'Study', e: 9, d: 'Classes for the course you\'re enrolled in. Miss too many and they\'ll drop you.' }
 };
 const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Weekend'];
 function jobDays() { return S.me.jobs.reduce((s, j) => s + j.days, 0); }
@@ -10648,6 +10660,7 @@ function closeWeek(a) {
     const days = j.days;
     const pay = j.rate * days;
     cashIn += pay; M.stats.earned += pay;
+    if (M.agent) cashOut += Math.round(pay * M.agent.cut);
     M.stats.weeks++;
     j.done++;
     me.lastWork = S.week;
@@ -10667,9 +10680,10 @@ function closeWeek(a) {
   const offers = [], noes = [];
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
-    if (!post) continue;
+    if (!post || blockedFrom(tmplOf(post))) continue;
     M.stats.apps++;
     if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post);
+    if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
@@ -10677,6 +10691,8 @@ function closeWeek(a) {
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
   if (rival !== undefined && noes.length && prnd() < .2) { const p = ppick(noes); addTie(me, P(rival), -3); inbox('note', `${P(rival).name} again`, `You hear who got the ${p.t.toLowerCase()} job you wanted${p.film !== null ? ' on ' + S.films[p.film].title : ''}: ${P(rival).name}.`, { person: rival }); stress += 3; }
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
+  const fee = schoolWeek(L, gain);
+  if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
   cashOut += Math.round(usd(life.rent) * traitMul(me, 'living')) + M.upkeep;
@@ -10801,6 +10817,7 @@ function afterTick(fresh) {
   }
   // scenes from the jobs you're on
   for (const j of M.jobs) if (j.done > 0 && prnd() < .55) { const sc = pickScene(j); if (sc) inbox('scene', sc.title, sc.text, { job: j.id, scene: sc.id, ctx: sc.ctx, choices: sc.opts }); }
+  agentWeek(); agentApproach(); maybeEvent();
   // life events
   if (M.quirk === 'secret' && !M.secretOut && S.week - M.startW > 20 && prnd() < .03) secretEvent();
   if (M.shark > 0 && (S.week - M.startW) % 8 === 7) inbox('debt', 'A visit about the loan', `The man you owe ${fmtCash(M.shark)} comes by. Interest is running at one percent a week.`, { choices: [{ k: 'pay', label: `Pay it all (${fmtCash(M.shark)})`, dis: M.cash < M.shark ? 'Not enough cash' : null }, { k: 'part', label: `Pay ${fmtCash(Math.round(M.shark / 4))} to buy time`, dis: M.cash < M.shark / 4 ? 'Not enough cash' : null }, { k: 'stall', label: 'Stall' }] });
@@ -10877,7 +10894,7 @@ const SCENES = [
 function pickScene(j) {
   // scenes written for this job come up more than generic ones, and none repeats within a couple of months
   const recent = new Set(S.me.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 8).map(x => x.scene));
-  const L = SCENES.filter(s => (!s.jobs || s.jobs.includes(j.k)) && !recent.has(s.id) && !(j.film === null && /\{(film|dir|lead)\}/.test(s.text + JSON.stringify(s.opts))));
+  const L = SCENES.filter(s => !s.event && (!s.jobs || s.jobs.includes(j.k)) && !recent.has(s.id) && !(j.film === null && /\{(film|dir|lead)\}/.test(s.text + JSON.stringify(s.opts))));
   if (!L.length) return null;
   let tw = 0; const ws = L.map(s => { const w = s.jobs ? 3 : 1; tw += w; return w; });
   let r = prnd() * tw, s = L[L.length - 1];
@@ -10889,7 +10906,7 @@ function pickScene(j) {
   return { id: s.id, title: s.title, text: fillScene(s.text, ctx), ctx, opts: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check, hint: o.check ? statLabel(o.check[0]) : null })) };
 }
 function statLabel(k) { return MINDS[k] || (SUB2C[k] ? CRAFTS[SUB2C[k]].subs[k] : k); }
-function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : 'someone'); }
+function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : 'someone').replace(/\b([Tt]he) The /g, '$1 '); }
 
 function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
@@ -10904,6 +10921,8 @@ function sceneResolve(it, k) {
   if (fx.stress) M.stress = clamp(M.stress + fx.stress, 0, 100);
   if (fx.energy) M.energy = clamp(M.energy + fx.energy, 0, 100);
   if (fx.cash) M.cash += usd(fx.cash);
+  if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
+  if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
   const job = M.jobs.find(j => j.id === it.job);
   if (fx.shadow && job) job.shadow = 1;
@@ -10920,6 +10939,10 @@ function sceneResolve(it, k) {
 function resolvePick(it, k) {
   const M = S.me, me = ME(), c = it.choices.find(x => x.k === k);
   if (!c || c.dis) return false;
+  if (it.kind === 'agentoffer') {
+    if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
+    it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
+  }
   if (it.kind === 'offer') {
     if (k === 'yes') {
       if (jobDays() + it.post.days > 5) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
@@ -10988,6 +11011,10 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
+    case 'enrol': return enrol(a);
+    case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${PROGRAMS[S.me.school.prog].label.toLowerCase()}.`); S.me.school = null; return true;
+    case 'query': return queryAgency(a);
+    case 'fireagent': if (!S.me.agent) return false; inbox('note', 'You leave your agent', `You and ${S.me.agent.name} part ways.`); if (S.me.known[S.me.agent.id]) addTie(ME(), P(S.me.agent.id), -10); S.me.agent = null; return true;
   }
   return false;
 }
@@ -11136,6 +11163,9 @@ function portraitSVG(L, age, size = 96, bare = false) {
   if (L.head === 7) o.push(`<path d="M${cx - hairHalf} ${top + 7} Q${cx} ${top - 2} ${cx + hairHalf} ${top + 7}" stroke="#C8102E" stroke-width="4" fill="none"/>`);
   if (L.head === 8) o.push(`<ellipse cx="${cx}" cy="${brim}" rx="${hw + 12}" ry="4.5" fill="#3B3226"/><path d="M${cx - hw + 1} ${brim} L${cx - hw + 3} ${top - 12} Q${cx} ${top - 6} ${cx + hw - 3} ${top - 12} L${cx + hw - 1} ${brim} Z" fill="#3B3226"/><rect x="${cx - hw + 1}" y="${brim - 5}" width="${hw * 2 - 2}" height="4" fill="#1E1A14"/>`);
   if (L.head === 9) o.push(`<path d="M${cx - hw} ${brim} Q${cx - hw} ${top - 10} ${cx} ${top - 11} Q${cx + hw} ${top - 10} ${cx + hw} ${brim} Z" fill="#1F1430"/><path d="M${cx - 2} ${brim - 1} L${cx + hw + 13} ${brim + 1} Q${cx + hw + 14} ${brim + 5} ${cx + hw + 6} ${brim + 5} L${cx - 2} ${brim + 3} Z" fill="#000"/><text x="${cx}" y="${top + 2}" font-size="6" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700">CREW</text>`);
+  // a raised forearm shows what's on the wrist
+  if (L.wrist) { const band = ['', '#3B3226', '#C9A646', '#8C6A2E', '#1E1E1E'][L.wrist], face = L.wrist === 2 ? null : L.wrist === 4 ? '#2C4F7C' : '#F3EFF8';
+    o.push(`<g transform="rotate(-18 100 112)"><rect x="93" y="92" width="14" height="30" rx="6" fill="${cloth}"/><rect x="94" y="80" width="12" height="16" rx="5" fill="${skin}"/><ellipse cx="100" cy="78" rx="7" ry="6" fill="${skin}"/><rect x="93" y="88" width="14" height="${L.wrist === 2 ? 2.5 : 4}" fill="${band}"/>${face ? `<rect x="96.5" y="86.5" width="7" height="7" rx="${L.wrist === 4 ? 1.5 : 3.5}" fill="${face}" stroke="${band}" stroke-width="1"/>` : ''}</g>`); }
   // glasses
   if (L.glasses) {
     const g = L.glasses, gc = g === 4 ? '#B9A06A' : g === 7 || g === 9 ? '#222' : '#2A2A2A', fill = g === 7 ? '#1D1D1D' : g === 9 ? 'rgba(80,60,120,.35)' : 'none';
@@ -11230,6 +11260,256 @@ function homeSceneSVG(day) {
   return `<svg class="home-scene" viewBox="0 0 400 180" role="img" aria-label="Your place">${o.join('')}</svg>`;
 }
 // </home>
+// <career-depth>
+// ---------------- Career depth ----------------
+// The whole job catalogue as work you can apply for, jobs for everyone else, school, agents, and the events that
+// happen to a life in film. Loaded after career-sim; it adds to POSTS and SCENES and is called from the week.
+
+// ---- Your level: how far up the ladder the board reaches ----
+// 0 nobody, 1 a few weeks' work, 2 credits to your name, 3 a working professional, 4 in demand, 5 established.
+function careerLevel() {
+  const M = S.me, me = ME();
+  return clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 60 + (M.agent ? .5 : 0)), 0, 5);
+}
+const LEVEL_NAME = ['Nobody yet', 'Getting work', 'Credits to your name', 'Working professional', 'In demand', 'Established'];
+
+// ---- The catalogue as postings ----
+const DEPT_HEAD = { Directed: 'prod', Writing: 'prod', Cast: 'dir', Produced: 'prod', Music: 'mus', Cinematography: 'dp', 'Film Editing': 'ed', 'Casting By': 'cst', 'Production Design': 'pd', 'Art Direction': 'pd', 'Set Decoration': 'pd', 'Costume Design': 'cos', 'Makeup Department': 'mu', 'Production Management': 'prod', 'Second Unit Director or Assistant Director': 'ad', 'Art Department': 'pd', 'Property Department': 'pd', 'Sound Department': 'snd', 'Special Effects': 'vfx', 'Visual Effects': 'vfx', Stunts: 'stn', 'Camera and Electrical Department': 'dp', 'Animation Department': 'vfx', 'Casting Department': 'cst', 'Costume and Wardrobe Department': 'cos', 'Editorial Department': 'ed', 'Location Management': 'prod', 'Music Department': 'mus', 'Script and Continuity Department': 'ad', 'Transportation Department': 'prod', 'Additional Crew': 'prod', Choreography: 'dir', 'Color Department': 'ed', 'Craft Services': 'prod', 'Health and Safety': 'ad', 'Intimacy Coordination': 'ad', Legal: 'prod', 'Production Department': 'prod', 'Production Finance and Accounting': 'prod', Publicity: 'prod', Puppetry: 'vfx', 'Voice Actors – Dubbing': 'dir', 'Studio Facilities/Equipment (Additional Crew)': 'prod' };
+const DEPT_STAGE = { Writing: [0], Produced: [0, 1], 'Casting By': [1], 'Casting Department': [1], 'Production Design': [1, 2], 'Art Direction': [1, 2], 'Set Decoration': [1, 2], 'Art Department': [1, 2], 'Property Department': [1, 2], 'Costume Design': [1, 2], 'Costume and Wardrobe Department': [1, 2], 'Location Management': [1, 2], 'Production Management': [1, 2], 'Production Finance and Accounting': [1, 2, 3], 'Film Editing': [3], 'Editorial Department': [3], 'Color Department': [3], 'Visual Effects': [2, 3], 'Animation Department': [2, 3], Music: [3], 'Music Department': [3], Publicity: [3], Legal: [0, 1] };
+const LV_RATE = [70, 190, 380, 620, 1000, 1800], LV_REQ = [0, 0, 7, 10, 12.5, 15];
+// Which sub-skills a job uses: the craft's subs that its listing mentions, else the craft's first three.
+function jobSubs(j) {
+  const C = CRAFTS[j.craft] || CRAFTS.pro, text = (j.t + ' ' + (j.resp || []).join(' ') + ' ' + (j.sk || []).join(' ')).toLowerCase();
+  const hit = Object.entries(C.subs).filter(([, lab]) => lab.toLowerCase().split(/[ &]+/).some(w => w.length > 3 && text.includes(w))).map(([k]) => k);
+  return (hit.length ? hit : Object.keys(C.subs)).slice(0, 3);
+}
+const needsDegree = j => (j.sk || []).some(s => /degree|bachelor|\bBA\b|\bBS\b|MFA|JD\b|law school/i.test(s));
+const isIntern = j => j.lv === 0 || /intern/i.test(j.t) || j.dept === 'Internships';
+// Annual or hourly pay from the listing, as a daily rate in today's dollars.
+function payRate(j) {
+  const m = (j.pay || '').replace(/,/g, '').match(/\$(\d+(?:\.\d+)?)(k)?/i);
+  if (!m) return LV_RATE[j.lv];
+  let v = +m[1] * (m[2] ? 1000 : 1);
+  if (/hour|hr/i.test(j.pay)) return Math.round(v * 8);
+  if (/week/i.test(j.pay)) return Math.round(v / 5);
+  if (/day/i.test(j.pay)) return Math.round(v);
+  return v > 1000 ? Math.round(v / 250) : LV_RATE[j.lv];
+}
+(function addCataloguePosts() {
+  const have = new Set(POSTS.map(p => p.jid).concat(ODD_JOBS.map(p => p.jid)));
+  for (const j of JOBS.jobs) {
+    if (have.has(j.id) || !CRAFTS[j.craft]) continue;
+    const crew = j.sec === 'Production crew';
+    if (crew && !DEPT_HEAD[j.dept]) continue;
+    const intern = isIntern(j), tier = intern ? 0 : clamp(j.lv, 1, 5);
+    const base = { k: 'c:' + j.id, jid: j.id, t: j.t, tier, subs: jobSubs(j), rate: intern ? (/unpaid/i.test(j.pay || '') ? 0 : 60) : crew ? LV_RATE[tier] : payRate(j), req: LV_REQ[tier], cr: crew && /^yes/i.test(j.cr || '') ? 1 : 0, deg: needsDegree(j) ? 1 : 0, intern: intern ? 1 : 0, cat: 1 };
+    if (crew) POSTS.push(Object.assign(base, { st: DEPT_STAGE[j.dept] || [2], head: DEPT_HEAD[j.dept], days: j.dept === 'Writing' || j.dept === 'Cast' ? (tier <= 1 ? 2 : 5) : 5, actor: j.craft === 'act' ? 1 : 0, union: j.dept === 'Second Unit Director or Assistant Director' && tier >= 2 ? 1 : 0 }));
+    else ODD_JOBS.push(Object.assign(base, { biz: j.dept, days: intern ? 3 : 5, weeks: intern ? 10 : 12 + (j.lv * 7) % 30, d: (j.resp || [])[0] ? j.resp[0].charAt(0).toUpperCase() + j.resp[0].slice(1) + '.' : j.dept }));
+    have.add(j.id);
+  }
+  for (const p of POSTS) POST_BY[p.k] = p;
+  for (const p of ODD_JOBS) ODD_BY[p.k] = p;
+})();
+// Can you even apply? Some jobs want a degree or union training, unless your credits speak for you.
+function blockedFrom(t) {
+  const M = S.me, me = ME();
+  if (t.deg && !M.degrees.length && me.credits.length < 3) return 'Wants a degree';
+  if (t.union && !M.degrees.includes('union') && me.credits.length < 4) return 'Union training or 4 credits';
+  return null;
+}
+// The extra listings each week: catalogue crew jobs on films around you, industry jobs at companies, internships.
+function depthBoard(films) {
+  const M = S.me, L = careerLevel(), out = [];
+  const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
+  const fit = t => t.tier <= L + 1 && (t.tier >= L - 2 || t.tier === 0);
+  for (const f of films) {
+    if (out.length >= 5) break;
+    if (prnd() > .3) continue;
+    const opts = POSTS.filter(t => t.cat && fit(t) && t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
+    if (opts.length) out.push(makePost(ppick(opts), f));
+  }
+  const biz = ODD_JOBS.filter(t => t.cat && fit(t) && !M.jobs.some(j => j.k === t.k));
+  const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null);
+  for (let i = 0, n = biz.length ? 2 + (prnd() < .5 ? 1 : 0) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
+  return out;
+}
+
+// ---- Everyone else's job titles ----
+const ROLE_DEPTS = { director: ['Directed'], writer: ['Writing'], actor: ['Cast'], producer: ['Produced', 'Production Management'], dp: ['Cinematography', 'Camera and Electrical Department'], editor: ['Film Editing', 'Editorial Department', 'Color Department'], composer: ['Music', 'Music Department'], designer: ['Production Design', 'Art Direction', 'Art Department', 'Set Decoration'], costume: ['Costume Design', 'Costume and Wardrobe Department'], sound: ['Sound Department'], vfx: ['Visual Effects', 'Special Effects', 'Animation Department'], makeup: ['Makeup Department'], casting: ['Casting By', 'Casting Department'], ad: ['Second Unit Director or Assistant Director', 'Script and Continuity Department'], stunts: ['Stunts'] };
+const OCC_BY_ROLE = {};
+for (const r in ROLE_DEPTS) OCC_BY_ROLE[r] = JOBS.jobs.filter(j => j.sec === 'Production crew' && ROLE_DEPTS[r].includes(j.dept) && j.lv >= 1);
+// What someone actually does, from their department and standing. Stable for a person; never touches the RNG.
+function occupationOf(p) {
+  const L = OCC_BY_ROLE[p.role];
+  if (!L || !L.length) return ROLE_LABEL[p.role];
+  const lv = clamp(Math.round(1 + p.standing / 22), 1, 5);
+  const near = L.filter(j => j.lv === lv);
+  const pool = near.length ? near : L.slice().sort((a, b) => Math.abs(a.lv - lv) - Math.abs(b.lv - lv)).slice(0, 4);
+  return pool[(p.id * 2654435761 >>> 0) % pool.length].t.replace(/\s*\(see [^)]*\)/i, '');
+}
+
+// ---- School ----
+const PROGRAMS = {
+  short: { label: 'Short course', d: 'Eight weeks of evenings in one craft. A certificate and a few new faces.', weeks: 8, days: 1, fee: 80, grow: .03, deg: null },
+  cc: { label: 'Community college certificate', d: 'A year of practical classes, two days a week. Cheap and useful.', weeks: 40, days: 2, fee: 70, grow: .035, deg: 'cert' },
+  ba: { label: 'Degree, part-time', d: 'Three days a week for two years. Opens the doors that ask for a degree.', weeks: 100, days: 3, fee: 230, grow: .03, deg: 'ba' },
+  mfa: { label: 'Film school (MFA)', d: 'Two years, four days a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
+  union: { label: 'Union training programme', d: 'Paid on-set training for assistant directors. Hard to get into; the jobs that follow pay well.', weeks: 40, days: 4, fee: -260, grow: .04, deg: 'union', craft: 'dir', apply: ['eth', 13] }
+};
+function schoolDays() { return effectivePlan().filter(a => a === 'study').length; }
+function enrol(a) {
+  const M = S.me, P0 = PROGRAMS[a.prog];
+  if (!P0 || M.school || !CRAFTS[a.craft || P0.craft]) return false;
+  if (P0.apply) { const ok = roll(P0.apply[0], P0.apply[1]); inbox('note', ok ? `In: ${P0.label}` : `Not this year: ${P0.label}`, ok ? 'You start next week. Plan your study days.' : 'Hundreds applied for a handful of places. You can try again in six months.', { roll: M.lastRoll }); if (!ok) { M.schoolTry = S.week; return true; } }
+  M.school = { prog: a.prog, craft: a.craft || P0.craft, done: 0, missed: 0, start: S.week };
+  diary(`You enrol: ${P0.label.toLowerCase()} (${CRAFTS[M.school.craft].label.toLowerCase()}).`);
+  return true;
+}
+// Called when the week closes: fees, progress, classmates, graduation.
+function schoolWeek(L, gain) {
+  const M = S.me, me = ME(), sc = M.school;
+  if (!sc) return 0;
+  const P0 = PROGRAMS[sc.prog], days = schoolDays();
+  for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * days);
+  if (days >= P0.days) { sc.done++; sc.missed = 0; } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} days).`); }
+  if (P0.mates && days && prnd() < .08) { const q = youngNPC(M.hub, ppick(['director', 'writer', 'dp', 'editor', 'producer', 'actor'])); meet(q.id, 'Classmate', 8); L.push(`You get to know ${q.name}, a ${ROLE_LABEL[q.role].toLowerCase()} in your year.`); }
+  if (sc.missed >= 4) { inbox('note', 'Dropped out', `You missed too many weeks of ${P0.label.toLowerCase()}. The school lets you go.`); M.school = null; return 0; }
+  if (sc.done >= P0.weeks) {
+    if (P0.deg && !M.degrees.includes(P0.deg)) M.degrees.push(P0.deg);
+    me.standing = clamp(me.standing + (P0.deg === 'mfa' ? 3 : 1), 0, 100);
+    inbox('news', 'Graduation', `You finish ${P0.label.toLowerCase()} in ${CRAFTS[sc.craft].label.toLowerCase()}.${P0.deg ? ' The certificate goes on the wall, and on every application.' : ''}`);
+    M.school = null;
+  }
+  return P0.fee;   // a negative fee is a stipend
+}
+
+// ---- Agents ----
+const AGENCY_NAMES = [['Paramount Talent Group', 3], ['Creative Arts Collective', 3], ['Morrow & Endeavour', 3], ['United Talent Union', 2], ['Gersh & Daughters', 2], ['Silver Screen Associates', 2], ['Paradigm Lost Agency', 2], ['Kaplan Stewart Talent', 1], ['Lighthouse Management', 1], ['The Small Room Agency', 1], ['Second Act Artists', 1], ['Rough Cut Representation', 1]];
+// Each hub has its own handful of agencies, the same every time.
+function agenciesIn(hub) {
+  const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 11) >>> 0), L = AGENCY_NAMES.slice();
+  for (let i = L.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [L[i], L[j]] = [L[j], L[i]]; }
+  return L.slice(0, 6).map(([n, tier], i) => ({ i, name: hubName(hub) === 'Hollywood' || tier < 3 ? n : n + ' ' + hubName(hub), tier }));
+}
+function queryOdds(ag) {
+  const M = S.me, me = ME();
+  return clamp(logistic(-1.2 - (ag.tier - 1) * 1.1 + me.credits.length * .35 + (me.standing - 8) * .07 + M.spec.drafts * .25 + (me.fame || 0) * .02), .02, .9);
+}
+function queryAgency(a) {
+  const M = S.me, ag = agenciesIn(M.hub)[a.ag];
+  if (!ag || M.agent || (M.queried || {})[a.ag] > S.week - 12) return false;
+  (M.queried = M.queried || {})[a.ag] = S.week;
+  if (prnd() < queryOdds(ag)) signAgent(ag, 'They read your letter and want to meet. By Friday you have an agent.');
+  else inbox('note', `${ag.name} passes`, 'A polite form email. They are not taking on new clients at this time. Try again in a few months, with more on your reel.');
+  return true;
+}
+function signAgent(ag, why) {
+  const M = S.me, q = makePerson(M.hub, 'producer', { age: 30 + Math.floor(prnd() * 20) });
+  q.occ = 'Talent agent'; q.agency = ag.name;
+  M.agent = { ag: ag.i, name: ag.name, tier: ag.tier, id: q.id, since: S.week, lastBook: S.week, cut: .1 };
+  meet(q.id, 'Your agent', 15); trust(q.id, 20);
+  inbox('news', `You have an agent: ${q.name}`, `${why} ${q.name} at ${ag.name} takes 10% of what you earn, sends you up for better jobs and argues for better money.`, { person: q.id });
+}
+// Extra listings your agent finds, a level above where you'd look yourself, with their pitch behind them.
+function agentBoard(films) {
+  const M = S.me; if (!M.agent) return [];
+  const L = careerLevel(), out = [];
+  for (const f of films) {
+    if (out.length >= M.agent.tier + 1) break;
+    const opts = POSTS.filter(t => t.tier >= Math.max(1, L) && t.tier <= L + 2 && t.st.includes(f.stage) && headOf(f, t.head) !== null);
+    if (!opts.length || prnd() > .5) continue;
+    const p = makePost(ppick(opts), f);
+    p.agent = 1; p.rate = Math.round(p.rate * (1.1 + .06 * M.agent.tier));
+    out.push(p);
+  }
+  return out;
+}
+function agentWeek() {
+  const M = S.me; if (!M.agent) return;
+  if (M.jobs.length) M.agent.lastBook = S.week;
+  if (S.week - M.agent.lastBook > 30) { inbox('note', 'Your agent lets you go', `${M.agent.name} drops you: thirty weeks without a booking. It isn't personal. It feels personal.`); M.agent = null; }
+}
+function agentApproach() {
+  const M = S.me, me = ME();
+  if (M.agent || pending().some(x => x.kind === 'agentoffer') || me.credits.length < 1 || me.standing < 10 || prnd() > .035 + me.credits.length * .006) return;
+  const L = agenciesIn(M.hub).filter(a => a.tier <= 1 + Math.floor(me.credits.length / 3));
+  if (!L.length) return;
+  const ag = ppick(L);
+  inbox('agentoffer', `${ag.name} calls`, `Someone at ${ag.name} saw your name in the credits and wants to represent you. Ten per cent of everything; better jobs, better money.`, { ag: ag.i, choices: [{ k: 'yes', label: 'Sign with them' }, { k: 'no', label: 'Not yet' }] });
+}
+
+// ---- Events: luck, life, big moments and the tabloids ----
+// Each is a scene in the inbox. lv: [min, max] career level; fame: needs that much fame. Mostly good luck, as promised.
+const LIFE_EVENTS = [
+  { id: 'ev_lift', kind: 'luck', lv: [0, 2], w: 3, title: 'A breakdown on Sunset', text: 'A car has died at the lights and its driver is late for a meeting. You recognise {star}.', opts: [
+    { k: 'lift', label: 'Offer a lift', check: ['cha', 10], ok: { tie: { star: 12 }, tag: { star: 'Gave them a lift' } }, bad: { tie: { star: 2 } }, t: '{star} talks the whole way and takes your number.', tb: 'A polite thank-you, and silence the rest of the way.' },
+    { k: 'push', label: 'Help push it to the kerb', ok: { tie: { star: 5 }, energy: -5 }, t: 'Sweaty, grateful handshake. They\'ll probably remember your face.' }] },
+  { id: 'ev_wrongmail', kind: 'luck', lv: [0, 2], w: 3, title: 'Wrong recipient', text: 'An email from {contact}\'s office lands with you by mistake: a list of crew they\'re trying to fill.', opts: [
+    { k: 'reply', label: 'Reply, honestly and a little cheekily', check: ['cha', 12], ok: { tie: { contact: 8 }, due: 'contact' }, bad: { tie: { contact: -3 } }, t: 'They laugh, and mention you to their producer.', tb: 'Read as presumptuous. Oh well.' },
+    { k: 'forward', label: 'Point out the mistake, nothing more', ok: { tie: { contact: 3 }, trust: { contact: 5 } }, t: 'They thank you for being decent about it.' }] },
+  { id: 'ev_ticket', kind: 'luck', lv: [0, 3], w: 2, title: 'A spare ticket', text: 'A friend can\'t make a premiere and hands you their ticket. The after-party is where it happens.', opts: [
+    { k: 'work', label: 'Work the room', check: ['cha', 12], ok: { stand: .6, tie: { star: 6 } }, bad: { stress: 4 }, t: 'You leave with three numbers and a hangover.', tb: 'You end up talking to the caterers. Lovely people.' },
+    { k: 'watch', label: 'Just watch the film', ok: { xp: { tas: .3 } }, t: 'A good film on a big screen. You remember why.' }] },
+  { id: 'ev_windfall', kind: 'luck', lv: [0, 5], w: 1, title: 'Found money', text: 'A tax refund you\'d forgotten about. Or a scratch card. Either way: money.', opts: [
+    { k: 'save', label: 'Put it away', ok: { cash: 350 }, t: 'Three hundred and fifty dollars between you and disaster.' },
+    { k: 'spend', label: 'Take everyone out', ok: { cash: 120, stress: -8, tie: { friend: 6 } }, t: 'A long, loud dinner. Worth it.' }] },
+  { id: 'ev_teacher', kind: 'luck', lv: [0, 2], w: 2, title: 'An old teacher', text: 'A teacher from your school days writes: they\'ve told a former student, now working in film, all about you.', opts: [
+    { k: 'thank', label: 'Write back and thank them', ok: { refs: 1, stress: -2 }, t: 'Your next application will come with a word in someone\'s ear.' }] },
+  { id: 'ev_birthday', kind: 'life', lv: [0, 5], w: 2, title: 'Your birthday', text: 'Another year. {friend} wants to throw you something.', opts: [
+    { k: 'party', label: 'Let them throw a party', ok: { cash: -80, stress: -10, tie: { friend: 5 } }, t: 'Cake, friends, someone\'s guitar. You feel lucky.' },
+    { k: 'quiet', label: 'A quiet dinner', ok: { stress: -5 }, t: 'Just what you needed.' },
+    { k: 'work', label: 'Work through it', ok: { stress: 4 }, t: 'Nobody on the job knows. That\'s how you like it, apparently.' }] },
+  { id: 'ev_family', kind: 'life', lv: [0, 5], w: 1.4, title: 'A call from home', text: 'A parent is in hospital. Not critical, they say. They\'d like to see you.', opts: [
+    { k: 'go', label: 'Go home for a few days', ok: { cash: -450, energy: -10, stress: -6 }, t: 'Hospital coffee, old jokes, home cooking. They\'re going to be fine.' },
+    { k: 'stay', label: 'Call every day instead', ok: { stress: 9 }, t: 'They understand. You\'re not sure you do.' }] },
+  { id: 'ev_breakup', kind: 'life', lv: [0, 5], w: 1, title: 'It\'s over', text: 'The person you\'ve been seeing says you\'re married to the work.', opts: [
+    { k: 'fight', label: 'Fight for it', check: ['com', 12], ok: { stress: -3 }, bad: { stress: 10 }, t: 'You promise to make time, and mean it.', tb: 'It doesn\'t work. It rarely does.' },
+    { k: 'let', label: 'Let it go', ok: { stress: 6 }, t: 'A few bad nights. Then work.' }] },
+  { id: 'ev_flu', kind: 'life', lv: [0, 5], w: 1.2, title: 'Flu', text: 'You wake up shivering. Everyone on the last job had it.', opts: [
+    { k: 'rest', label: 'Stay in bed', ok: { energy: -10, stress: -2 }, t: 'Soup and old films. Three days lost.' },
+    { k: 'push', label: 'Push through it', check: ['eth', 13], ok: { stand: .2 }, bad: { energy: -25, stress: 6 }, t: 'You make it, somehow.', tb: 'You make it worse. Much worse.' }] },
+  { id: 'ev_strike', kind: 'big', lv: [1, 5], w: .5, title: 'The unions walk out', text: 'Contract talks have collapsed. The guilds call a strike, and the picket lines go up outside every studio.', opts: [
+    { k: 'picket', label: 'Walk the line', ok: { stand: .8, stress: 4, cash: -100 }, t: 'Weeks of signs and solidarity. Everyone remembers who showed up.' },
+    { k: 'nonunion', label: 'Take non-union work', check: ['com', 13], ok: { cash: 600 }, bad: { cash: 300, stand: -2 }, t: 'Money in a lean month, quietly.', tb: 'Someone sees you crossing. It gets around.' }] },
+  { id: 'ev_festival', kind: 'big', lv: [2, 5], w: 1, title: 'A festival invitation', text: 'A film you worked on is in a festival lineup, and the producers can fly one more person out.', opts: [
+    { k: 'go', label: 'Go, and network hard', check: ['cha', 13], ok: { stand: 1.5, cash: -300, tie: { star: 8 } }, bad: { cash: -300, stress: 4 }, t: 'Panels, parties, a terrace at dawn. People know your name now.', tb: 'Jet lag and a cold. You come back with a tan.' },
+    { k: 'stay', label: 'Stay and work', ok: { stress: 2 }, t: 'You watch the photos online.' }] },
+  { id: 'ev_awards', kind: 'big', lv: [3, 5], w: .8, title: 'Awards season', text: 'You\'re invited to a guild awards dinner. Black tie, a table near the back, and every decision-maker in town.', opts: [
+    { k: 'go', label: 'Go and make an impression', check: ['cha', 14], ok: { stand: 2, tie: { star: 10 } }, bad: { stress: 5 }, t: 'You end the night at a table with people who greenlight films.', tb: 'You talk to a coat-check attendant for most of the night.' },
+    { k: 'skip', label: 'Skip it', ok: { stress: -3 }, t: 'Pyjamas and the livestream.' }] },
+  { id: 'ev_profile', kind: 'big', lv: [3, 5], w: .8, title: 'The trades call', text: 'A trade magazine wants to include you in a feature on people to watch.', opts: [
+    { k: 'yes', label: 'Give a candid interview', check: ['cha', 12], ok: { stand: 2.5, fame: 6 }, bad: { stand: -1, stress: 6 }, t: 'A flattering profile and a good photo.', tb: 'One quote, out of context, follows you around for months.' },
+    { k: 'safe', label: 'Give a safe interview', ok: { stand: 1, fame: 3 }, t: 'Bland, but out there.' }] },
+  { id: 'ev_paps', kind: 'tabloid', lv: [2, 5], fame: 25, w: 1, title: 'Photographed', text: 'A photographer catches you leaving a restaurant with {star}. The picture is everywhere by morning.', opts: [
+    { k: 'laugh', label: 'Laugh it off in public', check: ['com', 12], ok: { fame: 6, tie: { star: 4 } }, bad: { stress: 8, tie: { star: -6 } }, t: 'You handle it like a pro. People like you more.', tb: 'You look rattled in every follow-up shot.' },
+    { k: 'silent', label: 'Say nothing', ok: { fame: 3, stress: 3 }, t: 'It blows over in a week.' }] },
+  { id: 'ev_rumour', kind: 'tabloid', lv: [2, 5], fame: 20, w: 1, title: 'A rumour in the column', text: 'A gossip column claims you were difficult on your last job. It isn\'t true. Mostly.', opts: [
+    { k: 'deny', label: 'Deny it on the record', check: ['cha', 13], ok: { stand: .5 }, bad: { stand: -1.5, stress: 6 }, t: 'Your denial lands well; colleagues back you.', tb: 'The denial becomes the story.' },
+    { k: 'ignore', label: 'Ignore it', ok: { stand: -.5, stress: 4 }, t: 'Some people believe it. Most forget.' },
+    { k: 'lean', label: 'Lean into it', check: ['com', 14], ok: { fame: 8 }, bad: { stand: -2 }, t: 'A difficult genius? Sells tickets.', tb: 'Now you are known as difficult.' }] },
+  { id: 'ev_feud', kind: 'tabloid', lv: [3, 5], fame: 35, w: .6, title: 'A public feud', text: '{rival} takes a swipe at you in an interview.', opts: [
+    { k: 'hit', label: 'Hit back', check: ['cha', 14], ok: { fame: 10, tie: { rival: -10 } }, bad: { fame: 4, stand: -2, tie: { rival: -10 } }, t: 'The internet decides you won.', tb: 'The internet decides you both lost.' },
+    { k: 'high', label: 'Take the high road', ok: { stand: 1 }, t: 'Classy. People notice.' }] }
+];
+for (const e of LIFE_EVENTS) SCENES.push(Object.assign({ event: 1, jobs: [] }, e));
+// One event at most a week, more often as your life fills up, never the same one within ten weeks.
+function maybeEvent() {
+  const M = S.me, me = ME(), L = careerLevel();
+  if (prnd() > .1 + L * .02) return;
+  const recent = new Set(M.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 10).map(x => x.scene));
+  const ok = LIFE_EVENTS.filter(e => L >= e.lv[0] && L <= e.lv[1] && !recent.has(e.id) && (!e.fame || (me.fame || 0) >= e.fame));
+  if (!ok.length) return;
+  let tw = ok.reduce((s, e) => s + e.w, 0), r = prnd() * tw, ev = ok[ok.length - 1];
+  for (const e of ok) { r -= e.w; if (r <= 0) { ev = e; break; } }
+  const known = Object.keys(M.known).map(Number).filter(id => !P(id).dead);
+  const best = known.slice().sort((a, b) => opinion(b) - opinion(a));
+  const ctx = { head: null, film: null, mates: [], friend: best[0] ?? null, contact: known.length ? ppick(known) : null,
+    rival: known.find(id => M.known[id].tags.includes('Rival')) ?? null };
+  if (/\{star\}/.test(ev.text + JSON.stringify(ev.opts))) { const s = bestIn(M.hub, ['actor', 'director'], q => q.fame + prnd() * 20); ctx.star = s ? s.id : null; }
+  for (const k of ['star', 'contact', 'friend', 'rival']) if ((ev.text + JSON.stringify(ev.opts)).includes('{' + k + '}') && ctx[k] === null) return;
+  inbox('scene', ev.title, fillScene(ev.text, ctx), { scene: ev.id, ctx, ev: ev.kind, choices: ev.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
+}
+// </career-depth>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -11458,7 +11738,7 @@ function viewPerson(id) {
   const current = S.active.map(i => S.films[i]).filter(f => keyIds(f).includes(p.id));
   const roleIn = f => f.xc && f.xc[p.id] ? f.xc[p.id] : f.dir === p.id ? (f.wri.includes(p.id) ? 'Writer-director' : 'Director') : f.cast.includes(p.id) ? ['Lead', 'Co-lead', 'Supporting'][f.cast.indexOf(p.id)] : f.wri.includes(p.id) ? 'Writer' : f.dp === p.id ? 'Cinematography' : f.ed === p.id ? 'Editor' : f.prod === p.id ? 'Producer' : crewRole(f, p.id);
   const repRow = (l, v, cls) => `<div class="rep"><span>${l}</span>${bar(v, 100, cls)}<b>${Math.round(v)}</b></div>`;
-  return `<div class="head detail partyhead"><div class="pf">${portraitOf(p, 112)}</div><div><p class="eyebrow">${ROLE_LABEL[p.role]} · ${esc(hubName(p.hub))}</p><h2>${esc(p.name)}</h2>
+  return `<div class="head detail partyhead"><div class="pf">${portraitOf(p, 112)}</div><div><p class="eyebrow">${p.player ? ROLE_LABEL[p.role] : esc(p.occ || occupationOf(p))}${!p.player && !p.occ && occupationOf(p) !== ROLE_LABEL[p.role] ? ' · ' + ROLE_LABEL[p.role] : ''} · ${esc(hubName(p.hub))}</p><h2>${esc(p.name)}</h2>
   <p class="lede">${p.player ? '<b>This is you.</b> ' : ''}${pron(p)[0]} ${pron(p)[1]} ${ageOf(p)}${p.dead ? ' (died)' : ''}, born ${p.born}. ${p.credits.length} credit${p.credits.length === 1 ? '' : 's'}${p.debut !== null && p.credits.length ? `, debut in ${yearOf(S.films[p.credits[0]].rel)}` : ''}. Status: ${esc(personStatus(p))}.</p>
   <div class="traits">${p.traits.map(t => `<span class="chip trait" title="${esc(TRAITS[t].d)}">${esc(t)}</span>`).join('')}</div>
   ${p.player && S.me ? `<p class="muted">${esc(ORIGIN.edu[S.me.edu].label)}. Loves ${S.me.love.map(g => g.toLowerCase()).join(', ') || 'everything'}${S.me.hate.length ? '; can\u2019t stand ' + S.me.hate.map(g => g.toLowerCase()).join(' or ') : ''}.${S.me.favs.length ? ' Favourite films: ' + S.me.favs.map(f => esc(S.cat.allFilms[f].t)).join(', ') + '.' : ''}</p>` : ''}</div></div>
@@ -11548,8 +11828,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 4, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 4 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 5, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 5 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -11724,6 +12004,17 @@ function guidePanel() {
     <div><h4>Real history</h4><p>The films and people of real film history are here under new names, with their real credits, trivia and rumours (switch on <i>Cinephile notes</i> on any film or person). From the day you arrive, history is yours to change.</p></div>
    </div></section>`;
 }
+// School and representation: the two longer roads.
+function pathsPanel() {
+  const M = S.me, ags = agenciesIn(M.hub);
+  const sc = M.school, P0 = sc ? PROGRAMS[sc.prog] : null;
+  const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. Plan <b>${P0.days} study day${P0.days > 1 ? 's' : ''}</b> a week${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
+    : `<p class="muted">Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
+      <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} day${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
+  const agent = M.agent ? `<p>${pl(M.agent.id)} at <b>${esc(M.agent.name)}</b> ${'★'.repeat(M.agent.tier)} represents you: takes 10%, pitches you for jobs a level up and pushes your rate. Last booking ${S.week - M.agent.lastBook} weeks ago${S.week - M.agent.lastBook > 20 ? ' <span class="bad">(they get restless after thirty)</span>' : ''}.</p><p><button class="linkish" data-fireagent="1">Leave your agent</button></p>`
+    : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
+  return `<section class="panel"><h3>School</h3>${school}<h3>Representation</h3>${agent}</section>`;
+}
 // Your place: the furniture shop and where things go.
 function homePanel() {
   const M = S.me, H = M.home, lay = homeLayout(), spots = HOME_SPOTS[M.life] || [];
@@ -11752,17 +12043,18 @@ function viewDesk() {
   const boardRow = p => {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
-    return `<tr><td><a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n">${p.rate ? fmtCash(p.rate) : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
-      <td><label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label></td></tr>`;
+    const block = blockedFrom(t);
+    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n">${p.rate ? fmtCash(p.rate) : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
+      <td>${block ? `<span class="muted small">${esc(block)}</span>` : `<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
   const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
     const q = P(id), k = M.known[id], o = opinion(id);
     const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
-    return `<tr><td>${pl(id)}</td><td>${esc(ROLE_LABEL[q.role])}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
+    return `<tr><td>${pl(id)}</td><td>${esc(q.occ || occupationOf(q))}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
       <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
   }).join('');
   return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
-   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'}</p>
+   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
     <div><span>Energy</span>${meter('', M.wk ? clamp(M.wk.energy, 0, 100) : M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
@@ -11783,6 +12075,7 @@ function viewDesk() {
      <div class="ccrow"><label>Living ${sel('pl-life', Object.entries(ORIGIN.life).map(([k, l]) => [k, `${l.label} (${fmtCash(usd(l.rent))}/wk)`]), M.life)}</label></div></section>
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
+    ${pathsPanel()}
     ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
    </div></div>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
@@ -11849,6 +12142,10 @@ function careerClick(t) {
     render(true); return true;
   }
   if (t.dataset.look) { const [k, v] = t.dataset.look.split(':'); setLook(k, +v); return true; }
+  if (t.dataset.enrol) { const [prog, craft] = t.dataset.enrol.split(':'); doAct({ t: 'enrol', prog, craft }); render(true); return true; }
+  if (t.dataset.dropout) { doAct({ t: 'dropout' }); render(true); return true; }
+  if (t.dataset.query) { doAct({ t: 'query', ag: +t.dataset.query }); render(true); return true; }
+  if (t.dataset.fireagent) { doAct({ t: 'fireagent' }); render(true); return true; }
   if (t.dataset.guide !== undefined) { UI.guide = !!t.dataset.guide && !UI.guide; render(true); return true; }
   if (t.dataset.homep !== undefined) { UI.homep = !!t.dataset.homep && !UI.homep; render(true); return true; }
   if (t.dataset.furnish) { doAct({ t: 'furnish', id: t.dataset.furnish }); render(true); return true; }
@@ -11873,7 +12170,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

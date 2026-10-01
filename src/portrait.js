@@ -141,6 +141,9 @@ function portraitSVG(L, age, size = 96, bare = false) {
   if (L.head === 7) o.push(`<path d="M${cx - hairHalf} ${top + 7} Q${cx} ${top - 2} ${cx + hairHalf} ${top + 7}" stroke="#C8102E" stroke-width="4" fill="none"/>`);
   if (L.head === 8) o.push(`<ellipse cx="${cx}" cy="${brim}" rx="${hw + 12}" ry="4.5" fill="#3B3226"/><path d="M${cx - hw + 1} ${brim} L${cx - hw + 3} ${top - 12} Q${cx} ${top - 6} ${cx + hw - 3} ${top - 12} L${cx + hw - 1} ${brim} Z" fill="#3B3226"/><rect x="${cx - hw + 1}" y="${brim - 5}" width="${hw * 2 - 2}" height="4" fill="#1E1A14"/>`);
   if (L.head === 9) o.push(`<path d="M${cx - hw} ${brim} Q${cx - hw} ${top - 10} ${cx} ${top - 11} Q${cx + hw} ${top - 10} ${cx + hw} ${brim} Z" fill="#1F1430"/><path d="M${cx - 2} ${brim - 1} L${cx + hw + 13} ${brim + 1} Q${cx + hw + 14} ${brim + 5} ${cx + hw + 6} ${brim + 5} L${cx - 2} ${brim + 3} Z" fill="#000"/><text x="${cx}" y="${top + 2}" font-size="6" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700">CREW</text>`);
+  // a raised forearm shows what's on the wrist
+  if (L.wrist) { const band = ['', '#3B3226', '#C9A646', '#8C6A2E', '#1E1E1E'][L.wrist], face = L.wrist === 2 ? null : L.wrist === 4 ? '#2C4F7C' : '#F3EFF8';
+    o.push(`<g transform="rotate(-18 100 112)"><rect x="93" y="92" width="14" height="30" rx="6" fill="${cloth}"/><rect x="94" y="80" width="12" height="16" rx="5" fill="${skin}"/><ellipse cx="100" cy="78" rx="7" ry="6" fill="${skin}"/><rect x="93" y="88" width="14" height="${L.wrist === 2 ? 2.5 : 4}" fill="${band}"/>${face ? `<rect x="96.5" y="86.5" width="7" height="7" rx="${L.wrist === 4 ? 1.5 : 3.5}" fill="${face}" stroke="${band}" stroke-width="1"/>` : ''}</g>`); }
   // glasses
   if (L.glasses) {
     const g = L.glasses, gc = g === 4 ? '#B9A06A' : g === 7 || g === 9 ? '#222' : '#2A2A2A', fill = g === 7 ? '#1D1D1D' : g === 9 ? 'rgba(80,60,120,.35)' : 'none';

@@ -478,7 +478,7 @@ function refreshBoard() {
   const films = S.active.map(i => S.films[i]).filter(f => f.hub === hub && f.stage >= 0 && f.stage < 4 && f.stageEnd - S.week >= 1);
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   for (const f of films) {
-    const opts = POSTS.filter(t => t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
+    const opts = POSTS.filter(t => !t.cat && t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
     const n = Math.min(opts.length, prnd() < .5 ? 1 : prnd() < .6 ? 2 : 0);
     const chosen = new Set();
     // a contact in charge of a department makes their own job easier to hear about
@@ -492,14 +492,14 @@ function refreshBoard() {
   out.sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0));
   const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, 14);
   const m = dateOf(S.week).getUTCMonth();
-  const odd = ODD_JOBS.filter(t => (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
-  M.board = film.concat(odd);
+  const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
+  M.board = agentBoard(films).concat(film, depthBoard(films), odd);
 }
 function makePost(t, f) {
   const head = f ? headOf(f, t.head) : null;
   const weeks = t.weeks || (f ? Math.max(1, Math.min(14, f.stageEnd - S.week + (t.st.length > 1 && f.stage === t.st[0] ? f.dur[f.stage + 1] : 0))) : 4);
   const hubComp = clamp(hubProd(S.me.hub, S.year) / 40, .3, 1.4);
-  const comp = !f ? .1 : (t.tier === 2 ? .8 : .6) * hubComp + (f.tier === 1 ? .6 : f.tier === 3 ? -.2 : 0);
+  const comp = !f ? (t.cat ? .3 + t.tier * .3 : .1) : (t.tier >= 2 ? .8 : .6) * hubComp + (f.tier === 1 ? .6 : f.tier === 3 ? -.2 : 0);
   return { id: S.me.seq++, k: t.k, odd: !f, t: t.t, jid: t.jid, tier: t.tier, film: f ? f.id : null, head, days: t.days, weeks, rate: usd(t.rate), comp, ref: head !== null && (S.me.refs[head] || 0) > 0, w: S.week };
 }
 function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
@@ -507,9 +507,13 @@ function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
 // How likely an application is to land, and why: a list of named factors in logit units.
 function hireFactors(post) {
   const M = S.me, me = ME(), t = tmplOf(post), F = [];
-  F.push(['Job level', post.odd ? 1 : post.tier === 1 ? .25 : -1.2]);
+  const lvl = careerLevel();
+  F.push(['Job level', post.odd && !t.cat ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
+  if (post.tier === 0 && M.school) F.push(['You\'re a student', .7]);
+  if (post.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
+  if (M.freeRef) F.push(['A word from your old teacher', .8]);
   const sc = subScore(t), req = postReq(t);
-  F.push(['Your skills for it', post.tier === 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
+  F.push(['Your skills for it', post.tier <= 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
   if (t.actor) F.push(['Looks and presence', (M.body.looks - 10) * .06 + (me.sk.pres - 10) * .05]);
   F.push(['Track record', Math.min(1.1, me.credits.length * .18 + M.stats.weeks * .01)]);
   F.push(['Standing', (me.standing - 10) * .035]);
@@ -522,7 +526,7 @@ function hireFactors(post) {
   if (M.wealth === 'trust') F.push(['Seen as a dabbler', -.25]);
   if (M.quirk === 'record' && post.film !== null && S.films[post.film].tier === 1) F.push(['Studio background check', -.8]);
   if (M.quirk === 'viral') F.push(['Internet fame', t.actor ? .4 : -.15]);
-  if (M.degrees.length && post.tier === 2) F.push(['Your degree', .25]);
+  if (M.degrees.length && post.tier >= 2) F.push(['Your degree', M.degrees.includes('mfa') ? .4 : .25]);
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   return F;
@@ -538,7 +542,8 @@ const ACTIVITIES = {
   write: { label: 'Write', e: 9, d: 'Work on a spec script. Slow, and it grows your writing.' },
   train: { label: 'Take a class', e: 9, cost: 70, d: 'Classes and practice in one craft. Slower than work, always available.' },
   hustle: { label: 'Side hustle', e: 13, d: 'Bar shifts and deliveries. Pays the rent; teaches nothing.' },
-  rest: { label: 'Rest', e: -20, d: 'Sleep, see friends outside the business. Restores energy, lowers stress.' }
+  rest: { label: 'Rest', e: -20, d: 'Sleep, see friends outside the business. Restores energy, lowers stress.' },
+  study: { label: 'Study', e: 9, d: 'Classes for the course you\'re enrolled in. Miss too many and they\'ll drop you.' }
 };
 const SLOT_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Weekend'];
 function jobDays() { return S.me.jobs.reduce((s, j) => s + j.days, 0); }
@@ -625,6 +630,7 @@ function closeWeek(a) {
     const days = j.days;
     const pay = j.rate * days;
     cashIn += pay; M.stats.earned += pay;
+    if (M.agent) cashOut += Math.round(pay * M.agent.cut);
     M.stats.weeks++;
     j.done++;
     me.lastWork = S.week;
@@ -644,9 +650,10 @@ function closeWeek(a) {
   const offers = [], noes = [];
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
-    if (!post) continue;
+    if (!post || blockedFrom(tmplOf(post))) continue;
     M.stats.apps++;
     if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post);
+    if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
@@ -654,6 +661,8 @@ function closeWeek(a) {
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
   if (rival !== undefined && noes.length && prnd() < .2) { const p = ppick(noes); addTie(me, P(rival), -3); inbox('note', `${P(rival).name} again`, `You hear who got the ${p.t.toLowerCase()} job you wanted${p.film !== null ? ' on ' + S.films[p.film].title : ''}: ${P(rival).name}.`, { person: rival }); stress += 3; }
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
+  const fee = schoolWeek(L, gain);
+  if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
   cashOut += Math.round(usd(life.rent) * traitMul(me, 'living')) + M.upkeep;
@@ -778,6 +787,7 @@ function afterTick(fresh) {
   }
   // scenes from the jobs you're on
   for (const j of M.jobs) if (j.done > 0 && prnd() < .55) { const sc = pickScene(j); if (sc) inbox('scene', sc.title, sc.text, { job: j.id, scene: sc.id, ctx: sc.ctx, choices: sc.opts }); }
+  agentWeek(); agentApproach(); maybeEvent();
   // life events
   if (M.quirk === 'secret' && !M.secretOut && S.week - M.startW > 20 && prnd() < .03) secretEvent();
   if (M.shark > 0 && (S.week - M.startW) % 8 === 7) inbox('debt', 'A visit about the loan', `The man you owe ${fmtCash(M.shark)} comes by. Interest is running at one percent a week.`, { choices: [{ k: 'pay', label: `Pay it all (${fmtCash(M.shark)})`, dis: M.cash < M.shark ? 'Not enough cash' : null }, { k: 'part', label: `Pay ${fmtCash(Math.round(M.shark / 4))} to buy time`, dis: M.cash < M.shark / 4 ? 'Not enough cash' : null }, { k: 'stall', label: 'Stall' }] });
@@ -854,7 +864,7 @@ const SCENES = [
 function pickScene(j) {
   // scenes written for this job come up more than generic ones, and none repeats within a couple of months
   const recent = new Set(S.me.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 8).map(x => x.scene));
-  const L = SCENES.filter(s => (!s.jobs || s.jobs.includes(j.k)) && !recent.has(s.id) && !(j.film === null && /\{(film|dir|lead)\}/.test(s.text + JSON.stringify(s.opts))));
+  const L = SCENES.filter(s => !s.event && (!s.jobs || s.jobs.includes(j.k)) && !recent.has(s.id) && !(j.film === null && /\{(film|dir|lead)\}/.test(s.text + JSON.stringify(s.opts))));
   if (!L.length) return null;
   let tw = 0; const ws = L.map(s => { const w = s.jobs ? 3 : 1; tw += w; return w; });
   let r = prnd() * tw, s = L[L.length - 1];
@@ -866,7 +876,7 @@ function pickScene(j) {
   return { id: s.id, title: s.title, text: fillScene(s.text, ctx), ctx, opts: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check, hint: o.check ? statLabel(o.check[0]) : null })) };
 }
 function statLabel(k) { return MINDS[k] || (SUB2C[k] ? CRAFTS[SUB2C[k]].subs[k] : k); }
-function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : 'someone'); }
+function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : 'someone').replace(/\b([Tt]he) The /g, '$1 '); }
 
 function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
@@ -881,6 +891,8 @@ function sceneResolve(it, k) {
   if (fx.stress) M.stress = clamp(M.stress + fx.stress, 0, 100);
   if (fx.energy) M.energy = clamp(M.energy + fx.energy, 0, 100);
   if (fx.cash) M.cash += usd(fx.cash);
+  if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
+  if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
   const job = M.jobs.find(j => j.id === it.job);
   if (fx.shadow && job) job.shadow = 1;
@@ -897,6 +909,10 @@ function sceneResolve(it, k) {
 function resolvePick(it, k) {
   const M = S.me, me = ME(), c = it.choices.find(x => x.k === k);
   if (!c || c.dis) return false;
+  if (it.kind === 'agentoffer') {
+    if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
+    it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
+  }
   if (it.kind === 'offer') {
     if (k === 'yes') {
       if (jobDays() + it.post.days > 5) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
@@ -965,6 +981,10 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
+    case 'enrol': return enrol(a);
+    case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${PROGRAMS[S.me.school.prog].label.toLowerCase()}.`); S.me.school = null; return true;
+    case 'query': return queryAgency(a);
+    case 'fireagent': if (!S.me.agent) return false; inbox('note', 'You leave your agent', `You and ${S.me.agent.name} part ways.`); if (S.me.known[S.me.agent.id]) addTie(ME(), P(S.me.agent.id), -10); S.me.agent = null; return true;
   }
   return false;
 }

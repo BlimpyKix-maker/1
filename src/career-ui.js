@@ -7,8 +7,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 4, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 4 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 5, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 5 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -183,6 +183,17 @@ function guidePanel() {
     <div><h4>Real history</h4><p>The films and people of real film history are here under new names, with their real credits, trivia and rumours (switch on <i>Cinephile notes</i> on any film or person). From the day you arrive, history is yours to change.</p></div>
    </div></section>`;
 }
+// School and representation: the two longer roads.
+function pathsPanel() {
+  const M = S.me, ags = agenciesIn(M.hub);
+  const sc = M.school, P0 = sc ? PROGRAMS[sc.prog] : null;
+  const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. Plan <b>${P0.days} study day${P0.days > 1 ? 's' : ''}</b> a week${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
+    : `<p class="muted">Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
+      <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} day${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
+  const agent = M.agent ? `<p>${pl(M.agent.id)} at <b>${esc(M.agent.name)}</b> ${'★'.repeat(M.agent.tier)} represents you: takes 10%, pitches you for jobs a level up and pushes your rate. Last booking ${S.week - M.agent.lastBook} weeks ago${S.week - M.agent.lastBook > 20 ? ' <span class="bad">(they get restless after thirty)</span>' : ''}.</p><p><button class="linkish" data-fireagent="1">Leave your agent</button></p>`
+    : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
+  return `<section class="panel"><h3>School</h3>${school}<h3>Representation</h3>${agent}</section>`;
+}
 // Your place: the furniture shop and where things go.
 function homePanel() {
   const M = S.me, H = M.home, lay = homeLayout(), spots = HOME_SPOTS[M.life] || [];
@@ -211,17 +222,18 @@ function viewDesk() {
   const boardRow = p => {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
-    return `<tr><td><a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n">${p.rate ? fmtCash(p.rate) : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
-      <td><label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label></td></tr>`;
+    const block = blockedFrom(t);
+    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n">${p.rate ? fmtCash(p.rate) : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
+      <td>${block ? `<span class="muted small">${esc(block)}</span>` : `<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
   const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
     const q = P(id), k = M.known[id], o = opinion(id);
     const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
-    return `<tr><td>${pl(id)}</td><td>${esc(ROLE_LABEL[q.role])}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
+    return `<tr><td>${pl(id)}</td><td>${esc(q.occ || occupationOf(q))}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
       <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
   }).join('');
   return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
-   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'}</p>
+   <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
     <div><span>Energy</span>${meter('', M.wk ? clamp(M.wk.energy, 0, 100) : M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
@@ -242,6 +254,7 @@ function viewDesk() {
      <div class="ccrow"><label>Living ${sel('pl-life', Object.entries(ORIGIN.life).map(([k, l]) => [k, `${l.label} (${fmtCash(usd(l.rent))}/wk)`]), M.life)}</label></div></section>
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
+    ${pathsPanel()}
     ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
    </div></div>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
@@ -308,6 +321,10 @@ function careerClick(t) {
     render(true); return true;
   }
   if (t.dataset.look) { const [k, v] = t.dataset.look.split(':'); setLook(k, +v); return true; }
+  if (t.dataset.enrol) { const [prog, craft] = t.dataset.enrol.split(':'); doAct({ t: 'enrol', prog, craft }); render(true); return true; }
+  if (t.dataset.dropout) { doAct({ t: 'dropout' }); render(true); return true; }
+  if (t.dataset.query) { doAct({ t: 'query', ag: +t.dataset.query }); render(true); return true; }
+  if (t.dataset.fireagent) { doAct({ t: 'fireagent' }); render(true); return true; }
   if (t.dataset.guide !== undefined) { UI.guide = !!t.dataset.guide && !UI.guide; render(true); return true; }
   if (t.dataset.homep !== undefined) { UI.homep = !!t.dataset.homep && !UI.homep; render(true); return true; }
   if (t.dataset.furnish) { doAct({ t: 'furnish', id: t.dataset.furnish }); render(true); return true; }
@@ -332,7 +349,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
