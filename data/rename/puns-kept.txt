@@ -157,6 +157,7 @@ stella_m
 stone_o
 stowe
 sunra
+suo_mas
 swank
 swanson
 swayze
@@ -169,6 +170,7 @@ taylor_gil
 taylor_j
 taylor_ju
 taylor_rich
+taylor_rob
 taylor_tate
 taylor_teyana
 topol
@@ -181,6 +183,7 @@ vallee
 vanpeebles
 vantema
 vigo
+walker_hal
 warner_f
 warnock
 west
