@@ -10,6 +10,17 @@ A career and management sim of the film industry (working title). The design doc
 - `tools/playtest.js [weeks] [depth]`: plays a career with a bot and checks that the save replays identically.
 - `tools/uitest.js <outdir>`: drives the page in Chromium (Playwright) and takes screenshots.
 
+Catalogue tools:
+
+- `node tools/fill-build.js`: builds `src/cat-fill.js` (the filmography-completion batch) from `data/fill/`:
+  `people.tsv`, `films-*.tsv` (missing films), `cast-*.tsv` (cast added to films already catalogued) and
+  `facts-*.tsv` (trivia and rumours; `{Real Name}` shows a person's game name). Credits are written with
+  real names and checked against the catalogue; run `build.py` afterwards.
+- `node tools/credit-audit.js`: flags impossible credits (too young, after death, unknown people, duplicates,
+  two directed in a year) in `data/audit/credits.tsv`, and thin filmographies in `data/audit/thin.tsv`.
+- `node tools/rename-quality.js`: flags game names too close to the real ones, including padded surnames;
+  deliberate puns are listed in `data/rename/puns-kept.txt`. `tools/rename-apply.py` applies `data/rename/*.tsv`.
+
 ## Status
 
 - Phase 1, world core: done. Phase 3, catalogue (1888–2026): done.
