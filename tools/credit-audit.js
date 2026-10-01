@@ -4,6 +4,8 @@ const fs = require('fs'), path = require('path');
 const h = require('./harness.js');
 const C = h.run('CATALOGUES');
 const ROLES = ['dir', 'wri', 'cast', 'dp', 'mus', 'prod', 'pd', 'vfx', 'ed', 'cos'];
+// credits that really did come after death (a score reused in a remake, say)
+const POSTHUMOUS = new Set(['capefear91:herrmann']);
 const MIN_AGE = { dir: 17, wri: 16, cast: 2, dp: 17, mus: 14, prod: 18, pd: 18, vfx: 17, ed: 17, cos: 17 };
 const people = {}, films = [], fseen = new Set();
 for (const c of C) {
@@ -21,7 +23,7 @@ for (const f of films) {
     if (!p) { out.push(['missing-person', f.id, id, `${f.real} ${f.y}: ${r} '${id}' not in catalogue`]); continue; }
     p.credits.push({ f, r });
     if (p.b && f.y - p.b < MIN_AGE[r]) out.push(['too-young', f.id, id, `${p.real} b.${p.b} credited ${r} on ${f.real} (${f.y}) at ${f.y - p.b}`]);
-    if (p.d && f.y > p.d + (r === 'cast' || r === 'mus' ? 3 : 2)) out.push(['after-death', f.id, id, `${p.real} d.${p.d} credited ${r} on ${f.real} (${f.y})`]);
+    if (p.d && f.y > p.d + (r === 'cast' || r === 'mus' ? 3 : 2) && !POSTHUMOUS.has(f.id + ':' + id)) out.push(['after-death', f.id, id, `${p.real} d.${p.d} credited ${r} on ${f.real} (${f.y})`]);
   }
 }
 for (const p of Object.values(people)) {

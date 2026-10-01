@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Inject src/career-sim.js and src/career-ui.js into index.html between their marker comments.
-Run after editing either file: python3 tools/build.py"""
+"""Inject src/*.js into index.html between their marker comments.
+Run after editing any of them: python3 tools/build.py (and node tools/fill-build.js first after editing data/fill/)."""
 import pathlib, re
 root = pathlib.Path(__file__).resolve().parent.parent
 html = (root / 'index.html').read_text()
-for name, anchor in [('portrait', '// ================= Apple Box — World Core UI ================='),
+for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
+                     ('portrait', '// ================= Apple Box — World Core UI ================='),
                      ('career-sim', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
