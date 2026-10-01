@@ -7,6 +7,7 @@ const out = process.argv[2] || '.';
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
+  await page.emulateMedia({ reducedMotion: 'reduce' });   // skips the roll overlay so clicks keep flowing
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });

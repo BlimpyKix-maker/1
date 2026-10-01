@@ -837,8 +837,12 @@ function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'fil
 function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
   const ok = o.check ? roll(o.check[0], o.check[1]) : true;
-  const fx = ok ? o.ok : (o.bad || o.ok);
-  let t0 = '';
+  const fx0 = ok ? o.ok : (o.bad || o.ok);
+  // the harder the check, the bigger the payoff when it lands
+  const hard = ok && o.check ? 1 + Math.max(0, o.check[1] - 12) * .25 : 1;
+  const scale = (obj, f) => { if (!obj) return obj; const out = {}; for (const k in obj) out[k] = obj[k] > 0 ? obj[k] * f : obj[k]; return out; };
+  const fx = hard > 1 ? Object.assign({}, fx0, { tie: scale(fx0.tie, hard), xp: scale(fx0.xp, hard), stand: fx0.stand > 0 ? fx0.stand * hard : fx0.stand, cash: fx0.cash > 0 ? fx0.cash * hard : fx0.cash, fame: fx0.fame > 0 ? fx0.fame * hard : fx0.fame }) : fx0;
+  let t0 = hard > 1 ? ' Hard won, and worth more for it.' : '';
   const ctx = it.ctx, who = r => r === 'mates' ? ctx.mates : ctx[r] !== null && ctx[r] !== undefined ? [ctx[r]] : [];
   for (const r in fx.tie || {}) for (const id of who(r)) { meet(id, null); addTie(me, P(id), fx.tie[r]); }
   for (const r in fx.trust || {}) for (const id of who(r)) trust(id, fx.trust[r]);

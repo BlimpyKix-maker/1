@@ -379,7 +379,30 @@ tr.blocked td { opacity: .55; }
 .ob-t { width: 70px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
 .ob-t i { display: block; height: 100%; }
 .ob-t i.hi { background: var(--good); } .ob-t i.mid { background: var(--accent); } .ob-t i.lo { background: var(--bad); }
+.oddsbar { flex-wrap: wrap; row-gap: 3px; }
+.ob-dc { font: 700 11px/1 var(--f-data); color: #fff; background: var(--slate); padding: 3px 5px; border-radius: 3px; }
+.ob-l { color: var(--ink); }
+.oddsbar .big { color: var(--gold); font-weight: 600; }
+.ob-why { flex-basis: 100%; font-size: 10px; color: var(--muted); }
 .oddsbar b { color: var(--ink); font-weight: 500; }
+#rollov { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgba(10, 20, 20, .55); backdrop-filter: blur(2px); }
+.ro-box { width: min(420px, 92vw); background: var(--panel); border-radius: 14px; padding: 18px 20px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.35); border-top: 6px solid var(--slate); }
+.ro-box.done.win { border-top-color: var(--good); } .ro-box.done.lose { border-top-color: var(--bad); } .ro-box.done.crit { border-top-color: var(--gold); box-shadow: 0 0 0 4px var(--gold-soft), 0 20px 60px rgba(0,0,0,.35); }
+.ro-what { margin: 0 0 8px; font-size: 14px; } .ro-what .adv { color: var(--good); } .ro-what .dis { color: var(--bad); }
+.ro-dice { display: flex; justify-content: center; gap: 14px; margin: 6px 0; }
+.ro-die .d20 { width: 92px; height: 92px; animation: rolldie .3s linear infinite; }
+.ro-die.landed .d20 { animation: settle .45s cubic-bezier(.2,1.6,.4,1) both; }
+.ro-die.spent { opacity: .35; transform: scale(.82); transition: all .3s .2s; }
+.ro-die text { font-size: 13px; }
+@keyframes rolldie { from { transform: rotate(0deg) translateY(0); } 50% { transform: rotate(180deg) translateY(-8px); } to { transform: rotate(360deg) translateY(0); } }
+@keyframes settle { from { transform: scale(1.35) rotate(-20deg); } to { transform: none; } }
+.ro-math { font: 15px/1.4 var(--f-data); margin: 6px 0; }
+.ro-track { margin: 22px 8px 6px; } .ro-track .got { transition: left .45s cubic-bezier(.3,1.3,.5,1); }
+.ro-verdict { font: 700 34px/1.1 var(--f-display); letter-spacing: .05em; text-transform: uppercase; min-height: 38px; margin: 8px 0 4px; }
+.ro-box.done .ro-verdict { animation: land .35s ease-out both; }
+.ro-box.win .ro-verdict { color: var(--good); } .ro-box.lose .ro-verdict { color: var(--bad); } .ro-box.crit .ro-verdict { color: var(--gold); }
+.ro-box.fumble.done { animation: shake .4s both; }
+.ro-box.done.lose .ro-die.landed .d20-body { fill: var(--bad); } .ro-box.done.crit .ro-die.landed .d20-body { fill: #B8901E; } .ro-box.done.win .ro-die.landed .d20-body { fill: var(--good); }
 .oddsbar em { font-style: normal; font-size: 10px; } .oddsbar .adv { color: var(--good); } .oddsbar .dis { color: var(--bad); }
 .fx { display: inline-block; font: 600 11px/1 var(--f-display); letter-spacing: .05em; text-transform: uppercase; padding: 3px 6px 2px; border-radius: 3px; margin: 1px 0; }
 .fx.up { background: color-mix(in srgb, var(--good) 15%, transparent); color: var(--good); }
@@ -10890,8 +10913,12 @@ function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'fil
 function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
   const ok = o.check ? roll(o.check[0], o.check[1]) : true;
-  const fx = ok ? o.ok : (o.bad || o.ok);
-  let t0 = '';
+  const fx0 = ok ? o.ok : (o.bad || o.ok);
+  // the harder the check, the bigger the payoff when it lands
+  const hard = ok && o.check ? 1 + Math.max(0, o.check[1] - 12) * .25 : 1;
+  const scale = (obj, f) => { if (!obj) return obj; const out = {}; for (const k in obj) out[k] = obj[k] > 0 ? obj[k] * f : obj[k]; return out; };
+  const fx = hard > 1 ? Object.assign({}, fx0, { tie: scale(fx0.tie, hard), xp: scale(fx0.xp, hard), stand: fx0.stand > 0 ? fx0.stand * hard : fx0.stand, cash: fx0.cash > 0 ? fx0.cash * hard : fx0.cash, fame: fx0.fame > 0 ? fx0.fame * hard : fx0.fame }) : fx0;
+  let t0 = hard > 1 ? ' Hard won, and worth more for it.' : '';
   const ctx = it.ctx, who = r => r === 'mates' ? ctx.mates : ctx[r] !== null && ctx[r] !== undefined ? [ctx[r]] : [];
   for (const r in fx.tie || {}) for (const id of who(r)) { meet(id, null); addTie(me, P(id), fx.tie[r]); }
   for (const r in fx.trust || {}) for (const id of who(r)) trust(id, fx.trust[r]);
@@ -12348,10 +12375,35 @@ function rollCard(r, small) {
      <div class="track" title="${esc(rollText(r))}"><span class="need" style="left:${pos(r.DC)}%"><i>needs ${r.DC}</i></span><span class="got" style="left:${pos(tot)}%"><i>${tot}</i></span></div>
      <small>${esc(statLabel(r.stat))}: rolled ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${tot}, needed ${r.DC}${r.adv > 0 ? ' · advantage' : r.adv < 0 ? ' · disadvantage' : ''}${esc(why)}</small></div></div>`;
 }
-// The odds before you commit: a bar, a number and the reasons.
+// The odds before you commit, spelled out: the target, your modifier, advantage, the reasons and the chance.
 function oddsBar(stat, dc) {
-  const c = checkInfo(stat, dc), p = Math.round(c.p * 100);
-  return `<span class="oddsbar" title="${esc(checkLabel(stat, dc) + (c.why.length ? ' · ' + c.why.join(', ') : ''))}"><span class="ob-l">${esc(statLabel(stat))}</span><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b>${c.adv > 0 ? '<em class="adv">▲ adv</em>' : c.adv < 0 ? '<em class="dis">▼ dis</em>' : ''}</span>`;
+  const c = checkInfo(stat, dc), p = Math.round(c.p * 100), hard = c.DC >= 14;
+  return `<span class="oddsbar" title="${esc(c.why.join(', '))}"><span class="ob-dc" title="Target: roll this or more on d20 plus your modifier">DC ${c.DC}</span><span class="ob-l">${esc(statLabel(stat))} ${c.mod >= 0 ? '+' : '−'}${Math.abs(c.mod)}</span>${c.adv > 0 ? '<em class="adv" title="Roll two dice, keep the higher">⚀⚀ advantage</em>' : c.adv < 0 ? '<em class="dis" title="Roll two dice, keep the lower">⚀⚀ disadvantage</em>' : ''}<span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b>${hard ? '<em class="big">★ big reward</em>' : ''}${c.why.length ? `<span class="ob-why">${esc(c.why.join(' · '))}</span>` : ''}</span>`;
+}
+// The roll, full screen: the die (or two) spins through numbers, lands, the total slides to the target, then the verdict.
+function showRollOverlay(r) {
+  if (!r || typeof document === 'undefined' || !document.body || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const old = document.getElementById('rollov'); if (old) old.remove();
+  const dice = r.dice || [r.d], tot = r.d + r.mod, pos = v => clamp((v - 1) / 24 * 100, 0, 100);
+  const el = document.createElement('div');
+  el.id = 'rollov';
+  el.innerHTML = `<div class="ro-box ${r.ok ? 'win' : 'lose'}${r.crit > 0 ? ' crit' : r.crit < 0 ? ' fumble' : ''}"><p class="ro-what">${esc(statLabel(r.stat))} check · needs <b>${r.DC}</b>${r.adv > 0 ? ' · <span class="adv">advantage: keep the higher</span>' : r.adv < 0 ? ' · <span class="dis">disadvantage: keep the lower</span>' : ''}</p>
+    <div class="ro-dice">${dice.map((d, i) => `<div class="ro-die" data-final="${d}" data-keep="${d === r.d && (i === 0 || dice[0] !== r.d) ? 1 : 0}">${d20SVG('?')}</div>`).join('')}</div>
+    <p class="ro-math">roll <b class="ro-d">?</b> ${r.mod >= 0 ? '+' : '−'} ${Math.abs(r.mod)} = <b class="ro-t">?</b></p>
+    <div class="track ro-track"><span class="need" style="left:${pos(r.DC)}%"><i>needs ${r.DC}</i></span><span class="got" style="left:0%"><i>…</i></span></div>
+    <p class="ro-verdict"></p><p class="ro-why muted small">${esc((r.why || []).join(' · '))}</p><button class="btn-s ro-ok">Continue</button></div>`;
+  document.body.appendChild(el);
+  const dies = [...el.querySelectorAll('.ro-die')];
+  let n = 0;
+  const spin = setInterval(() => { n++; dies.forEach(d => { d.querySelector('text').textContent = 1 + Math.floor(Math.random() * 20); }); if (n > 16) { clearInterval(spin); land(); } }, 65);
+  const land = () => {
+    dies.forEach(d => { d.querySelector('text').textContent = d.dataset.final; d.classList.add('landed'); if (dies.length > 1 && d.dataset.keep !== '1') d.classList.add('spent'); });
+    el.querySelector('.ro-d').textContent = r.d; el.querySelector('.ro-t').textContent = tot;
+    setTimeout(() => { const g = el.querySelector('.ro-track .got'); g.style.left = pos(tot) + '%'; g.querySelector('i').textContent = tot; }, 250);
+    setTimeout(() => { el.querySelector('.ro-verdict').textContent = r.crit > 0 ? 'Natural 20!' : r.crit < 0 ? 'Natural 1' : r.ok ? (tot - r.DC >= 5 ? 'Comfortably' : 'Made it') : (r.DC - tot <= 2 ? 'So close' : 'Missed'); el.querySelector('.ro-box').classList.add('done'); }, 700);
+  };
+  const close = () => { clearInterval(spin); el.remove(); };
+  el.addEventListener('click', e => { if (e.target.closest('.ro-ok') || e.target === el) close(); });
 }
 // What a trait, garment or piece of furniture does, as badges.
 function fxBadges(o) {
@@ -12595,8 +12647,8 @@ function careerClick(t) {
   }
   if (t.dataset.buy) { doAct({ t: 'buy', id: t.dataset.buy }); render(true); return true; }
   if (t.dataset.restyle) { UI.restyle = !UI.restyle; render(true); return true; }
-  if (t.dataset.party) { doAct({ t: 'party', k: t.dataset.party }); render(true); return true; }
-  if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'); doAct({ t: 'pick', id: +id, k }); render(true); return true; }
+  if (t.dataset.party) { const n0 = S.me.rollN || 0; doAct({ t: 'party', k: t.dataset.party }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'), n0 = S.me.rollN || 0; doAct({ t: 'pick', id: +id, k }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.quit) { doAct({ t: 'quit', id: +t.dataset.quit }); render(true); return true; }
   if (t.dataset.favour) { doAct({ t: 'favour', id: +t.dataset.favour }); render(true); return true; }
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
@@ -12667,10 +12719,10 @@ function render(keepScroll) {
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
   $('#main').innerHTML = html;
   if (UI.pendingSeen) UI.seenRoll = UI.pendingSeen;   // a roll tumbles in once
-  const adv = $('#adv'), mode = careerActive() ? 'career' : 'watch';
+  const adv = $('#adv'), mode = careerActive() ? 'career' : S.me && !S.me.over ? 'setup' : 'watch';
   if (adv.dataset.mode !== mode) {
     adv.dataset.mode = mode;
-    adv.innerHTML = mode === 'career' ? `<button class="btn primary" data-next="1">Next</button><button class="btn" data-day="1">End day</button><button class="btn" data-endweek="1">End week</button>` : '<button class="btn" data-adv="1">Next week</button><button class="btn" data-adv="4">Next month</button><button class="btn primary" data-adv="52">Next year</button>';
+    adv.innerHTML = mode === 'setup' ? '' : mode === 'career' ? `<button class="btn primary" data-next="1">Next</button><button class="btn" data-day="1">End day</button><button class="btn" data-endweek="1">End week</button>` : '<button class="btn" data-adv="1">Next week</button><button class="btn" data-adv="4">Next month</button><button class="btn primary" data-adv="52">Next year</button>';
   }
   if (mode === 'career') { const n = pending().length; adv.querySelectorAll('[data-endweek],[data-day],[data-next]').forEach(b => { b.disabled = UI.busy; b.title = n ? `Decide on ${n} inbox item${n > 1 ? 's' : ''} first` : ''; }); }
   if (keepScroll) document.scrollingElement.scrollTop = top; else window.scrollTo(0, 0);

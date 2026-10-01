@@ -113,10 +113,35 @@ function rollCard(r, small) {
      <div class="track" title="${esc(rollText(r))}"><span class="need" style="left:${pos(r.DC)}%"><i>needs ${r.DC}</i></span><span class="got" style="left:${pos(tot)}%"><i>${tot}</i></span></div>
      <small>${esc(statLabel(r.stat))}: rolled ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${tot}, needed ${r.DC}${r.adv > 0 ? ' · advantage' : r.adv < 0 ? ' · disadvantage' : ''}${esc(why)}</small></div></div>`;
 }
-// The odds before you commit: a bar, a number and the reasons.
+// The odds before you commit, spelled out: the target, your modifier, advantage, the reasons and the chance.
 function oddsBar(stat, dc) {
-  const c = checkInfo(stat, dc), p = Math.round(c.p * 100);
-  return `<span class="oddsbar" title="${esc(checkLabel(stat, dc) + (c.why.length ? ' · ' + c.why.join(', ') : ''))}"><span class="ob-l">${esc(statLabel(stat))}</span><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b>${c.adv > 0 ? '<em class="adv">▲ adv</em>' : c.adv < 0 ? '<em class="dis">▼ dis</em>' : ''}</span>`;
+  const c = checkInfo(stat, dc), p = Math.round(c.p * 100), hard = c.DC >= 14;
+  return `<span class="oddsbar" title="${esc(c.why.join(', '))}"><span class="ob-dc" title="Target: roll this or more on d20 plus your modifier">DC ${c.DC}</span><span class="ob-l">${esc(statLabel(stat))} ${c.mod >= 0 ? '+' : '−'}${Math.abs(c.mod)}</span>${c.adv > 0 ? '<em class="adv" title="Roll two dice, keep the higher">⚀⚀ advantage</em>' : c.adv < 0 ? '<em class="dis" title="Roll two dice, keep the lower">⚀⚀ disadvantage</em>' : ''}<span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b>${hard ? '<em class="big">★ big reward</em>' : ''}${c.why.length ? `<span class="ob-why">${esc(c.why.join(' · '))}</span>` : ''}</span>`;
+}
+// The roll, full screen: the die (or two) spins through numbers, lands, the total slides to the target, then the verdict.
+function showRollOverlay(r) {
+  if (!r || typeof document === 'undefined' || !document.body || (typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const old = document.getElementById('rollov'); if (old) old.remove();
+  const dice = r.dice || [r.d], tot = r.d + r.mod, pos = v => clamp((v - 1) / 24 * 100, 0, 100);
+  const el = document.createElement('div');
+  el.id = 'rollov';
+  el.innerHTML = `<div class="ro-box ${r.ok ? 'win' : 'lose'}${r.crit > 0 ? ' crit' : r.crit < 0 ? ' fumble' : ''}"><p class="ro-what">${esc(statLabel(r.stat))} check · needs <b>${r.DC}</b>${r.adv > 0 ? ' · <span class="adv">advantage: keep the higher</span>' : r.adv < 0 ? ' · <span class="dis">disadvantage: keep the lower</span>' : ''}</p>
+    <div class="ro-dice">${dice.map((d, i) => `<div class="ro-die" data-final="${d}" data-keep="${d === r.d && (i === 0 || dice[0] !== r.d) ? 1 : 0}">${d20SVG('?')}</div>`).join('')}</div>
+    <p class="ro-math">roll <b class="ro-d">?</b> ${r.mod >= 0 ? '+' : '−'} ${Math.abs(r.mod)} = <b class="ro-t">?</b></p>
+    <div class="track ro-track"><span class="need" style="left:${pos(r.DC)}%"><i>needs ${r.DC}</i></span><span class="got" style="left:0%"><i>…</i></span></div>
+    <p class="ro-verdict"></p><p class="ro-why muted small">${esc((r.why || []).join(' · '))}</p><button class="btn-s ro-ok">Continue</button></div>`;
+  document.body.appendChild(el);
+  const dies = [...el.querySelectorAll('.ro-die')];
+  let n = 0;
+  const spin = setInterval(() => { n++; dies.forEach(d => { d.querySelector('text').textContent = 1 + Math.floor(Math.random() * 20); }); if (n > 16) { clearInterval(spin); land(); } }, 65);
+  const land = () => {
+    dies.forEach(d => { d.querySelector('text').textContent = d.dataset.final; d.classList.add('landed'); if (dies.length > 1 && d.dataset.keep !== '1') d.classList.add('spent'); });
+    el.querySelector('.ro-d').textContent = r.d; el.querySelector('.ro-t').textContent = tot;
+    setTimeout(() => { const g = el.querySelector('.ro-track .got'); g.style.left = pos(tot) + '%'; g.querySelector('i').textContent = tot; }, 250);
+    setTimeout(() => { el.querySelector('.ro-verdict').textContent = r.crit > 0 ? 'Natural 20!' : r.crit < 0 ? 'Natural 1' : r.ok ? (tot - r.DC >= 5 ? 'Comfortably' : 'Made it') : (r.DC - tot <= 2 ? 'So close' : 'Missed'); el.querySelector('.ro-box').classList.add('done'); }, 700);
+  };
+  const close = () => { clearInterval(spin); el.remove(); };
+  el.addEventListener('click', e => { if (e.target.closest('.ro-ok') || e.target === el) close(); });
 }
 // What a trait, garment or piece of furniture does, as badges.
 function fxBadges(o) {
@@ -360,8 +385,8 @@ function careerClick(t) {
   }
   if (t.dataset.buy) { doAct({ t: 'buy', id: t.dataset.buy }); render(true); return true; }
   if (t.dataset.restyle) { UI.restyle = !UI.restyle; render(true); return true; }
-  if (t.dataset.party) { doAct({ t: 'party', k: t.dataset.party }); render(true); return true; }
-  if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'); doAct({ t: 'pick', id: +id, k }); render(true); return true; }
+  if (t.dataset.party) { const n0 = S.me.rollN || 0; doAct({ t: 'party', k: t.dataset.party }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'), n0 = S.me.rollN || 0; doAct({ t: 'pick', id: +id, k }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.quit) { doAct({ t: 'quit', id: +t.dataset.quit }); render(true); return true; }
   if (t.dataset.favour) { doAct({ t: 'favour', id: +t.dataset.favour }); render(true); return true; }
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
