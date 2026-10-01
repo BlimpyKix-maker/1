@@ -601,15 +601,19 @@ function closeWeek(a) {
   }
   // applications
   const apps = (a.apps || []).slice(0, hunted * 3);
-  const offers = [], noes = [];
+  const offers = [], noes = [], shortlisted = [];
+  M.interviews = (M.interviews || []).filter(x => !x.done);
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
     if (!post || blockedFrom(tmplOf(post))) continue;
     M.stats.apps++;
-    if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post);
+    if (post.odd && !tmplOf(post).cat) { if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post); }
+    else if (prnd() < shortlistOdds(post)) { (M.interviews = M.interviews || []).push({ post, day: Math.floor(prnd() * 5) }); shortlisted.push(post); }
+    else noes.push(post);
     if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
+  if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${DAYS7[M.interviews.find(x => x.post === p).day]})`).join('; ')}. The interview decides it.`);
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
   // a rival in the same line of work sometimes gets there first
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
@@ -739,7 +743,6 @@ function afterTick(fresh) {
     }
   }
   // scenes from the jobs you're on
-  for (const j of M.jobs) if (j.done > 0 && prnd() < .55) { const sc = pickScene(j); if (sc) inbox('scene', sc.title, sc.text, { job: j.id, scene: sc.id, ctx: sc.ctx, choices: sc.opts }); }
   agentWeek(); agentApproach(); maybeEvent();
   // life events
   if (M.quirk === 'secret' && !M.secretOut && S.week - M.startW > 20 && prnd() < .03) secretEvent();
@@ -835,6 +838,7 @@ function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
   const ok = o.check ? roll(o.check[0], o.check[1]) : true;
   const fx = ok ? o.ok : (o.bad || o.ok);
+  let t0 = '';
   const ctx = it.ctx, who = r => r === 'mates' ? ctx.mates : ctx[r] !== null && ctx[r] !== undefined ? [ctx[r]] : [];
   for (const r in fx.tie || {}) for (const id of who(r)) { meet(id, null); addTie(me, P(id), fx.tie[r]); }
   for (const r in fx.trust || {}) for (const id of who(r)) trust(id, fx.trust[r]);
@@ -846,22 +850,24 @@ function sceneResolve(it, k) {
   if (fx.cash) M.cash += usd(fx.cash);
   if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
   if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
+  if (fx.meet) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = ` You meet ${q.name}, ${ROLE_LABEL[q.role].toLowerCase()}.`; } }
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
   const job = M.jobs.find(j => j.id === it.job);
   if (fx.shadow && job) job.shadow = 1;
-  let t = fillScene(ok ? o.t : (o.tb || o.t), ctx);
+  let t = fillScene(ok ? o.t : (o.tb || o.t), ctx) + t0;
   if (fx.risk && prnd() < fx.risk) { M.energy = Math.max(0, M.energy - 25); M.stress = clamp(M.stress + 8, 0, 100); t += ' It comes back to bite you: a rough few days.'; }
   if (fx.fire && job && prnd() < fx.fire) { finishJob(job, null, true); t += ' You are let go.'; me.standing = Math.max(0, me.standing - 1); }
   recalc(me);
   const lr = o.check ? S.me.lastRoll : null;
   if (lr && lr.crit > 0) { me.standing = clamp(me.standing + .5, 0, 100); if (ctx.head !== null && ctx.head !== undefined) addTie(me, P(ctx.head), 3); t += ' People will talk about it.'; }
   if (lr && lr.crit < 0) { M.stress = clamp(M.stress + 5, 0, 100); t += ' It could hardly have gone worse.'; }
-  it.result = { ok: o.check ? ok : null, roll: lr, t };
+  it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null };
 }
 
 function resolvePick(it, k) {
   const M = S.me, me = ME(), c = it.choices.find(x => x.k === k);
   if (!c || c.dis) return false;
+  if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;

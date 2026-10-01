@@ -21,8 +21,13 @@ for (let w = 0; w < weeks; w++) {
   r(`for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }`);
   // plan: job hunt when not fully employed, otherwise write/rest
   r(`S.me.plan = jobDays() >= 5 ? ['hunt','hunt','hunt','hunt','hunt','rest','rest'] : ['hunt','hunt','network','train','hustle','rest','rest']; S.me.train = 'cam';`);
-  const ok = r(`(() => { const apps = S.me.board.slice().sort((a, b) => (hireOdds(b) + (b.odd ? -.5 : 0)) - (hireOdds(a) + (a.odd ? -.5 : 0))).slice(0, appSlots()).map(p => p.id); return doAct({ t: 'end', plan: S.me.plan.slice(), apps, train: S.me.train, catchWith: null }); })()`);
-  if (!ok) { console.log('end refused at week', w, r(`JSON.stringify(pending().map(x => x.kind))`), r('S.me.over')); break; }
+  // live the week; answer anything that comes up on the way
+  const ok = r(`(() => { const apps = S.me.board.slice().sort((a, b) => (hireOdds(b) + (b.odd ? -.5 : 0)) - (hireOdds(a) + (a.odd ? -.5 : 0))).slice(0, appSlots()).map(p => p.id); const w0 = S.week;
+    for (let g = 0; g < 40 && S.week === w0 && !S.me.over; g++) {
+      for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }
+      doAct({ t: 'end', plan: S.me.plan.slice(), apps, train: S.me.train, catchWith: null }); }
+    return S.week !== w0 || S.me.over; })()`);
+  if (!ok) { console.log('week stuck at', w, r(`JSON.stringify(pending().map(x => x.kind))`), r('S.me.over')); break; }
 }
 const sum = c => r(`(() => { const M = S.me, me = ME(); return JSON.stringify({ week: S.week, cash: M.cash, energy: Math.round(M.energy), stress: Math.round(M.stress), standing: +me.standing.toFixed(3), cam: +me.c.cam.toFixed(4), credits: me.credits.length, known: Object.keys(M.known).length, apps: M.stats.apps, offers: M.stats.offers, weeksWorked: M.stats.weeks, jobs: M.jobs.map(j => j.t), past: M.past.length, log: S.log.length, films: S.films.length }); })()`);
 const A = sum();
