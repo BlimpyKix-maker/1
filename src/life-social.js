@@ -120,6 +120,7 @@ const INVITES = [
   { k: 'karaoke', t: 'karaoke with {who}\'s crew', meet: 2, tie: 5, stress: -6, cost: 20 },
   { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 },
   { k: 'wedding', t: 'a wedding', never: 1, meet: 3, tie: 10, stress: -4, cost: 80 },
+  { k: 'festival', t: 'a festival premiere', never: 1, senior: 1, meet: 3, tie: 4, stand: .8, cost: 200, e: 6 },
   { k: 'awards', t: 'the awards', never: 1, senior: 1, meet: 2, tie: 4, stand: .6, cost: 120, stress: -2 }
 ];
 function inviteFrom(id) {
@@ -203,7 +204,7 @@ function runAppointment(x) {
   const M = S.me, me = ME(), W = M.wk, A = APPT_KINDS[x.kind] || APPT_KINDS.coffee;
   x.done = true;
   const q = x.who !== null && x.who !== undefined ? P(x.who) : null;
-  if (q && (q.dead || (x.kind !== 'interview' && x.ev !== 'awards' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
+  if (q && (q.dead || (x.kind !== 'interview' && x.ev !== 'awards' && x.ev !== 'festival' && !M.known[x.who]))) { card('✖', `${A.label} called off`, [`${q.name} can't make it after all.`], { notable: true }); runBlock(planBlocks()[W.day][W.block]); return; }
   M.energy = clamp(M.energy - (A.e || 0), 0, 100);
   W.stress += A.stress || 0;
   if (A.cost) W.cashOut += usd(A.cost);

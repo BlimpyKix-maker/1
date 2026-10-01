@@ -37,7 +37,7 @@ function dealPick(it, k) {
 // Weekly: offers from agents, options lapsing, producers getting films off the ground, your film's progress.
 function dealsWeek() {
   const M = S.me, me = ME();
-  marketWeek(); holdingsWeek();
+  marketWeek(); holdingsWeek(); companyWeek(); festWeek();
   for (const sc of M.scripts || []) {
     if (!sc.grade) continue;
     if (sc.option && !sc.made) {
@@ -196,4 +196,93 @@ function holdingsWeek() {
     if (h.made !== undefined && !h.told && S.films[h.made].rel !== null) { const f = S.films[h.made]; h.told = 1; milestone(`${f.title}, which you produced, opened: ${f.reviews}/100, ${fmtM(f.total)} worldwide`, 'film'); }
   }
   M.holdings = (M.holdings || []).filter(h => !h.lapsed || S.week - h.to < 8);
+}
+// ---- Your own company ----
+// Found a production company and it becomes one of the city's companies: it has its own bank account (in the
+// world's millions), makes the films you choose to finance, earns from them and can go bust like any other.
+const FOUND_COST = 25000;
+function myCo() { const M = S.me; return M.company !== undefined ? S.companies[M.company] : null; }
+function canFound() { const me = ME(), M = S.me; return M.company === undefined && M.cash >= usd(FOUND_COST) && (me.standing >= 15 || me.credits.length > 0 || (M.holdings || []).length > 0); }
+function foundCompany(a) {
+  const M = S.me, me = ME();
+  if (!canFound()) return false;
+  const name = String(a.name || '').replace(/\s+/g, ' ').trim().slice(0, 40) || `${me.name.split(' ').pop()} Pictures`;
+  const c = { id: S.companies.length, name, hub: M.hub, tier: 3, cash: 0, founded: S.year, closed: null, films: [], favors: {}, taste: Object.fromEntries((M.love || []).slice(0, 2).map(g => [g, 1.7])), hits: 0, libInc: 0, libIncLast: 0, acquired: [], owner: me.id };
+  S.companies.push(c);
+  M.cash -= usd(FOUND_COST); c.cash += usd(FOUND_COST) * .6 / 1e6;   // lawyers and an office take the rest
+  M.company = c.id;
+  milestone(`Founded ${name}`, 'work');
+  news('Company', `${name} opens its doors in ${HUBS[M.hub].name}, founded by ${me.name}.`, { company: c.id });
+  return true;
+}
+function coMoney(a) {
+  const M = S.me, c = myCo(), amt = Math.round(+a.amount || 0);
+  if (!c || c.closed !== null || !(amt > 0)) return false;
+  if (a.t === 'invest') { if (M.cash < amt) return false; M.cash -= amt; c.cash += amt / 1e6; }
+  else { if (c.cash * 1e6 < amt) return false; c.cash -= amt / 1e6; M.cash += amt; }
+  return true;
+}
+// What a small film of this genre costs here, before the surprises.
+function estBudget(genre) { return [0, 3, 1, .35][3] * budgetScale(S.year) * era(MARKETS[HUBS[S.me.hub].m].cost, S.year) * Math.pow(AMB[genre], .7); }
+// Finance a film yourself: your own finished script or one you've optioned. Optionally direct it.
+function selfFund(a) {
+  const M = S.me, me = ME(), c = myCo();
+  if (!c || c.closed !== null) return false;
+  const src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id && x.grade && !x.option && x.made === undefined) : (M.holdings || []).find(x => x.id === a.id && x.made === undefined && !x.lapsed);
+  const budget = estBudget(src ? src.genre : 'Drama') * (a.micro ? .25 : 1);
+  if (!src || c.cash < budget * .9) return false;
+  const direct = !!a.direct;
+  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : undefined, budget });
+  src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
+  if (direct) takeJob(makePost(POST_BY.owndir, f));
+  me.standing = clamp(me.standing + 1.5, 0, 100);
+  if (a.src !== 'script') addTie(me, P(src.writer), 8);
+  milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
+  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id });
+  return true;
+}
+// Directing your own film is a job like any other: five days a week from development to the final mix.
+POST_BY.owndir = { k: 'owndir', jid: 'owndir', t: 'Director', tier: 4, st: [0, 1, 2, 3], head: 'prod', subs: ['dact', 'vstory', 'tone', 'pace', 'setm'], days: 5, rate: 0, weeks: 90, cr: 1 };
+POST_FAMILY.owndir = 'dir';
+function companyWeek() {
+  const M = S.me, c = myCo();
+  if (!c) return;
+  if (c.closed === null) c.cash -= usd([0, 12000, 5000, 1500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
+  if (c.closed !== null && !M.coClosedTold) { M.coClosedTold = 1; inbox('note', `${c.name} goes under`, 'The debts were bigger than the slate. Your company closes and its films go to whoever buys the library. You keep the stories.'); milestone(`${c.name} closed`, 'work'); }
+  if (c.closed === null && c.tier === 3 && c.hits >= 2) { c.tier = 2; milestone(`${c.name} is now a mid-sized company`, 'work'); inbox('news', `${c.name} grows`, 'Two hits in, the phone rings differently. Agents send you better scripts; bigger names take meetings.'); }
+}
+// ---- Festivals ----
+// Released films you're credited on can go to festivals within a year. Selection is about quality, and small,
+// independent films get a little extra love. A prize is an award like any other, and a festival is a party you go to.
+const FESTIVALS = [
+  { k: 'mountain', name: 'the Mountain Film Festival', month: 0, bar: 62, fee: 60, prize: 'Grand Jury Prize', d: 'Snow, independents, buyers in parkas.' },
+  { k: 'cote', name: 'the Festival de la Côte', month: 4, bar: 80, fee: 120, prize: 'Grand Prix', d: 'The most prestigious festival in the world. Red carpet, black tie.' },
+  { k: 'lagoon', name: 'the Lagoon Film Festival', month: 8, bar: 74, fee: 100, prize: 'Golden Lion of the Lagoon', d: 'Old palazzos, new auteurs.' },
+  { k: 'north', name: 'the Northern Lights Festival', month: 8, bar: 58, fee: 70, prize: 'Audience Award', d: 'A big public festival. The audience award has launched careers.' },
+  { k: 'shorts', name: 'the Harbour Festival', month: 2, bar: 50, fee: 40, prize: 'Discovery Prize', d: 'Small, friendly, full of first films.' }
+];
+function myFilms() { const me = ME(), M = S.me; const ids = new Set(me.credits.concat(M.past.filter(p => p.credited && p.film !== null).map(p => p.film), (M.scripts || []).map(s => s.made), (M.holdings || []).map(h => h.made)).filter(x => x !== undefined && x !== null)); return [...ids].map(i => S.films[i]).filter(f => f && f.stage !== -1); }
+function festEligible(f) { return f.rel !== null && S.week - f.rel < 52; }
+function submitFest(a) {
+  const M = S.me, f = S.films[a.film], F = FESTIVALS.find(x => x.k === a.k);
+  if (!f || !F || !myFilms().includes(f) || !festEligible(f) || (M.fests || []).some(x => x.film === f.id && x.k === F.k) || M.cash < usd(F.fee)) return false;
+  M.cash -= usd(F.fee);
+  (M.fests = M.fests || []).push({ film: f.id, k: F.k, due: S.week + 5 + Math.floor(prnd() * 5) });
+  return true;
+}
+function festWeek() {
+  const M = S.me, me = ME();
+  for (const e of (M.fests || []).filter(x => !x.done && x.due <= S.week)) {
+    e.done = true;
+    const f = S.films[e.film], F = FESTIVALS.find(x => x.k === e.k), small = f.tier === 3 || f.co === null;
+    const v = f.q + (small ? 5 : 0) + (prnd() - .5) * 20;
+    if (v < F.bar) { inbox('note', `${F.name}: not selected`, `${f.title} isn't in this year's line-up. ${pickLine(['Hundreds of films, a few dozen slots.', 'Next festival.', 'The programmers wanted something else this year.'], f.id + e.due)}`, { film: f.id }); continue; }
+    e.sel = 1; f.cult = clamp((f.cult || 0) + 8, 0, 100); me.standing = clamp(me.standing + 1.5, 0, 100);
+    let t = `${f.title} is in the official selection at ${F.name}. ${F.d}`;
+    if (v >= F.bar + 14) { award(f, `${F.name.replace(/^the /, '')}: ${F.prize}`, [f.dir, f.prod].filter((x, i, A) => A.indexOf(x) === i)); me.fame = clamp((me.fame || 0) + 3, 0, 100); t += ` And it wins the ${F.prize}.`; milestone(`${f.title} won the ${F.prize} at ${F.name}`, 'prize'); }
+    else milestone(`${f.title} selected for ${F.name}`, 'prize');
+    inbox('news', `${F.name}`, t, { film: f.id });
+    const slot = freeSlot({ days: [3, 4, 5], blocks: [2], from: 1 }), host = [f.prod, f.dir, f.cast[0]].find(id => id !== me.id);
+    if (slot && host !== undefined) inbox('invite', `Go to ${F.name}?`, `Your film is screening. The premiere is ${slotLabel(slot)}: travel, a red carpet, and everyone who buys and sells films in one place.`, { person: host, ev: 'festival', slot, what: `the premiere at ${F.name}`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Stay home' }] });
+  }
 }

@@ -961,6 +961,10 @@ function applyAct(a) {
     case 'text': return textSomeone(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
+    case 'found': return foundCompany(a);
+    case 'invest': case 'withdraw': return coMoney(a);
+    case 'selffund': return selfFund(a);
+    case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);
     case 'share': return shareScript(a);
