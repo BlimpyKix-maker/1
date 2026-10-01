@@ -259,7 +259,7 @@ const CAL_PRESETS = {
 function threadOf(m) { return m.from === -1 ? (m.to ?? 'home') : m.from === null || m.from === undefined ? 'home' : m.from; }
 function phonePanel() {
   const M = S.me, all = M.phone || [], known = aliveKnown();
-  UI.seen = UI.seen || {};
+  UI.seen = UI.seen || {};   // per thread: how many of its messages you've looked at
   const threads = new Map();
   all.forEach((m, i) => { const k = threadOf(m); threads.set(k, { k, last: m, i, n: ((threads.get(k) || {}).n || 0) + 1 }); });
   const list = [...threads.values()].sort((a, b) => b.i - a.i);
@@ -335,6 +335,16 @@ function writingDesk() {
      <label>Background and notes <span class="muted small">(as much as you like: characters, scenes you can see, the ending, why it matters to you)</span><textarea id="ns-notes" rows="5" maxlength="6000">${esc(f.notes || '')}</textarea></label>
      <button class="btn-s" data-newscript="1">Begin</button></div>
     <p class="muted small">♥ genres you love write better; ✗ genres you hate write worse. ★ themes are already part of your voice. Preparation helps: a premise, a hero, a world and real notes all lift the draft a little. How you write depends on who you are: ${esc(writerStyle().lines.slice(0, 2).join(' ') || 'your traits will shape the process.')} Plan writing blocks to make progress.</p></details>` : ''}</section>`;
+}
+// Producing: scripts looking for a home, the ones you've optioned, and where you can pitch them.
+function producingPanel() {
+  const M = S.me, me = ME(), mk = M.market || [], hs = (M.holdings || []).filter(h => !h.lapsed), cos = S.companies.filter(c => c.hub === M.hub && c.closed === null).sort((a, b) => a.tier - b.tier);
+  if (!mk.length && !hs.length) return `<section class="panel"><h3>Producing</h3><p class="muted">No scripts on your desk yet. As you get known (or if producing is your trade), writers will send you their specs to option.</p></section>`;
+  const T = UI.pitch = UI.pitch || {};
+  return `<section class="panel"><h3>Producing</h3>
+   ${mk.length ? `<h4>Scripts looking for a home</h4><ul class="plain specs">${mk.map(x => { const c = coverage(x); return `<li><b>${esc(x.title)}</b> <span class="muted">${esc(x.genre)} · ${esc(THEMES[x.theme])} · by ${pl(x.writer)}</span><br><span class="small">Your read: <span class="grade g${gradeOf(c)}">${gradeOf(c)}</span> <span class="muted" title="The sharper your Taste, the closer your read is to the truth">(Taste ${Math.floor(me.mind.tas)})</span> · option for ${fmtCash(x.price)}</span> <button class="btn-s ghost" data-optionspec="${x.id}" ${M.cash < x.price || hs.filter(h => h.made === undefined).length >= 3 ? 'disabled' : ''}>Option it</button></li>`; }).join('')}</ul>` : ''}
+   ${hs.length ? `<h4>Your options</h4><ul class="plain specs">${hs.map(h => h.made !== undefined ? `<li><b>${esc(h.title)}</b> 🎬 ${fl(h.made)} · ${esc(S.films[h.made].status)} · you're producing</li>` : (() => { const avail = cos.filter(c => !(M.coYes || {})[c.id] && (!h.pitched[c.id] || S.week - h.pitched[c.id] >= 8)), sel0 = avail.find(c => c.id === +T[h.id]) || avail[0]; return `<li><b>${esc(h.title)}</b> <span class="muted">by ${pl(h.writer)} · until ${fmtDate(h.to, true)}</span><br>${avail.length ? `<span class="pitchrow">${sel('pitch-' + h.id, avail.map(c => [c.id, `${c.name} ${'★'.repeat(4 - c.tier)}`]), sel0.id)} ${oddsBar('pack', pitchDC(h, sel0))} <button class="btn-s" data-pitch="${h.id}:${sel0.id}" ${M.pitchW === curW() ? 'disabled title="One pitch a week"' : ''}>Pitch</button></span>` : '<span class="muted small">Everyone has heard it recently. Try again in a few weeks.</span>'}</li>`; })()).join('')}</ul>` : ''}
+   <p class="muted small">One pitch a week, and each company makes at most one of yours a year. Pitching rolls your Packaging. Bigger companies are harder to convince; a better script, more standing and an agent all help. If they say yes, the film goes into production with you as producer.</p></section>`;
 }
 // School and representation: the two longer roads.
 function pathsPanel() {
@@ -427,6 +437,7 @@ function viewDesk() {
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
     ${writingDesk()}
+    ${producingPanel()}
     ${pathsPanel()}
     ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
    </div></div>
@@ -527,6 +538,9 @@ function careerClick(t) {
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
+  if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
+  if (t.dataset.pitch) { const [id, co] = t.dataset.pitch.split(':').map(Number), n0 = S.me.rollN || 0; doAct({ t: 'pitch', id, co }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.phonejump !== undefined) { UI.tab = 'you'; UI.stack = []; render(); const el = document.querySelector('.panel.phone'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
   if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
   if (t.dataset.activescript) { doAct({ t: 'activescript', id: +t.dataset.activescript }); render(true); return true; }
@@ -537,7 +551,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -563,6 +577,7 @@ function careerChange(e) {
   }
   if (/^cal-\d-\d$/.test(id)) { calOf()[+id[4]][+id[6]] = v; render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
+  if (/^pitch-\d+$/.test(id)) { (UI.pitch = UI.pitch || {})[+id.slice(6)] = v; render(true); return true; }
   if (/^tx-(id|kind|slot)$/.test(id)) { UI.txt[id.slice(3)] = v; if (id === 'tx-id') UI.txt.slot = 0; render(true); return true; }
   if (id === 'pl-train') { S.me.train = v; return true; }
   if (id === 'pl-catch') { S.me.catchWith = v === '' ? null : +v; return true; }
@@ -652,4 +667,15 @@ async function readPages(id) {
     if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) { UI.sample = null; }
   }
   const st = el.querySelector('.pg-stop'); if (st) st.remove();
+}
+
+// Unread messages for the header badge: anything from someone else in a thread you haven't opened since.
+function phoneUnread() {
+  const M = S.me; if (!M || !M.phone) return 0;
+  const seen = UI.seen || {}, n = {};
+  let u = 0;
+  for (const m of M.phone) { const k = threadOf(m); n[k] = (n[k] || 0) + 1; if (m.from !== -1 && n[k] > (seen[k] ?? Infinity)) u++; }
+  // threads never opened in this session only count this week's news
+  for (const m of M.phone) if (m.from !== -1 && seen[threadOf(m)] === undefined && m.w === S.week) u++;
+  return u;
 }

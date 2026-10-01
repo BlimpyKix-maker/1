@@ -24,6 +24,7 @@ for (let c = 0; c < N; c++) {
       if (rnd() < .05) r(`doAct({ t: 'furnish', id: '${['bed', 'desk', 'plant', 'poster', 'camera'][Math.floor(rnd() * 5)]}' })`);
       const cal = JSON.stringify(Array.from({ length: 7 }, () => [acts[Math.floor(rnd() * acts.length)], acts[Math.floor(rnd() * acts.length)], eves[Math.floor(rnd() * eves.length)]]));
       r(`S.me.cal = ${cal}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
+      if (rnd() < .15) r(`(() => { const x = (S.me.market || [])[0]; if (x) doAct({ t: 'optionspec', id: x.id }); const h = (S.me.holdings || [])[0], co = S.companies.find(c => c.hub === S.me.hub && c.closed === null); if (h && co) doAct({ t: 'pitch', id: h.id, co: co.id }); producingPanel(); phoneUnread(); })()`);
       if (rnd() < .3) r(`(() => { const ids = aliveKnown(); const s = upcomingSlots(10)[${Math.floor(rnd() * 10)}]; if (ids.length) doAct(Object.assign({ t: 'text', id: ids[${Math.floor(rnd() * 50)} % ids.length], kind: '${['hi', 'coffee', 'drinks', 'date', 'mentor'][Math.floor(rnd() * 5)]}' }, s || {})); })()`);
       if (rnd() < .1) r(`(UI.txt = { id: String(aliveKnown()[0] ?? ''), kind: 'date', slot: 0 }, phonePanel())`);
       r(`(() => { const w0 = S.week; for (let g = 0; g < 80 && S.week === w0 && !S.me.over; g++) { for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[g % it.choices.length].k }); doAct(endWeekAct(g % 3 ? 'next' : 'day')); } })()`);

@@ -959,6 +959,8 @@ function applyAct(a) {
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
+    case 'optionspec': return optionSpec(a);
+    case 'pitch': return pitchSpec(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);
     case 'share': return shareScript(a);

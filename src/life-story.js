@@ -12,7 +12,8 @@ function storyWeek() {
     if (!p.credited || p.film === null || p.told) continue;
     const f = S.films[p.film];
     if (f.rel === null || S.week - f.rel < 8) continue;
-    p.told = 1;
+    for (const x of M.past) if (x.film === p.film) x.told = 1;   // one milestone per film, however many jobs you had on it
+    if ((M.scripts || []).some(sc => sc.made === p.film) || (M.holdings || []).some(h => h.made === p.film)) continue;   // your own film has its own line
     const hit = f.hitRatio > 2, flop = f.theatrical < -f.cost * .3;
     milestone(`${f.title} (${p.t.toLowerCase()}) ${hit ? 'became a hit' : flop ? 'flopped' : 'did steady business'}: ${f.reviews}/100 from critics, ${fmtM(f.total)} worldwide`, 'film');
   }
