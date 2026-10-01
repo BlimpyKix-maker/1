@@ -106,7 +106,7 @@ function viewCreator() {
    <p class="note">Jobs on films in a genre you love lower your stress and teach you faster; genres you hate wear you down.</p>
    <h4>Five favourite films <span class="count">optional</span></h4>
    <ol class="favs">${[0, 1, 2, 3, 4].map(favRow).join('')}</ol>
-   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y}) · ${esc(f.real)}">`).join('')}</datalist>
+   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y})" label="${esc(f.real)}">`).join('')}</datalist>
    <div class="ccrow"><button class="btn" data-cc="randfav">${c.favs.length >= 5 ? 'Reroll all five' : 'Fill the rest at random'}</button><span class="muted">Random picks lean toward your favourite genres, weighted by how widely seen and loved a film is.</span></div>
    <p class="note">Films you love sharpen the skills their genre leans on, and they come up in conversation.</p></section>
   <section class="panel cc"><h3>Something from your past</h3>${grid('quirk', ORIGIN.quirk)}</section>
