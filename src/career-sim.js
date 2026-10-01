@@ -616,6 +616,7 @@ function closeWeek(a) {
   if (rival !== undefined && noes.length && prnd() < .2) { const p = ppick(noes); addTie(me, P(rival), -3); inbox('note', `${P(rival).name} again`, `You hear who got the ${p.t.toLowerCase()} job you wanted${p.film !== null ? ' on ' + S.films[p.film].title : ''}: ${P(rival).name}.`, { person: rival }); stress += 3; }
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
+  dealsWeek();
   storyWeek();
   stress += socialWeek();
   stress += livingWorldWeek();
@@ -880,6 +881,7 @@ function resolvePick(it, k) {
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (socialPick(it, k)) return true;
+  if (dealPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;

@@ -65,13 +65,13 @@ function writeOnScript(L, scale = 1) {
 }
 function finishDraft(sc, L) {
   const M = S.me, me = ME(), avgQ = sc.q / Math.max(1, sc.target);
-  const score = clamp(Math.round(38 + (avgQ - 6) * 5 + (sc.draft - 1) * 7), 5, 98);   // a beginner's first draft is a D or C; skill, heart and rewrites lift it
+  const raw = 38 + (avgQ - 6) * 5 + (sc.draft - 1) * 7, score = clamp(Math.round(raw > 72 ? 72 + (raw - 72) * .45 : raw), 5, 98);   // the top is hard to reach   // a beginner's first draft is a D or C; skill, heart and rewrites lift it
   sc.score = score; sc.grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'F';
   sc.stage = 'done'; M.spec.drafts++; (sc.history = sc.history || []).push(sc.grade + ' ' + score);
   const v = voiceOf(); v[sc.theme] = (v[sc.theme] || 0) + 3; v[(GENRE_THEMES[sc.genre] || [])[0]] = (v[(GENRE_THEMES[sc.genre] || [])[0]] || 0) + 1;
   me.standing = clamp(me.standing + (score >= 70 ? .6 : .2), 0, 100);
   // finishing teaches: every draft makes you a better writer, a good one more so
-  for (const k of ['struc', 'dial', 'char', 'orig']) growSub(me, k, .08 + score / 1000);
+  for (const k of ['struc', 'dial', 'char', 'orig']) growSub(me, k, .03 + score / 3000);
   me.mind.tas = clamp(me.mind.tas + .1, 1, 20);
   M.stress = clamp(M.stress - 4, 0, 100);
   const n = (M.scripts || []).filter(x => x.grade).length;
@@ -141,7 +141,7 @@ function shareScript(a) {
   sc.shared.push(a.to);
   const t = tasteOf(q), fit = (t.genres.includes(sc.genre) ? 12 : 0) + (t.theme === sc.theme ? 10 : 0);
   const score = sc.score + fit + (prnd() - .5) * 20;
-  if (score >= 75) { addTie(me, q, 8); trust(q.id, 6); M.refs[q.id] = (M.refs[q.id] || 0) + 1; inbox('note', `${q.name} read ${sc.title}`, `"I couldn't put it down." ${t.genres.includes(sc.genre) ? 'It\'s exactly their kind of film.' : ''} They'll mention you to people who need writers.`, { person: q.id }); me.standing = clamp(me.standing + .4, 0, 100); }
+  if (score >= 75) { addTie(me, q, 8); trust(q.id, 6); M.refs[q.id] = (M.refs[q.id] || 0) + 1; inbox('note', `${q.name} read ${sc.title}`, `"I couldn't put it down." ${t.genres.includes(sc.genre) ? 'It\'s exactly their kind of film.' : ''} They'll mention you to people who need writers.`, { person: q.id }); me.standing = clamp(me.standing + .4, 0, 100); shareMayOption(sc, q.id, score); }
   else if (score >= 50) { addTie(me, q, 3); inbox('note', `${q.name} read ${sc.title}`, `Kind notes: they liked the ${ppick(['dialogue', 'opening', 'lead character', 'ending'])} and lost interest in the middle.${fit ? '' : ' Not really their kind of thing.'}`, { person: q.id }); }
   else { addTie(me, q, -2); inbox('note', `${q.name} read ${sc.title}`, `A polite email, two weeks late. "Keep writing."`, { person: q.id }); }
   return true;
@@ -167,7 +167,7 @@ function contestWeek() {
     const C = CONTESTS.find(c => c.k === e.c), sc = M.scripts.find(x => x.id === e.script), roll = sc.score + (prnd() - .5) * 18;
     if (roll >= C.bar) { M.cash += usd(C.prize); me.standing = clamp(me.standing + 4, 0, 100); me.fame = clamp((me.fame || 0) + 4, 0, 100); sc.won = (sc.won || []).concat(C.name);
       inbox('news', `${C.name}: you're in`, `${sc.title} is selected. ${C.d}${C.prize ? ' A cheque for ' + fmtCash(usd(C.prize)) + ' follows.' : ''} Agents start returning your calls.`);
-      milestone(`${sc.title} won a place at ${C.name}`, 'prize'); }
+      milestone(`${sc.title} won a place at ${C.name}`, 'prize'); contestMayOption(sc); }
     else if (roll >= C.bar - 12) inbox('note', `${C.name}: quarter-finals`, `${sc.title} made the quarter-finals. Not this year, but someone noticed.`);
     else inbox('note', `${C.name}: not selected`, `${sc.title} wasn't selected. Thousands enter.`);
   }

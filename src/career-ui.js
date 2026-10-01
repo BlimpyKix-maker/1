@@ -299,7 +299,7 @@ function writingDesk() {
   const row = sc => {
     const pct = Math.round(sc.pages / sc.target * 100);
     return `<div class="script"><div class="sh"><b>${esc(sc.title)}</b> <span class="muted">${esc(sc.genre)} · ${esc(THEMES[sc.theme])} · ${esc(TONES[sc.tone])} · draft ${sc.draft}</span>${sc.grade ? ` <span class="grade g${sc.grade}">${sc.grade}</span>` : ''}${sc.won ? ' ' + chip('Prize', 'good') : ''}</div>
-      <p class="muted">${esc(sc.logline)}</p>${sc.hero || sc.setting || sc.notes ? `<details class="scnotes"><summary>Your notes</summary>${sc.hero ? `<p><b>Hero:</b> ${esc(sc.hero)}</p>` : ''}${sc.setting ? `<p><b>World:</b> ${esc(sc.setting)}</p>` : ''}${sc.notes ? `<p class="notes">${esc(sc.notes)}</p>` : ''}</details>` : ''}
+      <p class="muted">${esc(sc.logline)}</p>${sc.made !== undefined ? `<p class="small good">🎬 In the world: ${fl(sc.made)} · ${esc(S.films[sc.made].status)}</p>` : sc.option ? `<p class="small">📝 Optioned by ${pl(sc.option.by)} until ${fmtDate(sc.option.to, true)}. They're trying to get it made.</p>` : ''}${sc.hero || sc.setting || sc.notes ? `<details class="scnotes"><summary>Your notes</summary>${sc.hero ? `<p><b>Hero:</b> ${esc(sc.hero)}</p>` : ''}${sc.setting ? `<p><b>World:</b> ${esc(sc.setting)}</p>` : ''}${sc.notes ? `<p class="notes">${esc(sc.notes)}</p>` : ''}</details>` : ''}
       ${UI.sample && (sc.grade || sc.pages >= 10) ? `<p class="small"><button class="btn-s ghost" data-readpages="${sc.id}">📄 Read the pages</button> <span class="muted">Claude writes the opening as well, or as badly, as ${sc.grade ? 'your ' + sc.grade : 'this draft so far'} deserves.</span></p>` : ''}
       ${sc.stage === 'writing' ? `<div class="pbar"><i style="width:${pct}%"></i></div><p class="small">${sc.pages} of ${sc.target} pages${M.activeScript === sc.id ? ' · <b>writing this one</b>' : ` · <button class="linkish" data-activescript="${sc.id}">Write this one</button>`}</p>`
         : `<p class="small"><button class="btn-s ghost" data-rewrite="${sc.id}">Rewrite (draft ${sc.draft + 1})</button>
@@ -594,7 +594,7 @@ const GRADE_VOICE = {
 if (typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function') window.claude.use('sample').then(s => { UI.sample = s || null; if (s && typeof careerActive === 'function' && careerActive()) render(true); }).catch(() => { UI.sample = null; });
 function pagesPrompt(sc) {
   const me = ME(), M = S.me, grade = sc.grade || (sc.pages >= 10 ? 'unfinished' : null);
-  const est = sc.grade ? sc.score : clamp(Math.round(38 + (sc.q / Math.max(1, sc.pages) - 6) * 5 + (sc.draft - 1) * 7), 5, 98);
+  const raw = 38 + (sc.q / Math.max(1, sc.pages) - 6) * 5 + (sc.draft - 1) * 7, est = sc.grade ? sc.score : clamp(Math.round(raw > 72 ? 72 + (raw - 72) * .45 : raw), 5, 98);
   const g = sc.grade || (est >= 85 ? 'A' : est >= 70 ? 'B' : est >= 55 ? 'C' : est >= 40 ? 'D' : 'F');
   return `You are ghost-writing pages for a character in a film-industry life simulation game. Write the OPENING of their screenplay, about three pages (600 to 900 words), in standard screenplay format (scene headings, action, character cues, dialogue) as plain text.
 
