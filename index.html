@@ -37,6 +37,18 @@
   --accent: #E8574B; --accent-soft: #3A1714; --data: #5FC0B6; --data-soft: #17302E; --gold: #E8B44A; --gold-soft: #3A2E12;
   --good: #5DBB85; --bad: #E47B6F; --slate: #0A2423; --slate-2: #061918; --slate-ink: #FFF8E8; --slate-muted: #8FB0AA; color-scheme: dark; }
 
+/* Palettes the player can choose (the dot row under the tabs). Marquee is the default. */
+@media not (prefers-color-scheme: dark) {
+:root[data-pal="marquee"] { --bg: #F7F1E6; --panel: #FFFDF8; --ink: #22181A; --muted: #6E5F5C; --line: #E3D6C5; --accent: #C0392B; --accent-soft: #F7DCD6; --data: #8A5A12; --data-soft: #F1E3C8; --gold: #C9971C; --gold-soft: #F5E7C2; --slate: #3D1118; --slate-2: #2A0B10; --slate-ink: #FFF6E6; --slate-muted: #D9B8A8; --hs-city: #8C6F6A; }
+:root[data-pal="kodachrome"] { --bg: #FBF6E9; --panel: #FFFFFF; --ink: #1A1A1A; --muted: #5E5A50; --line: #E6DDC4; --accent: #D7261E; --accent-soft: #FADAD7; --data: #1F4E79; --data-soft: #DCE7F2; --gold: #E5A800; --gold-soft: #FBEBBE; --slate: #F2B705; --slate-2: #D99E00; --slate-ink: #1A1A1A; --slate-muted: #4A3B00; --hs-city: #6E7F95; }
+:root[data-pal="noir"] { --bg: #ECEAE5; --panel: #FAFAF7; --ink: #111111; --muted: #5C5C5C; --line: #D6D3CC; --accent: #B7791F; --accent-soft: #F3E6CF; --data: #333333; --data-soft: #E2E0DB; --gold: #C99A2E; --gold-soft: #F2E6C8; --slate: #111111; --slate-2: #000000; --slate-ink: #F4F1EA; --slate-muted: #A8A39A; --hs-city: #6A6A6A; }
+:root[data-pal="riviera"] { --bg: #FAF5EC; --panel: #FFFFFF; --ink: #142233; --muted: #5B6675; --line: #E4DCCD; --accent: #E8553E; --accent-soft: #FBDDD6; --data: #1C4E80; --data-soft: #DCE8F4; --gold: #E0A526; --gold-soft: #F8E9C6; --slate: #1C4E80; --slate-2: #133A61; --slate-ink: #FFFFFF; --slate-muted: #B9CDE3; --hs-city: #7A93AE; }
+:root[data-pal="viola"] { --bg: #F3EFF8; --panel: #FFFFFF; --ink: #1F1430; --muted: #6A5E80; --line: #DCD2EA; --accent: #C8102E; --accent-soft: #FADCE1; --data: #5B2D90; --data-soft: #E9E0F5; --gold: #C9971C; --gold-soft: #F5E7C2; --slate: #4B2683; --slate-2: #3A1D66; --slate-ink: #FFFFFF; --slate-muted: #CDBEE8; --hs-city: #7E6AA6; }
+}
+:root[data-pal="teal"] { }
+.pals { display: inline-flex; gap: 6px; margin-left: 12px; vertical-align: middle; }
+.pal { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; padding: 0; }
+.pal.on { border-color: var(--ink); }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
 a { color: inherit; }
@@ -10191,7 +10203,7 @@ const SKILL_POINTS = 10, SKILL_MAX = 4;
 const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 
 function startCareer(c) {
-  const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
+  const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13 + (c.salt | 0)) >>> 0;   // the salt makes every run's party and luck different
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
   S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'hunt', 'rest', 'rest'], eve: ['home', 'home', 'home', 'home', 'out', 'home', 'home'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
@@ -10579,7 +10591,7 @@ function refreshBoard() {
     const n = Math.min(opts.length, prnd() < .5 ? 1 : prnd() < .6 ? 2 : 0);
     const chosen = new Set();
     // a contact in charge of a department makes their own job easier to hear about
-    for (const t of opts) { const h = headOf(f, t.head); if (M.known[h] && opinion(h) > 15 && prnd() < .5) chosen.add(t); }
+    for (const t of opts) { const h = headOf(f, t.head); if (M.known[h] && opinion(h) > 25 && M.known[h].trust >= 45 && prnd() < .4) chosen.add(t); }
     const want = Math.min(opts.length, chosen.size + n);
     while (chosen.size < want) chosen.add(ppick(opts));
     for (const t of chosen) out.push(makePost(t, f));
@@ -10587,7 +10599,9 @@ function refreshBoard() {
   // referrals first, then a mix: no more than two postings for the same job
   for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(prnd() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
   out.sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0));
-  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, 14);
+  // how much you hear about depends on who you are: a newcomer hears of a handful; a network, a reputation and an agent widen it
+  const heard = 3 + careerLevel() * 2 + Math.floor(Object.keys(M.known).length / 8) + (M.agent ? 2 : 0) + (M.school ? 1 : 0);
+  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.min(14, heard));
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), odd);
@@ -11369,14 +11383,14 @@ function depthBoard(films) {
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   const fit = t => t.tier <= L + 1 && (t.tier >= L - 2 || t.tier === 0);
   for (const f of films) {
-    if (out.length >= 5) break;
+    if (out.length >= 1 + careerLevel()) break;
     if (prnd() > .3) continue;
     const opts = POSTS.filter(t => t.cat && fit(t) && t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
     if (opts.length) out.push(makePost(ppick(opts), f));
   }
   const biz = ODD_JOBS.filter(t => t.cat && fit(t) && !M.jobs.some(j => j.k === t.k));
   const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null);
-  for (let i = 0, n = biz.length ? 2 + (prnd() < .5 ? 1 : 0) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
+  for (let i = 0, n = biz.length ? 1 + (prnd() < .5 ? 1 : 0) + Math.floor(careerLevel() / 2) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
   return out;
 }
 
@@ -12371,14 +12385,14 @@ function viewFilms() {
   if (st.genre !== 'ALL') rows = rows.filter(f => f.genre === st.genre);
   if (st.year !== 'ALL' && st.mode === 'released') rows = rows.filter(f => yearOf(f.rel) == st.year);
   if (st.src === 'real') rows = rows.filter(f => f.real); else if (st.src === 'made') rows = rows.filter(f => !f.real);
-  if (st.q) { const q = st.q.toLowerCase(); rows = rows.filter(f => f.title.toLowerCase().includes(q) || P(f.dir).name.toLowerCase().includes(q) || (UI.cine && f.real && f.real.toLowerCase().includes(q)) || (UI.cine && P(f.dir).real && P(f.dir).real.toLowerCase().includes(q))); }
+  if (st.q) { const q = st.q.toLowerCase(); rows = rows.filter(f => f.title.toLowerCase().includes(q) || P(f.dir).name.toLowerCase().includes(q) || (f.real && f.real.toLowerCase().includes(q)) || (P(f.dir).real && P(f.dir).real.toLowerCase().includes(q))); }
   const n = rows.length;
   const G = { title: f => f.title, rel: f => f.rel ?? f.gl, hub: f => hubName(f.hub), genre: f => f.genre, dir: f => P(f.dir).name, reviews: f => f.reviews ?? -1, total: f => f.total, cost: f => f.cost, life: f => lifetime(f), stage: f => f.stage * 1000 - f.stageEnd };
   rows = sortRows(rows, st, G).slice(0, 200);
   const released = st.mode === 'released';
   return `<div class="head"><h2>Films</h2><p class="lede">${released ? 'Every release in the world since the history began.' : 'The pipeline: everything greenlit and not yet released.'}</p></div>
   <div class="filters"><span class="seg"><button class="pill${released ? ' on' : ''}" data-fmode="released">Released</button><button class="pill${!released ? ' on' : ''}" data-fmode="active">In production (${S.active.length})</button></span>
-  <input id="f-q" type="search" placeholder="Search title or director" value="${esc(st.q)}">${sel('f-src', [['ALL', 'All films'], ['real', 'Real history'], ['made', 'Invented']], st.src)}${sel('f-hub', hubOpts(), st.hub)}${sel('f-genre', [['ALL', 'All genres']].concat(GENRES), st.genre)}${released ? sel('f-year', [['ALL', 'All years']].concat(years.map(y => [y, y])), st.year) : ''}</div>
+  <input id="f-q" type="search" placeholder="Search title or director, real or in-game" value="${esc(st.q)}">${sel('f-src', [['ALL', 'All films'], ['real', 'Real history'], ['made', 'Invented']], st.src)}${sel('f-hub', hubOpts(), st.hub)}${sel('f-genre', [['ALL', 'All genres']].concat(GENRES), st.genre)}${released ? sel('f-year', [['ALL', 'All years']].concat(years.map(y => [y, y])), st.year) : ''}</div>
   <p class="count">${n.toLocaleString()} film${n === 1 ? '' : 's'}${n > 200 ? ' · showing 200' : ''}</p>
   <div class="tw"><table class="grid"><thead><tr>${th('title', 'Title', st)}${th('rel', released ? 'Released' : 'Greenlit', st)}${th('hub', 'Hub', st)}${th('genre', 'Genre', st)}${th('dir', 'Director', st)}
   ${released ? th('reviews', 'Critics', st, 'n') + th('cost', 'Cost', st, 'n') + th('total', 'Gross', st, 'n') + th('life', 'Lifetime', st, 'n') : th('stage', 'Stage', st) + th('cost', 'Budget', st, 'n') + '<th>Company</th>'}</tr></thead><tbody>
@@ -12417,12 +12431,12 @@ function viewPeople() {
   if (st.role !== 'ALL') rows = rows.filter(p => p.role === st.role);
   if (st.hub !== 'ALL') rows = rows.filter(p => p.hub === st.hub);
   if (st.src === 'real') rows = rows.filter(p => p.real); else if (st.src === 'made') rows = rows.filter(p => !p.real);
-  if (st.q) { const q = st.q.toLowerCase(); rows = rows.filter(p => p.name.toLowerCase().includes(q) || (UI.cine && p.real && p.real.toLowerCase().includes(q))); }
+  if (st.q) { const q = st.q.toLowerCase(); rows = rows.filter(p => p.name.toLowerCase().includes(q) || (p.real && p.real.toLowerCase().includes(q))); }
   const n = rows.length;
   const G = { name: p => p.name, role: p => p.role, hub: p => hubName(p.hub), age: p => ageOf(p), skill: p => p.c[MAIN[p.role]], standing: p => p.standing, fame: p => p.fame, intl: p => p.intl, credits: p => p.credits.length };
   rows = sortRows(rows.slice(), st, G).slice(0, 200);
   return `<div class="head"><h2>People</h2><p class="lede">Everyone working in the industry, simulated under the same rules the player will live by.</p></div>
-  <div class="filters"><input id="p-q" type="search" placeholder="Search names" value="${esc(st.q)}">${sel('p-src', [['ALL', 'Everyone'], ['real', 'Real history'], ['made', 'Invented']], st.src)}${sel('p-role', [['ALL', 'All roles']].concat(ROLES.map(r => [r, ROLE_LABEL[r]])), st.role)}${sel('p-hub', hubOpts(), st.hub)}${sel('p-status', [['active', 'Working'], ['retired', 'Retired or died'], ['all', 'Everyone']], st.status)}</div>
+  <div class="filters"><input id="p-q" type="search" placeholder="Search names, real or in-game" value="${esc(st.q)}">${sel('p-src', [['ALL', 'Everyone'], ['real', 'Real history'], ['made', 'Invented']], st.src)}${sel('p-role', [['ALL', 'All roles']].concat(ROLES.map(r => [r, ROLE_LABEL[r]])), st.role)}${sel('p-hub', hubOpts(), st.hub)}${sel('p-status', [['active', 'Working'], ['retired', 'Retired or died'], ['all', 'Everyone']], st.status)}</div>
   <p class="count">${n.toLocaleString()} ${n === 1 ? 'person' : 'people'}${n > 200 ? ' · showing 200' : ''}</p>
   <div class="tw"><table class="grid"><thead><tr>${th('name', 'Name', st)}${th('role', 'Role', st)}${th('hub', 'Hub', st)}${th('age', 'Age', st, 'n')}${th('skill', 'Craft', st, 'n')}${th('standing', 'Standing', st, 'n')}${th('fame', 'Fame', st, 'n')}${th('intl', 'Intl', st, 'n')}${th('credits', 'Credits', st, 'n')}<th>Status</th></tr></thead><tbody>
   ${rows.map(p => `<tr><td>${pl(p.id)}${p.real ? ' ' + chip('History', 'hist') : ''}</td><td>${ROLE_LABEL[p.role]}</td><td>${esc(hubName(p.hub))}</td><td class="n">${ageOf(p)}</td><td class="n">${skillCell(p.c[MAIN[p.role]])}</td><td class="n">${Math.round(p.standing)}</td><td class="n">${Math.round(p.fame)}</td><td class="n">${Math.round(p.intl)}</td><td class="n">${p.credits.length}</td><td class="st">${esc(personStatus(p))}</td></tr>`).join('') || '<tr><td colspan="10" class="empty">Nobody matches these filters.</td></tr>'}
@@ -12613,7 +12627,26 @@ function suggestName(hub, g) {
   return EAST[HUBS[hub].lang] ? `${l} ${f}` : `${f} ${l}`;
 }
 function ccDefaults() {
-  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', role: 'director', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], look: defaultLook() };
+  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', role: 'director', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], salt: Math.floor(Math.random() * 1e9), look: defaultLook() };
+}
+// Randomise the basics (name, pronouns, age, hub, dream job, look) or the whole page. Display-side randomness only:
+// what you end up with is what gets saved.
+function randomCC(all) {
+  const R0 = () => Math.random(), pk = L => L[Math.floor(R0() * L.length)];
+  const c = UI.cc;
+  c.g = pk(['X', 'F', 'M']); c.hub = pk(MAJOR_HUBS); c.role = pk(DREAM_ROLES); c.age = 18 + Math.floor(R0() * 15);
+  c.name = suggestName(c.hub, c.g);
+  for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
+  if (c.g === 'F') c.look.facial = 0;
+  c.salt = Math.floor(R0() * 1e9);
+  if (!all) return;
+  for (const k of ['wealth', 'edu', 'arrival', 'build', 'quirk']) c[k] = pk(Object.keys(ORIGIN[k]));
+  c.points = {}; let left = SKILL_POINTS; const crafts = Object.keys(CRAFTS);
+  c.points[MAIN[c.role]] = Math.min(SKILL_MAX, 2 + Math.floor(R0() * 3)); left -= c.points[MAIN[c.role]];
+  while (left > 0) { const cr = pk(crafts); if ((c.points[cr] || 0) < SKILL_MAX) { c.points[cr] = (c.points[cr] || 0) + 1; left--; } }
+  c.traits = []; for (let i = 0; i < 40 && c.traits.length < 3; i++) { const t = pk(PLAYER_TRAITS); if (!c.traits.includes(t) && !traitClash(c.traits, t) && (t !== 'Late bloomer' || c.age >= 26)) c.traits.push(t); }
+  const G = GENRES.slice().sort(() => R0() - .5); c.love = G.slice(0, 1 + Math.floor(R0() * 3)); c.hate = R0() < .5 ? [] : G.slice(4, 5 + Math.floor(R0() * 2));
+  c.favs = []; while (c.favs.length < 5) { const id = randomFav(c); if (!id) break; c.favs.push(id); }
 }
 function ccSpent(c) { return Object.values(c.points).reduce((s, v) => s + v, 0); }
 const optCard = (group, key, o, on) => `<button class="opt${on ? ' on' : ''}" data-cc="${group}" data-v="${esc(key)}" aria-pressed="${on}"><b>${esc(o.label)}</b><span>${esc(o.d)}</span></button>`;
@@ -12622,7 +12655,7 @@ function filmChoices() {
   if (UI.filmIdx && UI.filmIdx.y === S.startYear) return UI.filmIdx;
   const list = Object.values(S.cat.allFilms).filter(f => f.y < S.startYear).sort((a, b) => a.t.localeCompare(b.t));
   const byLabel = {};
-  for (const f of list) byLabel[`${f.t} (${f.y})`] = f.id;
+  for (const f of list) { byLabel[`${f.t} (${f.y})`] = f.id; byLabel[`${f.t} (${f.y}) · ${f.real}`] = f.id; }
   return (UI.filmIdx = { y: S.startYear, list, byLabel });
 }
 // Random favourite: leans hard toward the genres you love, but almost anything can come up, weighted by how
@@ -12652,10 +12685,11 @@ function viewCreator() {
   const left = SKILL_POINTS - ccSpent(c);
   const grid = (group, src) => `<div class="opts">${Object.entries(src).map(([k, o]) => optCard(group, k, o, c[group] === k)).join('')}</div>`;
   const fc = filmChoices();
-  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title…" aria-label="Favourite film ${i + 1}">`}</li>`; };
+  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}">`}</li>`; };
   const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
   const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span> ${fxBadges(TRAITS[t])}</button>`; };
   return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
+  <div class="ccrand"><button class="btn-s" data-randcc="basics">Randomise the basics</button> <button class="btn-s" data-randcc="all">Randomise everything</button> <span class="muted">Then tweak anything, or just go to the party.</span></div>
   <section class="panel cc"><h3>The basics</h3>
    <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 150)}</div><div>
    <div class="ccrow"><label>Name <input id="cc-name" type="text" maxlength="40" value="${esc(c.name)}"></label><button class="linkish" data-cc="rename">Suggest another</button></div>
@@ -12678,7 +12712,7 @@ function viewCreator() {
    <p class="note">Jobs on films in a genre you love lower your stress and teach you faster; genres you hate wear you down.</p>
    <h4>Five favourite films <span class="count">optional</span></h4>
    <ol class="favs">${[0, 1, 2, 3, 4].map(favRow).join('')}</ol>
-   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y})">`).join('')}</datalist>
+   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y}) · ${esc(f.real)}">`).join('')}</datalist>
    <div class="ccrow"><button class="btn" data-cc="randfav">${c.favs.length >= 5 ? 'Reroll all five' : 'Fill the rest at random'}</button><span class="muted">Random picks lean toward your favourite genres, weighted by how widely seen and loved a film is.</span></div>
    <p class="note">Films you love sharpen the skills their genre leans on, and they come up in conversation.</p></section>
   <section class="panel cc"><h3>Something from your past</h3>${grid('quirk', ORIGIN.quirk)}</section>
@@ -13026,6 +13060,7 @@ function careerClick(t) {
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
   if (t.dataset.day) { playStep('day'); return true; }
   if (t.dataset.next) { playStep('next'); return true; }
+  if (t.dataset.randcc) { randomCC(t.dataset.randcc === 'all'); render(true); return true; }
   if (t.dataset.story !== undefined) { UI.story = !!t.dataset.story && !UI.story; render(true); return true; }
   if (t.dataset.move) { doAct({ t: 'move', i: +t.dataset.move }); render(true); return true; }
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
@@ -13041,7 +13076,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -13093,7 +13128,7 @@ function render(keepScroll) {
   const top = document.scrollingElement.scrollTop;
   const d = dateOf(S.week);
   $('#date').innerHTML = `<span class="wk">Week ${Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 6048e5) + 1}${careerActive() ? ' · ' + BEAT_NAMES[S.me.wk ? S.me.wk.beat : 0].toLowerCase() : ''}</span><span class="dt">${careerActive() ? fmtDay(S.me.wk ? S.me.wk.day : 0) : fmtDate(S.week)}</span>`;
-  $('#pulse').textContent = `${S.people.filter(p => !p.retired).length.toLocaleString()} working · ${S.active.length} films in production · ${S.companies.filter(c => c.closed === null).length} companies`;
+  $('#pulse').innerHTML = `${S.people.filter(p => !p.retired).length.toLocaleString()} working · ${S.active.length} films in production · ${S.companies.filter(c => c.closed === null).length} companies <span class="pals" title="Colour scheme">${Object.entries(PALETTES).map(([k, c]) => `<button class="pal${palette() === k ? ' on' : ''}" data-pal="${k}" style="background:${c}" aria-label="${k} colours"></button>`).join('')}</span>`;
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
   let html;
@@ -13164,7 +13199,14 @@ function build(year, seed, depth) {
   setTimeout(step, 30);
 }
 
+// Colour schemes: a per-browser preference, so it lives in localStorage (and works without it).
+const PALETTES = { marquee: '#3D1118', kodachrome: '#F2B705', noir: '#111111', riviera: '#1C4E80', viola: '#4B2683', teal: '#0F3B3A' };
+function palette() { try { return localStorage.getItem('applebox-palette') || 'marquee'; } catch (e) { return 'marquee'; } }
+function setPalette(k) { if (!PALETTES[k]) return; try { localStorage.setItem('applebox-palette', k); } catch (e) { /* no storage: this visit only */ } document.documentElement.dataset.pal = k; }
+if (typeof document !== 'undefined' && document.documentElement) document.documentElement.dataset.pal = palette();
 document.addEventListener('click', e => {
+  const pal = e.target.closest && e.target.closest('[data-pal]');
+  if (pal && pal.classList.contains('pal')) { setPalette(pal.dataset.pal); render(true); return; }
   const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-bo],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
   if (!t) return;
   if (t.tagName === 'A') e.preventDefault();

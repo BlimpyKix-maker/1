@@ -60,14 +60,14 @@ function depthBoard(films) {
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   const fit = t => t.tier <= L + 1 && (t.tier >= L - 2 || t.tier === 0);
   for (const f of films) {
-    if (out.length >= 5) break;
+    if (out.length >= 1 + careerLevel()) break;
     if (prnd() > .3) continue;
     const opts = POSTS.filter(t => t.cat && fit(t) && t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
     if (opts.length) out.push(makePost(ppick(opts), f));
   }
   const biz = ODD_JOBS.filter(t => t.cat && fit(t) && !M.jobs.some(j => j.k === t.k));
   const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null);
-  for (let i = 0, n = biz.length ? 2 + (prnd() < .5 ? 1 : 0) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
+  for (let i = 0, n = biz.length ? 1 + (prnd() < .5 ? 1 : 0) + Math.floor(careerLevel() / 2) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
   return out;
 }
 

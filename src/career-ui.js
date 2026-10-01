@@ -21,7 +21,26 @@ function suggestName(hub, g) {
   return EAST[HUBS[hub].lang] ? `${l} ${f}` : `${f} ${l}`;
 }
 function ccDefaults() {
-  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', role: 'director', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], look: defaultLook() };
+  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', role: 'director', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], salt: Math.floor(Math.random() * 1e9), look: defaultLook() };
+}
+// Randomise the basics (name, pronouns, age, hub, dream job, look) or the whole page. Display-side randomness only:
+// what you end up with is what gets saved.
+function randomCC(all) {
+  const R0 = () => Math.random(), pk = L => L[Math.floor(R0() * L.length)];
+  const c = UI.cc;
+  c.g = pk(['X', 'F', 'M']); c.hub = pk(MAJOR_HUBS); c.role = pk(DREAM_ROLES); c.age = 18 + Math.floor(R0() * 15);
+  c.name = suggestName(c.hub, c.g);
+  for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
+  if (c.g === 'F') c.look.facial = 0;
+  c.salt = Math.floor(R0() * 1e9);
+  if (!all) return;
+  for (const k of ['wealth', 'edu', 'arrival', 'build', 'quirk']) c[k] = pk(Object.keys(ORIGIN[k]));
+  c.points = {}; let left = SKILL_POINTS; const crafts = Object.keys(CRAFTS);
+  c.points[MAIN[c.role]] = Math.min(SKILL_MAX, 2 + Math.floor(R0() * 3)); left -= c.points[MAIN[c.role]];
+  while (left > 0) { const cr = pk(crafts); if ((c.points[cr] || 0) < SKILL_MAX) { c.points[cr] = (c.points[cr] || 0) + 1; left--; } }
+  c.traits = []; for (let i = 0; i < 40 && c.traits.length < 3; i++) { const t = pk(PLAYER_TRAITS); if (!c.traits.includes(t) && !traitClash(c.traits, t) && (t !== 'Late bloomer' || c.age >= 26)) c.traits.push(t); }
+  const G = GENRES.slice().sort(() => R0() - .5); c.love = G.slice(0, 1 + Math.floor(R0() * 3)); c.hate = R0() < .5 ? [] : G.slice(4, 5 + Math.floor(R0() * 2));
+  c.favs = []; while (c.favs.length < 5) { const id = randomFav(c); if (!id) break; c.favs.push(id); }
 }
 function ccSpent(c) { return Object.values(c.points).reduce((s, v) => s + v, 0); }
 const optCard = (group, key, o, on) => `<button class="opt${on ? ' on' : ''}" data-cc="${group}" data-v="${esc(key)}" aria-pressed="${on}"><b>${esc(o.label)}</b><span>${esc(o.d)}</span></button>`;
@@ -30,7 +49,7 @@ function filmChoices() {
   if (UI.filmIdx && UI.filmIdx.y === S.startYear) return UI.filmIdx;
   const list = Object.values(S.cat.allFilms).filter(f => f.y < S.startYear).sort((a, b) => a.t.localeCompare(b.t));
   const byLabel = {};
-  for (const f of list) byLabel[`${f.t} (${f.y})`] = f.id;
+  for (const f of list) { byLabel[`${f.t} (${f.y})`] = f.id; byLabel[`${f.t} (${f.y}) · ${f.real}`] = f.id; }
   return (UI.filmIdx = { y: S.startYear, list, byLabel });
 }
 // Random favourite: leans hard toward the genres you love, but almost anything can come up, weighted by how
@@ -60,10 +79,11 @@ function viewCreator() {
   const left = SKILL_POINTS - ccSpent(c);
   const grid = (group, src) => `<div class="opts">${Object.entries(src).map(([k, o]) => optCard(group, k, o, c[group] === k)).join('')}</div>`;
   const fc = filmChoices();
-  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title…" aria-label="Favourite film ${i + 1}">`}</li>`; };
+  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}">`}</li>`; };
   const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
   const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span> ${fxBadges(TRAITS[t])}</button>`; };
   return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
+  <div class="ccrand"><button class="btn-s" data-randcc="basics">Randomise the basics</button> <button class="btn-s" data-randcc="all">Randomise everything</button> <span class="muted">Then tweak anything, or just go to the party.</span></div>
   <section class="panel cc"><h3>The basics</h3>
    <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 150)}</div><div>
    <div class="ccrow"><label>Name <input id="cc-name" type="text" maxlength="40" value="${esc(c.name)}"></label><button class="linkish" data-cc="rename">Suggest another</button></div>
@@ -86,7 +106,7 @@ function viewCreator() {
    <p class="note">Jobs on films in a genre you love lower your stress and teach you faster; genres you hate wear you down.</p>
    <h4>Five favourite films <span class="count">optional</span></h4>
    <ol class="favs">${[0, 1, 2, 3, 4].map(favRow).join('')}</ol>
-   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y})">`).join('')}</datalist>
+   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y}) · ${esc(f.real)}">`).join('')}</datalist>
    <div class="ccrow"><button class="btn" data-cc="randfav">${c.favs.length >= 5 ? 'Reroll all five' : 'Fill the rest at random'}</button><span class="muted">Random picks lean toward your favourite genres, weighted by how widely seen and loved a film is.</span></div>
    <p class="note">Films you love sharpen the skills their genre leans on, and they come up in conversation.</p></section>
   <section class="panel cc"><h3>Something from your past</h3>${grid('quirk', ORIGIN.quirk)}</section>
@@ -434,6 +454,7 @@ function careerClick(t) {
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
   if (t.dataset.day) { playStep('day'); return true; }
   if (t.dataset.next) { playStep('next'); return true; }
+  if (t.dataset.randcc) { randomCC(t.dataset.randcc === 'all'); render(true); return true; }
   if (t.dataset.story !== undefined) { UI.story = !!t.dataset.story && !UI.story; render(true); return true; }
   if (t.dataset.move) { doAct({ t: 'move', i: +t.dataset.move }); render(true); return true; }
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
@@ -449,7 +470,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

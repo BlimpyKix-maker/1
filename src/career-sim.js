@@ -94,7 +94,7 @@ const SKILL_POINTS = 10, SKILL_MAX = 4;
 const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 
 function startCareer(c) {
-  const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
+  const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13 + (c.salt | 0)) >>> 0;   // the salt makes every run's party and luck different
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
   S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'hunt', 'rest', 'rest'], eve: ['home', 'home', 'home', 'home', 'out', 'home', 'home'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
@@ -482,7 +482,7 @@ function refreshBoard() {
     const n = Math.min(opts.length, prnd() < .5 ? 1 : prnd() < .6 ? 2 : 0);
     const chosen = new Set();
     // a contact in charge of a department makes their own job easier to hear about
-    for (const t of opts) { const h = headOf(f, t.head); if (M.known[h] && opinion(h) > 15 && prnd() < .5) chosen.add(t); }
+    for (const t of opts) { const h = headOf(f, t.head); if (M.known[h] && opinion(h) > 25 && M.known[h].trust >= 45 && prnd() < .4) chosen.add(t); }
     const want = Math.min(opts.length, chosen.size + n);
     while (chosen.size < want) chosen.add(ppick(opts));
     for (const t of chosen) out.push(makePost(t, f));
@@ -490,7 +490,9 @@ function refreshBoard() {
   // referrals first, then a mix: no more than two postings for the same job
   for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(prnd() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
   out.sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0));
-  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, 14);
+  // how much you hear about depends on who you are: a newcomer hears of a handful; a network, a reputation and an agent widen it
+  const heard = 3 + careerLevel() * 2 + Math.floor(Object.keys(M.known).length / 8) + (M.agent ? 2 : 0) + (M.school ? 1 : 0);
+  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.min(14, heard));
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), odd);
