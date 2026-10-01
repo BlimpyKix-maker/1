@@ -96,7 +96,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: Object.assign({}, c.look || {}), degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -323,8 +323,15 @@ function checkMods(stat) {
   if (M.party && !M.party.done && M.party.drinks >= 3) { adv--; why.push('drunk'); }
   if (M.stress >= 70) { adv--; why.push('stressed'); }
   if (M.party && M.party.done && M.energy < 15) { adv--; why.push('exhausted'); }
-  return { v, mod, adv: Math.sign(adv), why };
+  let bonus = 0;
+  for (const id of worn()) { const W = WARDROBE[id], nm = LOOK[W.slot].opts[W.opt];
+    if (W.adv && W.adv.includes(stat)) { adv++; why.push(nm); }
+    if (W.dis && W.dis.includes(stat)) { adv--; why.push(nm + ' (against)'); }
+    if (W.bonus && W.bonus[stat]) { bonus += W.bonus[stat]; why.push(`${nm} ${W.bonus[stat] > 0 ? '+' : ''}${W.bonus[stat]}`); } }
+  return { v, mod: mod + bonus, adv: Math.sign(adv), why };
 }
+// Wardrobe pieces the player owns and has on.
+function worn() { const M = S.me; if (!M || !M.owned) return []; return M.owned.filter(id => M.look[WARDROBE[id].slot] === WARDROBE[id].opt); }
 function checkInfo(stat, dc) {
   const { mod, adv, why } = checkMods(stat), DC = dc + 1;
   let p = clamp((21 - (DC - mod)) / 20, .05, .95);
@@ -336,7 +343,9 @@ function checkP(stat, dc) { return checkInfo(stat, dc).p; }
 const d20 = () => 1 + Math.floor(prnd() * 20);
 function roll(stat, dc) {
   const { mod, adv, DC } = checkInfo(stat, dc);
-  const one = () => { let d = d20(); if (d === 1 && has(ME(), 'Lucky')) d = d20(); return d; };
+  const one = () => { let d = d20(); if (d === 1 && has(ME(), 'Lucky')) d = d20();
+    if (d === 1 && worn().includes('pendant') && S.me.pendantW !== S.week) { S.me.pendantW = S.week; d = d20(); }   // once a week
+    return d; };
   let d = one();
   if (adv) { const e = one(); d = adv > 0 ? Math.max(d, e) : Math.min(d, e); }
   const ok = d === 20 || (d !== 1 && d + mod >= DC);
@@ -902,7 +911,21 @@ function applyAct(a) {
     case 'end': if (pending().length || !S.me.party.done || S.me.over) return false; endWeek(a); return true;
     case 'quit': { const j = S.me.jobs.find(x => x.id === a.id); if (!j) return false; if (j.head !== null) addTie(ME(), P(j.head), -6); finishJob(j, null, true); refreshBoard(); return true; }
     case 'life': if (!ORIGIN.life[a.v]) return false; S.me.life = a.v; return true;
-    case 'look': if (!LOOK[a.k] || !(a.v >= 0 && a.v < LOOK[a.k].opts.length)) return false; S.me.look[a.k] = a.v; return true;
+    case 'look': {
+      if (a.k === 'extra') { migrateLook(Object.assign(S.me.look, { extra: a.v })); return true; }   // saves from before accessory slots
+      if (!LOOK[a.k] || !(a.v >= 0 && a.v < LOOK[a.k].opts.length)) return false;
+      const item = WARDROBE_AT[a.k + ':' + a.v];
+      if (item && !S.me.owned.includes(item)) return false;
+      S.me.look[a.k] = a.v; return true;
+    }
+    case 'buy': {
+      const W = WARDROBE[a.id], M = S.me;
+      if (!W || M.owned.includes(a.id) || M.cash < W.price) return false;
+      M.cash -= W.price; M.owned.push(a.id); M.look[W.slot] = W.opt;
+      if (W.standing) ME().standing = clamp(ME().standing + W.standing, 0, 100);
+      diary(`Bought: ${LOOK[W.slot].opts[W.opt]} (${usd(W.price)}).`);
+      return true;
+    }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
   }
   return false;

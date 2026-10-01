@@ -1,36 +1,39 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Apple Box World Core</title>
+<title>Apple Box</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a production-office console. Slim slate header with the date and the advance controls, tab rail, then dense tables and detail sheets like a sports-management game. */
+/* Layout: a production-office console in Florentine colours: viola for the slate and the data, white for the
+   paper, the red of the city's lily as the accent that spices things up. */
 :root {
-  --bg: #E7EAED;
-  --panel: #F6F7F8;
-  --ink: #131A22;
-  --muted: #5A6673;
-  --line: #CFD6DD;
-  --accent: #A9600E;      /* tungsten 3200K */
-  --accent-soft: #F1E2CC;
-  --data: #2C63A3;        /* daylight 5600K */
-  --data-soft: #D9E4F1;
+  --bg: #F3EFF8;
+  --panel: #FFFFFF;
+  --ink: #1F1430;
+  --muted: #6A5E80;
+  --line: #DCD2EA;
+  --accent: #C8102E;      /* giglio red */
+  --accent-soft: #FADCE1;
+  --data: #5B2D90;        /* viola */
+  --data-soft: #E9E0F5;
   --good: #2D7A4C;
   --bad: #B0362A;
-  --slate: #151C24;
-  --slate-ink: #EEF1F4;
+  --slate: #4B2683;
+  --slate-2: #3A1D66;
+  --slate-ink: #FFFFFF;
+  --slate-muted: #CDBEE8;
   --f-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
   --f-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
   --f-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0F141A; --panel: #161D25; --ink: #E3E8ED; --muted: #8E9AA7; --line: #28323D;
-  --accent: #E5A24C; --accent-soft: #3A2A16; --data: #78AAE3; --data-soft: #1D2B3C;
-  --good: #5DBB85; --bad: #E47B6F; --slate: #0A0E12; --slate-ink: #EEF1F4; color-scheme: dark; } }
+  --bg: #130D1D; --panel: #1C1429; --ink: #EEE8F6; --muted: #A497BC; --line: #33284A;
+  --accent: #F04A61; --accent-soft: #3D1520; --data: #B796EA; --data-soft: #2A1F44;
+  --good: #5DBB85; --bad: #E47B6F; --slate: #2C1650; --slate-2: #22113F; --slate-ink: #FFFFFF; --slate-muted: #BBA8DE; color-scheme: dark; } }
 :root[data-theme="dark"] {
-  --bg: #0F141A; --panel: #161D25; --ink: #E3E8ED; --muted: #8E9AA7; --line: #28323D;
-  --accent: #E5A24C; --accent-soft: #3A2A16; --data: #78AAE3; --data-soft: #1D2B3C;
-  --good: #5DBB85; --bad: #E47B6F; --slate: #0A0E12; --slate-ink: #EEF1F4; color-scheme: dark; }
+  --bg: #130D1D; --panel: #1C1429; --ink: #EEE8F6; --muted: #A497BC; --line: #33284A;
+  --accent: #F04A61; --accent-soft: #3D1520; --data: #B796EA; --data-soft: #2A1F44;
+  --good: #5DBB85; --bad: #E47B6F; --slate: #2C1650; --slate-2: #22113F; --slate-ink: #FFFFFF; --slate-muted: #BBA8DE; color-scheme: dark; }
 
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
@@ -41,20 +44,20 @@ header.slate { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
 .slate-in { max-width: 1240px; margin: 0 auto; padding-block: 10px; padding-inline: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
 .brand { display: flex; align-items: baseline; gap: 10px; }
 .brand b { font: 700 22px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
-.brand span { font: 500 13px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: #9FB0C1; }
+.brand span { font: 500 13px/1 var(--f-display); letter-spacing: .12em; text-transform: uppercase; color: var(--slate-muted); }
 /* clapper stripes: the one flourish */
-.brand::before { content: ""; width: 26px; height: 14px; align-self: center; background: repeating-linear-gradient(135deg, #EEF1F4 0 5px, #151C24 5px 10px); border-radius: 2px; }
+.brand::before { content: ""; width: 26px; height: 14px; align-self: center; background: repeating-linear-gradient(135deg, #FFFFFF 0 5px, var(--accent) 5px 10px); border-radius: 2px; }
 #date { display: flex; flex-direction: column; font-family: var(--f-data); line-height: 1.2; margin-left: auto; text-align: right; }
-#date .wk { font-size: 11px; color: #9FB0C1; letter-spacing: .08em; text-transform: uppercase; }
+#date .wk { font-size: 11px; color: var(--slate-muted); letter-spacing: .08em; text-transform: uppercase; }
 #date .dt { font-size: 15px; }
 .adv { display: flex; gap: 6px; }
-.btn { border: 1px solid #3A4654; background: #1F2831; color: #EEF1F4; padding: 7px 12px; border-radius: 4px; cursor: pointer; font: 600 14px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
-.btn:hover:not(:disabled) { border-color: #6C7C8C; }
+.btn { border: 1px solid rgba(255,255,255,.28); background: var(--slate-2); color: #FFFFFF; padding: 7px 12px; border-radius: 4px; cursor: pointer; font: 600 14px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
+.btn:hover:not(:disabled) { border-color: #FFFFFF; }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 :root:not([data-theme="light"]) .btn.primary { color: #fff; }
 .btn:disabled { opacity: .45; cursor: progress; }
 .btn:focus-visible, .pill:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-#status { width: 100%; font: 12px/1.3 var(--f-data); color: #C9D3DC; }
+#status { width: 100%; font: 12px/1.3 var(--f-data); color: var(--slate-muted); }
 nav { border-bottom: 1px solid var(--line); background: var(--panel); }
 .nav-in { max-width: 1240px; margin: 0 auto; padding-inline: 16px; display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
 nav button { border: 0; background: none; padding: 11px 12px 9px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; font: 600 15px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
@@ -225,6 +228,13 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .scene { border-left: 3px solid var(--accent); }
 .big-p { font-size: 18px; line-height: 1.5; margin: 0 0 14px; max-width: 68ch; }
 .choices { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.btn-s { border: 1px solid var(--data); background: var(--data); color: #fff; border-radius: 4px; padding: 5px 10px; cursor: pointer; font: 600 13px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
+.btn-s:disabled { opacity: .45; cursor: default; }
+.btn-s.ghost { background: transparent; color: var(--data); }
+.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.shop-item { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg); }
+.shop-item p { margin: 2px 0 6px; font-size: 13px; }
+.shop-item.owned { border-color: var(--data); }
 .choice { text-align: left; border: 1px solid var(--line); background: var(--bg); border-radius: 6px; padding: 9px 12px; cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; color: var(--ink); }
 .choice b { font-weight: 500; }
 .choice:hover:not(:disabled) { border-color: var(--accent); }
@@ -10028,7 +10038,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13) >>> 0;
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: Object.assign({}, c.look || {}), degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', plan: ['hunt', 'hunt', 'network', 'write', 'rest', 'rest'], train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -10255,8 +10265,15 @@ function checkMods(stat) {
   if (M.party && !M.party.done && M.party.drinks >= 3) { adv--; why.push('drunk'); }
   if (M.stress >= 70) { adv--; why.push('stressed'); }
   if (M.party && M.party.done && M.energy < 15) { adv--; why.push('exhausted'); }
-  return { v, mod, adv: Math.sign(adv), why };
+  let bonus = 0;
+  for (const id of worn()) { const W = WARDROBE[id], nm = LOOK[W.slot].opts[W.opt];
+    if (W.adv && W.adv.includes(stat)) { adv++; why.push(nm); }
+    if (W.dis && W.dis.includes(stat)) { adv--; why.push(nm + ' (against)'); }
+    if (W.bonus && W.bonus[stat]) { bonus += W.bonus[stat]; why.push(`${nm} ${W.bonus[stat] > 0 ? '+' : ''}${W.bonus[stat]}`); } }
+  return { v, mod: mod + bonus, adv: Math.sign(adv), why };
 }
+// Wardrobe pieces the player owns and has on.
+function worn() { const M = S.me; if (!M || !M.owned) return []; return M.owned.filter(id => M.look[WARDROBE[id].slot] === WARDROBE[id].opt); }
 function checkInfo(stat, dc) {
   const { mod, adv, why } = checkMods(stat), DC = dc + 1;
   let p = clamp((21 - (DC - mod)) / 20, .05, .95);
@@ -10268,7 +10285,9 @@ function checkP(stat, dc) { return checkInfo(stat, dc).p; }
 const d20 = () => 1 + Math.floor(prnd() * 20);
 function roll(stat, dc) {
   const { mod, adv, DC } = checkInfo(stat, dc);
-  const one = () => { let d = d20(); if (d === 1 && has(ME(), 'Lucky')) d = d20(); return d; };
+  const one = () => { let d = d20(); if (d === 1 && has(ME(), 'Lucky')) d = d20();
+    if (d === 1 && worn().includes('pendant') && S.me.pendantW !== S.week) { S.me.pendantW = S.week; d = d20(); }   // once a week
+    return d; };
   let d = one();
   if (adv) { const e = one(); d = adv > 0 ? Math.max(d, e) : Math.min(d, e); }
   const ok = d === 20 || (d !== 1 && d + mod >= DC);
@@ -10834,7 +10853,21 @@ function applyAct(a) {
     case 'end': if (pending().length || !S.me.party.done || S.me.over) return false; endWeek(a); return true;
     case 'quit': { const j = S.me.jobs.find(x => x.id === a.id); if (!j) return false; if (j.head !== null) addTie(ME(), P(j.head), -6); finishJob(j, null, true); refreshBoard(); return true; }
     case 'life': if (!ORIGIN.life[a.v]) return false; S.me.life = a.v; return true;
-    case 'look': if (!LOOK[a.k] || !(a.v >= 0 && a.v < LOOK[a.k].opts.length)) return false; S.me.look[a.k] = a.v; return true;
+    case 'look': {
+      if (a.k === 'extra') { migrateLook(Object.assign(S.me.look, { extra: a.v })); return true; }   // saves from before accessory slots
+      if (!LOOK[a.k] || !(a.v >= 0 && a.v < LOOK[a.k].opts.length)) return false;
+      const item = WARDROBE_AT[a.k + ':' + a.v];
+      if (item && !S.me.owned.includes(item)) return false;
+      S.me.look[a.k] = a.v; return true;
+    }
+    case 'buy': {
+      const W = WARDROBE[a.id], M = S.me;
+      if (!W || M.owned.includes(a.id) || M.cash < W.price) return false;
+      M.cash -= W.price; M.owned.push(a.id); M.look[W.slot] = W.opt;
+      if (W.standing) ME().standing = clamp(ME().standing + W.standing, 0, 100);
+      diary(`Bought: ${LOOK[W.slot].opts[W.opt]} (${usd(W.price)}).`);
+      return true;
+    }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
   }
   return false;
@@ -10855,11 +10888,33 @@ const LOOK = {
   glasses: { label: 'Glasses', opts: ['None', 'Round', 'Square', 'Thick frames', 'Wire rims', 'Cat-eye', 'Aviators', 'Sunglasses', 'Half-moons', 'Tinted'] },
   outfit: { label: 'Clothes', opts: ['T-shirt', 'Hoodie', 'Flannel', 'Denim jacket', 'Leather jacket', 'Turtleneck', 'Sweater', 'Dress shirt', 'Blazer', 'Suit and tie'] },
   colour: { label: 'Clothes colour', opts: ['#1E2A38', '#3B3B3B', '#7A2E2E', '#2E5A3A', '#2C4F7C', '#8C6A2E', '#5B3A6E', '#B5B0A6', '#C8553D', '#E8E4DA'] },
-  extra: { label: 'Accessory', opts: ['None', 'Earrings', 'Cap', 'Beanie', 'Scarf', 'Headphones', 'Nose ring', 'Bandana', 'Necklace', 'Hat'] },
+  head: { label: 'On your head', opts: ['Nothing', 'Cap', 'Beanie', 'Bandana', 'Hat', 'Headphones', 'Beret', 'Headband', 'Fedora', 'Director\'s cap'] },
+  ears: { label: 'Ears', opts: ['Nothing', 'Studs', 'Hoops', 'Ear cuff', 'Diamond studs'] },
+  mark: { label: 'Piercings and marks', opts: ['Nothing', 'Nose ring', 'Nose stud', 'Freckles', 'Beauty mark'] },
+  neck: { label: 'Neck', opts: ['Nothing', 'Scarf', 'Necklace', 'Chain', 'Bow tie', 'Lanyard', 'Silk scarf', 'Lucky pendant'] },
+  wrist: { label: 'Wrist', opts: ['Nothing', 'Plain watch', 'Bracelet', 'Vintage watch', 'Smartwatch'] },
   hairline: { label: 'Hairline with age', opts: ['Keeps it', 'Recedes'] }
 };
 const LOOK_KEYS = Object.keys(LOOK);
-function defaultLook() { return { skin: 3, face: 0, build: 2, hair: 2, hairColor: 2, eyes: 1, facial: 0, glasses: 0, outfit: 0, colour: 0, extra: 0, hairline: 0 }; }
+function defaultLook() { return { skin: 3, face: 0, build: 2, hair: 2, hairColor: 2, eyes: 1, facial: 0, glasses: 0, outfit: 0, colour: 0, head: 0, ears: 0, mark: 0, neck: 0, wrist: 0, hairline: 0 }; }
+// Wardrobe pieces you have to buy. Each sits in one slot; some change your rolls when worn. Everything else in LOOK is free.
+const WARDROBE = {
+  fedora: { slot: 'head', opt: 8, price: 180, adv: ['cha'], dis: ['col'], d: 'Old-Hollywood swagger. Advantage on Charisma; crews read it as attitude (disadvantage on Collaboration).' },
+  dircap: { slot: 'head', opt: 9, price: 60, bonus: { com: 1 }, d: 'You look like you know where the camera goes. +1 Composure.' },
+  diamonds: { slot: 'ears', opt: 4, price: 1500, bonus: { cha: 1 }, standing: 2, d: 'Money in your ears. +1 Charisma, and people assume you\'re doing well.' },
+  silk: { slot: 'neck', opt: 6, price: 240, adv: ['tas'], d: 'A painter\'s scarf. Advantage on Taste.' },
+  pendant: { slot: 'neck', opt: 7, price: 90, lucky: true, d: 'Somebody\'s grandmother swore by it. Rerolls your first natural 1 each week.' },
+  vintage: { slot: 'wrist', opt: 3, price: 650, adv: ['eth'], d: 'Never late again. Advantage on Work ethic.' },
+  smart: { slot: 'wrist', opt: 4, price: 320, bonus: { eth: 1 }, dis: ['com'], d: 'Every notification at once. +1 Work ethic, disadvantage on Composure.' }
+};
+const WARDROBE_AT = {};
+for (const id in WARDROBE) WARDROBE_AT[WARDROBE[id].slot + ':' + WARDROBE[id].opt] = id;
+// Older looks had a single accessory; spread it into the slots.
+function migrateLook(L) {
+  if (L.extra) { const m = { 1: ['ears', 1], 2: ['head', 1], 3: ['head', 2], 4: ['neck', 1], 5: ['head', 5], 6: ['mark', 1], 7: ['head', 3], 8: ['neck', 2], 9: ['head', 4] }[L.extra]; if (m && L[m[0]] === undefined) L[m[0]] = m[1]; }
+  delete L.extra;
+  return L;
+}
 // Region-weighted skin tones, kept broad: every hub draws from the whole range.
 const SKIN_BIAS = { 'North America': 3.5, Europe: 1.5, 'East Asia': 2, 'South Asia': 5, 'Southeast Asia': 4.5, Africa: 7.5, 'South America': 4, Oceania: 2.5, 'Middle East': 4 };
 function hashRand(seed) { let a = (seed * 2654435761) >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -10872,12 +10927,14 @@ function npcLook(p) {
   const dark = skin >= 5 || ['East Asia', 'South Asia', 'Southeast Asia', 'Africa', 'Middle East'].includes(region);
   const hairColor = dark ? [0, 0, 1, 1, 2][pk(5)] : [0, 1, 2, 2, 3, 4, 5, 6][pk(8)];
   const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
-  return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), extra: r() < .2 ? 1 + pk(9) : 0, hairline: !F && r() < .45 ? 1 : 0 };
+  return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), head: r() < .14 ? 1 + pk(7) : 0, ears: r() < (F ? .45 : .12) ? 1 + pk(3) : 0, mark: r() < .1 ? 1 + pk(4) : 0, neck: r() < .14 ? 1 + pk(5) : 0, wrist: 0, hairline: !F && r() < .45 ? 1 : 0 };
 }
-function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), S.me.look) : npcLook(p); }
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : npcLook(p); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
+let PORTRAIT_UID = 0;
 function portraitSVG(L, age, size = 96) {
-  L = Object.assign(defaultLook(), L);
+  L = Object.assign(defaultLook(), migrateLook(Object.assign({}, L)));
+  const uid = 'pc' + (++PORTRAIT_UID);
   const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#000000', .18), line = mixHex(skin, '#000000', .38);
   const grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
   const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
@@ -10887,27 +10944,46 @@ function portraitSVG(L, age, size = 96) {
   const cx = 60, cy = 52, top = cy - fh / 2;
   const o = [];
   o.push(`<rect width="120" height="120" rx="10" fill="var(--accent-soft)"/>`);
+  // how far the hair reaches, so headwear sits on top of it rather than inside it
+  const hairTop0 = top - 3 + recede * 10;
+  const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 ? fw / 2 : fw / 2 + 2;
+  const hairPeak = L.hair === 6 ? top + 10 - (fw / 2 + 12) : L.hair === 4 ? hairTop0 - 12 : L.hair === 5 ? hairTop0 - 6 : L.hair === 0 ? top : hairTop0 - 4;
+  const covers = [1, 2, 4, 6, 8, 9].includes(L.head);   // hats that hide the hair above the brim
+  const brim = top + ([0, 8, 10, 0, 6, 0, 7, 0, 6, 8][L.head] || 0);
+  const hw = Math.max(fw / 2 + 2, Math.min(hairHalf, fw / 2 + 9));   // headwear half-width: wide enough for the hair under it
+  if (covers) o.push(`<defs><clipPath id="${uid}"><rect x="0" y="${brim - 1}" width="120" height="${121 - brim}"/></clipPath></defs>`);
+  const hairOpen = covers ? `<g clip-path="url(#${uid})">` : '', hairClose = covers ? '</g>' : '';
   // hair behind the head
+  o.push(hairOpen);
   if ([7, 8, 9].includes(L.hair)) o.push(`<path d="M${cx - fw / 2 - 4} ${cy - 8} Q${cx - fw / 2 - 8} ${cy + 30} ${cx - fw / 2 + (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} L${cx + fw / 2 - (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} Q${cx + fw / 2 + 8} ${cy + 30} ${cx + fw / 2 + 4} ${cy - 8} Z" fill="${hc}"/>`);
   if (L.hair === 6) o.push(`<circle cx="${cx}" cy="${top + 10}" r="${fw / 2 + 12}" fill="${hc}"/>`);
+  o.push(hairClose);
   // body and clothes
   o.push(`<path d="M${cx - bw} 120 Q${cx - bw} 88 ${cx - neck - 8} 84 L${cx + neck + 8} 84 Q${cx + bw} 88 ${cx + bw} 120 Z" fill="${cloth}"/>`);
   o.push(`<rect x="${cx - neck}" y="${cy + fh / 2 - 6}" width="${neck * 2}" height="${16}" fill="${shade}"/>`);
   const collar = { 1: `<path d="M${cx - 16} 86 Q${cx} 100 ${cx + 16} 86" fill="none" stroke="${mixHex(cloth, '#000', .3)}" stroke-width="3"/>`, 2: `<path d="M${cx - 30} 100 L${cx + 30} 100 M${cx - 34} 110 L${cx + 34} 110" stroke="${mixHex(cloth, '#fff', .25)}" stroke-width="2"/>`, 3: `<path d="M${cx - 12} 85 L${cx} 98 L${cx + 12} 85" fill="none" stroke="${mixHex(cloth, '#fff', .3)}" stroke-width="2"/>`, 4: `<path d="M${cx - 14} 85 L${cx - 2} 110 M${cx + 14} 85 L${cx + 2} 110" stroke="${mixHex(cloth, '#000', .4)}" stroke-width="3"/>`, 5: `<rect x="${cx - neck - 3}" y="80" width="${neck * 2 + 6}" height="9" rx="3" fill="${cloth}"/>`, 7: `<path d="M${cx - 10} 85 L${cx} 95 L${cx + 10} 85" fill="#F1EEE8"/>`, 8: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 14} 86 L${cx - 4} 112 M${cx + 14} 86 L${cx + 4} 112" stroke="${mixHex(cloth, '#000', .35)}" stroke-width="3"/>`, 9: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 3} 92 L${cx + 3} 92 L${cx + 4} 112 L${cx} 116 L${cx - 4} 112 Z" fill="#8C2E2E"/>` }[L.outfit];
   if (collar) o.push(collar);
-  if (L.extra === 4) o.push(`<path d="M${cx - 20} 84 Q${cx} 96 ${cx + 20} 84 L${cx + 18} 92 Q${cx} 104 ${cx - 18} 92 Z" fill="#B8533A"/>`);
-  if (L.extra === 8) o.push(`<path d="M${cx - 10} 87 Q${cx} 97 ${cx + 10} 87" fill="none" stroke="#C9A646" stroke-width="1.5"/>`);
+  // round the neck
+  if (L.neck === 1 || L.neck === 6) { const sc = L.neck === 6 ? '#B9375A' : '#B8533A'; o.push(`<path d="M${cx - 20} 84 Q${cx} 96 ${cx + 20} 84 L${cx + 18} 92 Q${cx} 104 ${cx - 18} 92 Z" fill="${sc}"/>` + (L.neck === 6 ? `<path d="M${cx + 8} 94 L${cx + 14} 114 L${cx + 6} 112 Z" fill="${sc}"/>` : '')); }
+  if (L.neck === 2) o.push(`<path d="M${cx - 10} 87 Q${cx} 97 ${cx + 10} 87" fill="none" stroke="#C9A646" stroke-width="1.5"/>`);
+  if (L.neck === 3) o.push(`<path d="M${cx - 12} 86 Q${cx} 100 ${cx + 12} 86" fill="none" stroke="#D4AF37" stroke-width="2.6" stroke-dasharray="2 1"/>`);
+  if (L.neck === 4) o.push(`<path d="M${cx} 89 L${cx - 7} 85 L${cx - 7} 93 Z M${cx} 89 L${cx + 7} 85 L${cx + 7} 93 Z" fill="#1E1E1E"/><circle cx="${cx}" cy="89" r="1.8" fill="#1E1E1E"/>`);
+  if (L.neck === 5) o.push(`<path d="M${cx - 9} 85 L${cx - 2} 106 M${cx + 9} 85 L${cx + 2} 106" stroke="#5B2D90" stroke-width="2"/><rect x="${cx - 6}" y="105" width="12" height="9" rx="1" fill="#F4F1F8" stroke="#5B2D90" stroke-width="1"/>`);
+  if (L.neck === 7) o.push(`<path d="M${cx - 9} 86 Q${cx} 98 ${cx + 9} 86" fill="none" stroke="#C9A646" stroke-width="1.2"/><circle cx="${cx}" cy="97" r="2.6" fill="#2E8B57" stroke="#C9A646" stroke-width=".8"/>`);
   // head
   o.push(`<ellipse cx="${cx - fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/><ellipse cx="${cx + fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/>`);
   o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="${skin}"/>`);
-  if (L.extra === 1) o.push(`<circle cx="${cx - fw / 2 - 1}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/><circle cx="${cx + fw / 2 + 1}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/>`);
+  if (L.ears) { const ex2 = fw / 2 + 1, ear = L.ears === 1 ? (x => `<circle cx="${x}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/>`) : L.ears === 2 ? (x => `<circle cx="${x}" cy="${cy + 12}" r="3.2" fill="none" stroke="#D4AF37" stroke-width="1.3"/>`) : L.ears === 3 ? (x => `<path d="M${x} ${cy - 2} l0 6" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round"/>`) : (x => `<circle cx="${x}" cy="${cy + 9}" r="2" fill="#E8F4FF" stroke="#9FC6E8" stroke-width=".8"/>`); o.push(ear(cx - ex2) + (L.ears === 3 ? '' : ear(cx + ex2))); }
   // eyes, brows, nose, mouth
   const ey = cy - 1, ex = fw * .2, ec = LOOK.eyes.opts[L.eyes];
   o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><circle cx="${cx - ex}" cy="${ey}" r="1.7" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey}" r="1.7" fill="${ec}"/>`);
   o.push(`<path d="M${cx - ex - 4} ${ey - 5} Q${cx - ex} ${ey - 7} ${cx - ex + 4} ${ey - 5} M${cx + ex - 4} ${ey - 5} Q${cx + ex} ${ey - 7} ${cx + ex + 4} ${ey - 5}" stroke="${mixHex(hc, '#000', .2)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
   o.push(`<path d="M${cx} ${ey + 2} Q${cx - 2.5} ${ey + 9} ${cx + 1} ${ey + 10}" stroke="${line}" stroke-width="1.2" fill="none"/>`);
   o.push(`<path d="M${cx - 6} ${ey + 15} Q${cx} ${ey + 18} ${cx + 6} ${ey + 15}" stroke="${mixHex(skin, '#7A2F2F', .55)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
-  if (L.extra === 6) o.push(`<circle cx="${cx + 3}" cy="${ey + 10}" r="1.4" fill="none" stroke="#C0C0C0" stroke-width="1"/>`);
+  if (L.mark === 1) o.push(`<circle cx="${cx + 3}" cy="${ey + 10}" r="1.4" fill="none" stroke="#C0C0C0" stroke-width="1"/>`);
+  if (L.mark === 2) o.push(`<circle cx="${cx + 2.6}" cy="${ey + 8.6}" r=".9" fill="#D9D9D9"/>`);
+  if (L.mark === 3) o.push([[-9, 5], [-6, 7], [-11, 8], [9, 5], [6, 7], [11, 8], [-2, 4], [2, 4]].map(([dx, dy]) => `<circle cx="${cx + dx}" cy="${ey + dy}" r=".7" fill="${mixHex(skin, '#5A3015', .5)}"/>`).join(''));
+  if (L.mark === 4) o.push(`<circle cx="${cx + 7}" cy="${ey + 13}" r=".9" fill="#2A1A10"/>`);
   // age lines
   if (age >= 40) o.push(`<path d="M${cx - ex - 6} ${ey + 1} l-2 1.5 M${cx + ex + 6} ${ey + 1} l2 1.5" stroke="${line}" stroke-width=".8"/>`);
   if (age >= 52) o.push(`<path d="M${cx - 8} ${top + 9} Q${cx} ${top + 7} ${cx + 8} ${top + 9} M${cx - 9} ${ey + 11} q-2 4 0 6 M${cx + 9} ${ey + 11} q2 4 0 6" stroke="${line}" stroke-width=".8" fill="none"/>`);
@@ -10916,7 +10992,7 @@ function portraitSVG(L, age, size = 96) {
   const beard = { 1: `<path d="M${cx - fw / 2 + 3} ${cy + 8} Q${cx} ${cy + fh / 2 + 3} ${cx + fw / 2 - 3} ${cy + 8}" stroke="${fh2}" stroke-width="5" opacity=".3" fill="none"/>`, 2: `<path d="M${cx - 8} ${ey + 13} Q${cx} ${ey + 10} ${cx + 8} ${ey + 13}" stroke="${fh2}" stroke-width="3" fill="none" stroke-linecap="round"/>`, 3: `<path d="M${cx - 6} ${ey + 13} Q${cx} ${ey + 11} ${cx + 6} ${ey + 13} M${cx - 4} ${ey + 19} Q${cx} ${ey + 26} ${cx + 4} ${ey + 19}" stroke="${fh2}" stroke-width="3" fill="none"/>`, 4: `<path d="M${cx - fw / 2 + 2} ${cy + 6} Q${cx - fw / 2 + 4} ${cy + fh / 2 + 2} ${cx} ${cy + fh / 2 + 3} Q${cx + fw / 2 - 4} ${cy + fh / 2 + 2} ${cx + fw / 2 - 2} ${cy + 6} Q${cx} ${cy + 24} ${cx - fw / 2 + 2} ${cy + 6} Z" fill="${fh2}" opacity=".85"/>`, 5: `<path d="M${cx - fw / 2} ${cy + 2} Q${cx - fw / 2} ${cy + fh / 2 + 10} ${cx} ${cy + fh / 2 + 12} Q${cx + fw / 2} ${cy + fh / 2 + 10} ${cx + fw / 2} ${cy + 2} Q${cx} ${cy + 22} ${cx - fw / 2} ${cy + 2} Z" fill="${fh2}"/>`, 6: `<path d="M${cx - fw / 2 + 1} ${cy - 4} L${cx - fw / 2 + 2} ${cy + 12} M${cx + fw / 2 - 1} ${cy - 4} L${cx + fw / 2 - 2} ${cy + 12}" stroke="${fh2}" stroke-width="4"/>`, 7: `<path d="M${cx - fw / 2 + 1} ${cy + 2} Q${cx} ${cy + fh / 2 + 6} ${cx + fw / 2 - 1} ${cy + 2}" stroke="${fh2}" stroke-width="3" fill="none"/>`, 8: `<path d="M${cx - 10} ${ey + 18} Q${cx - 9} ${ey + 11} ${cx} ${ey + 12} Q${cx + 9} ${ey + 11} ${cx + 10} ${ey + 18}" stroke="${fh2}" stroke-width="2.6" fill="none"/>`, 9: `<path d="M${cx - 1.5} ${ey + 19} l3 0 l-1.5 4 z" fill="${fh2}"/>` }[L.facial];
   if (beard) o.push(beard);
   // hair on top
-  const hairTop = top - 3 + recede * 10;
+  const hairTop = hairTop0;
   const hairs = {
     1: `<path d="M${cx - fw / 2 + 1} ${cy - 6} Q${cx - fw / 2} ${hairTop} ${cx} ${hairTop} Q${cx + fw / 2} ${hairTop} ${cx + fw / 2 - 1} ${cy - 6} Q${cx} ${hairTop + 5} ${cx - fw / 2 + 1} ${cy - 6} Z" fill="${hc}" opacity=".55"/>`,
     2: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx + 8} ${hairTop + 6} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/>`,
@@ -10928,13 +11004,19 @@ function portraitSVG(L, age, size = 96) {
     8: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>`,
     9: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-12, -4, 4, 12].map(d => `<path d="M${cx + d} ${hairTop} L${cx + d * 1.6} ${cy + 34}" stroke="${hc}" stroke-width="5" stroke-linecap="round"/>`).join('')
   };
-  if (hairs[L.hair]) o.push(hairs[L.hair]);
+  if (hairs[L.hair]) o.push(hairOpen + hairs[L.hair] + hairClose);
   // headwear
-  if (L.extra === 2) o.push(`<path d="M${cx - fw / 2 - 2} ${top + 8} Q${cx} ${top - 14} ${cx + fw / 2 + 2} ${top + 8} Z" fill="${cloth}"/><rect x="${cx}" y="${top + 4}" width="${fw / 2 + 12}" height="5" rx="2" fill="${mixHex(cloth, '#000', .3)}"/>`);
-  if (L.extra === 3) o.push(`<path d="M${cx - fw / 2 - 2} ${top + 10} Q${cx} ${top - 18} ${cx + fw / 2 + 2} ${top + 10} Z" fill="${mixHex(cloth, '#fff', .15)}"/><rect x="${cx - fw / 2 - 3}" y="${top + 6}" width="${fw + 6}" height="6" rx="3" fill="${mixHex(cloth, '#000', .2)}"/>`);
-  if (L.extra === 5) o.push(`<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 2} ${top - 6} ${cx} ${top - 6} Q${cx + fw / 2 + 2} ${top - 6} ${cx + fw / 2 + 3} ${cy}" stroke="#2B2B2B" stroke-width="3" fill="none"/><rect x="${cx - fw / 2 - 7}" y="${cy - 5}" width="7" height="12" rx="3" fill="#2B2B2B"/><rect x="${cx + fw / 2}" y="${cy - 5}" width="7" height="12" rx="3" fill="#2B2B2B"/>`);
-  if (L.extra === 7) o.push(`<path d="M${cx - fw / 2 - 2} ${top + 9} Q${cx} ${top - 6} ${cx + fw / 2 + 2} ${top + 9} L${cx + fw / 2} ${top + 13} Q${cx} ${top + 2} ${cx - fw / 2} ${top + 13} Z" fill="#9C2B2B"/>`);
-  if (L.extra === 9) o.push(`<ellipse cx="${cx}" cy="${top + 6}" rx="${fw / 2 + 10}" ry="4" fill="${mixHex(cloth, '#000', .25)}"/><path d="M${cx - fw / 2 + 1} ${top + 6} Q${cx} ${top - 16} ${cx + fw / 2 - 1} ${top + 6} Z" fill="${mixHex(cloth, '#000', .25)}"/>`);
+  // headwear, sized to the hair underneath
+  const capC = cloth, dk = mixHex(cloth, '#000', .3);
+  if (L.head === 1) o.push(`<path d="M${cx - hw} ${brim} Q${cx - hw} ${top - 10} ${cx} ${top - 11} Q${cx + hw} ${top - 10} ${cx + hw} ${brim} Z" fill="${capC}"/><path d="M${cx - 2} ${brim - 1} L${cx + hw + 13} ${brim + 1} Q${cx + hw + 14} ${brim + 5} ${cx + hw + 6} ${brim + 5} L${cx - 2} ${brim + 3} Z" fill="${dk}"/>`);
+  if (L.head === 2) o.push(`<path d="M${cx - hw - 1} ${brim + 1} Q${cx - hw} ${top - 16} ${cx} ${top - 17} Q${cx + hw} ${top - 16} ${cx + hw + 1} ${brim + 1} Z" fill="${mixHex(cloth, '#fff', .15)}"/><rect x="${cx - hw - 2}" y="${brim - 4}" width="${hw * 2 + 4}" height="7" rx="3" fill="${mixHex(cloth, '#000', .2)}"/>`);
+  if (L.head === 3) o.push(`<path d="M${cx - hairHalf - 1} ${top + 9} Q${cx} ${Math.min(top - 6, hairPeak + 4)} ${cx + hairHalf + 1} ${top + 9} L${cx + hairHalf - 1} ${top + 13} Q${cx} ${top + 3} ${cx - hairHalf + 1} ${top + 13} Z" fill="#9C2B2B"/><path d="M${cx + hairHalf - 2} ${top + 10} l7 6 l-3 1 Z" fill="#9C2B2B"/>`);
+  if (L.head === 4) o.push(`<ellipse cx="${cx}" cy="${brim}" rx="${hw + 10}" ry="4" fill="${dk}"/><path d="M${cx - hw + 1} ${brim} Q${cx} ${top - 18} ${cx + hw - 1} ${brim} Z" fill="${dk}"/>`);
+  if (L.head === 5) { const W = Math.max(fw / 2 + 3, hairHalf + 1), T = Math.min(top - 6, hairPeak - 3); o.push(`<path d="M${cx - W} ${cy} Q${cx - W} ${T} ${cx} ${T} Q${cx + W} ${T} ${cx + W} ${cy}" stroke="#2B2B2B" stroke-width="3" fill="none"/><rect x="${cx - W - 5}" y="${cy - 6}" width="8" height="13" rx="3" fill="#2B2B2B"/><rect x="${cx + W - 3}" y="${cy - 6}" width="8" height="13" rx="3" fill="#2B2B2B"/>`); }
+  if (L.head === 6) o.push(`<path d="M${cx - hw - 3} ${brim} Q${cx - hw} ${top - 12} ${cx + 4} ${top - 12} Q${cx + hw + 8} ${top - 10} ${cx + hw + 3} ${brim} Z" fill="#5B2D90"/><circle cx="${cx + 2}" cy="${top - 12}" r="1.6" fill="#3A1D66"/>`);
+  if (L.head === 7) o.push(`<path d="M${cx - hairHalf} ${top + 7} Q${cx} ${top - 2} ${cx + hairHalf} ${top + 7}" stroke="#C8102E" stroke-width="4" fill="none"/>`);
+  if (L.head === 8) o.push(`<ellipse cx="${cx}" cy="${brim}" rx="${hw + 12}" ry="4.5" fill="#3B3226"/><path d="M${cx - hw + 1} ${brim} L${cx - hw + 3} ${top - 12} Q${cx} ${top - 6} ${cx + hw - 3} ${top - 12} L${cx + hw - 1} ${brim} Z" fill="#3B3226"/><rect x="${cx - hw + 1}" y="${brim - 5}" width="${hw * 2 - 2}" height="4" fill="#1E1A14"/>`);
+  if (L.head === 9) o.push(`<path d="M${cx - hw} ${brim} Q${cx - hw} ${top - 10} ${cx} ${top - 11} Q${cx + hw} ${top - 10} ${cx + hw} ${brim} Z" fill="#1F1430"/><path d="M${cx - 2} ${brim - 1} L${cx + hw + 13} ${brim + 1} Q${cx + hw + 14} ${brim + 5} ${cx + hw + 6} ${brim + 5} L${cx - 2} ${brim + 3} Z" fill="#000"/><text x="${cx}" y="${top + 2}" font-size="6" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700">CREW</text>`);
   // glasses
   if (L.glasses) {
     const g = L.glasses, gc = g === 4 ? '#B9A06A' : g === 7 || g === 9 ? '#222' : '#2A2A2A', fill = g === 7 ? '#1D1D1D' : g === 9 ? 'rgba(80,60,120,.35)' : 'none';
@@ -11299,9 +11381,17 @@ function randomFav(c) {
   for (let i = 0; i < list.length; i++) { r -= ws[i]; if (r <= 0) return list[i].id; }
   return null;
 }
-function lookControls(c) {
+// owned: wardrobe pieces the player has bought; anything else from the shop stays off the list.
+function lookControls(c, owned = []) {
   return `<div class="looks">${LOOK_KEYS.map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
-    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`}</div>`; }).join('')}</div>`;
+    const ok = i => { const it = WARDROBE_AT[k + ':' + i]; return !it || owned.includes(it); };
+    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>`;
+}
+// The wardrobe shop: things money buys that change how you look and, sometimes, how your rolls go.
+function wardrobeShop() {
+  const M = S.me;
+  return `<h4>Wardrobe shop</h4><div class="shop">${Object.entries(WARDROBE).map(([id, W]) => { const own = M.owned.includes(id), nm = LOOK[W.slot].opts[W.opt];
+    return `<div class="shop-item${own ? ' owned' : ''}">${portraitSVG(Object.assign(defaultLook(), M.look, { [W.slot]: W.opt }), S.year - ME().born, 56)}<div><b>${esc(nm)}</b> <span class="muted">${esc(LOOK[W.slot].label.toLowerCase())}</span><p class="muted">${esc(W.d)}</p>${own ? '<span class="chip t-Award">Owned</span>' : `<button class="btn-s" data-buy="${id}"${M.cash < W.price ? ' disabled' : ''}>Buy ${usd(W.price)}</button>`}</div></div>`; }).join('')}</div>`;
 }
 function viewCreator() {
   const c = UI.cc = UI.cc || ccDefaults();
@@ -11381,7 +11471,7 @@ function viewDesk() {
   }).join('');
   return `<div class="head partyhead"><div class="pf">${portraitOf(me, 96)}</div><div><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button></p></div></div>
-  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) })}</section>` : ''}
+  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   <div class="kpis"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)} to a lender` : ''}</small></div>
    <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div>
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
@@ -11456,6 +11546,7 @@ function careerClick(t) {
     render(true); return true;
   }
   if (t.dataset.look) { const [k, v] = t.dataset.look.split(':'); setLook(k, +v); return true; }
+  if (t.dataset.buy) { doAct({ t: 'buy', id: t.dataset.buy }); render(true); return true; }
   if (t.dataset.restyle) { UI.restyle = !UI.restyle; render(true); return true; }
   if (t.dataset.party) { doAct({ t: 'party', k: t.dataset.party }); render(true); return true; }
   if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'); doAct({ t: 'pick', id: +id, k }); render(true); return true; }
@@ -11467,6 +11558,8 @@ function careerClick(t) {
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
+// Every clickable the career screens use; the page's click handler listens for these.
+const CAREER_CLICKS = '[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -11583,7 +11676,7 @@ function build(year, seed, depth) {
 }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-bo],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover]');
+  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-bo],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
   if (!t) return;
   if (t.tagName === 'A') e.preventDefault();
   if (UI.busy && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;

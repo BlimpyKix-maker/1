@@ -43,9 +43,17 @@ function randomFav(c) {
   for (let i = 0; i < list.length; i++) { r -= ws[i]; if (r <= 0) return list[i].id; }
   return null;
 }
-function lookControls(c) {
+// owned: wardrobe pieces the player has bought; anything else from the shop stays off the list.
+function lookControls(c, owned = []) {
   return `<div class="looks">${LOOK_KEYS.map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
-    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>`}</div>`; }).join('')}</div>`;
+    const ok = i => { const it = WARDROBE_AT[k + ':' + i]; return !it || owned.includes(it); };
+    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>`;
+}
+// The wardrobe shop: things money buys that change how you look and, sometimes, how your rolls go.
+function wardrobeShop() {
+  const M = S.me;
+  return `<h4>Wardrobe shop</h4><div class="shop">${Object.entries(WARDROBE).map(([id, W]) => { const own = M.owned.includes(id), nm = LOOK[W.slot].opts[W.opt];
+    return `<div class="shop-item${own ? ' owned' : ''}">${portraitSVG(Object.assign(defaultLook(), M.look, { [W.slot]: W.opt }), S.year - ME().born, 56)}<div><b>${esc(nm)}</b> <span class="muted">${esc(LOOK[W.slot].label.toLowerCase())}</span><p class="muted">${esc(W.d)}</p>${own ? '<span class="chip t-Award">Owned</span>' : `<button class="btn-s" data-buy="${id}"${M.cash < W.price ? ' disabled' : ''}>Buy ${usd(W.price)}</button>`}</div></div>`; }).join('')}</div>`;
 }
 function viewCreator() {
   const c = UI.cc = UI.cc || ccDefaults();
@@ -125,7 +133,7 @@ function viewDesk() {
   }).join('');
   return `<div class="head partyhead"><div class="pf">${portraitOf(me, 96)}</div><div><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button></p></div></div>
-  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) })}</section>` : ''}
+  ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   <div class="kpis"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)} to a lender` : ''}</small></div>
    <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div>
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
@@ -200,6 +208,7 @@ function careerClick(t) {
     render(true); return true;
   }
   if (t.dataset.look) { const [k, v] = t.dataset.look.split(':'); setLook(k, +v); return true; }
+  if (t.dataset.buy) { doAct({ t: 'buy', id: t.dataset.buy }); render(true); return true; }
   if (t.dataset.restyle) { UI.restyle = !UI.restyle; render(true); return true; }
   if (t.dataset.party) { doAct({ t: 'party', k: t.dataset.party }); render(true); return true; }
   if (t.dataset.pick) { const [id, k] = t.dataset.pick.split(':'); doAct({ t: 'pick', id: +id, k }); render(true); return true; }
@@ -211,6 +220,8 @@ function careerClick(t) {
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
+// Every clickable the career screens use; the page's click handler listens for these.
+const CAREER_CLICKS = '[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
