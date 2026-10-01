@@ -619,6 +619,7 @@ function closeWeek(a) {
   const rival = Object.keys(M.known).map(Number).find(id => M.known[id].tags.includes('Rival') && !P(id).dead && P(id).hub === M.hub);
   if (rival !== undefined && noes.length && prnd() < .2) { const p = ppick(noes); addTie(me, P(rival), -3); inbox('note', `${P(rival).name} again`, `You hear who got the ${p.t.toLowerCase()} job you wanted${p.film !== null ? ' on ' + S.films[p.film].title : ''}: ${P(rival).name}.`, { person: rival }); stress += 3; }
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
+  contestWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
@@ -700,7 +701,7 @@ function catchupDay(L) {
   if (id === null || !M.known[id] || P(id).dead) { L.push('You meant to catch up with someone but never made the call.'); return; }
   const q = P(id), k = M.known[id];
   const ok = roll('cha', 9 - k.trust / 25);
-  addTie(me, q, ok ? 6 : 1); k.trust = clamp(k.trust + (ok ? 4 : 1), 0, 100);
+  addTie(me, q, (ok ? 6 : 1) + tasteMatch(q) * 2); k.trust = clamp(k.trust + (ok ? 4 : 1), 0, 100);   // shared tastes make it easier
   const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id) && f.hub === M.hub);
   if (film && opinion(id) > 10 && prnd() < .6) { M.refs[id] = (M.refs[id] || 0) + 1; L.push(`Coffee with ${q.name}: they're on ${film.title} and promise to put your name forward.`); }
   else L.push(`Coffee with ${q.name}. ${ok ? 'It goes well.' : 'They seem distracted.'}`);
@@ -854,6 +855,7 @@ function sceneResolve(it, k) {
   if (fx.cash) M.cash += usd(fx.cash);
   if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
   if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
+  if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
   if (fx.meet) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = ` You meet ${q.name}, ${ROLE_LABEL[q.role].toLowerCase()}.`; } }
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
   const job = M.jobs.find(j => j.id === it.job);
@@ -943,6 +945,11 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
+    case 'newscript': return newScript(a);
+    case 'rewrite': return rewriteScript(a);
+    case 'share': return shareScript(a);
+    case 'contest': return enterContest(a);
+    case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'enrol': return enrol(a);
     case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${PROGRAMS[S.me.school.prog].label.toLowerCase()}.`); S.me.school = null; return true;
     case 'query': return queryAgency(a);

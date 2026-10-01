@@ -231,6 +231,28 @@ function guidePanel() {
     <div><h4>Real history</h4><p>The films and people of real film history are here under new names, with their real credits, trivia and rumours (switch on <i>Cinephile notes</i> on any film or person). From the day you arrive, history is yours to change.</p></div>
    </div></section>`;
 }
+// The writing desk: your scripts, how far along, how good, and what to do with them.
+function writingDesk() {
+  const M = S.me, L = M.scripts || [], known = Object.keys(M.known).map(Number).filter(id => !P(id).dead);
+  const f = UI.newScript = UI.newScript || { genre: M.love[0] || 'Drama', theme: topThemes(voiceOf())[0] || 'family', tone: 'bittersweet', title: '' };
+  const row = sc => {
+    const pct = Math.round(sc.pages / sc.target * 100);
+    return `<div class="script"><div class="sh"><b>${esc(sc.title)}</b> <span class="muted">${esc(sc.genre)} · ${esc(THEMES[sc.theme])} · ${esc(TONES[sc.tone])} · draft ${sc.draft}</span>${sc.grade ? ` <span class="grade g${sc.grade}">${sc.grade}</span>` : ''}${sc.won ? ' ' + chip('Prize', 'good') : ''}</div>
+      <p class="muted">${esc(sc.logline)}</p>
+      ${sc.stage === 'writing' ? `<div class="pbar"><i style="width:${pct}%"></i></div><p class="small">${sc.pages} of ${sc.target} pages${M.activeScript === sc.id ? ' · <b>writing this one</b>' : ` · <button class="linkish" data-activescript="${sc.id}">Write this one</button>`}</p>`
+        : `<p class="small"><button class="btn-s ghost" data-rewrite="${sc.id}">Rewrite (draft ${sc.draft + 1})</button>
+          <select data-share="${sc.id}"><option value="">Show it to…</option>${known.filter(id => !sc.shared.includes(id)).map(id => { const t = tasteOf(P(id)); return `<option value="${id}">${esc(P(id).name)}${t.genres.includes(sc.genre) ? ' ♥ ' + esc(sc.genre.toLowerCase()) : ''}</option>`; }).join('')}</select>
+          ${CONTESTS.filter(c => !(sc.entered || []).includes(c.k)).map(c => `<button class="btn-s ghost" data-contest="${sc.id}:${c.k}" title="${esc(c.d)}">${esc(c.name)} (${fmtCash(usd(c.fee))})</button>`).join(' ')}</p>`}</div>`;
+  };
+  return `<section class="panel"><h3>Writing desk</h3>${L.length ? L.slice().reverse().map(row).join('') : '<p class="muted">No scripts yet. Every writer you admire started with a blank page and a stubborn idea.</p>'}
+   ${L.filter(x => x.stage === 'writing').length < 2 ? `<details class="newscript"${L.length ? '' : ' open'}><summary>Start a new script</summary>
+    <div class="ns"><label>Title <input id="ns-title" value="${esc(f.title)}" placeholder="Leave blank for a working title"></label>
+    <label>Genre ${sel('ns-genre', GENRES.map(g => [g, g + (M.love.includes(g) ? ' ♥' : (M.hate || []).includes(g) ? ' ✗' : '')]), f.genre)}</label>
+    <label>Theme ${sel('ns-theme', THEME_KEYS.map(k => [k, THEMES[k] + (topThemes(voiceOf()).includes(k) ? ' ★' : '')]), f.theme)}</label>
+    <label>Tone ${sel('ns-tone', Object.entries(TONES), f.tone)}</label>
+    <button class="btn-s" data-newscript="1">Begin</button></div>
+    <p class="muted small">♥ genres you love write better; ✗ genres you hate write worse. ★ themes are already part of your voice. Plan writing days (or late-night writing) to make progress.</p></details>` : ''}</section>`;
+}
 // School and representation: the two longer roads.
 function pathsPanel() {
   const M = S.me, ags = agenciesIn(M.hub);
@@ -276,11 +298,12 @@ function viewDesk() {
   const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
     const q = P(id), k = M.known[id], o = opinion(id);
     const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
-    return `<tr><td>${pl(id)}</td><td>${esc(q.occ || occupationOf(q))}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
+    return `<tr><td>${pl(id)}</td><td>${esc(q.occ || occupationOf(q))}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${(() => { const t = tasteOf(q); return t.genres.map(g => M.love.includes(g) ? `<b class="good">♥ ${esc(g)}</b>` : esc(g)).join(', ') + ' · ' + (topThemes(voiceOf()).includes(t.theme) ? `<b class="good">${esc(THEMES[t.theme])}</b>` : esc(THEMES[t.theme])); })()}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
       <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
   }).join('');
   return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
+   <p class="voice">Your voice: ${topThemes(voiceOf()).map(k => `<span class="vt">${esc(THEMES[k])}</span>`).join(' ') || '<span class="muted">still finding it</span>'} <span class="muted">· loves ${esc(M.love.join(', ').toLowerCase() || 'everything')}</span></p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
     <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
@@ -302,6 +325,7 @@ function viewDesk() {
      <div class="ccrow"><label>Living ${sel('pl-life', Object.entries(ORIGIN.life).map(([k, l]) => [k, `${l.label} (${fmtCash(usd(l.rent))}/wk)`]), M.life)}</label></div></section>
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
+    ${writingDesk()}
     ${pathsPanel()}
     ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
    </div></div>
@@ -310,7 +334,7 @@ function viewDesk() {
   <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}
   <h3>Contacts <span class="count">${known.length}</span></h3>
-  <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="8" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
+  <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>
   <p class="note"><button class="linkish" data-abandon="1">${UI.abandon ? 'Click again to delete this career for good' : 'Abandon this career'}</button></p>`;
 }
@@ -392,6 +416,10 @@ function careerClick(t) {
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
   if (t.dataset.day) { playStep('day'); return true; }
   if (t.dataset.next) { playStep('next'); return true; }
+  if (t.dataset.newscript) { const f = UI.newScript; f.title = ($('#ns-title') || {}).value || ''; doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone }); UI.newScript = null; render(true); return true; }
+  if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
+  if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
+  if (t.dataset.activescript) { doAct({ t: 'activescript', id: +t.dataset.activescript }); render(true); return true; }
   if (t.dataset.courses !== undefined) { UI.courses = !!t.dataset.courses; render(true); return true; }
   if (t.dataset.jobinfo !== undefined) { UI.jobinfo = t.dataset.jobinfo || null; render(true); return true; }
   if (t.dataset.abandon) { if (!UI.abandon) { UI.abandon = true; render(true); return true; } UI.abandon = false; clearSave(); build(S.startYear, S.seed, S.depth); return true; }
@@ -399,7 +427,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -407,6 +435,9 @@ function setLook(k, v) {
 }
 function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
+  if (e.target.dataset.share && v) { doAct({ t: 'share', id: +e.target.dataset.share, to: +v }); render(true); return true; }
+  if (/^ns-(genre|theme|tone)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
+  if (id === 'ns-title') { UI.newScript.title = v; return true; }
   if (e.target.dataset.place) { doAct({ t: 'place', id: e.target.dataset.place, sp: v || null }); render(true); return true; }
   if (e.target.dataset.lookk) { setLook(e.target.dataset.lookk, +v); return true; }
   if (e.target.dataset.fav !== undefined) { const fid = filmChoices().byLabel[v]; if (fid && !c.favs.includes(fid)) c.favs.push(fid); render(true); return true; }
