@@ -251,7 +251,10 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .dh b { font: 700 15px/1 var(--f-display); letter-spacing: .06em; text-transform: uppercase; }
 .di { font-size: 18px; }
 .den { font: 10px/1 var(--f-data); color: var(--muted); }
-.day .rollcard { padding: 6px; gap: 6px; }
+.day .rollcard { padding: 6px; gap: 4px; flex-direction: column; align-items: stretch; }
+.day .rollcard .dice { justify-content: center; }
+.day .rollcard .verdict { text-align: center; }
+.day .rollcard .track { margin: 16px 4px 4px; }
 .skip { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px; }
 @media (max-width: 760px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .guide { border-top: 3px solid var(--data); }

@@ -38,6 +38,12 @@ const out = process.argv[2] || '.';
   await page.selectOption('#pl-0', 'hunt');
   await page.selectOption('#pl-1', 'hunt');
   for (let i = 0; i < 4; i++) { const b = page.locator('[data-apply]').nth(i); if (await b.isEnabled()) await b.check(); }
+  // live the first three days one at a time; the mixer on Wednesday rolls a die
+  await page.selectOption('#pl-2', 'network');
+  for (let d = 0; d < 3; d++) await page.click('.day.now [data-day]');
+  await page.waitForTimeout(1300);
+  await page.screenshot({ path: out + '/3b-days.png', fullPage: true });
+  console.log('mid-week day', await page.evaluate(() => S.me.wk && S.me.wk.day));
   for (let w = 0; w < 6; w++) {
     // answer anything pending
     for (let k = 0; k < 6; k++) { const c = await page.$('.msg.open [data-pick]:not([disabled])'); if (!c) break; await c.click(); }
