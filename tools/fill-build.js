@@ -12,10 +12,11 @@ fs.writeFileSync(path.join(root, 'data', 'fill', '.base.html'), html);
 process.env.APPLEBOX_HTML = path.join(root, 'data', 'fill', '.base.html');
 const h = require('./harness.js');
 fs.unlinkSync(process.env.APPLEBOX_HTML);
+const nk = s => s.replace(/[’‘`]/g, "'").normalize('NFC');   // name key: apostrophe styles differ between sources
 const C = h.run('CATALOGUES'), GENRES = h.run('GENRES'), HUBS = h.run('HUBS');
 const byName = {}, ids = new Set(), have = new Set(), studios = new Set(), titles = new Set(), filmKey = {};
 for (const c of C) {
-  for (const p of c.people || []) { ids.add(p.id); (byName[p.real] = byName[p.real] || []).push(p.id); }
+  for (const p of c.people || []) { ids.add(p.id); (byName[nk(p.real)] = byName[nk(p.real)] || []).push(p.id); }
   for (const f of c.films || []) { have.add(f.real.toLowerCase() + '|' + f.y); have.add(f.real.toLowerCase() + '|' + f.dir[0]); ids.add(f.id); titles.add(f.t.toLowerCase()); filmKey[f.real.toLowerCase() + '|' + f.y] = f; }
   for (const s of c.studios || []) studios.add(s.id);
 }
@@ -25,15 +26,15 @@ const rows = f => fs.readFileSync(f, 'utf8').split('\n').filter(l => l.trim() &&
 const errs = [], people = [], films = [];
 const pf = path.join(dir, 'people.tsv');
 if (fs.existsSync(pf)) for (const [real, n, b, d, r, hub, lv, sx, note] of rows(pf)) {
-  if (byName[real]) { errs.push(`person already in catalogue: ${real}`); continue; }
+  if (byName[nk(real)]) { errs.push(`person already in catalogue: ${real}`); continue; }
   if (!HUBS[hub]) errs.push(`bad hub ${hub} for ${real}`);
   const id = uniq(slug(real.split(' ').pop()) + '_' + slug(real.split(' ')[0]).slice(0, 3));
-  byName[real] = [id];
+  byName[nk(real)] = [id];
   const p = { id, real, n, b: +b, r, hub, lv: +lv || 1 };
   if (d) p.d = +d; if (sx === 'F') p.sx = 'F'; if (note) p.note = note;
   people.push(p);
 }
-const who = (s, ctx) => s ? s.split(';').map(x => x.trim()).filter(Boolean).map(x => { const L = byName[x]; if (!L) { errs.push(`unknown person "${x}" in ${ctx}`); return null; } if (L.length > 1) errs.push(`ambiguous "${x}" in ${ctx}: ${L.join(',')}`); return L[0]; }).filter(Boolean) : [];
+const who = (s, ctx) => s ? s.split(';').map(x => x.trim()).filter(Boolean).map(x => { const L = byName[nk(x)]; if (!L) { errs.push(`unknown person "${x}" in ${ctx}`); return null; } if (L.length > 1) errs.push(`ambiguous "${x}" in ${ctx}: ${L.join(',')}`); return L[0]; }).filter(Boolean) : [];
 let skipped = 0;
 for (const file of fs.readdirSync(dir).filter(f => /^films-.*\.tsv$/.test(f)).sort()) for (const [real, y, t, hub, st, g, dirs, cast, q, extra] of rows(path.join(dir, file))) {
   const ctx = `${real} (${y}) [${file}]`;
