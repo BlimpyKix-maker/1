@@ -6,7 +6,11 @@ A career and management sim of the film industry (working title). The design doc
 - `index.html`: the whole game, one self-contained page (also published as the "Apple Box World Core" artifact).
 - `src/career-sim.js`, `src/career-ui.js`: phase 2, the player's career. `src/career-depth.js` adds the full job
   catalogue as listings, NPC job titles, school, agents and life events; `src/home.js` is the player's room and
-  furniture; `src/portrait.js` draws faces and the wardrobe. Edit these, then run
+  furniture; `src/portrait.js` draws faces and the wardrobe. `src/life.js` is the day engine (seven days of
+  morning, day and evening; energy, sleep and conditions); `src/life-scenes.js` the job scenes for every career,
+  interviews and days off; `src/life-voice.js` scripts, themes and taste; `src/life-city.js` housing, vehicles
+  and venues; `src/life-story.js` the résumé and timeline.
+- `tools/fuzz.js [careers] [weeks]`: lives random careers day by day with random choices and fails on any exception. Edit these, then run
   `python3 tools/build.py` to inject them into `index.html`.
 - `tools/harness.js`: runs the simulation headlessly in Node.
 - `tools/playtest.js [weeks] [depth]`: plays a career with a bot and checks that the save replays identically.

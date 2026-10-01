@@ -435,7 +435,7 @@ tr.blocked td { opacity: .55; }
 </style>
 
 <header class="slate"><div class="slate-in">
-  <div class="brand"><b>Apple Box</b><span>World Core</span></div>
+  <div class="brand"><b>Apple Box</b><span>A life in film</span></div>
   <div id="date" aria-live="polite"></div>
   <div class="adv" id="adv">
     <button class="btn" data-adv="1">Next week</button>
@@ -12930,7 +12930,7 @@ function viewDesk() {
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(ACTIVITIES).filter(([k]) => plan.includes(k) && k !== 'work').map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))})` : ''}`).join(' ')}</p>
-     <p class="note">Work costs about 15 energy a day; a night's sleep gives back 20 to 40 depending on your bed, your place and your stress. Evenings out cost energy but melt stress.</p>
+     <p class="note">A work day costs about 28 energy; a night's sleep gives back 20 to 40 depending on your bed, your home, your neighbourhood and your stress. Evenings out cost energy but melt stress.</p>
      <p class="note">You live in ${esc(ORIGIN.life[M.life].label.toLowerCase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-homep="1">Move or change how you travel</button></p></section>
     ${cityPanel()}
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
