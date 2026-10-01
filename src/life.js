@@ -68,7 +68,8 @@ function morningBeat() {
   const v = vehicleOf();
   if (act === 'rest' || weekend && act !== 'work') { card('☀️', 'A free morning', [pickLine(MORNING_FREE, W.day)]); return; }
   const commute = v.commute[(S.week + W.day) % v.commute.length];
-  M.energy = clamp(M.energy - v.e, 0, 100);
+  M.energy = clamp(M.energy - Math.max(0, v.e + (typeof hoodFx === 'function' ? hoodFx().commute || 0 : 0)), 0, 100);
+  W.stress += v.stress || 0;
   card(v.icon, v.label || 'Getting there', [commute]);
   morningEvent();
 }
@@ -102,14 +103,14 @@ function eveningBeat() {
   const L = [];
   if (k === 'latewrite') writeSession(L, .5);
   else if (k === 'read') { weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); }
-  else if (E.venue) L.push(...venueEvening(E));
+  else if (E.venue && typeof venueEvening === 'function') L.push(...venueEvening(E));
   else L.push(pickLine(k === 'out' ? OUT_LINES : HOME_LINES, W.day));
   card(E.icon, E.label, L, { roll: M.lastRoll });
   eveningEvent(k);
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
-  const sleep = 19 + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
+  const sleep = 19 + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
   M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
   const stressNow = M.stress + M.wk.stress;
   if (stressNow >= 96 && !M.burnout) { M.burnout = 1; inbox('note', 'You hit the wall', 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
@@ -151,4 +152,3 @@ function eveningEvent(k) { if (typeof lifeEveningEvent === 'function') lifeEveni
 function eveningOf(k) { return EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || EVENINGS.home; }
 function vehicleOf() { return typeof VEHICLES !== 'undefined' ? VEHICLES[S.me.vehicle || 'transit'] : { icon: '🚌', e: 2, commute: ['The bus, a podcast, a seat if you\'re lucky.'] }; }
 function writeSession(L, scale = 1) { if (typeof writeOnScript === 'function') return writeOnScript(L, scale); S.me.spec.pages += Math.round((4 + ME().mind.eth / 4) * scale * condMul()); L.push('You write.'); }
-function venueEvening(E) { return []; }

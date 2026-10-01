@@ -246,7 +246,7 @@ function lifeDayEvent(act) {
   }
   if (LIFE_SCENES[act] && prnd() < .2) lifeScene(LIFE_SCENES[act]);
 }
-function lifeMorningEvent() { interviewToday(); }
+function lifeMorningEvent() { const n = pending().length; interviewToday(); if (pending().length === n && typeof roadEvent === 'function') roadEvent(); }
 function lifeEveningEvent(k) { if (k === 'out' && prnd() < .2) lifeScene(LIFE_SCENES.out); else if (prnd() < .03) maybeEvent(); }
 
 // ---- interviews ----

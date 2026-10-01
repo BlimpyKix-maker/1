@@ -624,7 +624,8 @@ function closeWeek(a) {
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
-  cashOut += Math.round(usd(life.rent) * traitMul(me, 'living')) + M.upkeep;
+  cashOut += Math.round(usd(M.rentOverride && M.life !== 'couch' ? M.rentOverride : life.rent) * traitMul(me, 'living')) + M.upkeep + usd(VEHICLES[M.vehicle || 'transit'].upkeep);
+  stress += hoodFx().stress || 0;
   if (M.debt > 0) { const p = Math.min(M.debt, M.debtPay); M.debt -= p; cashOut += p; }
   if (M.shark > 0) M.shark = Math.round(M.shark * 1.01);
   cashIn += M.allowance;
@@ -891,7 +892,7 @@ function resolvePick(it, k) {
     else if (k === 'part') { const p = Math.round(M.shark / 4); M.cash -= p; M.shark -= p; it.result = { t: 'He takes it and leaves. For now.' }; }
     else { M.stress = clamp(M.stress + 12, 0, 100); M.shark = Math.round(M.shark * 1.1); it.result = { t: 'He adds ten percent for your trouble and makes sure you’re scared.' }; }
   } else if (it.kind === 'broke') {
-    if (k === 'down') { M.life = M.life === 'own' ? 'shared' : 'couch'; it.result = { t: `You move: ${ORIGIN.life[M.life].label.toLowerCase()} from now on.` }; }
+    if (k === 'down') { const ladder = ['couch', 'shared', 'studio', 'own', 'loft', 'house']; M.life = ladder[Math.max(0, ladder.indexOf(M.life) - 1)]; M.rentOverride = null; M.home.layout = {}; it.result = { t: `You move: ${ORIGIN.life[M.life].label.toLowerCase()} from now on.` }; }
     else if (k === 'borrow') { const f = bestFriend(); if (f === null) return false; const amt = Math.max(usd(800), -M.cash + usd(300)); M.cash += amt; M.known[f].owe++; addTie(me, P(f), -3); it.result = { t: `${P(f).name} lends you ${fmtCash(amt)}. You owe them, in every sense.` }; }
     else { M.over = true; me.retired = true; me.retY = S.year; it.result = { t: 'You pack up and go home. The business goes on without you.' }; }
   } else if (it.kind === 'secret') {
@@ -950,6 +951,8 @@ function applyAct(a) {
     case 'share': return shareScript(a);
     case 'contest': return enterContest(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
+    case 'move': return moveHome(a);
+    case 'vehicle': return buyVehicle(a);
     case 'enrol': return enrol(a);
     case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${PROGRAMS[S.me.school.prog].label.toLowerCase()}.`); S.me.school = null; return true;
     case 'query': return queryAgency(a);

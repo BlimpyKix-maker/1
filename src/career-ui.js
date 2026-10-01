@@ -265,15 +265,31 @@ function pathsPanel() {
     : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
   return `<section class="panel"><h3>School</h3>${school}<h3>Representation</h3>${agent}</section>`;
 }
+// A little drawing of each kind of home, from a couch to a house with a garden.
+function homeIcon(life) {
+  const b = { couch: '<rect x="8" y="30" width="44" height="14" rx="4" fill="#7A6E8E"/><rect x="8" y="24" width="44" height="10" rx="4" fill="#5E536F"/>', shared: '<rect x="14" y="10" width="32" height="38" fill="#B9A58A"/>' + [0, 1, 2].map(i => `<rect x="18" y="${14 + i * 11}" width="8" height="7" fill="#FFE9A8"/><rect x="34" y="${14 + i * 11}" width="8" height="7" fill="#5E7C78"/>`).join(''), studio: '<rect x="16" y="18" width="28" height="30" fill="#C9B79C"/><rect x="24" y="24" width="12" height="9" fill="#FFE9A8"/><rect x="26" y="38" width="8" height="10" fill="#6B4E3A"/>', own: '<rect x="12" y="16" width="36" height="32" fill="#D7C4A3"/><rect x="17" y="21" width="10" height="8" fill="#FFE9A8"/><rect x="33" y="21" width="10" height="8" fill="#FFE9A8"/><rect x="25" y="36" width="10" height="12" fill="#6B4E3A"/>', loft: '<rect x="6" y="12" width="48" height="36" fill="#8A6A5A"/>' + [0, 1, 2, 3].map(i => `<rect x="${10 + i * 11}" y="18" width="7" height="10" fill="#FFE9A8"/>`).join('') + '<rect x="6" y="10" width="48" height="4" fill="#5E5A54"/>', house: '<path d="M10 28 L30 10 L50 28 Z" fill="#B3261E"/><rect x="14" y="28" width="32" height="20" fill="#F3EBDD"/><rect x="26" y="36" width="8" height="12" fill="#6B4E3A"/><rect x="0" y="46" width="60" height="4" fill="#5DBB85"/>' }[life] || '';
+  return `<svg viewBox="0 0 60 50" width="72" height="60">${b}</svg>`;
+}
+// The city this week: what's on, and the venues you can put in your evenings.
+function cityPanel() {
+  const on = whatsOn();
+  return `<section class="panel"><h3>The city this week</h3><div class="whatson">${on.map(x => `<div class="wo"><span class="wi">${VENUES[x.venue].icon}</span><div><b>${esc(x.title)}</b><p class="muted">${esc(x.d)} · ${esc(VENUES[x.venue].label)}</p><button class="btn-s ghost" data-tonight="v:${x.venue}">Go tonight</button></div></div>`).join('')}</div>
+   <details><summary>All venues</summary><div class="venues">${Object.entries(VENUES).map(([k, V]) => `<div class="wo"><span class="wi">${V.icon}</span><div><b>${esc(V.label)}</b> <span class="muted">${V.cost ? fmtCash(usd(V.cost)) : 'free'} · energy −${V.e}${V.stress < 0 ? ` · stress ${V.stress}` : ''}</span><p class="muted">${esc(V.d)}</p><button class="btn-s ghost" data-tonight="v:${k}">Go tonight</button></div></div>`).join('')}</div></details>
+   <p class="muted small">Or plan venues for any evening in Your week.</p></section>`;
+}
 // Your place: the furniture shop and where things go.
 function homePanel() {
   const M = S.me, H = M.home, lay = homeLayout(), spots = HOME_SPOTS[M.life] || [];
   const spotName = { wallL: 'Left wall', wallL2: 'Left wall, by the door', wallR: 'Right wall', floorL: 'Left corner', floorC: 'By the window', floorR: 'Right corner', corner: 'Back corner', sill: 'Windowsill' };
   return `<section class="panel"><h3>Your place <button class="linkish" data-homep="">Close</button></h3>
-   <p class="muted">${M.life === 'couch' ? 'You\'re on a friend\'s couch: there\'s a windowsill and that\'s it. Anything bigger waits in a box until you have a room of your own.' : M.life === 'shared' ? 'One room in a shared flat: two walls, two corners and a windowsill.' : 'A place of your own: plenty of wall and floor to fill.'} Things only help once they're in the room.</p>
+   <p class="muted">${M.life === 'couch' ? 'You\'re on a friend\'s couch: there\'s a windowsill and that\'s it. Anything bigger waits in a box until you have a room of your own.' : `${esc(ORIGIN.life[M.life].label)}: ${(HOME_SPOTS[M.life] || []).length} spots for things.`} Things only help once they're in the room.</p>
    ${H.items.length ? `<h4>Arrange</h4><div class="arr">${H.items.map(id => { const F = FURNITURE[id], ok = spots.filter(s => fits(F.kind, s.kind));
      return `<label>${esc(F.name)} <select data-place="${id}"><option value="">${lay[id] ? 'Wherever there\'s room' : 'In a box (no room)'}</option>${ok.map(s => `<option value="${s.id}"${H.layout[id] === s.id ? ' selected' : ''}>${esc(spotName[s.id] || s.id)}</option>`).join('')}</select></label>`; }).join('')}</div>
      <p><button class="btn-s ghost" data-arrange="auto">Let the game arrange it</button> <button class="btn-s ghost" data-arrange="shuffle">Shuffle it</button></p>` : ''}
+   <h4>Places to live in ${esc(hubName(M.hub))}</h4><div class="listings">${listingsIn(M.hub).map(L => { const life = ORIGIN.life[L.life], here = M.life === L.life && (M.hoodWhere === L.where || !M.hoodWhere), hood = HOOD_KINDS.find(h => h.k === L.hood);
+     return `<div class="listing${here ? ' here' : ''}">${homeIcon(L.life)}<div><b>${esc(life.label)}</b><p class="muted">${esc(L.where)}. ${esc(life.d)} ${esc(hood.d)}</p><p class="small">${fmtCash(usd(L.rent))}/wk · ${(HOME_SPOTS[L.life] || []).length} spots for things · rest ${life.rest >= 0 ? '+' : ''}${life.rest}</p>${here ? '<span class="chip t-Award">You live here</span>' : `<button class="btn-s" data-move="${L.i}"${L.life !== 'couch' && M.cash < usd(L.rent) * 2 ? ' disabled' : ''}>Move here${L.life !== 'couch' ? ` (deposit ${fmtCash(usd(L.rent) * 2)})` : ''}</button>`}</div></div>`; }).join('')}</div>
+   <h4>Getting around</h4><div class="listings">${Object.entries(VEHICLES).map(([k, V]) => { const mine = (M.vehicle || 'transit') === k;
+     return `<div class="listing${mine ? ' here' : ''}"><span class="vi">${V.icon}</span><div><b>${esc(V.label)}</b><p class="muted">${esc(V.d)}</p><p class="small">${V.price ? fmtCash(usd(V.price)) : 'no cost'} · ${fmtCash(usd(V.upkeep))}/wk to run · commute energy −${V.e}${V.standing ? ' · standing +' + V.standing : ''}</p>${mine ? '<span class="chip t-Award">Yours</span>' : `<button class="btn-s" data-vehicle="${k}"${M.cash < usd(V.price) - Math.round(usd(VEHICLES[M.vehicle || 'transit'].price) * .4) ? ' disabled' : ''}>${V.price ? 'Buy (trade in yours)' : 'Sell up and ride the bus'}</button>`}</div></div>`; }).join('')}</div>
    <h4>Furniture and things</h4><div class="shop">${Object.entries(FURNITURE).map(([id, F]) => { const own = H.items.includes(id);
      return `<div class="shop-item${own ? ' owned' : ''}"><svg viewBox="-30 -84 120 92" width="64" height="50">${furnitureSVG(id, 0, 0)}</svg><div><b>${esc(F.name)}</b><p class="muted">${esc(F.d)}</p><p>${fxBadges(F)}</p>${own ? `<span class="chip t-Award">${lay[id] ? 'In the room' : 'In a box'}</span>` : `<button class="btn-s" data-furnish="${id}"${M.cash < F.price ? ' disabled' : ''}>Buy ${usd(F.price)}</button>`}</div></div>`; }).join('')}</div></section>`;
 }
@@ -322,7 +338,8 @@ function viewDesk() {
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(ACTIVITIES).filter(([k]) => plan.includes(k) && k !== 'work').map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))})` : ''}`).join(' ')}</p>
      <p class="note">Work costs about 15 energy a day; a night's sleep gives back 20 to 40 depending on your bed, your place and your stress. Evenings out cost energy but melt stress.</p>
-     <div class="ccrow"><label>Living ${sel('pl-life', Object.entries(ORIGIN.life).map(([k, l]) => [k, `${l.label} (${fmtCash(usd(l.rent))}/wk)`]), M.life)}</label></div></section>
+     <p class="note">You live in ${esc(ORIGIN.life[M.life].label.toLowerCase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-homep="1">Move or change how you travel</button></p></section>
+    ${cityPanel()}
     <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
     ${writingDesk()}
@@ -416,6 +433,9 @@ function careerClick(t) {
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
   if (t.dataset.day) { playStep('day'); return true; }
   if (t.dataset.next) { playStep('next'); return true; }
+  if (t.dataset.move) { doAct({ t: 'move', i: +t.dataset.move }); render(true); return true; }
+  if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
+  if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day + (W.beat > 2 ? 1 : 0) : 0; if (d < 7) S.me.eve[d] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript; f.title = ($('#ns-title') || {}).value || ''; doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone }); UI.newScript = null; render(true); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
   if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
@@ -427,7 +447,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
