@@ -255,25 +255,42 @@ const CAL_PRESETS = {
   balance: [['hunt', 'write', 'home'], ['hunt', 'network', 'home'], ['hunt', 'write', 'read'], ['train', 'hunt', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']],
   recover: [['rest', 'read', 'home'], ['rest', 'hunt', 'home'], ['rest', 'read', 'home'], ['rest', 'hunt', 'home'], ['rest', 'read', 'out'], ['rest', 'rest', 'home'], ['rest', 'home', 'home']]
 };
-// Your phone: messages as they arrive, a way to text anyone you know, your diary of appointments, and your people.
+// Your phone: conversations by person, a way to text anyone you know, your diary of appointments, and your people.
+function threadOf(m) { return m.from === -1 ? (m.to ?? 'home') : m.from === null || m.from === undefined ? 'home' : m.from; }
 function phonePanel() {
-  const M = S.me, msgs = (M.phone || []).slice(-14).reverse(), known = aliveKnown();
-  const T = UI.txt = UI.txt || { id: '', kind: 'coffee', slot: 0 };
-  const who = id => id === -1 ? 'You' : id === null || id === undefined ? 'Home' : P(id).name;
+  const M = S.me, all = M.phone || [], known = aliveKnown();
+  UI.seen = UI.seen || {};
+  const threads = new Map();
+  all.forEach((m, i) => { const k = threadOf(m); threads.set(k, { k, last: m, i, n: ((threads.get(k) || {}).n || 0) + 1 }); });
+  const list = [...threads.values()].sort((a, b) => b.i - a.i);
   const when = m => m.w === S.week ? `${DAYS7[m.d].slice(0, 3)} ${BLOCKS[m.b].toLowerCase()}` : `${S.week - m.w}w ago`;
+  const nameOf = k => k === 'home' ? 'Home & gossip' : P(k).name;
   const byRel = {};
   for (const id of known) { const r = relOf(id); (byRel[r] = byRel[r] || []).push(id); }
+  const T = UI.txt = UI.txt || { id: '', kind: 'hi', slot: 0, msg: '' };
+  const open = UI.thread !== undefined && UI.thread !== null && (UI.thread === 'home' || M.known[UI.thread]) ? UI.thread : null;
+  if (open !== null && open !== 'home') T.id = String(open);
   const tid = T.id === '' ? null : +T.id, trel = tid !== null && M.known[tid] ? relOf(tid) : null;
-  const kinds = [['hi', 'Just say hi'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
-  if (!kinds.some(k => k[0] === T.kind)) T.kind = 'coffee';
-  const slots = upcomingSlots(16);
-  const ahead = apptsAhead();
+  const kinds = [['hi', 'A message'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
+  if (!kinds.some(k => k[0] === T.kind)) T.kind = 'hi';
+  const slots = upcomingSlots(16), ahead = apptsAhead();
+  const compose = (fixed) => `<div class="compose">${fixed ? '' : `<label>To ${sel('tx-id', [['', 'Someone…']].concat(REL_ORDER.flatMap(r => (byRel[r] || []).map(id => [id, `${REL[r].icon} ${P(id).name}`]))), T.id)}</label>`}
+     ${tid !== null ? `<label>${sel('tx-kind', kinds, T.kind)}</label>${T.kind === 'hi' ? `<label class="grow"><input id="tx-msg" maxlength="280" placeholder="Say something (or leave blank)" value="${esc(T.msg || '')}"></label>` : `<label>${sel('tx-slot', slots.map((s, i) => [i, slotLabel(s)]), T.slot)}</label>`}<button class="btn-s" data-sendtext="1">Send</button>` : ''}</div>`;
+  let left;
+  if (open !== null) {
+    UI.seen[open] = (threads.get(open) || {}).n || 0;
+    const msgs = all.filter(m => threadOf(m) === open).slice(-30);
+    const q = open === 'home' ? null : P(open), rel = q ? relOf(open) : null;
+    left = `<div class="th-head"><button class="linkish" data-thread="">‹ All messages</button> <b>${q ? pl(open) : 'Home & gossip'}</b>${q ? ` <span class="muted small">${REL[rel].icon} ${esc(REL[rel].label)} · ${esc(q.occ || occupationOf(q))} · opinion ${Math.round(opinion(open))}</span>` : ''}</div>
+     <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><time>${when(m)}</time><p>${esc(m.t)}</p></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
+     ${q ? compose(true) : ''}`;
+  } else {
+    left = `<ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr${unread > 0 ? ' unread' : ''}" data-thread="${t.k}"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? ` <span class="dot">${unread}</span>` : ''} <time>${when(t.last)}</time><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
+  }
   return `<section class="panel phone"><h3>📱 Your phone</h3>
-   <div class="ph-cols"><div><ul class="sms">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><b>${m.from !== -1 && m.from !== null && m.from !== undefined ? pl(m.from) : esc(who(m.from))}${m.to !== undefined ? ' → ' + esc(P(m.to).name) : ''}</b> <time>${when(m)}</time><p>${esc(m.t)}</p></li>`).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>
-    <div class="compose"><label>Text ${sel('tx-id', [['', 'Someone…']].concat(REL_ORDER.flatMap(r => (byRel[r] || []).map(id => [id, `${REL[r].icon} ${P(id).name}`]))), T.id)}</label>
-     ${tid !== null ? `<label>About ${sel('tx-kind', kinds, T.kind)}</label>${T.kind !== 'hi' ? `<label>When ${sel('tx-slot', slots.map((s, i) => [i, slotLabel(s)]), T.slot)}</label>` : ''}<button class="btn-s" data-sendtext="1">Send</button>` : ''}</div></div>
+   <div class="ph-cols"><div>${left}</div>
     <div><h4>Coming up</h4>${ahead.length ? `<ul class="plain appts">${ahead.slice(0, 8).map(x => `<li>${APPT_KINDS[x.kind].icon} <b>${esc(slotLabel(x))}</b>: ${esc(APPT_KINDS[x.kind].label)}${x.who != null ? ' with ' + pl(x.who) : ''}${x.what ? ` <span class="muted">(${esc(x.what)})</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted small">Nothing booked. Text someone, or say yes to the next invitation.</p>'}
-     <h4>Your people</h4>${REL_ORDER.filter(r => byRel[r] && r !== 'contact').map(r => `<p class="relrow"><span class="relk">${REL[r].icon} ${esc(REL[r].label)}${byRel[r].length > 1 && r !== 'partner' ? 's' : ''}</span> ${byRel[r].slice(0, 8).map(id => pl(id)).join(', ')}${byRel[r].length > 8 ? ` <span class="muted">+${byRel[r].length - 8}</span>` : ''}</p>`).join('') || '<p class="muted small">Nobody close yet. It takes time: see people, and keep seeing them.</p>'}
+     <h4>Your people</h4>${REL_ORDER.filter(r => byRel[r] && r !== 'contact').map(r => `<p class="relrow"><span class="relk">${REL[r].icon} ${esc(REL[r].label)}${byRel[r].length > 1 && r !== 'partner' ? 's' : ''}</span> ${byRel[r].slice(0, 8).map(id => `<button class="linkish" data-thread="${id}">${esc(P(id).name)}</button>`).join(', ')}${byRel[r].length > 8 ? ` <span class="muted">+${byRel[r].length - 8}</span>` : ''}</p>`).join('') || '<p class="muted small">Nobody close yet. It takes time: see people, and keep seeing them.</p>'}
      ${byRel.contact ? `<p class="muted small">${byRel.contact.length} other contacts. People you don't see for a couple of months drift.</p>` : ''}</div></div></section>`;
 }
 // How the game works, in one place. Opens by itself the first time you reach your desk.
@@ -506,7 +523,8 @@ function careerClick(t) {
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
   if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
-  if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; const a = { t: 'text', id: +T.id, kind: T.kind }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0 }; render(true); return true; }
+  if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
+  if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
@@ -519,7 +537,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -544,6 +562,7 @@ function careerChange(e) {
     render(true); return true;
   }
   if (/^cal-\d-\d$/.test(id)) { calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (id === 'tx-msg') { UI.txt.msg = v; return true; }
   if (/^tx-(id|kind|slot)$/.test(id)) { UI.txt[id.slice(3)] = v; if (id === 'tx-id') UI.txt.slot = 0; render(true); return true; }
   if (id === 'pl-train') { S.me.train = v; return true; }
   if (id === 'pl-catch') { S.me.catchWith = v === '' ? null : +v; return true; }

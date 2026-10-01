@@ -115,7 +115,7 @@ const INVITES = [
   { k: 'screening', t: 'a cast-and-crew screening of {film}', film: 1, meet: 2, tie: 4, xp: { tas: .06 }, stand: .2 },
   { k: 'premiere', t: 'the premiere of {film}', film: 1, senior: 1, meet: 2, tie: 4, stand: .5, cost: 40 },
   { k: 'tableread', t: 'a table read of {who}\'s new script', meet: 1, tie: 5, xp: { dial: .04, struc: .03 } },
-  { k: 'football', t: 'a Sunday five-a-side game', meet: 1, tie: 3, stress: -5, e: 6 },
+  { k: 'football', t: 'a five-a-side game', meet: 1, tie: 3, stress: -5, e: 6 },
   { k: 'gallery', t: 'a gallery opening with {who}', meet: 1, tie: 3, xp: { vis: .05 } },
   { k: 'karaoke', t: 'karaoke with {who}\'s crew', meet: 2, tie: 5, stress: -6, cost: 20 },
   { k: 'wrap', t: 'a wrap party for {film}', film: 1, meet: 3, tie: 3, stress: -3 },
@@ -146,8 +146,8 @@ function socialPick(it, k) {
     const q = P(it.person);
     if (k === 'yes') {
       if (!slotFree(it.slot)) { it.result = { t: 'You already have something then. You tell them, and they understand.' }; }
-      else { bookAppt(Object.assign({ kind: it.kind === 'invite' ? 'invite' : 'help', who: it.person, ev: it.ev, film: it.film, what: it.what }, it.slot)); sms(-1, it.kind === 'invite' ? 'yes! see you there' : 'of course. I\'ll be there', 'text'); it.result = { t: `In your diary: ${it.what}, ${slotLabel(it.slot)}.` }; }
-    } else { addTie(me, q, it.kind === 'ask' ? -3 : -1); sms(-1, pickLine(['so sorry, can\'t that night', 'ah, I\'m slammed. next time?', 'can\'t, sorry!! have fun'], it.id), 'text'); it.result = { t: it.kind === 'ask' ? `${q.name} says it's fine. It isn't quite.` : 'Next time.' }; }
+      else { bookAppt(Object.assign({ kind: it.kind === 'invite' ? 'invite' : 'help', who: it.person, ev: it.ev, film: it.film, what: it.what }, it.slot)); sms(-1, it.kind === 'invite' ? 'yes! see you there' : 'of course. I\'ll be there', 'mine', { to: it.person }); it.result = { t: `In your diary: ${it.what}, ${slotLabel(it.slot)}.` }; }
+    } else { addTie(me, q, it.kind === 'ask' ? -3 : -1); sms(-1, pickLine(['so sorry, can\'t that night', 'ah, I\'m slammed. next time?', 'can\'t, sorry!! have fun'], it.id), 'mine', { to: it.person }); it.result = { t: it.kind === 'ask' ? `${q.name} says it's fine. It isn't quite.` : 'Next time.' }; }
     it.done = true; it.picked = k; return true;
   }
   return false;
@@ -355,7 +355,7 @@ function textSomeone(a) {
   if (!k || P(id).dead) return false;
   const q = P(id), rel = relOf(id), o = opinion(id);
   if (a.kind === 'hi') {
-    sms(-1, a.msg || pickLine(['how are you doing?', 'thinking of you, how\'s things', 'coffee soon?', 'saw this and thought of you'], id + S.week), 'mine', { to: id });
+    sms(-1, String(a.msg || '').trim().slice(0, 280) || pickLine(['how are you doing?', 'thinking of you, how\'s things', 'coffee soon?', 'saw this and thought of you'], id + S.week), 'mine', { to: id });
     if (k.hiW !== S.week) { k.hiW = S.week; addTie(me, q, o > 0 ? 1.5 : .5); k.seen = S.week; }
     sms(id, o > 20 ? pickLine(['!!! hi! all good, crazy busy, you?', 'aw. miss you. soon?', 'ha I was literally about to text you'], id) : o > -10 ? pickLine(['hey! good thanks', 'all fine here, you?', 'busy busy'], id) : '...', 'text');
     return true;

@@ -43,7 +43,7 @@ const out = process.argv[2] || '.';
   await page.selectOption('#cal-2-1', 'network');
   // text the first contact for coffee through the phone
   await page.selectOption('#tx-id', { index: 1 });
-  await page.selectOption('#tx-kind', 'coffee');
+  await page.selectOption('#tx-kind', 'coffee'); await page.waitForSelector('#tx-slot');
   await page.click('[data-sendtext]');
   console.log('phone after text:', await page.evaluate(() => S.me.phone.slice(-2).map(m => m.t).join(' / ')), 'appts', await page.evaluate(() => JSON.stringify((S.me.appts || []).map(x => [x.kind, x.d, x.b]))));
   // live with the space bar, answering decisions as they come
