@@ -7,12 +7,13 @@ const ROLES = ['dir', 'wri', 'cast', 'dp', 'mus', 'prod', 'pd', 'vfx', 'ed', 'co
 // credits that really did come after death (a score reused in a remake, say)
 const POSTHUMOUS = new Set(['capefear91:herrmann', 'ivantheterriblepar58:eisenstein']);
 const MIN_AGE = { dir: 17, wri: 16, cast: 2, dp: 17, mus: 14, prod: 18, pd: 18, vfx: 17, ed: 17, cos: 17 };
-const people = {}, films = [], fseen = new Set();
+const people = {}, films = [], fseen = new Set(), castAdd = {};
 for (const c of C) {
   for (const p of c.people || []) if (!people[p.id]) people[p.id] = { ...p, credits: [] };
+  for (const id in c.castAdd || {}) castAdd[id] = (castAdd[id] || []).concat(c.castAdd[id]);
   for (const f of c.films || []) { if (fseen.has(f.id)) { films.push({ dup: f.id }); continue; } fseen.add(f.id); films.push(f); }
 }
-const out = [], ids = (f, r) => [].concat(f[r] || []).filter(Boolean);
+const out = [], ids = (f, r) => [].concat(f[r] || [], r === 'cast' ? castAdd[f.id] || [] : []).filter(Boolean);
 const titleYear = {};
 for (const f of films) {
   if (f.dup) { out.push(['dup-id', f.dup, '', 'film id appears twice']); continue; }
