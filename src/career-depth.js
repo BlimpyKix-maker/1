@@ -122,43 +122,58 @@ function schoolWeek(L, gain) {
 }
 
 // ---- Agents ----
-const AGENCY_NAMES = [['Paramount Talent Group', 3], ['Creative Arts Collective', 3], ['Morrow & Endeavour', 3], ['United Talent Union', 2], ['Gersh & Daughters', 2], ['Silver Screen Associates', 2], ['Paradigm Lost Agency', 2], ['Kaplan Stewart Talent', 1], ['Lighthouse Management', 1], ['The Small Room Agency', 1], ['Second Act Artists', 1], ['Rough Cut Representation', 1]];
-// Each hub has its own handful of agencies, the same every time.
+// Agencies differ: what they specialise in and how they treat clients.
+// focus: talent (actors), lit (writers and directors), crew (heads of department and below the line), all.
+// style: shark (bigger cut, more pitches, little patience), nurturer (patient, steady, opens doors), packager (puts
+// you in bigger rooms), boutique (small list, personal), quiet (cheap, does little).
+const AGENCY_NAMES = [['Paramount Talent Group', 3, 'all', 'packager'], ['Creative Arts Collective', 3, 'all', 'packager'], ['Morrow & Endeavour', 3, 'talent', 'shark'], ['United Talent Union', 2, 'lit', 'shark'], ['Gersh & Daughters', 2, 'lit', 'nurturer'], ['Silver Screen Associates', 2, 'talent', 'nurturer'], ['Paradigm Lost Agency', 2, 'all', 'quiet'], ['Kaplan Stewart Talent', 1, 'talent', 'boutique'], ['Lighthouse Management', 1, 'all', 'nurturer'], ['The Small Room Agency', 1, 'lit', 'boutique'], ['Second Act Artists', 1, 'talent', 'nurturer'], ['Rough Cut Representation', 1, 'crew', 'boutique'],
+  ['Below the Line Partners', 2, 'crew', 'nurturer'], ['Frame & Focus Artists', 2, 'crew', 'shark'], ['Northlight Crew Agency', 1, 'crew', 'quiet'], ['Hammer & Nail Talent', 1, 'talent', 'shark'], ['Inkwell Literary', 1, 'lit', 'nurturer'], ['Marquee Management', 2, 'talent', 'packager'], ['Blue Door Artists', 1, 'all', 'boutique'], ['Coastline Talent', 1, 'talent', 'quiet'], ['Long Take Agency', 2, 'lit', 'boutique'], ['Key Light Collective', 1, 'crew', 'nurturer'], ['Atlas International Talent', 3, 'all', 'shark'], ['Wexford Banks Agency', 3, 'lit', 'packager']];
+const AG_STYLE = {
+  shark: { label: 'Shark', d: 'Takes 12%, pitches you hard and often, pushes rates up, drops you after twenty quiet weeks.', cut: .12, pitch: 1, pay: .06, patience: 20 },
+  nurturer: { label: 'Nurturer', d: 'Takes 10%, sticks with you through dry spells and passes on referrals.', cut: .1, pitch: 0, pay: 0, patience: 45, refs: 1 },
+  packager: { label: 'Packager', d: 'Takes 10%, puts you up for jobs well above your level alongside their bigger clients.', cut: .1, pitch: 0, pay: .03, patience: 30, up: 1 },
+  boutique: { label: 'Boutique', d: 'Takes 10% of a small list and knows you personally. Fewer pitches, better fits.', cut: .1, pitch: 0, pay: .02, patience: 36, fit: 1 },
+  quiet: { label: 'Low-key', d: 'Takes 8% and does the paperwork. Don\'t expect much hustle.', cut: .08, pitch: -1, pay: 0, patience: 30 }
+};
+const AG_FOCUS = { talent: 'actors', lit: 'writers and directors', crew: 'crew and heads of department', all: 'everyone' };
+function agFits(ag, role) { const r = role || ME().role; return ag.focus === 'all' || (ag.focus === 'talent' ? r === 'actor' : ag.focus === 'lit' ? ['writer', 'director', 'producer'].includes(r) : !['actor', 'writer', 'director'].includes(r)); }
 function agenciesIn(hub) {
   const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 11) >>> 0), L = AGENCY_NAMES.slice();
   for (let i = L.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [L[i], L[j]] = [L[j], L[i]]; }
-  return L.slice(0, 6).map(([n, tier], i) => ({ i, name: hubName(hub) === 'Hollywood' || tier < 3 ? n : n + ' ' + hubName(hub), tier }));
+  return L.slice(0, 9).map(([n, tier, focus, style], i) => ({ i, name: hubName(hub) === 'Hollywood' || tier < 3 ? n : n + ' ' + hubName(hub), tier, focus, style }));
 }
 function queryOdds(ag) {
   const M = S.me, me = ME();
-  return clamp(logistic(-1.2 - (ag.tier - 1) * 1.1 + me.credits.length * .35 + (me.standing - 8) * .07 + M.spec.drafts * .25 + (me.fame || 0) * .02), .02, .9);
+  return clamp(logistic(-1.2 - (ag.tier - 1) * 1.1 + me.credits.length * .35 + (me.standing - 8) * .07 + M.spec.drafts * .25 + (M.scripts || []).filter(x => x.grade && 'AB'.includes(x.grade)).length * .3 + (me.fame || 0) * .02 + (agFits(ag) ? .5 : -1) + (ag.style === 'boutique' ? -.3 : 0)), .02, .9);
 }
 function queryAgency(a) {
   const M = S.me, ag = agenciesIn(M.hub)[a.ag];
   if (!ag || M.agent || (M.queried || {})[a.ag] > S.week - 12) return false;
   (M.queried = M.queried || {})[a.ag] = S.week;
   if (prnd() < queryOdds(ag)) signAgent(ag, 'They read your letter and want to meet. By Friday you have an agent.');
-  else inbox('note', `${ag.name} passes`, 'A polite form email. They are not taking on new clients at this time. Try again in a few months, with more on your reel.');
+  else inbox('note', `${ag.name} passes`, agFits(ag) ? 'A polite form email. They are not taking on new clients at this time. Try again in a few months, with more on your reel.' : `A polite form email, and a hint: they mostly represent ${AG_FOCUS[ag.focus]}.`);
   return true;
 }
 function signAgent(ag, why) {
   const M = S.me, q = makePerson(M.hub, 'producer', { age: 30 + Math.floor(prnd() * 20) });
   q.occ = 'Talent agent'; q.agency = ag.name;
-  M.agent = { ag: ag.i, name: ag.name, tier: ag.tier, id: q.id, since: S.week, lastBook: S.week, cut: .1 };
+  const st = AG_STYLE[ag.style || 'nurturer'];
+  M.agent = { ag: ag.i, name: ag.name, tier: ag.tier, id: q.id, since: S.week, lastBook: S.week, cut: st.cut, style: ag.style || 'nurturer', focus: ag.focus || 'all' };
   meet(q.id, 'Your agent', 15); trust(q.id, 20);
   milestone(`Signed with ${q.name} at ${ag.name}`, 'agent');
-  inbox('news', `You have an agent: ${q.name}`, `${why} ${q.name} at ${ag.name} takes 10% of what you earn, sends you up for better jobs and argues for better money.`, { person: q.id });
+  inbox('news', `You have an agent: ${q.name}`, `${why} ${q.name} at ${ag.name} takes ${Math.round(st.cut * 100)}% of what you earn. ${st.d}`, { person: q.id });
 }
 // Extra listings your agent finds, a level above where you'd look yourself, with their pitch behind them.
 function agentBoard(films) {
   const M = S.me; if (!M.agent) return [];
   const L = careerLevel(), out = [];
   for (const f of films) {
-    if (out.length >= M.agent.tier + 1) break;
-    const opts = POSTS.filter(t => t.tier >= Math.max(1, L) && t.tier <= L + 2 && t.st.includes(f.stage) && headOf(f, t.head) !== null);
+    const st = AG_STYLE[M.agent.style || 'nurturer'];
+    if (out.length >= Math.max(1, M.agent.tier + 1 + st.pitch)) break;
+    const opts = POSTS.filter(t => t.tier >= Math.max(1, L + (st.up || 0)) && t.tier <= L + 2 + (st.up || 0) && t.st.includes(f.stage) && headOf(f, t.head) !== null && (!st.fit || t.subs.some(k => SUB2C[k] === MAIN[ME().role])));
     if (!opts.length || prnd() > .5) continue;
     const p = makePost(ppick(opts), f);
-    p.agent = 1; p.rate = Math.round(p.rate * (1.1 + .06 * M.agent.tier));
+    p.agent = 1; p.rate = Math.round(p.rate * (1.1 + .06 * M.agent.tier + st.pay));
     out.push(p);
   }
   return out;
@@ -166,12 +181,14 @@ function agentBoard(films) {
 function agentWeek() {
   const M = S.me; if (!M.agent) return;
   if (M.jobs.length) M.agent.lastBook = S.week;
-  if (S.week - M.agent.lastBook > 30) { inbox('note', 'Your agent lets you go', `${M.agent.name} drops you: thirty weeks without a booking. It isn't personal. It feels personal.`); M.agent = null; M.board = M.board.filter(p => !p.agent); }
+  const st = AG_STYLE[M.agent.style || 'nurturer'];
+  if (st.refs && (S.week - M.agent.since) % 8 === 7) { M.freeRef = (M.freeRef || 0) + 1; sms(M.agent.id, 'put your name in for a couple of things this week. apply and I\'ll follow up', 'tip'); }
+  if (S.week - M.agent.lastBook > st.patience) { inbox('note', 'Your agent lets you go', `${M.agent.name} drops you: too long without a booking. It isn't personal. It feels personal.`); M.agent = null; M.board = M.board.filter(p => !p.agent); }
 }
 function agentApproach() {
   const M = S.me, me = ME();
   if (M.agent || pending().some(x => x.kind === 'agentoffer') || me.credits.length < 1 || me.standing < 10 || prnd() > .035 + me.credits.length * .006) return;
-  const L = agenciesIn(M.hub).filter(a => a.tier <= 1 + Math.floor(me.credits.length / 3));
+  const L = agenciesIn(M.hub).filter(a => a.tier <= 1 + Math.floor(me.credits.length / 3) && agFits(a));
   if (!L.length) return;
   const ag = ppick(L);
   inbox('agentoffer', `${ag.name} calls`, `Someone at ${ag.name} saw your name in the credits and wants to represent you. Ten per cent of everything; better jobs, better money.`, { ag: ag.i, choices: [{ k: 'yes', label: 'Sign with them' }, { k: 'no', label: 'Not yet' }] });
