@@ -29,7 +29,7 @@ function storyHTML() {
   const best = Object.keys(M.known).map(Number).filter(id => !P(id).dead).sort((a, b) => opinion(b) - opinion(a))[0];
   const edu = ORIGIN.edu[M.edu];
   const filmRow = p => { const f = S.films[p.film]; return `<tr><td>${fl(f.id)}${f.rel !== null ? ` <span class="muted">${yearOf(f.rel)}</span>` : ''}</td><td>${esc(p.t)}</td><td>${p.head !== null ? pl(p.head) : ''}</td><td class="n">${f.rel !== null ? f.reviews : '—'}</td><td class="n">${f.rel !== null ? fmtM(f.total) : 'in production'}</td><td>${(f.awards || []).length ? esc(f.awards.slice(0, 2).join('; ')) : ''}</td></tr>`; };
-  return `<section class="panel story"><h3>Your story <button class="linkish" data-story="">Close</button></h3>
+  return `<section class="panel story"><h3>Your story</h3>
    <div class="kpis mini"><div><span>Since</span><b>${fmtDate(M.startW, true)}</b><small class="muted">${Math.round((S.week - M.startW) / 52 * 10) / 10} years in the business</small></div><div><span>Paid work</span><b>${weeks} weeks</b><small class="muted">${fmtCash(earned)} earned</small></div><div><span>Credits</span><b>${me.credits.length}</b><small class="muted">${M.stats.apps} applications, ${M.stats.offers} offers</small></div><div><span>People</span><b>${Object.keys(M.known).length}</b><small class="muted">${best !== undefined ? 'closest: ' + esc(P(best).name) : ''}</small></div></div>
    <h4>Résumé</h4>
    <p><b>${esc(me.name)}</b> · ${esc(ROLE_LABEL[me.role])} · ${esc(hubName(M.hub))}${M.agent ? ` · represented by ${esc(M.agent.name)}` : ''}</p>

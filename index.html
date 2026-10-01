@@ -302,6 +302,23 @@ table.cal td .chip { display: block; white-space: nowrap; overflow: hidden; text
 .threads .thr .prev { grid-column: 1 / -1; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .threads .thr.unread b { color: var(--accent); }
 .phonebadge { font-variant-numeric: tabular-nums; }
+.desknav { display: flex; flex-wrap: wrap; gap: 4px; margin: 14px 0 12px; padding: 4px; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); position: sticky; top: 58px; z-index: 5; }
+.desknav .dt { all: unset; cursor: pointer; padding: 7px 12px; border-radius: 7px; font-weight: 600; font-size: 14px; color: var(--muted); }
+.desknav .dt:hover { color: var(--ink); background: var(--bg); }
+.desknav .dt:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.desknav .dt.on { color: #fff; background: var(--accent); }
+.desknav .dn { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; line-height: 18px; text-align: center; background: var(--line); color: var(--ink); }
+.desknav .dn.bad { background: #c0392b; color: #fff; } .desknav .dn.good { background: #2e7d4f; color: #fff; }
+.desknav { scroll-margin-top: 66px; }
+.dstack { display: grid; gap: 14px; }
+.mkfilm { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin: 8px 0; background: var(--bg); }
+.mkrow { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
+.mkrow label { display: grid; font-size: 12px; color: var(--muted); }
+.mkrow select { max-width: 260px; }
+.dstack > .panel, .dstack > .cols { margin: 0; }
+.ns2 > button { justify-self: start; padding-left: 28px; padding-right: 28px; }
+.desknav .dt.on .dn { background: rgba(255,255,255,.25); color: #fff; }
+@media (max-width: 700px) { .desknav { position: static; overflow-x: auto; flex-wrap: nowrap; } .desknav .dt { white-space: nowrap; padding: 6px 9px; } }
 #co-amt { width: 140px; }
 .fests { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .threads .dot { display: inline-block; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--accent); color: #fff; font-size: 11px; text-align: center; }
@@ -9695,7 +9712,7 @@ function titleFor(genre, hub) {
   return t.replace(/\{(\w+)\}/g, (_, k) => rep[k] ? rep[k]() : k).replace(/\b([Tt]he) the /g, '$1 ');   // 'The {place}' with a place like 'the Canyon'
 }
 
-// o (optional): a film built around a script someone optioned: { genre, wri, title, prod, co, score, dir, budget }.
+// o (optional): a film built around a script someone optioned: { genre, wri, title, prod, co, score, dir, budget, lead }.
 function greenlight(hub, o = {}) {
   const y = S.year, H = HUBS[hub];
   const cos = S.companies.filter(c => c.hub === hub && c.closed === null && c.owner === undefined);   // the player's company only makes what they choose
@@ -9722,7 +9739,7 @@ function greenlight(hub, o = {}) {
   let lastG = null;
   for (let i = 0; i < 3; i++) {
     const wantOpp = lastG && rnd() < .6;
-    const id = pickPerson(hub, 'actor', p => p.fame * (tier === 1 ? .7 : .3) + p.standing * .3 + gcraft(p, 'act', genre) * 2 + tie(D, p) * .3 + (has(p, 'Photogenic') ? 5 : 0) + (wantOpp && p.g === lastG ? -40 : 0) + rnd() * 25 + tierAdj(p, tier) * (i === 0 ? 1 : .6), ex, i === 0);
+    const id = i === 0 && o.lead !== undefined && !ex.has(o.lead) ? o.lead : pickPerson(hub, 'actor', p => p.fame * (tier === 1 ? .7 : .3) + p.standing * .3 + gcraft(p, 'act', genre) * 2 + tie(D, p) * .3 + (has(p, 'Photogenic') ? 5 : 0) + (wantOpp && p.g === lastG ? -40 : 0) + rnd() * 25 + tierAdj(p, tier) * (i === 0 ? 1 : .6), ex, i === 0);
     cast.push(id); ex.add(id); lastG = P(id).g;
   }
   const dp = pickPerson(hub, 'dp', p => p.standing * .3 + gcraft(p, 'cam', genre) * 2.5 + tie(D, p) * .6 + rnd() * 20 + tierAdj(p, tier), ex, false); ex.add(dp);
@@ -12438,7 +12455,7 @@ function storyHTML() {
   const best = Object.keys(M.known).map(Number).filter(id => !P(id).dead).sort((a, b) => opinion(b) - opinion(a))[0];
   const edu = ORIGIN.edu[M.edu];
   const filmRow = p => { const f = S.films[p.film]; return `<tr><td>${fl(f.id)}${f.rel !== null ? ` <span class="muted">${yearOf(f.rel)}</span>` : ''}</td><td>${esc(p.t)}</td><td>${p.head !== null ? pl(p.head) : ''}</td><td class="n">${f.rel !== null ? f.reviews : '—'}</td><td class="n">${f.rel !== null ? fmtM(f.total) : 'in production'}</td><td>${(f.awards || []).length ? esc(f.awards.slice(0, 2).join('; ')) : ''}</td></tr>`; };
-  return `<section class="panel story"><h3>Your story <button class="linkish" data-story="">Close</button></h3>
+  return `<section class="panel story"><h3>Your story</h3>
    <div class="kpis mini"><div><span>Since</span><b>${fmtDate(M.startW, true)}</b><small class="muted">${Math.round((S.week - M.startW) / 52 * 10) / 10} years in the business</small></div><div><span>Paid work</span><b>${weeks} weeks</b><small class="muted">${fmtCash(earned)} earned</small></div><div><span>Credits</span><b>${me.credits.length}</b><small class="muted">${M.stats.apps} applications, ${M.stats.offers} offers</small></div><div><span>People</span><b>${Object.keys(M.known).length}</b><small class="muted">${best !== undefined ? 'closest: ' + esc(P(best).name) : ''}</small></div></div>
    <h4>Résumé</h4>
    <p><b>${esc(me.name)}</b> · ${esc(ROLE_LABEL[me.role])} · ${esc(hubName(M.hub))}${M.agent ? ` · represented by ${esc(M.agent.name)}` : ''}</p>
@@ -13445,22 +13462,52 @@ function coMoney(a) {
 }
 // What a small film of this genre costs here, before the surprises.
 function estBudget(genre) { return [0, 3, 1, .35][3] * budgetScale(S.year) * era(MARKETS[HUBS[S.me.hub].m].cost, S.year) * Math.pow(AMB[genre], .7); }
-// Finance a film yourself: your own finished script or one you've optioned. Optionally direct it.
+// Who you could cast or hire: people in town who are free, best fits first, people you know marked.
+function castOptions(genre) {
+  const M = S.me, ids = S.pool[M.hub].actor.filter(id => available(id) && id !== M.id);
+  return ids.map(P).sort((a, b) => (gcraft(b, 'act', genre) * 2 + b.fame * .3 + (M.known[b.id] ? 6 : 0)) - (gcraft(a, 'act', genre) * 2 + a.fame * .3 + (M.known[a.id] ? 6 : 0))).slice(0, 10);
+}
+function dirOptions(genre) {
+  const M = S.me, ids = S.pool[M.hub].director.filter(id => available(id) && id !== M.id);
+  return ids.map(P).sort((a, b) => (gcraft(b, 'dir', genre) * 2 + b.standing * .2 + (M.known[b.id] ? 6 : 0)) - (gcraft(a, 'dir', genre) * 2 + a.standing * .2 + (M.known[a.id] ? 6 : 0))).slice(0, 8);
+}
+// A name costs money: a lead's fee grows with their fame.
+function leadFee(id, genre, micro) { const q = P(id); return estBudget(genre) * (micro ? .25 : 1) * (.04 + Math.pow((q.fame || 0) / 100, 2) * .9); }
+// Investors put up what your company can't, for a share of what the film brings back. Convincing them is a roll.
+function investDC(src) { const c = myCo(), me = ME(); return Math.round(clamp(16 - me.standing / 20 - (c ? c.hits * 2 : 0) - (src.score - 60) / 10, 6, 19)); }
+// Finance a film yourself: your own finished script or one you've optioned. Choose the size, the director (or
+// yourself), the lead, and whether to bring in investors for the part your company can't cover.
 function selfFund(a) {
   const M = S.me, me = ME(), c = myCo();
   if (!c || c.closed !== null) return false;
   const src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id && x.grade && !x.option && x.made === undefined) : (M.holdings || []).find(x => x.id === a.id && x.made === undefined && !x.lapsed);
-  const budget = estBudget(src ? src.genre : 'Drama') * (a.micro ? .25 : 1);
-  if (!src || c.cash < budget * .9) return false;
-  const direct = !!a.direct;
-  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : undefined, budget });
+  if (!src) return false;
+  const lead = a.lead !== undefined && a.lead !== null && P(a.lead) && P(a.lead).role === 'actor' && available(a.lead) ? a.lead : undefined;
+  const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
+  let budget = estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) : 0);
+  let share = 0, invest = 0;
+  if (c.cash < budget * .9) {
+    if (!a.inv || c.cash < budget * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) return false;
+    src.invTry = S.week;
+    if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
+    invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+  }
+  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : dirPick, budget, lead });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
+  if (share) { f.investors = { share, amount: invest }; }
   if (direct) takeJob(makePost(POST_BY.owndir, f));
+  if (lead !== undefined) meet(lead, 'Cast in your film', 6);
+  if (dirPick !== undefined) meet(dirPick, 'Directing your film', 6);
   me.standing = clamp(me.standing + 1.5, 0, 100);
   if (a.src !== 'script') addTie(me, P(src.writer), 8);
   milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
-  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id });
+  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}${share ? `, ${fmtM(invest)} of it from investors who'll take ${Math.round(share * 100)}% of what it earns` : ''}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id, result: share ? { ok: true, roll: M.lastRoll, t: 'The investors are in.' } : undefined });
   return true;
+}
+// After release, investors take their share of what came back to the company.
+function payInvestors() {
+  const c = myCo(); if (!c) return;
+  for (const id of c.films) { const f = S.films[id]; if (!f.investors || f.investors.paid || f.rel === null) continue; const back = Math.max(0, f.rentals - f.pa - f.backend); f.investors.paid = back * f.investors.share; c.cash -= f.investors.paid; if (f.investors.paid > 0) inbox('note', `Paying the investors on ${f.title}`, `${fmtCash(Math.round(f.investors.paid * 1e6))} goes to the people who backed ${f.title}.`, { film: f.id }); }
 }
 // Directing your own film is a job like any other: five days a week from development to the final mix.
 POST_BY.owndir = { k: 'owndir', jid: 'owndir', t: 'Director', tier: 4, st: [0, 1, 2, 3], head: 'prod', subs: ['dact', 'vstory', 'tone', 'pace', 'setm'], days: 5, rate: 0, weeks: 90, cr: 1 };
@@ -13469,6 +13516,7 @@ function companyWeek() {
   const M = S.me, c = myCo();
   if (!c) return;
   if (c.closed === null) c.cash -= usd([0, 12000, 5000, 1500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
+  payInvestors();
   if (c.closed !== null && !M.coClosedTold) { M.coClosedTold = 1; inbox('note', `${c.name} goes under`, 'The debts were bigger than the slate. Your company closes and its films go to whoever buys the library. You keep the stories.'); milestone(`${c.name} closed`, 'work'); }
   if (c.closed === null && c.tier === 3 && c.hits >= 2) { c.tier = 2; milestone(`${c.name} is now a mid-sized company`, 'work'); inbox('news', `${c.name} grows`, 'Two hits in, the phone rings differently. Agents send you better scripts; bigger names take meetings.'); }
 }
@@ -14054,7 +14102,7 @@ function conditionsHTML() {
 // appointments show where they land. Everything else you can change until it happens.
 function weekGrid() {
   const M = S.me, W = M.wk, cal = calOf(), run = planBlocks(), now = W ? W.day * 3 + W.block : 0, burnt = M.burnout && W && W.burnt;
-  const opts = b => Object.entries(BLOCK_ACTS).filter(([k]) => k !== 'work' && (k !== 'study' || M.school)).map(([k, A]) => [k, `${A.icon} ${A.label}${A.cost ? ' ($' + usd(A.cost) + ')' : ''}`]).concat(b === 2 && typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
+  const opts = b => Object.entries(BLOCK_ACTS).filter(([k]) => k !== 'work' && (k !== 'study' || M.school)).map(([k, A]) => [k, `${A.icon} ${A.label}`]).concat(b === 2 && typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
   const cell = (d, b) => {
     const abs = d * 3 + b, ap = (M.appts || []).find(x => x.w === S.week && x.d === d && x.b === b && (!x.done || abs < now)), k = run[d][b];
     if (abs < now) { const c = W.cards.filter(x => x.d === d && x.b === b).pop(); return `<td class="past"><span class="muted">${c ? c.icon + ' ' + esc(c.title) : ''}</span></td>`; }
@@ -14105,7 +14153,7 @@ function phonePanel() {
      <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><time>${when(m)}</time><p>${esc(m.t)}</p></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
      ${q ? compose(true) : ''}`;
   } else {
-    left = `<ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr${unread > 0 ? ' unread' : ''}" data-thread="${t.k}"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? ` <span class="dot">${unread}</span>` : ''} <time>${when(t.last)}</time><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
+    left = `<ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr${unread > 0 ? ' unread' : ''}" data-thread="${t.k}"><b>${esc(nameOf(t.k))}${unread > 0 ? ` <span class="dot">${unread}</span>` : ''}</b> <time>${when(t.last)}</time><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
   }
   return `<section class="panel phone"><h3>📱 Your phone</h3>
    <div class="ph-cols"><div>${left}</div>
@@ -14122,6 +14170,7 @@ function guidePanel() {
      <p class="muted">Some goals people set themselves: a first screen credit · a film of your own · a festival prize · a home worth coming back to · a crew who follows you from job to job · a studio with your name on it.</p></div>
     <div><h4>A week</h4><p>Your week is a diary: seven days, each with a morning, an afternoon and an evening. Fill the blocks yourself or pick a quick plan. A job takes the working blocks; interviews, coffees, dates and invitations land in the diary as appointments. Press <b>Next</b> or the <kbd>space</kbd> bar to live on until something worth your attention happens: a decision, a text, a roll. <b>End day</b> and <b>End week</b> go further. The week closes with pay, replies, rent and the news.</p>
      <p class="muted">Energy drains with work and returns with sleep. Stress builds with rejection and bills. Let either run too far and you'll burn out for a week.</p></div>
+    <div><h4>Your desk</h4><p>Everything about your life sits in the tabs under your portrait: <b>Today</b> (what's happening and what needs a decision), <b>Your week</b> (the diary), <b>Phone</b>, <b>Work</b> (your job and the board), <b>Create</b> (scripts, producing, your company), <b>Life</b> (school, agents, your home, your story) and <b>People</b>. Numbers on a tab mean something's waiting there.</p></div>
     <div><h4>Your phone and your people</h4><p>Friends text, invite you out, ask for favours and pass on gossip. Text anyone to fix a coffee or drinks; see people often and they become friends, close friends, maybe more. A senior contact might mentor you. Ignore people for a couple of months and they drift. A partner, good friends or a lonely spell all show up in your rolls.</p></div>
     <div><h4>Rolls</h4><p>Risky moments roll a twenty-sided die. Your stat adds or subtracts; traits, clothes and the state you're in can give <span class="fx up">▲ advantage</span> (roll twice, keep the best) or <span class="fx down">▼ disadvantage</span>. A natural 20 always works and a natural 1 always fails. Before you choose, the bar shows your odds.</p>${rollCard(ex, true)}</div>
     <div><h4>Work and people</h4><p>The board lists jobs on real productions around you. Your odds depend on your skills, who you know, your standing and luck; hover them to see why. Everyone you meet remembers you: opinion is whether they like you, trust is whether they believe you, and favours are what they owe.</p></div>
@@ -14177,11 +14226,11 @@ function companyPanel() {
     const srcs = (M.scripts || []).filter(x => x.grade && !x.option && x.made === undefined).map(x => ['script', x]).concat((M.holdings || []).filter(h => h.made === undefined && !h.lapsed).map(h => ['holding', h]));
     co = `<p><a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a> ${'★'.repeat(4 - c.tier)} ${c.closed !== null ? '<span class="bad">closed</span>' : ''}· in the bank: <b class="${c.cash < 0 ? 'bad' : ''}">${fmtCash(Math.round(c.cash * 1e6))}</b> · ${c.films.length} film${c.films.length === 1 ? '' : 's'} · ${c.hits} hit${c.hits === 1 ? '' : 's'}</p>
      ${c.closed === null ? `<div class="ccrow"><label>Amount <input id="co-amt" type="number" min="100" step="100" value="${T.amt}"></label> <button class="btn-s ghost" data-comoney="invest">Put in</button> <button class="btn-s ghost" data-comoney="withdraw">Take out</button></div>
-     ${srcs.length ? `<h4>Make a film</h4><ul class="plain specs">${srcs.map(([k, x]) => { const est = Math.round(estBudget(x.genre) * 1e6), cash = c.cash * 1e6, btn = (micro, dir) => { const need = est * (micro ? .25 : 1), ok = cash >= need * .9; return `<button class="btn-s${dir ? ' ghost' : ''}" data-selffund="${k}:${x.id}:${dir ? 1 : 0}:${micro ? 1 : 0}" ${ok ? '' : `disabled title="Needs about ${fmtCash(Math.round(need))} in the company account"`}>${micro ? 'Micro-budget' : 'Full budget'}${dir ? ', you direct' : ''}</button>`; }; return `<li><b>${esc(x.title)}</b> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)} · full budget about ${fmtCash(est)}, micro about ${fmtCash(Math.round(est / 4))}</span><br>${btn(1, 0)} ${btn(1, 1)} ${btn(0, 0)} ${btn(0, 1)}</li>`; }).join('')}</ul><p class="muted small">A micro-budget costs a quarter, and the film will feel it. Directing takes you five days a week until release, and your directing craft shapes the film.</p>` : '<p class="muted small">Finish a script or option one to make a film with your company.</p>'}` : ''}`;
+     ${srcs.length ? `<h4>Make a film</h4>${srcs.map(([k, x]) => makeFilmForm(c, k, x)).join('')}<p class="muted small">A micro-budget costs a quarter, and the film will feel it. A famous lead costs more and sells more tickets. Directing takes you five days a week until release, and your directing craft shapes the film.</p>` : '<p class="muted small">Finish a script or option one to make a film with your company.</p>'}` : ''}`;
   }
   const festRow = f => { const done = (M.fests || []).filter(x => x.film === f.id); return festEligible(f) ? `<span class="fests">${FESTIVALS.map(F => { const e = done.find(x => x.k === F.k); return e ? `<span class="chip ${e.sel ? 'good' : e.done ? '' : 'hist'}">${esc(F.name.replace(/^the /, ''))}: ${e.done ? (e.sel ? 'selected' : 'no') : 'waiting'}</span>` : `<button class="btn-s ghost" data-fest="${f.id}:${F.k}" title="${esc(F.d)} Entry ${fmtCash(usd(F.fee))}">${esc(F.name.replace(/^the /, ''))}</button>`; }).join(' ')}</span>` : ''; };
   return `<section class="panel"><h3>Your company and films</h3>${co}
-   ${films.length ? `<h4>Your films</h4><ul class="plain specs">${films.map(f => `<li>${fl(f.id)} <span class="muted">${esc((f.xc && f.xc[me.id]) || (f.dir === me.id ? 'Director' : f.prod === me.id ? 'Producer' : f.wri.includes(me.id) ? 'Writer' : 'Crew'))} · ${esc(f.status)}${f.rel !== null ? ` · ${f.reviews}/100 · ${fmtM(f.total)}` : ''}</span>${festEligible(f) ? '<br>' + festRow(f) : ''}</li>`).join('')}</ul><p class="muted small">Released films can go to festivals for a year. Selection depends on quality; small independent films get a little extra love.</p>` : ''}</section>`;
+   ${films.length ? `<h4>Your films</h4><ul class="plain specs">${films.map(f => `<li>${fl(f.id)} <span class="muted">${esc((f.xc && f.xc[me.id]) || (f.dir === me.id ? 'Director' : f.prod === me.id ? 'Producer' : f.wri.includes(me.id) ? 'Writer' : 'Crew'))} · ${esc(f.status)}${f.rel !== null ? ` · ${f.reviews}/100 · ${fmtM(f.total)} worldwide · ${money(f.theatrical)} at the box office` : ''}</span>${f.rel === null && f.stage >= 0 ? `<br>${stageCell(f)} <span class="muted small">${fmtM(f.cost)} budget · ${f.stage < 4 ? 'next stage ' + fmtDate(f.stageEnd, true) : ''}${f.investors ? ` · investors take ${Math.round(f.investors.share * 100)}%` : ''}</span>` : ''}${festEligible(f) ? '<br>' + festRow(f) : ''}</li>`).join('')}</ul><p class="muted small">Released films can go to festivals for a year. Selection depends on quality; small independent films get a little extra love.</p>` : ''}</section>`;
 }
 // School and representation: the two longer roads.
 function pathsPanel() {
@@ -14211,7 +14260,7 @@ function cityPanel() {
 function homePanel() {
   const M = S.me, H = M.home, lay = homeLayout(), spots = HOME_SPOTS[M.life] || [];
   const spotName = { wallL: 'Left wall', wallL2: 'Left wall, by the door', wallR: 'Right wall', floorL: 'Left corner', floorC: 'By the window', floorR: 'Right corner', corner: 'Back corner', sill: 'Windowsill' };
-  return `<section class="panel"><h3>Your place <button class="linkish" data-homep="">Close</button></h3>
+  return `<section class="panel"><h3>Your place</h3>
    <p class="muted">${M.life === 'couch' ? 'You\'re on a friend\'s couch: there\'s a windowsill and that\'s it. Anything bigger waits in a box until you have a room of your own.' : `${esc(ORIGIN.life[M.life].label)}: ${(HOME_SPOTS[M.life] || []).length} spots for things.`} Things only help once they're in the room.</p>
    ${H.items.length ? `<h4>Arrange</h4><div class="arr">${H.items.map(id => { const F = FURNITURE[id], ok = spots.filter(s => fits(F.kind, s.kind));
      return `<label>${esc(F.name)} <select data-place="${id}"><option value="">${lay[id] ? 'Wherever there\'s room' : 'In a box (no room)'}</option>${ok.map(s => `<option value="${s.id}"${H.layout[id] === s.id ? ' selected' : ''}>${esc(spotName[s.id] || s.id)}</option>`).join('')}</select></label>`; }).join('')}</div>
@@ -14249,43 +14298,41 @@ function viewDesk() {
   return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
    <p class="voice">Your voice: ${topThemes(voiceOf()).map(k => `<span class="vt">${esc(THEMES[k])}</span>`).join(' ') || '<span class="muted">still finding it</span>'} <span class="muted">· loves ${esc(M.love.join(', ').toLowerCase() || 'everything')}</span></p>
-   <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-homep="1">${UI.homep ? 'Close your place' : 'Your place'}</button> · <button class="linkish" data-story="1">${UI.story ? 'Close your story' : 'Your story'}</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
+   <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-dtab="life">Your place</button> · <button class="linkish" data-dtab="life">Your story</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
     <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>
   ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own. Pieces marked ★ were bought.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
-  ${UI.story ? storyHTML() : ''}
-  ${UI.homep ? homePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
-    <section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
+  ${deskNav()}
+  <div class="dstack">${(() => { switch (UI.dtab || 'today') {
+    case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
      ${weekGrid()}
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(BLOCK_ACTS).filter(([k, a]) => plan.includes(k) && a.d).map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))} a block)` : ''}`).join(' ')}</p>
      <p class="note">A block of work costs about 14 energy; a night's sleep gives back 20 to 40 depending on your bed, your home, your neighbourhood and your stress. Nights out cost energy but melt stress. Appointments you make on your phone take over the block they're in.</p>
-     <p class="note">You live in ${esc(ORIGIN.life[M.life].label.toLowerCase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-homep="1">Move or change how you travel</button></p></section>
-  <div class="cols two desk">
-   <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
-    <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
-   <div>
-    ${todayPanel()}
-    ${phonePanel()}
-    ${cityPanel()}
-    <section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
+     <p class="note">${esc(livingPhrase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-dtab="life">Move or change how you travel</button></p></section>
+     ${cityPanel()}`;
+    case 'phone': return phonePanel();
+    case 'work': return `<section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
-    ${writingDesk()}
-    ${producingPanel()}
-    ${companyPanel()}
-    ${pathsPanel()}
-    ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
-   </div></div>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
   <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
-  ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}
-  <h3>Contacts <span class="count">${known.length}</span></h3>
+  ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
+    case 'create': return writingDesk() + producingPanel() + companyPanel();
+    case 'life': return pathsPanel() + homePanel() + storyHTML();
+    case 'people': return `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
-  <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>
+  <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
+    default: return `<div class="cols two desk">
+   <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
+    <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
+   <div>${todayPanel()}
+    ${lastDiary.length ? `<section class="panel"><h3>Last week</h3><ul class="plain">${lastDiary.map(d => `<li>${esc(d.t)}</li>`).join('')}</ul></section>` : ''}
+   </div></div>`;
+  } })()}</div>
   <p class="note"><button class="linkish" data-abandon="1">${UI.abandon ? 'Click again to delete this career for good' : 'Abandon this career'}</button></p>`;
 }
 function jobInfoPanel(jid) {
@@ -14305,10 +14352,11 @@ function careerActive() { return S && S.me && S.me.party && S.me.party.done && !
 function endWeekAct(t = 'end') { return { t, cal: calOf().map(r => r.slice()), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
 function playStep(t) {
   if (UI.busy || !careerActive()) return;
-  if (pending().length) { UI.tab = 'you'; UI.stack = []; render(); return; }
+  if (pending().length) { UI.tab = 'you'; UI.dtab = 'today'; UI.stack = []; render(); return; }
   const w0 = S.week;
   doAct(endWeekAct(t));
   if (S.week !== w0) UI.apps = new Set();
+  if (pending().length || UI.dtab === undefined) UI.dtab = 'today';
   UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
@@ -14376,13 +14424,15 @@ function careerClick(t) {
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
+  if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
+  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, micro: !!+F.micro, inv: !!+F.inv }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
   if (t.dataset.pitch) { const [id, co] = t.dataset.pitch.split(':').map(Number), n0 = S.me.rollN || 0; doAct({ t: 'pitch', id, co }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
-  if (t.dataset.phonejump !== undefined) { UI.tab = 'you'; UI.stack = []; render(); const el = document.querySelector('.panel.phone'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return true; }
+  if (t.dataset.phonejump !== undefined) { UI.tab = 'you'; UI.dtab = 'phone'; UI.stack = []; render(); const el = document.querySelector('.desknav'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
   if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
   if (t.dataset.activescript) { doAct({ t: 'activescript', id: +t.dataset.activescript }); render(true); return true; }
@@ -14393,7 +14443,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -14419,6 +14469,8 @@ function careerChange(e) {
   }
   if (/^cal-\d-\d$/.test(id)) { calOf()[+id[4]][+id[6]] = v; render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
+  if (/^mk-(micro|dir|lead)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
+  if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
   if (id === 'co-name') { (UI.co = UI.co || {}).name = v; return true; }
   if (/^pitch-\d+$/.test(id)) { (UI.pitch = UI.pitch || {})[+id.slice(6)] = v; render(true); return true; }
   if (/^tx-(id|kind|slot)$/.test(id)) { UI.txt[id.slice(3)] = v; if (id === 'tx-id') UI.txt.slot = 0; render(true); return true; }
@@ -14427,6 +14479,29 @@ function careerChange(e) {
   if (id === 'pl-life') { doAct({ t: 'life', v }); render(true); return true; }
   if (e.target.dataset.apply) { const pid = +e.target.dataset.apply; if (e.target.checked) UI.apps.add(pid); else UI.apps.delete(pid); render(true); return true; }
   return false;
+}
+// Where you live, said the way people say it.
+function livingPhrase() { const M = S.me; return ({ couch: 'You\'re couch-surfing', shared: 'You live in a shared flat', studio: 'You live in a studio flat', own: 'You have your own place', loft: 'You live in a converted warehouse loft', house: 'You live in a house with a garden' })[M.life] || 'You live in ' + ORIGIN.life[M.life].label.toLowerCase(); }
+// One form per script: size, who directs, who leads, investors, and what it all costs.
+function makeFilmForm(c, k, x) {
+  const key = k + ':' + x.id, F = (UI.mk = UI.mk || {})[key] = UI.mk[key] || { micro: 1, dir: '', lead: '', inv: 0 };
+  const micro = !!+F.micro, est = estBudget(x.genre) * (micro ? .25 : 1), leadId = F.lead === '' ? undefined : +F.lead;
+  const total = est + (leadId !== undefined ? leadFee(leadId, x.genre, micro) : 0), cash = c.cash, need = total * .9;
+  const short = cash < need, wait = x.invTry !== undefined && S.week - x.invTry < 4, canInv = cash >= total * .25 && !wait;
+  const dirs = dirOptions(x.genre), leads = castOptions(x.genre), M = S.me;
+  const tag = p => M.known[p.id] ? ' ★' : '';
+  return `<div class="mkfilm"><b>${esc(x.title)}</b> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)}</span>
+   <div class="mkrow"><label>Size ${sel('mk-micro-' + key, [['1', 'Micro-budget'], ['0', 'Full budget']], String(F.micro))}</label>
+    <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, 'dir', x.genre))}`])), F.dir)}</label>
+    <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label></div>
+   <p class="small">Cost about <b>${fmtCash(Math.round(total * 1e6))}</b> · company has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
+   <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button></div>`;
+}
+// The desk's sections. Counts show what's waiting in each.
+function deskNav() {
+  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'today';
+  const tabs = [['today', 'Today', pend, 'bad'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
+  return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
 // Rebuild a saved career: the world is already built from the same seed; feed it the log.
 function replayCareer(log, done) {

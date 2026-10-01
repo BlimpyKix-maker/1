@@ -36,16 +36,21 @@ const out = process.argv[2] || '.';
   await page.waitForSelector('.desk');
   await page.screenshot({ path: out + '/3-desk.png', fullPage: true });
   // plan: two hunting days, apply to the first two jobs
+  await page.click('.desknav [data-dtab="diary"]');
   await page.selectOption('#cal-0-1', 'hunt');
   await page.selectOption('#cal-1-1', 'hunt');
+  await page.click('.desknav [data-dtab="work"]');
   for (let i = 0; i < 4; i++) { const b = page.locator('[data-apply]').nth(i); if (await b.isEnabled()) await b.check(); }
   // live the first three days one at a time; the mixer on Wednesday rolls a die
+  await page.click('.desknav [data-dtab="diary"]');
   await page.selectOption('#cal-2-1', 'network');
+  await page.click('.desknav [data-dtab="phone"]');
   // text the first contact for coffee through the phone
   await page.selectOption('#tx-id', { index: 1 });
   await page.selectOption('#tx-kind', 'coffee'); await page.waitForSelector('#tx-slot');
   await page.click('[data-sendtext]');
   console.log('phone after text:', await page.evaluate(() => S.me.phone.slice(-2).map(m => m.t).join(' / ')), 'appts', await page.evaluate(() => JSON.stringify((S.me.appts || []).map(x => [x.kind, x.d, x.b]))));
+  await page.click('.desknav [data-dtab="today"]');
   // live with the space bar, answering decisions as they come
   for (let d = 0; d < 9; d++) { const c = await page.$('.beat.decide [data-pick]:not([disabled])'); if (c) { await c.click(); await page.waitForTimeout(150); continue; } await page.locator('body').focus().catch(() => {}); await page.evaluate(() => document.activeElement && document.activeElement.blur()); await page.keyboard.press('Space'); await page.waitForTimeout(50); }
   await page.waitForTimeout(1300);

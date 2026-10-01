@@ -224,22 +224,52 @@ function coMoney(a) {
 }
 // What a small film of this genre costs here, before the surprises.
 function estBudget(genre) { return [0, 3, 1, .35][3] * budgetScale(S.year) * era(MARKETS[HUBS[S.me.hub].m].cost, S.year) * Math.pow(AMB[genre], .7); }
-// Finance a film yourself: your own finished script or one you've optioned. Optionally direct it.
+// Who you could cast or hire: people in town who are free, best fits first, people you know marked.
+function castOptions(genre) {
+  const M = S.me, ids = S.pool[M.hub].actor.filter(id => available(id) && id !== M.id);
+  return ids.map(P).sort((a, b) => (gcraft(b, 'act', genre) * 2 + b.fame * .3 + (M.known[b.id] ? 6 : 0)) - (gcraft(a, 'act', genre) * 2 + a.fame * .3 + (M.known[a.id] ? 6 : 0))).slice(0, 10);
+}
+function dirOptions(genre) {
+  const M = S.me, ids = S.pool[M.hub].director.filter(id => available(id) && id !== M.id);
+  return ids.map(P).sort((a, b) => (gcraft(b, 'dir', genre) * 2 + b.standing * .2 + (M.known[b.id] ? 6 : 0)) - (gcraft(a, 'dir', genre) * 2 + a.standing * .2 + (M.known[a.id] ? 6 : 0))).slice(0, 8);
+}
+// A name costs money: a lead's fee grows with their fame.
+function leadFee(id, genre, micro) { const q = P(id); return estBudget(genre) * (micro ? .25 : 1) * (.04 + Math.pow((q.fame || 0) / 100, 2) * .9); }
+// Investors put up what your company can't, for a share of what the film brings back. Convincing them is a roll.
+function investDC(src) { const c = myCo(), me = ME(); return Math.round(clamp(16 - me.standing / 20 - (c ? c.hits * 2 : 0) - (src.score - 60) / 10, 6, 19)); }
+// Finance a film yourself: your own finished script or one you've optioned. Choose the size, the director (or
+// yourself), the lead, and whether to bring in investors for the part your company can't cover.
 function selfFund(a) {
   const M = S.me, me = ME(), c = myCo();
   if (!c || c.closed !== null) return false;
   const src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id && x.grade && !x.option && x.made === undefined) : (M.holdings || []).find(x => x.id === a.id && x.made === undefined && !x.lapsed);
-  const budget = estBudget(src ? src.genre : 'Drama') * (a.micro ? .25 : 1);
-  if (!src || c.cash < budget * .9) return false;
-  const direct = !!a.direct;
-  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : undefined, budget });
+  if (!src) return false;
+  const lead = a.lead !== undefined && a.lead !== null && P(a.lead) && P(a.lead).role === 'actor' && available(a.lead) ? a.lead : undefined;
+  const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
+  let budget = estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) : 0);
+  let share = 0, invest = 0;
+  if (c.cash < budget * .9) {
+    if (!a.inv || c.cash < budget * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) return false;
+    src.invTry = S.week;
+    if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
+    invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+  }
+  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : dirPick, budget, lead });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
+  if (share) { f.investors = { share, amount: invest }; }
   if (direct) takeJob(makePost(POST_BY.owndir, f));
+  if (lead !== undefined) meet(lead, 'Cast in your film', 6);
+  if (dirPick !== undefined) meet(dirPick, 'Directing your film', 6);
   me.standing = clamp(me.standing + 1.5, 0, 100);
   if (a.src !== 'script') addTie(me, P(src.writer), 8);
   milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
-  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id });
+  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}${share ? `, ${fmtM(invest)} of it from investors who'll take ${Math.round(share * 100)}% of what it earns` : ''}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id, result: share ? { ok: true, roll: M.lastRoll, t: 'The investors are in.' } : undefined });
   return true;
+}
+// After release, investors take their share of what came back to the company.
+function payInvestors() {
+  const c = myCo(); if (!c) return;
+  for (const id of c.films) { const f = S.films[id]; if (!f.investors || f.investors.paid || f.rel === null) continue; const back = Math.max(0, f.rentals - f.pa - f.backend); f.investors.paid = back * f.investors.share; c.cash -= f.investors.paid; if (f.investors.paid > 0) inbox('note', `Paying the investors on ${f.title}`, `${fmtCash(Math.round(f.investors.paid * 1e6))} goes to the people who backed ${f.title}.`, { film: f.id }); }
 }
 // Directing your own film is a job like any other: five days a week from development to the final mix.
 POST_BY.owndir = { k: 'owndir', jid: 'owndir', t: 'Director', tier: 4, st: [0, 1, 2, 3], head: 'prod', subs: ['dact', 'vstory', 'tone', 'pace', 'setm'], days: 5, rate: 0, weeks: 90, cr: 1 };
@@ -248,6 +278,7 @@ function companyWeek() {
   const M = S.me, c = myCo();
   if (!c) return;
   if (c.closed === null) c.cash -= usd([0, 12000, 5000, 1500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
+  payInvestors();
   if (c.closed !== null && !M.coClosedTold) { M.coClosedTold = 1; inbox('note', `${c.name} goes under`, 'The debts were bigger than the slate. Your company closes and its films go to whoever buys the library. You keep the stories.'); milestone(`${c.name} closed`, 'work'); }
   if (c.closed === null && c.tier === 3 && c.hits >= 2) { c.tier = 2; milestone(`${c.name} is now a mid-sized company`, 'work'); inbox('news', `${c.name} grows`, 'Two hits in, the phone rings differently. Agents send you better scripts; bigger names take meetings.'); }
 }
