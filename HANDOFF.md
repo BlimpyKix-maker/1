@@ -18,13 +18,13 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/career-sim.js` | career state (`S.me`), contacts, rolls (`roll`, `checkMods`), inbox, `closeWeek`, scenes resolver, `applyAct` dispatcher |
 | `src/career-depth.js` | levels, job board depth, school, agencies (focus + style), life events |
 | `src/life.js` | the diary: 7 days × morning/afternoon/evening blocks, `liveOn` (Next/End day/End week), energy, sleep |
-| `src/life-scenes.js`, `src/life-scenes-more.js` | work scenes per job family (with `teach` notes), life scenes, interviews |
+| `src/life-scenes.js`, `src/life-scenes-more.js`, `src/life-scenes-third.js` | work scenes per job family (with `teach` notes), life scenes, interviews |
 | `src/life-voice.js` | scripts: premise/notes, trait-driven writing, grades, sharing, contests |
 | `src/life-city.js` | housing, vehicles, venues, commutes |
 | `src/life-social.js` | phone (threads), appointments, invitations/favours, relationships (friend→close/partner/mentor/rival/ex), `relConditions` |
 | `src/life-world.js` | NPC backstories + life events, world events (heatwave, strike, recession, tax credit…) |
 | `src/life-deals.js` | options, green lights, job on your own film, producing (market + pitches), your company, investors, casting, festivals, awards night |
-| `src/life-story.js` | milestones, résumé, timeline |
+| `src/life-story.js` | milestones, résumé, timeline, year in review (`yearWeek`, `yearsHTML`) |
 | `src/trivia.js` | Cinephile notes: curated (fictionalised) + generated trivia, revealed by Taste |
 | `src/life-phone.js` | texting styles by personality, replies and conversations |
 | `src/computer.js` | the desk computer: mail, CrewList, trades, GEA search, bank, Flick, notes, Clapper Sweep |
@@ -73,5 +73,5 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 1. Done: hire DP, editor, composer, production designer; 'Your regulars' panel on the People tab.
 2. Done: festival selections bring distributor bids (advance + share, settled after release); the 'parent' background links you into a real family and gives a hiring edge. Careers screen runs job text through `deReal()` to hide real employers/unions.
 3. Done: `workCost()` (shooting days, seniority, two jobs) and the grind (`M.grind`: consecutive working weeks without a light week → stress, 'Worn down' condition at 12; trips reset; autopilot protects evenings at 8). Probe: scratch `diff.js`-style bot comparing employed vs idle weeks.
-4. Done for world events: most events carry a choice scene (`EV_SCENES` in life-world.js, `scene:` key on WORLD_EVENTS; `needs: 'friend'` picks a friend by week number, no dice). More job-family scenes still welcome.
+4. Done for world events: most events carry a choice scene (`EV_SCENES` in life-world.js, `scene:` key on WORLD_EVENTS; `needs: 'friend'` picks a friend by week number, no dice). Job families now have 5–11 scenes each (third reel in life-scenes-third.js).
 5. Done: fictionalise.js never swaps place/common words (ALLOW) or after 'Mount', and drops lines where a swap is glued to another name. 129 fake titles that equalled or contained a real title were retitled (catalogue + data/fill).
