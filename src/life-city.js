@@ -84,7 +84,7 @@ function venueEvening(E) {
   if (V.body) M.body.stamina = clamp(M.body.stamina + V.body, 1, 20);
   const on = whatsOn().find(x => x.venue === E.venue);
   if (on) out.push(`${on.title}. ${on.d}`); else out.push(V.d);
-  if (V.check) { const ok = roll(V.check[0], V.check[1]); out.push(ok ? 'Laughs. Real ones. You float home.' : 'Silence, then a cough. You\'ll be back.'); if (ok) me.standing = clamp(me.standing + .1, 0, 100); }
+  if (V.check) { const ok = roll(V.check[0], V.check[1]); out.push(ok ? (V.okT || 'Laughs. Real ones. You float home.') : (V.badT || 'Silence, then a cough. You\'ll be back.')); if (V.stake) S.me.cash += usd(ok ? V.stake : -V.stake); if (ok) me.standing = clamp(me.standing + .1, 0, 100); }
   const meetP = (V.meet || 0) + (on ? .25 : 0) + (hoodFx().meet ? .1 : 0);
   if (prnd() < meetP) { const q = bestIn(M.hub, E.venue === 'jazz' ? ['composer', 'sound'] : E.venue === 'gallery' ? ['designer', 'director', 'costume'] : E.venue === 'rep' ? ['director', 'writer', 'editor'] : ROLES, q => -Math.abs(q.standing - me.standing - 12) + tasteMatch(q) * 8 + prnd() * 25);
     if (q) { meet(q.id, 'Met out', 4 + tasteMatch(q) * 3); out.push(`You get talking to ${q.name}, ${(q.occ || occupationOf(q)).toLowerCase()}${tasteMatch(q) > .5 ? '. You love the same films' : ''}.`); } }

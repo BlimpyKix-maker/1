@@ -196,6 +196,7 @@ function appWindow2(k) {
     case 'studio': return studioApp();
     case 'cutroom': return cutroomApp();
     case 'store': return storeApp();
+    case 'bazaar': return typeof bazaarApp === 'function' ? bazaarApp() : '';
     case 'match': return matchApp();
     case 'cue': return cueApp();
     case 'scramble': return scrambleApp();
@@ -206,6 +207,7 @@ function appWindow2(k) {
 function computerClick(t) {
   const d = t.dataset;
   if (typeof msgClick === 'function' && msgClick(t)) return true;
+  if (typeof depthClick === 'function' && depthClick(t)) return true;
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
   if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
@@ -253,4 +255,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

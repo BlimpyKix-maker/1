@@ -517,6 +517,7 @@ function refreshBoard() {
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
+  if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   if (typeof leadBoard === 'function') { const L = leadBoard(), ids = new Set(L.map(p => p.id)); M.board = L.concat(M.board.filter(p => !ids.has(p.id))); }
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
 }
@@ -672,6 +673,8 @@ function closeWeek(a) {
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
+  if (typeof bazaarWeek === 'function') bazaarWeek();
+  if (typeof achWeek === 'function') achWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -1034,6 +1037,7 @@ function applyAct(a) {
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
+    case 'bazaar': return typeof bazaarAct === 'function' && bazaarAct(a);
     case 'email': return typeof emailAct === 'function' && emailAct(a);
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);

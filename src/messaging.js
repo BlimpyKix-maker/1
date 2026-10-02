@@ -68,7 +68,7 @@ function makeLead(id, f) {
   const cand = opts.slice(0, 40).map(t => makePost(t, f));
   cand.sort((a, b) => (typeof jobRelevance === 'function' ? jobRelevance(b) - jobRelevance(a) : 0) || hireOdds(b) - hireOdds(a));
   const p = cand[0]; p.ref = true; p.lead = id; if (f.hub !== M.hub) p.away = f.hub;
-  M.refs[id] = (M.refs[id] || 0) + 1;
+  M.refs[id] = (M.refs[id] || 0) + 1; (M.flags = M.flags || {}).lead = 1;
   (M.leads = M.leads || []).push({ p, until: S.week + 3 });
   M.board.unshift(p);
   return p;
@@ -87,7 +87,7 @@ function askBack(q, topic) {
 function topicText(a) {
   const M = S.me, me = ME(), id = a.id, q = P(id), k = M.known[id], o = opinion(id), rel = relOf(id), C = convoOf(id), T = TOPICS[a.kind];
   if (!topicAvail(id).includes(a.kind)) return false;
-  C.tw = C.tw || {}; C.tw[a.kind] = S.week;
+  C.tw = C.tw || {}; C.tw[a.kind] = S.week; (M.flags = M.flags || {})['t_' + a.kind] = 1;
   if (C.sw !== S.week) { C.sw = S.week; C.sn = 0; } C.sn++;
   const r = id * 31 + (M.phoneN || 0), x = {};
   if (a.kind === 'congrats') x.film = theirRecent(id, 10);
@@ -99,7 +99,7 @@ function topicText(a) {
   k.seen = S.week;
   let d = 0, back = '', mood = 'happy', ab = null;
   const say = (t, m2) => { back = t; if (m2) mood = m2; };
-  if (C.sn > 4) { d -= 1; say(pickLine(['you\'re blowing up my phone today 😅', 'ok slow down, I have a job', 'one at a time!!'], r), 'none'); }
+  if (C.sn > 4) { M.flags.spam = 1; d -= 1; say(pickLine(['you\'re blowing up my phone today 😅', 'ok slow down, I have a job', 'one at a time!!'], r), 'none'); }
   else switch (a.kind) {
     case 'askwork': {
       const f = theirActive(id), sen = seniorTo(id);
