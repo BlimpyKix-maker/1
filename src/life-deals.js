@@ -37,7 +37,7 @@ function dealPick(it, k) {
 // Weekly: offers from agents, options lapsing, producers getting films off the ground, your film's progress.
 function dealsWeek() {
   const M = S.me, me = ME();
-  marketWeek(); holdingsWeek(); companyWeek(); festWeek();
+  marketWeek(); holdingsWeek(); companyWeek(); festWeek(); troupeWeek();
   for (const sc of M.scripts || []) {
     if (!sc.grade) continue;
     if (sc.option && !sc.made) {
@@ -233,6 +233,12 @@ function dirOptions(genre) {
   const M = S.me, ids = S.pool[M.hub].director.filter(id => available(id) && id !== M.id);
   return ids.map(P).sort((a, b) => (gcraft(b, 'dir', genre) * 2 + b.standing * .2 + (M.known[b.id] ? 6 : 0)) - (gcraft(a, 'dir', genre) * 2 + a.standing * .2 + (M.known[a.id] ? 6 : 0))).slice(0, 8);
 }
+// Crew you could hire: free people in town in that role, your regulars first.
+function crewOptions(role, craft, genre) {
+  const M = S.me, reg = id => M.known[id] && M.known[id].tags.includes('Your regular') ? 10 : M.known[id] ? 4 : 0;
+  return S.pool[M.hub][role].filter(id => available(id) && id !== M.id).map(P).sort((a, b) => (gcraft(b, craft, genre) * 2 + reg(b.id)) - (gcraft(a, craft, genre) * 2 + reg(a.id))).slice(0, 8);
+}
+function pickable(id, role) { return id !== undefined && id !== null && P(id) && P(id).role === role && available(id) ? id : undefined; }
 // A name costs money: a lead's fee grows with their fame.
 function leadFee(id, genre, micro) { const q = P(id); return estBudget(genre) * (micro ? .25 : 1) * (.04 + Math.pow((q.fame || 0) / 100, 2) * .9); }
 // Investors put up what your company can't, for a share of what the film brings back. Convincing them is a roll.
@@ -244,7 +250,7 @@ function selfFund(a) {
   if (!c || c.closed !== null) return false;
   const src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id && x.grade && !x.option && x.made === undefined) : (M.holdings || []).find(x => x.id === a.id && x.made === undefined && !x.lapsed);
   if (!src) return false;
-  const lead = a.lead !== undefined && a.lead !== null && P(a.lead) && P(a.lead).role === 'actor' && available(a.lead) ? a.lead : undefined;
+  const lead = pickable(a.lead, 'actor'), dpPick = pickable(a.dp, 'dp'), edPick = pickable(a.ed, 'editor');
   const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
   let budget = estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) : 0);
   let share = 0, invest = 0;
@@ -254,12 +260,13 @@ function selfFund(a) {
     if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
     invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
   }
-  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : dirPick, budget, lead });
+  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
   if (direct) takeJob(makePost(POST_BY.owndir, f));
   if (lead !== undefined) meet(lead, 'Cast in your film', 6);
   if (dirPick !== undefined) meet(dirPick, 'Directing your film', 6);
+  for (const id of [dpPick, edPick]) if (id !== undefined) meet(id, 'Hired for your film', 5);
   me.standing = clamp(me.standing + 1.5, 0, 100);
   if (a.src !== 'script') addTie(me, P(src.writer), 8);
   milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
@@ -315,5 +322,20 @@ function festWeek() {
     inbox('news', `${F.name}`, t, { film: f.id });
     const slot = freeSlot({ days: [3, 4, 5], blocks: [2], from: 1 }), host = [f.prod, f.dir, f.cast[0]].find(id => id !== me.id);
     if (slot && host !== undefined) inbox('invite', `Go to ${F.name}?`, `Your film is screening. The premiere is ${slotLabel(slot)}: travel, a red carpet, and everyone who buys and sells films in one place.`, { person: host, ev: 'festival', slot, what: `the premiere at ${F.name}`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Stay home' }] });
+  }
+}
+
+// ---- Your regulars ----
+// When one of your films opens, the people who made it with you and liked it become regulars: they come first when
+// you hire, they're warmer to work with, and they text you between jobs.
+function troupeWeek() {
+  const M = S.me, me = ME();
+  for (const f of myFilms()) {
+    if (f.rel === null || f.troupeDone || !(f.co === M.company || f.prod === me.id || f.dir === me.id)) continue;
+    f.troupeDone = 1;
+    const ids = [f.dir, f.dp, f.ed, f.cast[0], f.cast[1], ...Object.values(f.crew || {})].filter(id => id !== me.id && !P(id).dead);
+    const joined = [];
+    for (const id of ids) { meet(id, null, 3 + (f.q - 50) / 10); if (opinion(id) >= 15 && !M.known[id].tags.includes('Your regular')) { M.known[id].tags.push('Your regular'); joined.push(P(id).name); } }
+    if (joined.length) { inbox('note', `Your regulars from ${f.title}`, `${joined.slice(0, 5).join(', ')}${joined.length > 5 ? ` and ${joined.length - 5} more` : ''} would work with you again. They'll come first when you hire.`, { film: f.id }); milestone(`${joined.length} of the ${f.title} crew became regulars`, 'work'); }
   }
 }
