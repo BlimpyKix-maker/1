@@ -96,7 +96,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13 + (c.salt | 0)) >>> 0;   // the salt makes every run's party and luck different
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', cal: [['hunt', 'network', 'home'], ['hunt', 'write', 'home'], ['hunt', 'write', 'read'], ['hunt', 'write', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']], phone: [], appts: [], rel: {}, train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', focus: { day: 'balanced', eve: 'quiet', auto: true }, cal: [['hunt', 'network', 'home'], ['hunt', 'write', 'home'], ['hunt', 'write', 'read'], ['hunt', 'write', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']], phone: [], appts: [], rel: {}, train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -666,6 +666,7 @@ function closeWeek(a) {
   tick();
   M.week = S.week;
   M.closing = false;
+  if (M.focus && M.focus.auto) M.cal = autoCal();   // autopilot writes next week's diary
   afterTick(S.news.slice(before));
 }
 function jobOver(j) { const f = S.films[j.film]; return f.stage < 0 || f.stage >= 4 || !POST_BY[j.k].st.includes(f.stage) && f.stage > Math.max(...POST_BY[j.k].st); }
@@ -984,6 +985,7 @@ function applyAct(a) {
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
     case 'reply': return replyText(a);
+    case 'focus': return setFocus(a);
     case 'like': return likePost(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);

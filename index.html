@@ -141,6 +141,17 @@
 .sweep .cell.open { background: var(--panel); } .sweep .cell.mine { background: var(--bad); }
 #pc-notes { width: 100%; font: inherit; }
 @media (max-width: 700px) { .desktop { grid-template-columns: 1fr; } .icons { grid-template-columns: repeat(5, 1fr); } }
+.fcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.fcard { all: unset; cursor: pointer; display: grid; gap: 2px; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); }
+.fcard span { font-size: 22px; } .fcard small { color: var(--muted); font-size: 12px; line-height: 1.3; }
+.fcard.on { border: 2px solid var(--accent); background: var(--accent-soft); } .fcard:focus-visible { outline: 2px solid var(--accent); }
+.fcards.eve .fcard { grid-template-columns: auto 1fr; align-items: center; }
+.forecast { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; margin-top: 6px; padding: 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); }
+.fdays { display: flex; gap: 6px; } .fd { display: grid; justify-items: center; gap: 2px; }
+.fbar { width: 16px; height: 60px; background: var(--line); border-radius: 4px; display: flex; align-items: end; overflow: hidden; }
+.fbar i { display: block; width: 100%; } .fbar i.hi { background: var(--good); } .fbar i.mid { background: var(--gold); } .fbar i.lo { background: var(--bad); }
+.forecast p { flex: 1; min-width: 220px; margin: 0; }
+.finetune summary { cursor: pointer; font-weight: 600; margin: 10px 0 6px; }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -10380,7 +10391,7 @@ const PLAYER_TRAITS = TRAIT_KEYS.filter(t => t !== 'Prodigy');
 function startCareer(c) {
   const y = S.year, hub = c.hub, seed = (S.seed * 7919 + 13 + (c.salt | 0)) >>> 0;   // the salt makes every run's party and luck different
   const love = (c.love || []).filter(g => GENRES.includes(g)).slice(0, 3), hate = (c.hate || []).filter(g => GENRES.includes(g) && !love.includes(g)).slice(0, 2);
-  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', cal: [['hunt', 'network', 'home'], ['hunt', 'write', 'home'], ['hunt', 'write', 'read'], ['hunt', 'write', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']], phone: [], appts: [], rel: {}, train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
+  S.me = { rng: mulberry(seed), hub, seq: 1, startW: S.week, quirk: c.quirk, wealth: c.wealth, edu: c.edu, arrival: c.arrival, love, hate, favs: [], look: migrateLook(Object.assign({}, c.look || {})), owned: [], home: { items: [], layout: {} }, degrees: [], body: {}, cash: 0, debt: 0, debtPay: 0, shark: 0, allowance: 0, upkeep: 0, energy: 100, stress: 10, life: c.wealth === 'trust' || c.wealth === 'welloff' ? 'own' : c.wealth === 'broke' || c.wealth === 'scraping' ? 'couch' : 'shared', focus: { day: 'balanced', eve: 'quiet', auto: true }, cal: [['hunt', 'network', 'home'], ['hunt', 'write', 'home'], ['hunt', 'write', 'read'], ['hunt', 'write', 'home'], ['hunt', 'write', 'out'], ['rest', 'read', 'out'], ['rest', 'home', 'home']], phone: [], appts: [], rel: {}, train: MAIN[c.role], catchWith: null, apps: [], jobs: [], past: [], inbox: [], known: {}, board: [], refs: {}, spec: { pages: 0, drafts: 0 }, broke: 0, burnout: 0, stats: { apps: 0, offers: 0, weeks: 0, earned: 0, credits: 0 }, diary: [], party: null, over: false };
   const M = S.me, W = ORIGIN.wealth[c.wealth], E = ORIGIN.edu[c.edu], B = ORIGIN.build[c.build], A = ORIGIN.arrival[c.arrival];
   const age = clamp(c.age | 0, 18, 45);
   const traits = [];
@@ -10950,6 +10961,7 @@ function closeWeek(a) {
   tick();
   M.week = S.week;
   M.closing = false;
+  if (M.focus && M.focus.auto) M.cal = autoCal();   // autopilot writes next week's diary
   afterTick(S.news.slice(before));
 }
 function jobOver(j) { const f = S.films[j.film]; return f.stage < 0 || f.stage >= 4 || !POST_BY[j.k].st.includes(f.stage) && f.stage > Math.max(...POST_BY[j.k].st); }
@@ -11268,6 +11280,7 @@ function applyAct(a) {
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
     case 'reply': return replyText(a);
+    case 'focus': return setFocus(a);
     case 'like': return likePost(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
@@ -11984,6 +11997,57 @@ const OFFICE_LINES = ['Emails, meetings, a deadline that moves.', 'You learn how
 function eveningOf(k) { return BLOCK_ACTS[k] || EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.home; }
 function vehicleOf() { return typeof VEHICLES !== 'undefined' ? VEHICLES[S.me.vehicle || 'transit'] : { icon: '🚌', e: 2, commute: ['The bus, a podcast, a seat if you\'re lucky.'] }; }
 function writeSession(L, scale = 1) { if (typeof writeOnScript === 'function') return writeOnScript(L, scale); S.me.spec.pages += Math.round((4 + ME().mind.eth / 4) * scale * condMul()); L.push('You write.'); }
+// ---- Week focus and autopilot ----
+// Instead of 21 choices, pick what your days are for and how you spend your evenings. Autopilot writes the diary
+// for the coming week and bends it to how you are: tired means more rest, frayed means a night out, broke means
+// shifts, enrolled means classes. You can still fine-tune any block by hand.
+const DAY_FOCUS = {
+  balanced: { label: 'Balanced', icon: '⚖️', d: 'A bit of everything: look for work, write, one class.', days: [['hunt', 'write'], ['hunt', 'network'], ['hunt', 'write'], ['train', 'hunt'], ['hunt', 'write']] },
+  hunt: { label: 'Job hunting', icon: '📋', d: 'Applications every day, a mixer twice. Most applications, slow skills.', days: [['hunt', 'hunt'], ['hunt', 'network'], ['hunt', 'hunt'], ['hunt', 'network'], ['hunt', 'hunt']] },
+  craft: { label: 'Get better', icon: '🎓', d: 'Classes most mornings. Skills grow fastest; costs money.', days: [['train', 'hunt'], ['train', 'read'], ['train', 'hunt'], ['train', 'read'], ['hunt', 'hunt']] },
+  write: { label: 'Writing', icon: '✍️', d: 'Pages, pages, pages. Your scripts move fastest.', days: [['write', 'write'], ['write', 'hunt'], ['write', 'write'], ['write', 'hunt'], ['write', 'write']] },
+  social: { label: 'Networking', icon: '🥂', d: 'Mixers and coffees. More people, warmer ties; costs money.', days: [['hunt', 'network'], ['catchup', 'network'], ['hunt', 'network'], ['catchup', 'network'], ['hunt', 'hunt']] },
+  money: { label: 'Pay the rent', icon: '🛵', d: 'Side hustles most days. Money now, no progress.', days: [['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle']] },
+  recover: { label: 'Recover', icon: '🛋️', d: 'Rest and easy days. Energy and stress come back.', days: [['rest', 'read'], ['rest', 'hunt'], ['rest', 'read'], ['rest', 'hunt'], ['rest', 'read']] }
+};
+const EVE_STYLE = {
+  quiet: { label: 'Quiet nights', icon: '🏠', eves: ['home', 'read', 'home', 'read', 'home', 'out', 'home'] },
+  social: { label: 'Out and about', icon: '🍻', eves: ['home', 'out', 'v:bar', 'home', 'out', 'out', 'home'] },
+  culture: { label: 'Culture', icon: '🎭', eves: ['v:rep', 'home', 'v:gallery', 'read', 'v:theatre', 'v:jazz', 'home'] },
+  grind: { label: 'Burn the midnight oil', icon: '🌙', eves: ['write', 'write', 'hunt', 'write', 'home', 'write', 'home'] }
+};
+function autoCal() {
+  const M = S.me, F = M.focus || {}, D = DAY_FOCUS[F.day] || DAY_FOCUS.balanced, E = EVE_STYLE[F.eve] || EVE_STYLE.quiet;
+  const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : 'read', E.eves[d]]);
+  const life = ORIGIN.life[M.life];
+  if (M.energy < 45) { cal[1][1] = 'rest'; cal[3][1] = 'rest'; }
+  if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
+  if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
+  if (M.school) { cal[0][0] = 'study'; cal[2][0] = 'study'; if ((PROGRAMS[M.school.prog] || {}).days > 2) cal[4][0] = 'study'; }
+  return cal;
+}
+function setFocus(a) {
+  const M = S.me;
+  if (a.day && !DAY_FOCUS[a.day] || a.eve && !EVE_STYLE[a.eve]) return false;
+  M.focus = Object.assign({ day: 'balanced', eve: 'quiet', auto: true }, M.focus || {}, a.day ? { day: a.day } : {}, a.eve ? { eve: a.eve } : {}, a.auto !== undefined ? { auto: !!a.auto } : {});
+  if (M.focus.auto) M.cal = autoCal();
+  return true;
+}
+// What the plan will probably do: energy day by day, stress, money, applications. An estimate, not a promise.
+function forecastWeek() {
+  const M = S.me, run = planBlocks(), W = M.wk, d0 = W ? W.day : 0, v = vehicleOf();
+  const sleep = 19 + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
+  let e = M.energy, st = 0, spend = 0, earn = 0; const days = [];
+  for (let d = d0; d < 7; d++) {
+    let out = false;
+    for (let b = (d === d0 && W ? W.block : 0); b < 3; b++) { const k = run[d][b], A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest; e -= A.e || 0; st += A.stress || 0; if (A.cost) spend += usd(A.cost); if (k === 'hustle') earn += usd(75); if (!AT_HOME.has(k) && b < 2) out = true; }
+    if (out) e -= v.e;
+    days.push({ d, low: Math.max(0, Math.round(e)) });
+    e = clamp(e + clamp(sleep - Math.max(0, M.stress + st - 40) / 5, 8, 40), 0, 100);
+  }
+  const blocks = [].concat(...run.slice(d0));
+  return { days, endE: Math.round(e), stress: Math.round(st), spend, earn, apps: countBlocks('hunt') * 3, writes: blocks.filter(k => k === 'write').length, classes: blocks.filter(k => k === 'train' || k === 'study').length, social: blocks.filter(k => k === 'network' || k === 'catchup' || k === 'out' || String(k).startsWith('v:')).length };
+}
 // </life>
 // <life-scenes>
 // ---------------- Scenes from a working life ----------------
@@ -14975,7 +15039,8 @@ function viewDesk() {
   ${deskNav()}
   <div class="dstack">${(() => { switch (UI.dtab || 'today') {
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
-     ${weekGrid()}
+     ${focusPanel()}
+     <details class="finetune"${M.focus && M.focus.auto && !UI.fineOpen ? '' : ' open'}><summary>Fine-tune the diary, block by block</summary>${weekGrid()}</details>
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(BLOCK_ACTS).filter(([k, a]) => plan.includes(k) && a.d).map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))} a block)` : ''}`).join(' ')}</p>
@@ -15093,6 +15158,7 @@ function careerClick(t) {
   if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
   if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
   if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
+  if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
@@ -15117,7 +15183,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -15141,7 +15207,8 @@ function careerChange(e) {
     if (k === 'age' && c.age < 26) c.traits = c.traits.filter(t => t !== 'Late bloomer');
     render(true); return true;
   }
-  if (/^cal-\d-\d$/.test(id)) { calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (e.target.dataset.autopilot) { doAct({ t: 'focus', auto: e.target.checked }); render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
   if (/^mk-(micro|dir|lead|dp|ed)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
@@ -15171,6 +15238,16 @@ function makeFilmForm(c, k, x) {
     <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
    <p class="small">Cost about <b>${fmtCash(Math.round(total * 1e6))}</b> · company has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
    <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button></div>`;
+}
+// Week focus: what your days are for, how your evenings go, and what that will probably do to you.
+function focusPanel() {
+  const M = S.me, F = M.focus || { day: 'balanced', eve: 'quiet', auto: false }, fc = forecastWeek();
+  const card = (k, D, on, g) => `<button class="fcard${on ? ' on' : ''}" data-focus="${g}:${k}" title="${esc(D.d || '')}"><span>${D.icon}</span><b>${esc(D.label)}</b>${D.d ? `<small>${esc(D.d)}</small>` : ''}</button>`;
+  return `<div class="focus"><h4>What are your days for?</h4><div class="fcards">${Object.entries(DAY_FOCUS).map(([k, D]) => card(k, D, F.day === k, 'day')).join('')}</div>
+   <h4>And your evenings?</h4><div class="fcards eve">${Object.entries(EVE_STYLE).map(([k, D]) => card(k, D, F.eve === k, 'eve')).join('')}</div>
+   <p><label><input type="checkbox" data-autopilot="1" ${F.auto ? 'checked' : ''}> Autopilot: write next week's diary from these, adjusting when I'm tired, stressed, broke or in school</label></p>
+   <div class="forecast"><div class="fdays">${fc.days.map(x => `<div class="fd"><span class="fbar"><i style="height:${x.low}%" class="${x.low < 20 ? 'lo' : x.low < 40 ? 'mid' : 'hi'}"></i></span><small>${DAYS7[x.d].slice(0, 2)}</small></div>`).join('')}</div>
+    <p class="small">Forecast: energy dips as low as <b>${Math.min(...fc.days.map(x => x.low))}</b> and ends the week near <b>${fc.endE}</b> · stress ${fc.stress >= 0 ? '+' : ''}${fc.stress} · ${fmtCash(fc.spend)} out${fc.earn ? `, ${fmtCash(fc.earn)} in` : ''} · ${fc.apps} applications · ${fc.writes} writing, ${fc.classes} class and ${fc.social} social blocks.${Math.min(...fc.days.map(x => x.low)) < 20 ? ' <span class="bad">You\'ll be exhausted: rolls get harder and mistakes happen.</span>' : ''}</p></div></div>`;
 }
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {

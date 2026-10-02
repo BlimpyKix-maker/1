@@ -37,12 +37,15 @@ const out = process.argv[2] || '.';
   await page.screenshot({ path: out + '/3-desk.png', fullPage: true });
   // plan: two hunting days, apply to the first two jobs
   await page.click('.desknav [data-dtab="diary"]');
+  await page.click('[data-focus="day:hunt"]');
+  await page.evaluate(() => document.querySelectorAll('details.finetune').forEach(d => d.open = true));
   await page.selectOption('#cal-0-1', 'hunt');
   await page.selectOption('#cal-1-1', 'hunt');
   await page.click('.desknav [data-dtab="work"]');
   for (let i = 0; i < 4; i++) { const b = page.locator('[data-apply]').nth(i); if (await b.isEnabled()) await b.check(); }
   // live the first three days one at a time; the mixer on Wednesday rolls a die
   await page.click('.desknav [data-dtab="diary"]');
+  await page.evaluate(() => document.querySelectorAll('details.finetune').forEach(d => d.open = true));
   await page.selectOption('#cal-2-1', 'network');
   await page.click('.desknav [data-dtab="phone"]');
   // text the first contact for coffee through the phone

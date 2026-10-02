@@ -462,7 +462,8 @@ function viewDesk() {
   ${deskNav()}
   <div class="dstack">${(() => { switch (UI.dtab || 'today') {
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
-     ${weekGrid()}
+     ${focusPanel()}
+     <details class="finetune"${M.focus && M.focus.auto && !UI.fineOpen ? '' : ' open'}><summary>Fine-tune the diary, block by block</summary>${weekGrid()}</details>
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(BLOCK_ACTS).filter(([k, a]) => plan.includes(k) && a.d).map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))} a block)` : ''}`).join(' ')}</p>
@@ -580,6 +581,7 @@ function careerClick(t) {
   if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
   if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
   if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
+  if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
@@ -604,7 +606,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -628,7 +630,8 @@ function careerChange(e) {
     if (k === 'age' && c.age < 26) c.traits = c.traits.filter(t => t !== 'Late bloomer');
     render(true); return true;
   }
-  if (/^cal-\d-\d$/.test(id)) { calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (e.target.dataset.autopilot) { doAct({ t: 'focus', auto: e.target.checked }); render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
   if (/^mk-(micro|dir|lead|dp|ed)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
@@ -658,6 +661,16 @@ function makeFilmForm(c, k, x) {
     <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
    <p class="small">Cost about <b>${fmtCash(Math.round(total * 1e6))}</b> · company has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
    <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button></div>`;
+}
+// Week focus: what your days are for, how your evenings go, and what that will probably do to you.
+function focusPanel() {
+  const M = S.me, F = M.focus || { day: 'balanced', eve: 'quiet', auto: false }, fc = forecastWeek();
+  const card = (k, D, on, g) => `<button class="fcard${on ? ' on' : ''}" data-focus="${g}:${k}" title="${esc(D.d || '')}"><span>${D.icon}</span><b>${esc(D.label)}</b>${D.d ? `<small>${esc(D.d)}</small>` : ''}</button>`;
+  return `<div class="focus"><h4>What are your days for?</h4><div class="fcards">${Object.entries(DAY_FOCUS).map(([k, D]) => card(k, D, F.day === k, 'day')).join('')}</div>
+   <h4>And your evenings?</h4><div class="fcards eve">${Object.entries(EVE_STYLE).map(([k, D]) => card(k, D, F.eve === k, 'eve')).join('')}</div>
+   <p><label><input type="checkbox" data-autopilot="1" ${F.auto ? 'checked' : ''}> Autopilot: write next week's diary from these, adjusting when I'm tired, stressed, broke or in school</label></p>
+   <div class="forecast"><div class="fdays">${fc.days.map(x => `<div class="fd"><span class="fbar"><i style="height:${x.low}%" class="${x.low < 20 ? 'lo' : x.low < 40 ? 'mid' : 'hi'}"></i></span><small>${DAYS7[x.d].slice(0, 2)}</small></div>`).join('')}</div>
+    <p class="small">Forecast: energy dips as low as <b>${Math.min(...fc.days.map(x => x.low))}</b> and ends the week near <b>${fc.endE}</b> · stress ${fc.stress >= 0 ? '+' : ''}${fc.stress} · ${fmtCash(fc.spend)} out${fc.earn ? `, ${fmtCash(fc.earn)} in` : ''} · ${fc.apps} applications · ${fc.writes} writing, ${fc.classes} class and ${fc.social} social blocks.${Math.min(...fc.days.map(x => x.low)) < 20 ? ' <span class="bad">You\'ll be exhausted: rolls get harder and mistakes happen.</span>' : ''}</p></div></div>`;
 }
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {

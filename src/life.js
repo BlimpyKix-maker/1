@@ -177,3 +177,54 @@ const OFFICE_LINES = ['Emails, meetings, a deadline that moves.', 'You learn how
 function eveningOf(k) { return BLOCK_ACTS[k] || EVENINGS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.home; }
 function vehicleOf() { return typeof VEHICLES !== 'undefined' ? VEHICLES[S.me.vehicle || 'transit'] : { icon: '🚌', e: 2, commute: ['The bus, a podcast, a seat if you\'re lucky.'] }; }
 function writeSession(L, scale = 1) { if (typeof writeOnScript === 'function') return writeOnScript(L, scale); S.me.spec.pages += Math.round((4 + ME().mind.eth / 4) * scale * condMul()); L.push('You write.'); }
+// ---- Week focus and autopilot ----
+// Instead of 21 choices, pick what your days are for and how you spend your evenings. Autopilot writes the diary
+// for the coming week and bends it to how you are: tired means more rest, frayed means a night out, broke means
+// shifts, enrolled means classes. You can still fine-tune any block by hand.
+const DAY_FOCUS = {
+  balanced: { label: 'Balanced', icon: '⚖️', d: 'A bit of everything: look for work, write, one class.', days: [['hunt', 'write'], ['hunt', 'network'], ['hunt', 'write'], ['train', 'hunt'], ['hunt', 'write']] },
+  hunt: { label: 'Job hunting', icon: '📋', d: 'Applications every day, a mixer twice. Most applications, slow skills.', days: [['hunt', 'hunt'], ['hunt', 'network'], ['hunt', 'hunt'], ['hunt', 'network'], ['hunt', 'hunt']] },
+  craft: { label: 'Get better', icon: '🎓', d: 'Classes most mornings. Skills grow fastest; costs money.', days: [['train', 'hunt'], ['train', 'read'], ['train', 'hunt'], ['train', 'read'], ['hunt', 'hunt']] },
+  write: { label: 'Writing', icon: '✍️', d: 'Pages, pages, pages. Your scripts move fastest.', days: [['write', 'write'], ['write', 'hunt'], ['write', 'write'], ['write', 'hunt'], ['write', 'write']] },
+  social: { label: 'Networking', icon: '🥂', d: 'Mixers and coffees. More people, warmer ties; costs money.', days: [['hunt', 'network'], ['catchup', 'network'], ['hunt', 'network'], ['catchup', 'network'], ['hunt', 'hunt']] },
+  money: { label: 'Pay the rent', icon: '🛵', d: 'Side hustles most days. Money now, no progress.', days: [['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle']] },
+  recover: { label: 'Recover', icon: '🛋️', d: 'Rest and easy days. Energy and stress come back.', days: [['rest', 'read'], ['rest', 'hunt'], ['rest', 'read'], ['rest', 'hunt'], ['rest', 'read']] }
+};
+const EVE_STYLE = {
+  quiet: { label: 'Quiet nights', icon: '🏠', eves: ['home', 'read', 'home', 'read', 'home', 'out', 'home'] },
+  social: { label: 'Out and about', icon: '🍻', eves: ['home', 'out', 'v:bar', 'home', 'out', 'out', 'home'] },
+  culture: { label: 'Culture', icon: '🎭', eves: ['v:rep', 'home', 'v:gallery', 'read', 'v:theatre', 'v:jazz', 'home'] },
+  grind: { label: 'Burn the midnight oil', icon: '🌙', eves: ['write', 'write', 'hunt', 'write', 'home', 'write', 'home'] }
+};
+function autoCal() {
+  const M = S.me, F = M.focus || {}, D = DAY_FOCUS[F.day] || DAY_FOCUS.balanced, E = EVE_STYLE[F.eve] || EVE_STYLE.quiet;
+  const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : 'read', E.eves[d]]);
+  const life = ORIGIN.life[M.life];
+  if (M.energy < 45) { cal[1][1] = 'rest'; cal[3][1] = 'rest'; }
+  if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
+  if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
+  if (M.school) { cal[0][0] = 'study'; cal[2][0] = 'study'; if ((PROGRAMS[M.school.prog] || {}).days > 2) cal[4][0] = 'study'; }
+  return cal;
+}
+function setFocus(a) {
+  const M = S.me;
+  if (a.day && !DAY_FOCUS[a.day] || a.eve && !EVE_STYLE[a.eve]) return false;
+  M.focus = Object.assign({ day: 'balanced', eve: 'quiet', auto: true }, M.focus || {}, a.day ? { day: a.day } : {}, a.eve ? { eve: a.eve } : {}, a.auto !== undefined ? { auto: !!a.auto } : {});
+  if (M.focus.auto) M.cal = autoCal();
+  return true;
+}
+// What the plan will probably do: energy day by day, stress, money, applications. An estimate, not a promise.
+function forecastWeek() {
+  const M = S.me, run = planBlocks(), W = M.wk, d0 = W ? W.day : 0, v = vehicleOf();
+  const sleep = 19 + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
+  let e = M.energy, st = 0, spend = 0, earn = 0; const days = [];
+  for (let d = d0; d < 7; d++) {
+    let out = false;
+    for (let b = (d === d0 && W ? W.block : 0); b < 3; b++) { const k = run[d][b], A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest; e -= A.e || 0; st += A.stress || 0; if (A.cost) spend += usd(A.cost); if (k === 'hustle') earn += usd(75); if (!AT_HOME.has(k) && b < 2) out = true; }
+    if (out) e -= v.e;
+    days.push({ d, low: Math.max(0, Math.round(e)) });
+    e = clamp(e + clamp(sleep - Math.max(0, M.stress + st - 40) / 5, 8, 40), 0, 100);
+  }
+  const blocks = [].concat(...run.slice(d0));
+  return { days, endE: Math.round(e), stress: Math.round(st), spend, earn, apps: countBlocks('hunt') * 3, writes: blocks.filter(k => k === 'write').length, classes: blocks.filter(k => k === 'train' || k === 'study').length, social: blocks.filter(k => k === 'network' || k === 'catchup' || k === 'out' || String(k).startsWith('v:')).length };
+}
