@@ -187,6 +187,7 @@ function askReply(q, m, k) {
 // Weekly: answers that take time, consequences that catch up, and friends who need something.
 function msgWeek() {
   const M = S.me, me = ME();
+  stakesWeek();
   for (const x of (M.msgq || []).filter(x => !x.done && x.due <= S.week)) {
     x.done = 1; const q = P(x.id); if (!q || q.dead) continue;
     if (x.k === 'leadlater' && M.known[x.id]) { const f = theirActive(x.id) || S.active.map(i => S.films[i]).find(f2 => f2.hub === M.hub && f2.stage >= 0 && f2.stage < 4 && f2.stageEnd - S.week >= 2 && keyIds(f2).some(j => tie(q, P(j)) > 25)); const p = f && prnd() < .6 ? makeLead(x.id, f) : null; sms(x.id, p ? `found you something: ${f.title} needs a ${p.t.toLowerCase()}. I've mentioned you, apply this week` : pickLine(['asked around. nothing yet, sorry. I\'ll keep trying', 'no luck so far. it\'s dead out there'], x.id + S.week), 'text', { replyable: 1, topic: p ? 'tip' : 'chat' }); }
@@ -201,8 +202,8 @@ function msgWeek() {
   for (const id in M.loans || {}) { const L = M.loans[id]; if (S.week - L.w > 12 && (S.week - L.w) % 6 === 1 && !P(+id).dead) { addTie(me, P(+id), -3); sms(+id, pickLine(['hey, awkward, but about that money…', 'not to nag, but I could really use that money back', 'still waiting on that loan. just saying'], +id + S.week), 'text', { replyable: 1, topic: 'chat', mood: 'none' }); } }
   // a friend asks something of you
   if (S.week % 3 === (M.id || 0) % 3) {
-    const ids = aliveKnown().filter(id => opinion(id) > 8);
-    if (ids.length && prnd() < .55) { const id = ids[Math.floor(prnd() * ids.length)], A = ASKS[Math.floor(prnd() * ASKS.length)], amt = Math.round(usd(150 + prnd() * 450) / 10) * 10; sms(id, A.t.replace('{amt}', fmtCash(amt)), 'text', { replyable: 1, topic: 'ask', ask: A.k, amt }); }
+    const IC = innerCircle(), ids = IC.filter(x => x[1] >= 2).map(x => x[0]);
+    if (ids.length && prnd() < .35) { const id = ids[Math.floor(prnd() * ids.length)], A = ASKS[Math.floor(prnd() * ASKS.length)], amt = Math.round(usd(150 + prnd() * 450) / 10) * 10; sms(id, A.t.replace('{amt}', fmtCash(amt)), 'text', { replyable: 1, topic: 'ask', ask: A.k, amt }); }
   }
 }
 // ---- email: write to companies and people you've never met ----
@@ -265,3 +266,83 @@ function msgClick(t) {
   if (d.mailsend) { const C = UI.mc || {}; C.text = ($('#mc-text') || {}).value || ''; doAct({ t: 'email', kind: C.kind, to: C.to, text: C.text }); UI.mc = { kind: C.kind, to: '', text: '' }; UI.mailf = 'sent'; render(true); return true; }
   return false;
 }
+// ---- who texts you, and why it matters ----
+// The phone is quieter now. Most texts come from your inner circle: your partner, close friends, your mentor,
+// people you've worked with in the last few months, and old ties. Many of them carry stakes: a friend in a
+// crisis, a collaborator crewing up, a warning about a rival, a reference call. Answer, and it counts. Ignore
+// one for a week, and that counts too.
+function recentColleagues() {
+  const M = S.me, out = new Set(), add = f => { if (f) for (const x of keyIds(f)) out.add(x); };
+  for (const j of M.jobs) { if (j.head !== null && j.head !== undefined) out.add(j.head); if (j.film !== null && j.film !== undefined) add(S.films[j.film]); }
+  for (const p of M.past) if (S.week - p.to <= 16) { if (p.head !== null && p.head !== undefined) out.add(p.head); if (p.film !== null && p.film !== undefined) add(S.films[p.film]); }
+  return out;
+}
+function innerCircle() {
+  const M = S.me, rec = recentColleagues();
+  return aliveKnown().map(id => {
+    const k = M.known[id], rel = relOf(id), o = opinion(id); let w = 0;
+    w += { partner: 6, close: 4, mentor: 3, friend: 2, rival: .6, cold: .4, ex: .4 }[rel] || 0;
+    if (rec.has(id)) w += 3;
+    if (S.week - k.met >= 26 && o > 15) w += 1.5;
+    if (S.week - (k.seen !== undefined ? k.seen : k.met) <= 2) w += .8;
+    return [id, w];
+  }).filter(x => x[1] > 0);
+}
+function pickWeighted(L) { let r = prnd() * L.reduce((s, x) => s + x[1], 0); for (const x of L) { r -= x[1]; if (r <= 0) return x[0]; } return L.length ? L[L.length - 1][0] : null; }
+const STAKES = {
+  crisis: { lines: ['I didn\'t get it. I\'m kind of a mess. can you call?', 'bad day. really bad. are you around?', 'I think I just got fired. I don\'t know what to do'], miss: -5, missT: 'never mind. I worked it out', opts: { st_call: '📞 Call them now', st_text: '💬 Send something kind', st_busy: '⏳ "Slammed, later?"' }, ok: id => opinion(id) > 10 },
+  collab: { lines: ['I\'m putting a team together for my next one. are you in?', 'I want you on my next job. say yes before I change my mind', 'building a crew for {film}. thought of you first'], miss: -2, missT: 'guess that\'s a no then. no worries', opts: { st_in: '🙌 I\'m in', st_maybe: '🤔 Send me details', st_pass: '🙅 Can\'t, sorry' }, ok: id => opinion(id) > 5 && recentColleagues().has(id) },
+  warn: { lines: ['heads up: {who} has been badmouthing you. thought you should know', 'not to stir, but {who} told people you were difficult on your last job', 'careful around {who}. they\'re saying things about you'], miss: 0, opts: { st_confront: '😤 Confront them', st_rise: '🧘 Rise above it', st_charm: '🌹 Win them over' }, ok: id => opinion(id) > 15 },
+  reference: { lines: ['someone just called me about you for a job. what do you want me to say?', 'got a reference call about you. want me to lay it on thick?'], miss: -1, missT: 'told them you were fine. hope that\'s ok', opts: { st_sell: '🔥 "Sell me hard"', st_honest: '🤝 "Just be honest"' }, ok: id => opinion(id) > 10 },
+  partner: { lines: ['can we talk tonight? properly', 'I feel like I never see you anymore', 'are we ok? you\'ve been somewhere else lately'], miss: -6, missT: 'ok. noted.', opts: { st_home: '🏠 "I\'ll be home early"', st_reassure: '❤️ Reassure them', st_later: '⏳ "This week is mad"' }, ok: id => relOf(id) === 'partner' },
+  credit: { lines: ['so the producer is calling that idea of yours "theirs" now', 'they cut your best work and the director is taking the credit for the fix', 'you know the bit everyone loved? someone else is getting the credit'], miss: 0, opts: { st_fight: '⚔️ Fight for it', st_letgo: '🤷 Let it go' }, ok: id => recentColleagues().has(id) },
+  secret: { lines: ['can you keep a secret? I\'m leaving the business', 'promise you won\'t tell anyone: I\'m up for something huge', 'don\'t tell a soul, but I think my film is going to get shut down'], miss: -1, missT: 'forget I said anything', opts: { st_keep: '🤐 "My lips are sealed"', st_tell: '👀 Tell someone anyway' }, ok: id => opinion(id) > 25 },
+  scoop: { lines: ['there\'s a job going on {film} that hasn\'t been posted. want it?', 'insider tip: {film} is hiring tomorrow. move fast'], miss: -1, missT: 'filled. you snooze you lose', opts: { st_jump: '🏃 "Yes! Put me in"', st_pass: '🙅 Not for me' }, ok: id => !!theirActive(id) }
+};
+Object.assign(REPLY_LABELS, ...Object.values(STAKES).map(s => s.opts));
+function stakeText(id) {
+  const M = S.me, ks = Object.keys(STAKES).filter(k => STAKES[k].ok(id) && !(M.phone || []).some(m => m.stake === k && S.week - m.w < 12));
+  if (!ks.length) return false;
+  const k = ks[Math.floor(prnd() * ks.length)], St = STAKES[k], f = theirActive(id), pool = aliveKnown().filter(j => j !== id && (['rival', 'cold'].includes(relOf(j)) || opinion(j) < 5)), who = pool.length ? pool[Math.floor(prnd() * pool.length)] : null;
+  if (k === 'warn' && who === null) return false;
+  const t = pickLine(St.lines, id + S.week).replace('{film}', f ? f.title : 'my next thing').replace('{who}', who !== null ? P(who).name.split(' ')[0] : 'someone');
+  sms(id, t, 'text', { replyable: 1, topic: 'stake', stake: k, who, mood: k === 'crisis' || k === 'partner' ? 'sad' : 'happy' });
+  return true;
+}
+function stakeOpts(m) { return Object.keys((STAKES[m.stake] || STAKES.crisis).opts); }
+function stakeReply(q, m, k) {
+  const M = S.me, me = ME(), r = q.id + M.phoneN, who = m.who !== null && m.who !== undefined ? P(m.who) : null;
+  const R = (mine, back, d) => ({ mine: pickLine(mine, r), back: pickLine(back, r + 1), d });
+  switch (k) {
+    case 'st_call': M.energy = clamp(M.energy - 6, 0, 100); trust(q.id, 5); return R(['calling you now', 'pick up. I\'m here'], ['…thank you. I needed that', 'you didn\'t have to. but I\'m glad you did'], 6);
+    case 'st_text': return R(['I\'m so sorry. you\'re going to be ok, I promise', 'this is awful and it isn\'t your fault'], ['thank you. means a lot', 'ok. breathing. thanks'], 2.5);
+    case 'st_busy': return R(['slammed today, can I call later?'], ['sure', 'ok'], -3);
+    case 'st_in': { const f = theirActive(q.id); const p = f ? makeLead(q.id, f) : null; if (p) { p.comp = (p.comp || 0) - 1.2; } else later({ k: 'leadlater', id: q.id, due: S.week + 2 + Math.floor(prnd() * 3) }); trust(q.id, 3); return R(['I\'m in. obviously'], [p ? `yes!! it's the ${p.t.toLowerCase()} on ${f.title}. apply, you're basically hired` : 'yes!! I\'ll send details when the money\'s in'], 3); }
+    case 'st_maybe': later({ k: 'leadlater', id: q.id, due: S.week + 1 }); return R(['send me details?'], ['will do'], .5);
+    case 'st_pass': return R(['can\'t this time, sorry'], ['next time then', 'shame. ok'], -1);
+    case 'st_confront': { if (!who) return R(['who?'], ['never mind'], 0); const ok = roll('cha', 12); addTie(me, who, ok ? 4 : -6); return R([`I'll talk to ${who.name.split(' ')[0]}`], [ok ? 'heard you two cleared the air. respect' : 'ooh. heard that got loud'], ok ? 1.5 : 0); }
+    case 'st_rise': trust(q.id, 2); M.stress = clamp(M.stress + 2, 0, 100); me.standing = clamp(me.standing + .2, 0, 100); return R(['thanks for telling me. I\'m not going to play that game'], ['classy. people notice that'], 1.5);
+    case 'st_charm': { if (!who) return R(['who?'], ['never mind'], 0); const ok = roll('cha', 13); addTie(me, who, ok ? 8 : -2); if (ok) meet(who.id, null, 0); return R([`I'm going to buy ${who.name.split(' ')[0]} a drink`], [ok ? 'and now you\'re friends?? how' : 'that did not work, I hear'], 1); }
+    case 'st_sell': { const ok = roll('cha', 11); M.refs[q.id] = (M.refs[q.id] || 0) + (ok ? 2 : 0); return R(['sell me hard. I owe you'], [ok ? 'told them you walk on water. they bought it' : 'laid it on thick. maybe too thick'], 1); }
+    case 'st_honest': M.refs[q.id] = (M.refs[q.id] || 0) + 1; trust(q.id, 3); return R(['just be honest. that\'s enough'], ['easy then. you\'re good'], 2);
+    case 'st_home': M.energy = clamp(M.energy - 4, 0, 100); M.stress = clamp(M.stress - 3, 0, 100); return R(['I\'ll be home early. we\'ll talk'], ['ok. thank you. I love you', 'good. I\'ll cook'], 6);
+    case 'st_reassure': { const ok = prnd() < .6; return R(['we\'re ok. I promise. I\'ve just been stretched'], [ok ? 'ok. I believe you' : 'you always say that'], ok ? 3 : -1); }
+    case 'st_later': return R(['this week is mad. sunday?'], ['sure. sunday.', 'it\'s always next week'], -4);
+    case 'st_fight': { const ok = roll('com', 13); if (ok) me.standing = clamp(me.standing + .6, 0, 100); else M.stress = clamp(M.stress + 4, 0, 100); return R(['I\'m not letting that go'], [ok ? 'it worked. everyone knows it was yours now' : 'they dug in. you made it awkward for everyone'], ok ? 2 : -1); }
+    case 'st_letgo': M.stress = clamp(M.stress + 3, 0, 100); return R(['not worth the fight'], ['you\'re better than me', 'hm. ok'], .5);
+    case 'st_keep': trust(q.id, 6); return R(['my lips are sealed'], ['I knew I could trust you'], 3);
+    case 'st_tell': { trust(q.id, -6); if (prnd() < .5) later({ k: 'leak', id: q.id, via: q.id, due: S.week + 1 + Math.floor(prnd() * 2) }); return R(['of course'], ['thank you'], 0); }
+    case 'st_jump': { const f = theirActive(q.id), p = f ? makeLead(q.id, f) : null; if (p) p.comp = (p.comp || 0) - .8; return R(['YES. put me in'], [p ? `done. ${p.t}. apply today` : 'ah, it just went. sorry!'], 1.5); }
+  }
+  return R(['ok'], ['ok'], 0);
+}
+// Unanswered stakes cost you.
+function stakesWeek() {
+  const M = S.me, me = ME();
+  for (const m of (M.phone || []).filter(m => m.topic === 'stake' && !m.replied && !m.missed && S.week - m.w >= 1)) {
+    m.missed = 1; const St = STAKES[m.stake]; if (!St || !M.known[m.from] || P(m.from).dead) continue;
+    if (St.miss) addTie(me, P(m.from), St.miss);
+    if (St.missT) sms(m.from, St.missT, 'text', { mood: 'none', topic: 'chat', replyable: 1 });
+  }
+}
+function pendingStakes() { return (S.me.phone || []).filter(m => m.topic === 'stake' && !m.replied && !m.missed); }

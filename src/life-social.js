@@ -77,14 +77,16 @@ const MENTOR_TIPS = [
 function phoneTick(d, b) {
   const M = S.me, known = aliveKnown();
   if (!M.party || !M.party.done) return;
-  if ((M.gossipQ || []).length && prnd() < .35) { const g = M.gossipQ.shift(); sms(g.from ?? null, g.t, 'gossip', g.person !== undefined ? { person: g.person } : {}); return; }
-  if (!known.length || prnd() > (b === 2 ? .16 : .07)) return;
-  const friends = known.filter(id => ['friend', 'close', 'partner', 'mentor'].includes(relOf(id)));
+  if ((M.gossipQ || []).length > 3) M.gossipQ.splice(0, M.gossipQ.length - 3);   // old gossip is no gossip
+  if ((M.gossipQ || []).length && prnd() < .12) { const g = M.gossipQ.shift(); sms(g.from ?? null, g.t, 'gossip', g.person !== undefined ? { person: g.person } : {}); return; }
+  if (!known.length || prnd() > (b === 2 ? .09 : .035)) return;
+  const IC = typeof innerCircle === 'function' ? innerCircle() : known.map(id => [id, 1]);
+  const friends = IC.filter(x => x[1] >= 2).map(x => x[0]);
+  if (typeof stakeText === 'function' && IC.length && prnd() < .45) { const id = pickWeighted(IC); if (id !== null && stakeText(id)) return; }
   const onFilms = known.filter(id => S.active.some(i => keyIds(S.films[i]).includes(id) && S.films[i].hub === M.hub));
   const part = partnerOf(), men = mentorOf();
-  const opts = [['gossip', 3], ['home', 1]];
-  if (friends.length) opts.push(['invite', 4], ['hi', 4], ['ask', 1]);
-  else opts.push(['hi', 4]);   // acquaintances text too
+  const opts = [['gossip', 1], ['home', .5]];
+  if (friends.length) opts.push(['invite', 4], ['hi', 2], ['ask', 1]);
   if (onFilms.length) opts.push(['tip', 1]);
   if (part !== null) opts.push(['partner', 3]);
   if (men !== null) opts.push(['mentor', 1]);
@@ -99,7 +101,7 @@ function phoneTick(d, b) {
       return;
     }
     case 'home': sms(null, ppick(HOME_CALLS), 'home'); M.wk.stress -= 1; return;
-    case 'hi': { const id = ppick(friends.length ? friends : known); if (prnd() < .6) phoneExtra(id); else sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
+    case 'hi': { const id = IC.length && typeof pickWeighted === 'function' ? pickWeighted(IC) : ppick(friends.length ? friends : known); if (id === null) return; if (prnd() < .35) phoneExtra(id); else sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
     case 'partner': sms(part, pickLine(PARTNER_LINES, d + b), 'love'); return;
     case 'mentor': { sms(men, pickLine(MENTOR_TIPS, men + S.week), 'tip'); for (const s of Object.keys(CRAFTS[MAIN[P(men).role]].subs).slice(0, 2)) weekGain(s, .01); return; }
     case 'tip': {

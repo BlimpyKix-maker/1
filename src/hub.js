@@ -7,6 +7,7 @@ function hubAlerts() {
   const pend = pending().length; if (pend) add('⚖️', `${pend} decision${pend > 1 ? 's' : ''} waiting`, 'feed', 'bad');
   const offers = (M.mail || []).filter(m => m.act && !m.done && S.week - m.w < 4);
   for (const m of offers.slice(0, 2)) add('✉️', `${m.subj} (${m.from.split(',')[0]})`, `computer:mail:${m.id}`, 'good');
+  const stk = typeof pendingStakes === 'function' ? pendingStakes().length : 0; if (stk) add('⏳', `${stk} text${stk > 1 ? 's' : ''} that need an answer`, 'phone', 'bad');
   const unread = phoneUnread(); if (unread) add('💬', `${unread} unread text${unread > 1 ? 's' : ''}`, 'phone');
   const cl = typeof ambClaimable === 'function' ? ambClaimable() : []; if (cl.length) add('✦', `${cl.length} reward${cl.length > 1 ? 's' : ''} to claim`, 'standing', 'good');
   if (M.make && M.make.ready) add('🎵', `${M.make.title || 'Your work'} is ready to release`, 'create', 'good');
