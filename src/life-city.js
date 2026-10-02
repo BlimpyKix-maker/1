@@ -76,7 +76,7 @@ function whatsOn() {
   const films = d ? Object.values(S.cat.allFilms).filter(f => f.dir.includes(d.id) && f.y < S.year).slice(0, 3).map(f => f.t) : [];
   return [d && films.length ? { venue: 'rep', title: `A season of ${d.n}`, d: `${films.join(', ')}${films.length ? ' on the big screen.' : ''}` } : null,
     { venue: 'bar', title: 'Wrap party for a local shoot', d: 'Half the town\'s crew will be there.' },
-    { venue: 'gallery', title: 'Opening: production design sketches', d: 'Original artwork from films you know.' }].filter(Boolean);
+    { venue: 'gallery', title: 'Opening: production design sketches', d: 'Original artwork from films you know.' }].filter(Boolean).concat(typeof whatsOnMore === 'function' ? whatsOnMore() : []);
 }
 function venueEvening(E) {
   const M = S.me, me = ME(), V = VENUES[E.venue], out = [];

@@ -11,7 +11,9 @@ const APPT_KINDS = {
   date: { icon: '🌹', label: 'Date', e: 8, cost: 45, stress: -4 },
   mentor: { icon: '🧭', label: 'Mentor session', e: 5, stress: -1 },
   invite: { icon: '🎟️', label: 'Invitation', e: 9, stress: -2 },
-  help: { icon: '📦', label: 'Helping a friend', e: 14, stress: 0 }
+  help: { icon: '📦', label: 'Helping a friend', e: 14, stress: 0 },
+  trip: { icon: '✈️', label: 'Trip', e: 12, stress: -6 },
+  tripday: { icon: '🧳', label: 'Away', e: 3, stress: -2 }
 };
 const REL = {
   partner: { label: 'Partner', icon: '❤️' }, close: { label: 'Close friend', icon: '🤞' }, mentor: { label: 'Mentor', icon: '🧭' },
@@ -224,6 +226,8 @@ function runAppointment(x) {
       break;
     }
     case 'invite': goToInvite(x, q, L); break;
+    case 'trip': goOnTrip(x, L); break;
+    case 'tripday': L.push(pickLine(['Another day away. You don\'t check your email once.', 'Late breakfast, long walk, new city.', 'You buy a souvenir you will never use.'], W.day + W.block)); break;
     case 'help': addTie(me, q, 8); trust(q.id, 6); L.push(`You give up the ${BLOCKS[W.block].toLowerCase()} for ${x.what}. ${q.name} won't forget it.`); M.known[q.id].due++; break;
   }
   card(A.icon, `${A.label}${q ? ' with ' + q.name : ''}`, (c ? [c] : []).concat(L), { roll: M.lastRoll, notable: true });

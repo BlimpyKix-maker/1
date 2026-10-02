@@ -406,10 +406,15 @@ function homeIcon(life) {
 }
 // The city this week: what's on, and the venues you can put in your evenings.
 function cityPanel() {
-  const on = whatsOn();
-  return `<section class="panel"><h3>The city this week</h3><div class="whatson">${on.map(x => `<div class="wo"><span class="wi">${VENUES[x.venue].icon}</span><div><b>${esc(x.title)}</b><p class="muted">${esc(x.d)} · ${esc(VENUES[x.venue].label)}</p><button class="btn-s ghost" data-tonight="v:${x.venue}">Go tonight</button></div></div>`).join('')}</div>
-   <details><summary>All venues</summary><div class="venues">${Object.entries(VENUES).map(([k, V]) => `<div class="wo"><span class="wi">${V.icon}</span><div><b>${esc(V.label)}</b> <span class="muted">${V.cost ? fmtCash(usd(V.cost)) : 'free'} · energy −${V.e}${V.stress < 0 ? ` · stress ${V.stress}` : ''}</span><p class="muted">${esc(V.d)}</p><button class="btn-s ghost" data-tonight="v:${k}">Go tonight</button></div></div>`).join('')}</div></details>
-   <p class="muted small">Or plan venues for any evening in Your week.</p></section>`;
+  const M = S.me, on = whatsOn(), cat = UI.vcat || 'all', trips = tripsAvailable();
+  const V = Object.entries(VENUES).filter(([, x]) => cat === 'all' || x.cat === cat);
+  const card = (k, x, title, d) => `<div class="wo"><span class="wi">${x.icon}</span><div><b>${esc(title || x.label)}</b><p class="muted">${esc(d || x.d)}${title ? ' · ' + esc(x.label) : ''}</p><p class="small muted">${x.cost ? fmtCash(usd(x.cost)) : 'free'} · energy ${x.e > 0 ? '−' + x.e : '+' + -x.e}${x.stress < 0 ? ` · stress ${x.stress}` : x.stress > 0 ? ` · stress +${x.stress}` : ''}${x.meet ? ' · good for meeting people' : ''}</p><button class="btn-s ghost" data-tonight="v:${k}">Go tonight</button></div></div>`;
+  return `<section class="panel city"><h3>Out and about in ${esc(hubName(M.hub))}</h3>
+   <h4>This week</h4><div class="whatson">${on.map(x => card(x.venue, VENUES[x.venue], x.title, x.d)).join('')}</div>
+   <h4>Weekend away</h4><div class="whatson">${trips.map(T => `<div class="wo"><span class="wi">${T.fest ? '🎪' : '✈️'}</span><div><b>${esc(T.label)}</b><p class="muted">${esc(T.d)}</p><p class="small muted">${fmtCash(usd(T.cost))} · Saturday and Sunday</p><button class="btn-s ghost" data-trip="${T.k}" ${M.cash < usd(T.cost) ? 'disabled title="Not enough money"' : ''}>Book it</button></div></div>`).join('') || '<p class="muted">Nothing tempting this month.</p>'}</div>
+   <h4>Every place in town</h4><div class="seg vcats">${Object.entries(VENUE_CATS).map(([k, l]) => `<button class="pill${cat === k ? ' on' : ''}" data-vcat="${k}">${l}</button>`).join('')}</div>
+   <div class="whatson">${V.map(([k, x]) => card(k, x)).join('')}</div>
+   <p class="muted small">"Go tonight" puts it in this evening's block; plan venues for any evening in the diary.</p></section>`;
 }
 // Your place: the furniture shop and where things go.
 function homePanel() {
@@ -581,6 +586,8 @@ function careerClick(t) {
   if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
   if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
   if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
+  if (t.dataset.vcat) { UI.vcat = t.dataset.vcat; render(true); return true; }
+  if (t.dataset.trip) { doAct({ t: 'trip', k: t.dataset.trip }); render(true); return true; }
   if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
@@ -606,7 +613,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

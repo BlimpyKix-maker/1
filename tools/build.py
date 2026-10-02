@@ -24,6 +24,7 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('companies', '// ================= Apple Box — World Core UI ================='),
                      ('life-phone', '// ================= Apple Box — World Core UI ================='),
                      ('computer', '// ================= Apple Box — World Core UI ================='),
+                     ('city-plus', '// ================= Apple Box — World Core UI ================='),
                      ('life-story', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'

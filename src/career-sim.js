@@ -986,6 +986,7 @@ function applyAct(a) {
     case 'text': return textSomeone(a);
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);
+    case 'trip': return bookTrip(a);
     case 'like': return likePost(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
