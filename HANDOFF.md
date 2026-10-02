@@ -46,6 +46,18 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/media-industry.js` | `FIELD_JOBS` (into `ODD_JOBS`), `MEDIA_COS`, parody `MEDIA_LEGENDS` + generated `mediaFigures`, `chartFor`/`viewCharts` (Charts tab), `MEDIA_AWARDS` (January), field contests, `MEDIA_HISTORY` into `TRENDS` |
 | `src/computer2.js` | computer apps: Mail (`mailWeek` offers: label deals, gigs, commissions), Ticker (`fieldIndex`, `tradeAct`), Studio (sequencer + podcast cutter), CutRoom, App Store (`SHOP`, `gearFor`), minigames; clicks in `computerClick` |
 | `src/mentor.js` | mentors (`mentorCandidates`, `mentorAct` rolls Charisma, `mentorWeek(gain)`: lesson every 3 weeks, intro every 13, graduate at 104), `filmStoryHTML` (film page, own films), `industryYear`/`industryHTML` (stored on each `M.years` entry, shown in Your years) |
+| `src/corrections.js` | splits directing duos into individuals (`DUOS`, `DUO_SOLO`, `DUO_FILMS`; films support `codir`), real studio chains of command `STUDIO_HEADS` (`headsOf`, `headsHTML`), renames a stray real festival |
+| `src/cinema.js` | stills (`SC_DRAW` 33 settings, `actor()` drawn from the cast's looks, `frameOf`, `stillCaption`, `stillSVG(f, i, w, animated)`) and the moving trailer (`trailerPlan` segments, `playTrailer` with motion, flashes, score via `trailerAudio`, scrubbing) |
+| `src/convo.js` | conversations: `msgTopic`, topic reply sets + `replyLabel`, own-words reading (`readIntent`, `answerOwn`: questions, invites booked via `freeSlot`, names, rudeness, echoed words), `ADVICE` with follow-ups, `convoWeek` |
+| `src/situations.js` | ~120 job problems (`SITUATIONS`) across 22 families, registered as scenes with fix/ask/bold/colleague options and a teach line |
+| `src/jobboard.js` | 22 more field jobs, `FIELD_GUIDE` duties pushed into `JOBS.jobs`, `postIndustry`, cross-industry `TRANSFER`/`fieldFactors`, board filters/sorting (`boardView`), sortable tables (`applyTableSorts`, called from `render`), `viewPost` (route `post:<id>`) |
+| `src/schools.js` | `SCHOOLS` worldwide + per-hub college/university, `SCHOOL_PROGS`, `schoolProg(sc)` (used everywhere instead of `PROGRAMS[sc.prog]`), `applySchool` (action `school`), alumni `almaFactors`, browser in Life |
+| `src/awardbodies.js` | national ceremony names `CEREMONY`/`ceremony(m)` (used by yearly awards), 107 award bodies with pages (route `award:<id>`), `filmAwardIndex`, the EGOF (`egofWins`, `egofWeek`, `egofHTML`) |
+| `src/corporate.js` | 8-rung `LADDER` per company, staff from `hubStaff` (computed fresh, never cached, so sim and UI agree), `corpPosts`, promotions/headhunters/schemes as `corp` pending items (`corpPick`), NPC poaching (`S.poach`), secrets that leak |
+| `src/standing.js` | Standing tab: 44 ambitions with claim (action `claimamb`) and pin (`pinamb`), reputation facets/radar/archetype/circles/quotes |
+| `src/starmeter.js` | `starScore`/`starmeter`/`myStarRank`, GEA Starmeter tab, `starFactors`, brand endorsements by mail (`endorseWeek`), `marketApp` (Ticker), desktop `menuBar`/`desktopWidgets`/`WALLS` |
+| `src/hub.js` | Today hub: `hubAlerts` (data-jump), quick actions, best fits with apply-best, inline text replies |
+| `src/codex.js` | `CODEX` (16 fields × 9 lessons), learned by time (`codexWeek`), `codexFactors`, `codexHTML` on Standing |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
