@@ -27,6 +27,7 @@ const OLD_EVE = { latewrite: 'write' };
 function conditionsOf() {
   const M = S.me, out = [];
   if (!M || !M.party || !M.party.done) return out;
+  if ((M.grind || 0) >= 12) out.push({ k: 'grind', label: 'Worn down', dis: ['col', 'cha'], d: 'Weeks of work without a real break. Disadvantage on Collaboration and Charisma until you take some proper rest or a weekend away.' });
   if (M.energy < 20) out.push({ k: 'exhausted', label: 'Exhausted', dis: 'all', d: 'Disadvantage on everything. Mistakes at work become likely; pages come slowly.' });
   else if (M.energy < 40) out.push({ k: 'tired', label: 'Tired', dis: ['eth', 'com', 'vis'], d: 'Disadvantage on Work ethic, Composure and Vision. Fewer pages, slower learning.' });
   if (M.stress >= 75) out.push({ k: 'frayed', label: 'Frayed', dis: ['cha', 'col', 'com'], d: 'Disadvantage with people. You might snap at someone. Burnout is close.' });
@@ -110,10 +111,18 @@ function commute() {
   return v.commute[(S.week + W.day) % v.commute.length];
 }
 const AT_HOME = new Set(['rest', 'home', 'write', 'read']);
+// A work block costs what the job asks of you: shooting days hardest, senior jobs harder, two jobs at once hardest of all.
+function workCost() {
+  const M = S.me; let c = 12;
+  for (const j of M.jobs) { const f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, t = tmplOf(j) || {}; c = Math.max(c, (f ? (f.stage === 2 ? 17 : 14) : 12) + Math.max(0, (t.lv ?? 2) - 2)); }
+  return Math.min(24, c + 4 * Math.max(0, M.jobs.length - 1));
+}
+const RESTFUL = new Set(['rest', 'home', 'read', 'out']);
 function runBlock(k) {
   const M = S.me, me = ME(), W = M.wk, A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest;
-  M.energy = clamp(M.energy - (A.e || 0), 0, 100);
+  M.energy = clamp(M.energy - (k === 'work' && M.jobs.length ? workCost() : A.e || 0), 0, 100);
   W.stress += A.stress || 0;
+  if (RESTFUL.has(k) || A.venue) W.restN = (W.restN || 0) + 1;
   if (A.cost) W.cashOut += usd(A.cost);
   const L = [], n0 = W.L.length;
   const c = AT_HOME.has(k) || W.block === 2 ? null : commute();
@@ -201,6 +210,7 @@ function autoCal() {
   const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : 'read', E.eves[d]]);
   const life = ORIGIN.life[M.life];
   if (M.energy < 45) { cal[1][1] = 'rest'; cal[3][1] = 'rest'; }
+  if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
   if (M.school) { cal[0][0] = 'study'; cal[2][0] = 'study'; if ((PROGRAMS[M.school.prog] || {}).days > 2) cal[4][0] = 'study'; }
@@ -220,7 +230,7 @@ function forecastWeek() {
   let e = M.energy, st = 0, spend = 0, earn = 0; const days = [];
   for (let d = d0; d < 7; d++) {
     let out = false;
-    for (let b = (d === d0 && W ? W.block : 0); b < 3; b++) { const k = run[d][b], A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest; e -= A.e || 0; st += A.stress || 0; if (A.cost) spend += usd(A.cost); if (k === 'hustle') earn += usd(75); if (!AT_HOME.has(k) && b < 2) out = true; }
+    for (let b = (d === d0 && W ? W.block : 0); b < 3; b++) { const k = run[d][b], A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest; e -= k === 'work' && M.jobs.length ? workCost() : A.e || 0; st += A.stress || 0; if (A.cost) spend += usd(A.cost); if (k === 'hustle') earn += usd(75); if (!AT_HOME.has(k) && b < 2) out = true; }
     if (out) e -= v.e;
     days.push({ d, low: Math.max(0, Math.round(e)) });
     e = clamp(e + clamp(sleep - Math.max(0, M.stress + st - 40) / 5, 8, 40), 0, 100);

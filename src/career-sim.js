@@ -657,6 +657,9 @@ function closeWeek(a) {
   for (const k in hf.grow) gain(k, hf.grow[k]);
   if (hf.standing) me.standing = clamp(me.standing + hf.standing, 0, 100);
   stress += hf.stress;
+  // the grind: week after week of work without real rest wears you down, even when the work is good
+  if (M.jobs.length && !burnt) { M.grind = (M.grind || 0) + 1; if ((W.restN || 0) >= 11) M.grind = Math.max(0, M.grind - 3); } else M.grind = Math.max(0, (M.grind || 0) - ((W.restN || 0) >= 11 ? 3 : 1));
+  if (M.grind > 6) { stress += Math.min(5, (M.grind - 6) * .6) * ((W.restN || 0) >= 8 ? .5 : 1); if (M.grind === 8) L.push('Eight weeks without a proper break. It\'s starting to show: evenings off and weekends away help.'); if (M.grind === 12) inbox('note', 'Worn down', 'Three months of work with hardly a day off. You\'re short with people and it shows. A week of rest, or a weekend away, would reset you.'); }
   stress += life.stress - 2 + (energy < 10 ? 6 : 0) + (M.cash < usd(life.rent) * 3 ? 4 : 0) + (M.debt > 0 ? 1 : 0);   // money worries weigh   // energy itself is restored night by night (life.js)
   M.energy = clamp(energy, 0, 100);
   M.stress = clamp(M.stress + stress * (stress > 0 ? traitMul(me, 'stress') * (has(me, 'Volatile') ? 1.2 : 1) : 1) * (1.1 - me.mind.com / 40), 0, 100);
