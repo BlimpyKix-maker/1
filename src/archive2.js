@@ -72,9 +72,10 @@ function paperHTML() {
   const card = (i, big) => { const n = S.news[i], f = n.ref && n.ref.film !== undefined ? S.films[n.ref.film] : null, p = n.ref && n.ref.person !== undefined ? P(n.ref.person) : null; return `<a href="#" class="np-card${big ? ' big' : ''}" data-go="article:${i}">${big && f ? `<span class="np-img">${posterSVG(f, 150)}</span>` : big && p ? `<span class="np-img">${portraitOf(p, 120)}</span>` : ''}<span class="np-k">${esc(n.type)} · ${fmtDate(n.w, true)}</span><b>${esc(n.text)}</b></a>`; };
   let body;
   if (sec === 'archive' || q) {
-    const L = rows.filter(i => !q || S.news[i].text.toLowerCase().includes(q)), byM = {};
-    for (const i of L.slice(0, 200)) { const k = fmtDate(S.news[i].w, true).replace(/^\d+ /, ''); (byM[k] = byM[k] || []).push(i); }
-    body = `${Object.entries(byM).map(([m, ids]) => `<h4>${esc(m)}</h4><ul class="np-list">${ids.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`).join('') || '<p class="muted">No stories match.</p>'}`;
+    const types = [...new Set(rows.map(i => S.news[i].type))].sort(), ty = UI.npt || '';
+    const L = rows.filter(i => (!q || S.news[i].text.toLowerCase().includes(q)) && (!ty || S.news[i].type === ty)), byM = {};
+    for (const i of L.slice(0, 300)) { const k = fmtDate(S.news[i].w, true).replace(/^\d+ /, ''); (byM[k] = byM[k] || []).push(i); }
+    body = `<div class="np-types">${['', ...types].map(t => `<button class="pill${ty === t ? ' on' : ''}" data-npt="${esc(t)}">${t || 'Every kind'}</button>`).join(' ')}</div>${Object.entries(byM).map(([m, ids]) => `<h4>${esc(m)}</h4><ul class="np-list">${ids.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`).join('') || '<p class="muted">No stories match.</p>'}`;
   } else if (sec === 'front') {
     const recent = rows.filter(i => S.week - S.news[i].w <= 1), lead = recent.find(i => S.news[i].ref && S.news[i].ref.film !== undefined && /Hit|Award|Flop/.test(S.news[i].type)) ?? recent[0] ?? rows[0];
     const mine = rows.filter(i => (S.news[i].ref || {}).person === me).slice(0, 3);
@@ -85,7 +86,7 @@ function paperHTML() {
   }
   return `<div class="np"><div class="np-mast"><b>The Daily Slate</b><span>${fmtDate(S.week, true)} · ${N.toLocaleString()} stories on file</span></div><div class="np-tabs">${PAPER_SECTIONS.map(([k, l]) => `<button class="${sec === k && !q ? 'on' : ''}" data-paper="${k}">${l}${k === 'you' ? ` (${rows.filter(i => (S.news[i].ref || {}).person === me).length})` : ''}</button>`).join('')}<input id="npq" type="search" placeholder="Search every story…" value="${esc(UI.npq || '')}"></div>${body}</div>`;
 }
-function paperClick(t) { if (t.dataset.paper) { UI.paper = t.dataset.paper; UI.npq = ''; render(true); return true; } return false; }
+function paperClick(t) { if (t.dataset.npt !== undefined) { UI.npt = t.dataset.npt; UI.paper = 'archive'; render(true); return true; } if (t.dataset.paper) { UI.paper = t.dataset.paper; UI.npq = ''; render(true); return true; } return false; }
 // Stories about you read like stories: what happened, where you came from, what people say.
 function playerArticle(n, r) {
   const M = S.me, me = ME(), pk = a => a[Math.floor(r() * a.length)], first = me.name.split(' ')[0];

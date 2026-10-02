@@ -187,7 +187,7 @@ function askReply(q, m, k) {
 // Weekly: answers that take time, consequences that catch up, and friends who need something.
 function msgWeek() {
   const M = S.me, me = ME();
-  stakesWeek();
+  stakesWeek(); workMailWeek(); inviteMailWeek();
   for (const x of (M.msgq || []).filter(x => !x.done && x.due <= S.week)) {
     x.done = 1; const q = P(x.id); if (!q || q.dead) continue;
     if (x.k === 'leadlater' && M.known[x.id]) { const f = theirActive(x.id) || S.active.map(i => S.films[i]).find(f2 => f2.hub === M.hub && f2.stage >= 0 && f2.stage < 4 && f2.stageEnd - S.week >= 2 && keyIds(f2).some(j => tie(q, P(j)) > 25)); const p = f && prnd() < .6 ? makeLead(x.id, f) : null; sms(x.id, p ? `found you something: ${f.title} needs a ${p.t.toLowerCase()}. I've mentioned you, apply this week` : pickLine(['asked around. nothing yet, sorry. I\'ll keep trying', 'no luck so far. it\'s dead out there'], x.id + S.week), 'text', { replyable: 1, topic: p ? 'tip' : 'chat' }); }
@@ -301,10 +301,11 @@ const STAKES = {
 };
 Object.assign(REPLY_LABELS, ...Object.values(STAKES).map(s => s.opts));
 function stakeText(id) {
-  const M = S.me, ks = Object.keys(STAKES).filter(k => STAKES[k].ok(id) && !(M.phone || []).some(m => m.stake === k && S.week - m.w < 12));
+  const M = S.me, ks = Object.keys(STAKES).filter(k => STAKES[k].ok(id) && !(M.phone || []).some(m => m.stake === k && S.week - m.w < 12) && !(M.mail || []).some(m => m.act && m.act.stake === k && S.week - m.w < 12));
   if (!ks.length) return false;
   const k = ks[Math.floor(prnd() * ks.length)], St = STAKES[k], f = theirActive(id), pool = aliveKnown().filter(j => j !== id && (['rival', 'cold'].includes(relOf(j)) || opinion(j) < 5)), who = pool.length ? pool[Math.floor(prnd() * pool.length)] : null;
   if (k === 'warn' && who === null) return false;
+  if (MAIL_STAKES[k]) return stakeMail(id, k);
   const t = pickLine(St.lines, id + S.week).replace('{film}', f ? f.title : 'my next thing').replace('{who}', who !== null ? P(who).name.split(' ')[0] : 'someone');
   sms(id, t, 'text', { replyable: 1, topic: 'stake', stake: k, who, mood: k === 'crisis' || k === 'partner' ? 'sad' : 'happy' });
   return true;
@@ -346,3 +347,87 @@ function stakesWeek() {
   }
 }
 function pendingStakes() { return (S.me.phone || []).filter(m => m.topic === 'stake' && !m.replied && !m.missed); }
+
+// ---- work correspondence goes by email ----
+// Texts are for friends. Work arrives in the inbox: a collaborator crewing up, a reference check, a credit fight,
+// an insider tip, a wrap note from your boss, a premiere invitation, the remittance for your last job. Each work
+// email has reply buttons; leave one unanswered for a fortnight and the sender draws their own conclusions.
+const MAIL_STAKES = {
+  collab: ['Your next job?', 'Hi {me},\n\nI\'m putting a team together for {film} and I want you on it. Before I go to the agencies: are you in?\n\n{them}'],
+  reference: ['Reference request', 'Hi {me},\n\nA production office just asked me for a reference on you. I\'m happy to give one. How hard do you want me to sell you?\n\n{them}'],
+  credit: ['About the credit', 'Hi {me},\n\nAwkward one. Someone above us is claiming your work on the last job as theirs. I thought you\'d want to know before it gets into the trades.\n\n{them}'],
+  scoop: ['Before it\'s posted', 'Hi {me},\n\n{film} is about to post a job that suits you. If you want it, say so today and I\'ll put your name in first.\n\n{them}']
+};
+function sigOf(q) { return `${q.name}${q.role ? ' (' + (ROLE_LABEL[q.role] || '').toLowerCase() + ')' : ''}`; }
+function stakeMail(id, k) {
+  const M = S.me, q = P(id), f = theirActive(id), [subj, body] = MAIL_STAKES[k];
+  mail('offers', sigOf(q), subj, body.replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]).replace('{film}', f ? f.title : 'my next film'), { k: 'opt', kind: 'stake', stake: k, id, opts: Object.entries(STAKES[k].opts) });
+  return true;
+}
+const WRAP_OPTS = [['w_keep', 'Thank them and keep in touch'], ['w_ref', 'Ask for a reference'], ['w_next', 'Ask what they\'re doing next']];
+function mailOptAct(m, k) {
+  const M = S.me, me = ME(), A = m.act, q = A.id !== undefined ? P(A.id) : null, re = 'Re: ' + m.subj.replace(/^Re: /, '');
+  const opt = (A.opts || []).find(o => o[0] === k); if (!opt) return false;
+  m.done = k; m.doneT = `You replied: ${opt[1].replace(/^[^A-Za-z]+/, '').replace(/["“”]/g, '')}.`;
+  if (A.kind === 'stake' && q && M.known[q.id]) {
+    const R = stakeReply(q, { who: null, stake: A.stake }, k); addTie(me, q, R.d); M.known[q.id].seen = S.week;
+    mail('inbox', sigOf(q), re, R.back.charAt(0).toUpperCase() + R.back.slice(1) + `.\n\n${q.name.split(' ')[0]}`, null);
+    return true;
+  }
+  if (A.kind === 'wrap' && q) {
+    if (k === 'w_keep') { addTie(me, q, 3); trust(q.id, 2); mail('inbox', sigOf(q), re, pickLine(['Likewise. Let\'s not leave it another five years.', 'You were a pleasure. Keep me posted.'], q.id) + `\n\n${q.name.split(' ')[0]}`, null); }
+    else if (k === 'w_ref') { const ok = opinion(q.id) > 5; if (ok) M.refs[q.id] = (M.refs[q.id] || 0) + 1; else addTie(me, q, -1); mail('inbox', sigOf(q), re, ok ? 'Of course. Put my name down; I\'ll say good things because they\'re true.' : 'I\'d rather not, if that\'s all right. Nothing personal.', null); }
+    else { const f = theirActive(q.id); const p = f && opinion(q.id) > 10 && prnd() < .5 ? makeLead(q.id, f) : null; mail('inbox', sigOf(q), re, p ? `Funny you ask: ${f.title}, and we need a ${p.t.toLowerCase()}. It's on your board. Apply.` : f ? `I'm on ${f.title}. Nothing for you right now, but I'll shout.` : 'Nothing yet. Resting, reading, panicking. I\'ll let you know.', null); }
+    return true;
+  }
+  if (A.kind === 'invite') return inviteMailAct(m, k);
+  if (A.kind === 'premiere') {
+    const f = S.films[A.film];
+    if (k === 'p_go') { M.cash -= usd(60); M.stress = clamp(M.stress - 3, 0, 100); me.standing = clamp(me.standing + .6, 0, 100); for (let i = 0; i < 2; i++) { const p2 = f ? keyIds(f).map(P).filter(x => x && !x.dead && !M.known[x.id])[i] : null; if (p2) meet(p2.id, `Met at the ${f.title} premiere`, 4); } m.doneT = `You went to the premiere of ${f ? f.title : 'the film'}. Red carpet, warm wine, two new numbers in your phone.`; }
+    else m.doneT = 'You sent your regrets.';
+    return true;
+  }
+  return true;
+}
+// Weekly work mail: wrap notes, remittances, premiere invitations; and unanswered work mail has consequences.
+function workMailWeek() {
+  const M = S.me, me = ME();
+  for (const p of M.past.filter(p => p.to === S.week)) {
+    const f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, where = f ? f.title : (p.mco || 'the company');
+    mail('inbox', `Accounts, ${where}`, `Remittance: ${p.t}`, `Payment for your work as ${p.t.toLowerCase()} on ${where} has been sent. Please allow three to five working days. Do not reply to this email; nobody reads it.`, null);
+    if (p.head !== null && p.head !== undefined && M.known[p.head] && !P(p.head).dead && !p.quit) { const q = P(p.head), good = (p.score || 0) >= 0; mail('inbox', sigOf(q), good ? `Thank you` : 'Wrapping up', good ? `Hi ${me.name.split(' ')[0]},\n\nJust wanted to say thank you for ${where}. You made my life easier, which is the highest compliment I give.\n\n${q.name.split(' ')[0]}` : `Hi ${me.name.split(' ')[0]},\n\nThat was a hard one. Thanks for sticking it out on ${where}. Let's both do better next time.\n\n${q.name.split(' ')[0]}`, { k: 'opt', kind: 'wrap', id: q.id, opts: WRAP_OPTS }); }
+  }
+  for (const id of me.credits) { const f = S.films[id]; if (f && f.rel === S.week) mail('offers', `${f.co !== null ? S.companies[f.co].name : 'The producers'} · Publicity`, `Invitation: the premiere of ${f.title}`, `You are warmly invited to the premiere of ${f.title}, followed by a reception. Black tie optional; enthusiasm mandatory. Please RSVP.`, { k: 'opt', kind: 'premiere', film: f.id, opts: [['p_go', 'Accept with pleasure'], ['p_no', 'Send regrets']] }); }
+  for (const m of (M.mail || []).filter(m => m.act && m.act.k === 'opt' && m.act.kind === 'stake' && !m.done && S.week - m.w >= 2)) {
+    m.done = 'missed'; m.doneT = 'You never replied.'; const q = P(m.act.id), St = STAKES[m.act.stake]; if (!q || !M.known[q.id]) continue;
+    if (St && St.miss) addTie(me, q, St.miss);
+    if (St && St.missT) mail('inbox', sigOf(q), 'Re: ' + m.subj, St.missT.charAt(0).toUpperCase() + St.missT.slice(1) + '.', null);
+  }
+}
+
+// ---- the industry writes to you: invitations with something in them ----
+const INVITE_MAILS = [
+  { k: 'panel', subj: 'Would you speak on a panel?', body: 'We\'re hosting "Breaking In, Staying In" next month and would love a working voice on the panel. An hour, a microphone, free sandwiches.', yes: 'Agree to speak', fx: { stand: .6, energy: -6, meet: 1 }, min: 8 },
+  { k: 'screen', subj: 'Private screening invitation', body: 'A small industry screening of a film we\'re very proud of, followed by drinks. Forty seats; one is yours if you want it.', yes: 'RSVP yes', fx: { stress: -2, meet: 1, tas: .05 }, min: 0 },
+  { k: 'workshop', subj: 'Masterclass: places available', body: 'Two days with a working head of department. Small group, hands on, brutally honest notes. There is a fee.', yes: 'Book a place', fx: { cost: 180, main: .3, energy: -8 }, min: 0 },
+  { k: 'breakfast', subj: 'Networking breakfast', body: 'Producers, agents and a man who swears he invented the steadicam. Coffee from seven.', yes: 'Go along', fx: { cost: 25, meet: 2, energy: -4 }, min: 0 },
+  { k: 'jury', subj: 'Join our short film jury?', body: 'We need one more juror for the short film competition. You\'d watch forty shorts and argue about six of them.', yes: 'Join the jury', fx: { stand: .8, energy: -10, meet: 2, tas: .08 }, min: 18 },
+  { k: 'mentee', subj: 'Would you mentor a student?', body: 'Our film school pairs final-year students with working people for a term. One coffee a month, one email a week.', yes: 'Say yes', fx: { stand: .4, stress: 1, meet: 1 }, min: 14 }
+];
+function inviteMailWeek() {
+  const M = S.me, me = ME(); if (prnd() > .3) return;
+  const L = INVITE_MAILS.filter(x => me.standing >= x.min && !(M.mail || []).some(m => m.act && m.act.inv === x.k && S.week - m.w < 10)); if (!L.length) return;
+  const x = L[Math.floor(prnd() * L.length)], cos = S.companies.filter(c => c.hub === M.hub && c.closed === null), c = cos.length ? cos[Math.floor(prnd() * cos.length)] : null;
+  mail('offers', c ? `${c.name} · Events` : 'Events team', x.subj, `Dear ${me.name.split(' ')[0]},\n\n${x.body}\n\nWarm regards,\nThe events team${c ? ', ' + c.name : ''}`, { k: 'opt', kind: 'invite', inv: x.k, opts: [['i_yes', x.yes], ['i_no', 'Politely decline']] });
+}
+function inviteMailAct(m, k) {
+  const M = S.me, me = ME(), x = INVITE_MAILS.find(y => y.k === m.act.inv); if (!x) return true;
+  if (k !== 'i_yes') { m.doneT = 'You declined politely.'; return true; }
+  const f = x.fx; if (f.cost && M.cash < usd(f.cost)) { m.done = null; m.doneT = null; return false; }
+  if (f.cost) M.cash -= usd(f.cost); if (f.energy) M.energy = clamp(M.energy + f.energy, 0, 100); if (f.stress) M.stress = clamp(M.stress + f.stress, 0, 100); if (f.stand) me.standing = clamp(me.standing + f.stand, 0, 100);
+  if (f.tas) growSub(me, 'tas', f.tas);
+  if (f.main) { const k2 = Object.keys(CRAFTS[MAIN[me.role]].subs)[0]; for (let i = 0; i < 3; i++) growSub(me, k2, f.main / 3); }
+  const met = []; for (let i = 0; i < (f.meet || 0); i++) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 6) + hashRand(m.id * 7 + i)() * 30 - (M.known[q.id] ? 99 : 0)); if (q && !M.known[q.id]) { meet(q.id, `Met at ${x.subj.toLowerCase().replace(/\?$/, '')}`, 4); met.push(q.name); } }
+  m.doneT = `You said yes.${met.length ? ' You met ' + met.join(' and ') + '.' : ''}`;
+  return true;
+}

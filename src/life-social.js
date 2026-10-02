@@ -79,7 +79,7 @@ function phoneTick(d, b) {
   if (!M.party || !M.party.done) return;
   if ((M.gossipQ || []).length > 3) M.gossipQ.splice(0, M.gossipQ.length - 3);   // old gossip is no gossip
   if ((M.gossipQ || []).length && prnd() < .12) { const g = M.gossipQ.shift(); sms(g.from ?? null, g.t, 'gossip', g.person !== undefined ? { person: g.person } : {}); return; }
-  if (!known.length || prnd() > (b === 2 ? .09 : .035)) return;
+  if (!known.length || prnd() > (b === 2 ? .06 : .022)) return;
   const IC = typeof innerCircle === 'function' ? innerCircle() : known.map(id => [id, 1]);
   const friends = IC.filter(x => x[1] >= 2).map(x => x[0]);
   if (typeof stakeText === 'function' && IC.length && prnd() < .45) { const id = pickWeighted(IC); if (id !== null && stakeText(id)) return; }
