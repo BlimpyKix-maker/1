@@ -525,9 +525,11 @@ tr.blocked td { opacity: .55; }
 .kpis small { font-size: 12px; }
 .kpis .rep { grid-template-columns: 0 minmax(0, 1fr) 40px; padding: 6px 0 0; }
 .odds-chip { font: 600 11px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; padding: 4px 7px 3px; border-radius: 3px; white-space: nowrap; cursor: help; }
-.odds-chip.hi { background: color-mix(in srgb, var(--good) 18%, transparent); color: var(--good); }
-.odds-chip.mid { background: var(--accent-soft); color: var(--accent); }
-.odds-chip.lo { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+.odds-chip.hi { background: #DDF2E3; color: #1E6B3A; border: 1px solid #8CCB9F; }
+.odds-chip.mid { background: #FFF1C2; color: #7A5600; border: 1px solid #E8C35A; }
+.odds-chip.lo { background: #FBDCD8; color: #A3261B; border: 1px solid #E59A90; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .odds-chip.hi { background: #163A24; color: #7FD9A0; border-color: #2E7A4C; } :root:not([data-theme="light"]) .odds-chip.mid { background: #3A2E08; color: #F2C84B; border-color: #8A6A12; } :root:not([data-theme="light"]) .odds-chip.lo { background: #3E1512; color: #F08A7E; border-color: #8A2E25; } }
+:root[data-theme="dark"] .odds-chip.hi { background: #163A24; color: #7FD9A0; border-color: #2E7A4C; } :root[data-theme="dark"] .odds-chip.mid { background: #3A2E08; color: #F2C84B; border-color: #8A6A12; } :root[data-theme="dark"] .odds-chip.lo { background: #3E1512; color: #F08A7E; border-color: #8A2E25; }
 .applyl { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; white-space: nowrap; cursor: pointer; }
 .plan td:first-child { width: 80px; font: 600 13px/1 var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .desk > div > .panel { margin-bottom: 14px; }
@@ -589,7 +591,7 @@ tr.blocked td { opacity: .55; }
 .oddsbar { display: inline-flex; align-items: center; gap: 6px; font: 11px/1 var(--f-data); color: var(--muted); }
 .ob-t { width: 70px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
 .ob-t i { display: block; height: 100%; }
-.ob-t i.hi { background: var(--good); } .ob-t i.mid { background: var(--accent); } .ob-t i.lo { background: var(--bad); }
+.ob-t i.hi { background: var(--good); } .ob-t i.mid { background: #E0A800; } .ob-t i.lo { background: var(--bad); }
 .oddsbar { flex-wrap: wrap; row-gap: 3px; }
 .ob-dc { font: 700 11px/1 var(--f-data); color: #fff; background: var(--slate); padding: 3px 5px; border-radius: 3px; }
 .ob-l { color: var(--ink); }
