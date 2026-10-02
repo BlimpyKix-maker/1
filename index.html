@@ -90,6 +90,13 @@
 #trailer .tr-line.show { opacity: 1; } #trailer .tr-line.big { font-size: 46px; }
 @media (max-width: 700px) { .filmhead { grid-template-columns: 1fr; } }
 .panel.cine { margin-top: 16px; }
+.article { max-width: 760px; } .article p { font-size: 16px; line-height: 1.6; } .art-media { float: right; margin: 0 0 10px 16px; }
+.feed .headline { text-decoration: none; } .feed .headline:hover { text-decoration: underline; }
+.term-top { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; margin-bottom: 12px; }
+.ticker { font: 600 14px var(--f-data); color: var(--muted); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; vertical-align: middle; }
+.price { font: 600 22px var(--f-data); margin: 4px 0; } .price small { font-size: 12px; color: var(--muted); }
+.term-k { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+@media (max-width: 700px) { .term-top { grid-template-columns: auto 1fr; } .term-top .spark { grid-column: 1 / -1; } }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -10125,6 +10132,7 @@ function monthly() {
   }
   for (const m in MARKETS) for (const g of GENRES) S.app[m][g] = clamp((S.app[m][g] || 0) * .996 + gauss() * .012, -.6, 1.5);
   for (const c of S.companies) if (c.closed === null && c.owner === undefined) c.cash -= [0, .6, .15, .03][c.tier] * budgetScale(y) * era(MARKETS[HUBS[c.hub].m].cost, y) / 1.6;
+  markCompanies();
   if (S.month === 4) festivalPick(S.films.filter(f => f.rel !== null && S.week - f.rel <= 52 && S.week - f.rel >= 0));
   for (const t of TRENDS) {
     const key = t.y + '-' + t.m;
@@ -13793,6 +13801,128 @@ function personBio(p) {
 // The archive's masthead: switch between films and people.
 function geaHead(cur) { return `<div class="geahead"><span class="gealogo">GEA</span><span class="muted">The Global Entertainment Archive</span><span class="seg"><button class="pill${cur === 'films' ? ' on' : ''}" data-gea="films">Films</button><button class="pill${cur === 'people' ? ' on' : ''}" data-gea="people">People</button></span></div>`; }
 // </gea>
+// <press>
+// ---------------- The trade press: articles ----------------
+// Every headline opens into a short article, written from what the simulation knows (budgets, grosses, who made
+// it, who said what) plus invented colour: quotes, anonymous sources, a rival's shrug. Same article every time.
+const PAPERS = ['The Daily Slate', 'Reel Report', 'Box Office Bulletin', 'The Lot', 'Frame & Fortune', 'Cut! Weekly', 'The Clapper'];
+const QUOTE_FILM = ['"We made the film we wanted to make. Everything else is weather."', '"Nobody knows anything, and I mean that as a compliment."', '"I\'m just glad people showed up."', '"Every film is a miracle. This one was a small one."', '"We had no money and a lot of nerve."', '"The audience decides. They always do."', '"I\'d do it all again. Maybe with more sleep."'];
+const QUOTE_RIVAL = ['"Good for them," one rival executive said, not entirely convincingly.', 'A rival producer called it "a fluke with good lighting."', 'One studio insider said they "saw it coming a mile off."', 'A competitor declined to comment, then commented at length off the record.'];
+const SOURCE = ['according to people familiar with the matter', 'sources close to the production say', 'two people who worked on it told this paper', 'insiders say', 'one crew member said'];
+function byline(i) { const r = hashRand(i * 31 + 7), N = NAMES.en; return `${N[r() < .5 ? 'M' : 'F'][Math.floor(r() * 10)]} ${N.L[Math.floor(r() * N.L.length)]}`; }
+function articleHTML(i) {
+  const n = S.news[i];
+  if (!n) return '<p class="muted">This story has been pulled.</p>';
+  const r = hashRand(i * 97 + n.w), pk = a => a[Math.floor(r() * a.length)], paper = pk(PAPERS);
+  const f = n.ref && n.ref.film !== undefined ? S.films[n.ref.film] : null, p = n.ref && n.ref.person !== undefined ? P(n.ref.person) : null, c = n.ref && n.ref.company !== undefined ? S.companies[n.ref.company] : null;
+  const paras = [];
+  if (f) {
+    const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null, co = f.co !== null ? S.companies[f.co] : null;
+    paras.push(`${f.title}, ${co ? `${co.name}'s` : 'the independent'} ${f.genre.toLowerCase()} directed by ${d.name}${lead ? ` and starring ${lead.name}` : ''}, ${n.type === 'Hit' ? 'has become the talk of the business' : n.type === 'Flop' ? 'has stumbled badly at the box office' : n.type === 'Award' ? 'has taken one of the season\'s big prizes' : n.type === 'Set' ? 'is having an eventful production' : n.type === 'Cult' || n.type === 'Legacy' ? 'is enjoying an unexpected second life' : 'is the story of the week'}. ${filmLogline(f)}`);
+    if (f.rel !== null) paras.push(`The film ${f.total > f.cost * 2 ? 'has earned' : 'has taken'} ${fmtM(f.total)} worldwide against a reported cost of ${fmtM(f.cost)}, ${pk(SOURCE)}. Critics have been ${f.reviews >= 75 ? 'warm, some of them ecstatic' : f.reviews >= 55 ? 'mixed but respectful' : 'unkind'}${f.reviews ? ` (an average of ${f.reviews}/100)` : ''}.`);
+    else paras.push(`The production, budgeted at ${fmtM(f.budget)}, is currently in ${f.status.toLowerCase()}. ${pk(SOURCE).replace(/^./, x => x.toUpperCase())} that ${pk(['the schedule is tight', 'morale is high', 'the script is still changing', 'the director is getting exactly what they want', 'the money men are nervous'])}.`);
+    paras.push(`${d.name} told ${paper}: ${pk(QUOTE_FILM)}`);
+    if (n.type === 'Hit' || n.type === 'Award') paras.push(pk(QUOTE_RIVAL));
+    if (f.events && f.events.length) { const E = f.events.slice(-2); paras.push(`${E.some(e => (e.q || 0) < 0) ? 'It hasn\'t all been smooth.' : 'Word from the set is good.'} ${E.map(e => e.t).join(' ')}`); }
+  } else if (p) {
+    paras.push(`${n.text} ${personBio(p)}`);
+    paras.push(`${pk(['Friends describe', 'Colleagues describe', 'Those who know them describe'])} ${p.name.split(' ')[0]} as ${pk(['generous to a fault', 'impossible to rattle', 'the hardest-working person on any set', 'quietly ruthless', 'funnier than their films suggest'])}. ${pk(SOURCE).replace(/^./, x => x.toUpperCase())} that ${pk(['their next move is already lined up', 'they have been thinking about this for a while', 'nobody saw it coming', 'the phone has not stopped ringing'])}.`);
+  } else if (c) {
+    paras.push(`${n.text} ${c.name}, founded in ${c.founded}, has ${c.films.length} film${c.films.length === 1 ? '' : 's'} to its name and ${c.hits} hit${c.hits === 1 ? '' : 's'}.`);
+    paras.push(`${pk(SOURCE).replace(/^./, x => x.toUpperCase())} that ${pk(['the board has been nervous for months', 'a buyer has been circling', 'the slate is stronger than people think', 'the money ran out faster than anyone expected'])}.`);
+  } else {
+    paras.push(`${n.text} ${pk(['Executives across town are taking note.', 'Agents say their phones have been busy.', 'It is the kind of shift that changes what gets made next year.', 'Not everyone is convinced it will last.'])}`);
+    paras.push(`${pk(SOURCE).replace(/^./, x => x.toUpperCase())} that ${pk(['studios are already adjusting their slates', 'smaller companies will feel it first', 'audiences got there before the executives did'])}.`);
+  }
+  const links = [f ? fl(f.id) : '', p ? pl(p.id) : '', c ? cl(c.id) : '', f && f.co !== null ? cl(f.co) : ''].filter(Boolean);
+  return `<article class="article"><p class="eyebrow">${esc(paper)} · ${esc(n.type)} · ${fmtDate(n.w, true)}</p><h2>${esc(n.text)}</h2><p class="muted">By ${esc(byline(i))}</p>
+   ${f ? `<div class="art-media">${posterSVG(f, 120)}</div>` : p ? `<div class="art-media">${portraitOf(p, 110)}</div>` : ''}
+   ${paras.map(t => `<p>${esc(t)}</p>`).join('')}
+   ${links.length ? `<p class="golinks">Related: ${links.join(' · ')}</p>` : ''}</article>`;
+}
+// </press>
+// <companies>
+// ---------------- Company terminal ----------------
+// Each company reads like a market terminal: a ticker, a share price that tracks what the company is really worth
+// (cash, the library's future earnings, the slate), its history month by month, a corporate structure, a logo,
+// and the lore at the bottom. The worth is the simulation's own numbers, so a hit moves the price and a flop sinks it.
+function tickerOf(c) { const w = c.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(x => x && !/^(the|and|of|films?|pictures?|studios?)$/i.test(x)); return (w.length >= 2 ? w.map(x => x[0]).join('') : (w[0] || c.name).slice(0, 4)).toUpperCase().slice(0, 4); }
+function sharesOf(c) { return [0, 20, 4, .5][c.tier] * (0.6 + hashRand(c.id * 13 + 1)() * .8); }   // millions of shares
+// What the company is worth, in the world's millions: cash, what its library will still earn, what's in the pipeline.
+function companyWorth(c, libByOwner) {
+  const lib = libByOwner ? libByOwner[c.id] || 0 : S.films.reduce((s, f) => s + (f.owner === c.id && f.rel !== null ? libValue(f, S.year) : 0), 0);
+  const pipe = c.films.reduce((s, i) => { const f = S.films[i]; return s + (f.rel === null && f.stage >= 0 ? f.budget * .35 : 0); }, 0);
+  return Math.max(.05, c.cash + lib * .6 + pipe + c.hits * .5);
+}
+// Once a month the market marks every company to its worth (no dice: the price is the worth plus a mood).
+function markCompanies() {
+  if (S.year < S.startYear) return;
+  const lib = {};
+  for (const f of S.films) if (f.owner !== null && f.owner !== undefined && f.rel !== null && S.week - f.rel < 520) lib[f.owner] = (lib[f.owner] || 0) + libValue(f, S.year);
+  for (const c of S.companies) {
+    if (c.closed !== null) continue;
+    const mood = 1 + Math.sin((S.week + c.id * 7) / 9) * .04;   // the market's own weather
+    (c.hist = c.hist || []).push(+(companyWorth(c, lib) * mood).toFixed(3));
+    if (c.hist.length > 120) c.hist.shift();
+  }
+}
+function priceOf(c, v) { return v / sharesOf(c); }
+function sparkline(vals, w = 260, h = 60) {
+  if (!vals || vals.length < 2) return '<p class="muted small">Not enough trading history yet.</p>';
+  const lo = Math.min(...vals), hi = Math.max(...vals), sx = w / (vals.length - 1), sy = v => h - 4 - (v - lo) / Math.max(1e-9, hi - lo) * (h - 8);
+  const up = vals[vals.length - 1] >= vals[0], pts = vals.map((v, i) => `${(i * sx).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="Value history"><polyline points="${pts}" fill="none" stroke="${up ? 'var(--good)' : 'var(--bad)'}" stroke-width="2"/><polygon points="0,${h} ${pts} ${w},${h}" fill="${up ? 'var(--good)' : 'var(--bad)'}" opacity=".12"/></svg>`;
+}
+function logoSVG(c, s = 64) {
+  const r = hashRand(c.id * 211 + 5), hues = ['#B3261E', '#0E5E5C', '#1C4E80', '#C8901A', '#4B2683', '#111111', '#2D7A4C', '#E8553E'], col = hues[Math.floor(r() * hues.length)], kind = Math.floor(r() * 5), t = tickerOf(c).slice(0, 3);
+  const mark = [`<circle cx="32" cy="32" r="28" fill="${col}"/>`, `<path d="M32 4 L58 16 L54 44 Q46 56 32 60 Q18 56 10 44 L6 16Z" fill="${col}"/>`, `<path d="M4 54 L22 18 L32 34 L42 12 L60 54Z" fill="${col}"/>`, `<rect x="6" y="6" width="52" height="52" rx="10" fill="${col}"/>`, `<circle cx="32" cy="32" r="28" fill="none" stroke="${col}" stroke-width="6"/>${[0, 1, 2, 3, 4].map(i => { const a = i / 5 * Math.PI * 2; return `<circle cx="${32 + Math.cos(a) * 15}" cy="${32 + Math.sin(a) * 15}" r="5" fill="${col}"/>`; }).join('')}`][kind];
+  const ink = kind === 4 ? col : '#fff';
+  return `<svg class="logo" viewBox="0 0 64 64" width="${s}" height="${s}" role="img" aria-label="${esc(c.name)} logo">${mark}<text x="32" y="${kind === 2 ? 50 : 38}" text-anchor="middle" fill="${ink}" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="${t.length > 2 ? 15 : 18}">${esc(t)}</text></svg>`;
+}
+// Who runs it: the producers it trusts most, plus a few names on the board.
+function structureOf(c) {
+  const fav = Object.entries(c.favors).map(([k, v]) => [+k, v]).filter(([k]) => P(k) && !P(k).dead).sort((a, b) => b[1] - a[1]);
+  const prods = fav.filter(([k]) => P(k).role === 'producer').map(([k]) => k), dirs = fav.filter(([k]) => P(k).role === 'director').map(([k]) => k);
+  const N = NAMES[HUBS[c.hub].lang] || NAMES.en, r = hashRand(c.id * 17 + 3), nm = () => { const a = N[r() < .5 ? 'M' : 'F'][Math.floor(r() * 10)], b = N.L[Math.floor(r() * N.L.length)]; return EAST[HUBS[c.hub].lang] ? `${b} ${a}` : `${a} ${b}`; };
+  const owner = c.owner !== undefined ? c.owner : null;
+  return {
+    ceo: owner !== null ? owner : prods[0] ?? null, ceoName: nm(), hop: prods[owner !== null ? 0 : 1] ?? null, dist: nm(), cfo: nm(), board: [nm(), nm(), nm()].slice(0, c.tier === 1 ? 3 : c.tier === 2 ? 2 : 1), partners: dirs.slice(0, 4),
+    divisions: { 1: ['Studio', 'Worldwide distribution', 'Classics label', 'Television', 'International'], 2: ['Production', 'Distribution', 'Library sales'], 3: ['Production'] }[c.tier]
+  };
+}
+function companyLore(c) {
+  const out = [], films = c.films.map(i => S.films[i]).filter(f => f && f.rel !== null);
+  const r = hashRand(c.id * 41 + 9), pk = a => a[Math.floor(r() * a.length)];
+  out.push(['f', `Founded in ${c.founded} ${pk(['above a dry cleaner', 'in a converted warehouse', 'with money from a cousin in shipping', 'by two former agents who fell out within a year', 'after its founder lost a bet', 'in a garage that still holds the first camera'])}.`, 0]);
+  if (films.length) {
+    const hit = films.slice().sort((a, b) => b.total - a.total)[0], flop = films.slice().sort((a, b) => a.theatrical - b.theatrical)[0], best = films.slice().sort((a, b) => b.reviews - a.reviews)[0];
+    out.push(['f', `Biggest hit: ${hit.title} (${yearOf(hit.rel)}), ${fmtM(hit.total)} worldwide.`, 0]);
+    if (flop.theatrical < 0) out.push(['f', `Most expensive mistake: ${flop.title}, which lost ${fmtM(-flop.theatrical)}.`, 3]);
+    out.push(['f', `Best reviewed: ${best.title} (${best.reviews}/100).`, 2]);
+    const g = {}; for (const f of films) g[f.genre] = (g[f.genre] || 0) + 1; const top = Object.entries(g).sort((a, b) => b[1] - a[1])[0];
+    out.push(['f', `${Math.round(top[1] / films.length * 100)}% of its films have been ${top[0].toLowerCase()}.`, 4]);
+    const aw = films.reduce((s, f) => s + (f.awards || []).length, 0); if (aw) out.push(['f', `Its films have won ${aw} award${aw > 1 ? 's' : ''}.`, 2]);
+  }
+  out.push(['r', pk(['The founder is said to read every script that comes in, personally, on a sun lounger.', 'Insiders say the canteen is better than most restaurants in town.', 'There is reportedly a vault of unreleased films nobody is allowed to mention.', 'The logo was supposedly sketched on a napkin during a very long lunch.', 'Staff whisper that the boardroom table was a gift from a grateful star.']), 12]);
+  out.push(['s', pk(['The office has a resident tortoise with a better parking space than the CFO.', 'Every new hire must sing the company song. Nobody knows the second verse.', 'The lobby fountain is rumoured to be haunted by a disgruntled screenwriter.', 'Company legend says a raccoon once sat in on a greenlight meeting and voted yes.']), 0]);
+  return out;
+}
+function companyTerminal(c) {
+  const h = c.hist || [], now = h.length ? h[h.length - 1] : companyWorth(c), sh = sharesOf(c), px = priceOf(c, now);
+  const chg = k => h.length > k ? (now / h[h.length - 1 - k] - 1) * 100 : null, pct = v => v === null ? '—' : `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v).toFixed(1)}%</span>`;
+  const films = c.films.map(i => S.films[i]).filter(Boolean), rel = films.filter(f => f.rel !== null), recent = rel.filter(f => S.week - f.rel < 156);
+  const priced = rel.filter(f => typeof f.theatrical === 'number' && f.theatrical === f.theatrical), hitRate = priced.length ? Math.round(priced.filter(f => f.theatrical > 0).length / priced.length * 100) : 0, avgRev = recent.length ? Math.round(avg(recent.map(f => f.reviews))) : null;
+  const slate = films.filter(f => f.rel === null && f.stage >= 0), st = structureOf(c);
+  const person = (id, alt) => id !== null && id !== undefined ? pl(id) : esc(alt || '—');
+  return `<div class="term">
+   <div class="term-top">${logoSVG(c, 72)}<div><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}${c.owner !== undefined ? ' · privately held by ' + esc(P(c.owner).name) : ''}</p><h2>${esc(c.name)} <span class="ticker">${esc(tickerOf(c))}</span></h2>
+    <p class="price">${c.closed !== null ? `<span class="bad">Closed ${c.closed}</span>` : `$${px.toFixed(2)}<small> a share</small> ${pct(chg(1))} <span class="muted small">1M</span> ${pct(chg(12))} <span class="muted small">1Y</span>`}</p></div>${sparkline(h.slice(-60))}</div>
+   <div class="kpis term-k"><div><span>Value</span><b>${fmtM(now)}</b></div><div><span>Cash</span><b class="${c.cash < 0 ? 'bad' : ''}">${fmtM(c.cash)}</b></div><div><span>Shares</span><b>${sh.toFixed(1)}M</b></div><div><span>Hit rate</span><b>${hitRate}%</b></div><div><span>Critics, 3 yrs</span><b>${avgRev ?? '—'}</b></div><div><span>Films / hits</span><b>${films.length} / ${c.hits}</b></div><div><span>Library films</span><b>${libCount(c)}</b></div><div><span>Library income</span><b>${fmtM(c.libIncLast)}</b></div></div>
+   <div class="cols two"><section class="panel"><h3>Who runs it</h3><div class="cr"><span>Chief executive</span><span>${person(st.ceo, st.ceoName)}</span></div><div class="cr"><span>Head of production</span><span>${person(st.hop, st.ceoName === st.dist ? '—' : 'Vacant')}</span></div><div class="cr"><span>Distribution</span><span>${esc(st.dist)}</span></div><div class="cr"><span>Finance</span><span>${esc(st.cfo)}</span></div><div class="cr"><span>Board</span><span>${st.board.map(esc).join(', ')}</span></div>${st.partners.length ? `<div class="cr"><span>Creative partners</span><span>${st.partners.map(pl).join(', ')}</span></div>` : ''}<p class="muted small">Divisions: ${st.divisions.join(' · ')}. Taste: ${Object.keys(c.taste).map(g => g.toLowerCase()).join(' and ')}.</p></section>
+   <section class="panel"><h3>On the slate</h3>${slate.length ? `<ul class="plain">${slate.slice(0, 10).map(f => `<li>${fl(f.id)} ${stageCell(f)} <span class="muted small">${fmtM(f.budget)}</span></li>`).join('')}</ul>` : '<p class="muted">Nothing in production.</p>'}
+    <h4>Analysts say</h4><p class="muted">${c.closed !== null ? 'Nothing: the company is gone.' : c.cash < 0 ? 'Debt is the story here. One more flop and the lenders take the keys.' : chg(12) !== null && chg(12) > 15 ? 'Momentum is real. The question is whether the next slate can match it.' : chg(12) !== null && chg(12) < -15 ? 'A rough year. Expect cost-cutting and a safer slate.' : hitRate > 55 ? 'A steady hand: more hits than misses, few surprises.' : 'Hard to read. Everything depends on the next couple of releases.'}</p></section></div></div>`;
+}
+// </companies>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -13838,13 +13968,12 @@ function ageOf(p) { return (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.bo
 function viewNews() {
   const st = UI.news;
   const types = ['All', 'Hit', 'Flop', 'Release', 'Gossip', 'Award', 'Set', 'Cult', 'Library', 'Trend', 'Career', 'Company', 'Legacy', 'Obituary'];
-  let items = S.news.filter(n => n.w >= S.historyEnd - 26);
-  if (st.type !== 'All') items = items.filter(n => n.type === st.type);
-  items = items.slice(-160).reverse();
+  let items = [];
+  for (let i = S.news.length - 1; i >= 0 && items.length < 160; i--) { const n = S.news[i]; if (n.w < S.historyEnd - 26) break; if (st.type === 'All' || n.type === st.type) items.push([n, i]); }
   const refLink = n => n.ref ? (n.ref.film !== undefined ? ` <span class="muted">·</span> ${fl(n.ref.film)}` : n.ref.person !== undefined ? ` <span class="muted">·</span> ${pl(n.ref.person)}` : n.ref.company !== undefined ? ` <span class="muted">·</span> ${cl(n.ref.company)}` : '') : '';
   return `<div class="head"><h2>Trade press</h2><p class="lede">Industry news from every hub. Things happen whether or not you're watching.</p></div>
   <div class="filters">${types.map(t => `<button class="pill${st.type === t ? ' on' : ''}" data-ntype="${t}">${t}</button>`).join('')}</div>
-  <ol class="feed">${items.map(n => `<li><time>${fmtDate(n.w, true)}</time>${chip(n.type, 't-' + n.type)}<span class="nt">${esc(n.text)}${refLink(n)}</span></li>`).join('') || '<li class="empty">Nothing yet. Advance time to see the industry move.</li>'}</ol>`;
+  <ol class="feed">${items.map(([n, i]) => `<li><time>${fmtDate(n.w, true)}</time>${chip(n.type, 't-' + n.type)}<span class="nt"><a href="#" class="lk headline" data-go="article:${i}">${esc(n.text)}</a>${refLink(n)}</span></li>`).join('') || '<li class="empty">Nothing yet. Advance time to see the industry move.</li>'}</ol>`;
 }
 
 function viewBoxOffice() {
@@ -13957,12 +14086,12 @@ function viewCompanies() {
   if (st.status === 'open') rows = rows.filter(c => c.closed === null);
   if (st.status === 'closed') rows = rows.filter(c => c.closed !== null);
   if (st.hub !== 'ALL') rows = rows.filter(c => c.hub === st.hub);
-  const G = { name: c => c.name, hub: c => hubName(c.hub), tier: c => c.tier, cash: c => c.cash, films: c => c.films.length, lib: c => libCount(c), libinc: c => c.libIncLast, founded: c => c.founded };
+  const G = { name: c => c.name, hub: c => hubName(c.hub), tier: c => c.tier, cash: c => c.cash, films: c => c.films.length, lib: c => libCount(c), libinc: c => c.libIncLast, founded: c => c.founded, price: c => c.hist && c.hist.length ? priceOf(c, c.hist[c.hist.length - 1]) : 0, chg: c => c.hist && c.hist.length > 12 ? c.hist[c.hist.length - 1] / c.hist[c.hist.length - 13] : 1 };
   rows = sortRows(rows.slice(), st, G);
   return `<div class="head"><h2>Companies</h2><p class="lede">Studios and production outfits. They finance films, win or lose money, and can go under.</p></div>
   <div class="filters">${sel('c-hub', hubOpts(), st.hub)}${sel('c-status', [['open', 'Operating'], ['closed', 'Closed'], ['all', 'All']], st.status)}</div>
-  <div class="tw"><table class="grid"><thead><tr>${th('name', 'Company', st)}${th('hub', 'Hub', st)}${th('tier', 'Size', st)}${th('cash', 'Cash', st, 'n')}${th('films', 'Films', st, 'n')}${th('lib', 'Library', st, 'n')}${th('libinc', 'Library income', st, 'n')}${th('founded', 'Founded', st, 'n')}<th>Status</th></tr></thead><tbody>
-  ${rows.map(c => `<tr><td>${cl(c.id)}</td><td>${esc(hubName(c.hub))}</td><td>${TIER[c.tier]}</td><td class="n ${c.cash < 0 ? 'neg' : ''}">${c.cash < 0 ? '−' : ''}${fmtM(Math.abs(c.cash))}</td><td class="n">${c.films.length}</td><td class="n">${libCount(c)}</td><td class="n">${fmtM(c.libIncLast)}</td><td class="n">${c.founded}</td><td>${c.closed !== null ? chip('Closed ' + c.closed, 'bad') : chip('Operating', 'good')}</td></tr>`).join('')}
+  <div class="tw"><table class="grid"><thead><tr><th></th>${th('name', 'Company', st)}<th>Ticker</th>${th('price', 'Price', st, 'n')}${th('chg', '1Y', st, 'n')}${th('hub', 'Hub', st)}${th('tier', 'Size', st)}${th('cash', 'Cash', st, 'n')}${th('films', 'Films', st, 'n')}${th('lib', 'Library', st, 'n')}${th('libinc', 'Library income', st, 'n')}${th('founded', 'Founded', st, 'n')}<th>Status</th></tr></thead><tbody>
+  ${rows.map(c => { const h = c.hist || [], px = h.length ? priceOf(c, h[h.length - 1]) : null, ch = h.length > 12 ? (h[h.length - 1] / h[h.length - 13] - 1) * 100 : null; return `<tr><td>${logoSVG(c, 22)}</td><td>${cl(c.id)}</td><td class="muted">${esc(tickerOf(c))}</td><td class="n">${px !== null && c.closed === null ? '$' + px.toFixed(2) : '—'}</td><td class="n ${ch !== null ? (ch >= 0 ? 'good' : 'bad') : ''}">${ch !== null ? (ch >= 0 ? '+' : '') + ch.toFixed(0) + '%' : '—'}</td><td>${esc(hubName(c.hub))}</td><td>${TIER[c.tier]}</td><td class="n ${c.cash < 0 ? 'neg' : ''}">${c.cash < 0 ? '−' : ''}${fmtM(Math.abs(c.cash))}</td><td class="n">${c.films.length}</td><td class="n">${libCount(c)}</td><td class="n">${fmtM(c.libIncLast)}</td><td class="n">${c.founded}</td><td>${c.closed !== null ? chip('Closed ' + c.closed, 'bad') : chip('Operating', 'good')}</td></tr>`; }).join('')}
   </tbody></table></div>`;
 }
 
@@ -14103,15 +14232,13 @@ function viewCompany(id) {
   const c = S.companies[id];
   const films = c.films.map(i => S.films[i]).sort((a, b) => (b.rel ?? 1e9) - (a.rel ?? 1e9));
   const fav = Object.entries(c.favors).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  return `<div class="head detail"><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}</p><h2>${esc(c.name)}</h2>
-  <p class="lede">${c.closed !== null ? `Closed in ${c.closed}.` : 'Operating.'} Cash ${fmtM(c.cash)}. ${c.films.length} films made, ${c.hits} hits. Favours ${Object.keys(c.taste).map(g => g.toLowerCase()).join(' and ')}.</p></div>
-  ${cinePanel(c.real, null, c.real ? `<p class="muted">Real dates: founded ${c.founded}${c.closed ? `, closed ${c.closed}` : ''}.</p>` : '')}
-  <div class="kpis"><div><span>Films in library</span><b>${libCount(c)}</b></div><div><span>Library income last year</span><b>${fmtM(c.libIncLast)}</b></div><div><span>Library value, next 10 years</span><b>${fmtM(S.films.reduce((s, f) => s + (f.owner === c.id ? libValue(f, S.year) : 0), 0))}</b></div><div><span>Libraries acquired</span><b>${c.acquired.length}</b></div></div>
+  return `${companyTerminal(c)}
   ${c.acquired.length ? `<p class="muted">Bought the libraries of ${c.acquired.map(i => link('company', i, S.companies[i].name)).join(', ')}.</p>` : ''}
   ${fav.length ? `<h3>Regular collaborators</h3><ul class="plain inline">${fav.map(([k]) => `<li>${pl(+k)} <span class="muted">${ROLE_LABEL[P(+k).role]}</span></li>`).join('')}</ul>` : ''}
   <h3>Films</h3>${films.length > 150 ? `<p class="count">${films.length.toLocaleString()} films · showing the latest 150</p>` : ''}<div class="tw"><table class="grid"><thead><tr><th>Title</th><th>Status</th><th>Director</th><th class="n">Cost</th><th class="n">Gross</th><th class="n">Lifetime</th></tr></thead><tbody>
   ${films.slice(0, 150).map(f => `<tr><td>${fl(f.id)}</td><td>${f.rel !== null ? 'Released ' + yearOf(f.rel) : esc(f.status)}</td><td>${pl(f.dir)}</td><td class="n">${fmtM(f.cost)}</td><td class="n">${f.rel !== null ? fmtM(f.total) : '—'}</td><td class="n">${f.rel !== null ? lifeCell(f) : '—'}</td></tr>`).join('')}
-  </tbody></table></div>`;
+  </tbody></table></div>
+  ${cinePanel(true, null, triviaList(companyLore(c)) + (c.real ? `<p class="muted">Based on a company from film history: its real founding and closing dates are kept.</p>` : ''))}`;
 }
 
 // <career-ui>
@@ -14878,7 +15005,7 @@ function render(keepScroll) {
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
   let html;
-  if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : viewCompany(cur.id));
+  if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : viewCompany(cur.id));
   else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld }[UI.tab];
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
   $('#main').innerHTML = html;
