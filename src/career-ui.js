@@ -82,6 +82,7 @@ function wardrobeShop() {
   return `<h4>Wardrobe shop</h4><div class="shop">${Object.entries(WARDROBE).map(([id, W]) => { const own = M.owned.includes(id), nm = LOOK[W.slot].opts[W.opt];
     return `<div class="shop-item${own ? ' owned' : ''}">${portraitSVG(Object.assign(defaultLook(), M.look, { [W.slot]: W.opt }), S.year - ME().born, 56)}<div><b>${esc(nm)}</b> <span class="muted">${esc(LOOK[W.slot].label.toLowerCase())}</span><p class="muted">${esc(W.d)}</p><p>${fxBadges(W)}</p>${own ? '<span class="chip t-Award">Owned</span>' : `<button class="btn-s" data-buy="${id}"${M.cash < W.price ? ' disabled' : ''}>Buy ${usd(W.price)}</button>`}</div></div>`; }).join('')}</div>`;
 }
+function buildBanner() { return UI.building ? `<div class="buildbar"><span>${UI.ccQueued ? '✓ You\'re ready. Your career starts the moment the world is built…' : 'The world is still being built while you create your character:'} <b id="buildtxt">${esc(UI.buildTxt || '')}</b></span><span class="bb"><i id="buildfill" style="width:${(UI.buildPct || 0).toFixed(1)}%"></i></span></div>` : ''; }
 function viewCreator() {
   const c = UI.cc = UI.cc || ccDefaults();
   const left = SKILL_POINTS - ccSpent(c);
@@ -90,7 +91,7 @@ function viewCreator() {
   const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : (i === c.favs.length ? `<input class="favin" id="fav-q" value="${esc(UI.favq || '')}" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}" autocomplete="off">${favResults()}` : '<span class="muted">…</span>')}</li>`; };
   const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
   const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span> ${fxBadges(TRAITS[t])}</button>`; };
-  return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
+  return buildBanner() + `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
   <div class="ccrand"><button class="btn-s" data-randcc="basics">Randomise the basics</button> <button class="btn-s" data-randcc="all">Randomise everything</button> <span class="muted">Then tweak anything, or just go to the party.</span></div>
   <section class="panel cc"><h3>The basics</h3>
    <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 150)}</div><div>
@@ -195,6 +196,7 @@ function viewParty() {
   return `<div class="head partyhead"><div class="pf">${portraitOf(ME(), 72)}</div><div><p class="eyebrow">New Year's Eve · ${S.startYear - 1}</p><h2>${esc(sc.title)}</h2></div></div>
   ${(pt.log || []).map(l => `<div class="plog"><span class="muted">${esc(l.title)}.</span> ${esc(l.choice)}${rollCard(l.roll, true)}<p>${esc(l.t)}</p></div>`).join('')}
   <section class="panel scene"><p class="big-p">${esc(sc.text)}</p>${sc.sys ? `<p class="sys"><b>How it works</b> ${esc(sc.sys)}</p>` : ''}${opts}</section>
+  <p><button class="btn-s ghost" data-partyauto="1" title="Make the sensible choice in every scene and get to the first week">⏩ Let the night play out</button> <span class="muted small">Skip ahead to January; the party still happens, with sensible choices.</span></p>
   <p class="note">${pt.drinks >= 3 ? 'You have had a few: disadvantage on your rolls until you sober up.' : 'Rolls are a d20 plus your modifier against the difficulty. A natural 20 always works; a natural 1 never does.'}</p>`;
 }
 
@@ -520,6 +522,7 @@ function careerActive() { return S && S.me && S.me.party && S.me.party.done && !
 function endWeekAct(t = 'end') { return { t, cal: calOf().map(r => r.slice()), apps: [...UI.apps], train: S.me.train, catchWith: S.me.catchWith }; }
 function playStep(t) {
   if (UI.busy || !careerActive()) return;
+  if (typeof autoBeforeStep === 'function') autoBeforeStep();
   if (pending().length) { UI.tab = 'you'; UI.dtab = 'today'; UI.stack = []; render(); return; }
   const w0 = S.week;
   doAct(endWeekAct(t));
@@ -548,6 +551,7 @@ function careerClick(t) {
   if (typeof schoolClick === 'function' && schoolClick(t)) return true;
   if (typeof standingClick === 'function' && standingClick(t)) return true;
   if (typeof hubClick === 'function' && hubClick(t)) return true;
+  if (typeof autoClick === 'function' && autoClick(t)) return true;
   if (t.dataset.abf) { UI.abf = t.dataset.abf; render(true); return true; }
   if (t.dataset.schools !== undefined) { UI.schools = !!t.dataset.schools; render(true); return true; }
   if (t.dataset.cc) {
@@ -561,6 +565,7 @@ function careerClick(t) {
     else if (g === 'randfav') { if (c.favs.length >= 5) c.favs = []; while (c.favs.length < 5) { const id = randomFav(c); if (!id) break; c.favs.push(id); } }
     else if (g === 'go') {
       c.name = ($('#cc-name').value || '').trim() || suggestName(c.hub, c.g);
+      if (UI.building) { UI.ccQueued = JSON.parse(JSON.stringify(c)); render(true); return true; }
       doAct({ t: 'create', c: JSON.parse(JSON.stringify(c)) });
       UI.apps = new Set(); UI.stack = []; render(); return true;
     } else c[g] = v;
@@ -637,7 +642,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

@@ -1051,6 +1051,7 @@ function applyAct(a) {
     case 'mentor': return mentorAct(a);
     case 'school': return applySchool(a);
     case 'claimamb': return claimAmb(a);
+    case 'auto': return autoAct(a);
     case 'pinamb': return pinAmb(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'move': return moveHome(a);
