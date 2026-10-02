@@ -36,7 +36,7 @@ function viewSong(id) {
   const unit = { music: 'streams', creator: 'views', podcast: 'downloads', stage: 'tickets sold' }[x.field] || 'plays';
   return `<div class="head"><p class="eyebrow">${esc(FIELD_LABEL[x.field] || '')} · ${fmtDate(slot * 6, true)}</p><h2>${esc(songTitle(x, slot))}</h2><p class="lede">By ${figLink(x)}${lab ? ` · ${mcoLink(lab[1])}` : ''} · ${x.field === 'stage' ? 'running time ' + (80 + Math.floor(r() * 70)) + ' min' : x.field === 'podcast' ? (20 + Math.floor(r() * 60)) + ' min episodes' : `${mins}:${String(secs).padStart(2, '0')}`}</p></div>
    <div class="kpis mini"><div><span>${unit}</span><b>${streams.toLocaleString()}</b></div><div><span>Chart peak</span><b>#${peak}</b></div><div><span>Weeks charting</span><b>${Math.max(1, Math.round((41 - peak) / 4))}</b></div></div>
-   <section class="panel"><h3>Credits</h3><p>${x.field === 'stage' ? 'Written by' : 'Written by'} ${figLink(x)}${writers.length ? ', ' + writers.map(pl).join(', ') : ''}${prod.length ? `<br>Produced by ${prod.map(pl).join(', ')}` : ''}</p><h3>More by ${esc(x.name)}</h3><p>${figReleases(x).filter(s => s !== slot).slice(0, 6).map(s => songLink(x, s)).join(' · ')}</p></section>`;
+   <section class="panel"><h3>Credits</h3><p>${x.field === 'stage' ? 'Written by' : 'Written by'} ${figLink(x)}${writers.length ? ', ' + writers.map(pl).join(', ') : ''}${prod.length ? `<br>Produced by ${prod.map(pl).join(', ')}` : ''}</p>${lab && typeof coRef === 'function' ? (() => { const R = coRef('m' + lab[1]), O = orgChart(R), A = O.D.find(d => /A&R|Creative|Production|Artistic/.test(d.dept)), Mk = O.D.find(d => /Marketing/.test(d.dept)); return `<p class="small">At ${mcoLink(lab[1])}: ${A ? 'A&R ' + empLink(R, A.start + Math.floor(r() * Math.min(A.n, 20))) : ''}${Mk ? ' · marketing ' + empLink(R, Mk.start + Math.floor(r() * Math.min(Mk.n, 20))) : ''}</p>`; })() : ''}<h3>More by ${esc(x.name)}</h3><p>${figReleases(x).filter(s => s !== slot).slice(0, 6).map(s => songLink(x, s)).join(' · ')}</p></section>`;
 }
 function viewMediaCo(i) {
   const c = MEDIA_COS[+i]; if (!c) return '<p class="muted">Not found.</p>';
@@ -45,7 +45,7 @@ function viewMediaCo(i) {
   const jobs = (S.me ? S.me.board : []).filter(p => p.mco === c.n);
   return `<div class="head"><p class="eyebrow">${esc(MCO_TYPE[c.type] || c.type)} · ${esc(hubName(c.hub))} · founded ${c.f}</p><h2>${esc(c.n)}</h2><p class="lede">${esc(c.d)}</p></div>
    <div class="cols two"><section class="panel"><h3>Roster</h3>${roster.length ? `<ul class="plain">${roster.map(x => `<li>${figLink(x)} <span class="muted small">${esc(KIND_LABEL[x.kind] || x.kind)} · ${Math.round(x.fans).toLocaleString()} fans</span></li>`).join('')}</ul>` : '<p class="muted small">Nobody signed that we know of.</p>'}</section>
-   <section class="panel"><h3>Hiring now</h3>${jobs.length ? `<ul class="plain">${jobs.map(p => `<li><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a> <span class="muted small">${fmtCash(p.rate)}/day</span></li>`).join('')}</ul>` : '<p class="muted small">Nothing on your board from them this week.</p>'}<h3>In the press</h3>${newsList(newsAbout(c.n))}</section></div>`;
+   <section class="panel"><h3>Hiring now</h3>${jobs.length ? `<ul class="plain">${jobs.map(p => `<li><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a> <span class="muted small">${fmtCash(p.rate)}/day</span></li>`).join('')}</ul>` : '<p class="muted small">Nothing on your board from them this week.</p>'}<h3>In the press</h3>${newsList(newsAbout(c.n))}</section></div>${typeof staffDirectoryHTML === 'function' ? staffDirectoryHTML(coRef('m' + (+i)), false) : ''}`;
 }
 function viewWork(id) {
   const M = S.me, w = (M.works || []).find(x => x.id === +id); if (!w) return '<p class="muted">Not found.</p>';
@@ -60,6 +60,9 @@ function viewExtra(cur) {
   if (cur.kind === 'song') return viewSong(cur.id);
   if (cur.kind === 'mco') return viewMediaCo(cur.id);
   if (cur.kind === 'work') return viewWork(cur.id);
+  if (cur.kind === 'emp' && typeof viewEmployee === 'function') return viewEmployee(cur.id);
+  if (cur.kind === 'staff' && typeof staffDirectoryHTML === 'function') { const R = coRef(cur.id); return R ? staffDirectoryHTML(R, true) : ''; }
+  if (cur.kind === 'biz' && typeof viewBiz === 'function') return viewBiz(cur.id);
   if (cur.kind === 'paper') return `<section class="panel">${paperHTML()}</section>`;
   return '';
 }

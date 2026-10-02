@@ -37,7 +37,7 @@ function nameEmployer(p) {
   if (mode === 'co') { const L = MEDIA_COS.map((c, i) => [c, i]).filter(([c]) => c.type === kind && c.f <= S.year), near = L.filter(([c]) => c.hub === hub), P2 = near.length ? near : L; if (P2.length) { const [c, i] = P2[Math.floor(r() * P2.length)]; p.mco = c.n; p.mcoi = i; return; } }
   const N = BIZ_NAMES[kind] || BIZ_NAMES.office; p.mco = `${N[0][Math.floor(r() * N[0].length)]} ${N[1][Math.floor(r() * N[1].length)]}`.trim();
 }
-function employerLink(p) { return p.mcoi !== undefined ? mcoLink(p.mcoi) : p.co !== undefined && S.companies[p.co] ? cl(p.co) : esc(p.mco || ''); }
+function employerLink(p) { return p.mcoi !== undefined ? mcoLink(p.mcoi) : p.co !== undefined && S.companies[p.co] ? cl(p.co) : p.mco ? `<a href="#" class="lk" data-go="biz:b${esc(p.mco)}|${p.away || (S.me ? S.me.hub : 'hollywood')}">${esc(p.mco)}</a>` : ''; }
 function nameBoard() { for (const p of S.me.board) nameEmployer(p); }
 
 // ---- the slate: your company's films, and your hand on them ----

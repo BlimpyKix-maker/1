@@ -553,6 +553,7 @@ function careerClick(t) {
   if (typeof schoolClick === 'function' && schoolClick(t)) return true;
   if (typeof standingClick === 'function' && standingClick(t)) return true;
   if (typeof awardsClick === 'function' && awardsClick(t)) return true;
+  if (typeof staffClick === 'function' && staffClick(t)) return true;
   if (typeof hubClick === 'function' && hubClick(t)) return true;
   if (typeof autoClick === 'function' && autoClick(t)) return true;
   if (t.dataset.trophy) { const [k, id] = t.dataset.trophy.split(':'); doAct({ t: 'trophy', k, id: +id }); render(true); return true; }
@@ -646,7 +647,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

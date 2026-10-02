@@ -66,6 +66,9 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/os.js` | ApplOS, the computer: `osPanel` (sidebar groups `OS_GROUPS`, header, body), apps `osHome`, `osJobs`, `osCal`, `osContacts`, `osBank` (`osNetWorth`), scoped dark theme under `.os` |
 | `src/archive2.js` | Pages for media figures (`viewFigure`, ids `hub~i`), songs (`viewSong`), media companies (`viewMediaCo`), your works (`viewWork`); `viewExtra` route hook; The Daily Slate (`paperHTML`, sections, search `npq`, monthly archive); `playerArticle` for stories about you |
 | `src/companywork.js` | Named employers for every off-set job (`nameEmployer`, `BIZ_NAMES`, `employerLink`); company slate influence by rung (`SWAY`, `slateWeek`, `f.exec`), big calls (`SLATE_CALLS`, `slatePick`, inbox kind `slate`), `slateHTML`, `companyWorkHTML` |
+| `src/awards2.js` | Full winners for every prize: `ceremonyRecord` (`CER_CATS`, `CER_ALIAS` canonical names, `CER_START`), `mediaRecord` (`MEDIA_CATS`), `contestRecord`, `allWinners` (cached), `awardTableHTML` (category chips, `ab-cat`/`ab-y`/`ab-sort`), `festLineup` |
+| `src/trailer2.js` | Trailers per film: `trailerPlan2` (genre scripts `TR_LINES`, voice-over `TR_VO`, freeze/stinger/laurel/sub segments, `titleNoun`/`plural`), `trailerScore` (genre sequencer `TR_SCORES`) |
+| `src/staff.js` | Company staffs in every industry: `coRef` keys (`f<id>` film, `m<idx>` media, `b<name>|<hub>` small business), `headcount`, `orgChart` (`DEPTS`, rank pyramid), `staffAt`, `bossOf`, `viewEmployee`, `staffDirectoryHTML` (routes `staff:`, `emp:`, `biz:`), `companyHistory`, `filmStaffHTML`; cache `ARCH` keyed to S |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
