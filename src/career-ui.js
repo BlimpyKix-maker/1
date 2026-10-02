@@ -470,6 +470,7 @@ function viewDesk() {
      <p class="note">${esc(livingPhrase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-dtab="life">Move or change how you travel</button></p></section>
      ${cityPanel()}`;
     case 'phone': return phonePanel();
+    case 'computer': return computerPanel();
     case 'work': return `<section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
@@ -576,6 +577,9 @@ function careerClick(t) {
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
   if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
+  if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
+  if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
+  if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
@@ -600,7 +604,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -658,7 +662,7 @@ function makeFilmForm(c, k, x) {
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {
   const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'today';
-  const tabs = [['today', 'Today', pend, 'bad'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
+  const tabs = [['today', 'Today', pend, 'bad'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
 // Rebuild a saved career: the world is already built from the same seed; feed it the log.

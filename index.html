@@ -127,6 +127,20 @@
 .thr2 .tt { display: flex; align-items: center; gap: 6px; } .thr2 .tt time { margin-left: auto; font-size: 11px; color: var(--muted); }
 .thr2 .prev { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .thr2.unread b { color: var(--accent); }
+.monitor { background: #1b1b1f; border-radius: 14px; padding: 14px 14px 22px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+.desktop { background: linear-gradient(135deg, var(--slate), var(--accent)); border-radius: 6px; min-height: 420px; padding: 14px; display: grid; grid-template-columns: 200px 1fr; gap: 14px; align-items: start; }
+.icons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+.appicon { all: unset; cursor: pointer; display: grid; justify-items: center; gap: 2px; color: #fff; font-size: 12px; text-align: center; padding: 6px; border-radius: 8px; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.appicon span { font-size: 26px; } .appicon:hover, .appicon.on, .appicon:focus-visible { background: rgba(255,255,255,.18); }
+.window { background: var(--panel); border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.35); max-height: 520px; display: flex; flex-direction: column; }
+.wbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--bg); border-bottom: 1px solid var(--line); font-weight: 600; }
+.wbody { padding: 12px; overflow-y: auto; }
+.wallnote { color: #fff; opacity: .8; }
+.flick .post { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); } .flick .post p { margin: 2px 0; }
+.sweep { display: grid; gap: 2px; } .sweep .cell { width: 28px; height: 28px; padding: 0; border: 1px solid var(--line); background: var(--accent-soft); border-radius: 3px; font: 600 13px var(--f-data); }
+.sweep .cell.open { background: var(--panel); } .sweep .cell.mine { background: var(--bad); }
+#pc-notes { width: 100%; font: inherit; }
+@media (max-width: 700px) { .desktop { grid-template-columns: 1fr; } .icons { grid-template-columns: repeat(5, 1fr); } }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -11254,6 +11268,7 @@ function applyAct(a) {
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
     case 'reply': return replyText(a);
+    case 'like': return likePost(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
     case 'found': return foundCompany(a);
@@ -14120,6 +14135,62 @@ function replyText(a) {
 // Phone-like rendering helpers.
 function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
 // </life-phone>
+// <computer>
+// ---------------- The computer on your desk ----------------
+// A desktop with apps: mail, a crew job site, the trades, the archive, your bank, a social feed, notes and a game
+// for when you should be writing. Most open a window onto the game; a few are just for fiddling with.
+const APPS = [
+  ['mail', '✉️', 'Mail'], ['jobs', '💼', 'CrewList'], ['trades', '📰', 'The Daily Slate'], ['gea', '🎞️', 'GEA'], ['bank', '🏦', 'Bank'],
+  ['flick', '📸', 'Flick'], ['notes', '📝', 'Notes'], ['sweep', '🎬', 'Clapper Sweep'], ['weather', '⛅', 'Weather'], ['write', '✍️', 'Scriptwriter']
+];
+// Flick: what your contacts post. Same posts every week for the same people (hash), plus their real life events.
+const FLICK_POSTS = ['On set at 5am. Coffee number three. {film}', 'Wrapped! Thank you to the best crew in the world 🎬', 'Brunch with the best people', 'New headshots. Be honest.', 'The view from today\'s location 🌅', 'Rewatching an old favourite tonight. Some films just hold up.', 'Reading scripts in the park like a cliché', 'My dog has better taste in films than most critics', 'Can\'t say what I\'m working on. But it\'s big. 🤐', 'Festival season. Send help (and snacks).', 'Grateful.', 'This sunset did NOT need to go this hard'];
+function flickFeed() {
+  const M = S.me, out = [];
+  for (const id of aliveKnown()) {
+    const p = P(id);
+    for (const e of (p.life || []).filter(e => S.week - e.w < 8)) out.push({ id: `l${id}-${e.w}`, who: id, w: e.w, t: e.t + '.' });
+    const r = hashRand(id * 31 + S.week), film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
+    if (r() < .35) out.push({ id: `p${id}-${S.week}`, who: id, w: S.week, t: FLICK_POSTS[Math.floor(r() * FLICK_POSTS.length)].replace('{film}', film ? '#' + film.title.replace(/\s+/g, '') : '') });
+  }
+  return out.sort((a, b) => b.w - a.w).slice(0, 20);
+}
+function likePost(a) { const M = S.me; M.liked = M.liked || {}; if (M.liked[a.post] || !M.known[a.who]) return false; M.liked[a.post] = S.week; addTie(ME(), P(a.who), .3); return true; }
+// Clapper Sweep: a little minesweeper, kept in the page only (not in your career).
+function sweepNew() { const n = 8, mines = new Set(); while (mines.size < 9) mines.add(Math.floor(Math.random() * n * n)); UI.sweep = { n, mines: [...mines], open: [], flag: [], over: 0 }; }
+function sweepCount(i) { const G = UI.sweep, n = G.n, x = i % n, y = Math.floor(i / n); let c = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = x + dx, Y = y + dy; if ((dx || dy) && X >= 0 && Y >= 0 && X < n && Y < n && G.mines.includes(Y * n + X)) c++; } return c; }
+function sweepOpen(i) {
+  const G = UI.sweep; if (G.over || G.open.includes(i)) return;
+  if (G.mines.includes(i)) { G.over = -1; G.open.push(...G.mines); return; }
+  const stack = [i];
+  while (stack.length) { const j = stack.pop(); if (G.open.includes(j)) continue; G.open.push(j); if (!sweepCount(j)) { const n = G.n, x = j % n, y = Math.floor(j / n); for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const X = x + dx, Y = y + dy; if (X >= 0 && Y >= 0 && X < n && Y < n) stack.push(Y * n + X); } } }
+  if (G.open.length >= G.n * G.n - G.mines.length) G.over = 1;
+}
+function notesKey() { return `applebox-notes-${S.seed}-${S.me ? S.me.id : 0}`; }
+function appWindow(k) {
+  const M = S.me, me = ME();
+  switch (k) {
+    case 'mail': return `<ul class="inbox">${M.inbox.slice(-12).reverse().map(it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}">${inboxCard(it)}</li>`).join('') || '<li class="muted">No mail.</li>'}</ul>`;
+    case 'jobs': { const q = (UI.cq || '').toLowerCase(); const L = M.board.filter(p => !q || p.t.toLowerCase().includes(q) || (p.away && hubName(p.away).toLowerCase().includes(q))); return `<p><input id="cq" type="search" placeholder="Search jobs, cities…" value="${esc(UI.cq || '')}"> <span class="muted small">${L.length} listings · apply from the board</span> <button class="linkish" data-dtab="work">Open the board ›</button></p><ul class="plain">${L.slice(0, 20).map(p => `<li><b>${esc(p.t)}</b> <span class="muted">${p.film !== null ? esc(S.films[p.film].title) + ' · ' : ''}${p.away ? esc(hubName(p.away)) + ' · ' : ''}${p.rate ? fmtCash(p.rate) + '/day' : 'unpaid'} · ${oddsBand(hireOdds(p))}</span></li>`).join('')}</ul>`; }
+    case 'trades': { const L = []; for (let i = S.news.length - 1; i >= 0 && L.length < 14; i--) L.push(i); return `<p class="eyebrow">The Daily Slate · ${fmtDate(S.week, true)}</p><ul class="plain">${L.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`; }
+    case 'gea': { const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return `<p><span class="gealogo">GEA</span> <input id="gq" type="search" placeholder="Search films and people…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
+    case 'bank': { const life = ORIGIN.life[M.life], c = typeof myCo === 'function' ? myCo() : null; const money = M.diary.filter(d => /^Money:/.test(d.t)).slice(-6).reverse(); return `<div class="kpis mini"><div><span>Balance</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b></div><div><span>Rent</span><b>${fmtCash(usd(life.rent))}/wk</b></div><div><span>Owed</span><b>${fmtCash(M.debt + (M.shark || 0))}</b></div>${c ? `<div><span>${esc(c.name)}</span><b>${fmtCash(Math.round(c.cash * 1e6))}</b></div>` : ''}</div><h4>Recent weeks</h4><ul class="plain">${money.map(d => `<li><time>${fmtDate(d.w, true)}</time> ${esc(d.t.replace(/^Money: /, ''))}</li>`).join('') || '<li class="muted">Nothing yet.</li>'}</ul>`; }
+    case 'flick': { const L = flickFeed(); return `<div class="flick">${L.map(x => `<div class="post">${phoneAvatar(x.who, 34)}<div><b>${pl(x.who)}</b> <span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w' : 'this week'}</span><p>${esc(x.t)}</p>${(M.liked || {})[x.id] ? '<span class="muted small">♥ Liked</span>' : `<button class="linkish" data-like="${x.id}|${x.who}">♡ Like</button>`}</div></div>`).join('') || '<p class="muted">Nobody you know has posted anything. Meet more people.</p>'}</div>`; }
+    case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
+    case 'sweep': { if (!UI.sweep) sweepNew(); const G = UI.sweep; return `<p class="muted small">${G.over > 0 ? 'Cleared! That\'s a wrap.' : G.over < 0 ? 'Boom. Reshoot?' : 'Find the clean takes. Avoid the 9 bad ones.'} <button class="btn-s ghost" data-sweep="new">New game</button></p><div class="sweep" style="grid-template-columns:repeat(${G.n}, 28px)">${Array.from({ length: G.n * G.n }, (_, i) => { const o = G.open.includes(i), m = G.mines.includes(i), c = o && !m ? sweepCount(i) : 0; return `<button class="cell${o ? ' open' : ''}${o && m ? ' mine' : ''}" data-sweep="${i}" ${o || G.over ? 'disabled' : ''}>${o ? (m ? '💥' : c || '') : ''}</button>`; }).join('')}</div>`; }
+    case 'weather': { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
+    case 'write': return `<p>Your scripts live in the Create tab.</p><p><button class="btn-s" data-dtab="create">Open your scripts ›</button></p>`;
+  }
+  return '';
+}
+function computerPanel() {
+  const k = UI.app, A = APPS.find(a => a[0] === k);
+  return `<section class="panel computer"><h3>🖥️ Your computer</h3><div class="monitor"><div class="desktop">
+    <div class="icons">${APPS.map(([k2, ic, l]) => `<button class="appicon${k === k2 ? ' on' : ''}" data-app="${k2}"><span>${ic}</span>${esc(l)}</button>`).join('')}</div>
+    ${A ? `<div class="window"><div class="wbar"><span>${A[1]} ${esc(A[2])}</span><button class="linkish" data-app="">✕</button></div><div class="wbody">${appWindow(k)}</div></div>` : '<p class="muted wallnote">Double-click nothing. Single-click an app.</p>'}
+   </div></div></section>`;
+}
+// </computer>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -14912,6 +14983,7 @@ function viewDesk() {
      <p class="note">${esc(livingPhrase())}${M.hoodWhere ? ' in ' + esc(M.hoodWhere) : ''} and get around by ${esc(VEHICLES[M.vehicle || 'transit'].label.toLowerCase())}. <button class="linkish" data-dtab="life">Move or change how you travel</button></p></section>
      ${cityPanel()}`;
     case 'phone': return phonePanel();
+    case 'computer': return computerPanel();
     case 'work': return `<section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
@@ -15018,6 +15090,9 @@ function careerClick(t) {
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
   if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
+  if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
+  if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
+  if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
@@ -15042,7 +15117,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -15100,7 +15175,7 @@ function makeFilmForm(c, k, x) {
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {
   const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'today';
-  const tabs = [['today', 'Today', pend, 'bad'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
+  const tabs = [['today', 'Today', pend, 'bad'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
 // Rebuild a saved career: the world is already built from the same seed; feed it the log.
@@ -15330,6 +15405,8 @@ document.addEventListener('change', e => {
 let qTimer;
 document.addEventListener('input', e => {
   const id = e.target.id;
+  if (id === 'pc-notes') { try { localStorage.setItem(notesKey(), e.target.value); } catch (err) { /* no storage */ } return; }
+  if (id === 'cq' || id === 'gq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'bo-q') { UI.bo.q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#bo-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'fav-q') { UI.favq = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#fav-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 150); return; }
   if (id !== 'f-q' && id !== 'p-q' && id !== 'j-q') return;
