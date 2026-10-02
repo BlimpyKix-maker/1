@@ -44,6 +44,7 @@ function mailWeek() {
   const play = (M.works || []).find(w => w.plat === 'stage' && w.q >= 70 && S.week - w.rel === 3);
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
   { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
+  if (typeof endorseWeek === 'function') endorseWeek();
   if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
 }
 const FAVOURS = [
@@ -84,6 +85,7 @@ function mailAct(a) {
   else if (A.k === 'gig') { M.cash += A.fee; M.energy = clamp(M.energy - 10, 0, 100); M.fol.spinly = (M.fol.spinly || 0) * 1.03 + 20; }
   else if (A.k === 'guest') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.08 + 40; }
   else if (A.k === 'collab') { for (const k of ['vidwire', 'blip']) if (M.fol[k]) M.fol[k] = M.fol[k] * 1.06 + 50; }
+  else if (A.k === 'endorse' && typeof endorseAccept === 'function') endorseAccept(A);
   else if (A.k === 'commission') { M.cash += A.fee; (M.flags = M.flags || {}).commissioned = S.week; }
   return true;
 }
@@ -108,8 +110,8 @@ function tradeAct(a) {
   const M = S.me, c = S.companies[a.co]; if (!c || c.closed !== null) return false;
   const h = c.hist || [], px = priceOf(c, h.length ? h[h.length - 1] : companyWorth(c)), n = Math.round(a.n);
   M.port = M.port || {};
-  if (n > 0) { const cost = Math.round(px * n); if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; }
-  else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k); M.port[a.co] = have - k; }
+  if (n > 0) { const cost = Math.round(px * n); if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; (M.portCost = M.portCost || {})[a.co] = ((M.portCost || {})[a.co] || 0) + cost; }
+  else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k); M.port[a.co] = have - k; M.portCost = M.portCost || {}; M.portCost[a.co] = Math.round((M.portCost[a.co] || 0) * (have - k) / have); }
   return true;
 }
 function tickerApp() {
@@ -119,7 +121,7 @@ function tickerApp() {
   const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => t + px(S.companies[+id]) * n, 0);
   const idx = [['box', 'Box office'], ['music', 'Music streaming'], ['video', 'Online video'], ['pod', 'Podcasts']].map(([k, l]) => { const v = Array.from({ length: 13 }, (_, i) => fieldIndex(k, S.week - (12 - i) * 4)); return `<div class="tick"><span>${l}</span>${v[12] ? sparkline(v, 120, 28) : '<span class="muted small">not yet invented</span>'}<b class="${v[12] >= v[0] ? 'good' : 'bad'}">${v[0] ? ((v[12] / v[0] - 1) * 100).toFixed(0) + '%' : ''}</b></div>`; }).join('');
   return `<p class="eyebrow">Industry indexes, last 12 months</p><div class="ticks">${idx}</div>
-   <p class="eyebrow">Studios${port.length ? ` · your portfolio ${fmtCash(val)}` : ''}</p><div class="tw"><table class="grid"><thead><tr><th>Ticker</th><th>Company</th><th class="n">Price</th><th class="n">1Y</th><th class="n">You own</th><th></th></tr></thead><tbody>${cos.map(c => `<tr><td><b>${esc(tickerOf(c))}</b></td><td class="small">${esc(c.name)}</td><td class="n">$${px(c).toFixed(2)}</td><td class="n ${ch(c) >= 0 ? 'good' : 'bad'}">${ch(c) >= 0 ? '+' : ''}${ch(c).toFixed(0)}%</td><td class="n">${(M.port || {})[c.id] || 0}</td><td><button class="btn-s ghost" data-trade="${c.id}:10">Buy 10</button>${(M.port || {})[c.id] ? ` <button class="btn-s ghost" data-trade="${c.id}:-10">Sell 10</button>` : ''}</td></tr>`).join('')}</tbody></table></div>
+   <p class="eyebrow">The market</p>${typeof marketApp === 'function' ? marketApp() : ''}
    <p class="eyebrow">What's hot</p><p class="small">${GENRES.map(g => [g, (S.app[HUBS[M.hub].m] || {})[g] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([g]) => esc(g)).join(' · ')} are up in ${esc(MARKETS[HUBS[M.hub].m].name)}.</p>`;
 }
 // ---- Studio: a step sequencer for songs, a waveform cutter for podcasts ----
@@ -222,6 +224,11 @@ function computerClick(t) {
   const d = t.dataset;
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
+  if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
+  if (d.wall) { UI.wall = d.wall; try { localStorage.setItem('ab-wall', d.wall); } catch (e) { } render(true); return true; }
+  if (d.smf) { const [k, v] = d.smf.split(':'); (UI.smf = UI.smf || { role: 'all', where: 'all' })[k] = v; render(true); return true; }
+  if (d.mkf) { UI.mkf = d.mkf; render(true); return true; }
+  if (d.geatab) { UI.geatab = d.geatab; render(true); return true; }
   if (d.mailact) { const [id, k] = d.mailact.split(':'); doAct({ t: 'mail', id: +id, k }); render(true); return true; }
   if (d.trade) { const [co, n] = d.trade.split(':'); doAct({ t: 'trade', co: +co, n: +n }); render(true); return true; }
   if (d.seq) { const [r, c] = d.seq.split(':').map(Number), G = seqGrid(); G[r][c] = G[r][c] ? 0 : 1; render(true); return true; }
@@ -260,4 +267,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

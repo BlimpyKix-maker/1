@@ -80,6 +80,9 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .ladder tr.me td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .repgrid { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; } @media (max-width: 640px) { .repgrid { grid-template-columns: 1fr; } } .reppanel .arch { margin: 2px 0 8px; } .reppanel .say { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--accent); font-style: italic; }
 .ambrow.done span:first-child { color: var(--good); } .claimbar { padding: 8px; border: 1px dashed var(--accent); border-radius: 6px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .ambcat { margin: 6px 0; } .ambcat summary { cursor: pointer; padding: 4px 0; }
+.starm { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; } .starm li { display: grid; grid-template-columns: 26px 36px 1fr auto; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); } .starm .rk { font: 700 16px var(--f-display); text-align: right; }
+.menubar { display: flex; justify-content: space-between; color: #eee; font: 500 12px var(--f-body, sans-serif); padding: 0 6px 8px; } .menubar .mb-r { display: flex; gap: 12px; }
+.widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; } .widget { background: rgba(255,255,255,.88); border-radius: 10px; padding: 10px 12px; box-shadow: 0 4px 14px rgba(0,0,0,.18); backdrop-filter: blur(6px); } .widget.wide { grid-column: span 2; } .widget h5 { margin: 0 0 6px; font: 600 12px var(--f-display); letter-spacing: .06em; text-transform: uppercase; } .widget p { margin: 2px 0; } .widget .wl { display: block; text-align: left; margin: 0 0 6px; } @media (max-width: 600px) { .widget.wide { grid-column: auto; } }
 .stills { display: flex; flex-wrap: wrap; gap: 8px; }
 .stills figure { margin: 0; } .stills figcaption { font-size: 11px; color: var(--muted); max-width: 240px; }
 .still { border-radius: 3px; display: block; }
@@ -10940,6 +10943,7 @@ function hireFactors(post) {
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof fieldFactors === 'function') F.push(...fieldFactors(post));
   if (typeof almaFactors === 'function') F.push(...almaFactors(post));
+  if (typeof starFactors === 'function') F.push(...starFactors(post));
   if (typeof repFactors === 'function') F.push(...repFactors(post));
   if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
@@ -14557,7 +14561,7 @@ function appWindow(k) {
     case 'mail': return mailApp();
     case 'jobs': { const q = (UI.cq || '').toLowerCase(); const L = M.board.filter(p => !q || p.t.toLowerCase().includes(q) || (p.away && hubName(p.away).toLowerCase().includes(q))); return `<p><input id="cq" type="search" placeholder="Search jobs, cities…" value="${esc(UI.cq || '')}"> <span class="muted small">${L.length} listings · apply from the board</span> <button class="linkish" data-dtab="work">Open the board ›</button></p><ul class="plain">${L.slice(0, 20).map(p => `<li><b>${esc(p.t)}</b> <span class="muted">${p.film !== null ? esc(S.films[p.film].title) + ' · ' : ''}${p.away ? esc(hubName(p.away)) + ' · ' : ''}${p.rate ? fmtCash(p.rate) + '/day' : 'unpaid'} · ${oddsBand(hireOdds(p))}</span></li>`).join('')}</ul>`; }
     case 'trades': { const L = []; for (let i = S.news.length - 1; i >= 0 && L.length < 14; i--) L.push(i); return `<p class="eyebrow">The Daily Slate · ${fmtDate(S.week, true)}</p><ul class="plain">${L.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`; }
-    case 'gea': { const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return `<p><span class="gealogo">GEA</span> <input id="gq" type="search" placeholder="Search films and people…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
+    case 'gea': { const tabsG = `<p class="bf-row"><span class="gealogo">GEA</span> <button class="pill${UI.geatab !== 'star' ? ' on' : ''}" data-geatab="search">Search</button><button class="pill${UI.geatab === 'star' ? ' on' : ''}" data-geatab="star">⭐ Starmeter</button></p>`; if (UI.geatab === 'star' && typeof starmeterHTML === 'function') return tabsG + starmeterHTML(); const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return tabsG + `<p><input id="gq" type="search" placeholder="Search films and people…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
     case 'bank': { const life = ORIGIN.life[M.life], c = typeof myCo === 'function' ? myCo() : null; const money = M.diary.filter(d => /^Money:/.test(d.t)).slice(-6).reverse(); return `<div class="kpis mini"><div><span>Balance</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b></div><div><span>Rent</span><b>${fmtCash(usd(life.rent))}/wk</b></div><div><span>Owed</span><b>${fmtCash(M.debt + (M.shark || 0))}</b></div>${c ? `<div><span>${esc(c.name)}</span><b>${fmtCash(Math.round(c.cash * 1e6))}</b></div>` : ''}</div><h4>Recent weeks</h4><ul class="plain">${money.map(d => `<li><time>${fmtDate(d.w, true)}</time> ${esc(d.t.replace(/^Money: /, ''))}</li>`).join('') || '<li class="muted">Nothing yet.</li>'}</ul>`; }
     case 'flick': { const L = flickFeed(); return `<div class="flick">${L.map(x => `<div class="post">${phoneAvatar(x.who, 34)}<div><b>${pl(x.who)}</b> <span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w' : 'this week'}</span><p>${esc(x.t)}</p>${(M.liked || {})[x.id] ? '<span class="muted small">♥ Liked</span>' : `<button class="linkish" data-like="${x.id}|${x.who}">♡ Like</button>`}</div></div>`).join('') || '<p class="muted">Nobody you know has posted anything. Meet more people.</p>'}</div>`; }
     case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
@@ -14570,9 +14574,9 @@ function appWindow(k) {
 }
 function computerPanel() {
   const k = UI.app, A = APPS.find(a => a[0] === k);
-  return `<section class="panel computer"><h3>🖥️ Your computer</h3><div class="monitor"><div class="desktop">
+  return `<section class="panel computer"><h3>🖥️ Your computer</h3><div class="monitor">${typeof menuBar === 'function' ? menuBar() : ''}<div class="desktop" style="background:${typeof WALLS !== 'undefined' ? WALLS[curWall()][1] : ''}">
     <div class="icons">${APPS.map(([k2, ic, l]) => `<button class="appicon${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k2}"><span>${ic}</span>${esc(l)}${appLocked(k2) ? ' 🔒' : ''}</button>`).join('')}</div>
-    ${A ? `<div class="window"><div class="wbar"><span>${A[1]} ${esc(A[2])}</span><button class="linkish" data-app="">✕</button></div><div class="wbody">${appWindow(k)}</div></div>` : '<p class="muted wallnote">Double-click nothing. Single-click an app.</p>'}
+    ${A ? `<div class="window"><div class="wbar"><span>${A[1]} ${esc(A[2])}</span><button class="linkish" data-app="">✕</button></div><div class="wbody">${appWindow(k)}</div></div>` : (typeof desktopWidgets === 'function' ? desktopWidgets() : '<p class="muted wallnote">Double-click nothing. Single-click an app.</p>')}
    </div></div></section>`;
 }
 // </computer>
@@ -16214,6 +16218,7 @@ function mailWeek() {
   const play = (M.works || []).find(w => w.plat === 'stage' && w.q >= 70 && S.week - w.rel === 3);
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
   { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
+  if (typeof endorseWeek === 'function') endorseWeek();
   if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
 }
 const FAVOURS = [
@@ -16254,6 +16259,7 @@ function mailAct(a) {
   else if (A.k === 'gig') { M.cash += A.fee; M.energy = clamp(M.energy - 10, 0, 100); M.fol.spinly = (M.fol.spinly || 0) * 1.03 + 20; }
   else if (A.k === 'guest') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.08 + 40; }
   else if (A.k === 'collab') { for (const k of ['vidwire', 'blip']) if (M.fol[k]) M.fol[k] = M.fol[k] * 1.06 + 50; }
+  else if (A.k === 'endorse' && typeof endorseAccept === 'function') endorseAccept(A);
   else if (A.k === 'commission') { M.cash += A.fee; (M.flags = M.flags || {}).commissioned = S.week; }
   return true;
 }
@@ -16278,8 +16284,8 @@ function tradeAct(a) {
   const M = S.me, c = S.companies[a.co]; if (!c || c.closed !== null) return false;
   const h = c.hist || [], px = priceOf(c, h.length ? h[h.length - 1] : companyWorth(c)), n = Math.round(a.n);
   M.port = M.port || {};
-  if (n > 0) { const cost = Math.round(px * n); if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; }
-  else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k); M.port[a.co] = have - k; }
+  if (n > 0) { const cost = Math.round(px * n); if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; (M.portCost = M.portCost || {})[a.co] = ((M.portCost || {})[a.co] || 0) + cost; }
+  else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k); M.port[a.co] = have - k; M.portCost = M.portCost || {}; M.portCost[a.co] = Math.round((M.portCost[a.co] || 0) * (have - k) / have); }
   return true;
 }
 function tickerApp() {
@@ -16289,7 +16295,7 @@ function tickerApp() {
   const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => t + px(S.companies[+id]) * n, 0);
   const idx = [['box', 'Box office'], ['music', 'Music streaming'], ['video', 'Online video'], ['pod', 'Podcasts']].map(([k, l]) => { const v = Array.from({ length: 13 }, (_, i) => fieldIndex(k, S.week - (12 - i) * 4)); return `<div class="tick"><span>${l}</span>${v[12] ? sparkline(v, 120, 28) : '<span class="muted small">not yet invented</span>'}<b class="${v[12] >= v[0] ? 'good' : 'bad'}">${v[0] ? ((v[12] / v[0] - 1) * 100).toFixed(0) + '%' : ''}</b></div>`; }).join('');
   return `<p class="eyebrow">Industry indexes, last 12 months</p><div class="ticks">${idx}</div>
-   <p class="eyebrow">Studios${port.length ? ` · your portfolio ${fmtCash(val)}` : ''}</p><div class="tw"><table class="grid"><thead><tr><th>Ticker</th><th>Company</th><th class="n">Price</th><th class="n">1Y</th><th class="n">You own</th><th></th></tr></thead><tbody>${cos.map(c => `<tr><td><b>${esc(tickerOf(c))}</b></td><td class="small">${esc(c.name)}</td><td class="n">$${px(c).toFixed(2)}</td><td class="n ${ch(c) >= 0 ? 'good' : 'bad'}">${ch(c) >= 0 ? '+' : ''}${ch(c).toFixed(0)}%</td><td class="n">${(M.port || {})[c.id] || 0}</td><td><button class="btn-s ghost" data-trade="${c.id}:10">Buy 10</button>${(M.port || {})[c.id] ? ` <button class="btn-s ghost" data-trade="${c.id}:-10">Sell 10</button>` : ''}</td></tr>`).join('')}</tbody></table></div>
+   <p class="eyebrow">The market</p>${typeof marketApp === 'function' ? marketApp() : ''}
    <p class="eyebrow">What's hot</p><p class="small">${GENRES.map(g => [g, (S.app[HUBS[M.hub].m] || {})[g] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([g]) => esc(g)).join(' · ')} are up in ${esc(MARKETS[HUBS[M.hub].m].name)}.</p>`;
 }
 // ---- Studio: a step sequencer for songs, a waveform cutter for podcasts ----
@@ -16392,6 +16398,11 @@ function computerClick(t) {
   const d = t.dataset;
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
+  if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
+  if (d.wall) { UI.wall = d.wall; try { localStorage.setItem('ab-wall', d.wall); } catch (e) { } render(true); return true; }
+  if (d.smf) { const [k, v] = d.smf.split(':'); (UI.smf = UI.smf || { role: 'all', where: 'all' })[k] = v; render(true); return true; }
+  if (d.mkf) { UI.mkf = d.mkf; render(true); return true; }
+  if (d.geatab) { UI.geatab = d.geatab; render(true); return true; }
   if (d.mailact) { const [id, k] = d.mailact.split(':'); doAct({ t: 'mail', id: +id, k }); render(true); return true; }
   if (d.trade) { const [co, n] = d.trade.split(':'); doAct({ t: 'trade', co: +co, n: +n }); render(true); return true; }
   if (d.seq) { const [r, c] = d.seq.split(':').map(Number), G = seqGrid(); G[r][c] = G[r][c] ? 0 : 1; render(true); return true; }
@@ -16430,7 +16441,7 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
 // </computer2>
 // <mentor>
 // ---------------- Mentors, your films' stories, the year in entertainment ----------------
@@ -18002,6 +18013,108 @@ function standingClick(t) {
   return false;
 }
 // </standing>
+// <starmeter>
+// ---------------- Starmeter, endorsements and a proper market ----------------
+// GEA's Starmeter ranks who the world is talking about this week: recent hits, prizes, fame and work. It matters:
+// buzz helps actors and heads of department get hired and gets you more at the negotiating table, and brands pay
+// people with buzz to stand next to their products, in line with what they do. The Ticker gets a real market:
+// every listed company, your gains and losses, and the week's movers.
+function starScore(p) {
+  if (!p || p.dead) return 0;
+  const recent = p.lastWork !== undefined && S.week - p.lastWork < 26 ? 10 : 0, aw = (p.awards || []).filter(a => a.endsWith(String(S.year)) || a.includes(` ${S.year} `) || a.includes(` ${S.year - 1}`)).length;
+  let s = (p.heat || 0) * .7 + (p.fame || 0) * .5 + (p.standing || 0) * .2 + recent + aw * 8;
+  if (p.player && S.me) s += Math.log10(1 + Math.max(0, ...Object.values(S.me.fol || {}))) * 6;
+  return Math.round(s * 10) / 10;
+}
+let SM_CACHE = null, SM_KEY = '';
+function starmeter() {
+  const k = S.week + ':' + S.people.length + ':' + S.films.length;
+  if (SM_CACHE && SM_KEY === k && SM_CACHE.S === S) return SM_CACHE.L;
+  const L = S.people.filter(p => !p.dead && !p.retired && !p.player).map(p => [p.id, starScore(p)]).sort((a, b) => b[1] - a[1]);
+  SM_CACHE = { S, L }; SM_KEY = k; return L;
+}
+function myStarRank() { const s = starScore(ME()), L = starmeter(); let lo = 0, hi = L.length; while (lo < hi) { const m = (lo + hi) >> 1; if (L[m][1] > s) lo = m + 1; else hi = m; } return lo + 1; }
+function whyTrending(p) {
+  const f = p.credits.map(i => S.films[i]).filter(x => x && x.rel !== null && S.week - x.rel < 40).sort((a, b) => b.rel - a.rel)[0];
+  const aw = (p.awards || []).slice(-1)[0];
+  return aw && /\b(20\d\d|19\d\d)\b/.test(aw) && +aw.match(/\b(20\d\d|19\d\d)\b/)[0] >= S.year - 1 ? `Won ${aw}` : f ? `${f.title}${f.hitRatio > 2 ? ', a hit' : f.reviews >= 75 ? ', loved by critics' : ''}` : p.fame > 60 ? 'Famous' : 'Working steadily';
+}
+function starmeterHTML() {
+  const M = S.me, F = UI.smf = UI.smf || { role: 'all', where: 'all' };
+  let L = starmeter();
+  if (F.role !== 'all') L = L.filter(([id]) => F.role === 'crew' ? !['actor', 'director', 'writer', 'producer'].includes(P(id).role) : P(id).role === F.role);
+  if (F.where === 'here') L = L.filter(([id]) => P(id).hub === M.hub);
+  const rank = myStarRank();
+  return `<p class="eyebrow">GEA Starmeter · who the world is talking about this week</p>
+   <div class="bf-row">${[['all', 'Everyone'], ['actor', 'Actors'], ['director', 'Directors'], ['writer', 'Writers'], ['producer', 'Producers'], ['crew', 'Crew']].map(([k, l]) => `<button class="pill${F.role === k ? ' on' : ''}" data-smf="role:${k}">${l}</button>`).join('')} <button class="pill${F.where === 'here' ? ' on' : ''}" data-smf="where:${F.where === 'here' ? 'all' : 'here'}">In ${esc(hubName(M.hub))} only</button></div>
+   <p class="small">You: <b>#${rank.toLocaleString()}</b> of ${starmeter().length.toLocaleString()} · buzz ${starScore(ME())}. ${rank <= 500 ? 'Agents notice the top 500.' : rank <= 5000 ? 'You\'re on the radar.' : 'Nobody\'s searching for you yet.'}</p>
+   <ol class="starm">${L.slice(0, 25).map(([id, s], i) => { const p = P(id); return `<li><span class="rk">${i + 1}</span>${portraitOf(p, 34)}<span><b>${pl(id)}</b><br><span class="muted small">${esc(ROLE_LABEL[p.role])} · ${esc(hubName(p.hub))} · ${esc(whyTrending(p))}</span></span><span class="small ${p.heat > 30 ? 'good' : ''}">${p.heat > 30 ? '▲' : '•'} ${Math.round(s)}</span></li>`; }).join('')}</ol>`;
+}
+// buzz helps you get hired, especially in front of the camera and at the top
+function starFactors(post) { const t = tmplOf(post) || {}; if (!t.actor && (post.tier || 1) < 3) return []; const s = starScore(ME()); return s >= 12 ? [['Your Starmeter buzz', clamp((s - 12) / 40, 0, t.actor ? .9 : .5)]] : []; }
+// ---- endorsements: brands that fit who you are ----
+const BRANDS = [
+  ['Argentum Optics', 'a camera lens', ['dp', 'director'], 0], ['Field & Fern', 'an outdoor jacket', ['dp', 'stunts', 'director'], 0], ['Lumenra', 'a lighting kit', ['dp', 'creator'], 0],
+  ['Hushwave', 'noise-cancelling headphones', ['composer', 'sound', 'music', 'podcast', 'editor'], 0], ['Keystroke Pro', 'an editing laptop', ['editor', 'creator', 'writer'], 0], ['Quillworks', 'a writing app', ['writer'], 0],
+  ['Maison Verel', 'a luxury watch', ['actor', 'director', 'producer'], 0], ['Ochre Atelier', 'a fragrance', ['actor'], 0], ['Velvet Row', 'a fashion house\'s new line', ['actor', 'costume', 'designer'], 0],
+  ['Zingo', 'an energy drink', ['creator', 'stunts', 'music'], 1], ['CoinVault', 'a crypto exchange', ['actor', 'creator', 'producer'], 2], ['GlowSkin', 'a skincare range', ['actor', 'makeup', 'creator'], 0],
+  ['Northline Air', 'an airline', ['actor', 'director', 'producer', 'music'], 0], ['Paperlane', 'a stationery brand', ['writer', 'designer'], 0], ['Ridgeback Motors', 'an electric car', ['actor', 'director', 'producer', 'music'], 0],
+  ['SnackStack', 'a crisps brand', ['creator', 'podcast', 'actor'], 1], ['Gamma Bet', 'a betting app', ['actor', 'creator', 'music'], 2], ['Tonic & Thyme', 'a gin', ['actor', 'music', 'writer'], 0]
+];
+function endorseWeek() {
+  const M = S.me, me = ME(), s = starScore(me), r = hashRand(S.week * 59 + M.id);
+  if (s < 18 || r() > .12 + s / 400 || (M.mail || []).some(m => m.act && m.act.k === 'endorse' && !m.done && S.week - m.w < 6)) return;
+  const field = M.field && M.field !== 'film' ? M.field : null, L = BRANDS.filter(b => b[2].includes(me.role) || (field && b[2].includes(field)));
+  if (!L.length) return;
+  const b = L[Math.floor(r() * L.length)], fee = Math.round(usd(clamp(600 * Math.pow(s / 18, 2.2), 600, 400000)) / 50) * 50;
+  mail('offers', `Partnerships, ${b[0]}`, `Be the face of ${b[1]}?`, `We think our customers would love to see you with ${b[1]}. A photo shoot, two posts and a short film for our channels. Fee: ${fmtCash(fee)}.${b[3] === 2 ? ' (Your agent mutters that this one could age badly.)' : b[3] === 1 ? ' It\'s not glamorous, but the money is real.' : ''}`, { k: 'endorse', fee, brand: b[0], shady: b[3] });
+}
+function endorseAccept(A) {
+  const M = S.me, me = ME();
+  M.cash += A.fee; me.fame = clamp((me.fame || 0) + 1.5, 0, 100); M.energy = clamp(M.energy - 6, 0, 100);
+  (M.deals = M.deals || []).push({ w: S.week, brand: A.brand, fee: A.fee });
+  if (A.shady === 2) (M.secrets = M.secrets || []).push({ w: S.week, risk: 3, what: `fronting ${A.brand}`, ad: 1 });
+  if (A.shady && (M.flags = M.flags || {})) M.flags.sellout = S.week;
+  milestone(`Became the face of ${A.brand}`, 'work');
+}
+// ---- the market: every listed company, your gains, the week's movers ----
+function marketApp() {
+  const M = S.me, worth = c => { const h = c.hist || []; return h.length ? h[h.length - 1] : companyWorth(c); }, px = c => priceOf(c, worth(c));
+  const ch = (c, k) => { const h = c.hist || []; return h.length > k ? (h[h.length - 1] / h[h.length - 1 - k] - 1) * 100 : 0; };
+  const F = UI.mkf = UI.mkf || 'all', listed = S.companies.filter(c => c.closed === null && c.owner === undefined && c.tier <= 2 && (F === 'all' || HUBS[c.hub].m === HUBS[M.hub].m));
+  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0).map(([id, n]) => [S.companies[+id], n]), val = port.reduce((t, [c, n]) => t + px(c) * n, 0), cost = port.reduce((t, [c]) => t + ((M.portCost || {})[c.id] || 0), 0);
+  const movers = listed.map(c => [c, ch(c, 1)]).sort((a, b) => b[1] - a[1]);
+  const pct = v => `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v).toFixed(1)}%</span>`;
+  return `${port.length ? `<div class="kpis mini"><div><span>Portfolio</span><b>${fmtCash(Math.round(val))}</b></div><div><span>Paid</span><b>${fmtCash(Math.round(cost))}</b></div><div><span>Gain</span><b class="${val >= cost ? 'good' : 'bad'}">${fmtCash(Math.round(val - cost))}</b></div><div><span>Holdings</span><b>${port.length}</b></div></div>` : ''}
+   <p class="small">Movers this month: ${movers.slice(0, 3).map(([c, v]) => `<b>${esc(tickerOf(c))}</b> ${pct(v)}`).join(' · ')} · ${movers.slice(-3).reverse().map(([c, v]) => `<b>${esc(tickerOf(c))}</b> ${pct(v)}`).join(' · ')}</p>
+   <div class="bf-row"><button class="pill${F === 'all' ? ' on' : ''}" data-mkf="all">All markets</button><button class="pill${F === 'home' ? ' on' : ''}" data-mkf="home">${esc(MARKETS[HUBS[M.hub].m].name)}</button></div>
+   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Chart</th><th class="n">Price</th><th class="n">1M</th><th class="n">1Y</th><th class="n">Own</th><th></th></tr></thead><tbody>${listed.sort((a, b) => worth(b) - worth(a)).slice(0, 40).map(c => { const n = (M.port || {})[c.id] || 0; return `<tr><td><b>${esc(tickerOf(c))}</b></td><td><a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a></td><td>${typeof sparkline === 'function' ? sparkline((c.hist || []).slice(-24), 70, 20) : ''}</td><td class="n">$${px(c).toFixed(2)}</td><td class="n" data-v="${ch(c, 1)}">${pct(ch(c, 1))}</td><td class="n" data-v="${ch(c, 12)}">${pct(ch(c, 12))}</td><td class="n">${n || ''}</td><td><button class="btn-s ghost" data-trade="${c.id}:10">Buy 10</button>${n ? ` <button class="btn-s ghost" data-trade="${c.id}:-${n}">Sell</button>` : ''}</td></tr>`; }).join('')}</tbody></table></div>
+   <p class="muted small">Prices follow each company's real results in this world: hits, flops, debt, mergers. Share prices update monthly.</p>`;
+}
+// ---- the desktop itself: a menu bar and widgets, so the computer is worth opening every day ----
+const WALLS = { studio: ['Studio red', 'linear-gradient(135deg, var(--slate), var(--accent))'], dusk: ['Sunset Boulevard', 'linear-gradient(160deg, #2B1B3F 0%, #7A2E5C 45%, #E8853A 100%)'], ocean: ['Pacific', 'linear-gradient(160deg, #0E2A47, #1C6E8C 60%, #8FD3F4)'], noir: ['Noir', 'repeating-linear-gradient(115deg, #111 0 22px, #1b1b1b 22px 44px)'], forest: ['Redwoods', 'linear-gradient(170deg, #12261C, #2E5A3A 55%, #A3C47A)'], marquee: ['Marquee', 'radial-gradient(circle at 30% 30%, #E3B23C 0 6%, transparent 7%), radial-gradient(circle at 70% 60%, #E3B23C 0 4%, transparent 5%), linear-gradient(135deg, #3A0F14, #7A1E28)'] };
+function menuBar() {
+  const M = S.me, W = M.wk, unreadMail = (M.mail || []).filter(m => S.week - m.w < 1 && m.folder !== 'spam' && m.folder !== 'news').length, unread = phoneUnread();
+  const time = W ? ['8:12', '13:40', '21:05'][W.block] : '9:00';
+  return `<div class="menubar"><span>🍏 <b>File</b> Edit View</span><span class="mb-r"><span title="Unread mail">✉️ ${unreadMail}</span><span title="Texts">💬 ${unread}</span><span title="Wi-Fi">📶</span><span title="Your energy">🔋 ${Math.round(M.energy)}%</span><span>${W ? fmtDay(W.day).split(' ')[0] : ''} ${time}</span></span></div>`;
+}
+function desktopWidgets() {
+  const M = S.me, me = ME(), mails = (M.mail || []).filter(m => m.folder !== 'spam').slice(-3).reverse(), ap = (M.appts || []).filter(a => !a.done).slice(0, 3);
+  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => { const c = S.companies[+id], h = c.hist || []; return t + priceOf(c, h.length ? h[h.length - 1] : companyWorth(c)) * n; }, 0);
+  const idx = [['box', '🎬'], ['music', '🎵'], ['video', '📺'], ['pod', '🎙️']].map(([k, ic]) => { const a = fieldIndex(k, S.week - 4), b = fieldIndex(k, S.week); return a > 0 ? `${ic} <span class="${b >= a ? 'good' : 'bad'}">${b >= a ? '▲' : '▼'}${Math.abs((b / a - 1) * 100).toFixed(1)}%</span>` : ''; }).filter(Boolean).join(' ');
+  const top = starmeter().slice(0, 3), news0 = S.news.slice(-2).reverse(), wall = curWall();
+  return `<div class="widgets">
+   <div class="widget"><h5>✉️ Mail</h5>${mails.length ? mails.map(m => `<button class="linkish wl" data-app="mail" data-mailo="${m.id}">${m.act && !m.done ? '● ' : ''}${esc(m.subj)}<br><span class="muted small">${esc(m.from)}</span></button>`).join('') : '<p class="muted small">Inbox zero.</p>'}</div>
+   <div class="widget"><h5>📈 Markets</h5><p class="small">${idx}</p>${port.length ? `<p class="small">Your shares: <b>${fmtCash(Math.round(val))}</b></p>` : '<p class="muted small">You own no shares.</p>'}<button class="linkish small" data-app="ticker">Open Ticker ›</button></div>
+   <div class="widget"><h5>⭐ Starmeter</h5><p class="small">You: <b>#${myStarRank().toLocaleString()}</b></p>${top.map(([id], i) => `<p class="small">${i + 1}. ${pl(id)}</p>`).join('')}<button class="linkish small" data-app="gea" data-geatab="star">See the chart ›</button></div>
+   <div class="widget"><h5>📅 Coming up</h5>${ap.length ? ap.map(a => `<p class="small">${esc((APPT_KINDS[a.kind] || {}).label || a.kind)}${a.who != null ? ' · ' + pl(a.who) : ''}<br><span class="muted">${esc(slotLabel(a))}</span></p>`).join('') : '<p class="muted small">Nothing booked.</p>'}</div>
+   <div class="widget"><h5>🏦 Money</h5><p class="small"><b>${fmtCash(M.cash)}</b> in the bank</p><p class="small muted">Rent ${fmtCash(usd(ORIGIN.life[M.life].rent))}/wk${(M.deals || []).length ? ` · ${M.deals.length} brand deal${M.deals.length > 1 ? 's' : ''}` : ''}</p></div>
+   <div class="widget wide"><h5>📰 The Daily Slate</h5>${news0.map(n => `<p class="small">${esc(n.text.slice(0, 140))}</p>`).join('')}</div>
+   <div class="widget"><h5>🖼️ Wallpaper</h5><p class="small">${Object.entries(WALLS).map(([k, [l]]) => `<button class="pill${wall === k ? ' on' : ''}" data-wall="${k}">${esc(l)}</button>`).join(' ')}</p></div></div>`;
+}
+
+function curWall() { if (!UI.wall) { try { const w = typeof localStorage !== 'undefined' && localStorage.getItem('ab-wall'); UI.wall = w && WALLS[w] ? w : 'studio'; } catch (e) { UI.wall = 'studio'; } } return WALLS[UI.wall] ? UI.wall : 'studio'; }
+// </starmeter>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

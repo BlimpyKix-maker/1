@@ -555,6 +555,7 @@ function hireFactors(post) {
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof fieldFactors === 'function') F.push(...fieldFactors(post));
   if (typeof almaFactors === 'function') F.push(...almaFactors(post));
+  if (typeof starFactors === 'function') F.push(...starFactors(post));
   if (typeof repFactors === 'function') F.push(...repFactors(post));
   if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
