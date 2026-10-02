@@ -77,6 +77,8 @@ function portraitSVG(L, age, size = 96, bare = false) {
     else if (pat === 2) o.push(Array.from({ length: 8 }, (_, i) => `<rect x="${i * 16}" y="0" width="7" height="120" fill="#FFFFFF" opacity=".14"/>`).join(''));
     else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/>`);
   }
+  // the sitter fills the frame: everything below is drawn a little larger than life
+  o.push(bare ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
   // how far the hair reaches, so headwear sits on top of it rather than inside it
   const hairTop0 = top - 3 + recede * 10;
   const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 ? fw / 2 : fw / 2 + 2;
@@ -92,8 +94,8 @@ function portraitSVG(L, age, size = 96, bare = false) {
   if (L.hair === 6) o.push(`<circle cx="${cx}" cy="${top + 10}" r="${fw / 2 + 12}" fill="${hc}"/>`);
   o.push(hairClose);
   // body and clothes
-  o.push(`<path d="M${cx - bw} 120 Q${cx - bw} 88 ${cx - neck - 8} 84 L${cx + neck + 8} 84 Q${cx + bw} 88 ${cx + bw} 120 Z" fill="url(#${uid}c)"/><path d="M${cx - bw + 3} 118 Q${cx - bw + 4} 92 ${cx - neck - 6} 87" stroke="#FFFFFF" stroke-width="1.5" opacity=".18" fill="none"/>`);
-  o.push(`<rect x="${cx - neck}" y="${cy + fh / 2 - 6}" width="${neck * 2}" height="${16}" fill="${shade}"/>`);
+  o.push(`<path d="M${cx - bw} 122 Q${cx - bw - 1} 94 ${cx - bw + 12} 89 Q${cx - neck - 12} 84.5 ${cx - neck - 2} 84 L${cx + neck + 2} 84 Q${cx + neck + 12} 84.5 ${cx + bw - 12} 89 Q${cx + bw + 1} 94 ${cx + bw} 122 Z" fill="url(#${uid}c)"/><path d="M${cx - bw + 3} 118 Q${cx - bw + 4} 92 ${cx - neck - 6} 87" stroke="#FFFFFF" stroke-width="1.5" opacity=".18" fill="none"/>`);
+  { const ny = cy + fh / 2 - 6; o.push(`<defs><linearGradient id="${uid}n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(skin, '#000', .3)}"/><stop offset=".45" stop-color="${shade}"/><stop offset="1" stop-color="${mixHex(skin, '#000', .1)}"/></linearGradient></defs><path d="M${cx - neck} ${ny} L${cx - neck} ${ny + 10} Q${cx - neck - 1} ${85} ${cx - neck - 5} 86.5 Q${cx} 92 ${cx + neck + 5} 86.5 Q${cx + neck + 1} 85 ${cx + neck} ${ny + 10} L${cx + neck} ${ny} Z" fill="url(#${uid}n)"/>`); }
   const collar = { 1: `<path d="M${cx - 16} 86 Q${cx} 100 ${cx + 16} 86" fill="none" stroke="${mixHex(cloth, '#000', .3)}" stroke-width="3"/>`, 2: `<path d="M${cx - 30} 100 L${cx + 30} 100 M${cx - 34} 110 L${cx + 34} 110" stroke="${mixHex(cloth, '#fff', .25)}" stroke-width="2"/>`, 3: `<path d="M${cx - 12} 85 L${cx} 98 L${cx + 12} 85" fill="none" stroke="${mixHex(cloth, '#fff', .3)}" stroke-width="2"/>`, 4: `<path d="M${cx - 14} 85 L${cx - 2} 110 M${cx + 14} 85 L${cx + 2} 110" stroke="${mixHex(cloth, '#000', .4)}" stroke-width="3"/>`, 5: `<rect x="${cx - neck - 3}" y="80" width="${neck * 2 + 6}" height="9" rx="3" fill="${cloth}"/>`, 7: `<path d="M${cx - 10} 85 L${cx} 95 L${cx + 10} 85" fill="#F1EEE8"/>`, 8: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 14} 86 L${cx - 4} 112 M${cx + 14} 86 L${cx + 4} 112" stroke="${mixHex(cloth, '#000', .35)}" stroke-width="3"/>`, 9: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 3} 92 L${cx + 3} 92 L${cx + 4} 112 L${cx} 116 L${cx - 4} 112 Z" fill="#8C2E2E"/>` }[L.outfit];
   if (collar) o.push(collar);
   // round the neck
@@ -110,9 +112,11 @@ function portraitSVG(L, age, size = 96, bare = false) {
   // eyes, brows, nose, mouth
   const ey = cy - 1, ex = fw * .2, ec = LOOK.eyes.opts[L.eyes];
   o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><circle cx="${cx - ex}" cy="${ey}" r="1.7" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey}" r="1.7" fill="${ec}"/><circle cx="${cx - ex}" cy="${ey}" r=".8" fill="#111"/><circle cx="${cx + ex}" cy="${ey}" r=".8" fill="#111"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><path d="M${cx - ex - 3.4} ${ey - .6} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .6}" stroke="${line}" stroke-width=".9" fill="none"/>`);
-  o.push(`<ellipse cx="${cx - ex - 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".16"/><ellipse cx="${cx + ex + 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".16"/>`);
+  o.push(`<path d="M${cx - ex - 3.4} ${ey - .4} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .4}" stroke="${mixHex(line, '#000', .35)}" stroke-width="1.1" fill="none" stroke-linecap="round"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/>`);
+  o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 4} Q${cx + fw / 2 - 1} ${cy + 10} ${cx + 4} ${cy + fh / 2 - 1} Q${cx + fw / 2 - 6} ${cy + 8} ${cx + fw / 2 - 5} ${cy - 4} Z" fill="${shade}" opacity=".22"/><path d="M${cx - 1.5} ${ey + 9.5} Q${cx + 1} ${ey + 11} ${cx + 3} ${ey + 9.5}" stroke="${shade}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>`);
+  o.push(`<ellipse cx="${cx - ex - 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/><ellipse cx="${cx + ex + 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/>`);
   o.push(`<path d="M${cx - ex - 4} ${ey - 5} Q${cx - ex} ${ey - 7} ${cx - ex + 4} ${ey - 5} M${cx + ex - 4} ${ey - 5} Q${cx + ex} ${ey - 7} ${cx + ex + 4} ${ey - 5}" stroke="${mixHex(hc, '#000', .2)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
-  o.push(`<path d="M${cx} ${ey + 2} Q${cx - 2.5} ${ey + 9} ${cx + 1} ${ey + 10}" stroke="${line}" stroke-width="1.2" fill="none"/>`);
+  o.push(`<path d="M${cx + .5} ${ey + 2.5} Q${cx - 2} ${ey + 8.5} ${cx + .5} ${ey + 9.6}" stroke="${line}" stroke-width=".85" fill="none" opacity=".75" stroke-linecap="round"/><circle cx="${cx - 2}" cy="${ey + 9.8}" r=".7" fill="${line}" opacity=".55"/><circle cx="${cx + 2.4}" cy="${ey + 9.8}" r=".7" fill="${line}" opacity=".55"/>`);
   { const lip = mixHex(skin, '#9A3B3B', .5); o.push(`<path d="M${cx - 6} ${ey + 15} Q${cx - 3} ${ey + 13.5} ${cx} ${ey + 14.5} Q${cx + 3} ${ey + 13.5} ${cx + 6} ${ey + 15} Q${cx} ${ey + 16} ${cx - 6} ${ey + 15} Z" fill="${mixHex(lip, '#000', .15)}"/><path d="M${cx - 6} ${ey + 15} Q${cx} ${ey + 19.5} ${cx + 6} ${ey + 15} Q${cx} ${ey + 16.5} ${cx - 6} ${ey + 15} Z" fill="${lip}"/><ellipse cx="${cx + 1}" cy="${ey + 16.8}" rx="1.8" ry=".6" fill="#FFFFFF" opacity=".3"/>`); }
   if (L.mark === 1) o.push(`<circle cx="${cx + 3}" cy="${ey + 10}" r="1.4" fill="none" stroke="#C0C0C0" stroke-width="1"/>`);
   if (L.mark === 2) o.push(`<circle cx="${cx + 2.6}" cy="${ey + 8.6}" r=".9" fill="#D9D9D9"/>`);
@@ -160,6 +164,7 @@ function portraitSVG(L, age, size = 96, bare = false) {
     const lens = g === 1 || g === 8 ? (x => `<circle cx="${x}" cy="${ey}" r="5" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : g === 5 ? (x => `<path d="M${x - 6} ${ey - 2} L${x + 6} ${ey - 4} L${x + 5} ${ey + 3} L${x - 5} ${ey + 3} Z" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : g === 6 ? (x => `<path d="M${x - 6} ${ey - 3} L${x + 6} ${ey - 3} L${x + 5} ${ey + 4} Q${x} ${ey + 7} ${x - 5} ${ey + 4} Z" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : (x => `<rect x="${x - 6}" y="${ey - 4}" width="12" height="${g === 8 ? 5 : 8}" rx="${g === 3 ? 1 : 2}" fill="${fill}" stroke="${gc}" stroke-width="${g === 3 ? 2.4 : 1.4}"/>`);
     o.push(lens(cx - ex) + lens(cx + ex) + `<path d="M${cx - ex + 5} ${ey - 1} L${cx + ex - 5} ${ey - 1}" stroke="${gc}" stroke-width="1.3"/>`);
   }
+  o.push('</g>');
   if (!bare) o.push(`<rect width="120" height="120" rx="10" fill="url(#${uid}v)"/>`);
   return `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
 }

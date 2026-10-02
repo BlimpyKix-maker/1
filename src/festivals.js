@@ -103,7 +103,7 @@ const STATUETTES = {
   tiger: ['Tiger head', (c, d) => `<circle cx="40" cy="40" r="20" fill="${c}"/><circle cx="26" cy="22" r="6" fill="${c}"/><circle cx="54" cy="22" r="6" fill="${c}"/>${[-10, 0, 10].map(x => `<path d="M${40 + x} 22 l-2 8" stroke="${d}" stroke-width="3"/>`).join('')}<circle cx="33" cy="38" r="3" fill="${d}"/><circle cx="47" cy="38" r="3" fill="${d}"/>`],
   bird: ['Firebird', (c, d) => `<path d="M14 46 Q30 40 40 30 Q50 18 62 20 Q52 28 54 36 Q44 34 40 46 Q30 58 18 56 Q26 50 14 46Z" fill="${c}"/><path d="M40 46 Q42 60 34 66" stroke="${d}" stroke-width="3" fill="none"/>`],
   medal: ['Silver medallion', (c, d) => `<path d="M30 12 L40 34 L50 12" stroke="${d}" stroke-width="5" fill="none"/><circle cx="40" cy="46" r="16" fill="${c}" stroke="${d}" stroke-width="2"/><path d="M33 46 L38 51 L48 41" stroke="${d}" stroke-width="3" fill="none"/>`],
-  oswald: ['The Oswald: a knight holding a reel', (c, d) => `<rect x="35" y="14" width="10" height="10" rx="5" fill="${c}"/><path d="M33 24 L47 24 L46 58 L34 58Z" fill="${c}"/><path d="M34 32 L46 32" stroke="${d}"/><circle cx="40" cy="40" r="5" fill="none" stroke="${d}" stroke-width="2"/>`],
+  oswald: ['The Oswald: a knight holding a reel', (c, d) => `<ellipse cx="40" cy="62" rx="11" ry="3.5" fill="${c}"/><path d="M33 61 L47 61 M36 59 L44 64 M44 59 L36 64" stroke="${d}" stroke-width=".8"/><ellipse cx="40" cy="12" rx="4.6" ry="5.4" fill="${c}"/><path d="M37.5 17 L42.5 17 L42 20 L38 20Z" fill="${c}"/><path d="M31 22 Q40 19 49 22 L47 34 Q45 46 44 59 L36 59 Q35 46 33 34Z" fill="${c}"/><path d="M33 26 Q36 34 40 35 Q44 34 47 26" stroke="${d}" stroke-width="1" fill="none"/><path d="M40 30 L40 59" stroke="${d}" stroke-width="1.6"/><path d="M36 32 L44 32" stroke="${d}" stroke-width="1.6" stroke-linecap="round"/><path d="M38 45 L38 58 M42 45 L42 58" stroke="${d}" stroke-width=".6" opacity=".6"/>`],
   gramophone: ['A golden gramophone', (c, d) => `<rect x="24" y="48" width="32" height="12" fill="${c}"/><path d="M40 48 L40 34 Q30 20 18 18 Q34 10 60 18 Q48 22 40 34" fill="${c}" stroke="${d}"/>`],
   footlight: ['A footlight and its glow', (c, d) => `<path d="M22 56 L58 56 L52 40 L28 40Z" fill="${c}"/><circle cx="40" cy="34" r="8" fill="#FFF3B0"/><path d="M28 22 L40 34 L52 22" stroke="#FFE07A" stroke-width="2" fill="none"/>`],
   emmet: ['Winged figure holding an atom', (c, d) => `<path d="M40 22 L36 60 L44 60Z" fill="${c}"/><path d="M38 30 Q22 22 18 34 Q28 32 38 36 M42 30 Q58 22 62 34 Q52 32 42 36" fill="${c}"/><ellipse cx="40" cy="16" rx="9" ry="4" fill="none" stroke="${d}" stroke-width="1.5"/><ellipse cx="40" cy="16" rx="9" ry="4" fill="none" stroke="${d}" stroke-width="1.5" transform="rotate(60 40 16)"/>`],
@@ -111,8 +111,22 @@ const STATUETTES = {
   plaque: ['An engraved plaque', (c, d) => `<rect x="20" y="16" width="40" height="46" rx="3" fill="${d}"/><rect x="25" y="21" width="30" height="36" fill="${c}"/><path d="M30 30 h20 M30 38 h20 M30 46 h14" stroke="${d}" stroke-width="2"/>`]
 };
 function statuetteSVG(kind, metal = 'gold', s = 80) {
-  const [, draw] = STATUETTES[kind] || STATUETTES.star, c = { gold: '#E3B23C', silver: '#C9CDD2', bronze: '#B87333' }[metal] || '#E3B23C', d = { gold: '#9A7420', silver: '#7E848C', bronze: '#7A4A22' }[metal] || '#9A7420', id = 'st' + kind + metal + s;
-  return `<svg class="statuette" viewBox="0 0 80 96" width="${s}" height="${s * 1.2}" role="img" aria-label="${esc(STATUETTES[kind] ? STATUETTES[kind][0] : 'statuette')}"><defs><linearGradient id="${id}" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>${draw(c, d)}<rect x="22" y="66" width="36" height="8" fill="#2B2B2B"/><rect x="18" y="74" width="44" height="12" rx="1" fill="#1B1B1B"/><rect x="26" y="78" width="28" height="4" fill="${c}" opacity=".8"/><rect x="0" y="0" width="80" height="96" fill="url(#${id})" style="mix-blend-mode:screen"/></svg>`;
+  const [, draw] = STATUETTES[kind] || STATUETTES.star;
+  const T = { gold: ['#7A5A12', '#C8962A', '#F6D77A', '#FFF4C8'], silver: ['#5E646C', '#A9AFB7', '#E4E8EC', '#FFFFFF'], bronze: ['#5A3315', '#A2622E', '#D9955A', '#F7CFA4'] }[metal] || ['#7A5A12', '#C8962A', '#F6D77A', '#FFF4C8'];
+  const id = `st-${kind}-${metal}`, g = `url(#${id}m)`;
+  return `<svg class="statuette" viewBox="0 0 80 100" width="${s}" height="${Math.round(s * 1.25)}" role="img" aria-label="${esc(STATUETTES[kind] ? STATUETTES[kind][0] : 'statuette')}"><defs>
+   <linearGradient id="${id}m" x1="0" x2="1" y1="0" y2=".25"><stop offset="0" stop-color="${T[0]}"/><stop offset=".28" stop-color="${T[1]}"/><stop offset=".46" stop-color="${T[3]}"/><stop offset=".58" stop-color="${T[2]}"/><stop offset="1" stop-color="${T[0]}"/></linearGradient>
+   <linearGradient id="${id}b" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3A3A40"/><stop offset=".5" stop-color="#1C1C21"/><stop offset="1" stop-color="#0B0B0E"/></linearGradient>
+   <linearGradient id="${id}t" x1="0" x2="1"><stop offset="0" stop-color="#2A2A30"/><stop offset=".5" stop-color="#55555E"/><stop offset="1" stop-color="#2A2A30"/></linearGradient>
+   <radialGradient id="${id}s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+   <ellipse cx="40" cy="95" rx="30" ry="4" fill="url(#${id}s)"/>
+   <g stroke-linejoin="round">${draw(g, T[0])}</g>
+   <rect x="26" y="66" width="28" height="4" rx="1" fill="url(#${id}t)"/>
+   <path d="M22 70 H58 L60 76 H20Z" fill="url(#${id}b)"/>
+   <rect x="17" y="76" width="46" height="16" rx="2" fill="url(#${id}b)"/>
+   <rect x="17" y="76" width="46" height="1.2" fill="#fff" opacity=".18"/>
+   <rect x="27" y="80" width="26" height="8" rx="1" fill="${g}"/>
+   <path d="M30 83 h20 M32 85.5 h16" stroke="${T[0]}" stroke-width=".8" opacity=".8"/></svg>`;
 }
 // which statuette a prize earns
 function trophyKind(name) {
