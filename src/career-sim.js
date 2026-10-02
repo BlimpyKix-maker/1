@@ -668,6 +668,7 @@ function closeWeek(a) {
   if (typeof convoWeek === 'function') convoWeek();
   if (typeof egofWeek === 'function') egofWeek();
   if (typeof corpWeek === 'function') corpWeek();
+  if (typeof stockWeek === 'function') stockWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -1052,6 +1053,7 @@ function applyAct(a) {
     case 'school': return applySchool(a);
     case 'claimamb': return claimAmb(a);
     case 'auto': return autoAct(a);
+    case 'watch': return watchAct(a);
     case 'pinamb': return pinAmb(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'move': return moveHome(a);

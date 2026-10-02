@@ -106,24 +106,7 @@ function fieldIndex(field, w) {
   const r = hashRand(Math.floor(w / 4) * 31 + field.length)();
   return growth * (.92 + r * .16) * (y === 2020 && field === 'box' ? .25 : 1);
 }
-function tradeAct(a) {
-  const M = S.me, c = S.companies[a.co]; if (!c || c.closed !== null) return false;
-  const h = c.hist || [], px = priceOf(c, h.length ? h[h.length - 1] : companyWorth(c)), n = Math.round(a.n);
-  M.port = M.port || {};
-  if (n > 0) { const cost = Math.round(px * n); if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; (M.portCost = M.portCost || {})[a.co] = ((M.portCost || {})[a.co] || 0) + cost; }
-  else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k); M.port[a.co] = have - k; M.portCost = M.portCost || {}; M.portCost[a.co] = Math.round((M.portCost[a.co] || 0) * (have - k) / have); }
-  return true;
-}
-function tickerApp() {
-  const M = S.me, worth = c => { const h = c.hist || []; return h.length ? h[h.length - 1] : companyWorth(c); };
-  const cos = S.companies.filter(c => c.closed === null && c.owner === undefined && c.tier <= 2).map(c => [c, worth(c)]).sort((a, b) => b[1] - a[1]).slice(0, 14).map(x => x[0]);
-  const px = c => priceOf(c, worth(c)), ch = c => { const h = c.hist || []; return h.length > 12 ? (h[h.length - 1] / h[h.length - 13] - 1) * 100 : 0; };
-  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => t + px(S.companies[+id]) * n, 0);
-  const idx = [['box', 'Box office'], ['music', 'Music streaming'], ['video', 'Online video'], ['pod', 'Podcasts']].map(([k, l]) => { const v = Array.from({ length: 13 }, (_, i) => fieldIndex(k, S.week - (12 - i) * 4)); return `<div class="tick"><span>${l}</span>${v[12] ? sparkline(v, 120, 28) : '<span class="muted small">not yet invented</span>'}<b class="${v[12] >= v[0] ? 'good' : 'bad'}">${v[0] ? ((v[12] / v[0] - 1) * 100).toFixed(0) + '%' : ''}</b></div>`; }).join('');
-  return `<p class="eyebrow">Industry indexes, last 12 months</p><div class="ticks">${idx}</div>
-   <p class="eyebrow">The market</p>${typeof marketApp === 'function' ? marketApp() : ''}
-   <p class="eyebrow">What's hot</p><p class="small">${GENRES.map(g => [g, (S.app[HUBS[M.hub].m] || {})[g] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([g]) => esc(g)).join(' · ')} are up in ${esc(MARKETS[HUBS[M.hub].m].name)}.</p>`;
-}
+function tickerApp() { return marketApp(); }
 // ---- Studio: a step sequencer for songs, a waveform cutter for podcasts ----
 const SEQ_ROWS = ['Kick', 'Snare', 'Bass', 'Chords', 'Melody'], SEQ_N = 8;
 function seqGrid() { UI.seq = UI.seq || SEQ_ROWS.map(() => Array(SEQ_N).fill(0)); return UI.seq; }
@@ -226,6 +209,7 @@ function computerClick(t) {
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
   if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
   if (d.wall) { UI.wall = d.wall; try { localStorage.setItem('ab-wall', d.wall); } catch (e) { } render(true); return true; }
+  if (typeof marketClick === 'function' && marketClick(t)) return true;
   if (d.smf) { const [k, v] = d.smf.split(':'); (UI.smf = UI.smf || { role: 'all', where: 'all' })[k] = v; render(true); return true; }
   if (d.mkf) { UI.mkf = d.mkf; render(true); return true; }
   if (d.geatab) { UI.geatab = d.geatab; render(true); return true; }
@@ -267,4 +251,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

@@ -61,20 +61,6 @@ function endorseAccept(A) {
   if (A.shady && (M.flags = M.flags || {})) M.flags.sellout = S.week;
   milestone(`Became the face of ${A.brand}`, 'work');
 }
-// ---- the market: every listed company, your gains, the week's movers ----
-function marketApp() {
-  const M = S.me, worth = c => { const h = c.hist || []; return h.length ? h[h.length - 1] : companyWorth(c); }, px = c => priceOf(c, worth(c));
-  const ch = (c, k) => { const h = c.hist || []; return h.length > k ? (h[h.length - 1] / h[h.length - 1 - k] - 1) * 100 : 0; };
-  const F = UI.mkf = UI.mkf || 'all', listed = S.companies.filter(c => c.closed === null && c.owner === undefined && c.tier <= 2 && (F === 'all' || HUBS[c.hub].m === HUBS[M.hub].m));
-  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0).map(([id, n]) => [S.companies[+id], n]), val = port.reduce((t, [c, n]) => t + px(c) * n, 0), cost = port.reduce((t, [c]) => t + ((M.portCost || {})[c.id] || 0), 0);
-  const movers = listed.map(c => [c, ch(c, 1)]).sort((a, b) => b[1] - a[1]);
-  const pct = v => `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '▼'} ${Math.abs(v).toFixed(1)}%</span>`;
-  return `${port.length ? `<div class="kpis mini"><div><span>Portfolio</span><b>${fmtCash(Math.round(val))}</b></div><div><span>Paid</span><b>${fmtCash(Math.round(cost))}</b></div><div><span>Gain</span><b class="${val >= cost ? 'good' : 'bad'}">${fmtCash(Math.round(val - cost))}</b></div><div><span>Holdings</span><b>${port.length}</b></div></div>` : ''}
-   <p class="small">Movers this month: ${movers.slice(0, 3).map(([c, v]) => `<b>${esc(tickerOf(c))}</b> ${pct(v)}`).join(' · ')} · ${movers.slice(-3).reverse().map(([c, v]) => `<b>${esc(tickerOf(c))}</b> ${pct(v)}`).join(' · ')}</p>
-   <div class="bf-row"><button class="pill${F === 'all' ? ' on' : ''}" data-mkf="all">All markets</button><button class="pill${F === 'home' ? ' on' : ''}" data-mkf="home">${esc(MARKETS[HUBS[M.hub].m].name)}</button></div>
-   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Chart</th><th class="n">Price</th><th class="n">1M</th><th class="n">1Y</th><th class="n">Own</th><th></th></tr></thead><tbody>${listed.sort((a, b) => worth(b) - worth(a)).slice(0, 40).map(c => { const n = (M.port || {})[c.id] || 0; return `<tr><td><b>${esc(tickerOf(c))}</b></td><td><a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a></td><td>${typeof sparkline === 'function' ? sparkline((c.hist || []).slice(-24), 70, 20) : ''}</td><td class="n">$${px(c).toFixed(2)}</td><td class="n" data-v="${ch(c, 1)}">${pct(ch(c, 1))}</td><td class="n" data-v="${ch(c, 12)}">${pct(ch(c, 12))}</td><td class="n">${n || ''}</td><td><button class="btn-s ghost" data-trade="${c.id}:10">Buy 10</button>${n ? ` <button class="btn-s ghost" data-trade="${c.id}:-${n}">Sell</button>` : ''}</td></tr>`; }).join('')}</tbody></table></div>
-   <p class="muted small">Prices follow each company's real results in this world: hits, flops, debt, mergers. Share prices update monthly.</p>`;
-}
 // ---- the desktop itself: a menu bar and widgets, so the computer is worth opening every day ----
 const WALLS = { studio: ['Studio red', 'linear-gradient(135deg, var(--slate), var(--accent))'], dusk: ['Sunset Boulevard', 'linear-gradient(160deg, #2B1B3F 0%, #7A2E5C 45%, #E8853A 100%)'], ocean: ['Pacific', 'linear-gradient(160deg, #0E2A47, #1C6E8C 60%, #8FD3F4)'], noir: ['Noir', 'repeating-linear-gradient(115deg, #111 0 22px, #1b1b1b 22px 44px)'], forest: ['Redwoods', 'linear-gradient(170deg, #12261C, #2E5A3A 55%, #A3C47A)'], marquee: ['Marquee', 'radial-gradient(circle at 30% 30%, #E3B23C 0 6%, transparent 7%), radial-gradient(circle at 70% 60%, #E3B23C 0 4%, transparent 5%), linear-gradient(135deg, #3A0F14, #7A1E28)'] };
 function menuBar() {
@@ -84,7 +70,7 @@ function menuBar() {
 }
 function desktopWidgets() {
   const M = S.me, me = ME(), mails = (M.mail || []).filter(m => m.folder !== 'spam').slice(-3).reverse(), ap = (M.appts || []).filter(a => !a.done).slice(0, 3);
-  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => { const c = S.companies[+id], h = c.hist || []; return t + priceOf(c, h.length ? h[h.length - 1] : companyWorth(c)) * n; }, 0);
+  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => t + mktPrice(S.companies[+id]) * n, 0);
   const idx = [['box', '🎬'], ['music', '🎵'], ['video', '📺'], ['pod', '🎙️']].map(([k, ic]) => { const a = fieldIndex(k, S.week - 4), b = fieldIndex(k, S.week); return a > 0 ? `${ic} <span class="${b >= a ? 'good' : 'bad'}">${b >= a ? '▲' : '▼'}${Math.abs((b / a - 1) * 100).toFixed(1)}%</span>` : ''; }).filter(Boolean).join(' ');
   const top = starmeter().slice(0, 3), news0 = S.news.slice(-2).reverse(), wall = curWall();
   return `<div class="widgets">
