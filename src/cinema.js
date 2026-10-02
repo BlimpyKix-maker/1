@@ -234,14 +234,14 @@ function trailerAudio() {
 function playTrailer(id) {
   const f = S.films[id]; if (!f || typeof document === 'undefined') return;
   const old = document.getElementById('trailer'); if (old) old.remove();
-  const c = GENRE_LOOK[f.genre] || GENRE_LOOK.Drama, plan = trailerPlan(f), total = plan.reduce((s, x) => s + x.ms, 0);
+  const c = GENRE_LOOK[f.genre] || GENRE_LOOK.Drama, plan = typeof trailerPlan2 === 'function' ? trailerPlan2(f) : trailerPlan(f), total = plan.reduce((s, x) => s + x.ms, 0);
   const el = document.createElement('div'); el.id = 'trailer'; el.style.setProperty('--tc', c[2]); el.style.setProperty('--tb', c[0]);
-  const layer = (s, k) => `<div class="tv-seg" data-k="${k}">${s.shot !== null && s.shot !== undefined ? `<div class="tv-shot mv-${s.move}${s.dim ? ' dim' : ''}" style="animation-duration:${s.ms + 900}ms">${stillSVG(f, s.shot, 960, true)}</div>` : ''}${s.text ? `<div class="tv-text ${s.pos}${s.big ? ' big' : ''}${s.slam ? ' slam' : ''}${s.text.length > 70 ? ' long' : ''}">${s.logo ? `<span class="tv-logo">${logoSVGFor(f)}</span>` : ''}${esc(s.text)}${s.big ? `<small>${esc(filmTagline(f))}</small>` : ''}</div>` : ''}</div>`;
+  const layer = (s, k) => `<div class="tv-seg" data-k="${k}">${s.shot !== null && s.shot !== undefined ? `<div class="tv-shot mv-${s.move}${s.dim ? ' dim' : ''}${s.freeze ? ' freeze' : ''}" style="animation-duration:${s.ms + 900}ms">${stillSVG(f, s.shot, 960, true)}</div>` : ''}${s.laurel && typeof laurelSVG === 'function' ? `<div class="tv-text card">${laurelSVG(s.laurel)}</div>` : ''}${s.sub ? `<div class="tv-sub">${esc(s.sub)}</div>` : ''}${s.text && s.text.trim() ? `<div class="tv-text ${s.pos}${s.vo ? ' vo' : ''}${s.big ? ' big' : ''}${s.slam ? ' slam' : ''}${s.text.length > 70 ? ' long' : ''}">${s.logo ? `<span class="tv-logo">${logoSVGFor(f)}</span>` : ''}${esc(s.text)}${s.big ? `<small>${esc(filmTagline(f))}</small>` : ''}</div>` : ''}</div>`;
   el.innerHTML = `<div class="tv"><div class="tv-screen">${plan.map(layer).join('')}<div class="tv-flash"></div><div class="tv-grain"></div></div>
    <div class="tv-bar"><button class="tv-btn tv-play" aria-label="Pause">❚❚</button><button class="tv-btn tv-again" aria-label="Replay">↺</button><span class="tv-prog"><i></i></span><span class="tv-time">0:00 / ${fmtClock(total)}</span><button class="tv-btn tv-mute" aria-label="Mute">🔊</button><button class="tv-btn tv-close" aria-label="Close">✕</button></div></div>`;
   document.body.appendChild(el);
   const segs = [...el.querySelectorAll('.tv-seg')], flash = el.querySelector('.tv-flash'), bar = el.querySelector('.tv-prog i'), clock = el.querySelector('.tv-time'), playB = el.querySelector('.tv-play'), muteB = el.querySelector('.tv-mute');
-  const A = trailerAudio(), starts = []; let acc = 0; for (const s of plan) { starts.push(acc); acc += s.ms; }
+  const A = typeof trailerScore === 'function' ? trailerScore(f) : trailerAudio(), starts = []; let acc = 0; for (const s of plan) { starts.push(acc); acc += s.ms; }
   let t = 0, cur = -1, last = null, paused = false, muted = false, raf = 0, done = false;
   const enter = k => {
     const s = plan[k], prev = segs[cur];
@@ -250,7 +250,9 @@ function playTrailer(id) {
     seg.querySelectorAll('svg').forEach(svg => { try { svg.setCurrentTime(0); svg.unpauseAnimations(); } catch (e) { } });
     if (s.cut === 'flash') { flash.classList.remove('go'); void flash.offsetWidth; flash.classList.add('go'); }
     el.classList.toggle('hardcut', s.cut === 'hard');
-    if (s.slam) A.hit(true); else if (s.cut !== 'fade' || s.text) A.hit(false);
+    if (A.hush) A.hush(!!s.hush || (!!s.freeze && plan[k - 1] && plan[k - 1].freeze));
+    if (s.freeze && !(plan[k - 1] && plan[k - 1].freeze) && A.scratch) A.scratch();
+    else if (s.slam) A.hit(true); else if (s.cut === 'hard' || s.vo) A.hit(false);
     A.swell(k / plan.length);
     cur = k;
   };
