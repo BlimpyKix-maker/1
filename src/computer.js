@@ -47,6 +47,7 @@ function appWindow(k) {
   return '';
 }
 function computerPanel() {
+  if (typeof osPanel === 'function') return osPanel();
   const k = UI.app, A = APPS.find(a => a[0] === k), anim = k && UI.prevApp !== k; UI.prevApp = k;
   const tint = i => ['#E8553E', '#F4B400', '#2E9A6E', '#3F8FBF', '#7E5AA6', '#C2577F', '#1C4E80', '#E08A3A', '#5E7C78', '#B23A3A'][i % 10];
   const dock = `<div class="dock">${APPS.map(([k2, ic, l], i) => `<button class="dk${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k === k2 ? '' : k2}" title="${esc(l)}${appLocked(k2) ? ' (in the App Store)' : ''}" style="--t:${tint(i)}"><span>${ic}</span><em>${esc(l)}</em></button>`).join('')}</div>`;
