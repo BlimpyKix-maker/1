@@ -78,6 +78,8 @@
 table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.sortable thead th:hover { color: var(--accent); } table.grid thead th.sorted::after { content: ' ' attr(data-dir); font-size: 10px; }
 .egofrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .egofc { border: 1px solid var(--line); border-radius: 6px; padding: 8px; display: grid; gap: 2px; text-align: center; opacity: .6; } .egofc b { font: 700 28px var(--f-display); } .egofc.won { opacity: 1; border-color: var(--gold, #C9A24A); background: color-mix(in srgb, #E3B23C 14%, transparent); } .egofc small { font-size: 11px; color: var(--muted); }
 .ladder tr.me td { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.repgrid { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; } @media (max-width: 640px) { .repgrid { grid-template-columns: 1fr; } } .reppanel .arch { margin: 2px 0 8px; } .reppanel .say { margin: 6px 0; padding: 6px 10px; border-left: 3px solid var(--accent); font-style: italic; }
+.ambrow.done span:first-child { color: var(--good); } .claimbar { padding: 8px; border: 1px dashed var(--accent); border-radius: 6px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .ambcat { margin: 6px 0; } .ambcat summary { cursor: pointer; padding: 4px 0; }
 .stills { display: flex; flex-wrap: wrap; gap: 8px; }
 .stills figure { margin: 0; } .stills figcaption { font-size: 11px; color: var(--muted); max-width: 240px; }
 .still { border-radius: 3px; display: block; }
@@ -206,7 +208,7 @@ details.yr { border-top: 1px solid var(--line); padding: 8px 0; } details.yr sum
 .cohort tr.me td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .camp { border-top: 1px solid var(--line); padding: 8px 0; } .camp:first-of-type { border-top: 0; }
 .reviews li { margin: 6px 0; } .reviews .stars { color: var(--gold, #c9a227); letter-spacing: 1px; margin-right: 4px; }
-.ambrow { display: grid; grid-template-columns: minmax(0, 1fr) 100px 110px; gap: 10px; align-items: center; padding: 4px 0; } .ambrow .tbar { width: 100%; }
+.ambrow { display: grid; grid-template-columns: minmax(0, 1fr) 100px 120px auto; gap: 10px; align-items: center; padding: 4px 0; } .ambrow .tbar { width: 100%; }
 .cliplist { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; } .clip { border: 1px solid var(--line); border-left: 3px solid var(--accent); padding: 8px 10px; background: var(--panel); } .clip b { display: block; font-family: var(--f-display); font-size: 16px; margin: 2px 0; }
 .moves li { margin-bottom: 6px; }
 @media (max-width: 600px) { .ambrow { grid-template-columns: minmax(0, 1fr) 70px; } .ambrow > :last-child { grid-column: 1 / -1; } }
@@ -11430,6 +11432,8 @@ function applyAct(a) {
     case 'campaign': return campaignAct(a);
     case 'mentor': return mentorAct(a);
     case 'school': return applySchool(a);
+    case 'claimamb': return claimAmb(a);
+    case 'pinamb': return pinAmb(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'move': return moveHome(a);
     case 'vehicle': return buyVehicle(a);
@@ -15082,7 +15086,7 @@ function feedPanel() {
      ${pend.length ? `<p class="bad">${pend.length} decision${pend.length > 1 ? 's' : ''} waiting <button class="linkish" data-feedf="needs">Show</button></p>` : `<p><button class="btn-s" data-next="1">Live on <kbd>space</kbd></button></p>`}
      <p class="small">${job ? `Working: <b>${esc(job.t)}</b>${job.film !== null && job.film !== undefined ? ' on ' + fl(job.film) : ''}${job.task ? `<br>Task: ${esc(job.task.t)} (${job.task.prog}/${job.task.need})` : ''} <button class="linkish" data-dtab="work">The work</button>` : 'Between jobs. <button class="linkish" data-dtab="work">See the board</button>'}</p>
      <p class="small">Cash <b>${fmtCash(M.cash)}</b> · energy <b>${Math.round(M.energy)}</b> · stress <b>${Math.round(M.stress)}</b>${M.grind > 6 ? ` · <span class="bad">${M.grind} weeks without a break</span>` : ''}</p>${typeof worldStrip === 'function' ? worldStrip() : ''}</section>
-    ${nextMovesHTML()}
+    ${nextMovesHTML()}${typeof pinnedAmbHTML === 'function' ? pinnedAmbHTML() : ''}
     ${upcoming.length ? `<section class="panel"><h4>Coming up</h4><ul class="plain small">${upcoming.map(a => { const A = APPT_KINDS[a.kind] || {}; return `<li>${A.icon || '•'} ${esc(A.label || a.kind)}${a.who != null ? ' with ' + pl(a.who) : ''} <span class="muted">${a.w === S.week ? DAYS7[a.d] : fmtDate(a.w, true)}</span></li>`; }).join('')}</ul></section>` : ''}
     ${senders.length ? `<section class="panel"><h4>Messages${unread ? ` <span class="dn good">${unread}</span>` : ''}</h4><div class="fsend">${senders.map(id => `<button class="linkish" data-fthread="${id}" title="${esc(P(id).name)}">${phoneAvatar(id, 34)}</button>`).join('')}</div></section>` : ''}
     <section class="panel"><h4>Jump to</h4><p class="small">${[['work', 'Job board'], ['create', 'Your writing & company'], ['people', 'Contacts'], ['life', 'Life & years']].map(([k, l]) => `<button class="linkish" data-dtab="${k}">${l}</button>`).join(' · ')}</p></section>
@@ -15762,8 +15766,7 @@ function ambitionWeek() {
     if (M.amb[A.k] !== undefined) continue;
     const [c, n] = A.p(); if (c < n) continue;
     M.amb[A.k] = S.week;
-    me.standing = clamp(me.standing + A.rw * .15, 0, 100); M.stress = clamp(M.stress - A.rw * 3, 0, 100);
-    inbox('note', `Ambition reached: ${A.t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. ${AMBITIONS.find(x => M.amb[x.k] === undefined) ? 'Next: ' + AMBITIONS.find(x => M.amb[x.k] === undefined).t.toLowerCase() + '.' : 'You\'ve done everything you set out to do. Time for bigger dreams.'}`);
+    inbox('note', `Ambition reached: ${A.t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. Your reward is waiting on the Standing page. ${AMBITIONS.find(x => M.amb[x.k] === undefined) ? 'Next: ' + AMBITIONS.find(x => M.amb[x.k] === undefined).t.toLowerCase() + '.' : 'You\'ve done everything you set out to do. Time for bigger dreams.'}`);
   }
 }
 function ambitionsHTML() {
@@ -17862,6 +17865,143 @@ function corpPick(it, k) {
   return false;
 }
 // </corporate>
+// <standing>
+// ---------------- Standing: your ambitions and your reputation ----------------
+// Two pages that answer "how am I doing?". Ambitions: every goal there is, in six groups, with progress; reach one and
+// a reward waits to be claimed; pin up to three to keep them in front of you. Reputation: what the business actually
+// thinks, worked out from what you've done: eight traits on a chart, the kind of player people take you for, how each
+// circle sees you, and what the people who know you say behind your back.
+const AMB_CAT = { start: 'Getting started', craft: 'Craft and career', money: 'Money', fame: 'Audience and fame', power: 'Industry power', legend: 'Legend' };
+const AMB_CATS = { contacts: 'start', firstjob: 'start', cushion: 'money', credit: 'craft', script: 'craft', contest: 'craft', level2: 'craft', agent: 'craft', corner: 'start', five: 'craft', senior: 'craft', level3: 'craft', ownfilm: 'craft', festival: 'fame', level4: 'craft', award: 'fame' };
+const maxFol = () => Math.max(0, ...Object.values(S.me.fol || {}));
+const corpRung = () => { const j = S.me.jobs.find(x => /^corp_/.test(x.k)); const past = S.me.past.filter(x => /^corp_/.test(x.k)).map(x => +x.k.slice(5)); return Math.max(j ? +j.k.slice(5) : -1, ...past, -1); };
+const wonShow = show => (S.me.milestones || []).some(m => m.kind === 'prize' && /^Won/.test(m.t) && m.t.includes(show));
+AMBITIONS.push(
+  { k: 'firstwork', c: 'start', t: 'Release something of your own', p: () => [(S.me.works || []).length + (S.me.scripts || []).filter(s => s.grade).length, 1], rw: 1 },
+  { k: 'mentor', c: 'start', t: 'Find a mentor', p: () => [S.me.mentor || (S.me.mentors || []).length ? 1 : 0, 1], rw: 2 },
+  { k: 'school', c: 'craft', t: 'Graduate from a school', p: () => [(S.me.alma || []).length + S.me.degrees.filter(d => d !== 'film').length > 0 ? 1 : 0, 1], rw: 2 },
+  { k: 'elite', c: 'craft', t: 'Get into one of the great schools', p: () => [[S.me.school && S.me.school.at, ...(S.me.alma || [])].some(id => id && SCHOOL_BY[id] && SCHOOL_BY[id][4] === 1) ? 1 : 0, 1], rw: 3 },
+  { k: 'crossover', c: 'craft', t: 'Work in three different industries', p: () => [Object.values(fieldExp()).filter(v => v >= 1).length, 3], rw: 3 },
+  { k: 'mentorgrad', c: 'craft', t: 'Complete a mentorship', p: () => [(S.me.mentors || []).length, 1], rw: 3 },
+  { k: 'twenty', c: 'craft', t: 'Twenty screen credits', p: () => [S.me.past.filter(x => x.credited).length, 20], rw: 5 },
+  { k: 'level5', c: 'craft', t: 'Reach level 5: the top of your craft', p: () => [careerLevel(), 5], rw: 6 },
+  { k: 'tenk', c: 'money', t: 'Have $10,000 in the bank', p: () => [Math.max(0, S.me.cash), usd(10000)], rw: 1, money: 1 },
+  { k: 'hundredk', c: 'money', t: 'Have $100,000 in the bank', p: () => [Math.max(0, S.me.cash), usd(100000)], rw: 3, money: 1 },
+  { k: 'million', c: 'money', t: 'Become a millionaire', p: () => [Math.max(0, S.me.cash), usd(1000000)], rw: 6, money: 1 },
+  { k: 'fans1k', c: 'fame', t: 'A thousand followers', p: () => [maxFol(), 1000], rw: 1 },
+  { k: 'fans100k', c: 'fame', t: 'A hundred thousand followers', p: () => [maxFol(), 100000], rw: 4 },
+  { k: 'fans1m', c: 'fame', t: 'A million followers', p: () => [maxFol(), 1000000], rw: 7 },
+  { k: 'platinum', c: 'fame', t: 'A million streams on one song', p: () => [Math.max(0, ...(S.me.works || []).filter(w => w.type === 'song').map(w => w.units)), 1000000], rw: 5 },
+  { k: 'fame50', c: 'fame', t: 'Become a household name (fame 50)', p: () => [Math.round(ME().fame || 0), 50], rw: 5 },
+  { k: 'corp', c: 'power', t: 'Join a company\'s ladder', p: () => [corpRung() >= 0 ? 1 : 0, 1], rw: 1 },
+  { k: 'vp', c: 'power', t: 'Become a vice president', p: () => [Math.max(0, corpRung()), 4], rw: 4 },
+  { k: 'president', c: 'power', t: 'Run production at a company', p: () => [Math.max(0, corpRung()), 6], rw: 6 },
+  { k: 'ceo', c: 'power', t: 'Become a chief executive', p: () => [Math.max(0, corpRung()), 7], rw: 8 },
+  { k: 'found', c: 'power', t: 'Found your own company', p: () => [S.me.company !== undefined ? 1 : 0, 1], rw: 3 },
+  { k: 'threehits', c: 'power', t: 'Three hits from your own company', p: () => [S.me.company !== undefined ? S.companies[S.me.company].hits : 0, 3], rw: 6 },
+  { k: 'titan', c: 'power', t: 'Standing 80: an industry titan', p: () => [Math.round(ME().standing), 80], rw: 7 },
+  { k: 'oswald', c: 'legend', t: 'Win an Oswald', p: () => [wonShow('Academy Oswalds') ? 1 : 0, 1], rw: 8 },
+  { k: 'gramophone', c: 'legend', t: 'Win a Gramophone', p: () => [wonShow('The Gramophones') ? 1 : 0, 1], rw: 6 },
+  { k: 'footlight', c: 'legend', t: 'Win a Footlight', p: () => [wonShow('The Footlights') ? 1 : 0, 1], rw: 6 },
+  { k: 'emmet', c: 'legend', t: 'Win an Emmet', p: () => [wonShow('The Emmets') ? 1 : 0, 1], rw: 6 },
+  { k: 'egof', c: 'legend', t: 'Complete the EGOF', p: () => [Object.keys(egofWins()).length, 4], rw: 10 }
+);
+for (const A of AMBITIONS) A.c = A.c || AMB_CATS[A.k] || 'craft';
+function claimAmb(a) {
+  const M = S.me, me = ME(), A = AMBITIONS.find(x => x.k === a.k);
+  if (!A || (M.amb || {})[A.k] === undefined || (M.ambClaim || {})[A.k]) return false;
+  (M.ambClaim = M.ambClaim || {})[A.k] = S.week;
+  me.standing = clamp(me.standing + A.rw * .15, 0, 100); M.stress = clamp(M.stress - A.rw * 3, 0, 100); M.energy = clamp(M.energy + A.rw * 2, 0, 100);
+  const cash = usd(A.rw * A.rw * 60); M.cash += cash;
+  if (M.ambPin) M.ambPin = M.ambPin.filter(k => k !== A.k);
+  diary(`Ambition claimed: ${A.t.toLowerCase()}. +${fmtCash(cash)}, a little more standing, a little less stress.`);
+  return true;
+}
+function pinAmb(a) { const M = S.me, L = M.ambPin = M.ambPin || []; if (!AMBITIONS.some(x => x.k === a.k)) return false; const i = L.indexOf(a.k); if (i >= 0) L.splice(i, 1); else { if (L.length >= 3) L.shift(); L.push(a.k); } return true; }
+function ambClaimable() { const M = S.me; return AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined && !(M.ambClaim || {})[A.k]); }
+function ambRow(A) {
+  const M = S.me, done = (M.amb || {})[A.k] !== undefined, claimed = (M.ambClaim || {})[A.k], pinned = (M.ambPin || []).includes(A.k), [c, n] = A.p(), pct = clamp(c / n, 0, 1);
+  return `<div class="ambrow${done ? ' done' : ''}"><span>${done ? (claimed ? '✓ ' : '★ ') : ''}${esc(A.t)}</span><span class="tbar"><i style="width:${Math.round((done ? 1 : pct) * 100)}%"></i></span><span class="small muted">${done ? (claimed ? 'claimed ' + fmtDate(claimed, true) : 'reached!') : A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n).toLocaleString() + ' / ' + n.toLocaleString()}</span><span>${done && !claimed ? `<button class="btn-s" data-ambclaim="${A.k}">Claim ${'✦'.repeat(Math.min(3, Math.ceil(A.rw / 3)))}</button>` : !done ? `<button class="linkish" data-ambpin="${A.k}" title="${pinned ? 'Unpin' : 'Pin to keep it in view'}">${pinned ? '📌 Pinned' : 'Pin'}</button>` : ''}</span></div>`;
+}
+function ambitionsPage() {
+  const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined).length, pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), cl = ambClaimable();
+  return `<section class="panel amb"><h3>Ambitions <span class="count">${done} of ${AMBITIONS.length}</span></h3>
+   ${cl.length ? `<div class="claimbar">✦ ${cl.length} reward${cl.length > 1 ? 's' : ''} waiting: ${cl.map(A => `<button class="btn-s" data-ambclaim="${A.k}">${esc(A.t)}</button>`).join(' ')}</div>` : ''}
+   ${pins.length ? `<h4>📌 Pinned</h4>${pins.map(ambRow).join('')}` : '<p class="muted small">Pin up to three goals to keep them on your Today page.</p>'}
+   ${Object.entries(AMB_CAT).map(([c, l]) => { const L = AMBITIONS.filter(A => A.c === c); return L.length ? `<details class="ambcat"${c === 'start' || c === 'craft' ? ' open' : ''}><summary><b>${l}</b> <span class="count">${L.filter(A => (M.amb || {})[A.k] !== undefined).length} of ${L.length}</span></summary>${L.map(ambRow).join('')}</details>` : ''; }).join('')}
+   <p class="muted small">Reach a goal and its reward waits here: standing, some cash, energy back and stress off. Bigger goals, bigger rewards.</p></section>`;
+}
+function pinnedAmbHTML() { const M = S.me, pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), cl = ambClaimable(); if (!pins.length && !cl.length) return ''; return `<section class="panel"><h4>Your goals</h4>${cl.length ? `<p class="small">✦ <button class="linkish" data-dtab="standing">${cl.length} reward${cl.length > 1 ? 's' : ''} to claim</button></p>` : ''}${pins.map(ambRow).join('')}</section>`; }
+// ---- reputation ----
+const FACETS = [['talent', 'Talent'], ['reliability', 'Reliability'], ['bankability', 'Bankability'], ['prestige', 'Prestige'], ['warmth', 'Warmth'], ['integrity', 'Integrity'], ['fame', 'Fame'], ['power', 'Power']];
+function facets() {
+  const M = S.me, me = ME(), F = M.flags || {}, cr = MAIN[me.role] || 'wri';
+  const known = Object.keys(M.known).map(Number).filter(id => P(id) && !P(id).dead), avgO = known.length ? avg(known.map(id => opinion(id))) : 0;
+  const myF = typeof myFilms === 'function' ? myFilms().filter(f => f.rel !== null) : [], hits = myF.filter(f => f.hitRatio > 2).length, rev = myF.length ? avg(myF.map(f => f.reviews || 50)) : 50;
+  const secrets = M.secrets || [], out = secrets.filter(x => x.out).length, prizes = (M.milestones || []).filter(m => m.kind === 'prize').length;
+  return {
+    talent: clamp(avg(Object.keys(CRAFTS[cr].subs).map(k => me.sk[k])) * 5, 0, 100),
+    reliability: clamp(45 + (F.reliable !== undefined ? 15 : 0) + Math.min(30, M.past.filter(x => !x.quit).length * 3) - M.past.filter(x => x.quit).length * 8 - (F.fudger !== undefined ? 15 : 0), 0, 100),
+    bankability: clamp(hits * 15 + Math.log10(1 + maxFol()) * 8 + (S.me.works || []).filter(w => w.units > 100000).length * 6, 0, 100),
+    prestige: clamp(prizes * 14 + (rev - 50) * 1.2 + (M.alma || []).length * 6, 0, 100),
+    warmth: clamp(50 + avgO, 0, 100),
+    integrity: clamp(70 - out * 25 - secrets.length * 5 - (F.mudslinger !== undefined ? 20 : 0) + (F.whistle !== undefined ? 10 : 0) - Object.keys(M.black || {}).length * 4, 0, 100),
+    fame: clamp(me.fame || 0, 0, 100),
+    power: clamp(me.standing * .8 + Math.max(0, corpRung()) * 4 + (M.company !== undefined ? 8 : 0), 0, 100)
+  };
+}
+const ARCHETYPES = {
+  'talent+reliability': 'The craftsperson everyone wants on their crew', 'talent+prestige': 'An artist on the rise', 'talent+bankability': 'A rare thing: good and commercial', 'talent+warmth': 'Gifted, and kind with it',
+  'reliability+warmth': 'The safe pair of hands', 'reliability+power': 'The operator', 'bankability+fame': 'A box-office draw', 'bankability+power': 'A deal-maker', 'prestige+fame': 'A festival darling turned star',
+  'power+fame': 'A mogul in the making', 'warmth+fame': 'Everybody\'s favourite', 'integrity+warmth': 'The conscience of the room', 'integrity+talent': 'The real thing', 'power+integrity': 'A fair boss, which is rare',
+  'prestige+integrity': 'An auteur of principle', 'reliability+integrity': 'Solid as a rock', 'bankability+reliability': 'A sure bet', 'fame+talent': 'A star with chops'
+};
+function archetype(F) { const top = Object.entries(F).sort((a, b) => b[1] - a[1]).slice(0, 2).map(x => x[0]); if (F[top[0]] < 25) return 'An unknown quantity'; if (F.integrity < 30) return F.power > 40 ? 'A shark, and people know it' : 'Someone people are careful around'; return ARCHETYPES[top.join('+')] || ARCHETYPES[top.slice().reverse().join('+')] || `Known for ${FACETS.find(f => f[0] === top[0])[1].toLowerCase()}`; }
+function radarSVG(F, s = 240) {
+  const c = s / 2, R = s / 2 - 52, n = FACETS.length, pt = (i, v) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [c + Math.cos(a) * R * v / 100, c + Math.sin(a) * R * v / 100]; };
+  const ring = v => FACETS.map((_, i) => pt(i, v).map(x => x.toFixed(1)).join(',')).join(' ');
+  return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}" class="radar" style="overflow:visible" role="img" aria-label="Reputation chart">${[25, 50, 75, 100].map(v => `<polygon points="${ring(v)}" fill="none" stroke="var(--line)" stroke-width="1"/>`).join('')}${FACETS.map((_, i) => { const [x, y] = pt(i, 100); return `<line x1="${c}" y1="${c}" x2="${x}" y2="${y}" stroke="var(--line)"/>`; }).join('')}
+   <polygon points="${FACETS.map(([k], i) => pt(i, Math.max(4, F[k])).map(x => x.toFixed(1)).join(',')).join(' ')}" fill="var(--accent)" fill-opacity=".25" stroke="var(--accent)" stroke-width="2"/>
+   ${FACETS.map(([k, l], i) => { const [x, y] = pt(i, 122); return `<text x="${x}" y="${y + 3}" text-anchor="middle" font-size="10" font-family="Barlow, sans-serif" fill="var(--ink, #333)">${l} ${Math.round(F[k])}</text>`; }).join('')}</svg>`;
+}
+const SAYS = {
+  talent: [['Honestly the best I\'ve worked with at that level.', 'They make it look easy. It isn\'t.'], ['Talented? Sure. Not as much as they think.']],
+  reliability: [['If they say Thursday, it\'s Thursday.', 'Never once the reason we waited.'], ['Brilliant when they turn up.']],
+  warmth: [['Remembers your kids\' names. Who does that?', 'They brought soup when I was ill. Soup!'], ['Cold. Polite, but cold.']],
+  integrity: [['Straight with you, even when it costs them.', 'Never heard them badmouth anyone.'], ['I\'d check my wallet after the meeting.', 'Watch what you say around them.']],
+  power: [['When they call, people pick up.', 'One word from them and a film gets made.'], ['They\'d step on you to reach a shelf.']],
+  fame: [['My mother asked for their autograph.', 'You can\'t walk down the street with them anymore.'], ['Famous for being around, mostly.']],
+  bankability: [['Their name on a poster sells tickets.', 'Money follows them.'], ['They need a hit, and soon.']],
+  prestige: [['The critics adore them. So do I.', 'Their work will outlast all of ours.'], ['A bit pleased with their reviews.']]
+};
+function circlesOf() {
+  const M = S.me, by = { crew: [], executives: [], artists: [] };
+  for (const id of Object.keys(M.known).map(Number)) { const p = P(id); if (!p || p.dead) continue; const g = ['producer', 'casting'].includes(p.role) ? 'executives' : ['actor', 'director', 'writer', 'composer'].includes(p.role) ? 'artists' : 'crew'; by[g].push(opinion(id)); }
+  const myF = typeof myFilms === 'function' ? myFilms().filter(f => f.rel !== null) : [];
+  return [['Crews', by.crew.length ? 50 + avg(by.crew) : null, 'the people on set and in the cutting room'], ['Executives', by.executives.length ? 50 + avg(by.executives) : null, 'producers and the people with the money'], ['Artists', by.artists.length ? 50 + avg(by.artists) : null, 'actors, directors, writers and composers'], ['Critics', myF.length ? avg(myF.map(f => f.reviews || 50)) : null, 'from the reviews of your work'], ['Audiences', Math.min(100, (ME().fame || 0) + Math.log10(1 + maxFol()) * 8), 'fame and followers']];
+}
+function reputationPage() {
+  const M = S.me, me = ME(), F = facets(), arch = archetype(F);
+  const known = Object.keys(M.known).map(Number).filter(id => P(id) && !P(id).dead), sorted = known.slice().sort((a, b) => opinion(b) - opinion(a));
+  const strongest = Object.entries(F).sort((a, b) => b[1] - a[1])[0][0], weakest = Object.entries(F).sort((a, b) => a[1] - b[1])[0][0];
+  const quotes = [...sorted.slice(0, 2).filter(id => opinion(id) > 15).map(id => [id, SAYS[strongest][0][id % SAYS[strongest][0].length]]), ...sorted.slice(-1).filter(id => opinion(id) < -5).map(id => [id, SAYS[weakest][1][id % SAYS[weakest][1].length]])];
+  const C = circlesOf(), flags = Object.entries(M.flags || {}).filter(([k]) => REP_FLAGS[k]);
+  return `<section class="panel reppanel"><h3>Your reputation</h3><div class="repgrid"><div>${radarSVG(F)}</div><div><p class="eyebrow">What the business takes you for</p><h2 class="arch">${esc(arch)}</h2>
+    <p>Strongest: <b>${FACETS.find(f => f[0] === strongest)[1]}</b>. Weakest: <b>${FACETS.find(f => f[0] === weakest)[1]}</b>.</p>
+    <h4>In the rooms you're not in</h4>${C.map(([l, v, d]) => `<div class="ambrow"><span>${l} <span class="muted small">${d}</span></span><span class="tbar"><i style="width:${v === null ? 0 : Math.round(clamp(v, 0, 100))}%"></i></span><span class="small muted">${v === null ? 'don\'t know you yet' : l === 'Audiences' ? (v >= 70 ? 'love you' : v >= 40 ? 'know you' : v >= 15 ? 'noticing you' : 'never heard of you') : l === 'Critics' ? (v >= 75 ? 'admire you' : v >= 60 ? 'like your work' : v >= 45 ? 'mixed' : 'unkind') : v >= 70 ? 'fans' : v >= 55 ? 'warm' : v >= 45 ? 'neutral' : v >= 30 ? 'wary' : 'hostile'}</span></div>`).join('')}</div></div>
+   ${quotes.length ? `<h4>What people say about you</h4>${quotes.map(([id, q]) => `<blockquote class="say">“${esc(q)}” <span class="muted small">— ${pl(id)}, ${esc(ROLE_LABEL[P(id).role].toLowerCase())}</span></blockquote>`).join('')}` : ''}
+   ${flags.length ? `<h4>What sticks to you</h4><ul class="plain">${flags.map(([k, w]) => `<li><b>${esc(REP_FLAGS[k].label)}</b> <span class="muted small">since ${fmtDate(w, true)}</span> · <span class="muted">${esc(REP_FLAGS[k].d)}</span></li>`).join('')}</ul>` : ''}
+   ${(M.secrets || []).filter(x => !x.out).length ? `<p class="small bad">You have ${(M.secrets || []).filter(x => !x.out).length} secret${(M.secrets || []).filter(x => !x.out).length > 1 ? 's' : ''} that could come out.</p>` : ''}
+   <p class="muted small">Every trait is worked out from what you've done: your skills, finished jobs, hits, prizes, what your contacts think, any secrets, your fame and your seat at the table. It changes as you do.</p></section>`;
+}
+function standingHTML() { return reputationPage() + (typeof egofHTML === 'function' ? egofHTML() : '') + ambitionsPage(); }
+function standingClick(t) {
+  const d = t.dataset;
+  if (d.ambclaim) { doAct({ t: 'claimamb', k: d.ambclaim }); render(true); return true; }
+  if (d.ambpin) { doAct({ t: 'pinamb', k: d.ambpin }); render(true); return true; }
+  return false;
+}
+// </standing>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -18693,7 +18833,8 @@ function viewDesk() {
   ${typeof boardFilterHTML === 'function' ? boardFilterHTML() : ''}<div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${(typeof boardView === 'function' ? boardView() : M.board).map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing matches. Try another industry or level.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return portfolioHTML() + writingDesk() + producingPanel() + companyPanel();
-    case 'life': return pathsPanel() + ambitionsHTML() + reputationHTML() + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
+    case 'standing': return standingHTML();
+    case 'life': return pathsPanel() + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
     case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
@@ -18749,6 +18890,7 @@ function careerClick(t) {
   if (typeof computerClick === 'function' && computerClick(t)) return true;
   if (typeof boardClick === 'function' && boardClick(t)) return true;
   if (typeof schoolClick === 'function' && schoolClick(t)) return true;
+  if (typeof standingClick === 'function' && standingClick(t)) return true;
   if (t.dataset.abf) { UI.abf = t.dataset.abf; render(true); return true; }
   if (t.dataset.schools !== undefined) { UI.schools = !!t.dataset.schools; render(true); return true; }
   if (t.dataset.cc) {
@@ -18838,7 +18980,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -18921,7 +19063,7 @@ function focusPanel() {
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {
   const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'feed';
-  const tabs = [['today', 'Today', pend, 'bad'], ['feed', 'Feed', pend + unread, pend ? 'bad' : 'good'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['compete', 'Contests', COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length, 'good'], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
+  const tabs = [['today', 'Today', pend, 'bad'], ['feed', 'Feed', pend + unread, pend ? 'bad' : 'good'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['compete', 'Contests', COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length, 'good'], ['standing', 'Standing', typeof ambClaimable === 'function' ? ambClaimable().length : 0, 'good'], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
 // Rebuild a saved career: the world is already built from the same seed; feed it the log.

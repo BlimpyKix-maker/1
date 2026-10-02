@@ -83,8 +83,7 @@ function ambitionWeek() {
     if (M.amb[A.k] !== undefined) continue;
     const [c, n] = A.p(); if (c < n) continue;
     M.amb[A.k] = S.week;
-    me.standing = clamp(me.standing + A.rw * .15, 0, 100); M.stress = clamp(M.stress - A.rw * 3, 0, 100);
-    inbox('note', `Ambition reached: ${A.t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. ${AMBITIONS.find(x => M.amb[x.k] === undefined) ? 'Next: ' + AMBITIONS.find(x => M.amb[x.k] === undefined).t.toLowerCase() + '.' : 'You\'ve done everything you set out to do. Time for bigger dreams.'}`);
+    inbox('note', `Ambition reached: ${A.t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. Your reward is waiting on the Standing page. ${AMBITIONS.find(x => M.amb[x.k] === undefined) ? 'Next: ' + AMBITIONS.find(x => M.amb[x.k] === undefined).t.toLowerCase() + '.' : 'You\'ve done everything you set out to do. Time for bigger dreams.'}`);
   }
 }
 function ambitionsHTML() {
