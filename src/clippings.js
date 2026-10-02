@@ -48,6 +48,7 @@ function nextMoves() {
   const B = Object.keys(M.black || {}); if (B.length) add(`Try to make peace with ${P(+B[0]).name}.`, 'people', 'Bad blood is costing you');
   if (typeof campaignSeason === 'function' && campaignSeason() && campaignFilms().some(f => !(f.campLog || []).length)) add('Awards season: campaign for your film.', 'compete', 'October to December');
   if (typeof COMPS !== 'undefined') { const c = COMPS.find(c => compOpen(c) && !compEntered(c) && compFits(c) && (c.need !== 'script' || (M.scripts || []).some(s => s.grade))); if (c) add(`Enter ${c.name}.`, 'compete', 'Fits you, open now'); }
+  if (typeof mentorCandidates === 'function' && !M.mentor) { const c = mentorCandidates().find(p => S.week - ((M.mAsk || {})[p.id] ?? -99) >= 26); if (c) add(`Ask ${c.name} to mentor you.`, 'people', 'Senior, and likes you'); }
   if (!M.agent && careerLevel() >= 2) add('You could interest an agent now.', 'work', 'Level ' + careerLevel());
   if (phoneUnread() >= 3) add('Reply to your texts: people notice.', 'phone', `${phoneUnread()} unread`);
   if (!(M.scripts || []).length && me.mind.vis >= 11) add('Start writing a script: you have the eye for it.', 'create', 'Vision ' + Math.round(me.mind.vis));

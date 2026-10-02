@@ -24,6 +24,7 @@ function yearWeek() {
   const r = { y: a.y, earned: b.earned - a.earned, weeks: Math.min(52, b.weeks - a.weeks), credits: b.credits - a.credits, known: b.known - a.known, apps: b.apps - a.apps, offers: b.offers - a.offers, standing: Math.round((b.standing - a.standing) * 10) / 10, fame: Math.round(b.fame - a.fame), cash: b.cash, awards: ms.filter(m => m.kind === 'prize').length,
     films: me.credits.map(i => S.films[i]).filter(f => f.rel !== null && yearOf(f.rel) === a.y).map(f => f.id), high: ms.filter(m => ['prize', 'level', 'credit', 'film', 'write'].includes(m.kind)).slice(-5).map(m => m.t) };
   r.head = yearHeadline(r);
+  if (typeof industryYear === 'function') { r.ind = industryYear(a.y); industryNews(a.y, r.ind); }
   (M.years = M.years || []).push(r);
   inbox('note', `${a.y} in review: ${r.head.toLowerCase()}`, `${r.weeks} weeks of paid work, ${fmtCash(r.earned)} earned, ${r.credits} new credit${r.credits === 1 ? '' : 's'}, ${r.known} new people in your phone. Standing ${r.standing >= 0 ? 'up' : 'down'} ${Math.abs(r.standing)}. The full recap is on the Life tab.`);
   M.yr = b;
@@ -34,7 +35,7 @@ function yearsHTML() {
   const sign = v => (v > 0 ? '+' : '') + v;
   return `<section class="panel years"><h3>Your years</h3>${Y.map((r, i) => `<details class="yr"${i === 0 ? ' open' : ''}><summary><b>${r.y}</b> · ${esc(r.head)}</summary>
    <div class="kpis mini"><div><span>Paid work</span><b>${r.weeks} wk</b><small class="muted">${fmtCash(r.earned)} earned</small></div><div><span>Credits</span><b>${sign(r.credits)}</b><small class="muted">${r.apps} applications, ${r.offers} offers</small></div><div><span>Standing</span><b class="${r.standing < 0 ? 'bad' : 'good'}">${sign(r.standing)}</b><small class="muted">fame ${sign(r.fame)}</small></div><div><span>People</span><b>${sign(r.known)}</b><small class="muted">ended with ${fmtCash(r.cash)}</small></div></div>
-   ${r.films.length ? `<p class="small"><b>Released:</b> ${r.films.map(fl).join(', ')}</p>` : ''}${r.high.length ? `<ul class="plain small">${r.high.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</details>`).join('')}</section>`;
+   ${r.films.length ? `<p class="small"><b>Released:</b> ${r.films.map(fl).join(', ')}</p>` : ''}${r.high.length ? `<ul class="plain small">${r.high.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}${typeof industryHTML === 'function' ? industryHTML(r.ind) : ''}</details>`).join('')}</section>`;
 }
 function storyWeek() {
   const M = S.me, L = careerLevel();

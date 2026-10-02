@@ -42,6 +42,10 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/campaign.js` | awards season Oct–Dec: `CAMPAIGN` moves add `f.camp`, which `nationalAwards` weighs |
 | `src/life-scenes-low.js` | early-career scenes: commutes, hunting, mixers, coffees, hustle, classes, evenings, junior work |
 | `src/clippings.js` | press about you (`pressAboutYou`, from `milestone`), `nextMoves` advisor (Feed sidebar), `AMBITIONS` ladder (Life tab) |
+| `src/media.js` | non-film fields: `PLATFORMS` (Spinly, Vidwire, Blip, Podhaus, library, stage), `WORK_TYPES`, `startWork`/`makeSession`/`releaseWork`, weekly `mediaWeek` (units, pay gated by followers, label recoup, discovery-only follower growth), `portfolioHTML` (Create tab) |
+| `src/media-industry.js` | `FIELD_JOBS` (into `ODD_JOBS`), `MEDIA_COS`, parody `MEDIA_LEGENDS` + generated `mediaFigures`, `chartFor`/`viewCharts` (Charts tab), `MEDIA_AWARDS` (January), field contests, `MEDIA_HISTORY` into `TRENDS` |
+| `src/computer2.js` | computer apps: Mail (`mailWeek` offers: label deals, gigs, commissions), Ticker (`fieldIndex`, `tradeAct`), Studio (sequencer + podcast cutter), CutRoom, App Store (`SHOP`, `gearFor`), minigames; clicks in `computerClick` |
+| `src/mentor.js` | mentors (`mentorCandidates`, `mentorAct` rolls Charisma, `mentorWeek(gain)`: lesson every 3 weeks, intro every 13, graduate at 104), `filmStoryHTML` (film page, own films), `industryYear`/`industryHTML` (stored on each `M.years` entry, shown in Your years) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working

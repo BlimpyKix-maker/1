@@ -489,7 +489,7 @@ function viewDesk() {
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return portfolioHTML() + writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + ambitionsHTML() + reputationHTML() + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
-    case 'people': return cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
+    case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `<div class="cols two desk">
@@ -603,6 +603,7 @@ function careerClick(t) {
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
   if (t.dataset.startWork) { doAct({ t: 'startwork', type: UI.newWork || Object.keys(WORK_TYPES).find(workTypeOpen), title: ($('#new-work-title') || {}).value || '' }); render(true); return true; }
   if (t.dataset.releaseWork) { doAct({ t: 'releasework', promo: +(UI.relPromo || 0) }); render(true); return true; }
+  if (t.dataset.mentor !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'mentor', id: +t.dataset.mentor }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.campaign) { const [film, k] = t.dataset.campaign.split(':'), n0 = S.me.rollN || 0; doAct({ t: 'campaign', film: +film, k }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.compf) { UI.compf = t.dataset.compf; render(true); return true; }
   if (t.dataset.comp) { const k = t.dataset.comp, el = document.getElementById('comp-sc-' + k), n0 = S.me.rollN || 0; doAct({ t: 'compete', k, script: el ? +el.value : undefined }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
@@ -628,7 +629,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

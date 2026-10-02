@@ -36,6 +36,7 @@ for (let c = 0; c < N; c++) {
       if (rnd() < .3) r(`(() => { const ids = aliveKnown(); const s = upcomingSlots(10)[${Math.floor(rnd() * 10)}]; if (ids.length) doAct(Object.assign({ t: 'text', id: ids[${Math.floor(rnd() * 50)} % ids.length], kind: '${['hi', 'coffee', 'drinks', 'date', 'mentor', 'sorry'][Math.floor(rnd() * 6)]}' }, s || {})); })()`);
       if (rnd() < .1) r(`(UI.txt = { id: String(aliveKnown()[0] ?? ''), kind: 'date', slot: 0 }, phonePanel())`);
       r(`(() => { const w0 = S.week; for (let g = 0; g < 80 && S.week === w0 && !S.me.over; g++) { for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.choices[g % it.choices.length].k }); doAct(endWeekAct(g % 3 ? 'next' : 'day')); } })()`);
+      if (rnd() < .1) r(`(() => { const c = mentorCandidates()[0]; if (c) doAct({ t: 'mentor', id: c.id }); mentorHTML(); for (const f of myFilms()) filmStoryHTML(f); for (const y of S.me.years || []) industryHTML(y.ind); })()`);
       r('viewDesk(); viewYou();');   // rendering must never throw
     }
     console.log(`career ${c}: ok, week ${r('S.week')}, cash ${r('S.me.cash')}, level ${r('careerLevel()')}, agent ${r('!!S.me.agent')}`);

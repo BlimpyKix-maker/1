@@ -659,6 +659,7 @@ function closeWeek(a) {
   if (typeof ambitionWeek === 'function') ambitionWeek();
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
+  if (typeof mentorWeek === 'function') mentorWeek(gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -726,7 +727,8 @@ function finishJob(j, L, quit) {
   const T = j.tasks || [];
   M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
   if (T.length && L) L.push(`Your work as ${j.t.toLowerCase()}: ${T.length} task${T.length > 1 ? 's' : ''} delivered, ${T.filter(x => x.pts > 0).length} good, ${T.filter(x => x.pts < 0).length} rough${f && j.contrib ? `; it moved the film ${j.contrib > 0 ? 'up' : 'down'} ${Math.abs(j.contrib).toFixed(1)} points` : ''}.`);
-  if (j.head !== null && !quit) {
+  if (j.head != null && P(j.head) && !quit) {
+    if (!M.known[j.head]) meet(j.head);
     const o = opinion(j.head), k = M.known[j.head];
     k.trust = clamp(k.trust + (o > 10 ? 8 : 2), 0, 100);
     if (!k.tags.includes('Worked for them')) k.tags.push('Worked for them');
@@ -1037,6 +1039,7 @@ function applyAct(a) {
     case 'contest': return enterContest(a);
     case 'compete': return enterComp(a);
     case 'campaign': return campaignAct(a);
+    case 'mentor': return mentorAct(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'move': return moveHome(a);
     case 'vehicle': return buyVehicle(a);
