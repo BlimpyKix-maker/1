@@ -20367,7 +20367,7 @@ function build(year, seed, depth) {
   const total = (Date.UTC(year, 0, 1) - Date.UTC(S.y0, 0, 1)) / 6048e5;
   const sv0 = loadSave(), replay = sv0 && sv0.seed === S.seed && sv0.year === S.startYear && sv0.depth === S.depth;
   UI.building = true; UI.ccQueued = null; UI.earlyCC = false; let firstStep = true;
-  const bar = (pct, txt) => { if (UI.earlyCC) { const f = $('#buildfill'), t = $('#buildtxt'); if (f) f.style.width = pct.toFixed(1) + '%'; if (t) t.textContent = txt; } else { $('#prog').style.width = pct.toFixed(1) + '%'; $('#progtxt').textContent = txt; } UI.buildPct = pct; UI.buildTxt = txt; };
+  const bar = (pct, txt) => { if (UI.earlyCC) { const f = $('#buildfill'), t = $('#buildtxt'); if (f) f.style.width = pct.toFixed(1) + '%'; if (t) t.textContent = txt; } else { const f = $('#prog'), t = $('#progtxt'); if (f) f.style.width = pct.toFixed(1) + '%'; if (t) t.textContent = txt; } UI.buildPct = pct; UI.buildTxt = txt; };
   const step = () => {
     if (firstStep && !replay) { firstStep = false; UI.earlyCC = true; UI.tab = 'you'; render(); }
     if (archiving()) {

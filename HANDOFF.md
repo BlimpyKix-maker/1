@@ -58,6 +58,11 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/starmeter.js` | `starScore`/`starmeter`/`myStarRank`, GEA Starmeter tab, `starFactors`, brand endorsements by mail (`endorseWeek`), `marketApp` (Ticker), desktop `menuBar`/`desktopWidgets`/`WALLS` |
 | `src/hub.js` | Today hub: `hubAlerts` (data-jump), quick actions, best fits with apply-best, inline text replies |
 | `src/codex.js` | `CODEX` (16 fields × 9 lessons), learned by time (`codexWeek`), `codexFactors`, `codexHTML` on Standing |
+| `src/autopilot.js` | Opt-out helpers for the early game: `autoBeforeStep` (apply for best fits, handle small scenes), `autoHTML` toggles, `rankedFits`, `jobRelevance`, party auto-play |
+| `src/market.js` | The Bourse: cached prices `mktBar`/`mktPrice` (anchored to `companyWorth`), events, candles, `tradeAct` (action `trade`), `watchAct`, dividends in `stockWeek`, `marketApp` |
+| `src/festivals.js` | `FEST_INFO` (24 festivals: rules, sections, prizes, statuette kinds), `festFits`, `festPeople` (directors, programmers, juries), `festWinners`/`festRecord`, `STATUETTES` SVGs, trophies (`trophyWeek`, `trophyAct` show/sell, `trophyShelfHTML`), `festivalPage` |
+| `src/messaging.js` | `TOPICS` (22 ways to start a text) via `topicText`, `makeLead`/`leadBoard` (real postings from friends), NPC asks (`ASKS`, `askReply`), delayed answers in `msgWeek` (`M.msgq`), email compose (`EMAIL_KINDS`, `emailAct`, `mailReply`, `composeMailHTML`) |
+| `src/depth.js` | `GIGS` (one-week jobs, `gigPosts`), more `VENUES` and `COMPS`, the Bazaar computer app (`BAZAAR`, collectibles `bzLots`/`bzValue`, `bazaarAct`, `bazaarWeek`), achievements (`ACH`, `achWeek`, `achHTML`) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
