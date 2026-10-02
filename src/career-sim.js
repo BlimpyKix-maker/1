@@ -554,6 +554,7 @@ function hireFactors(post) {
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof fieldFactors === 'function') F.push(...fieldFactors(post));
+  if (typeof almaFactors === 'function') F.push(...almaFactors(post));
   if (typeof repFactors === 'function') F.push(...repFactors(post));
   if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
@@ -1042,11 +1043,12 @@ function applyAct(a) {
     case 'compete': return enterComp(a);
     case 'campaign': return campaignAct(a);
     case 'mentor': return mentorAct(a);
+    case 'school': return applySchool(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'move': return moveHome(a);
     case 'vehicle': return buyVehicle(a);
     case 'enrol': return enrol(a);
-    case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${PROGRAMS[S.me.school.prog].label.toLowerCase()}.`); S.me.school = null; return true;
+    case 'dropout': if (!S.me.school) return false; inbox('note', 'You leave the course', `You drop out of ${schoolProg(S.me.school).label.toLowerCase()}.`); S.me.school = null; return true;
     case 'query': return queryAgency(a);
     case 'fireagent': if (!S.me.agent) return false; inbox('note', 'You leave your agent', `You and ${S.me.agent.name} part ways.`); if (S.me.known[S.me.agent.id]) addTie(ME(), P(S.me.agent.id), -10); S.me.agent = null; S.me.board = S.me.board.filter(p => !p.agent); return true;
   }

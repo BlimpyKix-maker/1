@@ -115,16 +115,17 @@ function enrol(a) {
 function schoolWeek(L, gain) {
   const M = S.me, me = ME(), sc = M.school;
   if (!sc) return 0;
-  const P0 = PROGRAMS[sc.prog], days = schoolDays();
+  const P0 = typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog], days = schoolDays();
   for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * days);
   if (days >= P0.days) { sc.done++; sc.missed = 0; } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} days).`); }
   if (P0.mates && days && prnd() < .08) { const q = youngNPC(M.hub, ppick(['director', 'writer', 'dp', 'editor', 'producer', 'actor'])); meet(q.id, 'Classmate', 8); L.push(`You get to know ${q.name}, a ${ROLE_LABEL[q.role].toLowerCase()} in your year.`); }
-  if (sc.missed >= 4) { inbox('note', 'Dropped out', `You missed too many weeks of ${P0.label.toLowerCase()}. The school lets you go.`); M.school = null; return 0; }
+  if (sc.missed >= 4) { inbox('note', 'Dropped out', `You missed too many weeks of ${(sc.at ? P0.label : P0.label.toLowerCase())}. The school lets you go.`); M.school = null; return 0; }
   if (sc.done >= P0.weeks) {
     if (P0.deg && !M.degrees.includes(P0.deg)) M.degrees.push(P0.deg);
-    me.standing = clamp(me.standing + (P0.deg === 'mfa' ? 3 : 1), 0, 100);
-    milestone(`Graduated: ${P0.label.toLowerCase()} in ${CRAFTS[sc.craft].label.toLowerCase()}`, 'school');
-    inbox('news', 'Graduation', `You finish ${P0.label.toLowerCase()} in ${CRAFTS[sc.craft].label.toLowerCase()}.${P0.deg ? ' The certificate goes on the wall, and on every application.' : ''}`);
+    if (typeof schoolGraduate === 'function') schoolGraduate(sc);
+    me.standing = clamp(me.standing + (P0.deg === 'mfa' ? 3 : 1) + (sc.at && SCHOOL_BY[sc.at] ? [0, 3, 1.5, 0][SCHOOL_BY[sc.at][4]] : 0), 0, 100);
+    milestone(`Graduated: ${(sc.at ? P0.label : P0.label.toLowerCase())} in ${CRAFTS[sc.craft].label.toLowerCase()}`, 'school');
+    inbox('news', 'Graduation', `You finish ${(sc.at ? P0.label : P0.label.toLowerCase())} in ${CRAFTS[sc.craft].label.toLowerCase()}.${P0.deg ? ' The certificate goes on the wall, and on every application.' : ''}`);
     M.school = null;
   }
   return P0.fee;   // a negative fee is a stipend

@@ -392,14 +392,15 @@ function companyPanel() {
 // School and representation: the two longer roads.
 function pathsPanel() {
   const M = S.me, ags = agenciesIn(M.hub).sort((x, y) => agFits(y) - agFits(x));
-  const sc = M.school, P0 = sc ? PROGRAMS[sc.prog] : null;
+  const sc = M.school, P0 = sc ? (typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog]) : null;
   const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. Plan <b>${P0.days} study day${P0.days > 1 ? 's' : ''}</b> a week${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
-    : !UI.courses ? `<p class="muted">Courses grow one craft fast; degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p><p><button class="btn-s ghost" data-courses="1">Browse courses</button></p>`
-    : `<p class="muted"><button class="linkish" data-courses="">Hide courses</button> Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ({ ba: 'a degree', mfa: 'an MFA', cert: 'a certificate', union: 'union training' }[d] || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
+    : !UI.courses ? `<p class="muted">Courses grow one craft fast; degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ((typeof DEG_LABEL !== 'undefined' && DEG_LABEL[d]) || 'a ' + d + ' degree')).join(', ')}.` : ''}</p><p><button class="btn-s ghost" data-courses="1">Browse courses</button></p>`
+    : `<p class="muted"><button class="linkish" data-courses="">Hide courses</button> Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ((typeof DEG_LABEL !== 'undefined' && DEG_LABEL[d]) || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
       <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} day${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
   const agent = M.agent ? `<p>${pl(M.agent.id)} at <b>${esc(M.agent.name)}</b> ${'★'.repeat(M.agent.tier)} represents you. <b>${esc(AG_STYLE[M.agent.style || 'nurturer'].label)}</b>: ${esc(AG_STYLE[M.agent.style || 'nurturer'].d)} Last booking ${S.week - M.agent.lastBook} weeks ago${S.week - M.agent.lastBook > AG_STYLE[M.agent.style || 'nurturer'].patience - 10 ? ' <span class="bad">(they\'re getting restless)</span>' : ''}.</p><p><button class="linkish" data-fireagent="1">Leave your agent</button></p>`
     : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr${agFits(a) ? '' : ' class="blocked"'}><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span><br><span class="muted small" title="${esc(AG_STYLE[a.style].d)}">${esc(AG_STYLE[a.style].label)} · for ${esc(AG_FOCUS[a.focus])}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
-  return `<section class="panel"><h3>School</h3>${school}<h3>Representation</h3>${agent}</section>`;
+  const world = typeof schoolsHTML === 'function' ? (UI.schools ? `<p><button class="linkish" data-schools="">Hide the world's schools</button></p>${schoolsHTML()}` : `<p><button class="btn-s ghost" data-schools="1">Schools around the world</button> <span class="muted small">Film, music, drama, animation, games, journalism and business schools in every city.</span></p>`) : '';
+  return `<section class="panel"><h3>School</h3>${school}${M.school ? '' : world}<h3>Representation</h3>${agent}</section>`;
 }
 // A little drawing of each kind of home, from a couch to a house with a garden.
 function homeIcon(life) {
@@ -543,6 +544,8 @@ function careerClick(t) {
   const c = UI.cc;
   if (typeof computerClick === 'function' && computerClick(t)) return true;
   if (typeof boardClick === 'function' && boardClick(t)) return true;
+  if (typeof schoolClick === 'function' && schoolClick(t)) return true;
+  if (t.dataset.schools !== undefined) { UI.schools = !!t.dataset.schools; render(true); return true; }
   if (t.dataset.cc) {
     const g = t.dataset.cc, v = t.dataset.v;
     if (g === 'rename') c.name = suggestName(c.hub, c.g);
@@ -630,7 +633,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -639,6 +642,7 @@ function setLook(k, v) {
 function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
   if (e.target.dataset.share && v) { doAct({ t: 'share', id: +e.target.dataset.share, to: +v }); render(true); return true; }
+  if (typeof schoolChange === 'function' && schoolChange(id, v)) { render(true); return true; }
   if (id === 'bf-sort') { (UI.bf = UI.bf || { ind: 'all', tier: 'all', fit: false }).sort = v; render(true); return true; }
   if (/^ns-(genre|theme|tone)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
   if (/^ns-(premise|hero|setting|notes)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }

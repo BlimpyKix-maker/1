@@ -135,7 +135,7 @@ function runBlock(k) {
     case 'catchup': catchupDay(W.L); break;
     case 'write': writeSession(L, .5); break;
     case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
-    case 'study': W.studied++; if (M.school) { for (const s in CRAFTS[M.school.craft].subs) weekGain(s, PROGRAMS[M.school.prog].grow / 2); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
+    case 'study': W.studied++; if (M.school) { for (const s in CRAFTS[M.school.craft].subs) weekGain(s, schoolProg(M.school).grow / 2); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
     case 'hustle': W.cashIn += usd(Math.round(75 * worldFx().hustle)); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
     case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
     case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
@@ -217,7 +217,7 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
-  if (M.school) { cal[0][0] = 'study'; cal[2][0] = 'study'; if ((PROGRAMS[M.school.prog] || {}).days > 2) cal[4][0] = 'study'; }
+  if (M.school) { cal[0][0] = 'study'; cal[2][0] = 'study'; if ((schoolProg(M.school) || {}).days > 2) cal[4][0] = 'study'; }
   return cal;
 }
 function setFocus(a) {
