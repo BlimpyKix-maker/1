@@ -208,6 +208,7 @@ function computerClick(t) {
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
   if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
+  if (d.wmax) { UI.wmax = !UI.wmax; render(true); return true; }
   if (d.wall) { UI.wall = d.wall; try { localStorage.setItem('ab-wall', d.wall); } catch (e) { } render(true); return true; }
   if (typeof marketClick === 'function' && marketClick(t)) return true;
   if (d.smf) { const [k, v] = d.smf.split(':'); (UI.smf = UI.smf || { role: 'all', where: 'all' })[k] = v; render(true); return true; }
@@ -251,4 +252,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

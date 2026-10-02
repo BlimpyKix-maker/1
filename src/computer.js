@@ -47,9 +47,10 @@ function appWindow(k) {
   return '';
 }
 function computerPanel() {
-  const k = UI.app, A = APPS.find(a => a[0] === k);
-  return `<section class="panel computer"><h3>🖥️ Your computer</h3><div class="monitor">${typeof menuBar === 'function' ? menuBar() : ''}<div class="desktop" style="background:${typeof WALLS !== 'undefined' ? WALLS[curWall()][1] : ''}">
-    <div class="icons">${APPS.map(([k2, ic, l]) => `<button class="appicon${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k2}"><span>${ic}</span>${esc(l)}${appLocked(k2) ? ' 🔒' : ''}</button>`).join('')}</div>
-    ${A ? `<div class="window"><div class="wbar"><span>${A[1]} ${esc(A[2])}</span><button class="linkish" data-app="">✕</button></div><div class="wbody">${appWindow(k)}</div></div>` : (typeof desktopWidgets === 'function' ? desktopWidgets() : '<p class="muted wallnote">Double-click nothing. Single-click an app.</p>')}
-   </div></div></section>`;
+  const k = UI.app, A = APPS.find(a => a[0] === k), anim = k && UI.prevApp !== k; UI.prevApp = k;
+  const tint = i => ['#E8553E', '#F4B400', '#2E9A6E', '#3F8FBF', '#7E5AA6', '#C2577F', '#1C4E80', '#E08A3A', '#5E7C78', '#B23A3A'][i % 10];
+  const dock = `<div class="dock">${APPS.map(([k2, ic, l], i) => `<button class="dk${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k === k2 ? '' : k2}" title="${esc(l)}${appLocked(k2) ? ' (in the App Store)' : ''}" style="--t:${tint(i)}"><span>${ic}</span><em>${esc(l)}</em></button>`).join('')}</div>`;
+  return `<section class="panel computer"><div class="monitor${UI.wmax ? ' max' : ''}">${typeof menuBar === 'function' ? menuBar() : ''}<div class="desktop${A ? ' haswin' : ''}" style="background:${typeof WALLS !== 'undefined' ? WALLS[curWall()][1] : ''}">
+    ${A ? `<div class="window${anim ? ' anim' : ''}"><div class="wbar"><span class="lights"><button class="tl r" data-app="" title="Close"></button><button class="tl y" data-app="" title="Minimise"></button><button class="tl g" data-wmax="1" title="${UI.wmax ? 'Restore' : 'Full screen'}"></button></span><span>${A[1]} ${esc(A[2])}</span><span></span></div><div class="wbody">${appWindow(k)}</div></div>` : (typeof desktopWidgets === 'function' ? desktopWidgets() : '')}
+   </div>${dock}</div></section>`;
 }

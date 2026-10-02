@@ -89,6 +89,13 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .autop { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 0 0 8px; }
 .bourse-h { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; padding: 8px 10px; margin-bottom: 8px; background: #0E1426; color: #E6EAF0; border-radius: 6px; font: 500 13px var(--f-data); } .bourse-logo { font: 700 16px var(--f-display); letter-spacing: .12em; color: #F4B400; } .bourse-h .muted { color: #9AA6B8; }
 .stockh { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start; } .stockh .big { font: 700 28px var(--f-data); margin: 2px 0; } .trade input { width: 70px; } .candles { display: block; margin: 8px 0; background: var(--paper, #fff); border-radius: 6px; } .mnews li { padding: 3px 0; border-bottom: 1px solid var(--line); }
+.desktop.haswin { grid-template-columns: 1fr; } .desktop:not(.haswin) { grid-template-columns: 1fr; }
+.dock { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 10px auto 0; padding: 8px 10px; width: fit-content; max-width: 100%; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); border-radius: 16px; backdrop-filter: blur(10px); }
+.dk { all: unset; cursor: pointer; position: relative; width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, color-mix(in srgb, var(--t) 80%, #fff), var(--t)); box-shadow: 0 4px 10px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.4); transition: transform .15s ease, margin .15s; } .dk span { font-size: 26px; } .dk em { position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: rgba(0,0,0,.8); color: #fff; font: 500 11px var(--f-body, sans-serif); padding: 3px 7px; border-radius: 5px; opacity: 0; pointer-events: none; transition: opacity .15s; }
+.dk:hover { transform: translateY(-8px) scale(1.18); } .dk:hover em { opacity: 1; } .dk.on::after { content: ''; position: absolute; bottom: -6px; width: 5px; height: 5px; border-radius: 50%; background: #fff; } .dk.locked { filter: grayscale(.7); opacity: .65; }
+.monitor.max { position: fixed; inset: 8px; z-index: 60; overflow: auto; } .monitor.max .window { max-height: calc(100vh - 160px); min-height: calc(100vh - 160px); }
+@media (prefers-reduced-motion: reduce) { .window.anim { animation: none; } .dk { transition: none; } }
+@media (max-width: 600px) { .dk { width: 40px; height: 40px; } .dk span { font-size: 21px; } .window { min-height: 420px; } }
 .stills { display: flex; flex-wrap: wrap; gap: 8px; }
 .stills figure { margin: 0; } .stills figcaption { font-size: 11px; color: var(--muted); max-width: 240px; }
 .still { border-radius: 3px; display: block; }
@@ -176,9 +183,9 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .icons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
 .appicon { all: unset; cursor: pointer; display: grid; justify-items: center; gap: 2px; color: #fff; font-size: 12px; text-align: center; padding: 6px; border-radius: 8px; text-shadow: 0 1px 2px rgba(0,0,0,.6); }
 .appicon span { font-size: 26px; } .appicon:hover, .appicon.on, .appicon:focus-visible { background: rgba(255,255,255,.18); }
-.window { background: var(--panel); border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.35); max-height: 520px; display: flex; flex-direction: column; }
-.wbar { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: var(--bg); border-bottom: 1px solid var(--line); font-weight: 600; }
-.wbody { padding: 12px; overflow-y: auto; }
+.window { background: var(--paper, #FFFDF8); background: color-mix(in srgb, var(--panel) 100%, #FFFDF8); border-radius: 10px; overflow: hidden; box-shadow: 0 18px 50px rgba(0,0,0,.45); display: flex; flex-direction: column; min-height: 560px; max-height: 75vh; } .window.anim { animation: winIn .22s cubic-bezier(.2,.9,.3,1.2); } @keyframes winIn { from { transform: scale(.94) translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+.wbar { display: grid; grid-template-columns: 80px 1fr 80px; text-align: center; align-items: center; padding: 7px 10px; background: linear-gradient(var(--bg), color-mix(in srgb, var(--bg) 85%, #000)); border-bottom: 1px solid var(--line); font-weight: 600; } .lights { display: flex; gap: 7px; } .tl { all: unset; cursor: pointer; width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); } .tl.r { background: #FF5F57; } .tl.y { background: #FEBC2E; } .tl.g { background: #28C840; } .tl:hover { filter: brightness(.85); }
+.wbody { padding: 14px; overflow-y: auto; flex: 1; }
 .wallnote { color: #fff; opacity: .8; }
 .flick .post { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); } .flick .post p { margin: 2px 0; }
 .sweep { display: grid; gap: 2px; } .sweep .cell { width: 28px; height: 28px; padding: 0; border: 1px solid var(--line); background: var(--accent-soft); border-radius: 3px; font: 600 13px var(--f-data); }
@@ -14584,11 +14591,12 @@ function appWindow(k) {
   return '';
 }
 function computerPanel() {
-  const k = UI.app, A = APPS.find(a => a[0] === k);
-  return `<section class="panel computer"><h3>🖥️ Your computer</h3><div class="monitor">${typeof menuBar === 'function' ? menuBar() : ''}<div class="desktop" style="background:${typeof WALLS !== 'undefined' ? WALLS[curWall()][1] : ''}">
-    <div class="icons">${APPS.map(([k2, ic, l]) => `<button class="appicon${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k2}"><span>${ic}</span>${esc(l)}${appLocked(k2) ? ' 🔒' : ''}</button>`).join('')}</div>
-    ${A ? `<div class="window"><div class="wbar"><span>${A[1]} ${esc(A[2])}</span><button class="linkish" data-app="">✕</button></div><div class="wbody">${appWindow(k)}</div></div>` : (typeof desktopWidgets === 'function' ? desktopWidgets() : '<p class="muted wallnote">Double-click nothing. Single-click an app.</p>')}
-   </div></div></section>`;
+  const k = UI.app, A = APPS.find(a => a[0] === k), anim = k && UI.prevApp !== k; UI.prevApp = k;
+  const tint = i => ['#E8553E', '#F4B400', '#2E9A6E', '#3F8FBF', '#7E5AA6', '#C2577F', '#1C4E80', '#E08A3A', '#5E7C78', '#B23A3A'][i % 10];
+  const dock = `<div class="dock">${APPS.map(([k2, ic, l], i) => `<button class="dk${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k === k2 ? '' : k2}" title="${esc(l)}${appLocked(k2) ? ' (in the App Store)' : ''}" style="--t:${tint(i)}"><span>${ic}</span><em>${esc(l)}</em></button>`).join('')}</div>`;
+  return `<section class="panel computer"><div class="monitor${UI.wmax ? ' max' : ''}">${typeof menuBar === 'function' ? menuBar() : ''}<div class="desktop${A ? ' haswin' : ''}" style="background:${typeof WALLS !== 'undefined' ? WALLS[curWall()][1] : ''}">
+    ${A ? `<div class="window${anim ? ' anim' : ''}"><div class="wbar"><span class="lights"><button class="tl r" data-app="" title="Close"></button><button class="tl y" data-app="" title="Minimise"></button><button class="tl g" data-wmax="1" title="${UI.wmax ? 'Restore' : 'Full screen'}"></button></span><span>${A[1]} ${esc(A[2])}</span><span></span></div><div class="wbody">${appWindow(k)}</div></div>` : (typeof desktopWidgets === 'function' ? desktopWidgets() : '')}
+   </div>${dock}</div></section>`;
 }
 // </computer>
 // <city-plus>
@@ -16446,6 +16454,7 @@ function computerClick(t) {
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
   if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
+  if (d.wmax) { UI.wmax = !UI.wmax; render(true); return true; }
   if (d.wall) { UI.wall = d.wall; try { localStorage.setItem('ab-wall', d.wall); } catch (e) { } render(true); return true; }
   if (typeof marketClick === 'function' && marketClick(t)) return true;
   if (d.smf) { const [k, v] = d.smf.split(':'); (UI.smf = UI.smf || { role: 'all', where: 'all' })[k] = v; render(true); return true; }
@@ -16489,7 +16498,7 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
 // </computer2>
 // <mentor>
 // ---------------- Mentors, your films' stories, the year in entertainment ----------------
