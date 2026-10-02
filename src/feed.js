@@ -31,7 +31,7 @@ function feedEntry(e) {
     const L = e.conv, q = P(e.who) || null, last = L.filter(m => m.from >= 0).pop() || L[L.length - 1], can = last.from >= 0 && last.replyable && !last.replied && typeof replyOptions === 'function';
     return `<li class="fe fe-msg"><span class="fic">${phoneAvatar(e.who, 32)}</span><div class="fb"><div class="mh"><time>${fmtDate(e.w, true)}</time><b>${esc(q ? q.name : 'Someone')}</b> <span class="muted small">${L.length} message${L.length > 1 ? 's' : ''}</span></div>
       <div class="fconv">${L.slice(-4).map(m => `<p class="${m.from < 0 ? 'out' : 'in'}">${esc(m.t)}</p>`).join('')}</div>
-      <p class="small">${can ? replyOptions(last).slice(0, 4).map(k => `<button class="qr" data-reply="${last.id}:${k}">${REPLIES[k].label}</button>`).join(' ') + ' ' : ''}<button class="linkish" data-fthread="${e.who}">Open the thread</button></p></div></li>`;
+      <p class="small">${can ? replyOptions(last).slice(0, 4).map(k => `<button class="qr" data-reply="${last.id}:${k}">${replyLabel(last, k)}</button>`).join(' ') + ' ' : ''}<button class="linkish" data-fthread="${e.who}">Open the thread</button></p></div></li>`;
   }
   const x = e.news;
   return `<li class="fe fe-industry"><span class="fic">📰</span><div class="fb"><div class="mh"><time>${fmtDate(x.w, true)}</time>${chip(x.type, 't-' + x.type)}</div><p><a href="#" class="lk headline" data-go="article:${e.ni}">${esc(x.text)}</a></p></div></li>`;

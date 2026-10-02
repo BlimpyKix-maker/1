@@ -43,14 +43,43 @@ function mailWeek() {
   if (fol('vidwire') + fol('blip') >= 2000 && r() < .25) { const N = NAMES[HUBS[M.hub].lang] || NAMES.en; mail('offers', `${N.F[Math.floor(r() * N.F.length)]} ${N.L[Math.floor(r() * N.L.length)]} (creator)`, 'Collab?', 'Big fan. Want to make something together? I\'ll bring my audience, you bring yours.', { k: 'collab' }); }
   const play = (M.works || []).find(w => w.plat === 'stage' && w.q >= 70 && S.week - w.rel === 3);
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
+  { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
   if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
 }
+const FAVOURS = [
+  ['Could you read something?', 'Hi {me}, I\'ve finished a draft and I trust your eye more than anyone\'s. Would you read it and tell me the truth? Twenty pages. {them}'],
+  ['A reference?', 'Hi {me}, I\'m up for a job and they want two references. Could I put you down? They might call. {them}'],
+  ['Panel next month', 'Hi {me}, I\'m moderating a panel for new filmmakers and someone dropped out. Would you come and say true things for an hour? {them}'],
+  ['Short film, one day', 'Hi {me}, we\'re shooting a short on Saturday and our person fell through. One day, food provided, eternal gratitude. {them}'],
+  ['Feedback on my reel', 'Hi {me}, I\'ve recut my reel. Would you watch it and tell me what to lose? It\'s three minutes, I promise. {them}'],
+  ['Moving day', 'Hi {me}, this is not glamorous, but I\'m moving flats on Sunday and I have a van and no friends with arms. Pizza is involved. {them}'],
+  ['An introduction?', 'Hi {me}, you know people I don\'t. Would you introduce me to someone at a company? No pressure at all. {them}'],
+  ['Test screening', 'Hi {me}, we\'re testing our cut on twenty people on Thursday. Would you come and fill in the card honestly? {them}']
+];
 function mailAct(a) {
   const M = S.me, me = ME(), m = (M.mail || []).find(x => x.id === a.id);
+  if (m && a.k === 'fan' && m.folder === 'fans' && !m.replied) { m.replied = 1; for (const k in M.fol || {}) M.fol[k] = M.fol[k] + 2; M.stress = clamp(M.stress - 1, 0, 100); return true; }
   if (!m || !m.act || m.done) return false;
+  const A = m.act, pay = A.fee !== undefined ? 'fee' : A.adv !== undefined ? 'adv' : null, re = 'Re: ' + m.subj.replace(/^Re: /, '');
+  if (a.k === 'more') {
+    if (!pay || A.pushed) return false;
+    m.done = 'more';
+    const p = clamp(.3 + me.standing / 120 + (M.agent ? .15 : 0) + Object.values(M.fol || {}).reduce((t, v) => t + v, 0) / 400000, .1, .85), x = prnd();
+    if (x < p) { const B = Object.assign({}, A, { [pay]: Math.round(A[pay] * (1.2 + prnd() * .2) / 10) * 10, pushed: 1 }); mail(m.folder, m.from, re, pickLine(['Fine. We can stretch to {v}. That really is the ceiling.', 'You drive a hard bargain. {v}, and we shake on it.', 'Our finance people winced, but yes: {v}.'], m.id).replace('{v}', fmtCash(B[pay])), B); }
+    else if (x > .85) mail(m.folder, m.from, re, 'Thanks for coming back to us. We\'ve decided to go in another direction. Best of luck.', null);
+    else mail(m.folder, m.from, re, pickLine(['That\'s our best offer, honestly. It stands for now.', 'We can\'t move on the number, but the offer is still open.'], m.id), Object.assign({}, A, { pushed: 1 }));
+    return true;
+  }
+  if (a.k === 'ask') {
+    if (A.asked) return false;
+    m.done = 'asked';
+    const info = { label: `The advance is paid on signing. You keep 18% of royalties after it's earned back, and we take your next two releases. Marketing is on us.`, gig: `Doors at 8, you're on at 9:30 for forty minutes. Two drink tickets. Sound check at 6, don't be late.`, guest: `We record on Tuesdays, an hour, video optional. We'll send questions a week ahead.`, collab: `I'm thinking one video each, on each other's channels, same week. Split costs. I have a camera person.`, commission: `It's a development commission: a first draft in six months, a reading at the end. The fee is half on signing.`, favour: `It would take an afternoon. I'd owe you, properly.` }[A.k] || 'Happy to answer anything. The offer stands.';
+    mail(m.folder, m.from, re, info, Object.assign({}, A, { asked: 1 }));
+    return true;
+  }
   m.done = a.k;
+  if (A.k === 'favour') { const id = A.id; if (!M.known[id] || P(id).dead) return true; if (a.k === 'yes') { M.energy = clamp(M.energy - 12, 0, 100); addTie(me, P(id), 5); M.known[id].owe = (M.known[id].owe || 0) + 1; trust(id, 4); sms(id, pickLine(['you\'re a lifesaver. I owe you one', 'thank you. seriously. I won\'t forget it', 'that was so kind. drinks are on me forever'], id + S.week), 'text'); } else { addTie(me, P(id), -1.5); } return true; }
   if (a.k !== 'yes') return true;
-  const A = m.act;
   if (A.k === 'label') { M.deal = { lab: A.lab, adv: A.adv, rec: 0, w: S.week }; M.cash += A.adv; milestone(`Signed a record deal with ${A.lab}`, 'work'); }
   else if (A.k === 'gig') { M.cash += A.fee; M.energy = clamp(M.energy - 10, 0, 100); M.fol.spinly = (M.fol.spinly || 0) * 1.03 + 20; }
   else if (A.k === 'guest') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.08 + 40; }
@@ -65,7 +94,7 @@ function mailApp() {
   const cnt = k => L.filter(m => (k === 'inbox' ? m.folder !== 'spam' : m.folder === k) && S.week - m.w < 2).length;
   return `<div class="mailapp"><div class="mfold">${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button></div>
    <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || '<p class="muted">Nothing here.</p>'}</div>
-   ${open && f !== 'old' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.act ? (open.done ? `<p class="muted">${open.done === 'yes' ? 'You said yes.' : 'You declined.'}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">Accept</button> <button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
+   ${open && f !== 'old' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.folder === 'fans' ? (open.replied ? '<p class="muted">You wrote back. It made their week.</p>' : `<p><button class="btn-s ghost" data-mailact="${open.id}:fan">Write back</button></p>`) : ''}${open.act ? (open.done ? `<p class="muted">${{ yes: 'You said yes.', more: 'You asked for more. See their reply.', asked: 'You asked a question. See their reply.' }[open.done] || 'You declined.'}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">${open.act.k === 'favour' ? 'Help them' : 'Accept'}</button> ${(open.act.fee !== undefined || open.act.adv !== undefined) && !open.act.pushed ? `<button class="btn-s ghost" data-mailact="${open.id}:more" title="Ask for more money. They might say yes, hold firm, or walk away.">Negotiate</button> ` : ''}${!open.act.asked ? `<button class="btn-s ghost" data-mailact="${open.id}:ask">Ask a question</button> ` : ''}<button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
 }
 // ---- Ticker: the industry's market and its trends ----
 function fieldIndex(field, w) {

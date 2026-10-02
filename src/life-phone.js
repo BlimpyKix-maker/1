@@ -40,7 +40,7 @@ function phoneExtra(id) {
   const g = worldGripe(), r = prnd();
   if (g && r < .25) return sms(id, g, 'text', { replyable: 1 });
   if (r < .45) return sms(id, ppick(MEMES), 'text', { replyable: 1 });
-  if (r < .6) return sms(id, ppick(ASK_ADVICE), 'advice', { replyable: 1 });
+  if (r < .6) { const i = Math.floor(prnd() * ASK_ADVICE.length); return sms(id, ASK_ADVICE[i], 'advice', { replyable: 1, topic: 'adv' + i }); }
   return sms(id, ppick(MORE_HI), 'text', { replyable: 1 });
 }
 // ---- replying ----
@@ -50,38 +50,5 @@ const REPLIES = {
   flirty: { label: '😏 Flirty', mine: ['you\'re trouble, you know that', 'thinking about you, for the record', 'save me a seat next to you'] },
   brief: { label: '👍 Brief', mine: ['👍', 'ha, yeah', 'nice', 'ok!'] }
 };
-function replyOptions(m) {
-  const id = m.from, o = [['warm'], ['funny'], ['brief']];
-  if (id >= 0 && (relOf(id) === 'partner' || canRomance(id))) o.splice(2, 0, ['flirty']);
-  return o.map(x => x[0]);
-}
-function replyText(a) {
-  const M = S.me, m = (M.phone || []).find(x => x.id === a.mid);
-  if (!m || m.replied || m.from === null || m.from === undefined || m.from < 0 || !M.known[m.from] || P(m.from).dead) return false;
-  const q = P(m.from), me = ME(), rel = relOf(q.id), o = opinion(q.id);
-  m.replied = 1;
-  let mine, back, tieD = 0, mood = 'happy';
-  if (a.kind === 'own') {
-    mine = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 280);
-    if (!mine) return false;
-    const L = mine.toLowerCase();
-    back = /\?$/.test(mine) ? pickLine(['honestly? I don\'t know. ask me after coffee', 'yes. obviously yes', 'hmm. let me think about it', 'great question. terrible timing'], q.id + M.phoneN) : /love|miss|proud/.test(L) ? pickLine(['stop it, you\'ll make me cry', 'same. always', 'ok now I\'m smiling at my phone like an idiot'], q.id) : /sorry|apolog/.test(L) ? pickLine(['don\'t be silly, we\'re fine', 'water under the bridge', 'thank you for saying that'], q.id) : /haha|lol|😂/.test(L) ? pickLine(['HA', 'you\'re ridiculous', 'stop, I\'m in a meeting'], q.id) : pickLine(['fair', 'true', 'this is why I text you', 'noted, wise one'], q.id + M.phoneN);
-    tieD = 1 + (mine.length > 40 ? .5 : 0);
-  } else {
-    const R = REPLIES[a.kind]; if (!R) return false;
-    mine = pickLine(R.mine, q.id + M.phoneN);
-    if (a.kind === 'warm') { tieD = o > 0 ? 2 : .5; back = pickLine(['❤️', 'you too. seriously', 'ok let\'s actually do it this time'], q.id); }
-    else if (a.kind === 'funny') { const ok = prnd() < .35 + me.mind.cha / 40 + (has(me, 'Witty') ? .2 : 0); tieD = ok ? 2 : -.5; back = ok ? pickLine(['HAHAHA', 'I\'m screenshotting this', 'you\'re wasted in this business. or perfect for it'], q.id) : pickLine(['…ok', 'not your best', 'I\'ll allow it'], q.id); }
-    else if (a.kind === 'flirty') {
-      if (rel === 'partner') { tieD = 2.5; mood = 'love'; back = pickLine(['come home early then', 'stop, I\'m at work', 'you\'re lucky you\'re cute'], q.id); }
-      else if (o >= 30 && canRomance(q.id)) { tieD = 2; mood = 'love'; back = pickLine(['…is that a hint', 'well well well', 'ask me properly sometime'], q.id); (M.rel = M.rel || {})[q.id] = Object.assign(M.rel[q.id] || {}, { flirt: (M.rel[q.id] || {}).flirt + 1 || 1 }); }
-      else { tieD = -2; mood = 'none'; back = pickLine(['haha… ok', 'I think that was meant for someone else?', 'let\'s keep it professional'], q.id); }
-    } else { tieD = rel === 'close' || rel === 'partner' ? -.5 : 0; back = pickLine(['k', 'ok then', 'cool cool'], q.id); mood = 'none'; }
-  }
-  sms(-1, mine, 'mine', { to: q.id });
-  addTie(me, q, tieD); M.known[q.id].seen = S.week;
-  sms(q.id, back, 'text', { mood });
-  return true;
-}
 // Phone-like rendering helpers.
 function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }

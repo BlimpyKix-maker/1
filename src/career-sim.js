@@ -660,6 +660,7 @@ function closeWeek(a) {
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
   if (typeof mentorWeek === 'function') mentorWeek(gain);
+  if (typeof convoWeek === 'function') convoWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];

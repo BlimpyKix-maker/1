@@ -11039,6 +11039,7 @@ function closeWeek(a) {
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
   if (typeof mentorWeek === 'function') mentorWeek(gain);
+  if (typeof convoWeek === 'function') convoWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -14489,7 +14490,7 @@ function phoneExtra(id) {
   const g = worldGripe(), r = prnd();
   if (g && r < .25) return sms(id, g, 'text', { replyable: 1 });
   if (r < .45) return sms(id, ppick(MEMES), 'text', { replyable: 1 });
-  if (r < .6) return sms(id, ppick(ASK_ADVICE), 'advice', { replyable: 1 });
+  if (r < .6) { const i = Math.floor(prnd() * ASK_ADVICE.length); return sms(id, ASK_ADVICE[i], 'advice', { replyable: 1, topic: 'adv' + i }); }
   return sms(id, ppick(MORE_HI), 'text', { replyable: 1 });
 }
 // ---- replying ----
@@ -14499,39 +14500,6 @@ const REPLIES = {
   flirty: { label: '😏 Flirty', mine: ['you\'re trouble, you know that', 'thinking about you, for the record', 'save me a seat next to you'] },
   brief: { label: '👍 Brief', mine: ['👍', 'ha, yeah', 'nice', 'ok!'] }
 };
-function replyOptions(m) {
-  const id = m.from, o = [['warm'], ['funny'], ['brief']];
-  if (id >= 0 && (relOf(id) === 'partner' || canRomance(id))) o.splice(2, 0, ['flirty']);
-  return o.map(x => x[0]);
-}
-function replyText(a) {
-  const M = S.me, m = (M.phone || []).find(x => x.id === a.mid);
-  if (!m || m.replied || m.from === null || m.from === undefined || m.from < 0 || !M.known[m.from] || P(m.from).dead) return false;
-  const q = P(m.from), me = ME(), rel = relOf(q.id), o = opinion(q.id);
-  m.replied = 1;
-  let mine, back, tieD = 0, mood = 'happy';
-  if (a.kind === 'own') {
-    mine = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 280);
-    if (!mine) return false;
-    const L = mine.toLowerCase();
-    back = /\?$/.test(mine) ? pickLine(['honestly? I don\'t know. ask me after coffee', 'yes. obviously yes', 'hmm. let me think about it', 'great question. terrible timing'], q.id + M.phoneN) : /love|miss|proud/.test(L) ? pickLine(['stop it, you\'ll make me cry', 'same. always', 'ok now I\'m smiling at my phone like an idiot'], q.id) : /sorry|apolog/.test(L) ? pickLine(['don\'t be silly, we\'re fine', 'water under the bridge', 'thank you for saying that'], q.id) : /haha|lol|😂/.test(L) ? pickLine(['HA', 'you\'re ridiculous', 'stop, I\'m in a meeting'], q.id) : pickLine(['fair', 'true', 'this is why I text you', 'noted, wise one'], q.id + M.phoneN);
-    tieD = 1 + (mine.length > 40 ? .5 : 0);
-  } else {
-    const R = REPLIES[a.kind]; if (!R) return false;
-    mine = pickLine(R.mine, q.id + M.phoneN);
-    if (a.kind === 'warm') { tieD = o > 0 ? 2 : .5; back = pickLine(['❤️', 'you too. seriously', 'ok let\'s actually do it this time'], q.id); }
-    else if (a.kind === 'funny') { const ok = prnd() < .35 + me.mind.cha / 40 + (has(me, 'Witty') ? .2 : 0); tieD = ok ? 2 : -.5; back = ok ? pickLine(['HAHAHA', 'I\'m screenshotting this', 'you\'re wasted in this business. or perfect for it'], q.id) : pickLine(['…ok', 'not your best', 'I\'ll allow it'], q.id); }
-    else if (a.kind === 'flirty') {
-      if (rel === 'partner') { tieD = 2.5; mood = 'love'; back = pickLine(['come home early then', 'stop, I\'m at work', 'you\'re lucky you\'re cute'], q.id); }
-      else if (o >= 30 && canRomance(q.id)) { tieD = 2; mood = 'love'; back = pickLine(['…is that a hint', 'well well well', 'ask me properly sometime'], q.id); (M.rel = M.rel || {})[q.id] = Object.assign(M.rel[q.id] || {}, { flirt: (M.rel[q.id] || {}).flirt + 1 || 1 }); }
-      else { tieD = -2; mood = 'none'; back = pickLine(['haha… ok', 'I think that was meant for someone else?', 'let\'s keep it professional'], q.id); }
-    } else { tieD = rel === 'close' || rel === 'partner' ? -.5 : 0; back = pickLine(['k', 'ok then', 'cool cool'], q.id); mood = 'none'; }
-  }
-  sms(-1, mine, 'mine', { to: q.id });
-  addTie(me, q, tieD); M.known[q.id].seen = S.week;
-  sms(q.id, back, 'text', { mood });
-  return true;
-}
 // Phone-like rendering helpers.
 function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
 // </life-phone>
@@ -15076,7 +15044,7 @@ function feedEntry(e) {
     const L = e.conv, q = P(e.who) || null, last = L.filter(m => m.from >= 0).pop() || L[L.length - 1], can = last.from >= 0 && last.replyable && !last.replied && typeof replyOptions === 'function';
     return `<li class="fe fe-msg"><span class="fic">${phoneAvatar(e.who, 32)}</span><div class="fb"><div class="mh"><time>${fmtDate(e.w, true)}</time><b>${esc(q ? q.name : 'Someone')}</b> <span class="muted small">${L.length} message${L.length > 1 ? 's' : ''}</span></div>
       <div class="fconv">${L.slice(-4).map(m => `<p class="${m.from < 0 ? 'out' : 'in'}">${esc(m.t)}</p>`).join('')}</div>
-      <p class="small">${can ? replyOptions(last).slice(0, 4).map(k => `<button class="qr" data-reply="${last.id}:${k}">${REPLIES[k].label}</button>`).join(' ') + ' ' : ''}<button class="linkish" data-fthread="${e.who}">Open the thread</button></p></div></li>`;
+      <p class="small">${can ? replyOptions(last).slice(0, 4).map(k => `<button class="qr" data-reply="${last.id}:${k}">${replyLabel(last, k)}</button>`).join(' ') + ' ' : ''}<button class="linkish" data-fthread="${e.who}">Open the thread</button></p></div></li>`;
   }
   const x = e.news;
   return `<li class="fe fe-industry"><span class="fic">📰</span><div class="fb"><div class="mh"><time>${fmtDate(x.w, true)}</time>${chip(x.type, 't-' + x.type)}</div><p><a href="#" class="lk headline" data-go="article:${e.ni}">${esc(x.text)}</a></p></div></li>`;
@@ -16228,14 +16196,43 @@ function mailWeek() {
   if (fol('vidwire') + fol('blip') >= 2000 && r() < .25) { const N = NAMES[HUBS[M.hub].lang] || NAMES.en; mail('offers', `${N.F[Math.floor(r() * N.F.length)]} ${N.L[Math.floor(r() * N.L.length)]} (creator)`, 'Collab?', 'Big fan. Want to make something together? I\'ll bring my audience, you bring yours.', { k: 'collab' }); }
   const play = (M.works || []).find(w => w.plat === 'stage' && w.q >= 70 && S.week - w.rel === 3);
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
+  { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
   if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
 }
+const FAVOURS = [
+  ['Could you read something?', 'Hi {me}, I\'ve finished a draft and I trust your eye more than anyone\'s. Would you read it and tell me the truth? Twenty pages. {them}'],
+  ['A reference?', 'Hi {me}, I\'m up for a job and they want two references. Could I put you down? They might call. {them}'],
+  ['Panel next month', 'Hi {me}, I\'m moderating a panel for new filmmakers and someone dropped out. Would you come and say true things for an hour? {them}'],
+  ['Short film, one day', 'Hi {me}, we\'re shooting a short on Saturday and our person fell through. One day, food provided, eternal gratitude. {them}'],
+  ['Feedback on my reel', 'Hi {me}, I\'ve recut my reel. Would you watch it and tell me what to lose? It\'s three minutes, I promise. {them}'],
+  ['Moving day', 'Hi {me}, this is not glamorous, but I\'m moving flats on Sunday and I have a van and no friends with arms. Pizza is involved. {them}'],
+  ['An introduction?', 'Hi {me}, you know people I don\'t. Would you introduce me to someone at a company? No pressure at all. {them}'],
+  ['Test screening', 'Hi {me}, we\'re testing our cut on twenty people on Thursday. Would you come and fill in the card honestly? {them}']
+];
 function mailAct(a) {
   const M = S.me, me = ME(), m = (M.mail || []).find(x => x.id === a.id);
+  if (m && a.k === 'fan' && m.folder === 'fans' && !m.replied) { m.replied = 1; for (const k in M.fol || {}) M.fol[k] = M.fol[k] + 2; M.stress = clamp(M.stress - 1, 0, 100); return true; }
   if (!m || !m.act || m.done) return false;
+  const A = m.act, pay = A.fee !== undefined ? 'fee' : A.adv !== undefined ? 'adv' : null, re = 'Re: ' + m.subj.replace(/^Re: /, '');
+  if (a.k === 'more') {
+    if (!pay || A.pushed) return false;
+    m.done = 'more';
+    const p = clamp(.3 + me.standing / 120 + (M.agent ? .15 : 0) + Object.values(M.fol || {}).reduce((t, v) => t + v, 0) / 400000, .1, .85), x = prnd();
+    if (x < p) { const B = Object.assign({}, A, { [pay]: Math.round(A[pay] * (1.2 + prnd() * .2) / 10) * 10, pushed: 1 }); mail(m.folder, m.from, re, pickLine(['Fine. We can stretch to {v}. That really is the ceiling.', 'You drive a hard bargain. {v}, and we shake on it.', 'Our finance people winced, but yes: {v}.'], m.id).replace('{v}', fmtCash(B[pay])), B); }
+    else if (x > .85) mail(m.folder, m.from, re, 'Thanks for coming back to us. We\'ve decided to go in another direction. Best of luck.', null);
+    else mail(m.folder, m.from, re, pickLine(['That\'s our best offer, honestly. It stands for now.', 'We can\'t move on the number, but the offer is still open.'], m.id), Object.assign({}, A, { pushed: 1 }));
+    return true;
+  }
+  if (a.k === 'ask') {
+    if (A.asked) return false;
+    m.done = 'asked';
+    const info = { label: `The advance is paid on signing. You keep 18% of royalties after it's earned back, and we take your next two releases. Marketing is on us.`, gig: `Doors at 8, you're on at 9:30 for forty minutes. Two drink tickets. Sound check at 6, don't be late.`, guest: `We record on Tuesdays, an hour, video optional. We'll send questions a week ahead.`, collab: `I'm thinking one video each, on each other's channels, same week. Split costs. I have a camera person.`, commission: `It's a development commission: a first draft in six months, a reading at the end. The fee is half on signing.`, favour: `It would take an afternoon. I'd owe you, properly.` }[A.k] || 'Happy to answer anything. The offer stands.';
+    mail(m.folder, m.from, re, info, Object.assign({}, A, { asked: 1 }));
+    return true;
+  }
   m.done = a.k;
+  if (A.k === 'favour') { const id = A.id; if (!M.known[id] || P(id).dead) return true; if (a.k === 'yes') { M.energy = clamp(M.energy - 12, 0, 100); addTie(me, P(id), 5); M.known[id].owe = (M.known[id].owe || 0) + 1; trust(id, 4); sms(id, pickLine(['you\'re a lifesaver. I owe you one', 'thank you. seriously. I won\'t forget it', 'that was so kind. drinks are on me forever'], id + S.week), 'text'); } else { addTie(me, P(id), -1.5); } return true; }
   if (a.k !== 'yes') return true;
-  const A = m.act;
   if (A.k === 'label') { M.deal = { lab: A.lab, adv: A.adv, rec: 0, w: S.week }; M.cash += A.adv; milestone(`Signed a record deal with ${A.lab}`, 'work'); }
   else if (A.k === 'gig') { M.cash += A.fee; M.energy = clamp(M.energy - 10, 0, 100); M.fol.spinly = (M.fol.spinly || 0) * 1.03 + 20; }
   else if (A.k === 'guest') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.08 + 40; }
@@ -16250,7 +16247,7 @@ function mailApp() {
   const cnt = k => L.filter(m => (k === 'inbox' ? m.folder !== 'spam' : m.folder === k) && S.week - m.w < 2).length;
   return `<div class="mailapp"><div class="mfold">${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button></div>
    <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || '<p class="muted">Nothing here.</p>'}</div>
-   ${open && f !== 'old' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.act ? (open.done ? `<p class="muted">${open.done === 'yes' ? 'You said yes.' : 'You declined.'}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">Accept</button> <button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
+   ${open && f !== 'old' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.folder === 'fans' ? (open.replied ? '<p class="muted">You wrote back. It made their week.</p>' : `<p><button class="btn-s ghost" data-mailact="${open.id}:fan">Write back</button></p>`) : ''}${open.act ? (open.done ? `<p class="muted">${{ yes: 'You said yes.', more: 'You asked for more. See their reply.', asked: 'You asked a question. See their reply.' }[open.done] || 'You declined.'}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">${open.act.k === 'favour' ? 'Help them' : 'Accept'}</button> ${(open.act.fee !== undefined || open.act.adv !== undefined) && !open.act.pushed ? `<button class="btn-s ghost" data-mailact="${open.id}:more" title="Ask for more money. They might say yes, hold firm, or walk away.">Negotiate</button> ` : ''}${!open.act.asked ? `<button class="btn-s ghost" data-mailact="${open.id}:ask">Ask a question</button> ` : ''}<button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
 }
 // ---- Ticker: the industry's market and its trends ----
 function fieldIndex(field, w) {
@@ -16951,6 +16948,341 @@ function playTrailer(id) {
 function fmtClock(ms) { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
 function logoSVGFor(f) { return f.co !== null && typeof logoSVG === 'function' ? logoSVG(S.companies[f.co], 54) : ''; }
 // </cinema>
+// <convo>
+// ---------------- Conversations that answer back ----------------
+// A text has a topic (a meme, a gripe, good news, a question, gossip, a request for advice) and the replies you can
+// send fit it. What you write in your own words is read: a question gets an answer, an invitation gets a yes or a
+// no and a time in the diary, a name gets their opinion of that person, a sharp word lands sharply, and a word of
+// yours can come back to you weeks later. People remember: the advice you gave, the jokes that landed, the weeks you
+// only sent a thumbs-up. All of it is decided from the logged action and the player's dice, so replays agree.
+const ADVICE = [
+  { q: 'boss takes credit', a: ['Say something, calmly', 'Wait and keep receipts'], kw: [/say|talk|tell|confront|speak/, /wait|keep|quiet|patient|receipt/], ok: [['talked to them like you said. they actually apologised. I\'m on the next one with my name on it', 'said something. now I\'m "difficult". off the next job. great'], ['kept quiet, kept emails. when it blew up I had everything. thank you', 'waited. they did it again. and again']] },
+  { q: 'two job offers', a: ['Take the fun one', 'Take the money'], kw: [/fun|happy|joy|love|creative/, /money|pay|cash|rent|safe/], ok: [['took the fun one. best month of my working life', 'took the fun one. it got cancelled in week two. lol. lmao even'], ['took the money. paid off my card. boring and I don\'t care', 'took the money. miserable. counting the days']] },
+  { q: 'quit acting and go into editing', a: ['Do it, you\'d be great', 'Don\'t burn the bridge yet'], kw: [/do it|go|yes|great|switch/, /don.t|wait|both|bridge|careful/], ok: [['started assisting in a cutting room. I think I\'ve found it', 'tried editing. turns out I hate sitting still. back to auditions'], ['doing both for now. glad I didn\'t jump', 'kept auditioning. nothing. should have jumped']] },
+  { q: 'turn down a friend\'s film', a: ['Be honest, they\'ll get it', 'Do it as a favour'], kw: [/honest|no|turn|decline/, /favour|favor|yes|help|do it/], ok: [['told them. they were lovely about it. friendship intact', 'told them. they haven\'t spoken to me since'], ['did it. it was actually fun', 'did it. eighteen-hour days for nothing. never again']] },
+  { q: 'move cities', a: ['Go, you can always come back', 'Stay and build here'], kw: [/go|move|leave|yes/, /stay|build|here|no/], ok: [['moved. first week was terrifying. now? I love it', 'moved. lonely. very lonely'], ['stayed. something just came through here', 'stayed. starting to think I should have gone']] },
+  { q: 'NDA for a student film', a: ['Normal, sign it', 'Ask what it covers'], kw: [/sign|normal|fine/, /ask|read|check|lawyer/], ok: [['signed. it was fine. it\'s a film about a sad goose', 'signed. turns out it covered my next three ideas too'], ['asked. they rewrote it. good call', 'asked. they replaced me with someone who didn\'t ask']] },
+  { q: 'say no to someone famous', a: ['Be gracious and brief', 'Say yes, it\'s too good'], kw: [/gracious|polite|no|brief|kind/, /yes|take|too good/], ok: [['said no nicely. they said "respect". I\'m still shaking', 'said no. their assistant has blocked me everywhere'], ['said yes. they remembered my name on day three!!', 'said yes. it was a nightmare. a famous nightmare']] },
+  { q: 'job abroad', a: ['Go, it\'s a chance', 'Stay close to people'], kw: [/go|chance|abroad|yes/, /stay|people|home|no/], ok: [['took it. sending you a postcard. it\'s ridiculous here', 'took it. the job is great. I miss everyone'], ['stayed. glad. Sunday lunch is worth more than a credit', 'stayed. they gave it to someone else who\'s now everywhere']] },
+  { q: 'script has a hole', a: ['Tell them, kindly', 'Leave it, not your job'], kw: [/tell|kind|honest|say/, /leave|not your|quiet|job/], ok: [['told them. they fixed it and thanked me in front of everyone', 'told them. they said "it\'s intentional". it was not'], ['said nothing. the critics said it for me', 'kept quiet. it worked out somehow']] },
+  { q: 'more money for a worse job', a: ['Take the money', 'Hold out for better'], kw: [/money|take|yes/, /hold|wait|better|no/], ok: [['took it. my bank account says thank you', 'took it. I\'ve aged five years'], ['held out. something better came in yesterday!', 'held out. still holding. send snacks']] },
+  { q: 'ask an ex for a reference', a: ['Totally fine, go for it', 'Find someone else'], kw: [/fine|go|ask|yes/, /someone else|no|don.t/], ok: [['asked. they were glowing. emotionally confusing', 'asked. the reference was… honest'], ['found someone else. smooth', 'couldn\'t find anyone else. awkward week']] },
+  { q: 'work for free', a: ['Only if it helps you', 'No. Never for free'], kw: [/only|if|maybe|depends|yes/, /no|never|free|pay/], ok: [['did it. met a producer on it who\'s now paying me', 'did it. exposure is not a currency, it turns out'], ['said no. they found the budget. funny that', 'said no. they found someone who said yes']] }
+];
+const STOP = new Set(['about', 'there', 'their', 'would', 'could', 'should', 'which', 'these', 'those', 'think', 'thing', 'really', 'going', 'actually', 'because', 'something', 'anything', 'everything', 'nothing', 'people', 'always', 'never', 'maybe', 'still', 'sounds', 'pretty', 'right', 'today', 'tonight', 'though', 'where', 'whatever', 'honestly', 'literally', 'probably']);
+function convoOf(id) { const M = S.me; M.convo = M.convo || {}; return M.convo[id] = M.convo[id] || { n: 0, brief: 0, jokes: 0, inv: 0, word: null, wordW: 0 }; }
+function msgTopic(m) {
+  if (m.topic) return m.topic;
+  const t = String(m.t || '').toLowerCase();
+  if (m.kind === 'advice') { const i = ADVICE.findIndex(A => t.includes(A.q.toLowerCase().split(' ')[0]) && t.includes(A.q.toLowerCase().split(' ').slice(-1)[0])); return i >= 0 ? 'adv' + i : 'question'; }
+  if (/^\[/.test(t)) return 'meme';
+  if (m.kind === 'gossip') return 'gossip';
+  if (m.kind === 'tip') return 'tip';
+  if (m.kind === 'love') return 'love';
+  if (/fired|lost|over|hospital|dumped|died|sick|rejected|cancelled|flop|bad review|broke|miss(ed)? out/.test(t)) return 'bad';
+  if (/got the|booked|cast|hired|engaged|pregnant|won|promot|greenlit|signed|yes!!|wrapped/.test(t)) return 'good';
+  if (/too hot|strike|river|budgets|killing me|sick|terrible|hate|ugh|died/.test(t)) return 'gripe';
+  if (/\?\s*$|^(what|how|are|do|is|should|tell me|quick)/.test(t)) return 'question';
+  return 'chat';
+}
+const REPLY_SETS = {
+  meme: ['laugh', 'meme', 'brief'], gripe: ['sympathy', 'invite', 'advise', 'brief'], bad: ['sympathy', 'invite', 'advise', 'brief'], good: ['congrats', 'drinks', 'jealous', 'brief'],
+  question: ['warm', 'funny', 'invite', 'brief'], chat: ['warm', 'funny', 'invite', 'brief'], gossip: ['spill', 'nogossip', 'funny'], tip: ['thanks', 'askmore', 'brief'], love: ['warm', 'flirty', 'invite', 'brief']
+};
+const REPLY_LABELS = { laugh: '😂 Laugh', meme: '📸 Send one back', sympathy: '🫂 Be there', invite: '☕ Invite them out', advise: '💡 Give advice', congrats: '🎉 Celebrate', drinks: '🍾 Drinks on me', jealous: '😒 Grumble', spill: '👀 Tell me more', nogossip: '🙅 Not my business', thanks: '🙏 Thank them', askmore: '❓ Ask more', notsure: '🤷 Not sure', workgood: '😊 It\'s going great', workbad: '😩 It\'s a nightmare', worksecret: '🤐 Can\'t say' };
+function replyLabel(m, k) { if (/^a[01]$/.test(k)) { const A = ADVICE[+msgTopic(m).slice(3)]; return '💬 ' + A.a[+k[1]]; } return REPLY_LABELS[k] || (REPLIES[k] ? REPLIES[k].label : k); }
+function replyOptions(m) {
+  const id = m.from, top = msgTopic(m);
+  let o = /^adv\d+$/.test(top) ? ['a0', 'a1', 'notsure'] : top === 'work' ? ['workgood', 'workbad', 'worksecret'] : (REPLY_SETS[top] || REPLY_SETS.chat).slice();
+  if (id >= 0 && (relOf(id) === 'partner' || canRomance(id)) && !o.includes('flirty') && ['chat', 'question', 'good'].includes(top)) o.splice(o.length - 1, 0, 'flirty');
+  return o;
+}
+// ---- reading what you wrote ----
+function readIntent(text) {
+  const L = text.toLowerCase(), has = re => re.test(L);
+  return {
+    greet: has(/^(hi|hey|hello|yo|morning|evening|hiya)\b/), question: /\?\s*$/.test(text) || has(/^(what|how|why|when|where|who|are|do|did|can|could|will|would|should|is|any)\b/),
+    invite: has(/coffee|drink|dinner|lunch|brunch|meet up|meet\b|hang|catch up|grab|come over|walk|sunday|saturday|tonight|tomorrow|weekend|this week/),
+    love: has(/\blove\b|miss you|proud|adore|❤|you're the best|you are the best|thank|grateful/), sorry: has(/sorry|apolog|my bad|i was wrong/),
+    funny: has(/haha|lol|lmao|😂|🤣|joke|hilarious/), rude: has(/hate you|stupid|idiot|shut up|annoying|whatever|leave me alone|get lost|boring|pathetic/),
+    sympathy: has(/sorry to hear|that sucks|awful|here for you|hugs|🫂|rough|that's hard|so sorry/), congrats: has(/congrat|amazing|well done|so happy for you|brilliant|🎉|proud of you|incredible/),
+    work: has(/\bjob\b|film|shoot|\bset\b|audition|script|gig|work|project|role|edit|song|album|podcast|video|show/), money: has(/money|broke|rent|pay|cash|loan/),
+    yes: has(/^(yes|yeah|yep|sure|ok|okay|definitely|totally|absolutely|deal)\b/), no: has(/^(no|nope|nah|never|not really)\b/), long: text.length > 80
+  };
+}
+function keyWord(text) { const w = text.toLowerCase().replace(/[^a-z' ]/g, ' ').split(/\s+/).filter(x => x.length >= 6 && !STOP.has(x)); return w.sort((a, b) => b.length - a.length)[0] || null; }
+function nameIn(text, exclude) { const L = text.toLowerCase(); for (const k of Object.keys(S.me.known)) { const p = P(+k); if (!p || +k === exclude) continue; const first = p.name.split(' ')[0].toLowerCase(); if (first.length >= 3 && new RegExp('\\b' + first + '\\b').test(L)) return +k; } return null; }
+function tryInvite(q, kind, C, L) {
+  const M = S.me, me = ME(), o = opinion(q.id), k = M.known[q.id];
+  if ((M.appts || []).some(x => !x.done && x.who === q.id)) return { t: pickLine(['we already have a plan, silly', 'aren\'t we already meeting?', 'yes, we\'re already on. don\'t you dare cancel'], q.id + C.n), d: .5 };
+  const s = typeof freeSlot === 'function' ? freeSlot({ from: 1, blocks: [1, 2] }) : null, p = clamp(.25 + o / 70 + k.trust / 250 - (seniorTo(q.id) ? .2 : 0) - C.inv * .05, .05, .95);
+  C.inv++;
+  if (!s || prnd() >= p) return { t: pickLine(o < 0 ? ['I\'m busy', 'not really', 'maybe not'] : ['ugh, slammed. rain check?', 'can\'t this week, but YES soon', 'I\'m away, but hold that thought'], q.id + C.n), d: o < 0 ? -.5 : .3 };
+  if (typeof bookAppt === 'function') bookAppt(Object.assign({ kind, who: q.id }, s));
+  C.inv = 0;
+  return { t: pickLine(['yes! ' + slotLabel(s) + '?', 'done. ' + slotLabel(s) + ', you\'re buying', 'I\'m in. ' + slotLabel(s) + ' works', 'finally. ' + slotLabel(s) + ', don\'t be late'], q.id + C.n), d: 1.5, booked: s };
+}
+// How they answer: built from what you said, who they are, and what they remember.
+function answerOwn(q, text, m, C) {
+  const I = readIntent(text), o = opinion(q.id), rel = relOf(q.id), t = q.traits || [], top = msgTopic(m), parts = [];
+  let d = 1 + (I.long ? .5 : 0), mood = 'happy';
+  if (I.rude) { d = t.includes('Volatile') ? -6 : -4; mood = 'none'; parts.push(t.includes('Volatile') ? pickLine(['wow. ok. noted', 'say that to my face', 'right. done talking to you for a bit'], q.id) : pickLine(['ouch', 'that was unnecessary', 'ok… I\'ll pretend I didn\'t read that'], q.id)); return { t: parts.join(' '), d, mood }; }
+  if (I.sorry) { d = 2; parts.push(o < 0 ? pickLine(['…thank you for saying it', 'ok. I\'m listening'], q.id) : pickLine(['don\'t be silly, we\'re fine', 'water under the bridge', 'you\'re forgiven. obviously'], q.id + C.n)); }
+  if (/^adv\d+$/.test(top)) { const i = +top.slice(3), A = ADVICE[i], pick = A.kw[0].test(text.toLowerCase()) ? 0 : A.kw[1].test(text.toLowerCase()) ? 1 : null; if (pick !== null) { scheduleAdvice(q.id, i, pick); parts.push(pickLine(['ok. you\'re right. I\'ll do it', 'that\'s what I needed to hear', 'hm. yeah. ok. thank you'], q.id + C.n)); d += 1; } else parts.push(pickLine(['so… is that a yes or a no 😅', 'very wise. very vague', 'I\'ll take that as "your call"'], q.id + C.n)); }
+  if (I.congrats && top === 'good') { d += 1.5; parts.push(pickLine(['thank you!! still can\'t believe it', 'stop, I\'m blushing', 'means a lot coming from you'], q.id + C.n)); }
+  if (I.sympathy && (top === 'bad' || top === 'gripe')) { d += 1.5; mood = 'sad'; parts.push(pickLine(['thank you. really', 'I needed that today', 'you\'re a good one'], q.id + C.n)); }
+  if (I.love) { if (o >= 10) { d += 1.5; mood = rel === 'partner' ? 'love' : 'happy'; parts.push(pickLine(['stop it, you\'ll make me cry', 'same. always', 'ok now I\'m smiling at my phone like an idiot'], q.id + C.n)); } else { d += .3; parts.push(pickLine(['oh! that\'s… nice of you', 'ha, thanks?'], q.id)); } }
+  if (I.funny && !parts.length) { const ok = prnd() < .45 + ME().mind.cha / 50; d += ok ? 1 : 0; if (ok) C.jokes++; parts.push(ok ? pickLine(['HA', 'you\'re ridiculous', 'stop, I\'m in a meeting', 'I\'m screenshotting this'], q.id + C.n) : pickLine(['lol', 'heh'], q.id + C.n)); }
+  const who = nameIn(text, q.id);
+  if (who !== null) { const tt = tie(q, P(who)), n = P(who).name.split(' ')[0]; parts.push(tt > 30 ? pickLine([`${n}! love ${n}`, `${n} is the best. say hi from me`, `you know ${n}? small world`], q.id + who) : tt < -15 ? pickLine([`ugh. ${n}. don't get me started`, `we don't talk about ${n}`, `${n}? I have Opinions`], q.id + who) : pickLine([`${n}? only met them once`, `don't really know ${n}`, `${n}, the one who's always on their phone?`], q.id + who)); }
+  if (I.question && !I.invite && !/^adv/.test(top) && parts.length < 2) parts.push(I.work ? pickLine(['work\'s fine. mad, but fine. you?', 'don\'t ask. or do. over a drink', 'honestly? the best job I\'ve had in years'], q.id + C.n) : I.money ? pickLine(['skint, like everyone', 'I\'m ok. are you ok? do you need anything?', 'don\'t talk to me about money this month'], q.id + C.n) : pickLine(['honestly? I don\'t know. ask me after coffee', 'yes. obviously yes', 'hmm. let me think about it', 'great question. terrible timing'], q.id + C.n));
+  if (I.invite) { const R = tryInvite(q, rel === 'partner' ? 'date' : /drink|bar|pub|wine|beer/.test(text.toLowerCase()) ? 'drinks' : 'coffee', C); d += R.d; parts.push(R.t); }
+  if (!parts.length) { const w = keyWord(text); parts.push(w && prnd() < .7 ? pickLine([`"${w}". yes. exactly that`, `wait, ${w}? tell me more`, `ha, ${w}. I'm stealing that`, `${w}… you always find the right word`], q.id + C.n) : I.yes ? pickLine(['good. it\'s settled then', 'knew you\'d say that'], q.id + C.n) : I.no ? pickLine(['fair enough', 'your loss 😄'], q.id + C.n) : pickLine(['fair', 'true', 'this is why I text you', 'noted, wise one'], q.id + C.n)); if (w) { C.word = w; C.wordW = S.week; } }
+  return { t: parts.join('. ').replace(/\.\./g, '.'), d, mood };
+}
+function scheduleAdvice(id, i, pick) {
+  const M = S.me, good = prnd() < clamp(.45 + (ME().mind.tas - 10) / 40 + (ME().mind.com - 10) / 60, .2, .8);
+  (M.advice = M.advice || []).push({ id, i, pick, good, due: S.week + 2 + Math.floor(prnd() * 5) });
+}
+function replyText(a) {
+  const M = S.me, m = (M.phone || []).find(x => x.id === a.mid);
+  if (!m || m.replied || m.from === null || m.from === undefined || m.from < 0 || !M.known[m.from] || P(m.from).dead) return false;
+  const q = P(m.from), me = ME(), rel = relOf(q.id), o = opinion(q.id), C = convoOf(q.id), top = msgTopic(m), r = q.id + M.phoneN;
+  m.replied = 1; C.n++;
+  let mine, back, d = 0, mood = 'happy';
+  if (a.kind === 'own') {
+    mine = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+    if (!mine) return false;
+    const R = answerOwn(q, mine, m, C); back = R.t; d = R.d; mood = R.mood; C.brief = 0;
+  } else {
+    const k = a.kind; if (!replyOptions(m).includes(k)) return false;
+    C.brief = k === 'brief' ? C.brief + 1 : 0;
+    const P2 = (L, L2) => pickLine(o >= 25 ? L : L2 || L, r);
+    if (/^a[01]$/.test(k)) { const A = ADVICE[+top.slice(3)], pick = +k[1]; mine = pickLine([`honestly? ${A.a[pick].toLowerCase()}`, `${A.a[pick].toLowerCase()}. trust me`, `if it were me: ${A.a[pick].toLowerCase()}`], r); scheduleAdvice(q.id, +top.slice(3), pick); d = 1.5; back = pickLine(['ok. you\'re right', 'that\'s what I needed to hear', 'hm. yeah. ok. thank you'], r); }
+    else if (k === 'notsure') { mine = pickLine(['honestly I don\'t know. what does your gut say?', 'that\'s a hard one. sleep on it?'], r); d = .5; back = pickLine(['my gut says pizza', 'yeah. ok. sleeping on it'], r); }
+    else if (k === 'laugh') { mine = pickLine(['😂😂😂', 'I am WHEEZING', 'this is the best thing I\'ve seen all week'], r); d = 1; back = pickLine(['knew you\'d get it', 'there\'s more where that came from', 'I have a whole folder'], r); }
+    else if (k === 'meme') { mine = pickLine(['[a photo of your lunch, which is worse]', '[a video of a boom mic falling on someone]', '[a screenshot of your own terrible review]'], r); d = 1.5; C.jokes++; back = pickLine(['NO 😂', 'you win. you always win', 'ok that one\'s going in the group chat'], r); }
+    else if (k === 'sympathy') { mine = pickLine(['oh no. I\'m so sorry. I\'m here, ok?', 'that\'s awful. what do you need?', 'sending you the biggest hug'], r); d = top === 'bad' ? 2.5 : 1.5; mood = 'sad'; back = P2(['thank you. really. you\'re one of the good ones', 'I needed that today', 'can I call you later?'], ['thanks', 'appreciate it']); }
+    else if (k === 'advise') { mine = pickLine(['sleep, water, then decide. in that order', 'write it down, then do the opposite of what scares you least', 'call the person you\'re avoiding'], r); const ok = prnd() < .4 + me.mind.tas / 40; d = ok ? 1.5 : -.5; back = ok ? pickLine(['…that\'s actually good advice', 'ok. yes. doing that', 'when did you get wise'], r) : pickLine(['I didn\'t ask for advice', 'mm', 'easy for you to say'], r); }
+    else if (k === 'congrats') { mine = pickLine(['!!!!! SO happy for you', 'you deserve this, all of it', 'told you. TOLD YOU'], r); d = 2; back = P2(['stop, I\'m crying', 'thank you!! couldn\'t have done it without you yelling at me', 'drinks soon, my treat'], ['thanks!', 'thank you!']); }
+    else if (k === 'drinks') { const R = tryInvite(q, 'drinks', C); mine = pickLine(['this calls for drinks. my treat', 'we\'re celebrating. pick a night'], r); d = 1 + R.d; back = R.t; }
+    else if (k === 'invite') { const R = tryInvite(q, rel === 'partner' ? 'date' : 'coffee', C); mine = pickLine(['let\'s get a coffee and talk properly', 'come out, I\'ll buy', 'when are you free? I want to see you'], r); d = R.d; back = R.t; }
+    else if (k === 'jealous') { mine = pickLine(['must be nice 🙄', 'some of us are still waiting by the phone', 'ok but when is it my turn'], r); d = has(q, 'Cynical') ? .5 : -1.5; mood = 'none'; back = has(q, 'Cynical') ? pickLine(['ha. honest at least', 'your turn\'s coming. probably'], r) : pickLine(['…ok', 'I thought you\'d be happy for me', 'wow'], r); }
+    else if (k === 'spill') { mine = pickLine(['WAIT. tell me everything', 'go on…', 'I need the full story. now'], r); d = 1; const g = S.people.length ? circleOf(q, 8).map(P).find(x => x && !x.dead) : null; back = g ? pickLine([`can't say more by text. but ask ${g.name.split(' ')[0]} about the yacht`, `ok but you didn't hear it from me. ${g.name.split(' ')[0]} knows the rest`, 'over a drink. not in writing'], r) : 'over a drink. not in writing'; if (g && !M.known[g.id] && prnd() < .3) meet(g.id, `Gossip via ${q.name}`, 2); }
+    else if (k === 'nogossip') { mine = pickLine(['eh, not my business', 'I\'d rather not, honestly', 'poor them'], r); d = has(q, 'Gossip') ? -1 : .5; back = has(q, 'Gossip') ? pickLine(['boring', 'fine, saint'], r) : pickLine(['yeah, you\'re right', 'fair. I feel bad now'], r); trust(q.id, 2); }
+    else if (k === 'thanks') { mine = pickLine(['you\'re a star, thank you', 'owe you one', 'that\'s really useful, thanks'], r); d = 1.5; back = pickLine(['anytime', 'you\'d do the same', 'now go get it'], r); trust(q.id, 2); }
+    else if (k === 'askmore') { mine = pickLine(['who should I talk to?', 'any idea who\'s hiring?', 'how do I get in?'], r); d = 1; const g = circleOf(q, 10).map(P).find(x => x && !x.dead && !M.known[x.id]); if (g) { meet(g.id, `Introduced by ${q.name}`, 4); back = pickLine([`talk to ${g.name}. I'll send them your number`, `${g.name}. tell them I sent you`], r); } else back = pickLine(['that\'s all I\'ve got, sorry', 'keep your ear to the ground'], r); }
+    else if (k === 'workgood') { mine = pickLine(['honestly? great. long days but great', 'best crew I\'ve had', 'going really well, touch wood'], r); d = 1; back = pickLine(['love that for you', 'told you you\'d be good at it', 'so proud of you'], r); }
+    else if (k === 'workbad') { mine = pickLine(['it\'s a nightmare. send help', 'I\'m surviving. barely', 'don\'t ask. please ask. it\'s bad'], r); d = 1.5; mood = 'sad'; back = P2(['oh no. drinks after wrap? on me', 'every job has one week like this. hang in there'], ['that sucks', 'it\'ll pass']); }
+    else if (k === 'worksecret') { mine = pickLine(['can\'t talk about it 🤐', 'NDA. I\'ve said too much already', 'all I can say is: big'], r); d = .5; back = pickLine(['ooh mysterious', 'fine. I\'ll find out from the trades', 'you\'re no fun'], r); }
+    else {
+      const R = REPLIES[k]; if (!R) return false;
+      mine = pickLine(R.mine, r);
+      if (k === 'warm') { d = o > 0 ? 2 : .5; back = pickLine(['❤️', 'you too. seriously', 'ok let\'s actually do it this time'], r); }
+      else if (k === 'funny') { const ok = prnd() < .35 + me.mind.cha / 40 + (has(me, 'Witty') ? .2 : 0) + Math.min(.15, C.jokes * .03); d = ok ? 2 : -.5; if (ok) C.jokes++; back = ok ? pickLine(C.jokes > 3 ? ['you\'re on a roll today', 'stop, my ribs', 'every time 😂'] : ['HAHAHA', 'I\'m screenshotting this', 'you\'re wasted in this business. or perfect for it'], r) : pickLine(['…ok', 'not your best', 'I\'ll allow it'], r); }
+      else if (k === 'flirty') {
+        if (rel === 'partner') { d = 2.5; mood = 'love'; back = pickLine(['come home early then', 'stop, I\'m at work', 'you\'re lucky you\'re cute'], r); }
+        else if (o >= 30 && canRomance(q.id)) { d = 2; mood = 'love'; back = pickLine(['…is that a hint', 'well well well', 'ask me properly sometime'], r); (M.rel = M.rel || {})[q.id] = Object.assign(M.rel[q.id] || {}, { flirt: (M.rel[q.id] || {}).flirt + 1 || 1 }); }
+        else { d = -2; mood = 'none'; back = pickLine(['haha… ok', 'I think that was meant for someone else?', 'let\'s keep it professional'], r); }
+      } else { d = rel === 'close' || rel === 'partner' ? -.5 : 0; mood = 'none'; back = C.brief >= 3 ? pickLine(['you ok? you\'ve been short with me lately', 'everything alright? you only ever send thumbs now', 'did I do something?'], r) : pickLine(['k', 'ok then', 'cool cool'], r); if (C.brief >= 3) d -= 1; }
+    }
+  }
+  sms(-1, mine, 'mine', { to: q.id });
+  addTie(me, q, d); M.known[q.id].seen = S.week;
+  sms(q.id, back, 'text', { mood, topic: 'chat' });
+  return true;
+}
+// Weekly: advice comes home, and now and then a word of yours comes back to you.
+function convoWeek() {
+  const M = S.me, me = ME();
+  for (const x of (M.advice || []).filter(x => !x.done && x.due <= S.week)) {
+    x.done = 1; const q = P(x.id); if (!q || q.dead || !M.known[x.id]) continue;
+    const A = ADVICE[x.i], line = A.ok[x.pick][x.good ? 0 : 1];
+    sms(x.id, line + (x.good ? pickLine([' you were right', ' thank you for that', ''], x.id + S.week) : pickLine([' should not have listened to you', ' not blaming you. mostly', ''], x.id + S.week)), 'text', { replyable: 1, topic: x.good ? 'good' : 'bad' });
+    addTie(me, q, x.good ? 4 : -2); if (x.good) trust(x.id, 4);
+  }
+  M.advice = (M.advice || []).filter(x => !x.done || S.week - x.due < 8);
+  if (S.week % 5 === 2) for (const id in M.convo || {}) { const C = M.convo[id]; if (C.word && S.week - C.wordW >= 4 && S.week - C.wordW <= 12 && M.known[id] && !P(+id).dead && opinion(+id) > 15) { sms(+id, pickLine([`still thinking about what you said. "${C.word}". it stuck with me`, `I used your word, "${C.word}", in a meeting today. it went down well`, `"${C.word}". you were right, you know`], +id + S.week), 'text', { replyable: 1, topic: 'chat' }); addTie(me, P(+id), 1); C.word = null; break; } }
+  // someone asks about the job you're on
+  const j = M.jobs[0];
+  if (j && j.film !== null && j.film !== undefined && S.week % 3 === 1) { const ids = Object.keys(M.known).map(Number).filter(id => opinion(id) > 25 && !P(id).dead); if (ids.length) { const id = ids[S.week % ids.length]; sms(id, pickLine([`how's ${S.films[j.film].title} going??`, `so?? how is it on ${S.films[j.film].title}`, `tell me everything about ${S.films[j.film].title}. or nothing, I know about NDAs`], id + S.week), 'text', { replyable: 1, topic: 'work' }); } }
+}
+// </convo>
+// <situations>
+// ---------------- Situations: the problems each job actually throws at you ----------------
+// A big bank of real problems, by job family, each with what it teaches about the work and four ways to meet it:
+// fix it yourself (a craft check), ask your head of department (safe, slower), try something bold (harder, worth
+// more), or pull in a colleague (charm). Registered into the same scene system as the hand-written ones, so they
+// come up on working days and never repeat for months.
+// [id, title, text, teach, stat, dc, fix, bold, ok, bad]
+const SITUATIONS = {
+  set: [
+    ['lostwalkie', 'Dead channel', 'Your walkie dies mid-take and the background action is cued off your call.', 'Set walkies run on channels: 1 for production, 2 for "go to 2" private talk, others for camera, grip and electric. Batteries swap at lunch.', 'eth', 11, 'Sprint to the next PA and cue it by hand', 'Run the cue with a hand signal you agreed at the rehearsal', 'The take goes off. Nobody knows how close it was.', 'The extras walk a beat late. Another take, another five minutes of daylight.'],
+    ['lockup', 'The lock-up', 'A cyclist ignores you and rides straight through the frame mid-take.', 'A lock-up is holding the public out of shot. You can ask, never force: on public streets the permit lets you film, not command.', 'cha', 12, 'Ask politely to hold for ninety seconds', 'Turn it into a cameo: ask them to ride through on "action"', 'They wait. One even asks what you\'re making.', 'They argue loudly. The sound team groans into the next take.'],
+    ['basecamp', 'Basecamp move', 'The company move is in twenty minutes and an actor\'s trailer is still locked.', 'A company move relocates the whole unit mid-day. Done well it takes 45 minutes; done badly it eats the afternoon.', 'com', 12, 'Find the trailer key from the transport captain', 'Reroute the actor straight to set in the picture car', 'Moved on time. The 2nd AD gives you a nod.', 'Twenty-minute delay, logged on the production report under your department.'],
+    ['rainday', 'Weather call', 'Rain is forecast for the exterior. The weather cover set is twenty minutes away and nobody has told the cast.', 'Productions keep "weather cover": an interior scene ready to shoot if the exterior is washed out.', 'eth', 11, 'Call every cast member on the cover list', 'Ring ahead to unlock the cover set before anyone asks', 'The switch happens before the first drop.', 'Half the cast turn up at the wrong location.'],
+    ['extras', 'Background mutiny', 'The extras haven\'t been fed and lunch is still an hour away. Murmurs.', 'Background artists are on set ten hours or more; unions set meal and overtime rules for them too.', 'cha', 12, 'Get crafty to send out snacks now', 'Give a little speech about why today matters', 'Bananas and goodwill. The crowd stays on side.', 'Two extras leave. Continuity notices.'],
+    ['nightshoot', 'Night shoot', 'Hour fourteen. A grip falls asleep on an apple box. The last setup is the hardest.', 'Turnaround is the minimum rest between wrap and next call, usually ten to twelve hours. Night shoots wreck it.', 'eth', 13, 'Push through, keep everyone moving', 'Suggest to the AD the shot could be picked up tomorrow', 'You get the shot. You\'ll feel it for two days.', 'Someone trips over a cable. Nobody hurt, everyone shaken.']
+  ],
+  ad: [
+    ['overtime', 'Into overtime', 'You\'re forty minutes from overtime with three setups left.', 'The 1st AD runs the floor and the clock; overtime costs the production time-and-a-half for the whole crew.', 'setm', 13, 'Combine two setups into one move', 'Propose cutting a setup to the director, with an alternative', 'Done one minute under. The producer sends a thank-you text.', 'Overtime. The cost report has your name on it.'],
+    ['latecall', 'The late star', 'The lead\'s car is stuck. They\'ll be ninety minutes late.', 'ADs reschedule on the fly: shoot around the missing actor with doubles, inserts and other scenes.', 'setm', 12, 'Flip the order and shoot the supporting scene first', 'Shoot their coverage with a double from behind', 'Nobody loses a minute. The star never knows.', 'Crew sits idle for an hour. The UPM writes it down.'],
+    ['safety', 'Safety meeting', 'The stunt is next. The coordinator wants a safety meeting; the director wants to roll.', 'Before any stunt, effect or risky shot, the 1st AD calls a safety meeting with everyone involved. It is not optional.', 'com', 11, 'Hold the meeting, short and complete', 'Hold it while camera resets, so nobody waits', 'Everyone knows where to stand. It goes clean.', 'Rushed. A near miss you\'ll think about for a while.'],
+    ['schedule', 'Strip board', 'The location for scenes 40–44 fell through. You have to rebuild next week.', 'Schedules are built on a strip board: each scene a strip, ordered by location, cast and day/night to save money.', 'setm', 14, 'Rebuild the week from the board, scene by scene', 'Move the whole block to the studio and save a day', 'A cleaner schedule than before. The UPM asks how.', 'A cast member is double-booked. Your phone starts ringing.'],
+    ['dayout', 'Day out of days', 'An actor\'s agent says they\'re only free three of the five days you booked.', 'A "day out of days" chart tracks which days each actor works; holding days between work days still cost.', 'setm', 12, 'Rejig to fit their three days', 'Get the agent on the phone and negotiate the other two', 'Fits. Their agent sends you a Christmas card.', 'Two scenes move to a reshoot day nobody budgeted for.'],
+    ['walkies2', 'Too many voices', 'Three departments are talking over each other on channel one.', 'Channel one is production\'s; good ADs keep it clear with short, standard calls: "rolling", "cut", "back to one".', 'cha', 11, 'Call for "channel one, clear"', 'Set up a quiet rule: department heads only on one', 'Calm. You can hear the take now.', 'Someone answers back on the open channel. The director hears it.']
+  ],
+  cam: [
+    ['focus', 'Soft focus', 'Dailies show the last scene\'s key close-up a touch soft.', 'The 1st AC (focus puller) marks actor positions and pulls focus live, often without looking through the lens.', 'move', 13, 'Re-mark and request a pickup', 'Shoot the pickup handheld on a longer lens, a different feel', 'The pickup is sharp. The DP doesn\'t say anything, which is praise.', 'Still soft. The editor works around it, and remembers.'],
+    ['magic', 'Magic hour', 'You have twenty minutes of magic hour and two shots to get.', 'Magic hour, just after sunrise or before sunset, gives soft warm light for minutes, not hours. Crews rehearse first and shoot fast.', 'light', 14, 'Prioritise the wide, then the close-up if time allows', 'Shoot both at once with two cameras', 'Both shots, glowing. The director hugs you.', 'One shot, and the light was going on it.'],
+    ['diner', 'Night interior', 'The diner set looks flat and the director says "make it feel lonely".', 'Lighting builds mood: a single hard source and deep shadows read lonely; soft even light reads safe.', 'light', 13, 'Kill the overheads, light from the window only', 'Add a single practical neon outside and let it bleed in', 'It looks like a painting. Lonely, exactly.', 'Too dark for the sensor. You re-light, and lose an hour.'],
+    ['rain', 'Rain on the lens', 'The rain machine is soaking the lens on every take.', 'Rain on screen is usually rain towers, backlit so the drops read. A spinning rain deflector clears the lens.', 'eth', 12, 'Rig a rain cover and towel between takes', 'Rent a rain deflector from the next town', 'Clean frames. The grip team is impressed.', 'Spots on every take. Some will need VFX cleanup.'],
+    ['card', 'The missing card', 'The DIT says one card from yesterday is missing from the backup.', 'The DIT (digital imaging technician) copies every card twice, checksums it, and only then clears it for reuse.', 'eth', 14, 'Retrace the chain card by card', 'Check the camera cart drawers, then the courier bag', 'Found in a jacket pocket. Backed up. Heart rate returning.', 'It was formatted. Half a scene lost.'],
+    ['steadicam', 'One long take', 'The director wants the whole party scene in one moving shot.', 'Long takes are choreographed like dance: camera, actors, focus, sound and lighting all rehearsed together.', 'move', 15, 'Rehearse it a dozen times, mark every beat', 'Hide two cuts in whip-pans so it plays as one', 'Take nine. The crew applauds after "cut".', 'Fourteen takes. The light changes. You settle for two shots.']
+  ],
+  snd: [
+    ['plane', 'Plane overhead', 'A plane drones over every take of the key dialogue scene.', 'Sound mixers call "hold for plane"; anything unusable is replaced later in ADR, which actors hate.', 'sound', 12, 'Hold between planes and grab it clean', 'Record wild lines right after the take while the actor is still in it', 'Clean dialogue. The editor will never know.', 'ADR. The actor sighs at you in the corridor.'],
+    ['mic', 'Rustle', 'The lead\'s radio mic picks up costume rustle on every move.', 'Lavalier mics are hidden in costume; sound and costume work together on fabrics and placement.', 'sound', 12, 'Re-rig the mic with a different mount', 'Ask costume for a silk lining patch', 'Gone. Costume says thanks for asking first.', 'Still rustling. Boom only from here.'],
+    ['tone', 'Room tone', 'The AD wants to move on before you get room tone.', 'Room tone is thirty seconds of a location\'s silence, used to fill gaps in the edit. Without it, cuts sound wrong.', 'cha', 11, 'Ask the whole set for thirty seconds of quiet', 'Grab it during the lunch call', 'Thirty seconds of nothing. Precious.', 'You never get it. The dialogue editor curses you in March.'],
+    ['foley', 'Footsteps', 'The footsteps in reel two sound like cardboard.', 'Foley artists perform sounds to picture: footsteps, cloth, props. A good Foley stage has pits of gravel, sand and wood.', 'sound', 13, 'Re-record them on the right surfaces', 'Layer them with real recordings from the location', 'You can hear the gravel. The director closes their eyes.', 'Better, not right.'],
+    ['mix', 'Too loud', 'The distributor says the final mix is too loud for streaming.', 'Mixes are delivered to loudness standards: theatrical, broadcast and streaming each have their own.', 'sound', 14, 'Do a dedicated streaming pass', 'Rebalance the dynamics without crushing the score', 'Delivered, and it still breathes.', 'Rejected once. Rush fees.'],
+    ['wind', 'Clifftop', 'A gale on the clifftop location. The boom is useless.', 'Wind protection, "dead cats", only does so much. Sometimes the scene is ADR\'d from the start and everyone knows it.', 'sound', 14, 'Get close with lavs and hide them well', 'Record guide tracks and plan for ADR, saying so now', 'Usable. Barely. A small miracle.', 'Nothing usable. The whole scene goes to ADR.']
+  ],
+  art: [
+    ['continuity', 'The moved vase', 'A vase moved between takes and the script supervisor flags it.', 'Set dressers reset the set to match continuity photos after every take.', 'eth', 11, 'Reset from the photos', 'Propose a story reason the vase moved', 'Matched. Nobody watching will ever see.', 'Missed in the next setup. It\'ll be in the blooper forums for years.'],
+    ['period', 'Wrong decade', 'A historian on set spots a 1970s phone in a 1962 kitchen.', 'Period detail is research: catalogues, photos, museum loans. Audiences notice anachronisms more than you think.', 'period', 13, 'Swap it from the prop truck', 'Source the right model from a collector by lunch', 'Right phone, right colour. The historian smiles.', 'The swap is worse. You live with it.'],
+    ['build', 'The build', 'The set builders need two more days than the schedule gives them.', 'The art department designs, builds, dresses and strikes sets; construction is usually the biggest chunk of its budget.', 'sets', 14, 'Simplify the build where the camera won\'t see', 'Rent a standing set and redress it', 'On time, and the camera sees exactly what it needs.', 'A wall wobbles when a door slams.'],
+    ['graphics', 'Fake brands', 'Legal says the cereal box on the table is a real brand. Not cleared.', 'Graphic designers make fake brands for everything on screen: labels, newspapers, logos, so no real trademark needs clearing.', 'world', 12, 'Design a fake brand overnight', 'Make the fake brand a running joke in the film\'s world', 'Crispy Oaties, ready by six a.m.', 'The fake is printed blurry. It reads as fake.'],
+    ['palette', 'The palette', 'The director wants every room to tell you about the character who lives there.', 'Production designers choose a palette per character or act; colour carries story before anyone speaks.', 'world', 14, 'Build a colour board per character', 'Paint the lead\'s world warmer each act as they heal', 'The DP says it\'s the best prep they\'ve had.', 'Too subtle. Nobody notices.'],
+    ['strike', 'The strike', 'Wrap on the location. The owner wants it back exactly as it was by morning.', 'A strike takes down the set; on locations you return everything as found, photographed before and after.', 'eth', 12, 'Restore from the "before" photos', 'Leave it better: fix the gate that was broken', 'The owner offers the house again next year.', 'A scratched floor. A deposit gone.']
+  ],
+  cos: [
+    ['doubles', 'Five of the same', 'The lead gets soaked in scene 30. You need five identical costumes, aged the same.', 'Costume makes "multiples" of anything that gets wet, bloody or torn, each aged to match.', 'wardrobe', 13, 'Age them together in one batch', 'Distress each to a different stage for the fight', 'Indistinguishable. The DP can\'t tell which is which.', 'Number four is a shade lighter. The camera sees it.'],
+    ['fitting', 'The fitting', 'The star hates the costume at the fitting.', 'Fittings are where actors find the character in the clothes; good designers listen first.', 'cha', 12, 'Ask them what the character would never wear', 'Build a new look around one thing they love', 'They walk differently in it. That\'s the character.', 'They wear it, and sulk.'],
+    ['continuity2', 'Which button?', 'Was the coat buttoned in the wide? Nobody remembers.', 'Costume continuity relies on photos and notes for every scene and take.', 'eth', 11, 'Check the continuity book', 'Ask the script supervisor and compare notes', 'Second button, undone. Matched.', 'Guessed wrong. The editor cuts around it.'],
+    ['crowd', 'Two hundred', 'Two hundred extras arrive for a period street and only 150 costumes fit.', 'Crowd costumes are rented by the rail from costume houses and fitted the morning of the shoot.', 'wardrobe', 13, 'Mix and match until everyone works in the wide', 'Put the misfits in the back under coats and hats', 'In the wide, it\'s 1938. Perfect.', 'One extra in trainers. It\'s in the shot.'],
+    ['budget', 'Over budget', 'You\'ve spent the costume budget and there are three weeks left.', 'Costume designers manage a budget for buying, renting, making and cleaning, and often hand back their own receipts.', 'bud', 12, 'Rent instead of buy for the rest', 'Ask the producer to trade from the art budget', 'Back in line.', 'The producer reminds you, in writing.']
+  ],
+  act: [
+    ['line', 'Blank', 'Halfway through the take, your line is gone.', 'Actors are expected to arrive "off book" (lines learned). If you go up, staying in character often saves the take.', 'impro', 12, 'Stay in the scene and find your way back', 'Improvise something the character would say', 'They keep it. It\'s better than the script.', 'Cut. Again. Everyone waits.'],
+    ['cry', 'On cue', 'The scene needs tears, take after take, from different angles.', 'Screen actors repeat emotional peaks many times: wide, mediums, close-ups. Saving the biggest for the close-up is craft.', 'range', 14, 'Save it for your close-up', 'Go full every take and trust it', 'The close-up is devastating. The crew goes quiet.', 'Nothing left by the close-up.'],
+    ['mark', 'Hit the mark', 'The camera is tight and you keep landing an inch off your mark.', 'Marks are tape on the floor so focus and lighting land; good screen actors hit them without looking down.', 'pres', 11, 'Count steps in rehearsal', 'Ask for a sandbag mark you can feel', 'Spot on, every take.', 'Soft focus on your best take.'],
+    ['chemistry', 'Chemistry read', 'Your scene partner gives you nothing back.', 'Screen acting is listening. Chemistry is often two actors actually reacting rather than waiting for their line.', 'cha', 13, 'Take them for a coffee and talk about the scene', 'Change your reading to surprise them into reacting', 'Something sparks. The director sees it.', 'Two people saying lines at each other.'],
+    ['note', 'The note', 'The director gives you a note that contradicts the last one.', 'Directors often give results ("be angrier") rather than actions. Good actors translate notes into something playable.', 'range', 12, 'Translate it into an action you can play', 'Ask what the scene is really about for them', 'You find it. They say "that".', 'You split the difference. It shows.'],
+    ['selftape', 'Self-tape', 'An audition self-tape is due tonight. Your reader cancelled.', 'Most auditions now start as self-tapes: a plain backdrop, eye-level camera, a reader off-camera.', 'eth', 11, 'Record with a friend on the phone', 'Do it in one unbroken take for honesty', 'Sent with an hour to spare.', 'Sent with bad sound. You know it.']
+  ],
+  dir: [
+    ['coverage', 'Out of time', 'You have time for one setup for a three-person scene.', 'Coverage is the set of angles shot for a scene. When time\'s short, directors "oner" it or pick the angle that tells the story.', 'vstory', 14, 'Choose the angle that tells the story', 'Shoot it as one moving master', 'One shot, and it\'s the best in the film.', 'You miss a key reaction. The editor despairs.'],
+    ['actors', 'Two methods', 'One actor wants twenty takes, the other is best on take one.', 'Directors manage different processes: some shoot the "one-take" actor\'s coverage first.', 'dact', 13, 'Shoot the fast actor\'s coverage first', 'Change the order each take so both stay fresh', 'Both alive in the same scene.', 'One is brilliant, one is exhausted.'],
+    ['tone', 'Lost the tone', 'The dailies feel like two different films.', 'Tone is the director\'s main job; many keep a "tone reel" of clips to show the crew what they mean.', 'tone', 14, 'Make a tone reel and show the heads', 'Reshoot the opening scene to set the key', 'Everyone sees the same film now.', 'Still two films. The edit will have to choose.'],
+    ['studio', 'The studio note', 'The studio wants the ending happier.', 'Studios have contractual approvals; directors negotiate, sometimes shoot both, sometimes lose.', 'cha', 14, 'Shoot both versions', 'Argue for yours with test-screening data', 'Your ending stays. Barely.', 'Their ending. Your name.'],
+    ['blocking', 'Blocking', 'The rehearsal looks like people standing in a line.', 'Blocking is where people move. Good blocking tells the story without cuts: who moves toward whom, who has the power.', 'stag', 12, 'Give each character a reason to move', 'Stage it around a single prop they fight over', 'It plays without words.', 'Still static. You cover it with cuts.'],
+    ['cut', 'Director\'s cut', 'The first assembly is three hours. It should be two.', 'The director\'s cut, often ten weeks by guild rule, comes before the producers\' and studio\'s.', 'pace', 14, 'Cut the subplot you love', 'Restructure: start the film at the midpoint', 'Two hours. Better than the script.', 'Two hours twenty, and tired.']
+  ],
+  wri: [
+    ['notes', 'Notes call', 'Twenty-seven notes from the studio, some contradicting each other.', 'Look for "the note behind the note": three notes about pacing may really mean the audience can\'t tell what the hero wants.', 'struc', 13, 'Find the three real problems behind the 27', 'Push back on the notes you think are wrong, with reasons', 'They say it\'s the best draft yet.', 'They hire another writer to "polish".'],
+    ['pages', 'Pink pages', 'They need revised pages for tomorrow by midnight.', 'Revisions during a shoot are issued in colours: blue, pink, yellow, green… so everyone knows which draft is current.', 'eth', 12, 'Rewrite only what\'s needed', 'Rewrite the whole scene so it finally works', 'Pages out at 11:40. The actors like them.', 'Out at 3 a.m. Nobody has learned them.'],
+    ['table', 'Table read', 'At the table read, a joke dies in the room.', 'Table reads show what plays aloud. Writers listen for silence, not just laughter.', 'dial', 12, 'Cut it', 'Rewrite it for the actor\'s rhythm', 'The new version gets the biggest laugh of the day.', 'The new joke dies too.'],
+    ['structure', 'Saggy middle', 'Everyone agrees the second act sags.', 'The midpoint often turns the story; a good one changes what the hero wants or knows.', 'struc', 14, 'Add a midpoint reversal', 'Cut the subplot and give its scenes to the antagonist', 'It moves now. Producers lean forward.', 'Faster, but empty.'],
+    ['character', 'Who are they?', 'An actor asks what their character wants. You\'re not sure.', 'Characters need a want (external goal) and a need (what they actually lack). Actors play the want.', 'char', 12, 'Write a page of backstory just for them', 'Ask the actor what they think, and use it', 'They own the part from that moment.', 'They play it vague.'],
+    ['credit', 'Arbitration', 'Another writer claims a shared credit on your script.', 'Writing credits go to arbitration in guild systems; readers compare drafts without names.', 'orig', 13, 'Submit your drafts with a clear statement', 'Settle: offer a story credit', 'Sole screenplay credit.', 'Shared credit. It stings.']
+  ],
+  pro: [
+    ['budget', 'The overage', 'Day 12 and you\'re 8% over budget.', 'Line producers track a daily cost report; contingency is usually 10%, and every department dips into it.', 'bud', 13, 'Trim days from the schedule', 'Find a location deal that pays back the overage', 'Back on budget by the end of the week.', 'Into contingency. The financiers call.'],
+    ['insurance', 'The bond', 'The completion bond company is asking questions.', 'A completion bond guarantees financiers the film gets finished; the bond company can take over a troubled production.', 'fin', 14, 'Give them a clear recovery plan', 'Invite them to set to see it\'s fine', 'They back off.', 'They send someone to sit on set every day.'],
+    ['talent', 'The star wants', 'The star\'s agent wants a bigger trailer, a chef and a later call time.', 'Talent riders list perks in the contract; producers negotiate them like everything else.', 'pack', 12, 'Give the trailer, hold the call time', 'Trade the chef for a producer credit', 'Everyone feels they won.', 'They dig in. You give in.'],
+    ['location', 'Permit trouble', 'The city pulls the street permit the day before the shoot.', 'Location managers secure permits, notify residents, and handle police and parking.', 'pack', 13, 'Find another street with the same look', 'Go to the council in person', 'Shooting tomorrow, as planned.', 'A day lost.'],
+    ['sales', 'The sales agent', 'A sales agent wants to see the film before it\'s finished.', 'Sales agents sell rights territory by territory at markets like Cannes, Berlin and AFM.', 'mkt', 13, 'Show a tight twenty-minute promo', 'Show the rough cut, warts and all', 'They take it on. Pre-sales follow.', 'They pass.'],
+    ['union', 'The union', 'A union rep is on set about turnaround.', 'Union rules cover hours, meals, rest and pay; breaches cost penalties and goodwill.', 'cha', 12, 'Fix the schedule and apologise', 'Bring the rep into the next schedule meeting', 'Resolved, with goodwill.', 'A formal complaint.']
+  ],
+  cst: [
+    ['kid', 'The child actor', 'You need a seven-year-old who can cry on cue and won\'t freeze.', 'Child actors work limited hours by law, with tutors and chaperones on set.', 'talent', 13, 'Hold open auditions in schools', 'Cast the kid who\'s most themselves, not the most polished', 'Found them. The crew will adore them.', 'Polished and wooden.'],
+    ['chem', 'Chemistry reads', 'Two leads, eight finalists, one day.', 'Chemistry reads pair finalists to see who sparks; casting directors watch the listening, not the talking.', 'talent', 14, 'Pair them in every combination', 'Trust your gut and pair the unlikely two', 'Electric. The director picks your pair.', 'Nothing sparks. Another day.'],
+    ['offer', 'Offer only', 'The director wants a star who doesn\'t audition.', 'Established actors take "offers": the part, the money, the script, no audition.', 'pack', 13, 'Make the offer through their agent', 'Get the director to write them a letter', 'They say yes.', 'They pass. Politely.'],
+    ['diverse', 'Fresh faces', 'The producers want "someone new". The director wants their usual people.', 'Casting directors hold the balance between finds and names that help financing.', 'cha', 12, 'Present both, honestly', 'Bring in one unknown so good it settles it', 'A star is found.', 'The usual people.'],
+    ['tape', 'Five hundred tapes', 'Five hundred self-tapes in the inbox. Three days.', 'Casting assistants pre-screen tapes; most decisions are made in the first fifteen seconds.', 'eth', 11, 'Watch the first thirty seconds of each', 'Watch every one fully, in order', 'You find the one.', 'You miss the one.']
+  ],
+  edt: [
+    ['assembly', 'The assembly', 'The assembly is four hours. The director hasn\'t seen it.', 'The editor\'s assembly strings every scene as scripted; it is always too long, and that\'s fine.', 'shape', 13, 'Watch it with the director, no judging', 'Show a radical 100-minute version first', 'They see the film in it.', 'They panic.'],
+    ['performance', 'The best take', 'The best performance has a boom in the shot.', 'Editors choose performance over polish; VFX can paint out a boom, but nobody can fix a dead take.', 'rhythm', 12, 'Use it and flag the boom for VFX', 'Cut around it with a reaction shot', 'The scene sings.', 'The VFX bill arrives.'],
+    ['music', 'Temp love', 'The director has fallen in love with the temp music.', 'Temp music is placeholder score in the cut; composers dread "temp love" because it sets an impossible target.', 'cha', 12, 'Swap temp tracks early and often', 'Bring the composer in early to replace it', 'The real score lands.', 'They sue-proof the temp. It sounds like a copy.'],
+    ['test', 'Test screening', 'Test audiences hate the ending.', 'Test screenings score films on cards; "would you recommend" is the number studios watch.', 'shape', 14, 'Recut the last ten minutes', 'Move the reveal earlier', 'Scores jump twenty points.', 'Scores move two points.'],
+    ['sync', 'Out of sync', 'Reel three drifts out of sync by two frames.', 'Sync is checked against the slate clap: picture and sound marry on the clapper closing.', 'cont', 11, 'Re-sync from the slates', 'Re-conform the whole reel', 'Locked.', 'Still a frame off in one shot.'],
+    ['lock', 'Picture lock', 'Everyone wants "one more change" after lock.', 'Picture lock is when the cut is frozen so sound, music and VFX can finish. Changes after it cost a fortune.', 'com', 13, 'Hold the line', 'Allow one change, trade it for something', 'Locked. The sound team is grateful.', 'Unlocked. Everything slips.']
+  ],
+  mus: [
+    ['spot', 'Spotting session', 'The director wants music everywhere. You think less.', 'In a spotting session the director and composer decide where music starts and stops.', 'score', 13, 'Argue for silence in two key scenes', 'Score one scene both ways and play them', 'The silence plays. They agree.', 'Wall-to-wall music.'],
+    ['theme', 'The theme', 'You need a theme that works on a solo piano and a full orchestra.', 'A strong theme is a few notes that can be reharmonised for every mood in the film.', 'theme', 14, 'Write four notes and live with them', 'Base it on the hero\'s name in musical letters', 'They hum it at wrap.', 'Pretty, forgettable.'],
+    ['session', 'Session day', 'The orchestra is booked for six hours; you have 40 minutes of music.', 'Scoring sessions run on union rules: three-hour calls, so cues are planned to the minute.', 'orch', 14, 'Record the hardest cues first', 'Record the big cue live in one take', 'All 40 minutes, with ten to spare.', 'Overtime for sixty players.'],
+    ['clear', 'Clearance', 'A pop song in the bar scene costs more than the whole music budget.', 'Using a song needs two licences: the sync (composition) and the master (recording).', 'pack', 12, 'Commission a sound-alike', 'Ask the artist directly, explaining the scene', 'Cleared for a fraction.', 'Cut from the film.'],
+    ['temp', 'Temp war', 'The director keeps asking for it to sound "more like the temp".', 'Composers learn to hear what the director loves in the temp, then write something new that does the same job.', 'score', 13, 'Analyse what the temp is doing emotionally', 'Write the opposite and argue for it', 'They forget the temp exists.', 'It sounds like the temp, and that worries legal.']
+  ],
+  vfx: [
+    ['plates', 'Bad plates', 'The plates for the big shot were shot without tracking markers.', 'VFX supervisors on set ask for markers, HDRI light probes and clean plates so the shots can be finished later.', 'digi', 13, 'Hand-track it frame by frame', 'Rebuild the background entirely in CG', 'Seamless.', 'It floats. People will notice.'],
+    ['render', 'Render farm', 'Delivery is Friday. The render farm says Monday.', 'Render farms process frames in parallel; a single complex frame can take hours.', 'digi', 14, 'Optimise the heaviest shots', 'Rent cloud rendering, over budget', 'Delivered Friday.', 'Delivered Monday. Penalties.'],
+    ['notes', 'Notes', 'The director wants the creature "scarier, but cuter".', 'VFX reviews go shot by shot; notes come as words, and artists translate them into pictures.', 'cha', 12, 'Show three options side by side', 'Find the reference image that says both', 'They point at one and smile.', 'Round fourteen of notes.'],
+    ['roto', 'Hair', 'Roto on curly hair against a moving background.', 'Rotoscoping cuts elements out frame by frame; hair is the hardest thing there is.', 'digi', 12, 'Grind it out', 'Use a key plus roto hybrid', 'Clean edges.', 'A halo around the hair.']
+  ],
+  stn: [
+    ['fall', 'The fall', 'A forty-foot fall onto an airbag. The wind is gusting.', 'Stunt coordinators can halt any stunt for safety. Wind, light and fatigue all count.', 'stunt', 14, 'Call it until the wind drops', 'Lower the height and cheat it with the lens', 'Safe, and it looks huge.', 'You go anyway. You land badly.'],
+    ['fight', 'Fight choreography', 'The actors keep missing the beats in the bar fight.', 'Screen fights are choreographed like dance and sold by camera angle; nobody actually lands a punch.', 'stunt', 12, 'Break it into shorter pieces', 'Use the actors\' mistakes as character', 'It looks brutal and nobody\'s hurt.', 'A real knock. A bruise and an apology.'],
+    ['car', 'Car hit', 'The car hit needs exact timing at 15 mph.', 'Car hits use precision drivers, pads, rehearsal at walking speed, and many safety meetings.', 'stunt', 15, 'Rehearse at walking pace ten times', 'Do it in one, all cameras rolling', 'One take. Everyone exhales.', 'A bruised hip. It\'s in the film.'],
+    ['double', 'Matching', 'You don\'t look enough like the lead from behind.', 'Stunt doubles are cast by build, height and movement; wigs and wardrobe do the rest.', 'eth', 11, 'Study how they walk', 'Ask makeup for a closer wig', 'From behind, you\'re them.', 'A sharp-eyed viewer will clock it.']
+  ],
+  office: [
+    ['coverage', 'Coverage', 'Ten scripts this weekend. Coverage due Monday.', 'Coverage is a two-page summary and verdict (pass, consider, recommend) that decides if anyone reads a script.', 'tas', 12, 'Read every page', 'Skim nine and fight hard for the one', 'Your "recommend" gets read upstairs.', 'You passed on something that sold elsewhere.'],
+    ['phones', 'Rolling calls', 'Your boss has fourteen calls to roll in two hours.', 'Assistants "roll calls": dial in order, connect, log who called back. It\'s the first job of a lot of moguls.', 'eth', 11, 'Prioritise by who matters most today', 'Rebook three to make room for the important one', 'Smooth. Your boss doesn\'t notice, which is perfect.', 'A big name is left on hold.'],
+    ['deal', 'Deal memo', 'A deal memo needs drafting before the talent changes their mind.', 'A deal memo is the short version of a contract: fee, credit, dates, perks. The long form comes later.', 'pack', 13, 'Draft from the template carefully', 'Send it tonight before anyone wakes up', 'Signed by morning.', 'A mistake in the fee. Lawyers.'],
+    ['development', 'The pile', 'Your boss asks what the company should make next.', 'Development executives track books, articles and scripts, and build relationships with writers years ahead.', 'tas', 14, 'Pitch the three strongest from the pile', 'Pitch an unpublished novel you found yourself', 'They option it.', 'They laugh. Kindly.']
+  ],
+  cinema: [
+    ['projector', 'Projector down', 'The digital projector fails ten minutes into a sold-out show.', 'Most cinemas run DCPs (digital cinema packages) with encrypted keys that unlock each film for set dates.', 'eth', 12, 'Restart the server and reload the key', 'Switch the audience to screen two with a quick speech', 'Back on in four minutes. Applause.', 'Refunds for 200 people.'],
+    ['queue', 'The queue', 'The premiere queue is round the block and the system crashes.', 'Front of house manages capacity, safety and ticketing; a good manager is calm on a radio.', 'cha', 12, 'Go manual with a clipboard', 'Entertain the queue while IT fixes it', 'Everyone in on time.', 'Forty minutes late.'],
+    ['programme', 'Programming', 'You get one late-night slot a week. What plays?', 'Repertory programmers build seasons around themes and anniversaries, and know their local audience.', 'tas', 13, 'A cult classic everyone knows', 'Something nobody\'s seen, with a great intro', 'Sold out. A regular crowd is born.', 'Eleven people. Loyal ones.']
+  ],
+  intern: [
+    ['coffee', 'The order', 'Twelve coffees, six with alternative milks, one "surprise me".', 'Every career starts somewhere. The runner who gets the order right gets asked back.', 'eth', 10, 'Write it down and double-check', 'Surprise "surprise me" with something perfect', 'Every cup right.', 'Oat instead of almond. Remembered.'],
+    ['meeting', 'Sit in', 'You\'re allowed to sit in on a meeting. Someone asks your opinion.', 'Interns who listen get asked back; interns who talk too much don\'t.', 'cha', 12, 'Say one sharp thing, briefly', 'Disagree with the room, politely', 'They ask your name.', 'Silence. You stare at the table.'],
+    ['scripts', 'Binding', 'Forty scripts to print and bind for the table read in an hour.', 'Table-read scripts are often watermarked with each recipient\'s name to stop leaks.', 'eth', 10, 'Assembly line it', 'Recruit two other interns to help', 'Forty, warm off the press.', 'Two scripts missing a page.']
+  ],
+  music: [
+    ['mixnotes', 'Mix notes', 'The label says the vocal is too quiet. You think it\'s perfect.', 'A mix balances every element; mastering then sets the final loudness and tone for release.', 'song', 12, 'Do a "vocal up" version as well', 'Explain why the quiet vocal is the point', 'They hear it. It stays.', 'They pick the loud one.'],
+    ['live', 'Sound check', 'The venue\'s monitor mix is a mess and doors open in an hour.', 'At gigs, front-of-house mixes for the audience; monitors are what the band hears on stage.', 'cha', 11, 'Talk the engineer through what you need', 'Play it unplugged closer to the crowd', 'A great gig. Someone films it.', 'You can\'t hear yourself all night.'],
+    ['split', 'Splits', 'A co-writer says they wrote more of the song than you think.', 'Songwriting splits divide publishing royalties; agree them in the room, on the day, in writing.', 'cha', 12, 'Agree a fair split now', 'Give them more; the friendship matters', 'Signed, friends.', 'A lawyer\'s letter.'],
+    ['release', 'Release day', 'The release is Friday. The artwork isn\'t done.', 'Distributors need audio and artwork weeks ahead to pitch a track to playlist editors.', 'eth', 11, 'Use the backup artwork', 'Push the release a week and do it right', 'Out on time.', 'Missed the playlist window.']
+  ],
+  creator: [
+    ['thumb', 'Thumbnail', 'The video is great. The click-through rate is 2%.', 'On video platforms the thumbnail and title decide who clicks; creators test several.', 'tas', 12, 'Test three thumbnails', 'Retitle it around the most surprising moment', 'Click-through doubles.', 'No change.'],
+    ['sponsor', 'The sponsor', 'A sponsor wants approval over your script.', 'Paid partnerships must be disclosed; sponsors usually get to check facts, not voice.', 'pack', 13, 'Agree to fact-check only', 'Turn it into a running joke they sign off on', 'A sponsor read people actually watch.', 'It reads like an ad. Comments notice.'],
+    ['comments', 'Comments', 'A comment section turns ugly.', 'Moderation tools, pinned comments and clear rules shape a community over time.', 'com', 11, 'Pin a clear rule and moderate', 'Make a video about it', 'It calms down.', 'It gets worse before it gets better.'],
+    ['burnout', 'The schedule', 'You promised a video every week. You\'re exhausted.', 'Creator burnout is common; many announce breaks and come back stronger.', 'com', 12, 'Announce a two-week break', 'Push through with a lighter format', 'You come back with ideas.', 'Viewers notice the tired edit.']
+  ],
+  podcast: [
+    ['guest', 'The guest', 'Your guest is giving one-word answers.', 'Interviewers prepare open questions and follow-ups; the best ones listen more than they talk.', 'cha', 12, 'Switch to a story question', 'Share a story of your own first', 'They open up.', 'Forty minutes of "yeah".'],
+    ['audio', 'Bad audio', 'The guest recorded on a laptop mic in a kitchen.', 'Remote recordings are usually "double-ender": each side recorded locally then synced.', 'sound', 12, 'Clean it up in post', 'Re-record with a proper mic posted to them', 'Listenable, even warm.', 'Reviews mention the echo.'],
+    ['ads', 'Ad reads', 'An advertiser wants a host-read ad you don\'t believe in.', 'Host-read ads pay more because listeners trust the host; that trust is the asset.', 'eth', 11, 'Only read what you\'ve tried', 'Turn it down', 'Your listeners trust you.', 'A one-star review mentions it.'],
+    ['edit', 'The edit', 'The episode is 2 hours. It should be 50 minutes.', 'Podcast editing cuts tangents, ums and dead air; tight shows keep listeners to the end.', 'shape', 12, 'Cut to the story', 'Restructure it to open with the best moment', 'Fifty minutes, tight.', 'Ninety minutes, baggy.']
+  ],
+  stage: [
+    ['previews', 'Previews', 'The first preview runs long and the second act drags.', 'Previews are paid performances before opening night; writers and directors change the show nightly.', 'struc', 13, 'Cut ten minutes from act two', 'Swap two scenes', 'It flies.', 'It still drags.'],
+    ['understudy', 'Understudy', 'The lead is ill. The understudy is on in two hours.', 'Understudies learn roles in rehearsal and may go on at an hour\'s notice.', 'com', 12, 'Run the big scenes with them now', 'Let them do it their way', 'A star is born, briefly.', 'Rocky. The audience is kind.'],
+    ['tech', 'Tech week', 'The set change takes ninety seconds. It needs to take twenty.', 'Tech rehearsals add lights, sound, set and costume; "cue to cue" skips the acting to fix transitions.', 'setm', 13, 'Rehearse the change twenty times', 'Restage the change in the dark with music', 'Twenty seconds. Applause from the crew.', 'Sixty seconds, with a bump.'],
+    ['review', 'The reviews', 'The big paper hates it. The audience loves it.', 'Shows can survive bad reviews on word of mouth, but rarely in their first weeks.', 'cha', 12, 'Quote the audience in the ads', 'Invite the critic back', 'Word of mouth wins.', 'Ticket sales dip.']
+  ]
+};
+(function registerSituations() {
+  for (const fam in SITUATIONS) for (const [id, title, text, teach, stat, dc, fix, bold, ok, bad] of SITUATIONS[fam]) {
+    const s = { id: 'sit_' + fam + '_' + id, title, text, teach, opts: [
+      { k: 'fix', label: fix, check: [stat, dc], ok: { tie: { head: 3 }, xp: { [stat]: .25 }, stand: .3 }, bad: { tie: { head: -2 }, stress: 4 }, t: ok, tb: bad },
+      { k: 'ask', label: 'Ask {head} how they want it handled', ok: { tie: { head: 1 }, trust: { head: 2 }, xp: { [stat]: .1 } }, t: '{head} tells you exactly how they like it. Slower, but nothing breaks.' },
+      { k: 'bold', label: bold, check: [stat, Math.min(19, dc + 3)], ok: { tie: { head: 6 }, xp: { [stat]: .4 }, stand: .8 }, bad: { tie: { head: -5 }, stand: -.4, stress: 6 }, t: ok + ' People talk about it afterwards.', tb: bad + ' And it was your idea.' },
+      { k: 'mate', label: 'Pull in a colleague to help', check: ['cha', 11], ok: { tie: { mates: 3 } }, bad: { tie: { mates: -1 }, stress: 2 }, t: 'Two of you, twice as fast. You owe them a drink.', tb: 'They\'re busy and say so. You do it alone, late.' }
+    ] };
+    (ROLE_SCENES[fam] = ROLE_SCENES[fam] || []).push(s);
+    SCENES.push(Object.assign({ role: fam, jobs: [] }, s));
+  }
+})();
+// </situations>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -17599,7 +17931,7 @@ function phonePanel() {
     const canReply = q && lastIn && lastIn.replyable && !lastIn.replied && lastIn.id !== undefined;
     left = `<div class="ph-bar"><button class="linkish" data-thread="">‹</button>${phoneAvatar(open, 28)}<div><b>${q ? esc(q.name) : 'Home & gossip'}</b>${q ? `<small>${REL[rel].icon} ${esc(REL[rel].label)} · texts ${esc(TEXT_STYLES[textStyle(q)].label)}</small>` : ''}</div>${q ? `<a href="#" class="lk small" data-go="person:${open}">Profile</a>` : ''}</div>
      <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><p>${esc(m.t)}</p><time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
-     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${REPLIES[k].label}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div>` : q ? compose(true) : ''}`;
+     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div>` : q ? compose(true) : ''}`;
   } else {
     left = `<div class="ph-bar"><b>Messages</b></div><ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
   }
