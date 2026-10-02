@@ -287,6 +287,7 @@ function companyWeek() {
   if (!c) return;
   if (c.closed === null) c.cash -= usd([0, 12000, 5000, 1500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
   if (c.closed === null) c.cash -= deptUpkeep(c);
+  settleDistribution(c);
   // festivals-first films go to the festivals by themselves
   for (const id of c.films) { const f = S.films[id]; if (f.festFirst && f.rel !== null && !f.festSent && festEligible(f)) { f.festSent = 1; for (const F of FESTIVALS) if (!(M.fests || []).some(x => x.film === f.id && x.k === F.k)) (M.fests = M.fests || []).push({ film: f.id, k: F.k, due: S.week + 5 + Math.floor(prnd() * 5) }); } }
   payInvestors();
@@ -304,7 +305,9 @@ const FESTIVALS = [
   { k: 'shorts', name: 'the Harbour Festival', month: 2, bar: 50, fee: 40, prize: 'Discovery Prize', d: 'Small, friendly, full of first films.' }
 ];
 function myFilms() { const me = ME(), M = S.me; const ids = new Set(me.credits.concat(M.past.filter(p => p.credited && p.film !== null).map(p => p.film), (M.scripts || []).map(s => s.made), (M.holdings || []).map(h => h.made)).filter(x => x !== undefined && x !== null)); return [...ids].map(i => S.films[i]).filter(f => f && f.stage !== -1); }
-function festEligible(f) { return f.rel !== null && S.week - f.rel < 52; }
+function festEligible(f) { return f.rel !== null ? S.week - f.rel < 52 : f.stage === 3 && S.me.company !== undefined && f.co === S.me.company; }
+// Before release nobody knows how good it is; programmers judge from the people and the script.
+function preQ(f) { const d = P(f.dir); return clamp((f.scriptScore || 55) * .45 + gcraft(d, 'dir', f.genre) * 2 + (f.qBonus || 0) + 5, 10, 95); }
 function submitFest(a) {
   const M = S.me, f = S.films[a.film], F = FESTIVALS.find(x => x.k === a.k);
   if (!f || !F || !myFilms().includes(f) || !festEligible(f) || (M.fests || []).some(x => x.film === f.id && x.k === F.k) || M.cash < usd(F.fee)) return false;
@@ -317,13 +320,14 @@ function festWeek() {
   for (const e of (M.fests || []).filter(x => !x.done && x.due <= S.week)) {
     e.done = true;
     const f = S.films[e.film], F = FESTIVALS.find(x => x.k === e.k), small = f.tier === 3 || f.co === null;
-    const v = f.q + (small ? 5 : 0) + (prnd() - .5) * 20;
+    const v = (f.q ?? preQ(f)) + (small ? 5 : 0) + (prnd() - .5) * 20;
     if (v < F.bar) { inbox('note', `${F.name}: not selected`, `${f.title} isn't in this year's line-up. ${pickLine(['Hundreds of films, a few dozen slots.', 'Next festival.', 'The programmers wanted something else this year.'], f.id + e.due)}`, { film: f.id }); continue; }
     e.sel = 1; f.cult = clamp((f.cult || 0) + 8, 0, 100); me.standing = clamp(me.standing + 1.5, 0, 100);
     let t = `${f.title} is in the official selection at ${F.name}. ${F.d}`;
     if (v >= F.bar + 14) { award(f, `${F.name.replace(/^the /, '')}: ${F.prize}`, [f.dir, f.prod].filter((x, i, A) => A.indexOf(x) === i)); me.fame = clamp((me.fame || 0) + 3, 0, 100); t += ` And it wins the ${F.prize}.`; milestone(`${f.title} won the ${F.prize} at ${F.name}`, 'prize'); }
     else milestone(`${f.title} selected for ${F.name}`, 'prize');
     inbox('news', `${F.name}`, t, { film: f.id });
+    if (f.rel === null && f.co === M.company && f.distBy === undefined && !pending().some(x => x.kind === 'bid' && x.film === f.id)) distributorBids(f, v >= F.bar + 14);
     const slot = freeSlot({ days: [3, 4, 5], blocks: [2], from: 1 }), host = [f.prod, f.dir, f.cast[0]].find(id => id !== me.id);
     if (slot && host !== undefined) inbox('invite', `Go to ${F.name}?`, `Your film is screening. The premiere is ${slotLabel(slot)}: travel, a red carpet, and everyone who buys and sells films in one place.`, { person: host, ev: 'festival', slot, what: `the premiere at ${F.name}`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Stay home' }] });
   }
@@ -342,4 +346,34 @@ function troupeWeek() {
     for (const id of ids) { meet(id, null, 3 + (f.q - 50) / 10); if (opinion(id) >= 15 && !M.known[id].tags.includes('Your regular')) { M.known[id].tags.push('Your regular'); joined.push(P(id).name); } }
     if (joined.length) { inbox('note', `Your regulars from ${f.title}`, `${joined.slice(0, 5).join(', ')}${joined.length > 5 ? ` and ${joined.length - 5} more` : ''} would work with you again. They'll come first when you hire.`, { film: f.id }); milestone(`${joined.length} of the ${f.title} crew became regulars`, 'work'); }
   }
+}
+
+// ---- Distributors ----
+// A festival selection brings buyers. Each bids an advance (the minimum guarantee) for the right to release your film,
+// keeping a share of what it earns. A big buyer means a big release; selling means less risk and less upside.
+function distributorBids(f, prize) {
+  const M = S.me, q = preQ(f);
+  const buyers = S.companies.filter(b => b.closed === null && b.owner === undefined && b.tier <= 2 && b.cash > 0).sort((a, b) => hashRand(a.id * 7 + f.id)() - hashRand(b.id * 7 + f.id)()).slice(0, 3);
+  if (!buyers.length) return;
+  const bids = buyers.map(b => { const mg = f.budget * (.35 + q / 140 + (prize ? .45 : 0)) * (b.tier === 1 ? 1.3 : 1) * (.8 + prnd() * .4); return { b: b.id, mg, share: b.tier === 1 ? .5 : .4 }; });
+  inbox('bid', `Buyers want ${f.title}`, `After the festival screening, ${bids.length} distributor${bids.length > 1 ? 's' : ''} make offers. An advance now, and they take a share of what the film earns.`, { film: f.id, bids, choices: bids.map((x, i) => ({ k: 'b' + i, label: `${S.companies[x.b].name}: ${fmtCash(Math.round(x.mg * 1e6))} advance, ${Math.round(x.share * 100)}% to them` })).concat([{ k: 'self', label: 'Release it ourselves' }]) });
+}
+function bidPick(it, k) {
+  if (it.kind !== 'bid') return false;
+  const M = S.me, f = S.films[it.film], c = myCo();
+  it.done = true; it.picked = k;
+  if (!f || f.rel !== null || !c) { it.result = { t: 'Too late: the film is already out.' }; return true; }
+  if (k === 'self') { it.result = { t: 'You keep it. All the risk, all the upside.' }; return true; }
+  const x = it.bids[+k.slice(1)], b = S.companies[x.b];
+  f.distBy = x.b; f.mg = x.mg; f.distShare = x.share; c.cash += x.mg;
+  f.hook = clamp(f.hook + (b.tier === 1 ? 14 : 8), 5, 99); f.paMul = (f.paMul || 1) * (b.tier === 1 ? 1.3 : 1.1);
+  milestone(`${f.title} sold to ${b.name} for ${fmtCash(Math.round(x.mg * 1e6))}`, 'credit');
+  it.result = { t: `Sold. ${b.name} will release it, wide. ${fmtCash(Math.round(x.mg * 1e6))} lands in the company account.` };
+  return true;
+}
+// After release the distributor takes its share, and recoups the advance from yours.
+function settleDistribution(c) {
+  for (const id of c.films) { const f = S.films[id]; if (f.distBy === undefined || f.distSettled || f.rel === null || f.rel > S.week || f.rentals === undefined) continue; f.distSettled = 1;
+    const back = Math.max(0, f.rentals - f.pa - f.backend), take = back * f.distShare + Math.min(f.mg, back * (1 - f.distShare));
+    c.cash -= take; inbox('note', `${f.title}: settling with ${S.companies[f.distBy].name}`, `The distributor keeps ${fmtCash(Math.round(take * 1e6))} (its share plus the advance it paid you). ${back * (1 - f.distShare) > f.mg ? 'The film earned past the advance: the rest is yours.' : 'It didn\'t earn past the advance, so the advance was the best money you\'ll see.'}`, { film: f.id }); }
 }

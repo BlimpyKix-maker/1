@@ -67,11 +67,11 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 ## Ideas queue (after the big notes pass)
 - Avatars for real-world counterparts don't resemble the real people yet: would need a per-person look table (hair, skin, glasses, beard) for the famous names.
 - A few catalogue names are still close to real ones (e.g. a studio called "YRF Films"); run a rename pass on studios and people.
-- Distributors bidding for your films at festivals; hiring a composer and production designer; a troupe page.
-- Player-side family background (born into the business) as a character-creation option.
+- Hiring a composer and production designer; a troupe page.
+- Distribution territories (sell a film market by market rather than one worldwide buyer).
 
 1. Hire your own crew (DP, editor, composer) when producing/directing; a "troupe" of regulars who want to work with you again.
-2. Sell your company's films to distributors at festivals (bids, territories).
+2. Done: festival selections bring distributor bids (advance + share, settled after release); the 'parent' background links you into a real family and gives a hiring edge. Careers screen runs job text through `deReal()` to hide real employers/unions.
 3. Gentle difficulty tuning: energy/stress feel easy for steady jobs.
 4. More scenes per job family and more NPC life events; more world events with choices.
 5. Spot-check `src/fiction.js` for any real reference that slipped through.

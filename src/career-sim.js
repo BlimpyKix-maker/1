@@ -189,7 +189,8 @@ function makeParty(c) {
   for (const k in g) ids[k] = g[k].id;
   if (c.quirk === 'parent') {
     const par = bestIn(hub, [role, 'director', 'producer'], q => q.standing + q.fame * .5 + (S.year - q.born > 46 ? 30 : -50) + prnd() * 10);
-    if (par) { ids.parent = par.id; meet(par.id, 'Your parent', 60); trust(par.id, 40); }
+    if (par) { ids.parent = par.id; meet(par.id, 'Your parent', 60); trust(par.id, 40);
+      const me = S.people[S.me.id] || null; if (me && typeof familyOfP === 'function') { familyOfP(me).parent = par.id; const kids = familyOfP(par).kids = familyOfP(par).kids || []; for (const sib of kids) { meet(sib, 'Your sibling', 30); (familyOfP(me).sibs = familyOfP(me).sibs || []).push(sib); } kids.push(me.id); } }
   }
   if (c.quirk === 'rival') { const r = youngNPC(hub, role); ids.rival = r.id; meet(r.id, 'Rival', -35); }
   const arr = c.arrival;
@@ -546,6 +547,7 @@ function hireFactors(post) {
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof repFactors === 'function') F.push(...repFactors(post));
+  { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;
 }
 function hireOdds(post) { return clamp(logistic(hireFactors(post).reduce((s, f) => s + f[1], 0)), .02, .96); }
@@ -914,6 +916,7 @@ function resolvePick(it, k) {
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (socialPick(it, k)) return true;
   if (dealPick(it, k)) return true;
+  if (bidPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
