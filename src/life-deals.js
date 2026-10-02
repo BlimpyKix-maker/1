@@ -310,7 +310,7 @@ function festEligible(f) { return f.rel !== null ? S.week - f.rel < 52 : f.stage
 function preQ(f) { const d = P(f.dir); return clamp((f.scriptScore || 55) * .45 + gcraft(d, 'dir', f.genre) * 2 + (f.qBonus || 0) + 5, 10, 95); }
 function submitFest(a) {
   const M = S.me, f = S.films[a.film], F = FESTIVALS.find(x => x.k === a.k);
-  if (!f || !F || !myFilms().includes(f) || !festEligible(f) || (M.fests || []).some(x => x.film === f.id && x.k === F.k) || M.cash < usd(F.fee)) return false;
+  if (!f || !F || !myFilms().includes(f) || !festEligible(f) || (typeof festFits === 'function' && !festFits(F, f)) || (M.fests || []).some(x => x.film === f.id && x.k === F.k) || M.cash < usd(F.fee)) return false;
   M.cash -= usd(F.fee);
   (M.fests = M.fests || []).push({ film: f.id, k: F.k, due: S.week + 5 + Math.floor(prnd() * 5) });
   return true;
