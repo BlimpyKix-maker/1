@@ -485,7 +485,7 @@ function viewDesk() {
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
-  <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
+  ${typeof boardFilterHTML === 'function' ? boardFilterHTML() : ''}<div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${(typeof boardView === 'function' ? boardView() : M.board).map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing matches. Try another industry or level.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return portfolioHTML() + writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + ambitionsHTML() + reputationHTML() + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
@@ -504,7 +504,7 @@ function viewDesk() {
 function jobInfoPanel(jid) {
   const j = JOBS.jobs.find(x => x.id === jid);
   if (!j) return '';
-  return `<section class="panel jobd"><h3>${esc(j.t)} <button class="linkish" data-jobinfo="">Close</button></h3>${j.resp ? `<ul class="plain">${j.resp.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}${j.sk ? `<p class="muted">What it takes: ${j.sk.map(esc).join(' · ')}</p>` : ''}${j.after ? `<p class="muted">Leads to: ${esc(j.after)}</p>` : ''}</section>`;
+  return `<section class="panel jobd"><h3>${esc(j.t)} <button class="linkish" data-jobinfo="">Close</button></h3>${j.resp ? `<ul class="plain">${j.resp.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}${j.sk ? `<p class="muted">What it takes: ${j.sk.map(esc).join(' · ')}</p>` : ''}${j.after ? `<p class="muted">Leads to: ${esc(j.after)}</p>` : ''}${typeof jobCrossHTML === 'function' ? jobCrossHTML(j) : ''}</section>`;
 }
 function viewYou() {
   if (UI.replaying) return `<div class="loading"><p class="eyebrow">Loading your career</p><h2>Replaying your life so far</h2><p class="lede">${esc(UI.replaying)}</p></div>`;
@@ -542,6 +542,7 @@ function playWeeks(n) {
 function careerClick(t) {
   const c = UI.cc;
   if (typeof computerClick === 'function' && computerClick(t)) return true;
+  if (typeof boardClick === 'function' && boardClick(t)) return true;
   if (t.dataset.cc) {
     const g = t.dataset.cc, v = t.dataset.v;
     if (g === 'rename') c.name = suggestName(c.hub, c.g);
@@ -629,7 +630,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -638,6 +639,7 @@ function setLook(k, v) {
 function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
   if (e.target.dataset.share && v) { doAct({ t: 'share', id: +e.target.dataset.share, to: +v }); render(true); return true; }
+  if (id === 'bf-sort') { (UI.bf = UI.bf || { ind: 'all', tier: 'all', fit: false }).sort = v; render(true); return true; }
   if (/^ns-(genre|theme|tone)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
   if (/^ns-(premise|hero|setting|notes)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
   if (id === 'ns-title') { UI.newScript.title = v; return true; }

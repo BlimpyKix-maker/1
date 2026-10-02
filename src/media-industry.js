@@ -46,7 +46,7 @@ function fieldPosts() {
   const M = S.me, L = careerLevel(), out = [];
   const fit = t => t.tier <= L + 1 && (t.tier >= L - 2 || t.tier === 0) && !M.jobs.some(j => j.k === t.k) && (t.field !== 'creator' || platOpen('vidwire')) && (t.field !== 'podcast' || platOpen('podhaus'));
   const mine = FIELD_JOBS.filter(t => fit(t) && t.field === M.field), other = FIELD_JOBS.filter(t => fit(t) && t.field !== M.field);
-  const n = (M.field && M.field !== 'film' ? 2 : 0) + (prnd() < .5 ? 1 : 0);
+  const n = (M.field && M.field !== 'film' ? 2 : 1) + (prnd() < .5 ? 1 : 0);   // other industries always post a few: people cross over
   for (let i = 0; i < n; i++) { const pool = mine.length && (i < 2 || prnd() < .5) ? mine : other; if (!pool.length) continue; const t = ppick(pool), p = makePost(t, null); if (t.co) p.mco = mediaCoFor(t.field, M.hub, p.id); out.push(p); }
   return out;
 }
