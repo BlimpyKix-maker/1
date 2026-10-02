@@ -38,6 +38,7 @@ const REP_FLAGS = {
   organiser: { label: 'Strike organiser', d: 'Crews trust you; some producers are wary.', hire: .25 },
   honest: { label: 'Straight talker', d: 'You told the truth when it cost you. Heads of department notice.', hire: .2 },
   fudger: { label: 'Fudged the numbers', d: 'Someone noticed. A small mark against you with ADs and producers.', hire: -.15 },
+  mudslinger: { label: 'Mudslinger', d: 'You were caught running down a rival film in awards season. Producers are wary.', hire: -.3 },
   reliable: { label: 'Reliable', d: 'Always on time, never the reason a setup waits.', hire: .2 }
 };
 function repFactors(post) {

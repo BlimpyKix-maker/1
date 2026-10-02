@@ -642,6 +642,7 @@ function closeWeek(a) {
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
   if (typeof compWeek === 'function') compWeek();
+  if (typeof campaignFilms === 'function' && campaignSeason() && M.campY !== S.year && campaignFilms().length) { M.campY = S.year; inbox('note', 'Awards season', `Campaigns are starting for this year's films. ${campaignFilms().map(f => f.title).join(', ')} ${campaignFilms().length > 1 ? 'are' : 'is'} eligible. Screeners, trade ads, Q&As: it's all on the Contests tab.`); }
   dealsWeek();
   awardsWeek();
   storyWeek();
@@ -1019,6 +1020,7 @@ function applyAct(a) {
     case 'share': return shareScript(a);
     case 'contest': return enterContest(a);
     case 'compete': return enterComp(a);
+    case 'campaign': return campaignAct(a);
     case 'activescript': if (!(S.me.scripts || []).some(x => x.id === a.id && x.stage === 'writing')) return false; S.me.activeScript = a.id; return true;
     case 'move': return moveHome(a);
     case 'vehicle': return buyVehicle(a);

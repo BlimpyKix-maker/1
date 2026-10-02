@@ -34,6 +34,13 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/press.js` | trade press articles |
 | `src/companies.js` | company terminal: valuation, share price history, structure, logo, lore |
 | `src/strategy.js` | company departments, release strategy, reputation flags, Awards screen |
+| `src/feed.js` | the Feed desk tab: inbox, texts (grouped per person/week), trades stories that touch you, filters, sidebar |
+| `src/job-tasks.js` | jobs as deliverables: `JOB_TASKS` per family, `jobTaskBlock` (per work block), `jobScore` → film `qBonus` weighted by tier (`TASK_WEIGHT`), `jobWorkHTML` |
+| `src/consequence.js` | temperaments (`temperOf`), blackballing that spreads through circles, champions, `apologise`, `circleFactors` in hiring |
+| `src/competitions.js` | `COMPS` (45 contests: major/industry/fun), `enterComp` rolls at entry, `compWeek` results, Contests tab |
+| `src/cohort.js` | `pickCohort` (no dice), `cohortWeek` news, `cohortHTML` ranking |
+| `src/campaign.js` | awards season Oct–Dec: `CAMPAIGN` moves add `f.camp`, which `nationalAwards` weighs |
+| `src/life-scenes-low.js` | early-career scenes: commutes, hunting, mixers, coffees, hustle, classes, evenings, junior work |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -59,6 +66,10 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 ```
 
 ## Recent balance decisions
+- Save version is 8 (job tasks changed the dice stream).
+- Scenes never repeat for ~26 weeks, longer each time (`sceneFresh`, `M.seenSc`).
+- `careerLevel` = credits·.35 + standing/20 + weeks/90 + clamp(work/18, −1, 1.5) + agent: quality of work matters more than time served.
+- Task DC = 6 + tier·1.4 (+1 shooting); junior misses −0.5, scene misses −0.5.
 - Script grades compress above 72; first drafts land around C, rewrites lift them.
 - Options mostly lapse (~0.2–1%/week greenlight chance); writer fee 1.2% of budget, capped.
 - Producing: one pitch a week, each company says yes to you at most once a year.
