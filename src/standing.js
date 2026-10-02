@@ -126,7 +126,7 @@ function reputationPage() {
    ${(M.secrets || []).filter(x => !x.out).length ? `<p class="small bad">You have ${(M.secrets || []).filter(x => !x.out).length} secret${(M.secrets || []).filter(x => !x.out).length > 1 ? 's' : ''} that could come out.</p>` : ''}
    <p class="muted small">Every trait is worked out from what you've done: your skills, finished jobs, hits, prizes, what your contacts think, any secrets, your fame and your seat at the table. It changes as you do.</p></section>`;
 }
-function standingHTML() { return reputationPage() + (typeof egofHTML === 'function' ? egofHTML() : '') + ambitionsPage(); }
+function standingHTML() { return reputationPage() + (typeof egofHTML === 'function' ? egofHTML() : '') + ambitionsPage() + (typeof codexHTML === 'function' ? codexHTML() : ''); }
 function standingClick(t) {
   const d = t.dataset;
   if (d.ambclaim) { doAct({ t: 'claimamb', k: d.ambclaim }); render(true); return true; }

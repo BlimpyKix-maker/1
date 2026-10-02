@@ -1,0 +1,85 @@
+// ---------------- What you know: the craft, learned on the job ----------------
+// Every field has its knowledge, from the basics everyone learns in week one to the things only masters know. You
+// pick it up by doing: weeks on a job, days in class, coffees with a mentor. Each lesson grows a skill a little and
+// goes into your codex; knowing a field deeply shows in interviews. No dice: lessons come with time spent.
+// topic: [label, sub-skill it grows, basics[3], practice[3], mastery[3]]
+const CODEX = {
+  set: ['Life on set', 'eth', ['The call sheet, sent the night before, lists every scene, actor, location and call time for the next day.', '"Back to one" means reset to your first position; "checking the gate" means the take is good and the camera can move on.', 'A company move is the whole unit relocating mid-day. It eats an hour, which is why schedulers avoid them.'],
+    ['The 1st AD runs the floor: they call "rolling", "action" belongs to the director, "cut" to the director too.', 'Turnaround, the rest between wrap and next call, is usually ten to twelve hours by union rule.', 'A martini is the last shot of the day; the Abby Singer is the one before it, named for an AD who always called it.'],
+    ['A good set runs on quiet: radios on channel two, side conversations off the floor, problems solved before they reach the director.', 'The production report records every minute lost and every meal penalty; it is how producers judge a day.', 'The best crews protect the actors\' concentration as if it were the most expensive thing on set, because it is.']],
+  cam: ['Camera and light', 'light', ['The focal length changes how a face looks: long lenses flatten, wide lenses distort near the edges.', 'Three-point lighting is key, fill and back light. Most great lighting breaks it on purpose.', 'The camera department is the DP, the operator, the 1st AC (focus puller), the 2nd AC (slate, cards, reports) and the DIT.'],
+    ['Exposure is a trade between aperture (depth of field), shutter (motion blur) and ISO (noise). The 180-degree rule keeps motion natural.', 'Motivated lighting: every source in the frame should seem to come from something the audience can believe, a window, a lamp.', 'Coverage is a master, mediums and close-ups; editors need overlap in action so the cuts match.'],
+    ['Great DPs light the space, not the shot, so actors can move and the director can find the scene.', 'Contrast ratio sets the mood: 2:1 is a comedy, 8:1 is a thriller.', 'The look is set in pre-production with tests: film stock or sensor, lenses, filtration and a grade, signed off before day one.']],
+  snd: ['Sound', 'sound', ['Dialogue is king: the boom gets the best sound, radio mics are the backup.', 'Room tone, thirty seconds of a location\'s silence, lets editors fill gaps invisibly.', 'Wild lines are lines recorded without picture, right after a take, while the actor still has the voice.'],
+    ['ADR replaces unusable dialogue in a studio, synced to picture; actors dislike it because the performance is out of context.', 'Foley artists perform footsteps, cloth and props to picture on a stage full of surfaces.', 'Mixes are delivered to loudness standards; cinema, broadcast and streaming all differ.'],
+    ['Sound design builds a world: the hum of a room can make an audience anxious before anything happens.', 'Stems (dialogue, music, effects) are delivered separately so the film can be dubbed into other languages.', 'Silence is the most powerful sound a mixer has, and the hardest to win in a notes session.']],
+  art: ['Design', 'sets', ['The production designer designs the world; the art director runs the department; the set decorator dresses it.', 'Graphic designers make fake brands for everything on screen so nothing needs legal clearance.', 'Continuity photos let set dressers reset a set exactly after every take.'],
+    ['A colour palette per character or act carries story before anyone speaks.', 'Swing gang dress and strike sets overnight so the shooting crew walks into a finished room.', 'Building a set costs more than finding a location, but you can fly the walls out for the camera.'],
+    ['The best design is felt, not noticed: audiences should believe the room was there before the film started.', 'Period films live on research: catalogues, newspapers, museum collections and photographs.', 'Designers and DPs plan together: the colour of a wall decides how much light a scene needs.']],
+  cos: ['Costume', 'wardrobe', ['Costume designers break the script down by character, scene and day to count every change.', 'Multiples are copies of a costume that will get wet, bloody or torn.', 'Continuity photos and notes track every button and sleeve.'],
+    ['Fittings are where actors find the character in the clothes; the best designers listen first.', 'Ageing and dyeing make new clothes look lived in.', 'Crowd costumes come from costume houses by the rail and are fitted the morning of the shoot.'],
+    ['A costume\'s arc tells the story: watch what a character wears in the first and last scenes.', 'Designers work with the DP on colour and texture, because some fabrics read badly on camera.', 'The costume budget covers buying, renting, making and cleaning; designers trade between them all through the shoot.']],
+  act: ['Acting', 'range', ['Arrive off book: lines learned. Screen acting rewards thinking the line, not performing it.', 'Hit your mark without looking down; focus and lighting depend on it.', 'Self-tapes: eye-level camera, plain background, a reader off-camera, two takes at most.'],
+    ['Play the action, not the emotion: what does the character want from the other person in this scene?', 'Save your biggest moment for the close-up; you will repeat a scene many times from different angles.', 'Listening is half of screen acting: the reaction is often the shot that ends up in the film.'],
+    ['Great actors translate result notes ("be angrier") into something playable ("make them leave").', 'Matching: repeat movements and timing exactly across takes so the editor can cut.', 'The camera sees thought. The less you push, the more it reads.']],
+  dir: ['Directing', 'vstory', ['The shot list and floor plan go to every head of department before the shoot day.', 'The 180-degree rule keeps the audience oriented in a conversation; breaking it should mean something.', 'Directors talk to actors in actions and intentions, not line readings.'],
+    ['Blocking is where people move; good blocking tells the story without cuts.', 'Tone is the director\'s main job; many make a "tone reel" of clips for the crew.', 'The director\'s cut, protected by guild rules, comes before the producers\' and the studio\'s.'],
+    ['Shoot for the edit: know what each shot is for and where it will cut.', 'Protect the actors\' best take, not the most perfect shot.', 'The best directors decide fast and change their minds openly when someone has a better idea.']],
+  wri: ['Writing', 'struc', ['A page of screenplay is roughly a minute of screen time.', 'Every scene needs a want and an obstacle; if nobody wants anything, cut it.', 'Spec scripts are written on speculation, unpaid, to show what you can do.'],
+    ['The midpoint turns the story: the hero learns something or wants something new.', 'Notes calls: find the note behind the note. Three notes about pace may mean the goal is unclear.', 'Revisions during a shoot come out in colours: blue, pink, yellow, green.'],
+    ['Subtext: characters rarely say what they mean, and audiences love working it out.', 'Write the ending first; every page should earn it.', 'Writing credits in guild systems are decided by arbitration, reading drafts without names.']],
+  pro: ['Producing', 'pack', ['Development, pre-production, production, post-production, distribution: the five stages of every film.', 'A budget splits into above the line (writer, director, producers, cast) and below the line (everything else).', 'Contingency is usually 10% of the budget, and every film uses it.'],
+    ['Packaging attaches a director and stars to a script so financiers can value it.', 'Pre-sales sell distribution rights in territories before the film is made, to raise money.', 'A completion bond guarantees financiers the film gets finished, and lets the bond company take over if it doesn\'t.'],
+    ['The recoupment waterfall decides who gets paid first; profit participants are usually last.', 'Producers protect the film from the money and the money from the film.', 'The best producers say no more often than yes, and early.']],
+  edt: ['Editing', 'rhythm', ['The editor\'s assembly strings every scene as scripted. It is always too long.', 'Assistants sync, log and organise the footage into bins before anyone cuts.', 'Picture lock freezes the cut so sound, music and effects can finish.'],
+    ['Cut on movement so the eye doesn\'t notice the join.', 'Performance beats polish: a great take with a flaw beats a flawless dead one.', 'Temp music shapes a cut; beware "temp love".'],
+    ['The film is rewritten in the edit; scenes move, characters disappear, endings change.', 'Test screenings score films on cards; editors read the silences, not just the numbers.', 'The best cut is the one nobody notices.']],
+  mus: ['Music', 'score', ['A spotting session decides where music starts and stops.', 'A theme is a few notes that can be rearranged for every mood.', 'Using a song needs two licences: sync (the composition) and master (the recording).'],
+    ['Scoring sessions run on union rules: three-hour calls, planned to the minute.', 'Cue sheets list every piece of music in a film so composers are paid royalties.', 'Stems let the mixer balance music against dialogue.'],
+    ['Silence makes music matter; wall-to-wall scores numb the audience.', 'Great composers serve the scene first and their own voice second.', 'Releases need audio and artwork weeks ahead to be pitched to playlist editors.']],
+  fx: ['Effects and stunts', 'digi', ['Practical effects happen on set; visual effects are added later.', 'VFX supervisors on set ask for tracking markers, light references and clean plates.', 'Stunt coordinators can stop any stunt for safety; their word is final.'],
+    ['Rotoscoping cuts elements out frame by frame; hair is the hardest thing there is.', 'Render farms process frames in parallel; one complex frame can take hours.', 'Screen fights are choreographed like dance and sold by camera angle.'],
+    ['The best effect is the one nobody notices.', 'Previs animates difficult sequences before shooting so everyone knows the plan.', 'Mixing practical and digital work hides the seams of both.']],
+  music: ['The music business', 'song', ['Streams pay fractions of a cent each; labels, distributors and publishers take shares before the artist.', 'Songwriting and recording are separate rights with separate royalties.', 'A&R finds and develops artists; managers run their careers; agents book their shows.'],
+    ['Splits are agreed in the room, on the day, in writing.', 'Advances are loans against royalties: you see no royalties until they are earned back.', 'Mixing balances the tracks; mastering sets the final loudness and tone.'],
+    ['Touring and merchandise pay most working artists more than recordings.', 'Sync placements in films, ads and games can make a song\'s whole year.', 'A catalogue is an asset: owning your masters is power.']],
+  creator: ['Online video', 'tas', ['The thumbnail and title decide who clicks; test several.', 'Retention, how long people keep watching, matters more than views.', 'The first five seconds are the hook; if they leave, the platform stops showing it.'],
+    ['Paid partnerships must be disclosed; sponsors check facts, not your voice.', 'A consistent schedule builds an audience; the algorithm rewards regularity.', 'Short clips feed long videos: audiences discover you in thirty seconds and stay for twenty minutes.'],
+    ['Community is the asset: an audience that trusts you follows you across platforms.', 'Diversify income: ads, sponsorships, memberships, products.', 'Burnout ends more channels than bad videos. Plan breaks.']],
+  podcast: ['Podcasting', 'struc', ['Remote interviews are recorded on each side and synced later for clean sound.', 'Show notes, chapters and a good title help people find an episode.', 'Host-read ads pay more because listeners trust the host.'],
+    ['Narrative podcasts are reported, scripted and scored like documentaries.', 'Editing for story means cutting tangents, not just ums.', 'Open questions and follow-ups get stories; closed questions get one-word answers.'],
+    ['The audience is built episode by episode; consistency beats virality.', 'Networks offer reach and ad sales in exchange for a share of revenue.', 'The best interviewers make their guests forget the microphone.']],
+  stage: ['Theatre', 'setm', ['The stage manager calls every lighting and sound cue from the prompt book.', 'The "half" is thirty-five minutes before curtain up; actors must be in the building.', 'Previews are paid performances where the show is still changing every night.'],
+    ['Tech rehearsals add lights, sound, set and costume; "cue to cue" skips the acting.', 'Understudies learn roles in rehearsal and can go on with an hour\'s notice.', 'Eight shows a week is a marathon: voices, bodies and costumes all need care.'],
+    ['A show is frozen at opening night; after that, the resident director keeps it as it was.', 'Word of mouth can save a show the critics hated, but rarely in its first weeks.', 'Producers raise money from investors who get paid back only after the show recoups.']]
+};
+const FAM_TOPIC = { set: 'set', ad: 'set', cam: 'cam', snd: 'snd', art: 'art', cos: 'cos', act: 'act', dir: 'dir', wri: 'wri', pro: 'pro', cst: 'pro', office: 'pro', cinema: 'pro', intern: 'set', edt: 'edt', mus: 'mus', vfx: 'fx', stn: 'fx', music: 'music', creator: 'creator', podcast: 'podcast', stage: 'stage' };
+const CRAFT_TOPIC = { act: 'act', dir: 'dir', wri: 'wri', cam: 'cam', edt: 'edt', pro: 'pro', mus: 'mus', des: 'art', fx: 'fx' };
+// time spent on a topic: when it passes the next threshold, you learn the next lesson (deeper ones need seniority)
+function codexTime(topic, units, L, gain) {
+  const M = S.me, C = M.codex = M.codex || {}, T = M.cxt = M.cxt || {};
+  if (!CODEX[topic]) return;
+  T[topic] = (T[topic] || 0) + units;
+  const n = C[topic] || 0; if (n >= 9) return;
+  const need = 2 + n * 2, maxN = careerLevel() >= 4 || (M.alma || []).some(id => SCHOOL_BY[id] && SCHOOL_BY[id][4] === 1) ? 9 : careerLevel() >= 2 || (M.mentors || []).length ? 6 : 3;
+  if (T[topic] < need || n >= maxN) return;
+  T[topic] = 0; C[topic] = n + 1;
+  const X = CODEX[topic], lesson = X[2 + Math.floor(n / 3)][n % 3];
+  gain(X[1], .25 + Math.floor(n / 3) * .1);
+  (M.learned = M.learned || []).push({ w: S.week, topic, n });
+  L.push(`You learn something about ${X[0].toLowerCase()}: ${lesson}`);
+  if (n + 1 === 3 || n + 1 === 6 || n + 1 === 9) milestone(`${['Learned the basics', 'Became practised', 'Mastered'][Math.floor(n / 3)]} of ${X[0].toLowerCase()}`, 'school');
+}
+function codexWeek(L, gain) {
+  const M = S.me;
+  for (const j of M.jobs) { const t = FAM_TOPIC[familyOf(j)]; if (t) codexTime(t, 1, L, gain); }
+  if (M.school && schoolDays() > 0) { const t = CRAFT_TOPIC[M.school.craft]; if (t) codexTime(t, 1, L, gain); }
+  if (M.mentor && (S.week - M.mentor.from) % 3 === 0) { const t = CRAFT_TOPIC[MAIN[P(M.mentor.id).role]]; if (t) codexTime(t, 1, L, gain); }
+  for (const w of (M.works || []).filter(w => w.rel === S.week)) { const t = { song: 'music', score: 'mus', mv: 'creator', video: 'creator', blip: 'creator', podcast: 'podcast', play: 'stage', musical: 'stage' }[w.type]; if (t) codexTime(t, 2, L, gain); }
+}
+function codexFactors(post) { const t = FAM_TOPIC[familyOf(post)], n = ((S.me.codex || {})[t]) || 0; return n >= 3 ? [[`You know ${CODEX[t][0].toLowerCase()}`, n >= 9 ? .4 : n >= 6 ? .25 : .1]] : []; }
+function codexHTML() {
+  const C = S.me.codex || {}, total = Object.values(C).reduce((a, b) => a + b, 0);
+  return `<section class="panel codex"><h3>What you know <span class="count">${total} of ${Object.keys(CODEX).length * 9} lessons</span></h3><p class="muted small">Learned by doing: weeks on a job, days in class, a mentor's coffees, the things you make. Basics come first; practice needs some seniority or a mentor; mastery needs the top of your field or one of the great schools.</p>
+   ${Object.entries(CODEX).map(([k, X]) => { const n = C[k] || 0; return `<details class="ambcat"${n ? '' : ''}><summary><b>${esc(X[0])}</b> <span class="lvl">${'●'.repeat(Math.min(3, Math.ceil(n / 3)))}${'○'.repeat(3 - Math.min(3, Math.ceil(n / 3)))}</span> <span class="count">${n}/9</span></summary>${[0, 1, 2].map(lv => `<p class="small"><b>${['Basics', 'Practice', 'Mastery'][lv]}</b></p><ul class="plain small">${X[2 + lv].map((t, i) => lv * 3 + i < n ? `<li>✓ ${esc(t)}</li>` : `<li class="muted">… not yet learned</li>`).join('')}</ul>`).join('')}</details>`; }).join('')}</section>`;
+}
