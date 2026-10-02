@@ -63,7 +63,7 @@ function releaseWork(a) {
   if (M.cash < cost) return false;
   M.cash -= cost;
   const sk = T.subs.reduce((t, s) => t + skillOf(me, s), 0) / T.subs.length;
-  const q = clamp(Math.round(sk * 3.6 + 12 + k.boost * 2 + (M.gear || 0) * 3 + (a.edit || 0) + pgauss() * 9), 3, 98);
+  const q = clamp(Math.round(sk * 3.6 + 12 + k.boost * 2 + gearFor(k.type) * 3 + (a.edit || 0) + pgauss() * 9), 3, 98);
   const w = { id: (M.works || []).length, type: k.type, title: k.title, q, rel: S.week, plat: T.plat, units: 0, earned: 0, wk: [], promo, cost };
   if (T.plat === 'stage') {
     // a two-week fringe run: seats × nights × how full it is
@@ -73,7 +73,7 @@ function releaseWork(a) {
     if (q >= 78 && fill > .75) { w.pickup = 1; M.cash += usd(k.type === 'musical' ? 6000 : 2500); }
   } else {
     const z = pgauss(), fol = followers(T.plat);
-    const disc = T.base * Math.pow(10, (q - 50) / 22 + z * .75) * (1 + promo * .8);
+    const disc = T.base * Math.pow(10, (q - 50) / 22 + z * .75) * (1 + promo * .8) * (M.deal && ['song', 'mv'].includes(k.type) ? 2.5 : 1);   // a label's promotion
     w.v0 = Math.round(fol * T.eng + disc); w.z = z; w.df = w.v0 > 0 ? disc / w.v0 : 1;   // only newcomers become followers
     if (k.type === 'score') w.v0 = Math.max(0, Math.round((q - 35) / 12 + z));
   }
@@ -96,7 +96,8 @@ function mediaWeek() {
     if (units < 1 && age > 8) { w.done = 1; continue; }
     w.units += units; w.wk.push(units); if (w.wk.length > 26) w.wk.shift();
     const monet = !P0.gate || followers(w.plat) >= P0.gate;
-    const pay = Math.round(units * payNow(P0.pay) * (monet ? 1 : 0));
+    let pay = Math.round(units * payNow(w.plat === 'spinly' && M.deal ? .0011 : P0.pay) * (monet ? 1 : 0));
+    if (w.plat === 'spinly' && M.deal && M.deal.rec < M.deal.adv) { const r = Math.min(pay, M.deal.adv - M.deal.rec); M.deal.rec += r; pay -= r; }   // the advance is paid back first
     w.earned += pay; M.cash += pay;
     M.fol[w.plat] = (M.fol[w.plat] || 0) + units * (w.df ?? 1) * T.conv * (.5 + w.q / 100);
     if (w.type === 'mv') { const s = M.works.find(x => x.type === 'song' && !x.done); if (s) s.v0 += units * .002; }

@@ -648,6 +648,7 @@ function closeWeek(a) {
   if (typeof compWeek === 'function') compWeek();
   if (typeof mediaWeek === 'function') mediaWeek();
   if (typeof mediaAwardsWeek === 'function') mediaAwardsWeek();
+  if (typeof mailWeek === 'function') mailWeek();
   if (typeof campaignFilms === 'function' && campaignSeason() && M.campY !== S.year && campaignFilms().length) { M.campY = S.year; inbox('note', 'Awards season', `Campaigns are starting for this year's films. ${campaignFilms().map(f => f.title).join(', ')} ${campaignFilms().length > 1 ? 'are' : 'is'} eligible. Screeners, trade ads, Q&As: it's all on the Contests tab.`); }
   dealsWeek();
   awardsWeek();
@@ -983,6 +984,11 @@ function applyAct(a) {
   switch (a.t) {
     case 'create': startCareer(a.c); return true;
     case 'startwork': return startWork(a);
+    case 'mail': return mailAct(a);
+    case 'trade': return tradeAct(a);
+    case 'session': return appSession(a);
+    case 'play': return playGame(a);
+    case 'buyapp': return buyApp(a);
     case 'releasework': return releaseWork(a);
     case 'party': return partyPick(a.k);
     case 'pick': { const it = S.me.inbox.find(x => x.id === a.id); return it && !it.done ? resolvePick(it, a.k) : false; }

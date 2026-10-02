@@ -1,0 +1,234 @@
+// ---------------- The computer, part two ----------------
+// Mail that matters (offers, fans, labels, bookings, newsletters, spam), a market app for the industry, a studio for
+// songs and podcasts, an editing suite for videos, games, and an app store for tools and toys. Anything that changes
+// your career goes through a logged action carrying its result, so replays agree; the fiddling stays in the page.
+APPS.push(['ticker', '📈', 'Ticker'], ['studio', '🎚️', 'Studio'], ['cutroom', '🎞️', 'CutRoom'], ['store', '🛍️', 'App Store'], ['match', '🃏', 'Reel Match'], ['cue', '🥁', 'Cue Hero'], ['scramble', '🔤', 'Logline Scramble']);
+const SHOP = {
+  cue: { label: 'Cue Hero', d: 'A rhythm game: hit the cue on the beat.', price: 15, kind: 'game' },
+  scramble: { label: 'Logline Scramble', d: 'Unscramble the film words before the clock runs out.', price: 10, kind: 'game' },
+  protone: { label: 'ProTone Studio', d: 'Professional recording software. Your music sounds better (+ quality).', price: 150, kind: 'gear', gear: 'music' },
+  cutpro: { label: 'CutPro Editor', d: 'A real editing suite. Your videos look better (+ quality).', price: 150, kind: 'gear', gear: 'video' },
+  podsuite: { label: 'Podcaster Suite', d: 'Noise removal and levelling. Your episodes sound better (+ quality).', price: 120, kind: 'gear', gear: 'podcast' },
+  mic: { label: 'A proper microphone', d: 'Large-diaphragm condenser and an interface. Music and podcasts (+ quality).', price: 260, kind: 'gear', gear: 'music', also: 'podcast' },
+  camera: { label: 'Camera and ring light', d: 'A mirrorless camera, a lens and a light. Videos (+ quality).', price: 450, kind: 'gear', gear: 'video' }
+};
+function appLocked(k) { return SHOP[k] && SHOP[k].kind === 'game' && !((S.me.owned2 || []).includes(k)); }
+function gearFor(type) { const G = S.me.gearF || {}; const f = { song: 'music', score: 'music', musical: 'music', mv: 'video', video: 'video', blip: 'video', podcast: 'podcast' }[type]; return f ? Math.min(3, G[f] || 0) : 0; }
+function buyApp(a) {
+  const M = S.me, it = SHOP[a.k]; if (!it || (M.owned2 || []).includes(a.k) || M.cash < usd(it.price)) return false;
+  M.cash -= usd(it.price); (M.owned2 = M.owned2 || []).push(a.k);
+  if (it.gear) { M.gearF = M.gearF || {}; M.gearF[it.gear] = (M.gearF[it.gear] || 0) + 1; if (it.also) M.gearF[it.also] = (M.gearF[it.also] || 0) + 1; }
+  diary(`You buy ${it.label}.`);
+  return true;
+}
+// ---- mail: generated each week from what's happening to you, no dice ----
+const SPAM = ['You have WON a cruise (please send bank details)', 'Hot singles in your postcode want to read your screenplay', 'URGENT: your account will be suspended', 'A prince needs a cinematographer', 'Lose ten pounds by thinking about lighting', 'Your free trial of Premium Clapperboard is ending', 'Re: Re: Re: FW: you won\'t believe this headshot'];
+const FANS = ['I don\'t usually write to people but your last thing got me through a bad week.', 'my whole family argues about your stuff at dinner now', 'Please make more. Also, what microphone do you use?', 'I showed your work to my class and now they all want to do what you do', 'You probably won\'t read this but thank you.'];
+function mail(folder, from, subj, body, act) { const M = S.me; M.mail = M.mail || []; M.mail.push({ id: (M.mailN = (M.mailN || 0) + 1), w: S.week, folder, from, subj, body, act: act || null }); if (M.mail.length > 90) M.mail.splice(0, M.mail.length - 90); }
+function mailWeek() {
+  const M = S.me, r = hashRand(S.week * 53 + M.id), fol = k => followers(k);
+  const top = []; for (let i = S.news.length - 1; i >= 0 && top.length < 3; i--) if (S.week - S.news[i].w < 2) top.push(S.news[i].text);
+  if (top.length) mail('news', 'The Daily Slate', 'This week in the trades', top.map(t => '• ' + t).join('\n'));
+  if (r() < .35) mail('spam', ['noreply@winn3r.biz', 'prince.hollywood@mail.example', 'support@totally-real.co'][Math.floor(r() * 3)], SPAM[Math.floor(r() * SPAM.length)], 'Click here.');
+  if (S.week % 4 === 0 && M.board.length) mail('news', 'CrewList', 'Jobs picked for you', M.board.slice(0, 3).map(p => `• ${p.t}${p.film !== null && p.film !== undefined ? ' on ' + S.films[p.film].title : p.mco ? ' at ' + p.mco : ''} (${fmtCash(p.rate)}/day)`).join('\n'));
+  const bigF = Object.keys(PLATFORMS).filter(k => fol(k) >= 800);
+  if (bigF.length && r() < .5) { const N = NAMES[HUBS[M.hub].lang] || NAMES.en; mail('fans', `${N.F[Math.floor(r() * N.F.length)]} ${N.L[Math.floor(r() * N.L.length)]}`, 'a message from a fan', FANS[Math.floor(r() * FANS.length)]); }
+  const songs = (M.works || []).filter(w => w.type === 'song'), streams = songs.reduce((t, w) => t + w.units, 0);
+  if (!M.deal && streams > 15000 && S.week % 6 === 0 && !(M.mail || []).some(m => m.act && m.act.k === 'label' && !m.done && S.week - m.w < 12)) {
+    const L = MEDIA_COS.filter(c => c.type === 'label' && c.f <= S.year), lab = L[Math.floor(r() * L.length)], adv = Math.round(usd(streams > 200000 ? 60000 : streams > 60000 ? 20000 : 6000) / 500) * 500;
+    mail('offers', `A&R, ${lab.n}`, 'We\'d like to sign you', `We've been listening. We'd like to offer a record deal: an advance of ${fmtCash(adv)}, recoupable against your royalties, and our promotion behind your next releases. Your share per stream drops, but far more people will hear you. Think about it.`, { k: 'label', lab: lab.n, adv });
+  }
+  if (fol('spinly') >= 500 && r() < .3) { const fee = Math.round(usd(clamp(fol('spinly') / 20, 120, 4000)) / 10) * 10; mail('offers', 'Bookings, The Velvet Room', 'Can you play a show?', `We have a slot on a Friday. ${fmtCash(fee)} guarantee, you keep your merch money.`, { k: 'gig', fee }); }
+  if (fol('podhaus') >= 300 && r() < .25) mail('offers', 'Producer, a bigger show', 'Guest spot on our podcast?', 'We love your show and think our listeners would too. An hour, remote is fine.', { k: 'guest' });
+  if (fol('vidwire') + fol('blip') >= 2000 && r() < .25) { const N = NAMES[HUBS[M.hub].lang] || NAMES.en; mail('offers', `${N.F[Math.floor(r() * N.F.length)]} ${N.L[Math.floor(r() * N.L.length)]} (creator)`, 'Collab?', 'Big fan. Want to make something together? I\'ll bring my audience, you bring yours.', { k: 'collab' }); }
+  const play = (M.works || []).find(w => w.plat === 'stage' && w.q >= 70 && S.week - w.rel === 3);
+  if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
+  if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
+}
+function mailAct(a) {
+  const M = S.me, me = ME(), m = (M.mail || []).find(x => x.id === a.id);
+  if (!m || !m.act || m.done) return false;
+  m.done = a.k;
+  if (a.k !== 'yes') return true;
+  const A = m.act;
+  if (A.k === 'label') { M.deal = { lab: A.lab, adv: A.adv, rec: 0, w: S.week }; M.cash += A.adv; milestone(`Signed a record deal with ${A.lab}`, 'work'); }
+  else if (A.k === 'gig') { M.cash += A.fee; M.energy = clamp(M.energy - 10, 0, 100); M.fol.spinly = (M.fol.spinly || 0) * 1.03 + 20; }
+  else if (A.k === 'guest') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.08 + 40; }
+  else if (A.k === 'collab') { for (const k of ['vidwire', 'blip']) if (M.fol[k]) M.fol[k] = M.fol[k] * 1.06 + 50; }
+  else if (A.k === 'commission') { M.cash += A.fee; (M.flags = M.flags || {}).commissioned = S.week; }
+  return true;
+}
+function mailApp() {
+  const M = S.me, L = (M.mail || []).slice().reverse(), f = UI.mailf || 'inbox';
+  const F = { inbox: 'Everything', offers: 'Offers', fans: 'Fan mail', news: 'Newsletters', spam: 'Spam' };
+  const list = f === 'inbox' ? L.filter(m => m.folder !== 'spam') : L.filter(m => m.folder === f), open = L.find(m => m.id === UI.mailo);
+  const cnt = k => L.filter(m => (k === 'inbox' ? m.folder !== 'spam' : m.folder === k) && S.week - m.w < 2).length;
+  return `<div class="mailapp"><div class="mfold">${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button></div>
+   <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || '<p class="muted">Nothing here.</p>'}</div>
+   ${open && f !== 'old' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.act ? (open.done ? `<p class="muted">${open.done === 'yes' ? 'You said yes.' : 'You declined.'}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">Accept</button> <button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
+}
+// ---- Ticker: the industry's market and its trends ----
+function fieldIndex(field, w) {
+  const y = yearOf(w), start = { box: 1900, music: 1950, video: 2005, pod: 2005 }[field];
+  if (y < start) return 0;
+  const growth = { box: 1 + (y - 1950) * .02, music: y < 1999 ? 1 + (y - 1950) * .03 : y < 2015 ? 2.5 - (y - 1999) * .05 : 1.7 + (y - 2015) * .12, video: Math.pow(1.35, y - 2005), pod: y < 2014 ? 1 + (y - 2005) * .05 : 1.5 * Math.pow(1.22, y - 2014) }[field];
+  const r = hashRand(Math.floor(w / 4) * 31 + field.length)();
+  return growth * (.92 + r * .16) * (y === 2020 && field === 'box' ? .25 : 1);
+}
+function tradeAct(a) {
+  const M = S.me, c = S.companies[a.co]; if (!c || c.closed !== null) return false;
+  const h = c.hist || [], px = priceOf(c, h.length ? h[h.length - 1] : companyWorth(c)), n = Math.round(a.n);
+  M.port = M.port || {};
+  if (n > 0) { const cost = Math.round(px * n); if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; }
+  else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k); M.port[a.co] = have - k; }
+  return true;
+}
+function tickerApp() {
+  const M = S.me, worth = c => { const h = c.hist || []; return h.length ? h[h.length - 1] : companyWorth(c); };
+  const cos = S.companies.filter(c => c.closed === null && c.owner === undefined && c.tier <= 2).map(c => [c, worth(c)]).sort((a, b) => b[1] - a[1]).slice(0, 14).map(x => x[0]);
+  const px = c => priceOf(c, worth(c)), ch = c => { const h = c.hist || []; return h.length > 12 ? (h[h.length - 1] / h[h.length - 13] - 1) * 100 : 0; };
+  const port = Object.entries(M.port || {}).filter(([, n]) => n > 0), val = port.reduce((t, [id, n]) => t + px(S.companies[+id]) * n, 0);
+  const idx = [['box', 'Box office'], ['music', 'Music streaming'], ['video', 'Online video'], ['pod', 'Podcasts']].map(([k, l]) => { const v = Array.from({ length: 13 }, (_, i) => fieldIndex(k, S.week - (12 - i) * 4)); return `<div class="tick"><span>${l}</span>${v[12] ? sparkline(v, 120, 28) : '<span class="muted small">not yet invented</span>'}<b class="${v[12] >= v[0] ? 'good' : 'bad'}">${v[0] ? ((v[12] / v[0] - 1) * 100).toFixed(0) + '%' : ''}</b></div>`; }).join('');
+  return `<p class="eyebrow">Industry indexes, last 12 months</p><div class="ticks">${idx}</div>
+   <p class="eyebrow">Studios${port.length ? ` · your portfolio ${fmtCash(val)}` : ''}</p><div class="tw"><table class="grid"><thead><tr><th>Ticker</th><th>Company</th><th class="n">Price</th><th class="n">1Y</th><th class="n">You own</th><th></th></tr></thead><tbody>${cos.map(c => `<tr><td><b>${esc(tickerOf(c))}</b></td><td class="small">${esc(c.name)}</td><td class="n">$${px(c).toFixed(2)}</td><td class="n ${ch(c) >= 0 ? 'good' : 'bad'}">${ch(c) >= 0 ? '+' : ''}${ch(c).toFixed(0)}%</td><td class="n">${(M.port || {})[c.id] || 0}</td><td><button class="btn-s ghost" data-trade="${c.id}:10">Buy 10</button>${(M.port || {})[c.id] ? ` <button class="btn-s ghost" data-trade="${c.id}:-10">Sell 10</button>` : ''}</td></tr>`).join('')}</tbody></table></div>
+   <p class="eyebrow">What's hot</p><p class="small">${GENRES.map(g => [g, (S.app[HUBS[M.hub].m] || {})[g] || 0]).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([g]) => esc(g)).join(' · ')} are up in ${esc(MARKETS[HUBS[M.hub].m].name)}.</p>`;
+}
+// ---- Studio: a step sequencer for songs, a waveform cutter for podcasts ----
+const SEQ_ROWS = ['Kick', 'Snare', 'Bass', 'Chords', 'Melody'], SEQ_N = 8;
+function seqGrid() { UI.seq = UI.seq || SEQ_ROWS.map(() => Array(SEQ_N).fill(0)); return UI.seq; }
+function seqScore(G) {
+  let s = 0; const d = r => G[r].filter(Boolean).length;
+  if (G[0][0] && G[0][4]) s += 2; if (G[1][2] && G[1][6]) s += 2;
+  if (d(2) >= 3 && d(2) <= 5) s += 2; if (d(3) >= 2 && d(3) <= 4) s += 1; if (d(4) >= 3 && d(4) <= 6) s += 2;
+  if (G[4].join('') !== G[2].join('')) s += 1; if (G.flat().filter(Boolean).length > 32) s -= 3;
+  return clamp(s, 0, 10);
+}
+function playSeq() {
+  if (typeof window === 'undefined' || !window.AudioContext && !window.webkitAudioContext) return;
+  const ctx = UI.actx = UI.actx || new (window.AudioContext || window.webkitAudioContext)(), G = seqGrid(), t0 = ctx.currentTime + .05, step = .22;
+  const freq = [55, 180, 98, 262, 523], type = ['sine', 'square', 'triangle', 'sawtooth', 'triangle'], melody = [523, 587, 659, 784, 659, 587, 523, 440];
+  for (let r = 0; r < SEQ_ROWS.length; r++) for (let c = 0; c < SEQ_N; c++) if (G[r][c]) {
+    const o = ctx.createOscillator(), g = ctx.createGain(), t = t0 + c * step;
+    o.type = type[r]; o.frequency.value = r === 4 ? melody[c] : r === 3 ? [262, 262, 220, 220, 175, 175, 196, 196][c] : freq[r];
+    if (r === 0) o.frequency.exponentialRampToValueAtTime(30, t + .15);
+    g.gain.setValueAtTime(r === 1 ? .08 : .18, t); g.gain.exponentialRampToValueAtTime(.001, t + (r === 3 ? .4 : .18));
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t + .45);
+  }
+}
+function podSegs() { const r = hashRand(S.week * 17 + (S.me.make ? S.me.make.prog : 0)); return Array.from({ length: 24 }, () => { const x = r(); return x < .2 ? 'um' : x < .32 ? 'gap' : 'talk'; }); }
+function studioApp() {
+  const k = S.me.make, T = k && WORK_TYPES[k.type];
+  if (!k || !['song', 'score', 'musical', 'podcast'].includes(k.type)) return `<p>Open a song, score, musical or podcast project on the Create tab, then work on it here.</p><p><button class="btn-s" data-dtab="create">Go to Create</button></p>`;
+  const done = S.me.sessD === S.week * 7 + (S.me.wk ? S.me.wk.day : 0);
+  if (k.type === 'podcast') {
+    const segs = podSegs(), cut = UI.cuts || [];
+    return `<p><b>${esc(k.title)}</b> · cut the ums and dead air, keep the talk.</p><div class="wave">${segs.map((s, i) => `<button class="seg ${s}${cut.includes(i) ? ' cut' : ''}" data-podcut="${i}" title="${s === 'um' ? 'um…' : s === 'gap' ? 'silence' : 'talking'}"><i style="height:${s === 'talk' ? 26 + (i * 7) % 14 : s === 'um' ? 14 : 3}px"></i></button>`).join('')}</div>
+     <p>${done ? '<span class="muted">You\'ve done a session today.</span>' : `<button class="btn-s" data-session="podcut">Export the edit</button>`} <span class="muted small">Tall, varied bars are talk; short stubs are ums; flat lines are silence.</span></p>`;
+  }
+  const G = seqGrid();
+  return `<p><b>${esc(k.title)}</b> · build the groove, play it back, bounce it when it feels right.</p><div class="seq">${SEQ_ROWS.map((row, r) => `<div class="srow"><span>${row}</span>${G[r].map((v, c) => `<button class="step${v ? ' on' : ''}${c % 4 === 0 ? ' downbeat' : ''}" data-seq="${r}:${c}"></button>`).join('')}</div>`).join('')}</div>
+   <p><button class="btn-s ghost" data-seqplay="1">▶ Play</button> ${done ? '<span class="muted">You\'ve done a session today.</span>' : `<button class="btn-s" data-session="studio">Bounce the take</button>`} <span class="muted small">Kick on the one, snare on the backbeat, a bassline and a melody that aren't the same.</span></p>`;
+}
+// ---- CutRoom: arrange the clips, choose the thumbnail ----
+const CLIPS = ['Hook', 'Intro', 'Main point', 'Joke', 'Payoff', 'Outro'];
+function cutOrder() { if (!UI.order || UI.orderW !== S.week) { const r = hashRand(S.week * 71 + 3); UI.order = CLIPS.slice().sort(() => r() - .5); UI.orderW = S.week; UI.pickC = null; } return UI.order; }
+function cutScore(O, thumb) { let s = 0; if (O[0] === 'Hook') s += 3; if (O[O.length - 1] === 'Outro') s += 2; if (O.indexOf('Payoff') > O.indexOf('Main point')) s += 2; if (O.indexOf('Intro') <= 2) s += 1; if (thumb === 0) s += 2; return clamp(s, 0, 10); }
+function cutroomApp() {
+  const k = S.me.make;
+  if (!k || !['video', 'blip', 'mv'].includes(k.type)) return `<p>Open a video, Blip clip or music video project on the Create tab, then cut it here.</p><p><button class="btn-s" data-dtab="create">Go to Create</button></p>`;
+  const O = cutOrder(), th = UI.thumb ?? null, done = S.me.sessD === S.week * 7 + (S.me.wk ? S.me.wk.day : 0);
+  return `<p><b>${esc(k.title)}</b> · click two clips to swap them. Hook first, payoff after the main point, outro last.</p><div class="timeline">${O.map((c, i) => `<button class="clip2${UI.pickC === i ? ' on' : ''}" data-clip="${i}">${esc(c)}</button>`).join('')}</div>
+   <p class="small">Thumbnail: ${['😲 Big face, big arrow', '🌄 A pretty landscape', '🔤 Just the title'].map((t, i) => `<button class="btn-s${th === i ? '' : ' ghost'}" data-thumb="${i}">${t}</button>`).join(' ')}</p>
+   <p>${done ? '<span class="muted">You\'ve done a session today.</span>' : `<button class="btn-s" data-session="edit" ${th === null ? 'disabled' : ''}>Render the cut</button>`}</p>`;
+}
+// a session from the apps: counts as two sessions of work, and the score adds quality
+function appSession(a) {
+  const M = S.me, k = M.make, day = S.week * 7 + (M.wk ? M.wk.day : 0);
+  if (!k || M.sessD === day || !(a.score >= 0)) return false;
+  M.sessD = day; const sc = clamp(Math.round(a.score), 0, 10);
+  k.prog = Math.min(k.need, k.prog + 2); k.boost += (sc - 4) / 2;
+  if (k.prog >= k.need) k.ready = 1;
+  M.energy = clamp(M.energy - 6, 0, 100);
+  diary(`${k.title}: a session on the computer (${sc >= 7 ? 'it sounds great' : sc >= 4 ? 'decent work' : 'not your best'}).`);
+  return true;
+}
+// ---- games ----
+const MATCH_ICONS = ['🎬', '🎥', '🍿', '🎞️', '🎭', '🎤'];
+function matchApp() {
+  if (!UI.match) { const L = MATCH_ICONS.concat(MATCH_ICONS); for (let i = L.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [L[i], L[j]] = [L[j], L[i]]; } UI.match = { L, open: [], got: [], tries: 0 }; }
+  const G = UI.match, won = G.got.length === G.L.length;
+  return `<p class="small">${won ? `Matched them all in ${G.tries} tries. <button class="btn-s ghost" data-mem="new">Again</button>` : `Find the pairs. Tries: ${G.tries}`}</p><div class="memgrid">${G.L.map((x, i) => `<button class="mem${G.open.includes(i) || G.got.includes(i) ? ' up' : ''}" data-mem="${i}">${G.open.includes(i) || G.got.includes(i) ? x : '?'}</button>`).join('')}</div>`;
+}
+function cueApp() {
+  UI.cue = UI.cue || { hits: 0, n: 0, on: false };
+  const G = UI.cue;
+  return `<p class="small">Hit the drum when the light flashes. ${G.n ? `${G.hits} of ${G.n} on the beat.` : ''}</p><div class="cuepad"><span class="cuelight" id="cuelight"></span><button class="btn-s" data-cue="tap">🥁 Hit</button> <button class="btn-s ghost" data-cue="start">${G.on ? 'Restart' : 'Start'}</button></div>`;
+}
+const SCRAMBLE = ['DIRECTOR', 'CLAPPER', 'TRAILER', 'PREMIERE', 'MONTAGE', 'CLOSEUP', 'CASTING', 'SOUNDTRACK', 'STUNTMAN', 'SPOTLIGHT', 'SCREENPLAY', 'PODCAST', 'CHORUS', 'ENCORE'];
+function scrambleApp() {
+  if (!UI.scr) { const w = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)]; UI.scr = { w, s: w.split('').sort(() => Math.random() - .5).join(''), got: 0, n: 0 }; }
+  const G = UI.scr;
+  return `<p class="big" style="letter-spacing:.3em">${G.s}</p><p><input id="scr-in" type="text" maxlength="14" autocomplete="off"> <button class="btn-s" data-scr="go">Check</button> <button class="btn-s ghost" data-scr="skip">Skip</button></p><p class="small muted">${G.n ? `${G.got} of ${G.n} solved.` : 'A film word, shuffled.'}</p>`;
+}
+function playGame(a) { const M = S.me, day = S.week * 7 + (M.wk ? M.wk.day : 0); if (M.playD === day) return false; M.playD = day; M.stress = clamp(M.stress - clamp(a.score || 1, 1, 4), 0, 100); return true; }
+function storeApp() {
+  const M = S.me;
+  return `<p class="small muted">Games for the bad days; tools that make your work better.</p><div class="shop">${Object.entries(SHOP).map(([k, it]) => { const own = (M.owned2 || []).includes(k); return `<div class="sitem"><b>${esc(it.label)}</b><p class="small">${esc(it.d)}</p>${own ? '<span class="good small">Owned</span>' : `<button class="btn-s" data-buyapp="${k}" ${M.cash < usd(it.price) ? 'disabled' : ''}>Buy ${fmtCash(usd(it.price))}</button>`}</div>`; }).join('')}</div>`;
+}
+function appWindow2(k) {
+  if (appLocked(k)) return `<p>${esc(SHOP[k].label)} isn't installed. <button class="btn-s" data-app="store">Get it in the App Store</button></p>`;
+  switch (k) {
+    case 'ticker': return tickerApp();
+    case 'studio': return studioApp();
+    case 'cutroom': return cutroomApp();
+    case 'store': return storeApp();
+    case 'match': return matchApp();
+    case 'cue': return cueApp();
+    case 'scramble': return scrambleApp();
+  }
+  return '';
+}
+// clicks for the computer, called from the career click handler
+function computerClick(t) {
+  const d = t.dataset;
+  if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
+  if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
+  if (d.mailact) { const [id, k] = d.mailact.split(':'); doAct({ t: 'mail', id: +id, k }); render(true); return true; }
+  if (d.trade) { const [co, n] = d.trade.split(':'); doAct({ t: 'trade', co: +co, n: +n }); render(true); return true; }
+  if (d.seq) { const [r, c] = d.seq.split(':').map(Number), G = seqGrid(); G[r][c] = G[r][c] ? 0 : 1; render(true); return true; }
+  if (d.seqplay) { playSeq(); return true; }
+  if (d.podcut) { const i = +d.podcut; UI.cuts = UI.cuts || []; UI.cuts = UI.cuts.includes(i) ? UI.cuts.filter(x => x !== i) : UI.cuts.concat(i); render(true); return true; }
+  if (d.clip !== undefined) { const i = +d.clip; if (UI.pickC === null || UI.pickC === undefined) UI.pickC = i; else { const O = UI.order; [O[UI.pickC], O[i]] = [O[i], O[UI.pickC]]; UI.pickC = null; } render(true); return true; }
+  if (d.thumb !== undefined) { UI.thumb = +d.thumb; render(true); return true; }
+  if (d.session) {
+    let score = 0;
+    if (d.session === 'studio') score = seqScore(seqGrid());
+    else if (d.session === 'podcut') { const segs = podSegs(), cut = UI.cuts || []; score = clamp(Math.round(cut.reduce((t, i) => t + (segs[i] === 'talk' ? -2 : 1), 0) / Math.max(1, segs.filter(s => s !== 'talk').length) * 10), 0, 10); UI.cuts = []; }
+    else if (d.session === 'edit') { score = cutScore(cutOrder(), UI.thumb); UI.thumb = null; UI.orderW = -1; }
+    doAct({ t: 'session', score }); render(true); return true;
+  }
+  if (d.buyapp) { doAct({ t: 'buyapp', k: d.buyapp }); render(true); return true; }
+  if (d.mem) {
+    if (d.mem === 'new') { UI.match = null; render(true); return true; }
+    const G = UI.match, i = +d.mem; if (!G || G.got.includes(i) || G.open.includes(i)) return true;
+    if (G.open.length === 2) G.open = [];
+    G.open.push(i);
+    if (G.open.length === 2) { G.tries++; if (G.L[G.open[0]] === G.L[G.open[1]]) { G.got.push(...G.open); G.open = []; if (G.got.length === G.L.length) doAct({ t: 'play', game: 'match', score: G.tries <= 9 ? 3 : 2 }); } }
+    render(true); return true;
+  }
+  if (d.cue) {
+    const G = UI.cue = UI.cue || { hits: 0, n: 0 };
+    if (d.cue === 'start') { clearInterval(UI.cueT); Object.assign(G, { hits: 0, n: 0, on: true, lit: 0 }); UI.cueT = setInterval(() => { G.lit = performance.now(); const el = document.getElementById('cuelight'); if (el) { el.classList.add('lit'); setTimeout(() => el.classList.remove('lit'), 180); } }, 900); render(true); return true; }
+    if (G.on) { G.n++; if (performance.now() - G.lit < 260) G.hits++; if (G.n >= 12) { clearInterval(UI.cueT); G.on = false; doAct({ t: 'play', game: 'cue', score: G.hits >= 9 ? 4 : G.hits >= 6 ? 2 : 1 }); } render(true); }
+    return true;
+  }
+  if (d.scr) {
+    const G = UI.scr; if (!G) return true;
+    if (d.scr === 'go') { const v = (($('#scr-in') || {}).value || '').trim().toUpperCase(); G.n++; if (v === G.w) { G.got++; if (G.got % 3 === 0) doAct({ t: 'play', game: 'scramble', score: 2 }); } }
+    else G.n++;
+    const w = SCRAMBLE[Math.floor(Math.random() * SCRAMBLE.length)]; Object.assign(G, { w, s: w.split('').sort(() => Math.random() - .5).join('') });
+    render(true); return true;
+  }
+  return false;
+}
+const COMPUTER_CLICKS = '[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

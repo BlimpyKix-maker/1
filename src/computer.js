@@ -32,7 +32,7 @@ function notesKey() { return `applebox-notes-${S.seed}-${S.me ? S.me.id : 0}`; }
 function appWindow(k) {
   const M = S.me, me = ME();
   switch (k) {
-    case 'mail': return `<ul class="inbox">${M.inbox.slice(-12).reverse().map(it => `<li class="msg ${it.kind}${it.choices && !it.done ? ' open' : ''}">${inboxCard(it)}</li>`).join('') || '<li class="muted">No mail.</li>'}</ul>`;
+    case 'mail': return mailApp();
     case 'jobs': { const q = (UI.cq || '').toLowerCase(); const L = M.board.filter(p => !q || p.t.toLowerCase().includes(q) || (p.away && hubName(p.away).toLowerCase().includes(q))); return `<p><input id="cq" type="search" placeholder="Search jobs, cities…" value="${esc(UI.cq || '')}"> <span class="muted small">${L.length} listings · apply from the board</span> <button class="linkish" data-dtab="work">Open the board ›</button></p><ul class="plain">${L.slice(0, 20).map(p => `<li><b>${esc(p.t)}</b> <span class="muted">${p.film !== null ? esc(S.films[p.film].title) + ' · ' : ''}${p.away ? esc(hubName(p.away)) + ' · ' : ''}${p.rate ? fmtCash(p.rate) + '/day' : 'unpaid'} · ${oddsBand(hireOdds(p))}</span></li>`).join('')}</ul>`; }
     case 'trades': { const L = []; for (let i = S.news.length - 1; i >= 0 && L.length < 14; i--) L.push(i); return `<p class="eyebrow">The Daily Slate · ${fmtDate(S.week, true)}</p><ul class="plain">${L.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`; }
     case 'gea': { const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return `<p><span class="gealogo">GEA</span> <input id="gq" type="search" placeholder="Search films and people…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
@@ -42,13 +42,14 @@ function appWindow(k) {
     case 'sweep': { if (!UI.sweep) sweepNew(); const G = UI.sweep; return `<p class="muted small">${G.over > 0 ? 'Cleared! That\'s a wrap.' : G.over < 0 ? 'Boom. Reshoot?' : 'Find the clean takes. Avoid the 9 bad ones.'} <button class="btn-s ghost" data-sweep="new">New game</button></p><div class="sweep" style="grid-template-columns:repeat(${G.n}, 28px)">${Array.from({ length: G.n * G.n }, (_, i) => { const o = G.open.includes(i), m = G.mines.includes(i), c = o && !m ? sweepCount(i) : 0; return `<button class="cell${o ? ' open' : ''}${o && m ? ' mine' : ''}" data-sweep="${i}" ${o || G.over ? 'disabled' : ''}>${o ? (m ? '💥' : c || '') : ''}</button>`; }).join('')}</div>`; }
     case 'weather': { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
     case 'write': return `<p>Your scripts live in the Create tab.</p><p><button class="btn-s" data-dtab="create">Open your scripts ›</button></p>`;
+    default: return appWindow2(k);
   }
   return '';
 }
 function computerPanel() {
   const k = UI.app, A = APPS.find(a => a[0] === k);
   return `<section class="panel computer"><h3>🖥️ Your computer</h3><div class="monitor"><div class="desktop">
-    <div class="icons">${APPS.map(([k2, ic, l]) => `<button class="appicon${k === k2 ? ' on' : ''}" data-app="${k2}"><span>${ic}</span>${esc(l)}</button>`).join('')}</div>
+    <div class="icons">${APPS.map(([k2, ic, l]) => `<button class="appicon${k === k2 ? ' on' : ''}${appLocked(k2) ? ' locked' : ''}" data-app="${k2}"><span>${ic}</span>${esc(l)}${appLocked(k2) ? ' 🔒' : ''}</button>`).join('')}</div>
     ${A ? `<div class="window"><div class="wbar"><span>${A[1]} ${esc(A[2])}</span><button class="linkish" data-app="">✕</button></div><div class="wbody">${appWindow(k)}</div></div>` : '<p class="muted wallnote">Double-click nothing. Single-click an app.</p>'}
    </div></div></section>`;
 }
