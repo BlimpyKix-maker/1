@@ -33,7 +33,7 @@ const out = process.argv[2] || '.';
   await page.waitForSelector('[data-party]');
   await page.screenshot({ path: out + '/2-party.png', fullPage: true });
   for (let i = 0; i < 12; i++) { const b = await page.$('[data-party]'); if (!b) break; await b.click(); if (i === 2) await page.screenshot({ path: out + '/2b-rooms.png', fullPage: true }); }
-  await page.waitForSelector('.desk');
+  await page.waitForSelector('.desknav');
   await page.screenshot({ path: out + '/3-desk.png', fullPage: true });
   // plan: two hunting days, apply to the first two jobs
   await page.click('.desknav [data-dtab="diary"]');

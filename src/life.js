@@ -158,6 +158,7 @@ function workDay() {
   for (const j of M.jobs) {
     const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
     out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day * 3 + M.wk.block + j.id)}`);
+    if (typeof jobTaskBlock === 'function') jobTaskBlock(j, out);
     if (M.energy < 20 && prnd() < .35) { mistakeAtWork(j); out.push('You\'re running on empty, and it shows.'); }
   }
   return out;

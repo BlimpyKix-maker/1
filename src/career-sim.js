@@ -707,7 +707,9 @@ function finishJob(j, L, quit) {
   const t = tmplOf(j);
   const credited = !quit && f && t.cr && j.done >= Math.min(2, j.weeks) && f.stage >= 0;
   if (credited) { f.xc = f.xc || {}; f.xc[me.id] = j.t; milestone(`${me.credits.length || M.past.some(p => p.credited) ? 'Screen credit' : 'First screen credit'}: ${j.t.toLowerCase()} on ${f.title}`, 'credit'); }
-  M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit });
+  const T = j.tasks || [];
+  M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
+  if (T.length && L) L.push(`Your work as ${j.t.toLowerCase()}: ${T.length} task${T.length > 1 ? 's' : ''} delivered, ${T.filter(x => x.pts > 0).length} good, ${T.filter(x => x.pts < 0).length} rough${f && j.contrib ? `; it moved the film ${j.contrib > 0 ? 'up' : 'down'} ${Math.abs(j.contrib).toFixed(1)} points` : ''}.`);
   if (j.head !== null && !quit) {
     const o = opinion(j.head), k = M.known[j.head];
     k.trust = clamp(k.trust + (o > 10 ? 8 : 2), 0, 100);
@@ -910,6 +912,8 @@ function sceneResolve(it, k) {
   if (lr && lr.crit > 0 && lr.DC >= 13) milestone(`A natural 20 when it counted: ${it.title.toLowerCase()}`, 'luck');
   if (lr && lr.crit > 0) { me.standing = clamp(me.standing + .5, 0, 100); if (ctx.head !== null && ctx.head !== undefined) addTie(me, P(ctx.head), 3); t += ' People will talk about it.'; }
   if (lr && lr.crit < 0) { M.stress = clamp(M.stress + 5, 0, 100); t += ' It could hardly have gone worse.'; }
+  // how a moment on the job goes is part of the work: it counts toward the film and your boss's opinion
+  if (o.check && ctx.film !== null && ctx.film !== undefined) { const jj = M.jobs.find(x => x.film === ctx.film); if (jj && typeof jobScore === 'function') jobScore(jj, ok ? (lr.crit > 0 ? 2 : 1) : (lr.crit < 0 ? -1.5 : -.5), it.title); }
   it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null };
 }
 

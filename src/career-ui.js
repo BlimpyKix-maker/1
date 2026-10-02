@@ -7,8 +7,8 @@ function doAct(a) {
   saveCareer();
   return true;
 }
-function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 7, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 7 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
+function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 8, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 8 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
 
 // ---------- Career: views ----------
@@ -466,7 +466,8 @@ function viewDesk() {
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
   ${deskNav()}
-  <div class="dstack">${(() => { switch (UI.dtab || 'today') {
+  <div class="dstack">${(() => { switch (UI.dtab || 'feed') {
+    case 'feed': return feedPanel();
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
      ${focusPanel()}
      <details class="finetune"${M.focus && M.focus.auto && !UI.fineOpen ? '' : ' open'}><summary>Fine-tune the diary, block by block</summary>${weekGrid()}</details>
@@ -478,7 +479,7 @@ function viewDesk() {
      ${cityPanel()}`;
     case 'phone': return phonePanel();
     case 'computer': return computerPanel();
-    case 'work': return `<section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
+    case 'work': return jobWorkHTML() + `<section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
@@ -597,6 +598,9 @@ function careerClick(t) {
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
+  if (t.dataset.feedf) { UI.feedf = t.dataset.feedf; UI.feedN = 30; UI.dtab = 'feed'; render(true); return true; }
+  if (t.dataset.feedmore) { UI.feedN = (UI.feedN || 30) + 30; render(true); return true; }
+  if (t.dataset.fthread !== undefined) { UI.tab = 'you'; UI.dtab = 'phone'; UI.thread = +t.dataset.fthread; UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
@@ -616,7 +620,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -693,8 +697,8 @@ function focusPanel() {
 }
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {
-  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'today';
-  const tabs = [['today', 'Today', pend, 'bad'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
+  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'feed';
+  const tabs = [['today', 'Today', pend, 'bad'], ['feed', 'Feed', pend + unread, pend ? 'bad' : 'good'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
 // Rebuild a saved career: the world is already built from the same seed; feed it the log.
