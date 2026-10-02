@@ -68,6 +68,28 @@
 .pal { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; padding: 0; }
 .pal.on { border-color: var(--ink); }
 .favres { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
+
+.filmhead { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; }
+.posterwrap { display: grid; gap: 6px; justify-items: center; }
+.poster { border-radius: 4px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+.logline { font-size: 17px; line-height: 1.45; margin: 8px 0 4px; }
+.tagline { font-style: italic; color: var(--muted); margin: 0 0 10px; }
+.stills { display: flex; flex-wrap: wrap; gap: 8px; }
+.stills figure { margin: 0; } .stills figcaption { font-size: 11px; color: var(--muted); max-width: 180px; }
+.still { border-radius: 3px; display: block; }
+.castgrid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.castcard { display: grid; justify-items: center; width: 92px; text-align: center; text-decoration: none; font-size: 13px; }
+.credits .more summary { cursor: pointer; margin-top: 8px; font-weight: 600; }
+.crewlist { columns: 2 220px; }
+.bio { font-size: 16px; line-height: 1.5; max-width: 820px; }
+.geahead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.gealogo { font: 800 26px/1 var(--f-display); letter-spacing: .08em; padding: 4px 10px; border: 3px solid var(--accent); color: var(--accent); border-radius: 4px; }
+#trailer { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.92); display: grid; place-items: center; }
+#trailer .tr-box { display: grid; gap: 18px; justify-items: center; padding: 20px; max-width: 760px; }
+#trailer .tr-line { color: var(--tc, #fff); font: 700 30px/1.25 var(--f-display); letter-spacing: .06em; text-align: center; min-height: 3em; opacity: 0; transition: opacity .4s; text-transform: none; }
+#trailer .tr-line.show { opacity: 1; } #trailer .tr-line.big { font-size: 46px; }
+@media (max-width: 700px) { .filmhead { grid-template-columns: 1fr; } }
+.panel.cine { margin-top: 16px; }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -550,8 +572,7 @@ tr.blocked td { opacity: .55; }
   <button data-tab="you" class="on">Your career</button>
   <button data-tab="news">Trade press</button>
   <button data-tab="bo">Box office</button>
-  <button data-tab="films">Films</button>
-  <button data-tab="people">People</button>
+  <button data-tab="films" title="The Global Entertainment Archive: films and people">GEA</button>
   <button data-tab="cos">Companies</button>
   <button data-tab="careers">Careers</button>
   <button data-tab="world">World</button>
@@ -9791,6 +9812,7 @@ function greenlight(hub, o = {}) {
     q: null, A: {}, gross: {}, total: 0, reviews: null, bd: null, status: 'Development'
   };
   if (o.score !== undefined) f.scriptScore = o.score;
+  extendCredits(f);   // executive producers, story credits and bit parts
   S.films.push(f); S.active.push(f.id);
   if (co) co.films.push(f.id);
   return f;
@@ -9965,6 +9987,7 @@ function release(f) {
   [f.dp, f.ed].forEach(i => roleW.set(i, { st: .8, fm: .15 }));
   crewIds(f).forEach(i => roleW.has(i) || roleW.set(i, { st: .6, fm: .05 }));
   roleW.set(f.prod, { st: .6, fm: .15 });
+  for (const id of extIds(f)) if (!roleW.has(id) && !P(id).dead) roleW.set(id, { st: .25, fm: .04 });
   for (const [id, rw] of roleW) {
     const p = P(id);
     const dq = (q - 55) * .08 * rw.st + (homeRatio > 2 ? 1 : 0);
@@ -13202,14 +13225,18 @@ const FICTION = {"note":{"f:roundhay":"The oldest surviving motion picture: abou
 // only reach people who know where to listen. Invented rumours are only ever about the world's invented films and people. Nothing here touches the world's random numbers.
 const RUMOURS_FILM = ['{lead} is said to have stayed in character for the entire shoot, to the crew\'s exhaustion.', 'The ending was reshot after a disastrous test screening.', 'A crew member\'s dog wanders through the background of one scene, and nobody noticed until release.', 'The script was rewritten every night of the shoot; the actors got pages at breakfast.', 'Half the budget went on a single sequence that runs four minutes.', '{dir} and {lead} stopped speaking halfway through and communicated by notes.', 'The studio wanted a different title; {dir} threatened to take their name off it.', 'A real storm hit the location; the best scene in the film was improvised around it.', 'The production lost its lead two weeks in; {lead} was a last-minute replacement.', 'The original cut ran nearly four hours.', 'Its most famous line was improvised on the day.', 'Insurance would not cover the stunt, so {lead} did it anyway.', 'The set was built twice: the first one burned down in a lighting accident.', 'Its composer wrote the main theme in a single night.', 'Somebody stole the only print of the finished film a week before release; it turned up in a taxi.'];
 const RUMOURS_PERSON = ['Turns down more work than most people are offered.', 'Keeps a notebook of every bad review and reads them on birthdays.', 'Has never watched any of their own films all the way through.', 'Once walked off a set over the colour of a coffee mug.', 'Is famously generous to crews: every wrap gift is handmade.', 'Was nearly cast in a career-making role and lost it to a coin toss.', 'Learns every crew member\'s name by the end of the first day.', 'Writes letters, by hand, to people whose work they admire.', 'Insists on eating lunch with the crew, never in the trailer.', 'Refused a studio contract that would have made them rich.'];
+// The rumour mill: stories so silly nobody could believe them. For fun, and labelled as such.
+const SILLY_FILM = ['A pigeon in the background of the station scene now has its own fan club.', '{lead} reportedly ate 212 bananas over the course of the shoot, "for the character".', 'The catering truck appears in four shots if you pause at exactly the right moment.', 'A local cat was paid in sardines for one scene and later demanded a trailer.', 'The script was lost in a laundrette for a week and came back folded, ironed and annotated.', '{dir} is said to have directed one scene entirely through a megaphone shaped like a fish.', 'The lead\'s wig had a separate contract and a better parking space.', 'Every clock on the set was stopped at 4:17. Nobody remembers why.', 'A fan claims to have seen {title} 400 times and still disputes the ending.', 'The crew held a moustache-growing contest. The boom operator won by a landslide.', 'One extra fell asleep on camera and is clearly visible snoring in the final cut.', 'The production accidentally ordered 3,000 rubber ducks. They are in the film somewhere.', '{lead} learned the accordion for the role. The accordion scene was cut.', 'A goat wandered onto set on day two and was written into the script by day three.', 'The editor swears the film was cut on a toaster during a power cut.', 'Somebody hid a tiny plastic dinosaur in every single scene.', 'The studio\'s lawyers once wrote a memo about the main character\'s hat.', 'Legend says the sequel script is buried in a time capsule under the car park.', '{dir} insisted the crew wear socks of the same colour on Thursdays.', 'An entire scene was reshot because a seagull "gave a better performance" in the first take.'];
+const SILLY_PERSON = ['Owns 41 identical grey jumpers and wears them in strict rotation.', 'Once auditioned for a commercial for a toothpaste that never existed.', 'Claims to have taught a parrot three lines of Shakespeare.', 'Keeps a lucky spoon in every trailer. It has its own case.', 'Has a recurring dream about being chased by a giant clapperboard.', 'Allegedly refuses to work on any film with a scene set in a lift.', 'Is said to have named a houseplant after every film they\'ve worked on.', 'Once got lost on a studio lot for six hours and came out with a new agent.', 'Can reportedly recite the entire crew list of their first film from memory, including the caterer\'s middle name.', 'Thinks the moon landing was filmed on location, and is very insistent about it.'];
 function tasteNow() { return S.me && S.me.party && S.me.party.done ? ME().mind.tas : 20; }
 // items: [kind 'f' | 'r', text, taste needed]
 function triviaList(items) {
   const tas = tasteNow(), seen = items.filter(x => tas >= x[2]), hid = items.filter(x => tas < x[2]);
-  const fs = seen.filter(x => x[0] === 'f'), rs = seen.filter(x => x[0] === 'r');
+  const fs = seen.filter(x => x[0] === 'f'), rs = seen.filter(x => x[0] === 'r'), ss = seen.filter((x, i, a) => x[0] === 's' && a.findIndex(y => y[1] === x[1]) === i);
   const next = hid.length ? Math.min(...hid.map(x => x[2])) : null;
   return (fs.length ? `<h4>Trivia</h4><ul class="trivia">${fs.map(x => `<li>${factHTML(x[1])}</li>`).join('')}</ul>` : '')
     + (rs.length ? `<h4>Rumour has it</h4><ul class="trivia rumour">${rs.map(x => `<li>${factHTML(x[1])}</li>`).join('')}</ul><p class="muted small">Stories that went round at the time. Some are true, some grew in the telling.</p>` : '')
+    + (ss.length ? `<h4>The rumour mill</h4><ul class="trivia silly">${ss.map(x => `<li>${esc(x[1])}</li>`).join('')}</ul><p class="muted small">Almost certainly nonsense. Told here for fun.</p>` : '')
     + (hid.length ? `<p class="locked">🔒 ${hid.length} more note${hid.length > 1 ? 's' : ''} you haven't picked up on yet. A Taste of ${next} would catch the next one${S.me ? ` (yours is ${Math.floor(tas)})` : ''}. Watch films, read scripts and go to screenings to sharpen it.</p>` : '');
 }
 function nm(id) { return id !== null && id !== undefined && P(id) ? P(id).name : 'the lead'; }
@@ -13218,6 +13245,7 @@ function filmTrivia(f) {
   const note = key && FICTION.note['f:' + key];
   if (note) out.push(['f', note, 0]);
   (key && FICTION.fact[key] || []).forEach(([k, t], i) => out.push([k === 'r' ? 'r' : 'f', t, k === 'r' ? 11 + i * 2 : 6 + i * 3]));
+  for (const x of productionFacts(f)) out.push(x);
   const r = hashRand(f.id * 7919 + 3), fill = t => t.replace('{lead}', nm(f.cast[0])).replace('{dir}', nm(f.dir));
   const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
   if (d && d.credits.length && d.credits[0] === f.id) out.push(['f', `${d.name}'s first film as director.`, 4]);
@@ -13251,6 +13279,27 @@ function personTrivia(p) {
   if (top && top[1] > 30 && P(+top[0])) out.push(['f', `Closest collaborator: ${P(+top[0]).name}.`, 7]);
   if (p.traits && p.traits.length) out.push(['f', `Reputation in the business: ${p.traits.join(', ').toLowerCase()}.`, 4]);
   if (p.standing > 20 && !p.catId) out.push(['r', RUMOURS_PERSON[Math.floor(r() * RUMOURS_PERSON.length)], 14]);
+  for (let k = 0; k < 2; k++) out.push(['s', SILLY_PERSON[Math.floor(r() * SILLY_PERSON.length)], 0]);
+  return out;
+}
+// Facts from the production itself: how long, how big, firsts, the people behind it.
+function productionFacts(f) {
+  const r = hashRand(f.id * 4217 + 11), out = [], y = f.rel !== null ? yearOf(f.rel) : S.year, hub = hubName(f.hub);
+  const rt = Math.round(({ Comedy: 95, Horror: 92, Animation: 88, Action: 118, War: 135, Period: 128, Musical: 122, Fantasy: 130, 'Sci-fi': 120, Documentary: 96 }[f.genre] || 108) + (r() - .4) * 30);
+  out.push(['f', `Runs ${rt} minutes.`, 0]);
+  if (f.dur) out.push(['f', `Shot over ${f.dur[2]} week${f.dur[2] > 1 ? 's' : ''} in and around ${hub}, after ${f.dur[1]} weeks of preparation.`, 2]);
+  out.push(['f', y < 1953 ? 'Shot in black and white, in the old square frame.' : y < 1968 && r() < .5 ? 'Shot in black and white, a deliberate choice by then.' : y < 2005 ? `Shot on 35mm film${r() < .4 ? ' in widescreen' : ''}.` : r() < .2 ? 'Shot on 35mm film, unusually for its time.' : 'Shot digitally.', 3]);
+  if (['Action', 'War', 'Period', 'Musical', 'Fantasy', 'Martial arts'].includes(f.genre)) out.push(['f', `Its biggest scene used ${50 + Math.floor(r() * 900)} extras.`, 5]);
+  const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
+  if (lead && d && !d.credits.some(i => i !== f.id && keyIds(S.films[i]).includes(lead.id) && S.films[i].rel !== null && (f.rel === null || S.films[i].rel < f.rel))) out.push(['f', `The first time ${d.name} and ${lead.name} worked together.`, 6]);
+  if (f.crew && f.crew.mus !== undefined) out.push(['f', `${P(f.crew.mus).name} wrote the score in ${2 + Math.floor(r() * 9)} weeks.`, 7]);
+  if (f.crew && f.crew.pd !== undefined) out.push(['f', `${P(f.crew.pd).name}'s team built ${2 + Math.floor(r() * 30)} sets.`, 8]);
+  if (lead) out.push(['f', `${lead.name} needed ${1 + Math.floor(r() * 25)} takes to get the final scene.`, 9]);
+  if (f.awards && f.awards.length) out.push(['f', `It won ${f.awards.length} award${f.awards.length > 1 ? 's' : ''}, among them ${f.awards[0].replace(/ \d{4}$/, '')}.`, 2]);
+  if (f.rel !== null) { const rivals = S.films.filter(g => g.rel !== null && g.genre === f.genre && g.m === f.m && yearOf(g.rel) === y); if (rivals.length > 2 && rivals.every(g => g.total <= f.total)) out.push(['f', `The biggest ${f.genre.toLowerCase()} of ${y} in ${MARKETS[f.m].name}.`, 4]); }
+  const sr = hashRand(f.id * 389 + 17), fill = t => t.replace('{lead}', lead ? lead.name : 'The lead').replace('{dir}', d ? d.name : 'The director').replace('{title}', f.title);
+  const used = new Set();
+  for (let k = 0; k < 3; k++) { const i = Math.floor(sr() * SILLY_FILM.length); if (!used.has(i)) { used.add(i); out.push(['s', fill(SILLY_FILM[i]), 0]); } }
   return out;
 }
 function filmTriviaHTML(f) { return triviaList(filmTrivia(f)); }
@@ -13599,6 +13648,151 @@ function troupeWeek() {
   }
 }
 // </life-deals>
+// <gea>
+// ---------------- GEA: the Global Entertainment Archive ----------------
+// The world's film database. Every film gets a logline, a poster, set stills and a trailer card; every person a
+// short bio. All of it is drawn from the simulation and a hash of the film or person, so it costs nothing until you
+// look and never touches the world's random numbers. Full credits go deeper than the people the simulation casts:
+// new films carry extra producers, story credits and bit parts (real people in the world, credited on release);
+// older films show the same kind of list, generated for display.
+const GENRE_LOOK = { Drama: ['#2B3A55', '#C9B79C', '#F2E8CF'], Comedy: ['#E8553E', '#F4B400', '#FFF6E0'], Crime: ['#151515', '#B3261E', '#E8E2D6'], Thriller: ['#0E2A3A', '#5FC0B6', '#E6F2F1'], Horror: ['#0B0B0B', '#8A0303', '#E9E1D3'], Action: ['#1A1A1A', '#F28C28', '#FFF3E0'], 'Martial arts': ['#5A0F0F', '#E8B44A', '#FFF4DC'], Western: ['#7A3E12', '#F2C14E', '#FFF1D6'], Romance: ['#5E1B3A', '#F28AB2', '#FFEAF2'], Musical: ['#2E1752', '#F2B705', '#FFF8E1'], 'Sci-fi': ['#06131F', '#4FC3F7', '#E1F5FE'], Fantasy: ['#1B3A2A', '#A5D6A7', '#F1F8E9'], War: ['#3B3B2E', '#C9C28A', '#EFEFE3'], Period: ['#4A2C2A', '#D4A373', '#FAEDCD'], Documentary: ['#263238', '#90A4AE', '#ECEFF1'], Animation: ['#FF7043', '#29B6F6', '#FFFDE7'], Superhero: ['#0D47A1', '#E53935', '#FFFFFF'] };
+const TAGLINES = {
+  Drama: ['Some families are chosen. Some are endured.', 'Every life has one summer.', 'What we keep is what keeps us.'], Comedy: ['One wedding. Zero plans.', 'They had one job.', 'It seemed like a good idea at the time.'],
+  Crime: ['Everybody pays.', 'One last job. There\'s always one last job.', 'The city keeps its secrets. Until now.'], Thriller: ['Trust no one. Not even yourself.', 'The truth has an expiry date.', 'Someone is always watching.'],
+  Horror: ['Don\'t go downstairs.', 'It remembers you.', 'Some doors stay shut for a reason.'], Action: ['No backup. No mercy. No brakes.', 'The clock is ticking.', 'This time it\'s personal.'],
+  'Martial arts': ['One master. One hundred enemies.', 'Discipline is a weapon.', 'The final form.'], Western: ['The frontier has a long memory.', 'A town without a law. A man without a past.', 'Justice rides alone.'],
+  Romance: ['Some loves arrive late.', 'Two hearts. One city. No timing.', 'It was always you.'], Musical: ['Life is better with a chorus.', 'Dance like the lights are on.', 'One song can change everything.'],
+  'Sci-fi': ['The future is listening.', 'Out there, no one is coming.', 'Tomorrow was yesterday.'], Fantasy: ['Every kingdom falls. One rises.', 'Magic has a price.', 'Beyond the last map.'],
+  War: ['No one comes home the same.', 'The line must hold.', 'Courage is a decision.'], Period: ['Society has rules. She had plans.', 'History is written by the bold.', 'Behind every portrait, a secret.'],
+  Documentary: ['The true story, finally.', 'Seeing is believing.', 'You were never told the whole story.'], Animation: ['Small hero. Huge heart.', 'Adventure is out the window.', 'Every toy has a story.'], Superhero: ['Not all heroes ask permission.', 'The mask is the easy part.', 'Rise.']
+};
+const LOG_WHO = ['a widowed fisherman', 'a burned-out detective', 'an estranged sister', 'a teenage runaway', 'an ageing magician', 'a disgraced surgeon', 'a small-town mayor', 'a night-shift nurse', 'a charming con artist', 'a retired boxer', 'a young widow', 'a failed novelist', 'a lonely astronaut', 'a stubborn farmer', 'a getaway driver', 'a schoolteacher with a past', 'a celebrity chef', 'a reluctant heir', 'two rival siblings', 'a travelling band'];
+const LOG_WANT = { family: 'must bring a scattered family back together', power: 'sets out to take control of the town that ignored them', love: 'risks everything for a second chance at love', memory: 'tries to recover a summer they can\'t remember', identity: 'discovers who they really are', justice: 'goes after the people who got away with it', survival: 'has to make it through one impossible night', faith: 'loses their faith and goes looking for it', ambition: 'will do anything to make it to the top', freedom: 'plans an escape nobody thinks is possible', loneliness: 'finds an unlikely friend', revenge: 'comes back for the people who left them for dead' };
+const LOG_WHERE = { Western: 'on the frontier', 'Sci-fi': 'on a station at the edge of known space', Fantasy: 'in a kingdom running out of magic', War: 'behind enemy lines', Period: 'in a society that forbids it', Horror: 'in a house that wants them to stay', Musical: 'on the biggest stage in town', 'Martial arts': 'in a city ruled by rival schools', Superhero: 'in a city that needs a hero and doesn\'t want one', Animation: 'in a world just beyond the garden fence', Documentary: '' };
+const LOG_TWIST = ['but the past won\'t stay buried', 'before time runs out', 'whatever it costs them', 'with nothing but each other', 'and the whole town is watching', 'while someone close is lying to them', ''];
+function filmLogline(f) {
+  const M = S.me;
+  const own = M && ((M.scripts || []).find(x => x.made === f.id) || (M.holdings || []).find(x => x.made === f.id));
+  if (own && own.logline) return own.logline;
+  const r = hashRand(f.id * 977 + 5), pick = a => a[Math.floor(r() * a.length)];
+  if (f.genre === 'Documentary') return `${pick(['An intimate look at', 'The untold story of', 'A year inside', 'A portrait of'])} ${pick(['a family business in decline', 'the last cinema in a small town', 'a musician on the edge of fame', 'a city trying to save its river', 'an underdog football club', 'the people who clean up after disasters'])}.`;
+  const th = pick(GENRE_THEMES[f.genre] || ['family']), where = LOG_WHERE[f.genre] ?? pick(['in a city that never sleeps', 'in a small town', 'over one long weekend', 'across three decades', '']);
+  const t = `${pick(LOG_WHO)} ${LOG_WANT[th] || LOG_WANT.family}${where ? ' ' + where : ''}${(() => { const x = pick(LOG_TWIST); return x ? ', ' + x : ''; })()}.`;
+  return t[0].toUpperCase() + t.slice(1);
+}
+function filmTagline(f) { const r = hashRand(f.id * 131 + 7); const L = TAGLINES[f.genre] || TAGLINES.Drama; return L[Math.floor(r() * L.length)]; }
+// ---- the poster ----
+function posterMotif(g, c, r) {
+  const [d, a, l] = c, x = 100, y = 120;
+  switch (g) {
+    case 'Horror': return `<circle cx="140" cy="70" r="34" fill="${l}" opacity=".9"/><path d="M40 300 L60 160 L52 150 L66 155 L70 120 L78 156 L92 140 L84 170 L100 300Z" fill="${d}"/><rect x="0" y="230" width="200" height="70" fill="${a}" opacity=".35"/>`;
+    case 'Western': return `<circle cx="100" cy="150" r="48" fill="${a}"/><path d="M0 200 L40 170 L60 180 L90 150 L130 180 L160 165 L200 190 L200 300 L0 300Z" fill="${d}"/>`;
+    case 'Sci-fi': return `${Array.from({ length: 24 }, () => `<circle cx="${Math.round(r() * 200)}" cy="${Math.round(r() * 200)}" r="${(r() * 1.4 + .4).toFixed(1)}" fill="${l}"/>`).join('')}<circle cx="120" cy="170" r="60" fill="${a}" opacity=".85"/><ellipse cx="120" cy="170" rx="90" ry="14" fill="none" stroke="${l}" stroke-width="3" opacity=".7"/>`;
+    case 'Romance': return `<circle cx="80" cy="150" r="46" fill="${a}" opacity=".85"/><circle cx="120" cy="150" r="46" fill="${l}" opacity=".55"/>`;
+    case 'Crime': return `${Array.from({ length: 9 }, (_, i) => `<rect x="0" y="${40 + i * 22}" width="200" height="10" fill="${a}" opacity=".5"/>`).join('')}<circle cx="100" cy="150" r="22" fill="${d}"/><path d="M60 300 L70 190 Q100 170 130 190 L140 300Z" fill="${d}"/>`;
+    case 'Action': return `${Array.from({ length: 16 }, (_, i) => { const t = i / 16 * Math.PI * 2; return `<path d="M${x} ${y + 40} L${x + Math.cos(t) * 160} ${y + 40 + Math.sin(t) * 160} L${x + Math.cos(t + .15) * 160} ${y + 40 + Math.sin(t + .15) * 160}Z" fill="${a}" opacity=".55"/>`; }).join('')}<circle cx="100" cy="160" r="30" fill="${l}"/>`;
+    case 'Comedy': return `${Array.from({ length: 7 }, (_, i) => `<path d="M${-60 + i * 50} 300 L${i * 50} 0 L${25 + i * 50} 0 L${-35 + i * 50} 300Z" fill="${a}" opacity=".35"/>`).join('')}<circle cx="100" cy="150" r="40" fill="${l}"/><path d="M80 158 Q100 178 120 158" stroke="${d}" stroke-width="5" fill="none"/><circle cx="88" cy="140" r="5" fill="${d}"/><circle cx="112" cy="140" r="5" fill="${d}"/>`;
+    case 'Thriller': return `<ellipse cx="100" cy="150" rx="70" ry="34" fill="${l}"/><circle cx="100" cy="150" r="24" fill="${a}"/><circle cx="100" cy="150" r="11" fill="${d}"/>`;
+    case 'Musical': return `<path d="M100 20 L40 280 L160 280Z" fill="${a}" opacity=".45"/><circle cx="100" cy="230" r="14" fill="${l}"/><path d="M90 300 L95 245 L105 245 L110 300Z" fill="${l}"/>`;
+    case 'War': return `<path d="M0 220 L200 200 L200 300 L0 300Z" fill="${d}"/>${Array.from({ length: 6 }, (_, i) => `<path d="M${15 + i * 32} 210 l6 -40 l6 40" stroke="${a}" stroke-width="3" fill="none"/>`).join('')}<circle cx="150" cy="80" r="26" fill="${a}" opacity=".6"/>`;
+    case 'Fantasy': return `<path d="M40 300 L40 170 L55 150 L70 170 L70 130 L90 100 L110 130 L110 170 L130 150 L145 170 L160 170 L160 300Z" fill="${d}"/><circle cx="100" cy="70" r="20" fill="${l}"/>`;
+    case 'Period': return `<rect x="45" y="70" width="110" height="150" rx="55" fill="none" stroke="${a}" stroke-width="6"/><circle cx="100" cy="130" r="24" fill="${l}"/><path d="M60 220 Q100 160 140 220Z" fill="${l}"/>`;
+    case 'Documentary': return `<rect x="30" y="80" width="140" height="100" fill="${l}" opacity=".9"/><rect x="40" y="90" width="120" height="80" fill="${a}"/><circle cx="100" cy="130" r="18" fill="${l}"/>`;
+    case 'Animation': return `<circle cx="70" cy="160" r="40" fill="${a}"/><circle cx="130" cy="150" r="30" fill="${l}"/><circle cx="62" cy="150" r="6" fill="${d}"/><circle cx="82" cy="150" r="6" fill="${d}"/>`;
+    case 'Superhero': return `<path d="M100 70 L150 90 L145 160 Q130 200 100 220 Q70 200 55 160 L50 90Z" fill="${a}"/><path d="M100 100 L110 130 L140 130 L115 148 L125 178 L100 160 L75 178 L85 148 L60 130 L90 130Z" fill="${l}"/>`;
+    case 'Martial arts': return `<circle cx="100" cy="120" r="56" fill="${a}"/><path d="M95 300 L98 200 L70 170 L60 140 L75 150 L100 175 L125 140 L140 150 L112 190 L118 300Z" fill="${d}"/>`;
+    default: return `<rect x="70" y="60" width="60" height="80" fill="${l}" opacity=".85"/><circle cx="100" cy="190" r="22" fill="${d}"/><path d="M60 300 L70 220 Q100 200 130 220 L140 300Z" fill="${d}"/>`;
+  }
+}
+function wrapTitle(t, n = 13) { const W = t.toUpperCase().split(/\s+/), L = []; let cur = ''; for (const w of W) { if ((cur + ' ' + w).trim().length > n && cur) { L.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); } if (cur) L.push(cur); return L.slice(0, 4); }
+function posterSVG(f, w = 200) {
+  const c = GENRE_LOOK[f.genre] || GENRE_LOOK.Drama, r = hashRand(f.id * 53 + 1), lines = wrapTitle(f.title);
+  const lead = f.cast && f.cast[0] !== undefined ? P(f.cast[0]).name.toUpperCase() : '', yr = f.rel !== null ? yearOf(f.rel) : 'COMING SOON';
+  const ty = 214 - lines.length * 9;
+  return `<svg class="poster" viewBox="0 0 200 300" width="${w}" height="${w * 1.5}" role="img" aria-label="Poster for ${esc(f.title)}"><rect width="200" height="300" fill="${c[0]}"/>${posterMotif(f.genre, c, r)}
+   <rect x="0" y="${ty - 26}" width="200" height="${lines.length * 21 + 36}" fill="${c[0]}" opacity=".55"/>
+   <text x="100" y="22" text-anchor="middle" fill="${c[2]}" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-size="11" letter-spacing="2">${esc(lead)}</text>
+   ${lines.map((l, i) => `<text x="100" y="${ty + i * 21}" text-anchor="middle" fill="${c[2]}" font-family="Barlow Condensed, Arial Narrow, sans-serif" font-weight="700" font-size="${l.length > 11 ? 18 : 22}" letter-spacing="1">${esc(l)}</text>`).join('')}
+   <text x="100" y="${ty + lines.length * 21 + 2}" text-anchor="middle" fill="${c[1]}" font-family="Barlow, sans-serif" font-style="italic" font-size="8.5">${esc(filmTagline(f))}</text>
+   <text x="100" y="290" text-anchor="middle" fill="${c[2]}" font-family="Barlow Condensed, sans-serif" font-size="8" letter-spacing="1" opacity=".8">${esc(P(f.dir).name.toUpperCase())} · ${yr}</text></svg>`;
+}
+// ---- stills from the set ----
+function stillSVG(f, i) {
+  const c = GENRE_LOOK[f.genre] || GENRE_LOOK.Drama, r = hashRand(f.id * 71 + i * 13), n = 1 + Math.floor(r() * 3), hz = 55 + Math.floor(r() * 25);
+  const fig = k => { const x = 30 + k * (110 / n) + r() * 20, s = .8 + r() * .5; return `<circle cx="${x}" cy="${hz - 22 * s}" r="${7 * s}" fill="${c[0]}"/><rect x="${x - 8 * s}" y="${hz - 15 * s}" width="${16 * s}" height="${26 * s}" rx="${4 * s}" fill="${c[0]}"/>`; };
+  const light = i === 2 ? `<path d="M150 0 L120 ${hz + 20} L180 ${hz + 20}Z" fill="${c[2]}" opacity=".25"/>` : `<circle cx="${20 + r() * 140}" cy="${10 + r() * 20}" r="${8 + r() * 10}" fill="${c[2]}" opacity=".6"/>`;
+  return `<svg class="still" viewBox="0 0 180 100" width="180" height="100" role="img" aria-label="Still from ${esc(f.title)}"><rect width="180" height="100" fill="${c[1]}"/><rect y="${hz}" width="180" height="${100 - hz}" fill="${c[0]}" opacity=".35"/>${light}${Array.from({ length: n }, (_, k) => fig(k)).join('')}${i === 0 ? '<rect x="4" y="80" width="40" height="14" rx="2" fill="#111"/><text x="24" y="90" text-anchor="middle" fill="#fff" font-size="7" font-family="monospace">SC ' + (1 + Math.floor(r() * 90)) + '</text>' : ''}</svg>`;
+}
+const STILL_CAPTIONS = ['Between takes on day {d}.', 'Rehearsing the big scene.', 'The crew waits for the light.', 'A setup that took all morning.', 'On location, week {w}.', 'The cast, wrapped and exhausted.'];
+function stillsHTML(f) {
+  const r = hashRand(f.id * 19 + 3);
+  const start = Math.floor(r() * STILL_CAPTIONS.length);
+  return `<div class="stills">${[0, 1, 2].map(i => `<figure>${stillSVG(f, i)}<figcaption>${esc(STILL_CAPTIONS[(start + i * 2) % STILL_CAPTIONS.length].replace('{d}', 1 + Math.floor(r() * 40)).replace('{w}', 1 + Math.floor(r() * 8)))}</figcaption></figure>`).join('')}</div>`;
+}
+// ---- the trailer: a little title-card sequence ----
+function trailerLines(f) {
+  const lead = f.cast[0] !== undefined ? P(f.cast[0]).name : '', co = f.co !== null ? S.companies[f.co].name : 'An independent picture';
+  return [co.toUpperCase() + ' PRESENTS', 'A FILM BY ' + P(f.dir).name.toUpperCase(), 'IN A WORLD WHERE…', filmLogline(f), lead.toUpperCase(), filmTagline(f), f.title.toUpperCase(), f.rel !== null ? 'NOW SHOWING' : 'COMING SOON'];
+}
+function playTrailer(id) {
+  const f = S.films[id]; if (!f || typeof document === 'undefined') return;
+  const old = document.getElementById('trailer'); if (old) old.remove();
+  const c = GENRE_LOOK[f.genre] || GENRE_LOOK.Drama, L = trailerLines(f), el = document.createElement('div');
+  el.id = 'trailer'; el.style.setProperty('--tc', c[2]); el.style.setProperty('--tb', c[0]);
+  el.innerHTML = `<div class="tr-box"><div class="tr-line"></div><button class="btn-s tr-close">Close</button></div>`;
+  document.body.appendChild(el);
+  const line = el.querySelector('.tr-line'); let i = 0, timer;
+  const next = () => { if (i >= L.length) { line.innerHTML = posterSVG(f, 160); return; } line.textContent = L[i]; line.className = 'tr-line show' + (i === L.length - 2 ? ' big' : ''); i++; timer = setTimeout(() => { line.className = 'tr-line'; timer = setTimeout(next, 350); }, 1700); };
+  const close = () => { clearTimeout(timer); el.remove(); };
+  el.querySelector('.tr-close').onclick = close; el.onclick = e => { if (e.target === el) close(); };
+  next();
+}
+// ---- extended credits ----
+// Picked in a fixed order from the hub's people by a hash of the film: same answer every time, no world dice.
+function extPick(f, role, n, salt, exclude) {
+  const ids = (S.pool[f.hub] && S.pool[f.hub][role] || []).filter(id => !exclude.has(id) && !P(id).dead);
+  const r = hashRand(f.id * 7 + salt), out = [];
+  for (let k = 0; k < n && ids.length; k++) { const j = Math.floor(r() * ids.length); out.push(ids[j]); exclude.add(ids[j]); ids.splice(j, 1); }
+  return out;
+}
+function makeExt(f) {
+  const ex = new Set(keyIds(f)), r = hashRand(f.id * 11 + 2);
+  return { eprod: extPick(f, 'producer', 1 + Math.floor(r() * 3), 1, ex), story: r() < .35 ? extPick(f, 'writer', 1, 2, ex) : [], bits: extPick(f, 'actor', 4 + Math.floor(r() * 6), 3, ex) };
+}
+// New films get theirs when they're greenlit, so the people really are credited when it opens.
+function extendCredits(f) { f.ext = makeExt(f); }
+function extIds(f) { return f.ext ? [...f.ext.eprod, ...f.ext.story, ...f.ext.bits] : []; }
+const CREW_ROLES = ['Unit production manager', 'First assistant director', 'Script supervisor', 'Gaffer', 'Key grip', 'Location manager', 'Production coordinator', 'Set decorator', 'Property master', 'Hair department head', 'Makeup department head', 'Supervising sound editor', 'Re-recording mixer', 'Foley artist', 'Colourist', 'Visual effects supervisor', 'Stunt coordinator', 'Unit publicist', 'Still photographer', 'Catering'];
+function crewNames(f) {
+  const N = NAMES[HUBS[f.hub].lang] || NAMES.en, r = hashRand(f.id * 29 + 9), pk = a => a[Math.floor(r() * a.length)];
+  const nm = () => { const g = r() < .5 ? 'M' : 'F', a = pk(N[g]), b = pk(N.L); return EAST[HUBS[f.hub].lang] ? `${b} ${a}` : `${a} ${b}`; };
+  return CREW_ROLES.filter(() => r() < .75).map(role => [role, nm()]);
+}
+function fullCredits(f) {
+  const credit = (l, ids) => ids.length ? `<div class="cr"><span>${l}</span><span>${ids.map(pl).join(', ')}</span></div>` : '';
+  const x = f.ext || makeExt(f), crew = Object.keys(CREW_LABEL).filter(k => f.crew && f.crew[k] !== undefined);
+  return `<section class="panel credits"><h3>Credits</h3>
+   <div class="castgrid">${f.cast.map((id, i) => `<a href="#" class="castcard" data-go="person:${id}">${portraitOf(P(id), 56)}<b>${esc(P(id).name)}</b><span class="muted small">${f.genre === 'Documentary' ? 'Featuring' : f.genre === 'Animation' ? 'Voice' : ['Lead', 'Co-lead', 'Supporting'][i] || 'Cast'}</span></a>`).join('')}</div>
+   ${credit('Director', [f.dir])}${credit(f.wri.length > 1 ? 'Screenplay' : 'Written by', f.wri)}${credit('Story by', x.story)}${credit('Produced by', [f.prod])}${credit('Executive producers', x.eprod)}${credit('Cinematography', [f.dp])}${credit('Editor', [f.ed])}${crew.map(k => credit(CREW_LABEL[k], [f.crew[k]])).join('')}${Object.keys(f.xc || {}).filter(id => !keyIds(f).includes(+id)).map(id => credit(f.xc[id], [+id])).join('')}
+   <details class="more"><summary>Full cast and crew</summary>${credit('Also starring', x.bits)}<div class="crewlist">${crewNames(f).map(([r, n]) => `<div class="cr"><span>${esc(r)}</span><span>${esc(n)}</span></div>`).join('')}</div></details></section>`;
+}
+// ---- people ----
+function personBio(p) {
+  if (p.player) return '';
+  const cr = p.credits.map(i => S.films[i]).filter(f => f && f.rel !== null).sort((a, b) => a.rel - b.rel);
+  const best = cr.slice().sort((a, b) => b.reviews - a.reviews)[0], big = cr.slice().sort((a, b) => b.total - a.total)[0];
+  const b = backstoryOf(p), occ = (p.occ || occupationOf(p)).toLowerCase(), P0 = pron(p);
+  let t = `${p.name} is ${/^[aeiou]/.test(occ) ? 'an' : 'a'} ${occ} based in ${hubName(p.hub)}`;
+  t += cr.length ? `, with ${cr.length} credit${cr.length > 1 ? 's' : ''} since ${yearOf(cr[0].rel)}.` : ', still waiting on a first credit.';
+  if (best) t += ` Best known for ${best.title} (${yearOf(best.rel)})${big && big !== best ? ` and the hit ${big.title}` : ''}.`;
+  if (p.awards.length) t += ` ${P0[0]} ${P0[0] === 'They' ? 'have' : 'has'} won ${p.awards.length} award${p.awards.length > 1 ? 's' : ''}.`;
+  if (b && b.from) t += ` Grew up in ${b.from}.`;
+  if (p.traits.length) t += ` Known for being ${p.traits.slice(0, 2).map(x => x.toLowerCase()).join(' and ')}.`;
+  return t;
+}
+// The archive's masthead: switch between films and people.
+function geaHead(cur) { return `<div class="geahead"><span class="gealogo">GEA</span><span class="muted">The Global Entertainment Archive</span><span class="seg"><button class="pill${cur === 'films' ? ' on' : ''}" data-gea="films">Films</button><button class="pill${cur === 'people' ? ' on' : ''}" data-gea="people">People</button></span></div>`; }
+// </gea>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -13704,7 +13898,7 @@ function viewFilms() {
   const G = { title: f => f.title, rel: f => f.rel ?? f.gl, hub: f => hubName(f.hub), genre: f => f.genre, dir: f => P(f.dir).name, reviews: f => f.reviews ?? -1, total: f => f.total, cost: f => f.cost, life: f => lifetime(f), stage: f => f.stage * 1000 - f.stageEnd };
   rows = sortRows(rows, st, G).slice(0, 200);
   const released = st.mode === 'released';
-  return `<div class="head"><h2>Films</h2><p class="lede">${released ? 'Every release in the world since the history began.' : 'The pipeline: everything greenlit and not yet released.'}</p></div>
+  return `${geaHead('films')}<div class="head"><h2>Films</h2><p class="lede">${released ? 'Every release in the world since the history began.' : 'The pipeline: everything greenlit and not yet released.'}</p></div>
   <div class="filters"><span class="seg"><button class="pill${released ? ' on' : ''}" data-fmode="released">Released</button><button class="pill${!released ? ' on' : ''}" data-fmode="active">In production (${S.active.length})</button></span>
   <input id="f-q" type="search" placeholder="Search title or director, real or in-game" value="${esc(st.q)}">${sel('f-src', [['ALL', 'All films'], ['real', 'Real history'], ['made', 'Invented']], st.src)}${sel('f-hub', hubOpts(), st.hub)}${sel('f-genre', [['ALL', 'All genres']].concat(GENRES), st.genre)}${released ? sel('f-year', [['ALL', 'All years']].concat(years.map(y => [y, y])), st.year) : ''}</div>
   <p class="count">${n.toLocaleString()} film${n === 1 ? '' : 's'}${n > 200 ? ' · showing 200' : ''}</p>
@@ -13728,7 +13922,7 @@ function triviaHTML(key) {
 }
 function cinePanel(real, note, extra) {
   if (!real) return '';
-  if (!UI.cine) return `<section class="panel cine off"><button class="linkbtn" data-cine="1">Show Cinephile notes</button></section>`;
+  if (UI.cine === false) return `<section class="panel cine off"><button class="linkbtn" data-cine="1">Show Cinephile notes</button></section>`;
   return `<section class="panel cine"><div class="cinehead"><h3>Cinephile notes</h3><button class="linkbtn" data-cine="1">Hide</button></div>
     ${note ? `<p>${esc(note)}</p>` : ''}${extra || ''}</section>`;
 }
@@ -13749,7 +13943,7 @@ function viewPeople() {
   const n = rows.length;
   const G = { name: p => p.name, role: p => p.role, hub: p => hubName(p.hub), age: p => ageOf(p), skill: p => p.c[MAIN[p.role]], standing: p => p.standing, fame: p => p.fame, intl: p => p.intl, credits: p => p.credits.length };
   rows = sortRows(rows.slice(), st, G).slice(0, 200);
-  return `<div class="head"><h2>People</h2><p class="lede">Everyone working in the industry, simulated under the same rules the player will live by.</p></div>
+  return `${geaHead('people')}<div class="head"><h2>People</h2><p class="lede">Everyone working in the industry, simulated under the same rules the player will live by.</p></div>
   <div class="filters"><input id="p-q" type="search" placeholder="Search names, real or in-game" value="${esc(st.q)}">${sel('p-src', [['ALL', 'Everyone'], ['real', 'Real history'], ['made', 'Invented']], st.src)}${sel('p-role', [['ALL', 'All roles']].concat(ROLES.map(r => [r, ROLE_LABEL[r]])), st.role)}${sel('p-hub', hubOpts(), st.hub)}${sel('p-status', [['active', 'Working'], ['retired', 'Retired or died'], ['all', 'Everyone']], st.status)}</div>
   <p class="count">${n.toLocaleString()} ${n === 1 ? 'person' : 'people'}${n > 200 ? ' · showing 200' : ''}</p>
   <div class="tw"><table class="grid"><thead><tr>${th('name', 'Name', st)}${th('role', 'Role', st)}${th('hub', 'Hub', st)}${th('age', 'Age', st, 'n')}${th('skill', 'Craft', st, 'n')}${th('standing', 'Standing', st, 'n')}${th('fame', 'Fame', st, 'n')}${th('intl', 'Intl', st, 'n')}${th('credits', 'Credits', st, 'n')}<th>Status</th></tr></thead><tbody>
@@ -13841,7 +14035,7 @@ function viewPerson(id) {
   <p class="lede">${p.player ? '<b>This is you.</b> ' : ''}${pron(p)[0]} ${pron(p)[1]} ${ageOf(p)}${p.dead ? ' (died)' : ''}, born ${p.born}. ${p.credits.length} credit${p.credits.length === 1 ? '' : 's'}${p.debut !== null && p.credits.length ? `, debut in ${yearOf(S.films[p.credits[0]].rel)}` : ''}. Status: ${esc(personStatus(p))}.</p>
   <div class="traits">${p.traits.map(t => `<span class="chip trait" title="${esc(TRAITS[t].d)}">${esc(t)}</span>`).join('')}</div>
   ${p.player && S.me ? `<p class="muted">${esc(ORIGIN.edu[S.me.edu].label)}. Loves ${S.me.love.map(g => g.toLowerCase()).join(', ') || 'everything'}${S.me.hate.length ? '; can\u2019t stand ' + S.me.hate.map(g => g.toLowerCase()).join(' or ') : ''}.${S.me.favs.length ? ' Favourite films: ' + S.me.favs.map(f => esc(S.cat.allFilms[f].t)).join(', ') + '.' : ''}</p>` : ''}</div></div>
-  ${p.player ? '' : cinePanel(true, null, personTriviaHTML(p) + (p.real ? `<p class="muted">A figure from film history: films marked as history below happened; the rest of this filmography is this world's own.</p>` : ''))}
+  ${p.player ? '' : `<p class="bio">${esc(personBio(p))}</p>`}
   ${lifeOfHTML(p)}
   <div class="cols">
    <section class="panel"><h3>Craft</h3><table class="atts">${craftBlock(main, true)}${craftBlock(second, true)}${others.slice(1).map(c => craftBlock(c, false)).join('')}</table>
@@ -13856,15 +14050,17 @@ function viewPerson(id) {
   <h3>Filmography</h3>
   <div class="tw"><table class="grid"><thead><tr><th>Year</th><th>Title</th><th>Role</th><th>Genre</th><th class="n">Critics</th><th class="n">Gross</th></tr></thead><tbody>
   ${credits.map(f => `<tr><td>${yearOf(f.rel)}</td><td>${fl(f.id)}${f.awards.length ? ' <span class="aw">✦</span>' : ''}${histChip(f)}</td><td>${esc(roleIn(f))}</td><td>${esc(f.genre)}</td><td class="n">${reviewCell(f.reviews)}</td><td class="n">${fmtM(f.total)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No released credits yet.</td></tr>'}
-  </tbody></table></div>`;
+  </tbody></table></div>
+${p.player ? '' : cinePanel(true, null, personTriviaHTML(p) + (p.real ? `<p class="muted">A figure from film history: films marked as history below happened; the rest of this filmography is this world's own.</p>` : ''))}`;
 }
 
 const CREW_LABEL = { mus: 'Music', pd: 'Production design', cos: 'Costume design', snd: 'Sound', vfx: 'Visual effects', mu: 'Makeup', cst: 'Casting', ad: 'Assistant director', stn: 'Stunts' };
+
 function crewRole(f, id) { for (const k in f.crew || {}) if (f.crew[k] === id) return CREW_LABEL[k]; return 'Crew'; }
 function viewFilm(id) {
   const f = S.films[id];
   const credit = (l, ids) => `<div class="cr"><span>${l}</span><span>${ids.map(pl).join(', ')}</span></div>`;
-  const credits = `<section class="panel"><h3>Credits</h3>${credit('Director', [f.dir])}${credit(f.wri.length > 1 ? 'Writers' : 'Writer', f.wri)}${credit('Starring', f.cast)}${credit('Cinematography', [f.dp])}${credit('Editor', [f.ed])}${credit('Producer', [f.prod])}${Object.keys(CREW_LABEL).filter(k => f.crew && f.crew[k] !== undefined).map(k => credit(CREW_LABEL[k], [f.crew[k]])).join('')}${Object.entries(f.xc || {}).map(([id, t]) => credit(t, [+id])).join('')}<div class="cr"><span>Company</span><span>${cl(f.co)}</span></div></section>`;
+  const credits = fullCredits(f);
   const released = f.rel !== null;
   let body;
   if (!released) {
@@ -13891,16 +14087,16 @@ function viewFilm(id) {
       <h4>What it could still earn</h4><div class="rep"><span>Next 10 years</span>${bar(lv, Math.max(lv, f.cost), 'data')}<b>${fmtM(lv)}</b></div>
       <div class="rep"><span>Cult following</span>${bar(f.cult, 100, 'warm')}<b>${Math.round(f.cult)}</b></div><p class="note">${cultLabel}${f.cultY ? `, since ${f.cultY}` : ''}.</p></section>`;
     const cm = cinePanel(true, null, filmTriviaHTML(f) + (!f.real ? '' : `<p class="muted">${f.recorded ? `Box office: home figure from the historical trade records (${fmtM(f.cat.dr)} in rentals).` : f.cat.dr != null ? `Box office: home figure based on reported rentals (${fmtM(f.cat.dr)}).` : 'Box office: no reliable records survive; figures are the model\u2019s estimate.'}${f.cat.b != null ? ` Cost: ${fmtM(f.cat.b)} (reported).` : ''}${f.onList ? ' This one is on your list.' : ''}</p>`));
-    body = cm + `<div class="kpis"><div><span>Critics</span><b>${reviewCell(f.reviews)}</b></div><div><span>Worldwide gross</span><b>${fmtM(f.total)}</b></div><div><span>Final cost</span><b>${fmtM(f.cost)}</b></div><div><span>Lifetime result</span><b>${lifeCell(f)}</b></div></div>
+    body = `<div class="kpis"><div><span>Critics</span><b>${reviewCell(f.reviews)}</b></div><div><span>Worldwide gross</span><b>${fmtM(f.total)}</b></div><div><span>Final cost</span><b>${fmtM(f.cost)}</b></div><div><span>Lifetime result</span><b>${lifeCell(f)}</b></div></div>
     <div class="cols two">${credits}
     <section class="panel"><h3>Post-mortem</h3><p class="muted">What made this film ${Math.round(f.q)} out of 100 on the hidden quality scale.${b.hist ? ' Its score is set by film history; luck absorbs the gap between history and what the model would predict from its team.' : ''}</p>${pm}
     <p class="note">Script, direction, cast and crafts build the base score; chemistry and budget fit scale it; events, traits and luck add or subtract.</p></section></div>
     <div class="cols two">${moneyPanel}<section class="panel"><h3>Gross by market</h3>${gm.map(([m, v]) => `<div class="rep"><span>${esc(MARKETS[m].name)}</span>${bar(v, gmax, m === f.m ? 'accent' : 'data')}<b>${fmtM(v)}</b></div>`).join('')}</section>
     </div><div class="cols two"><section class="panel"><h3>Story of the production</h3>${f.events.length ? `<ul class="plain">${f.events.map(e => `<li><time>${fmtDate(e.w, true)}</time> ${esc(e.t)}</li>`).join('')}</ul>` : '<p class="muted">An uneventful shoot.</p>'}
-    ${f.awards.length ? `<h4>Awards</h4><ul class="plain">${f.awards.map(a => `<li>✦ ${esc(a)}</li>`).join('')}</ul>` : ''}${f.legacy ? `<h4>Legacy</h4><p>Rediscovered as a classic in ${f.legacy}.</p>` : ''}</section><div></div></div>`;
+    ${f.awards.length ? `<h4>Awards</h4><ul class="plain">${f.awards.map(a => `<li>✦ ${esc(a)}</li>`).join('')}</ul>` : ''}${f.legacy ? `<h4>Legacy</h4><p>Rediscovered as a classic in ${f.legacy}.</p>` : ''}</section><div></div></div>` + cm;
   }
-  return `<div class="head detail"><p class="eyebrow">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${released ? 'Released ' + fmtDate(f.rel, true) : 'Greenlit ' + fmtDate(f.gl, true)}</p><h2>${esc(f.title)}</h2>
-  <p class="lede">${f.co === null ? 'An independent production' : { 1: 'A major-studio', 2: 'A mid-size', 3: 'A low-budget' }[f.tier] + ' production for ' + esc(S.companies[f.co].name)}, directed by ${esc(P(f.dir).name)}.</p></div>${body}`;
+  return `<div class="head detail filmhead"><div class="posterwrap">${posterSVG(f, 170)}<button class="btn-s ghost" data-trailer="${f.id}">▶ Trailer</button></div><div><p class="eyebrow">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${released ? 'Released ' + fmtDate(f.rel, true) : 'Greenlit ' + fmtDate(f.gl, true)}</p><h2>${esc(f.title)}</h2>
+  <p class="lede">${f.co === null ? 'An independent production' : { 1: 'A major-studio', 2: 'A mid-size', 3: 'A low-budget' }[f.tier] + ' production for ' + esc(S.companies[f.co].name)}, directed by ${esc(P(f.dir).name)}.</p><p class="logline">${esc(filmLogline(f))}</p><p class="tagline">“${esc(filmTagline(f))}”</p>${stillsHTML(f)}</div></div>${body}${released ? '' : cinePanel(true, null, filmTriviaHTML(f))}`;
 }
 
 function viewCompany(id) {
@@ -14762,7 +14958,7 @@ if (typeof document !== 'undefined' && document.documentElement) document.docume
 document.addEventListener('click', e => {
   const pal = e.target.closest && e.target.closest('[data-pal]');
   if (pal && pal.classList.contains('pal')) { if (pal.dataset.pal === 'theme') { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; setTheme(dark ? 'light' : 'dark'); } else setPalette(pal.dataset.pal); render(true); return; }
-  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-bo],[data-bosort],[data-bomore],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
+  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-trailer],[data-gea],[data-bo],[data-bosort],[data-bomore],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
   if (!t) return;
   if (t.tagName === 'A') e.preventDefault();
   if (UI.busy && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;
@@ -14773,8 +14969,10 @@ document.addEventListener('click', e => {
   if (t.dataset.adv) { advanceWeeks(+t.dataset.adv); return; }
   if (t.dataset.job) { const id = t.dataset.job; UI.jobs.open = UI.jobs.open === id ? null : id; render(true); return; }
   if (t.dataset.rolejump) { UI.tab = 'people'; UI.people.role = t.dataset.rolejump; UI.people.status = 'active'; render(); return; }
-  if (t.dataset.cine) { UI.cine = !UI.cine; render(true); return; }
+  if (t.dataset.cine) { UI.cine = UI.cine === false; render(true); return; }
   if (t.dataset.ntype) { UI.news.type = t.dataset.ntype; render(true); return; }
+  if (t.dataset.trailer) { playTrailer(+t.dataset.trailer); return; }
+  if (t.dataset.gea) { UI.tab = t.dataset.gea; UI.stack = []; render(); return; }
   if (t.dataset.bo) { UI.bo.view = t.dataset.bo; UI.bo.more = 0; render(true); return; }
   if (t.dataset.bosort) { const k = t.dataset.bosort; UI.bo.dir = UI.bo.sort === k && UI.bo.dir !== 'asc' ? 'asc' : 'desc'; UI.bo.sort = k; render(true); return; }
   if (t.dataset.bomore) { UI.bo.more = 1; render(true); return; }
