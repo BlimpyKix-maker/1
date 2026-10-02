@@ -155,6 +155,9 @@
 .depts { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
 .dept { display: flex; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); } .dept .di { font-size: 24px; } .dept p { margin: 2px 0 6px; }
 .strat h4 { margin-top: 12px; }
+.heat { display: grid; gap: 4px; } .hrow { display: grid; grid-template-columns: 110px 1fr 90px; gap: 8px; align-items: center; font-size: 14px; }
+.hbar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; } .hbar i { display: block; height: 100%; }
+.h-hot { background: #D9480F; } .h-warm { background: #E0A800; } .h-steady { background: var(--muted); } .h-cool { background: #5B8DB8; } .h-cold { background: #2F5F8A; }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -14067,6 +14070,7 @@ function companyWorth(c, libByOwner) {
 // Once a month the market marks every company to its worth (no dice: the price is the worth plus a mood).
 function markCompanies() {
   if (S.year < S.startYear) return;
+  industryMonth();
   const lib = {};
   for (const f of S.films) if (f.owner !== null && f.owner !== undefined && f.rel !== null && S.week - f.rel < 520) lib[f.owner] = (lib[f.owner] || 0) + libValue(f, S.year);
   for (const c of S.companies) {
@@ -14125,7 +14129,7 @@ function companyTerminal(c) {
   const slate = films.filter(f => f.rel === null && f.stage >= 0), st = structureOf(c);
   const person = (id, alt) => id !== null && id !== undefined ? pl(id) : esc(alt || '—');
   return `<div class="term">
-   <div class="term-top">${logoSVG(c, 72)}<div><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}${c.owner !== undefined ? ' · privately held by ' + esc(P(c.owner).name) : ''}</p><h2>${esc(c.name)} <span class="ticker">${esc(tickerOf(c))}</span></h2>
+   <div class="term-top">${logoSVG(c, 72)}<div><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}${c.owner !== undefined ? ' · privately held by ' + esc(P(c.owner).name) : ''}</p><h2>${esc(c.name)} <span class="ticker">${esc(tickerOf(c))}</span></h2><p class="muted small">Strategy: <b>${esc(companyStrategy(c))}</b> · chasing ${Object.entries(c.taste).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([g]) => esc(g.toLowerCase())).join(' and ') || 'anything'}</p>
     <p class="price">${c.closed !== null ? `<span class="bad">Closed ${c.closed}</span>` : `$${px.toFixed(2)}<small> a share</small> ${pct(chg(1))} <span class="muted small">1M</span> ${pct(chg(12))} <span class="muted small">1Y</span>`}</p></div>${sparkline(h.slice(-60))}</div>
    <div class="kpis term-k"><div><span>Value</span><b>${fmtM(now)}</b></div><div><span>Cash</span><b class="${c.cash < 0 ? 'bad' : ''}">${fmtM(c.cash)}</b></div><div><span>Shares</span><b>${sh.toFixed(1)}M</b></div><div><span>Hit rate</span><b>${hitRate}%</b></div><div><span>Critics, 3 yrs</span><b>${avgRev ?? '—'}</b></div><div><span>Films / hits</span><b>${films.length} / ${c.hits}</b></div><div><span>Library films</span><b>${libCount(c)}</b></div><div><span>Library income</span><b>${fmtM(c.libIncLast)}</b></div></div>
    <div class="cols two"><section class="panel"><h3>Who runs it</h3><div class="cr"><span>Chief executive</span><span>${person(st.ceo, st.ceoName)}</span></div><div class="cr"><span>Head of production</span><span>${person(st.hop, st.ceoName === st.dist ? '—' : 'Vacant')}</span></div><div class="cr"><span>Distribution</span><span>${esc(st.dist)}</span></div><div class="cr"><span>Finance</span><span>${esc(st.cfo)}</span></div><div class="cr"><span>Board</span><span>${st.board.map(esc).join(', ')}</span></div>${st.partners.length ? `<div class="cr"><span>Creative partners</span><span>${st.partners.map(pl).join(', ')}</span></div>` : ''}<p class="muted small">Divisions: ${st.divisions.join(' · ')}. Taste: ${Object.keys(c.taste).map(g => g.toLowerCase()).join(' and ')}.</p></section>
@@ -14428,6 +14432,65 @@ function viewAwards() {
    <div class="tw"><table class="grid"><thead><tr><th>Award</th><th>Film</th><th>Winners</th></tr></thead><tbody>${rows.map(a => `<tr><td>${esc(a.name)}</td><td>${fl(a.film)}</td><td>${a.people.map(pl).join(', ')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No awards recorded for this year yet.</td></tr>'}</tbody></table></div>`;
 }
 // </strategy>
+// <industry>
+// ---------------- A living industry ----------------
+// Once a month: companies chase what's working (a hit genre makes every rival want one), genres heat up and cool off
+// in the trade press, and a company sliding toward collapse can be bought by a richer rival instead. Each company has a
+// readable strategy, worked out from what it actually makes. No dice: everything follows from results.
+function heatOf(m, g) { const v = (S.app[m] || {})[g] || 0; return v > .35 ? 'hot' : v > .12 ? 'warm' : v < -.25 ? 'cold' : v < -.08 ? 'cool' : 'steady'; }
+const HEAT_LABEL = { hot: '🔥 Hot', warm: '▲ Warm', steady: '— Steady', cool: '▼ Cooling', cold: '❄️ Cold' };
+function industryMonth() {
+  if (S.year < S.startYear) return;
+  const recent = S.films.filter(f => f.rel !== null && S.week - f.rel < 26 && f.rel <= S.week);
+  // copycats: a genre that's paying makes everyone want one; old tastes fade
+  for (const c of S.companies) {
+    if (c.closed !== null || c.owner !== undefined) continue;
+    const m = HUBS[c.hub].m;
+    for (const g in c.taste) c.taste[g] = 1 + (c.taste[g] - 1) * .97;
+    for (const f of recent) if (f.m === m && f.hitRatio > 2 && f.co !== c.id) c.taste[f.genre] = Math.min(2.6, (c.taste[f.genre] || 1) + .12);
+  }
+  // genre heat in the trades
+  S.heat = S.heat || {};
+  for (const m of new Set(HUB_IDS.map(h => HUBS[h].m))) {
+    S.heat[m] = S.heat[m] || {};
+    for (const g of GENRES) {
+      const h = heatOf(m, g), was = S.heat[m][g];
+      S.heatNews = S.heatNews || {};
+      if (was && was !== h && (h === 'hot' || h === 'cold') && !(S.week - (S.heatNews[m + g] ?? -99) < 26)) (S.heatNews[m + g] = S.week), news('Trend', h === 'hot' ? `${g} is hot in ${MARKETS[m].name}: audiences can't get enough, and every studio wants one.` : `${g} has gone cold in ${MARKETS[m].name}. Projects are being quietly shelved.`, {});
+      S.heat[m][g] = h;
+    }
+  }
+  // mergers: a company heading for the rocks can be bought by a healthy rival in the same market
+  const scale = y => budgetScale(y) * era(MARKETS.US.cost, y);
+  for (const c of S.companies) {
+    if (c.closed !== null || c.owner !== undefined || c.cash > -[0, 20, 6, 1.5][c.tier] * scale(S.year) * .35) continue;
+    const buyer = S.companies.filter(b => b !== c && b.closed === null && b.owner === undefined && HUBS[b.hub].m === HUBS[c.hub].m && b.tier <= c.tier && b.cash > -c.cash).sort((a, b) => b.cash - a.cash)[0];
+    if (!buyer) continue;
+    buyer.cash += c.cash * .5;
+    for (const f of S.films) { if (f.owner === c.id) f.owner = buyer.id; if (f.co === c.id && f.rel === null) { f.co = buyer.id; buyer.films.push(f.id); } }
+    for (const k in c.favors) buyer.favors[k] = (buyer.favors[k] || 0) + c.favors[k] * .5;
+    c.closed = S.year; c.mergedInto = buyer.id; buyer.acquired.push(c.id);
+    news('Company', `${buyer.name} buys ${c.name}, debts and all. Staff are told their jobs are "safe for now".`, { company: buyer.id });
+  }
+}
+// What a company is about, read from what it makes and how it's doing.
+function companyStrategy(c) {
+  if (c.closed !== null) return c.mergedInto !== undefined ? `Absorbed by ${S.companies[c.mergedInto].name}` : 'Closed';
+  if (c.owner !== undefined) return 'Founder-run';
+  const films = c.films.map(i => S.films[i]).filter(f => f && f.rel !== null && S.week - f.rel < 260);
+  const rev = films.length ? avg(films.map(f => f.reviews)) : 60, top = Object.entries(c.taste).sort((a, b) => b[1] - a[1])[0];
+  if (c.cash < -[0, 20, 6, 1.5][c.tier] * budgetScale(S.year) * .3) return 'In survival mode';
+  if (c.tier === 1 && top && ['Superhero', 'Action', 'Sci-fi', 'Fantasy', 'Animation'].includes(top[0])) return 'Franchise machine';
+  if (rev >= 70) return c.tier === 3 ? 'Indie darling' : 'Prestige house';
+  if (top && ['Horror', 'Comedy', 'Thriller', 'Crime'].includes(top[0]) && c.tier >= 2) return 'Genre factory';
+  if (films.length && avg(films.map(f => f.cost)) < budgetFor(c.tier, c.hub, 'Drama', S.year) * .6) return 'Cost cutter';
+  return 'Generalist';
+}
+function heatPanel(m) {
+  const rows = GENRES.map(g => [g, (S.app[m] || {})[g] || 0]).sort((a, b) => b[1] - a[1]);
+  return `<section class="panel"><h3>What audiences want in ${esc(MARKETS[m].name)}</h3><div class="heat">${rows.map(([g, v]) => `<div class="hrow"><span>${esc(g)}</span><span class="hbar"><i style="width:${Math.round(clamp((v + .6) / 2.1, .03, 1) * 100)}%" class="h-${heatOf(m, g)}"></i></span><span class="small">${HEAT_LABEL[heatOf(m, g)]}</span></div>`).join('')}</div><p class="muted small">Tastes drift with every hit and flop. Studios chase what's hot, so what's hot gets crowded.</p></section>`;
+}
+// </industry>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -14636,6 +14699,7 @@ function viewWorld() {
   const maxS = mk[0].size;
   const fired = TRENDS.filter(t => S.firedTrends[t.y + '-' + t.m]).reverse();
   return `<div class="head"><h2>The world</h2><p class="lede">${HUB_IDS.length} hubs across ${Object.keys(MARKETS).length} markets. Market sizes, tastes and trade shift every year.</p></div>
+  ${heatPanel(S.me ? HUBS[S.me.hub].m : 'US')}
   <section class="panel catstat"><h3>The catalogue</h3><p>${S.cat.count} real films reimagined so far: ${S.cat.batches.map(b => `batch ${b.id}, ${esc(b.span)} (${esc(b.title.charAt(0).toLowerCase() + b.title.slice(1))})`).join('; ')}. The catalogue now runs from 1888 to 2026; everything outside it is invented filler. A depth pass adding more films per year is next.</p></section>
   <section class="newworld panel"><h3>Start a new world</h3>
    <p class="muted">History is written up to the year before your start date, then that final year is simulated so films are mid-production when you arrive. The present day is the main campaign; 1968 and 1995 are historical starts for film buffs. Full history goes back to 1888 and takes longest to build.</p>
@@ -15415,7 +15479,7 @@ function makeFilmForm(c, k, x) {
   const dirs = dirOptions(x.genre), leads = castOptions(x.genre), M = S.me;
   const tag = p => M.known[p.id] ? (M.known[p.id].tags.includes('Your regular') ? ' ♥' : ' ★') : '';
   const crewSel = (f, role, craft, lab) => `<label>${lab} ${sel('mk-' + f + '-' + key, [['', 'Their choice']].concat(crewOptions(role, craft, x.genre).map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, craft, x.genre))}`])), F[f] || '')}</label>`;
-  return `<div class="mkfilm"><b>${esc(x.title)}</b> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)}</span>
+  return `<div class="mkfilm"><b>${esc(x.title)}</b> <span class="chip" title="How audiences in your market feel about ${esc(x.genre.toLowerCase())} right now">${HEAT_LABEL[heatOf(HUBS[S.me.hub].m, x.genre)]}</span> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)}</span>
    <div class="mkrow"><label>Size ${sel('mk-micro-' + key, [['1', 'Micro-budget'], ['0', 'Full budget']], String(F.micro))}</label>
     <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, 'dir', x.genre))}`])), F.dir)}</label>
     <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>

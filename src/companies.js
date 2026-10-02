@@ -13,6 +13,7 @@ function companyWorth(c, libByOwner) {
 // Once a month the market marks every company to its worth (no dice: the price is the worth plus a mood).
 function markCompanies() {
   if (S.year < S.startYear) return;
+  industryMonth();
   const lib = {};
   for (const f of S.films) if (f.owner !== null && f.owner !== undefined && f.rel !== null && S.week - f.rel < 520) lib[f.owner] = (lib[f.owner] || 0) + libValue(f, S.year);
   for (const c of S.companies) {
@@ -71,7 +72,7 @@ function companyTerminal(c) {
   const slate = films.filter(f => f.rel === null && f.stage >= 0), st = structureOf(c);
   const person = (id, alt) => id !== null && id !== undefined ? pl(id) : esc(alt || '—');
   return `<div class="term">
-   <div class="term-top">${logoSVG(c, 72)}<div><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}${c.owner !== undefined ? ' · privately held by ' + esc(P(c.owner).name) : ''}</p><h2>${esc(c.name)} <span class="ticker">${esc(tickerOf(c))}</span></h2>
+   <div class="term-top">${logoSVG(c, 72)}<div><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}${c.owner !== undefined ? ' · privately held by ' + esc(P(c.owner).name) : ''}</p><h2>${esc(c.name)} <span class="ticker">${esc(tickerOf(c))}</span></h2><p class="muted small">Strategy: <b>${esc(companyStrategy(c))}</b> · chasing ${Object.entries(c.taste).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([g]) => esc(g.toLowerCase())).join(' and ') || 'anything'}</p>
     <p class="price">${c.closed !== null ? `<span class="bad">Closed ${c.closed}</span>` : `$${px.toFixed(2)}<small> a share</small> ${pct(chg(1))} <span class="muted small">1M</span> ${pct(chg(12))} <span class="muted small">1Y</span>`}</p></div>${sparkline(h.slice(-60))}</div>
    <div class="kpis term-k"><div><span>Value</span><b>${fmtM(now)}</b></div><div><span>Cash</span><b class="${c.cash < 0 ? 'bad' : ''}">${fmtM(c.cash)}</b></div><div><span>Shares</span><b>${sh.toFixed(1)}M</b></div><div><span>Hit rate</span><b>${hitRate}%</b></div><div><span>Critics, 3 yrs</span><b>${avgRev ?? '—'}</b></div><div><span>Films / hits</span><b>${films.length} / ${c.hits}</b></div><div><span>Library films</span><b>${libCount(c)}</b></div><div><span>Library income</span><b>${fmtM(c.libIncLast)}</b></div></div>
    <div class="cols two"><section class="panel"><h3>Who runs it</h3><div class="cr"><span>Chief executive</span><span>${person(st.ceo, st.ceoName)}</span></div><div class="cr"><span>Head of production</span><span>${person(st.hop, st.ceoName === st.dist ? '—' : 'Vacant')}</span></div><div class="cr"><span>Distribution</span><span>${esc(st.dist)}</span></div><div class="cr"><span>Finance</span><span>${esc(st.cfo)}</span></div><div class="cr"><span>Board</span><span>${st.board.map(esc).join(', ')}</span></div>${st.partners.length ? `<div class="cr"><span>Creative partners</span><span>${st.partners.map(pl).join(', ')}</span></div>` : ''}<p class="muted small">Divisions: ${st.divisions.join(' · ')}. Taste: ${Object.keys(c.taste).map(g => g.toLowerCase()).join(' and ')}.</p></section>
