@@ -127,3 +127,50 @@ SCENES.push({ event: 1, jobs: [], id: 'ev_picket', title: 'The picket line', tea
   { k: 'walk', label: 'Walk the line with them', check: ['col', 10], ok: { tie: { mates: 4 }, meet: 1, stand: .3, stress: -2 }, bad: { tie: { mates: 2 }, energy: -6 }, t: 'Twelve hours, two blisters and a dozen new numbers. Solidarity is a network too.', tb: 'Long, cold and dull, but you showed up.' },
   { k: 'organise', label: 'Help organise the strike fund', check: ['cha', 13], ok: { meet: 1, stand: .8, xp: { cha: .1 } }, bad: { stress: 4 }, t: 'The union reps learn your name. That kind of thing gets remembered.', tb: 'Meetings, spreadsheets, arguments. You burn out on it.' },
   { k: 'cross', label: 'Take non-union work across town', ok: { cash: 400, stand: -1.5 }, t: 'The money helps. Someone takes a photo of you going in. It does the rounds.' }] });
+
+// ---- Families ----
+// The business runs in families. Some newcomers are the children of established people: they carry the name, start
+// with a little standing and inherit their parent's friendships, and the world's casting, which favours people with
+// strong ties, does the rest. Decided by a hash of the person, so it never shifts the world's dice.
+function surnameSwap(p, parent) {
+  const east = EAST[HUBS[p.hub].lang], a = p.name.split(' '), b = parent.name.split(' ');
+  if (a.length < 2 || b.length < 2) return;
+  if (east) a[0] = b[0]; else a[a.length - 1] = b[b.length - 1];
+  p.name = a.join(' ');
+}
+function familyOfP(p) { return p.family || (p.family = {}); }
+function nepoLink(p, chance = .12) {
+  if (p.catId || p.player || hashRand(p.id * 613 + 29)() > chance) return false;
+  const age = S.year - p.born, ids = [];
+  for (const role of ROLES) for (const id of S.pool[p.hub][role]) { const q = P(id); if (q !== p && !q.dead && !q.player && q.standing >= 22 && S.year - q.born >= age + 20 && S.year - q.born <= age + 45 && (familyOfP(q).kids || []).length < 3) ids.push(id); }
+  if (!ids.length) return false;
+  const parent = P(ids[Math.floor(hashRand(p.id * 37 + 1)() * ids.length)]);
+  surnameSwap(p, parent);
+  familyOfP(p).parent = parent.id;
+  const kids = familyOfP(parent).kids = familyOfP(parent).kids || [];
+  for (const sib of kids) { addTie(p, P(sib), 25); (familyOfP(p).sibs = familyOfP(p).sibs || []).push(sib); (familyOfP(P(sib)).sibs = familyOfP(P(sib)).sibs || []).push(p.id); }
+  kids.push(p.id);
+  addTie(p, parent, 50);
+  for (const [k, v] of Object.entries(parent.ties).sort((a, b) => b[1] - a[1]).slice(0, 4)) if (v > 20 && P(+k) && !P(+k).dead) addTie(p, P(+k), 10);
+  p.standing = clamp(p.standing + 4, 0, 100);
+  if (S.historyEnd !== undefined && S.week > S.historyEnd && parent.fame > 40) news('Career', `${p.name}, ${pron(p)[0] === 'She' ? 'daughter' : pron(p)[0] === 'He' ? 'son' : 'child'} of ${parent.name}, ${pick0(p.id, ['makes a debut, and everyone has an opinion about it', 'signs with an agency the week they leave school', 'is suddenly in every meeting in town'])}.`, { person: p.id });
+  return true;
+}
+function pick0(i, L) { return L[Math.floor(hashRand(i * 7 + 3)() * L.length)]; }
+// At the start, some of the world's younger people already belong to its families; a few established couples are married.
+function seedFamilies() {
+  for (const p of S.people) if (!p.dead && !p.retired && !p.catId && S.year - p.born < 34) nepoLink(p, .07);
+  for (const h of HUB_IDS) {
+    const L = ROLES.flatMap(r => S.pool[h][r]).map(P).filter(q => !q.dead && !q.retired && !q.catId && S.year - q.born > 30 && !familyOfP(q).spouse);
+    for (let i = 0; i + 1 < L.length; i += 2) { const a = L[i], b = L[i + 1]; if (hashRand(a.id * 5 + b.id)() < .08 && Math.abs(a.born - b.born) < 12) { familyOfP(a).spouse = b.id; familyOfP(b).spouse = a.id; addTie(a, b, 40); } }
+  }
+}
+function familyHTML(p) {
+  const F = p.family; if (!F) return '';
+  const rel = [];
+  if (F.parent !== undefined) rel.push(['Parent', [F.parent]]);
+  if (F.spouse !== undefined) rel.push(['Married to', [F.spouse]]);
+  if ((F.sibs || []).length) rel.push(['Siblings', F.sibs]);
+  if ((F.kids || []).length) rel.push(['Children in the business', F.kids]);
+  return rel.length ? `<p class="family">${rel.map(([l, ids]) => `<span><b>${l}:</b> ${ids.map(pl).join(', ')}</span>`).join(' · ')}</p>` : '';
+}
