@@ -20,6 +20,8 @@ function articleHTML(i) {
     paras.push(`${d.name} told ${paper}: ${pk(QUOTE_FILM)}`);
     if (n.type === 'Hit' || n.type === 'Award') paras.push(pk(QUOTE_RIVAL));
     if (f.events && f.events.length) { const E = f.events.slice(-2); paras.push(`${E.some(e => (e.q || 0) < 0) ? 'It hasn\'t all been smooth.' : 'Word from the set is good.'} ${E.map(e => e.t).join(' ')}`); }
+  } else if (p && S.me && p.id === S.me.id && typeof playerArticle === 'function') {
+    paras.push(...playerArticle(n, r));
   } else if (p) {
     paras.push(`${n.text} ${personBio(p)}`);
     paras.push(`${pk(['Friends describe', 'Colleagues describe', 'Those who know them describe'])} ${p.name.split(' ')[0]} as ${pk(['generous to a fault', 'impossible to rattle', 'the hardest-working person on any set', 'quietly ruthless', 'funnier than their films suggest'])}. ${pk(SOURCE).replace(/^./, x => x.toUpperCase())} that ${pk(['their next move is already lined up', 'they have been thinking about this for a while', 'nobody saw it coming', 'the phone has not stopped ringing'])}.`);
