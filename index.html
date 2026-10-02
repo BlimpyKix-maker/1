@@ -76,6 +76,7 @@
 .tagline { font-style: italic; color: var(--muted); margin: 0 0 10px; }
 .bfilter { display: grid; gap: 6px; margin: 6px 0 10px; } .bfilter .bf-row { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; } .bfilter .count { opacity: .7; font-size: 11px; }
 table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.sortable thead th:hover { color: var(--accent); } table.grid thead th.sorted::after { content: ' ' attr(data-dir); font-size: 10px; }
+.egofrow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; } .egofc { border: 1px solid var(--line); border-radius: 6px; padding: 8px; display: grid; gap: 2px; text-align: center; opacity: .6; } .egofc b { font: 700 28px var(--f-display); } .egofc.won { opacity: 1; border-color: var(--gold, #C9A24A); background: color-mix(in srgb, #E3B23C 14%, transparent); } .egofc small { font-size: 11px; color: var(--muted); }
 .stills { display: flex; flex-wrap: wrap; gap: 8px; }
 .stills figure { margin: 0; } .stills figcaption { font-size: 11px; color: var(--muted); max-width: 240px; }
 .still { border-radius: 3px; display: block; }
@@ -10296,12 +10297,12 @@ function nationalAwards(films) {
     if (L.length < 2) continue;
     const cp = f => f.camp || 0;   // an awards campaign (the player's) puts a film in front of voters
     const best = L.reduce((a, b) => (b.q + cp(b) + gauss() * 3 > a.q + cp(a) ? b : a));
-    award(best, `${MARKETS[m].name} Film Awards: Best Film`, [best.dir, best.prod]);
+    award(best, `${ceremony(m)}: Best Film`, [best.dir, best.prod]);
     const act = L.reduce((a, b) => (P(b.cast[0]).c.act + b.q / 10 + cp(b) / 3 > P(a.cast[0]).c.act + a.q / 10 + cp(a) / 3 ? b : a));
-    award(act, `${MARKETS[m].name} Film Awards: Best Performance`, [act.cast[0]]);
+    award(act, `${ceremony(m)}: Best Performance`, [act.cast[0]]);
     const scr = L.reduce((a, b) => ((b.bd ? b.bd.S : 0) + cp(b) / 2 > (a.bd ? a.bd.S : 0) + cp(a) / 2 ? b : a));   // the best-written film
-    award(scr, `${MARKETS[m].name} Film Awards: Best Screenplay`, scr.wri);
-    if (['US', 'UK', 'FR', 'JP', 'IN', 'HK', 'IT'].includes(m)) news('Award', `${best.title} wins Best Film at the ${MARKETS[m].name} Film Awards.`, { film: best.id });
+    award(scr, `${ceremony(m)}: Best Screenplay`, scr.wri);
+    if (['US', 'UK', 'FR', 'JP', 'IN', 'HK', 'IT'].includes(m)) news('Award', `${best.title} wins Best Film at the ${ceremony(m)}.`, { film: best.id });
   }
 }
 function award(f, name, people) {
@@ -11044,6 +11045,7 @@ function closeWeek(a) {
   const fee = schoolWeek(L, gain);
   if (typeof mentorWeek === 'function') mentorWeek(gain);
   if (typeof convoWeek === 'function') convoWeek();
+  if (typeof egofWeek === 'function') egofWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -13872,7 +13874,7 @@ function contestMayOption(sc) {
 // Each February your market's Film Awards hold their ceremony. If you worked on a nominee, wrote one, know a
 // nominee well or have the standing, you're invited; otherwise you watch it on television like everyone else.
 function awardsMarket() { return HUBS[S.me.hub].m; }
-function awardsThisYear() { const mk = MARKETS[awardsMarket()].name; return (S.awards || []).filter(a => a.y === S.year && a.name.startsWith(mk + ' Film Awards')); }
+function awardsThisYear() { const mk = ceremony(awardsMarket()); return (S.awards || []).filter(a => a.y === S.year && a.name.startsWith(mk + ':')); }
 function awardsNominees() {
   const m = awardsMarket(), L = S.films.filter(f => f.rel !== null && f.ry === S.year - 1 && f.m === m).sort((a, b) => b.q - a.q).slice(0, 5);
   for (const a of awardsThisYear()) if (!L.some(f => f.id === a.film)) L.push(S.films[a.film]);
@@ -13888,23 +13890,23 @@ function awardsWeek() {
   const friend = noms.flatMap(f => [f.dir, f.prod, f.cast[0]]).find(id => M.known[id] && ['friend', 'close', 'partner', 'mentor'].includes(relOf(id)));
   const host = mine.length ? mine[0].prod : friend;
   const slot = freeSlot({ days: [5], blocks: [2], from: 0 });
-  const mk = MARKETS[awardsMarket()].name;
+  const mk = ceremony(awardsMarket());
   // the night itself is a week away: a nominee's team, a friend's plus-one, or a ticket your standing earns
   if (slot && (mine.length || friend !== undefined || me.standing >= 30 || (M.agent && M.agent.tier >= 2))) {
     const why = mine.length ? `${mine[0].title}, which you worked on, is nominated.` : friend !== undefined ? `${P(friend).name} is nominated and wants you as their plus-one.` : 'Your name is on the list now.';
-    inbox('invite', `The ${mk} Film Awards`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
+    inbox('invite', `The ${mk}`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
   } else {
     const best = wins.find(a => /Best Film/.test(a.name));
-    inbox('note', `The ${mk} Film Awards`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
+    inbox('note', `The ${mk}`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
   }
 }
 function awardsNight(x, L) {
   const M = S.me, me = ME(), wins = awardsThisYear();
-  for (const a of wins) L.push(`${a.name.replace(/^.* Film Awards: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
+  for (const a of wins) L.push(`${a.name.replace(/^[^:]*: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
   const mineWon = wins.filter(a => M.past.some(p => p.film === a.film && p.credited) || a.people.includes(me.id));
   for (const a of mineWon) {
     const self = a.people.includes(me.id);
-    milestone(self ? `Won ${a.name} for ${S.films[a.film].title}` : `${S.films[a.film].title}, which you worked on, won ${a.name.replace(/^.* Film Awards: /, '')}`, 'prize');
+    milestone(self ? `Won ${a.name} for ${S.films[a.film].title}` : `${S.films[a.film].title}, which you worked on, won ${a.name.replace(/^[^:]*: /, '')}`, 'prize');
     if (self) { me.fame = clamp((me.fame || 0) + 6, 0, 100); L.push('They call your name. You don\'t remember walking to the stage.'); }
     else me.standing = clamp(me.standing + 1, 0, 100);
   }
@@ -14708,14 +14710,15 @@ function viewAwards() {
   const years = [...new Set((S.awards || []).map(a => a.y))].sort((a, b) => b - a), y = +(st.y || years[0] || S.year);
   const rows = (S.awards || []).filter(a => a.y === y && (!st.q || a.name.toLowerCase().includes(st.q.toLowerCase())));
   const mo = dateOf(S.week).getUTCMonth(), MON_ = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const cal = [].concat((typeof CONTESTS !== 'undefined' ? CONTESTS : []).map(c => ({ m: c.month, t: c.name, k: 'Screenplay contest', d: c.d })), (typeof FESTIVALS !== 'undefined' ? FESTIVALS : []).map(f => ({ m: f.month, t: f.name.replace(/^the /, 'The '), k: 'Festival', d: f.d })), [{ m: 1, t: 'The national Film Awards', k: 'Awards night', d: 'Best Film, Best Performance, Best Screenplay. Invitations go to nominees, their friends and people with standing.' }]).sort((a, b) => ((a.m - mo + 12) % 12) - ((b.m - mo + 12) % 12));
+  const cal = [].concat((typeof CONTESTS !== 'undefined' ? CONTESTS : []).map(c => ({ m: c.month, t: c.name, k: 'Screenplay contest', d: c.d })), (typeof FESTIVALS !== 'undefined' ? FESTIVALS : []).map(f => ({ m: f.month, t: f.name.replace(/^the /, 'The '), k: 'Festival', d: f.d })), [{ m: 1, t: S.me ? 'The ' + ceremony(awardsMarket()) : 'The national film awards', k: 'Awards night', d: 'Best Film, Best Performance, Best Screenplay. Invitations go to nominees, their friends and people with standing.' }]).sort((a, b) => ((a.m - mo + 12) % 12) - ((b.m - mo + 12) % 12));
   const mine = me ? (S.awards || []).filter(a => a.people.includes(me.id) || (M.past || []).some(p => p.film === a.film && p.credited)) : [];
   return `<div class="head"><h2>Awards and recognition</h2><p class="lede">Prizes, festivals and contests: the other road to a name, beside the job board.</p></div>
-   <div class="cols two"><section class="panel"><h3>Coming up</h3><ul class="plain">${cal.map(x => `<li><b>${MON_[x.m]}</b> · ${esc(x.t)} <span class="chip">${esc(x.k)}</span><br><span class="muted small">${esc(x.d)}</span></li>`).join('')}</ul><p class="muted small">Enter scripts in contests and films in festivals from the Create tab.</p></section>
+   <div class="cols two"><section class="panel"><h3>Coming up</h3><ul class="plain">${cal.map(x => `<li><b>${MON_[x.m]}</b> · ${typeof bodyLink === 'function' ? bodyLink(x.t.replace(/^The (?=Academy|Mountain|Festival|Lagoon|Northern|Harbour)/, '')) : esc(x.t)} <span class="chip">${esc(x.k)}</span><br><span class="muted small">${esc(x.d)}</span></li>`).join('')}</ul><p class="muted small">Enter scripts in contests and films in festivals from the Create tab.</p></section>
    <section class="panel"><h3>Your recognition</h3>${mine.length ? `<ul class="plain">${mine.map(a => `<li>✦ ${esc(a.name)} ${a.y} · ${fl(a.film)}${a.people.includes(me.id) ? ' <b>(yours)</b>' : ''}</li>`).join('')}</ul>` : '<p class="muted">Nothing yet. Work on films that win, write scripts that place, or take your own films to festivals.</p>'}
     ${M && (M.scripts || []).some(s => s.won) ? `<h4>Contests</h4><ul class="plain">${M.scripts.filter(s => s.won).map(s => `<li>${esc(s.title)}: ${esc(s.won.join(', '))}</li>`).join('')}</ul>` : ''}</section></div>
+   ${typeof egofHTML === 'function' && S.me ? egofHTML() : ''}${typeof awardBodiesHTML === 'function' ? awardBodiesHTML() : ''}
    <h3>Winners</h3><div class="filters">${sel('aw-y', years.map(v => [v, v]), y)}<input id="aw-q" type="search" placeholder="Filter by award or country…" value="${esc(st.q || '')}"></div>
-   <div class="tw"><table class="grid"><thead><tr><th>Award</th><th>Film</th><th>Winners</th></tr></thead><tbody>${rows.map(a => `<tr><td>${esc(a.name)}</td><td>${fl(a.film)}</td><td>${a.people.map(pl).join(', ')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No awards recorded for this year yet.</td></tr>'}</tbody></table></div>`;
+   <div class="tw"><table class="grid"><thead><tr><th>Award</th><th>Film</th><th>Winners</th></tr></thead><tbody>${rows.map(a => `<tr><td>${typeof bodyLink === 'function' ? bodyLink(a.name) : esc(a.name)}</td><td>${fl(a.film)}</td><td>${a.people.map(pl).join(', ')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No awards recorded for this year yet.</td></tr>'}</tbody></table></div>`;
 }
 // </strategy>
 // <industry>
@@ -16112,6 +16115,7 @@ function mediaAwardsWeek() {
       inbox('news', `${show} ${y}: ${won ? 'you won' : 'you were nominated'}`, `${mine.title} was nominated for ${cats[0]}.${won ? ' And it won. You make a speech you won\'t remember.' : ' You don\'t win, but the nomination goes on every bio you\'ll ever write.'}`);
       if (!won) me.standing = clamp(me.standing + 1.5, 0, 100);
     }
+    (S.mawards = S.mawards || []).push({ y, show, w: line.split(' · ').map(x => [x.split(': ')[0], x.split(': ').slice(1).join(': ')]) });
     news('Award', `${show} ${y}: ${line}.`, {});
   }
 }
@@ -16669,6 +16673,8 @@ function headsHTML(c) {
   const L = STUDIO_HEADS[c.catId]; if (!L) return '';
   return `<h4>Leadership through the years</h4><ul class="plain small">${L.filter(h => h[0] <= S.year).map(h => `<li>${h[0]}–${h[1] === null ? 'today' : h[1]} · <b>${headLink(h)}</b> <span class="muted">${esc(h[5])}</span></li>`).join('')}</ul>`;
 }
+// one real festival name slipped into the record: it's the Mountain Film Festival in this world
+for (const C of CATALOGUES) for (const f of C.films || []) if (f.aw) f.aw = f.aw.map(a => a.replace(/^Festival Sundance/, 'Mountain Film Festival'));
 // </corrections>
 // <cinema>
 // ---------------- Cinema: stills you can read, and trailers that play like trailers ----------------
@@ -17467,6 +17473,17 @@ function jobCrossHTML(j) {
   const to = Object.entries(T).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${IND_LABEL[k]} (${Math.round(v * 100)}%)`);
   return `<p class="small"><b>${esc(IND_LABEL[ind])}</b>${to.length ? ` · experience here also counts in ${to.join(', ')}` : ''}${t ? ` · typical pay ${fmtCash(usd(t.rate))}/day` : ''}</p>`;
 }
+// A job posting has its own page: the job, the people, the money, why your odds are what they are.
+function viewPost(id) {
+  const M = S.me, p = M.board.find(x => x.id === id) || M.jobs.find(x => x.id === id);
+  if (!p) return '<section class="panel"><h3>That posting has gone</h3><p class="muted">Jobs come down from the board after a few weeks. Check the board for what\'s open now.</p></section>';
+  const t = tmplOf(p) || {}, f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, j = p.jid ? JOBS.jobs.find(x => x.id === p.jid) : null, ind = postIndustry(p), mine = M.jobs.includes(p);
+  const F = mine ? [] : hireFactors(p), odds = mine ? null : hireOdds(p), block = mine ? null : blockedFrom(t);
+  return `<div class="head"><p class="eyebrow">${esc(IND_LABEL[ind])}${t.tier ? ' · ' + '★'.repeat(t.tier) : ''}${p.away ? ' · in ' + esc(hubName(p.away)) : ''}</p><h2>${esc(p.t)}</h2><p class="lede">${f ? `On ${fl(f.id)}, ${esc(f.status.toLowerCase())}${f.co !== null ? ' for ' + `<a href="#" class="lk" data-go="co:${f.co}">${esc(S.companies[f.co].name)}</a>` : ''}.` : p.mco ? `At ${esc(p.mco)} (${esc(t.biz || '')}).` : esc(t.biz || t.d || '')}${p.head !== null && p.head !== undefined ? ` You'd report to ${pl(p.head)}.` : ''}</p></div>
+   <div class="cols two"><section class="panel"><h3>The job</h3>${t.d ? `<p>${esc(t.d)}</p>` : ''}${j && j.resp ? `<ul class="plain">${j.resp.map(x => `<li>• ${esc(x)}</li>`).join('')}</ul>` : ''}${j && j.sk ? `<p class="muted">What it takes: ${j.sk.map(esc).join(' · ')}</p>` : ''}${j && j.before ? `<p class="muted small">People come from: ${esc(j.before)}</p>` : ''}${j && j.after ? `<p class="muted small">It leads to: ${esc(j.after)}</p>` : ''}
+    <div class="kpis mini"><div><span>Pay</span><b>${fmtCash(p.rate)}/day</b></div><div><span>Days</span><b>${p.days} a week</b></div><div><span>Length</span><b>${p.weeks} weeks</b></div><div><span>Worth</span><b>${fmtCash(p.rate * p.days * p.weeks)}</b></div></div>${j ? jobCrossHTML(j) : ''}</section>
+   <section class="panel"><h3>${mine ? 'You have this job' : 'Your odds'}</h3>${mine ? `<p>Week ${p.done + 1} of about ${p.weeks}.</p>` : `<p class="big">${Math.round(odds * 100)}%</p>${block ? `<p class="bad">⚠ ${esc(block)}: you'll be filtered out.</p>` : ''}<ul class="plain small">${F.filter(x => Math.abs(x[1]) >= .05).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<li><span class="${v > 0 ? 'good' : 'bad'}">${v > 0 ? '▲' : '▼'}</span> ${esc(k)}</li>`).join('')}</ul><p class="muted small">Tick "Apply" on the board to send an application this week.</p>`}</section></div>`;
+}
 // </jobboard>
 // <schools>
 // ---------------- Schools of the world ----------------
@@ -17619,6 +17636,102 @@ function schoolClick(t) {
 }
 function schoolChange(id, v) { const F = UI.sch = UI.sch || { kind: 'all', where: 'all', sort: 'prestige' }; if (id === 'sch-where') { F.where = v; return true; } if (id === 'sch-sort') { F.sort = v; return true; } return false; }
 // </schools>
+// <awardbodies>
+// ---------------- Award bodies, festivals and contests you can open; and the EGOF ----------------
+// Every prize in the game has a page: who gives it, since when, what it stands for, what its voters or juries
+// actually reward, its categories, and every winner on record, from the archive and from the years you've lived.
+// The grand slam of this world is the EGOF: an Emmet (screens at home), a Gramophone (music), an Oswald (cinema)
+// and a Footlight (theatre). Very few people have all four.
+const CEREMONY = {
+  US: ['Academy Oswalds', 1929, 'The Academy of Motion Picture Arts and Letters, about ten thousand voting members in branches by craft.'], CA: ['Maple Screen Awards', 1949, 'Canada\'s screen academy.'], MX: ['Ariadna Awards', 1947, 'The Mexican Academy\'s prizes, a bronze statuette of a winged woman.'],
+  UK: ['British Academy Masks', 1949, 'The British Academy of Film and Television Arts\' film awards, a mask on a plinth.'], FR: ['Césaire Awards', 1976, 'The French national film academy\'s awards, judged by four thousand professionals.'], IT: ['Donatello Davids', 1956, 'Italy\'s Academy of Cinema prizes, named after a Renaissance statue.'],
+  DE: ['Lola-Berlin Film Prize', 1951, 'Germany\'s national film prize, the most richly funded in Europe.'], ES: ['Goyesca Awards', 1987, 'The Spanish Academy\'s awards, a bust of the painter.'], HK: ['Harbour Film Awards', 1982, 'Hong Kong\'s industry awards, voted by guild members.'],
+  TW: ['Golden Steed Awards', 1962, 'The Chinese-language world\'s most prestigious film prize, held in Taipei.'], JP: ['Japan Academy Prize', 1978, 'Japan\'s industry academy awards.'], KR: ['Azure Dragon Awards', 1963, 'Korea\'s most watched film awards, run by a newspaper.'],
+  CN: ['Golden Phoenix Awards', 1981, 'Mainland China\'s professional film prize, chosen by experts.'], IN: ['Filmfair Awards', 1954, 'India\'s oldest popular film awards, run by a film magazine.'], AU: ['Southern Cross Screen Awards', 1958, 'Australia\'s screen academy awards.'],
+  NZ: ['Kiwi Screen Awards', 2005, 'New Zealand\'s screen awards.'], NG: ['Lagos Viewers\' Choice Awards', 2013, 'Africa\'s most-watched screen awards, half chosen by viewers.'], EG: ['Cairo Film Prize', 1976, 'Egypt\'s national cinema prize.'],
+  BR: ['Grand Othello Prize', 2000, 'The Brazilian Film Academy\'s awards.'], AR: ['Platinum Condor Awards', 1943, 'Argentina\'s film critics\' prizes, the oldest in Latin America.'], SU: ['Nike Awards', 1988, 'Russia\'s national film academy awards.'],
+  SE: ['Golden Beetle Awards', 1964, 'Sweden\'s national film awards.'], DK: ['Bodilia Awards', 1948, 'Denmark\'s critics\' prize, one of Europe\'s oldest.'], CS: ['Czech Lynx Awards', 1993, 'The Czech film academy\'s prizes.'],
+  PL: ['Polish Falcons', 1999, 'The Polish Film Academy\'s awards.'], HU: ['Hungarian Film Week Prize', 1965, 'Hungary\'s national film festival awards.'], FI: ['Jussila Awards', 1944, 'Finland\'s film awards, a statuette of a farmhand.'],
+  TR: ['Golden Tangerine Awards', 1964, 'Turkey\'s oldest film festival prizes, in Antalya.'], IR: ['Crystal Phoenix of Tehran', 1982, 'Iran\'s national film festival prizes.'], SN: ['Golden Stallion of Yennenga', 1969, 'The pan-African film festival\'s top prize.'],
+  PH: ['Manila Gawad Awards', 1952, 'The Philippines\' oldest film awards.'], TH: ['Golden Swan Awards', 1955, 'Thailand\'s national film awards.'], VN: ['Silver Kite Awards', 2003, 'Vietnam\'s cinema association awards.'],
+  CO: ['Macondo Prize', 2010, 'Colombia\'s film academy awards.'], ID: ['Citra-Jaya Awards', 1955, 'Indonesia\'s national film festival awards.'], ZA: ['Silver Horn Awards', 2006, 'South Africa\'s film and television awards.']
+};
+function ceremony(m) { return (CEREMONY[m] || [MARKETS[m].name + ' Film Awards'])[0]; }
+// the EGOF: Emmet, Gramophone, Oswald, Footlight
+MEDIA_AWARDS.creator = ['The Emmets', ['Outstanding Online Series', 'Breakout Creator', 'Outstanding Short-Form Series']];
+const EGOF = [['E', 'Emmet', 'The Emmets', 'television, streaming and online video'], ['G', 'Gramophone', 'The Gramophones', 'recorded music'], ['O', 'Oswald', 'Academy Oswalds', 'cinema'], ['F', 'Footlight', 'The Footlights', 'theatre']];
+function egofWins() { const M = S.me; if (!M) return {}; const W = {}; for (const m of M.milestones || []) if (m.kind === 'prize' && /^Won/.test(m.t)) for (const [k, , show] of EGOF) if (m.t.includes(show)) W[k] = W[k] || m.w; return W; }
+function egofWeek() {
+  const M = S.me, me = ME(), W = egofWins();
+  if (M.egof || Object.keys(W).length < 4) return;
+  M.egof = S.week; me.standing = clamp(me.standing + 10, 0, 100); me.fame = clamp((me.fame || 0) + 15, 0, 100);
+  milestone('Completed the EGOF: an Emmet, a Gramophone, an Oswald and a Footlight', 'prize');
+  news('People', `${me.name} completes the EGOF, the rarest achievement in entertainment.`, { person: me.id });
+  inbox('news', 'The EGOF', 'An Emmet, a Gramophone, an Oswald and a Footlight. The papers run your photo with the four statues. Fewer than twenty people have ever done it. You put them on the same shelf and look at them for a long time.');
+}
+function egofHTML() {
+  const W = egofWins(), M = S.me;
+  return `<section class="panel egof"><h3>The EGOF ${M && M.egof ? '<span class="chip good">Complete</span>' : `<span class="count">${Object.keys(W).length} of 4</span>`}</h3><div class="egofrow">${EGOF.map(([k, n, show, what]) => `<div class="egofc${W[k] ? ' won' : ''}"><b>${k}</b><span>${n}</span><small>${esc(what)}</small><small>${W[k] ? 'Won ' + yearOf(W[k]) : esc(show)}</small></div>`).join('')}</div><p class="muted small">Entertainment's grand slam. Win an Emmet (series and online video), a Gramophone (music), an Oswald (cinema, at the Academy Oswalds) and a Footlight (theatre). It takes several careers' worth of crossing over.</p></section>`;
+}
+// ---- the bodies ----
+const BODY_SEEKS = {
+  ceremony: 'Voters are working professionals. They reward ambition, big performances, period and social dramas, and films that campaigned well; genre films and comedies rarely win the top prize.',
+  festival: 'Juries and programmers look for discoveries: a distinct voice, formal risk, and films that start conversations. Small independent films have an edge; polish matters less than nerve.',
+  music: 'Voting members of the recording academy reward craft and cultural impact: songs that defined the year, artists who broke through, albums that hold together.',
+  stage: 'Theatre critics and producers vote on the season\'s new plays, musicals and performances; a show must have opened in the city to qualify.',
+  podcast: 'An industry jury listens for craft: reporting, editing, sound and a host people trust.',
+  creator: 'The Emmets\' online categories reward series that build an audience and a format; numbers count, but so does craft.',
+  contest: 'Readers score entries blind against a rubric; the best stand out in the first ten pages.'
+};
+let AB_CACHE = null, AB_FOR = null, AW_IDX = null, AW_KEY = '';
+function awardBodies() {
+  if (AB_CACHE && AB_FOR === S) return AB_CACHE;
+  const L = [];
+  for (const m in CEREMONY) { const [n, y, who] = CEREMONY[m]; L.push({ name: n, kind: 'ceremony', field: 'film', month: 1, founded: y, about: `${who} The national film awards of ${MARKETS[m].name}, held each February.`, cats: ['Best Film', 'Best Performance', 'Best Screenplay'], key: n, m, prestige: m === 'US' ? 1 : ['UK', 'FR', 'TW', 'IN', 'JP', 'KR', 'IT'].includes(m) ? 2 : 3 }); }
+  const ALIAS = { lagoon: ['Lion of the Lagoon'], mountain: ['Festival Sundance', 'Mountain Film Festival'], cote: ['Festival de la Côte'] };
+  for (const F of typeof FESTIVALS !== 'undefined' ? FESTIVALS : []) L.push({ alias: ALIAS[F.k] || [], name: F.name.replace(/^the /, 'The '), kind: 'festival', field: 'film', month: F.month, about: F.d, cats: [F.prize, 'Official selection'], key: F.name.replace(/^the /, ''), bar: F.bar, fee: F.fee, prestige: F.bar >= 78 ? 1 : F.bar >= 65 ? 2 : 3 });
+  L.push({ name: 'The Bruin Film Festival', kind: 'festival', field: 'film', month: 1, founded: 1951, about: 'Berlin\'s big winter festival, the most political of the three great European festivals; its top prize is a golden bear cub.', cats: ['Golden Bruin', 'Silver Bruin'], key: 'Golden Bruin', alias: ['Silver Bruin', 'Bruin Film Festival'], prestige: 1 });
+  for (const f in MEDIA_AWARDS) { const [show, cats] = MEDIA_AWARDS[f]; L.push({ name: show, kind: f === 'creator' || f === 'podcast' ? 'media' : f, field: f, month: 0, about: { music: 'The recording academy\'s awards, the music industry\'s biggest night.', stage: 'Broadway\'s and the West End\'s prizes in this world, for the season\'s plays, musicals and performances.', podcast: 'The audio industry\'s awards, given since podcasts became a business.', creator: 'The awards for series made for screens at home: streaming, television and online video.' }[f], cats, key: show, prestige: 1, seeks: BODY_SEEKS[f] }); }
+  for (const c of typeof COMPS !== 'undefined' ? COMPS : []) L.push({ name: c.name, kind: 'contest', field: c.cat, month: c.month, about: c.d, cats: [c.tier === 'major' ? 'Grand prize' : 'Winner'], key: c.name, comp: c.k, fee: c.fee, prize: c.prize, prestige: c.tier === 'major' ? 1 : c.tier === 'mid' ? 2 : 3 });
+  L.forEach((b, i) => b.id = i);
+  AB_FOR = S; AW_IDX = null; return AB_CACHE = L;
+}
+function bodyWinners(b) {
+  const out = [];
+  if (b.kind === 'ceremony' || b.kind === 'festival') return (filmAwardIndex()[b.key] || []).slice().sort((a, c) => c.y - a.y); else if (b.kind === 'contest') { const M = S.me; for (const e of (M && M.comps) || []) if (e.k === b.comp && e.place === 'win') out.push({ y: yearOf(e.w || S.week), cat: 'Winner', name: ME().name, mine: 1 }); }
+  else for (const r of S.mawards || []) if (r.show === b.key) for (const [cat, name] of r.w) out.push({ y: r.y, cat, name });
+  return out.sort((a, b2) => b2.y - a.y);
+}
+// one pass over every film's awards, rebuilt when the record grows
+function filmAwardIndex() {
+  const k = S.films.length + ':' + (S.awards || []).length + ':' + S.week;
+  if (AW_IDX && AW_KEY === k) return AW_IDX;
+  const bs = awardBodies().filter(b => b.kind === 'ceremony' || b.kind === 'festival'), I = {};
+  const add = (name, rec) => { const b = bs.find(x => [x.key, ...(x.alias || [])].some(k => name.startsWith(k) || name.includes(', ' + k))); if (b) (I[b.key] = I[b.key] || []).push(rec); };
+  const seen = new Set();
+  for (const a of S.awards || []) { add(a.name, { y: a.y, cat: a.name.replace(/^[^:]*: /, ''), film: a.film, people: a.people }); seen.add(a.film + '|' + a.name); }
+  for (const f of S.films) if (f.archive) for (const s of f.awards || []) { const cat = s.replace(/^[^:]*: /, ''), base = s.replace(/ \d{4}(:|$)/, '$1').replace(/ \d{4}$/, ''); if (seen.has(f.id + '|' + base)) continue; add(s, { y: +((s.match(/\b(18|19|20)\d\d\b/) || [])[0]) || (f.rel !== null ? yearOf(f.rel) : 0), cat, film: f.id, people: [] }); }
+  AW_KEY = k; return AW_IDX = I;
+}
+function bodyLink(name) { const b = awardBodies().find(x => [x.key, ...(x.alias || [])].some(k => name.startsWith(k) || name.includes(', ' + k))); return b ? `<a href="#" class="lk" data-go="award:${b.id}">${esc(name)}</a>` : esc(name); }
+function viewAwardBody(id) {
+  const b = awardBodies()[id]; if (!b) return '<p>Not found.</p>';
+  const W = bodyWinners(b), MON_ = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const kindL = { ceremony: 'National film awards', festival: 'Film festival', music: 'Music awards', stage: 'Theatre awards', media: 'Screen and audio awards', contest: 'Competition' }[b.kind];
+  const seeks = b.seeks || BODY_SEEKS[b.kind] || BODY_SEEKS.contest;
+  const egof = EGOF.find(e => e[2] === b.key);
+  return `<div class="head"><p class="eyebrow">${esc(kindL)}${b.founded ? ' · since ' + b.founded : ''} · ${MON_[b.month]}</p><h2>${esc(b.name)}</h2><p class="lede">${esc(b.about || '')}</p></div>
+   <div class="cols two"><section class="panel"><h3>What it stands for</h3><p>${esc(seeks)}</p>${b.bar ? `<p class="small">Selection bar: films need to be about <b>${b.bar}/100</b> in quality. Small, independent films get a nudge. Entry fee ${fmtCash(usd(b.fee))}.</p>` : ''}${b.prize ? `<p class="small">Prize: <b>${fmtCash(usd(b.prize))}</b> · entry ${fmtCash(usd(b.fee))} · enter from the Contests tab.</p>` : ''}${egof ? `<p class="small">One of the four EGOF prizes: the <b>${egof[1]}</b>.</p>` : ''}
+    <h4>Categories</h4><ul class="plain">${b.cats.map(c => `<li>${esc(c)}</li>`).join('')}</ul><p class="muted small">Prestige ${'★'.repeat(4 - b.prestige)}</p></section>
+   <section class="panel"><h3>Winners on record <span class="count">${W.length}</span></h3>${W.length ? `<div class="tw"><table class="grid small"><thead><tr><th>Year</th><th>Category</th><th>Winner</th></tr></thead><tbody>${W.slice(0, 120).map(w => `<tr><td>${w.y}</td><td>${esc(w.cat)}</td><td>${w.film !== undefined ? fl(w.film) + (w.people && w.people.length ? ' · ' + w.people.map(pl).join(', ') : '') : esc(w.name)}${w.mine ? ' <b>(you)</b>' : ''}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No winners recorded yet. They\'ll appear here as the years go by.</p>'}</section></div>`;
+}
+function awardBodiesHTML() {
+  const B = awardBodies(), F = UI.abf = UI.abf || 'all', kinds = { all: 'All', ceremony: 'Film awards', festival: 'Festivals', music: 'Music', stage: 'Theatre', media: 'Screens & audio', contest: 'Competitions' };
+  const L = B.filter(b => F === 'all' || b.kind === F);
+  return `<h3>Every prize <span class="count">${B.length}</span></h3><div class="bfilter"><div class="bf-row">${Object.entries(kinds).map(([k, l]) => `<button class="pill${F === k ? ' on' : ''}" data-abf="${k}">${l}</button>`).join('')}</div></div>
+   <div class="tw"><table class="grid small"><thead><tr><th>Prize</th><th>Kind</th><th>When</th><th>Prestige</th><th class="n">Winners</th></tr></thead><tbody>${L.map(b => `<tr><td><a href="#" class="lk" data-go="award:${b.id}">${esc(b.name)}</a></td><td>${esc(kinds[b.kind] || b.kind)}</td><td data-v="${b.month}">${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][b.month]}</td><td data-v="${4 - b.prestige}">${'★'.repeat(4 - b.prestige)}</td><td class="n">${bodyWinners(b).length}</td></tr>`).join('')}</tbody></table></div>`;
+}
+// </awardbodies>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -18410,7 +18523,7 @@ function viewDesk() {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
     const block = blockedFrom(t);
-    return `<tr${block ? ' class="blocked"' : ''}><td>${p.jid ? `<a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>` : `<b>${esc(p.t)}</b>`}${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.mco ? `${esc(p.mco)} <span class="muted">${esc(t.biz || '')}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
+    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.mco ? `${esc(p.mco)} <span class="muted">${esc(t.biz || '')}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
       <td>${`<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
   const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
@@ -18506,6 +18619,7 @@ function careerClick(t) {
   if (typeof computerClick === 'function' && computerClick(t)) return true;
   if (typeof boardClick === 'function' && boardClick(t)) return true;
   if (typeof schoolClick === 'function' && schoolClick(t)) return true;
+  if (t.dataset.abf) { UI.abf = t.dataset.abf; render(true); return true; }
   if (t.dataset.schools !== undefined) { UI.schools = !!t.dataset.schools; render(true); return true; }
   if (t.dataset.cc) {
     const g = t.dataset.cc, v = t.dataset.v;
@@ -18594,7 +18708,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -18784,7 +18898,7 @@ function render(keepScroll) {
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
   let html;
-  if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : viewCompany(cur.id));
+  if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : viewCompany(cur.id));
   else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts }[UI.tab];
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
   $('#main').innerHTML = html;

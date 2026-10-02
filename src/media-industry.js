@@ -207,6 +207,7 @@ function mediaAwardsWeek() {
       inbox('news', `${show} ${y}: ${won ? 'you won' : 'you were nominated'}`, `${mine.title} was nominated for ${cats[0]}.${won ? ' And it won. You make a speech you won\'t remember.' : ' You don\'t win, but the nomination goes on every bio you\'ll ever write.'}`);
       if (!won) me.standing = clamp(me.standing + 1.5, 0, 100);
     }
+    (S.mawards = S.mawards || []).push({ y, show, w: line.split(' · ').map(x => [x.split(': ')[0], x.split(': ').slice(1).join(': ')]) });
     news('Award', `${show} ${y}: ${line}.`, {});
   }
 }

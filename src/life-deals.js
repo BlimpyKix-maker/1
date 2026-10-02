@@ -84,7 +84,7 @@ function contestMayOption(sc) {
 // Each February your market's Film Awards hold their ceremony. If you worked on a nominee, wrote one, know a
 // nominee well or have the standing, you're invited; otherwise you watch it on television like everyone else.
 function awardsMarket() { return HUBS[S.me.hub].m; }
-function awardsThisYear() { const mk = MARKETS[awardsMarket()].name; return (S.awards || []).filter(a => a.y === S.year && a.name.startsWith(mk + ' Film Awards')); }
+function awardsThisYear() { const mk = ceremony(awardsMarket()); return (S.awards || []).filter(a => a.y === S.year && a.name.startsWith(mk + ':')); }
 function awardsNominees() {
   const m = awardsMarket(), L = S.films.filter(f => f.rel !== null && f.ry === S.year - 1 && f.m === m).sort((a, b) => b.q - a.q).slice(0, 5);
   for (const a of awardsThisYear()) if (!L.some(f => f.id === a.film)) L.push(S.films[a.film]);
@@ -100,23 +100,23 @@ function awardsWeek() {
   const friend = noms.flatMap(f => [f.dir, f.prod, f.cast[0]]).find(id => M.known[id] && ['friend', 'close', 'partner', 'mentor'].includes(relOf(id)));
   const host = mine.length ? mine[0].prod : friend;
   const slot = freeSlot({ days: [5], blocks: [2], from: 0 });
-  const mk = MARKETS[awardsMarket()].name;
+  const mk = ceremony(awardsMarket());
   // the night itself is a week away: a nominee's team, a friend's plus-one, or a ticket your standing earns
   if (slot && (mine.length || friend !== undefined || me.standing >= 30 || (M.agent && M.agent.tier >= 2))) {
     const why = mine.length ? `${mine[0].title}, which you worked on, is nominated.` : friend !== undefined ? `${P(friend).name} is nominated and wants you as their plus-one.` : 'Your name is on the list now.';
-    inbox('invite', `The ${mk} Film Awards`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
+    inbox('invite', `The ${mk}`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
   } else {
     const best = wins.find(a => /Best Film/.test(a.name));
-    inbox('note', `The ${mk} Film Awards`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
+    inbox('note', `The ${mk}`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
   }
 }
 function awardsNight(x, L) {
   const M = S.me, me = ME(), wins = awardsThisYear();
-  for (const a of wins) L.push(`${a.name.replace(/^.* Film Awards: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
+  for (const a of wins) L.push(`${a.name.replace(/^[^:]*: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
   const mineWon = wins.filter(a => M.past.some(p => p.film === a.film && p.credited) || a.people.includes(me.id));
   for (const a of mineWon) {
     const self = a.people.includes(me.id);
-    milestone(self ? `Won ${a.name} for ${S.films[a.film].title}` : `${S.films[a.film].title}, which you worked on, won ${a.name.replace(/^.* Film Awards: /, '')}`, 'prize');
+    milestone(self ? `Won ${a.name} for ${S.films[a.film].title}` : `${S.films[a.film].title}, which you worked on, won ${a.name.replace(/^[^:]*: /, '')}`, 'prize');
     if (self) { me.fame = clamp((me.fame || 0) + 6, 0, 100); L.push('They call your name. You don\'t remember walking to the stage.'); }
     else me.standing = clamp(me.standing + 1, 0, 100);
   }

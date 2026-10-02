@@ -112,3 +112,5 @@ function headsHTML(c) {
   const L = STUDIO_HEADS[c.catId]; if (!L) return '';
   return `<h4>Leadership through the years</h4><ul class="plain small">${L.filter(h => h[0] <= S.year).map(h => `<li>${h[0]}–${h[1] === null ? 'today' : h[1]} · <b>${headLink(h)}</b> <span class="muted">${esc(h[5])}</span></li>`).join('')}</ul>`;
 }
+// one real festival name slipped into the record: it's the Mountain Film Festival in this world
+for (const C of CATALOGUES) for (const f of C.films || []) if (f.aw) f.aw = f.aw.map(a => a.replace(/^Festival Sundance/, 'Mountain Film Festival'));

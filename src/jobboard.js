@@ -175,3 +175,14 @@ function jobCrossHTML(j) {
   const to = Object.entries(T).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${IND_LABEL[k]} (${Math.round(v * 100)}%)`);
   return `<p class="small"><b>${esc(IND_LABEL[ind])}</b>${to.length ? ` · experience here also counts in ${to.join(', ')}` : ''}${t ? ` · typical pay ${fmtCash(usd(t.rate))}/day` : ''}</p>`;
 }
+// A job posting has its own page: the job, the people, the money, why your odds are what they are.
+function viewPost(id) {
+  const M = S.me, p = M.board.find(x => x.id === id) || M.jobs.find(x => x.id === id);
+  if (!p) return '<section class="panel"><h3>That posting has gone</h3><p class="muted">Jobs come down from the board after a few weeks. Check the board for what\'s open now.</p></section>';
+  const t = tmplOf(p) || {}, f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, j = p.jid ? JOBS.jobs.find(x => x.id === p.jid) : null, ind = postIndustry(p), mine = M.jobs.includes(p);
+  const F = mine ? [] : hireFactors(p), odds = mine ? null : hireOdds(p), block = mine ? null : blockedFrom(t);
+  return `<div class="head"><p class="eyebrow">${esc(IND_LABEL[ind])}${t.tier ? ' · ' + '★'.repeat(t.tier) : ''}${p.away ? ' · in ' + esc(hubName(p.away)) : ''}</p><h2>${esc(p.t)}</h2><p class="lede">${f ? `On ${fl(f.id)}, ${esc(f.status.toLowerCase())}${f.co !== null ? ' for ' + `<a href="#" class="lk" data-go="co:${f.co}">${esc(S.companies[f.co].name)}</a>` : ''}.` : p.mco ? `At ${esc(p.mco)} (${esc(t.biz || '')}).` : esc(t.biz || t.d || '')}${p.head !== null && p.head !== undefined ? ` You'd report to ${pl(p.head)}.` : ''}</p></div>
+   <div class="cols two"><section class="panel"><h3>The job</h3>${t.d ? `<p>${esc(t.d)}</p>` : ''}${j && j.resp ? `<ul class="plain">${j.resp.map(x => `<li>• ${esc(x)}</li>`).join('')}</ul>` : ''}${j && j.sk ? `<p class="muted">What it takes: ${j.sk.map(esc).join(' · ')}</p>` : ''}${j && j.before ? `<p class="muted small">People come from: ${esc(j.before)}</p>` : ''}${j && j.after ? `<p class="muted small">It leads to: ${esc(j.after)}</p>` : ''}
+    <div class="kpis mini"><div><span>Pay</span><b>${fmtCash(p.rate)}/day</b></div><div><span>Days</span><b>${p.days} a week</b></div><div><span>Length</span><b>${p.weeks} weeks</b></div><div><span>Worth</span><b>${fmtCash(p.rate * p.days * p.weeks)}</b></div></div>${j ? jobCrossHTML(j) : ''}</section>
+   <section class="panel"><h3>${mine ? 'You have this job' : 'Your odds'}</h3>${mine ? `<p>Week ${p.done + 1} of about ${p.weeks}.</p>` : `<p class="big">${Math.round(odds * 100)}%</p>${block ? `<p class="bad">⚠ ${esc(block)}: you'll be filtered out.</p>` : ''}<ul class="plain small">${F.filter(x => Math.abs(x[1]) >= .05).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<li><span class="${v > 0 ? 'good' : 'bad'}">${v > 0 ? '▲' : '▼'}</span> ${esc(k)}</li>`).join('')}</ul><p class="muted small">Tick "Apply" on the board to send an application this week.</p>`}</section></div>`;
+}
