@@ -9683,6 +9683,7 @@ function catalogueFilm(cf, Y, relW, ros) {
   };
   const dir = cid(cf.dir[0]);
   ex.add(dir);
+  const codir = cf.dir.slice(1).map(cid); codir.forEach(i => ex.add(i));   // brothers, sisters and partners who direct together
   // no writer on record: silent-era directors and known writer-directors wrote their own; otherwise an invented writer
   const dsrc = S.cat.src.people[cf.dir[0]];
   const wri = cf.wri ? cf.wri.map(cid) : (cf.y < 1930 || dsrc.r2 === 'wri') ? [dir] : fill('writer', [], 1);
@@ -9705,7 +9706,7 @@ function catalogueFilm(cf, Y, relW, ros) {
   const budget = cf.b != null ? cf.b : budgetFor(tier, cf.hub, cf.g, Y);
   const f = {
     id: S.films.length, title: cf.t, real: cf.real, cat: cf, genre: cf.g, hub: cf.hub, m: HUBS[cf.hub].m, co: co ? co.id : null, tier, budget, cost: budget,
-    stage: 3, stageEnd: relW, dur: [0, 0, 0, 0], dir, wri, cast, dp, ed, prod, crew, gl: relW - 40, rel: null, events: [], awards: [], archive: true,
+    stage: 3, stageEnd: relW, dur: [0, 0, 0, 0], dir, codir: codir.length ? codir : undefined, wri, cast, dp, ed, prod, crew, gl: relW - 40, rel: null, events: [], awards: [], archive: true,
     hook: clamp(35 + rnd() * 40, 5, 95), q: null, A: {}, gross: {}, total: 0, reviews: null, bd: null, status: 'Post-production',
     fixedQ: cf.q, fixedHome: cf.dr != null ? cf.dr / .5 : cf.flop ? budget * .9 : null, fixedMk: cf.dr != null ? recMarket(cf) : HUBS[cf.hub].m, fixedCult: cf.cult || 0, onList: !!cf.list, recorded: cf.m === 'r'
   };
@@ -9953,7 +9954,7 @@ const EVENTS = [
 ];
 function crewIds(f) { return f.crew ? Object.values(f.crew) : []; }
 function corePeople(f) { return [...new Set([f.dir, ...f.wri, ...f.cast, f.dp, f.ed, f.prod])].map(P); }
-function keyPeople(f) { return [...new Set([f.dir, ...f.wri, ...f.cast, f.dp, f.ed, f.prod, ...crewIds(f)])].map(P); }
+function keyPeople(f) { return [...new Set([f.dir, ...(f.codir || []), ...f.wri, ...f.cast, f.dp, f.ed, f.prod, ...crewIds(f)])].map(P); }
 // Everyone who works on a film gets to know everyone else, but how well depends on how closely they work.
 // Each credit sits in a department; same-department pairs and direct working lines bond hardest.
 const DEPT_OF = { dir: 'helm', ad: 'helm', wri: 'story', cast: 'cast', stn: 'cast', dp: 'camera', ed: 'post', snd: 'post', mus: 'post', vfx: 'effects', pd: 'design', cos: 'design', mu: 'design', prod: 'office', cst: 'office' };
@@ -10102,6 +10103,7 @@ function release(f) {
   f.hitRatio = homeRatio;
   const roleW = new Map();
   roleW.set(f.dir, { st: 1.2, fm: .6 });
+  (f.codir || []).forEach(i => roleW.set(i, { st: 1, fm: .3 }));
   f.wri.forEach(i => roleW.has(i) || roleW.set(i, { st: 1, fm: .3 }));
   f.cast.forEach((i, k) => roleW.set(i, { st: 1, fm: [1, .7, .5][k] ?? .35 }));
   [f.dp, f.ed].forEach(i => roleW.set(i, { st: .8, fm: .15 }));
@@ -14352,7 +14354,7 @@ function fullCredits(f) {
   const x = f.ext || makeExt(f), crew = Object.keys(CREW_LABEL).filter(k => f.crew && f.crew[k] !== undefined);
   return `<section class="panel credits"><h3>Credits</h3>
    <div class="castgrid">${f.cast.map((id, i) => `<a href="#" class="castcard" data-go="person:${id}">${portraitOf(P(id), 56)}<b>${esc(P(id).name)}</b><span class="muted small">${f.genre === 'Documentary' ? 'Featuring' : f.genre === 'Animation' ? 'Voice' : ['Lead', 'Co-lead', 'Supporting'][i] || 'Cast'}</span></a>`).join('')}</div>
-   ${credit('Director', [f.dir])}${credit(f.wri.length > 1 ? 'Screenplay' : 'Written by', f.wri)}${credit('Story by', x.story)}${credit('Produced by', [f.prod])}${credit('Executive producers', x.eprod)}${credit('Cinematography', [f.dp])}${credit('Editor', [f.ed])}${crew.map(k => credit(CREW_LABEL[k], [f.crew[k]])).join('')}${Object.keys(f.xc || {}).filter(id => !keyIds(f).includes(+id)).map(id => credit(f.xc[id], [+id])).join('')}
+   ${credit(f.codir ? 'Directors' : 'Director', [f.dir, ...(f.codir || [])])}${credit(f.wri.length > 1 ? 'Screenplay' : 'Written by', f.wri)}${credit('Story by', x.story)}${credit('Produced by', [f.prod])}${credit('Executive producers', x.eprod)}${credit('Cinematography', [f.dp])}${credit('Editor', [f.ed])}${crew.map(k => credit(CREW_LABEL[k], [f.crew[k]])).join('')}${Object.keys(f.xc || {}).filter(id => !keyIds(f).includes(+id)).map(id => credit(f.xc[id], [+id])).join('')}
    <details class="more"><summary>Full cast and crew</summary>${credit('Also starring', x.bits)}<div class="crewlist">${crewNames(f).map(([r, n]) => `<div class="cr"><span>${esc(r)}</span><span>${esc(n)}</span></div>`).join('')}</div></details></section>`;
 }
 // ---- people ----
@@ -14525,7 +14527,7 @@ function companyTerminal(c) {
    <div class="term-top">${logoSVG(c, 72)}<div><p class="eyebrow">${TIER[c.tier]} · ${esc(hubName(c.hub))} · founded ${c.founded}${c.owner !== undefined ? ' · privately held by ' + esc(P(c.owner).name) : ''}</p><h2>${esc(c.name)} <span class="ticker">${esc(tickerOf(c))}</span></h2><p class="muted small">Strategy: <b>${esc(companyStrategy(c))}</b> · chasing ${Object.entries(c.taste).sort((a, b) => b[1] - a[1]).slice(0, 2).map(([g]) => esc(g.toLowerCase())).join(' and ') || 'anything'}</p>
     <p class="price">${c.closed !== null ? `<span class="bad">Closed ${c.closed}</span>` : `$${px.toFixed(2)}<small> a share</small> ${pct(chg(1))} <span class="muted small">1M</span> ${pct(chg(12))} <span class="muted small">1Y</span>`}</p></div>${sparkline(h.slice(-60))}</div>
    <div class="kpis term-k"><div><span>Value</span><b>${fmtM(now)}</b></div><div><span>Cash</span><b class="${c.cash < 0 ? 'bad' : ''}">${fmtM(c.cash)}</b></div><div><span>Shares</span><b>${sh.toFixed(1)}M</b></div><div><span>Hit rate</span><b>${hitRate}%</b></div><div><span>Critics, 3 yrs</span><b>${avgRev ?? '—'}</b></div><div><span>Films / hits</span><b>${films.length} / ${c.hits}</b></div><div><span>Library films</span><b>${libCount(c)}</b></div><div><span>Library income</span><b>${fmtM(c.libIncLast)}</b></div></div>
-   <div class="cols two"><section class="panel"><h3>Who runs it</h3><div class="cr"><span>Chief executive</span><span>${person(st.ceo, st.ceoName)}</span></div><div class="cr"><span>Head of production</span><span>${person(st.hop, st.ceoName === st.dist ? '—' : 'Vacant')}</span></div><div class="cr"><span>Distribution</span><span>${esc(st.dist)}</span></div><div class="cr"><span>Finance</span><span>${esc(st.cfo)}</span></div><div class="cr"><span>Board</span><span>${st.board.map(esc).join(', ')}</span></div>${st.partners.length ? `<div class="cr"><span>Creative partners</span><span>${st.partners.map(pl).join(', ')}</span></div>` : ''}<p class="muted small">Divisions: ${st.divisions.join(' · ')}. Taste: ${Object.keys(c.taste).map(g => g.toLowerCase()).join(' and ')}.</p></section>
+   <div class="cols two"><section class="panel"><h3>Who runs it</h3>${(typeof headsOf === 'function' && headsOf(c).length) ? headsOf(c).map(h => `<div class="cr"><span>${esc(h[5])}</span><span>${headLink(h)}</span></div>`).join('') : `<div class="cr"><span>Chief executive</span><span>${person(st.ceo, st.ceoName)}</span></div><div class="cr"><span>Head of production</span><span>${person(st.hop, st.ceoName === st.dist ? '—' : 'Vacant')}</span></div>`}<div class="cr"><span>Distribution</span><span>${esc(st.dist)}</span></div><div class="cr"><span>Finance</span><span>${esc(st.cfo)}</span></div><div class="cr"><span>Board</span><span>${st.board.map(esc).join(', ')}</span></div>${st.partners.length ? `<div class="cr"><span>Creative partners</span><span>${st.partners.map(pl).join(', ')}</span></div>` : ''}<p class="muted small">Divisions: ${st.divisions.join(' · ')}. Taste: ${Object.keys(c.taste).map(g => g.toLowerCase()).join(' and ')}.</p>${typeof headsHTML === 'function' ? headsHTML(c) : ''}</section>
    <section class="panel"><h3>On the slate</h3>${slate.length ? `<ul class="plain">${slate.slice(0, 10).map(f => `<li>${fl(f.id)} ${stageCell(f)} <span class="muted small">${fmtM(f.budget)}</span></li>`).join('')}</ul>` : '<p class="muted">Nothing in production.</p>'}
     <h4>Analysts say</h4><p class="muted">${c.closed !== null ? 'Nothing: the company is gone.' : c.cash < 0 ? 'Debt is the story here. One more flop and the lenders take the keys.' : chg(12) !== null && chg(12) > 15 ? 'Momentum is real. The question is whether the next slate can match it.' : chg(12) !== null && chg(12) < -15 ? 'A rough year. Expect cost-cutting and a safer slate.' : hitRate > 55 ? 'A steady hand: more hits than misses, few surprises.' : 'Hard to read. Everything depends on the next couple of releases.'}</p></section></div></div>`;
 }
@@ -16635,6 +16637,122 @@ function industryHTML(I) {
    ${I.trends.length ? `<ul class="plain small">${I.trends.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</div>`;
 }
 // </mentor>
+// <corrections>
+// ---------------- Corrections: duos who are two people, and who really ran the studios ----------------
+// The catalogue once filed some directing partners as one person. They are two: they share films, and some of them
+// have made films apart. This splits each pair before the world is built and gives joint films both names.
+// It also gives the big studios their real chain of command, so the boss on a company page is who it was that year.
+const DUOS = {
+  coen: [['coen_j', 'Joel Coen', 'Joel Fargo', 1954], ['coen_e', 'Ethan Coen', 'Ethan Fargo', 1957]],
+  taviani: [['taviani_v', 'Vittorio Taviani', 'Vittorio Tavolini', 1929, 2018], ['taviani_p', 'Paolo Taviani', 'Paolo Tavolini', 1931, 2024]],
+  maysles: [['maysles_a', 'Albert Maysles', 'Albert Mazurski', 1926, 2015], ['maysles_d', 'David Maysles', 'David Mazurski', 1931, 1987]],
+  hughesbros: [['hughes_al', 'Allen Hughes', 'Allen Menace', 1972], ['hughes_ab', 'Albert Hughes', 'Albert Menace', 1972]],
+  farrelly: [['farrelly_p', 'Peter Farrelly', 'Peter Dumbarton', 1956], ['farrelly_b', 'Bobby Farrelly', 'Bobby Dumbarton', 1958]],
+  wachowskis: [['wachowski_la', 'Lana Wachowski', 'Lana Matrixon', 1965, null, 'F'], ['wachowski_li', 'Lilly Wachowski', 'Lilly Matrixon', 1967, null, 'F']],
+  bergerpulcini: [['berman_ss', 'Shari Springer Berman', 'Shari Springer Splendor', 1964, null, 'F'], ['pulcini', 'Robert Pulcini', 'Robert Harveypekar', 1964]],
+  daytonfaris: [['dayton_j', 'Jonathan Dayton', 'Jonathan Dayspring', 1957], ['faris_v', 'Valerie Faris', 'Valerie Ferris-Wheel', 1958, null, 'F']],
+  dardennes: [['dardenne_jp', 'Jean-Pierre Dardenne', 'Jean-Pierre Dardanelle', 1951], ['dardenne_l', 'Luc Dardenne', 'Luc Dardanelle', 1954]],
+  adilbilall: [['elarbi', 'Adil El Arbi', 'Adil El Amrani', 1988], ['fallah', 'Bilall Fallah', 'Bilall Fahmi', 1986]],
+  boden_fleck: [['boden', 'Anna Boden', 'Anna Halfnelson', 1979, null, 'F'], ['fleck', 'Ryan Fleck', 'Ryan Sugarman', 1976]],
+  chan_andrew: [['chan_jeff', 'Jeff Chan', 'Jeff Cheung', 1985], ['rhymer', 'Andrew Rhymer', 'Andrew Rhodes', 1985]],
+  daniels: [['kwan_d', 'Daniel Kwan', 'Daniel Kwong', 1988], ['scheinert', 'Daniel Scheinert', 'Daniel Schoenfeld', 1987]],
+  nakache_toledano: [['nakache', 'Olivier Nakache', 'Olivier Benhamou', 1973], ['toledano', 'Éric Toledano', 'Éric Intouchy', 1971]],
+  nee_brothers: [['nee_aa', 'Aaron Nee', 'Aaron Lostcity', 1981], ['nee_ad', 'Adam Nee', 'Adam Lostcity', 1981]],
+  philippous: [['philippou_d', 'Danny Philippou', 'Danny Philippakis', 1992], ['philippou_m', 'Michael Philippou', 'Michael Philippakis', 1992]],
+  radiosilence: [['bettinelli', 'Matt Bettinelli-Olpin', 'Matt Bettancourt', 1978], ['gillett', 'Tyler Gillett', 'Tyler Gilliard', 1982]],
+  russo: [['russo_a', 'Anthony Russo', 'Anthony Rossellini', 1970], ['russo_j', 'Joe Russo', 'Joe Rossellini', 1971]],
+  safdies: [['safdie_j'], ['safdie_b']]   // already in the catalogue as two people
+};
+// films one of a pair made alone (catalogue film id → the half who directed it)
+const DUO_SOLO = { macbeth21: 'coen_j', greenbook: 'farrelly_p' };
+// films made apart after the split, added to the record
+const DUO_FILMS = [
+  { id: 'hudsucker', real: 'The Hudsucker Proxy', t: 'The Hula-Hoop Executive', y: 1994, hub: 'hollywood', st: 'warner', g: 'Comedy', dir: ['coen_j', 'coen_e'], wri: ['coen_j', 'coen_e'], b: 25, flop: true, q: 72, cult: 40, note: 'A screwball fable about a mailroom boy made company president; it lost most of its money.' },
+  { id: 'intolerable', real: 'Intolerable Cruelty', t: 'Irreconcilable Differences, Esq.', y: 2003, hub: 'hollywood', st: 'universal', g: 'Comedy', dir: ['coen_j', 'coen_e'], cast: ['clooney', 'zetajones'], q: 64 },
+  { id: 'ladykillers04', real: 'The Ladykillers', t: 'The Gentlemen Burglars', y: 2004, hub: 'hollywood', st: 'touchstone', g: 'Comedy', dir: ['coen_j', 'coen_e'], wri: ['coen_j', 'coen_e'], cast: ['hanks'], q: 56 },
+  { id: 'burnafter', real: 'Burn After Reading', t: 'Destroy Once Read', y: 2008, hub: 'hollywood', st: 'focus', g: 'Comedy', dir: ['coen_j', 'coen_e'], wri: ['coen_j', 'coen_e'], cast: ['clooney', 'mcdormand', 'pitt', 'malkovich', 'swinton'], dp: 'lubezki', q: 76 },
+  { id: 'hailcaesar', real: 'Hail, Caesar!', t: 'All Hail the Emperor!', y: 2016, hub: 'hollywood', st: 'universal', g: 'Comedy', dir: ['coen_j', 'coen_e'], wri: ['coen_j', 'coen_e'], cast: ['brolin', 'clooney', 'johansson', 'swinton'], dp: 'deakins', mus: 'burwell', q: 72, note: 'A day in the life of a 1950s studio fixer, with a kidnapped star in a toga.' },
+  { id: 'busterscruggs', real: 'The Ballad of Buster Scruggs', t: 'The Ballad of the Singing Cowboy', y: 2018, hub: 'hollywood', st: 'netflix', g: 'Western', dir: ['coen_j', 'coen_e'], wri: ['coen_j', 'coen_e'], dp: 'delbonnel', mus: 'burwell', q: 80, note: 'Six western tales, first written over twenty-five years and finished for a streamer.' },
+  { id: 'driveawaydolls', real: 'Drive-Away Dolls', t: 'The Getaway Dolls', y: 2024, hub: 'hollywood', st: 'focus', g: 'Comedy', dir: ['coen_e'], wri: ['coen_e'], cast: ['qualley'], b: 7, q: 60, note: 'Ethan\'s first narrative feature without his brother, co-written with his wife, the editor Tricia Cooke.' },
+  { id: 'honeydont', real: 'Honey Don\'t!', t: 'Sweet Nothing, Detective', y: 2025, hub: 'hollywood', st: 'focus', g: 'Crime', dir: ['coen_e'], wri: ['coen_e'], cast: ['qualley'], q: 58 }
+];
+(function splitDuos() {
+  const cats = CATALOGUES;
+  const all = {}; for (const C of cats) for (const p of C.people || []) all[p.id] = p;
+  for (const d in DUOS) {
+    const src = all[d]; if (!src) continue;
+    for (const C of cats) {
+      const i = (C.people || []).indexOf(src);
+      if (i < 0) continue;
+      const halves = DUOS[d].filter(h => h.length > 1).map(([id, real, n, b, dd, sx]) => Object.assign({}, src, { id, real, n, b, d: dd || undefined, sx: sx || undefined, note: src.note ? src.note.replace(/^(Brothers|Twin brothers|Two [A-Za-z ]+ siblings|A [A-Za-z-]+ duo|The indie pair|Belgian brothers)/, m => 'One of ' + m.toLowerCase()) : undefined }));
+      C.people.splice(i, 1, ...halves);
+      if (typeof REAL_LOOKS !== 'undefined' && REAL_LOOKS[src.real]) for (const h of halves) REAL_LOOKS[h.real] = REAL_LOOKS[h.real] || REAL_LOOKS[src.real];
+    }
+    const ids = DUOS[d].map(h => h[0]);
+    for (const C of cats) {
+      for (const f of C.films || []) {
+        for (const k in f) {
+          const v = f[k];
+          if (v === d) f[k] = ids[0];
+          else if (Array.isArray(v) && v.includes(d)) { const i = v.indexOf(d); v.splice(i, 1, ...((k === 'dir' || k === 'wri') ? ids.filter(x => !v.includes(x)) : [ids[0]])); }
+        }
+        if (DUO_SOLO[f.id] && ids.includes(DUO_SOLO[f.id]) && f.dir) f.dir = f.dir.filter(x => !ids.includes(x) || x === DUO_SOLO[f.id]);
+      }
+      for (const id in C.credits || {}) for (const k in C.credits[id]) if (C.credits[id][k] === d) C.credits[id][k] = ids[0];
+      for (const id in C.castAdd || {}) C.castAdd[id] = C.castAdd[id].map(x => x === d ? ids[0] : x);
+    }
+  }
+  const have = new Set(cats.flatMap(C => (C.films || []).map(f => f.id))), ppl = new Set(cats.flatMap(C => (C.people || []).map(p => p.id)));
+  for (const f of DUO_FILMS) if (!have.has(f.id)) { f.cast = (f.cast || []).filter(x => ppl.has(x)); for (const k of ['dp', 'mus', 'ed']) if (f[k] && !ppl.has(f[k])) delete f[k]; CAT6.films.push(f); have.add(f.id); }
+})();
+// ---- who ran the studios: [from, to, catalogue person or null, real name (never shown), name in this world, title] ----
+const STUDIO_HEADS = {
+  disney: [[1923, 1966, 'disney', 'Walt Disney', null, 'Founder and chief'], [1966, 1971, null, 'Roy O. Disney', 'Roy O. Dizzley', 'Chief executive'], [1984, 2005, null, 'Michael Eisner', 'Michael Eisenberg', 'Chief executive'], [1984, 1994, null, 'Jeffrey Katzenberg', 'Jeffrey Katzenburg', 'Studio chairman'], [2005, 2020, null, 'Bob Iger', 'Bob Eiger', 'Chief executive'], [2020, 2022, null, 'Bob Chapek', 'Bob Chapman', 'Chief executive'], [2022, null, null, 'Bob Iger', 'Bob Eiger', 'Chief executive']],
+  marvelstudios: [[1996, 2007, null, 'Avi Arad', 'Avi Arcade', 'Chief executive'], [2007, null, null, 'Kevin Feige', 'Kevin Endgame', 'President']],
+  warner: [[1923, 1956, null, 'Harry Warner', 'Harry Warden', 'President'], [1923, 1969, 'jwarner', 'Jack L. Warner', null, 'Head of production'], [1969, 1981, null, 'Ted Ashley', 'Ted Ashford', 'Chairman'], [1981, 1999, null, 'Bob Daly', 'Bob Daley', 'Chairman'], [1999, 2013, null, 'Barry Meyer', 'Barry Meyers', 'Chairman'], [2013, 2018, null, 'Kevin Tsujihara', 'Kevin Tsujimura', 'Chief executive'], [2022, null, null, 'Michael De Luca', 'Michael De Lucca', 'Co-chairman']],
+  paramount: [[1916, 1964, 'zukor', 'Adolph Zukor', null, 'Chairman'], [1966, 1974, 'evans', 'Robert Evans', null, 'Head of production'], [1974, 1984, null, 'Barry Diller', 'Barry Dillon', 'Chairman'], [1992, 2004, null, 'Sherry Lansing', 'Sherry Lansdowne', 'Chairman'], [2005, 2017, null, 'Brad Grey', 'Brad Gray', 'Chairman'], [2025, null, null, 'David Ellison', 'David Ellerson', 'Chief executive']],
+  mgm: [[1924, 1951, 'lbmayer', 'Louis B. Mayer', null, 'Studio chief'], [1924, 1936, null, 'Irving Thalberg', 'Irving Thalbert', 'Head of production'], [1951, 1956, null, 'Dore Schary', 'Dore Scharf', 'Studio chief'], [1969, 2010, null, 'Kirk Kerkorian', 'Kirk Kirkland', 'Owner']],
+  universal: [[1912, 1936, 'laemmle', 'Carl Laemmle', null, 'Founder and president'], [1962, 1995, null, 'Lew Wasserman', 'Lew Waterman', 'Chairman'], [2013, null, null, 'Donna Langley', 'Donna Langdon', 'Chairman']],
+  columbia: [[1924, 1958, 'cohn', 'Harry Cohn', null, 'President'], [1987, 1989, null, 'David Puttnam', 'David Puttenham', 'Chairman'], [2006, 2015, null, 'Amy Pascal', 'Amy Paschal', 'Chairman'], [2016, null, null, 'Tom Rothman', 'Tom Rothmere', 'Chairman']],
+  fox20: [[1935, 1956, 'zanuck', 'Darryl F. Zanuck', null, 'Head of production'], [1962, 1971, 'zanuck', 'Darryl F. Zanuck', null, 'President'], [1976, 1979, null, 'Alan Ladd Jr.', 'Alan Ladder Jr.', 'President'], [2000, 2012, null, 'Tom Rothman', 'Tom Rothmere', 'Co-chairman'], [2012, 2019, null, 'Stacey Snider', 'Stacey Snyderman', 'Chairman']],
+  ua: [[1951, 1978, null, 'Arthur Krim', 'Arthur Krimson', 'Chairman']],
+  orion: [[1978, 1992, null, 'Arthur Krim', 'Arthur Krimson', 'Chairman']],
+  lucasfilm: [[1971, 2012, 'lucas', 'George Lucas', null, 'Founder and chairman'], [2012, null, null, 'Kathleen Kennedy', 'Kathleen Kennerly', 'President']],
+  pixar: [[1986, 2019, null, 'Ed Catmull', 'Ed Catmill', 'President'], [1986, 2018, 'lasseter', 'John Lasseter', null, 'Chief creative officer'], [2018, null, 'docter', 'Pete Docter', null, 'Chief creative officer']],
+  miramax: [[1979, 2005, null, 'Harvey Weinstein', 'Harvey Wainwright', 'Co-chairman']],
+  weinsteinco: [[2005, 2017, null, 'Harvey Weinstein', 'Harvey Wainwright', 'Co-chairman']],
+  dreamworks: [[1994, 2016, 'spielberg', 'Steven Spielberg', null, 'Co-founder']],
+  dwanim: [[2004, 2016, null, 'Jeffrey Katzenberg', 'Jeffrey Katzenburg', 'Chief executive']],
+  amblin: [[1981, null, 'spielberg', 'Steven Spielberg', null, 'Founder']],
+  newline: [[1967, 2008, null, 'Bob Shaye', 'Bob Shea', 'Founder and chairman']],
+  ealing: [[1938, 1959, 'balcon', 'Michael Balcon', null, 'Head of studio']],
+  shaw: [[1958, 2011, 'shaw_rr', 'Run Run Shaw', null, 'Chairman']],
+  goldenharvest: [[1970, 2007, null, 'Raymond Chow', 'Raymond Chau', 'Founder and chairman']],
+  ghibli: [[1985, null, null, 'Toshio Suzuki', 'Toshio Suzuka', 'Producer and president']],
+  yashraj: [[1970, 2012, 'chopra_y', 'Yash Chopra', null, 'Founder'], [2012, null, 'chopra_a', 'Aditya Chopra', null, 'Chairman']],
+  workingtitle: [[1983, null, null, 'Tim Bevan', 'Tim Bevin', 'Co-chairman']],
+  legendary: [[2000, 2017, null, 'Thomas Tull', 'Thomas Tully', 'Founder and chief executive']],
+  jerrybruckheimer: [[1995, null, 'bruckheimer', 'Jerry Bruckheimer', null, 'Founder']],
+  europacorp: [[1999, null, 'besson', 'Luc Besson', null, 'Founder']],
+  carolco: [[1976, 1995, null, 'Mario Kassar', 'Mario Kassab', 'Co-founder']],
+  cannon: [[1979, 1994, null, 'Menahem Golan', 'Menahem Golanski', 'Co-chairman']],
+  lionsgate: [[2000, null, null, 'Jon Feltheimer', 'Jon Feldheimer', 'Chief executive']],
+  imagine: [[1986, null, 'howard_r', 'Ron Howard', null, 'Co-founder']],
+  planb: [[2001, null, 'pitt', 'Brad Pitt', null, 'Founder']],
+  zoetrope: [[1969, null, 'coppola', 'Francis Ford Coppola', null, 'Founder']],
+  blumhouse: [[2000, null, null, 'Jason Blum', 'Jason Bloom', 'Founder and chief executive']],
+  netflix: [[1997, 2023, null, 'Reed Hastings', 'Reed Hastings-Streamer', 'Co-founder and chief executive'], [2011, null, null, 'Ted Sarandos', 'Ted Saranwrap', 'Chief content officer, then co-CEO']],
+  a24: [[2012, null, null, 'Daniel Katz', 'Daniel Kaplan', 'Co-founder']],
+  neon: [[2017, null, null, 'Tom Quinn', 'Tom Quill', 'Founder and chief executive']]
+};
+function headsOf(c, y = S.year) { return (STUDIO_HEADS[c.catId] || []).filter(h => h[0] <= y && (h[1] === null || h[1] >= y)); }
+function headName(h) { return h[2] && S.cat.src.people[h[2]] ? S.cat.src.people[h[2]].n : h[4]; }
+function headLink(h) { const id = h[2] !== null && S.cat.people ? S.cat.people[h[2]] : undefined; return id !== undefined && P(id) ? pl(id) : esc(headName(h)); }
+function headsHTML(c) {
+  const L = STUDIO_HEADS[c.catId]; if (!L) return '';
+  return `<h4>Leadership through the years</h4><ul class="plain small">${L.filter(h => h[0] <= S.year).map(h => `<li>${h[0]}–${h[1] === null ? 'today' : h[1]} · <b>${headLink(h)}</b> <span class="muted">${esc(h[5])}</span></li>`).join('')}</ul>`;
+}
+// </corrections>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -16673,7 +16791,7 @@ function personStatus(p) {
   if (p.busy >= S.week) { const f = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(p.id)); return f ? 'On ' + f.title : 'Working'; }
   return 'Available';
 }
-function keyIds(f) { return [f.dir, ...f.wri, ...f.cast, f.dp, f.ed, f.prod, ...(f.crew ? Object.values(f.crew) : [])]; }
+function keyIds(f) { return [f.dir, ...(f.codir || []), ...f.wri, ...f.cast, f.dp, f.ed, f.prod, ...(f.crew ? Object.values(f.crew) : [])]; }
 function ageOf(p) { return (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; }
 
 // ---------- views ----------
@@ -16890,7 +17008,7 @@ function viewPerson(id) {
   const friends = ties.filter(t => t[1] > 15).slice(0, 6), foes = ties.filter(t => t[1] < -10).slice(-4).reverse();
   const credits = p.credits.map(i => S.films[i]).sort((a, b) => b.rel - a.rel);
   const current = S.active.map(i => S.films[i]).filter(f => keyIds(f).includes(p.id));
-  const roleIn = f => f.xc && f.xc[p.id] ? f.xc[p.id] : f.dir === p.id ? (f.wri.includes(p.id) ? 'Writer-director' : 'Director') : f.cast.includes(p.id) ? ['Lead', 'Co-lead', 'Supporting'][f.cast.indexOf(p.id)] : f.wri.includes(p.id) ? 'Writer' : f.dp === p.id ? 'Cinematography' : f.ed === p.id ? 'Editor' : f.prod === p.id ? 'Producer' : crewRole(f, p.id);
+  const roleIn = f => f.xc && f.xc[p.id] ? f.xc[p.id] : (f.dir === p.id || (f.codir || []).includes(p.id)) ? (f.wri.includes(p.id) ? 'Writer-director' : 'Director') : f.cast.includes(p.id) ? ['Lead', 'Co-lead', 'Supporting'][f.cast.indexOf(p.id)] : f.wri.includes(p.id) ? 'Writer' : f.dp === p.id ? 'Cinematography' : f.ed === p.id ? 'Editor' : f.prod === p.id ? 'Producer' : crewRole(f, p.id);
   const repRow = (l, v, cls) => `<div class="rep"><span>${l}</span>${bar(v, 100, cls)}<b>${Math.round(v)}</b></div>`;
   return `<div class="head detail partyhead"><div class="pf">${portraitOf(p, 112)}</div><div><p class="eyebrow">${p.player ? ROLE_LABEL[p.role] : esc(p.occ || occupationOf(p))}${!p.player && !p.occ && occupationOf(p) !== ROLE_LABEL[p.role] ? ' · ' + ROLE_LABEL[p.role] : ''} · ${esc(hubName(p.hub))}</p><h2>${esc(p.name)}</h2>
   <p class="lede">${p.player ? '<b>This is you.</b> ' : ''}${pron(p)[0]} ${pron(p)[1]} ${ageOf(p)}${p.dead ? ' (died)' : ''}, born ${p.born}. ${p.credits.length} credit${p.credits.length === 1 ? '' : 's'}${p.debut !== null && p.credits.length ? `, debut in ${yearOf(S.films[p.credits[0]].rel)}` : ''}. Status: ${esc(personStatus(p))}.</p>

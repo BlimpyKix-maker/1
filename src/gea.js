@@ -207,7 +207,7 @@ function fullCredits(f) {
   const x = f.ext || makeExt(f), crew = Object.keys(CREW_LABEL).filter(k => f.crew && f.crew[k] !== undefined);
   return `<section class="panel credits"><h3>Credits</h3>
    <div class="castgrid">${f.cast.map((id, i) => `<a href="#" class="castcard" data-go="person:${id}">${portraitOf(P(id), 56)}<b>${esc(P(id).name)}</b><span class="muted small">${f.genre === 'Documentary' ? 'Featuring' : f.genre === 'Animation' ? 'Voice' : ['Lead', 'Co-lead', 'Supporting'][i] || 'Cast'}</span></a>`).join('')}</div>
-   ${credit('Director', [f.dir])}${credit(f.wri.length > 1 ? 'Screenplay' : 'Written by', f.wri)}${credit('Story by', x.story)}${credit('Produced by', [f.prod])}${credit('Executive producers', x.eprod)}${credit('Cinematography', [f.dp])}${credit('Editor', [f.ed])}${crew.map(k => credit(CREW_LABEL[k], [f.crew[k]])).join('')}${Object.keys(f.xc || {}).filter(id => !keyIds(f).includes(+id)).map(id => credit(f.xc[id], [+id])).join('')}
+   ${credit(f.codir ? 'Directors' : 'Director', [f.dir, ...(f.codir || [])])}${credit(f.wri.length > 1 ? 'Screenplay' : 'Written by', f.wri)}${credit('Story by', x.story)}${credit('Produced by', [f.prod])}${credit('Executive producers', x.eprod)}${credit('Cinematography', [f.dp])}${credit('Editor', [f.ed])}${crew.map(k => credit(CREW_LABEL[k], [f.crew[k]])).join('')}${Object.keys(f.xc || {}).filter(id => !keyIds(f).includes(+id)).map(id => credit(f.xc[id], [+id])).join('')}
    <details class="more"><summary>Full cast and crew</summary>${credit('Also starring', x.bits)}<div class="crewlist">${crewNames(f).map(([r, n]) => `<div class="cr"><span>${esc(r)}</span><span>${esc(n)}</span></div>`).join('')}</div></details></section>`;
 }
 // ---- people ----
