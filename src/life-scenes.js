@@ -189,6 +189,7 @@ const DEPT_FAMILY = { 'Second Unit Director or Assistant Director': 'ad', 'Scrip
 const POST_FAMILY = { usher: 'cinema', runner: 'set', rental: 'cam', screener: 'wri', setpa: 'ad', officepa: 'pro', extra: 'act', standin: 'act', reader: 'wri', asstprod: 'pro', campa: 'cam', artpa: 'art', costpa: 'cos', locpa: 'pro', postpa: 'edt', logger: 'edt', castasst: 'cst', crafty: 'pro', utilsnd: 'snd', dayplayer: 'act', ac2: 'cam', grip: 'cam', ae2: 'edt', ae1: 'edt', ad22: 'ad', dresser: 'art', boom: 'snd', makeup: 'cos', stunt: 'stn', devasst: 'wri' };
 function familyOf(j) {
   const t = tmplOf(j);
+  if (t && t.fam) return t.fam;
   if (t && t.tier === 0) return 'intern';
   if (POST_FAMILY[j.k]) return POST_FAMILY[j.k];
   const cj = JOBS.jobs.find(x => x.id === j.jid);

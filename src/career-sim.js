@@ -647,6 +647,7 @@ function closeWeek(a) {
   contestWeek();
   if (typeof compWeek === 'function') compWeek();
   if (typeof mediaWeek === 'function') mediaWeek();
+  if (typeof mediaAwardsWeek === 'function') mediaAwardsWeek();
   if (typeof campaignFilms === 'function' && campaignSeason() && M.campY !== S.year && campaignFilms().length) { M.campY = S.year; inbox('note', 'Awards season', `Campaigns are starting for this year's films. ${campaignFilms().map(f => f.title).join(', ')} ${campaignFilms().length > 1 ? 'are' : 'is'} eligible. Screeners, trade ads, Q&As: it's all on the Contests tab.`); }
   dealsWeek();
   awardsWeek();
