@@ -547,6 +547,7 @@ function hireFactors(post) {
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof repFactors === 'function') F.push(...repFactors(post));
+  if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;
 }
@@ -641,6 +642,7 @@ function closeWeek(a) {
   awardsWeek();
   storyWeek();
   stress += socialWeek();
+  if (typeof consequenceWeek === 'function') consequenceWeek();
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);

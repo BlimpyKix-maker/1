@@ -10873,6 +10873,7 @@ function hireFactors(post) {
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof repFactors === 'function') F.push(...repFactors(post));
+  if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;
 }
@@ -10967,6 +10968,7 @@ function closeWeek(a) {
   awardsWeek();
   storyWeek();
   stress += socialWeek();
+  if (typeof consequenceWeek === 'function') consequenceWeek();
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -11644,10 +11646,14 @@ function payRate(j) {
   for (const p of ODD_JOBS) ODD_BY[p.k] = p;
 })();
 // Can you even apply? Some jobs want a degree or union training, unless your credits speak for you.
+// Which jobs are union jobs: the catalogue knows each job's union.
+let JOB_UNION = null;
+function isUnionJob(t) { if (!JOB_UNION) { JOB_UNION = {}; for (const j of JOBS.jobs) JOB_UNION[j.id] = !!j.un && !/^(non|none)/i.test(j.un); } return !!(t && t.jid && JOB_UNION[t.jid]); }
 function blockedFrom(t) {
   const M = S.me, me = ME();
   if (t.deg && !M.degrees.length && me.credits.length < 3) return 'Wants a degree';
-  if (t.union && !M.degrees.includes('union') && me.credits.length < 4) return 'Union training or 4 credits';
+  if (M.flags && M.flags.scab !== undefined && S.week - M.flags.scab < 104 && (t.union || isUnionJob(t))) return 'The union remembers you crossed the picket line';
+  if (t.union && !M.degrees.includes('union') && me.credits.length < 4 && !(M.flags && M.flags.organiser !== undefined)) return 'Union training or 4 credits';
   if ((t.tier || 1) >= 3 && careerLevel() < t.tier - 1) return `Needs experience: level ${t.tier - 1} or more`;
   if (t.req && subScore(t) < t.req - 4) return 'Needs stronger skills for this one';
   return null;
@@ -13116,6 +13122,7 @@ function textSomeone(a) {
   const M = S.me, me = ME(), id = a.id, k = M.known[id];
   if (!k || P(id).dead) return false;
   const q = P(id), rel = relOf(id), o = opinion(id);
+  if (a.kind === 'sorry') return typeof apologise === 'function' && apologise(id);
   if (a.kind === 'hi') {
     sms(-1, String(a.msg || '').trim().slice(0, 280) || pickLine(['how are you doing?', 'thinking of you, how\'s things', 'coffee soon?', 'saw this and thought of you'], id + S.week), 'mine', { to: id });
     if (k.hiW !== S.week) { k.hiW = S.week; addTie(me, q, o > 0 ? 1.5 : .5); k.seen = S.week; }
@@ -15050,6 +15057,80 @@ function jobWorkHTML() {
   }).join('')}</section>`;
 }
 // </job-tasks>
+// <consequence>
+// ---------------- Consequences ----------------
+// People remember. Everyone has a temperament: some forgive and drift back to fond, some are fair and let it go in
+// time, some never forget. Push someone far enough and they blackball you: their close friends hear about it, and
+// it shows when you apply to anyone in that circle. Win someone over and they champion you: they vouch for you and
+// introduce you to the people they trust. Temperament comes from traits and a hash; the weekly check spends no dice.
+const TEMPER = { grudge: { label: 'Holds a grudge', line: -15, drift: 0 }, fair: { label: 'Fair-minded', line: -25, drift: .25 }, forgive: { label: 'Forgiving', line: -40, drift: .6 } };
+function temperOf(p) {
+  if (p.traits.some(t => ['Difficult', 'Volatile', 'Stubborn', 'Ruthless', 'Sensitive'].includes(t))) return 'grudge';
+  if (p.traits.some(t => ['Kind', 'Calm', 'Diplomatic', 'Humble', 'Beloved', 'Optimist'].includes(t))) return 'forgive';
+  const r = hashRand(p.id * 911 + 5)();
+  return r < .25 ? 'grudge' : r < .55 ? 'forgive' : 'fair';
+}
+function circleOf(p, n = 6) { return Object.entries(p.ties).filter(([k, v]) => v > 25 && P(+k) && !P(+k).dead && !P(+k).player).sort((a, b) => b[1] - a[1]).slice(0, n).map(([k]) => +k); }
+function consequenceWeek() {
+  const M = S.me, me = ME();
+  M.black = M.black || {}; M.champ = M.champ || {};
+  for (const id of aliveKnown()) {
+    const p = P(id), T = temperOf(p), o = opinion(id), b = M.black[id];
+    // time heals, depending on who it is
+    if (o < 0 && !b && TEMPER[T].drift) addTie(me, p, TEMPER[T].drift);
+    if (!b && o <= TEMPER[T].line) {
+      M.black[id] = { w: S.week, t: T };
+      const circle = circleOf(p);
+      for (const q of circle) { addTie(me, P(q), -4); if (M.known[q] && !M.known[q].tags.includes('Heard bad things')) M.known[q].tags.push('Heard bad things'); }
+      inbox('note', `${p.name} has it in for you`, `${p.name} (${ROLE_LABEL[p.role].toLowerCase()}) has decided you're trouble, and says so. ${circle.length ? `Their circle hears it first: ${circle.slice(0, 4).map(q => P(q).name).join(', ')}${circle.length > 4 ? ' and others' : ''}. Expect a cooler welcome there.` : 'Luckily they don\'t have many friends in the business.'} ${T === 'grudge' ? 'They are not the forgiving kind.' : T === 'fair' ? 'Give it time, or make amends.' : 'They\'ll probably come round.'}`, { person: id });
+      milestone(`Fell out with ${p.name}`, 'life');
+    } else if (b && (o >= -5 || (b.t !== 'grudge' && S.week - b.w > (b.t === 'forgive' ? 52 : 156)))) {
+      delete M.black[id];
+      inbox('note', `${p.name} lets it go`, `${o >= -5 ? 'Whatever happened between you is done.' : 'Enough time has passed.'} ${p.name}'s circle stops bringing it up.`, { person: id });
+    }
+    // champions: people of standing who rate you open their address book
+    if (!M.champ[id] && o >= 45 && p.standing >= 35) {
+      M.champ[id] = S.week;
+      const circle = circleOf(p, 8).filter(q => q !== M.id);
+      for (const q of circle) addTie(me, P(q), 2);
+      const intro = circle.find(q => !M.known[q]);
+      if (intro !== undefined) meet(intro, `Introduced by ${p.name}`, 8);
+      inbox('note', `${p.name} is in your corner`, `${p.name} has started vouching for you.${intro !== undefined ? ` They introduce you to ${P(intro).name} (${ROLE_LABEL[P(intro).role].toLowerCase()}).` : ''} People in their circle take your calls a little faster now.`, { person: id });
+      milestone(`${p.name} became a champion of your work`, 'life');
+    } else if (M.champ[id] && o < 25) { delete M.champ[id]; inbox('note', `${p.name} has gone quiet`, `${p.name} doesn't mention you the way they used to.`, { person: id }); }
+    else if (M.champ[id] && (S.week - M.champ[id]) % 26 === 25) { const intro = circleOf(p, 10).find(q => !M.known[q] && q !== M.id); if (intro !== undefined) { meet(intro, `Introduced by ${p.name}`, 6); sms(id, pickLine([`you should meet ${P(intro).name}. I've told them about you`, `${P(intro).name} is looking for people like you. call them`, `introducing you to ${P(intro).name}. be nice`], id + S.week), 'tip'); } }
+  }
+}
+// What grudges and champions do to a job application.
+function circleFactors(post) {
+  const M = S.me, out = [];
+  if (post.head === null || post.head === undefined || !P(post.head)) return out;
+  const h = P(post.head), B = Object.keys(M.black || {}).map(Number), C = Object.keys(M.champ || {}).map(Number);
+  if (B.includes(post.head)) out.push([`${h.name} has it in for you`, -1.8]);
+  else { const b = B.find(id => tie(P(id), h) > 25); if (b !== undefined) out.push([`Heard about you from ${P(b).name}`, TEMPER[temperOf(P(b))].label === 'Holds a grudge' ? -.8 : -.5]); }
+  if (C.includes(post.head)) out.push([`${h.name} is in your corner`, .9]);
+  else { const c = C.find(id => tie(P(id), h) > 25); if (c !== undefined) out.push([`${P(c).name} vouched for you`, .55]); }
+  return out;
+}
+// Making amends: a logged action with a roll. How hard depends on who you're apologising to.
+function apologise(id) {
+  const M = S.me, me = ME(), k = M.known[id], q = P(id);
+  if (!k || q.dead || opinion(id) >= -5 || (k.sorryW !== undefined && S.week - k.sorryW < 8)) return false;
+  k.sorryW = S.week;
+  const T = temperOf(q), dc = { forgive: 9, fair: 12, grudge: 16 }[T];
+  sms(-1, pickLine(['I owe you an apology. I got it wrong, and I\'m sorry', 'can we talk? I\'ve been thinking about what happened, and I was out of line', 'I\'m sorry. no excuses. I hope we can work together again one day'], id + S.week), 'mine', { to: id });
+  if (roll('cha', dc)) { addTie(me, q, T === 'grudge' ? 8 : 14); k.trust = clamp(k.trust + 5, 0, 100); sms(id, pickLine(['...thank you for saying that. ok. we\'re ok', 'appreciated. let\'s start again', 'that means a lot. coffee sometime'], id), 'text'); }
+  else { addTie(me, q, -2); sms(id, T === 'grudge' ? pickLine(['no.', 'too late for that', 'save it'], id) : pickLine(['I need some time', 'I hear you. not yet though', 'maybe one day'], id), 'text'); }
+  return true;
+}
+function circleHTML() {
+  const M = S.me, B = Object.entries(M.black || {}), C = Object.entries(M.champ || {});
+  if (!B.length && !C.length) return '';
+  return `<section class="panel"><h3>Who's for you, who's against you</h3>
+   ${C.length ? `<p><b>In your corner:</b> ${C.map(([id]) => pl(+id)).join(', ')}</p>` : ''}
+   ${B.length ? `<p><b>Has it in for you:</b> ${B.map(([id, b]) => `${pl(+id)} <span class="muted small">(${esc(TEMPER[b.t].label.toLowerCase())}, since ${fmtDate(b.w, true)})</span>`).join(', ')}</p><p class="muted small">Their close friends hear about it, and it counts against you when you apply to anyone in their circle. Text them an apology to try to make amends.</p>` : ''}</section>`;
+}
+// </consequence>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15309,7 +15390,7 @@ function viewPerson(id) {
   const repRow = (l, v, cls) => `<div class="rep"><span>${l}</span>${bar(v, 100, cls)}<b>${Math.round(v)}</b></div>`;
   return `<div class="head detail partyhead"><div class="pf">${portraitOf(p, 112)}</div><div><p class="eyebrow">${p.player ? ROLE_LABEL[p.role] : esc(p.occ || occupationOf(p))}${!p.player && !p.occ && occupationOf(p) !== ROLE_LABEL[p.role] ? ' · ' + ROLE_LABEL[p.role] : ''} · ${esc(hubName(p.hub))}</p><h2>${esc(p.name)}</h2>
   <p class="lede">${p.player ? '<b>This is you.</b> ' : ''}${pron(p)[0]} ${pron(p)[1]} ${ageOf(p)}${p.dead ? ' (died)' : ''}, born ${p.born}. ${p.credits.length} credit${p.credits.length === 1 ? '' : 's'}${p.debut !== null && p.credits.length ? `, debut in ${yearOf(S.films[p.credits[0]].rel)}` : ''}. Status: ${esc(personStatus(p))}.</p>
-  <div class="traits">${p.traits.map(t => `<span class="chip trait" title="${esc(TRAITS[t].d)}">${esc(t)}</span>`).join('')}</div>
+  <div class="traits">${p.traits.map(t => `<span class="chip trait" title="${esc(TRAITS[t].d)}">${esc(t)}</span>`).join('')}${S.me && S.me.known[p.id] && typeof temperOf === 'function' ? ` <span class="chip" title="How they handle being crossed">${esc(TEMPER[temperOf(p)].label)}</span>` : ''}</div>
   ${p.player && S.me ? `<p class="muted">${esc(ORIGIN.edu[S.me.edu].label)}. Loves ${S.me.love.map(g => g.toLowerCase()).join(', ') || 'everything'}${S.me.hate.length ? '; can\u2019t stand ' + S.me.hate.map(g => g.toLowerCase()).join(' or ') : ''}.${S.me.favs.length ? ' Favourite films: ' + S.me.favs.map(f => esc(S.cat.allFilms[f].t)).join(', ') + '.' : ''}</p>` : ''}</div></div>
   ${p.player ? '' : `<p class="bio">${esc(personBio(p))}</p>`}
   ${familyHTML(p)}
@@ -15683,7 +15764,7 @@ function phonePanel() {
   const open = UI.thread !== undefined && UI.thread !== null && (UI.thread === 'home' || M.known[UI.thread]) ? UI.thread : null;
   if (open !== null && open !== 'home') T.id = String(open);
   const tid = T.id === '' ? null : +T.id, trel = tid !== null && M.known[tid] ? relOf(tid) : null;
-  const kinds = [['hi', 'A message'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
+  const kinds = [['hi', 'A message'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(tid !== null && opinion(tid) < -5 ? [['sorry', 'Apologise']] : []).concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
   if (!kinds.some(k => k[0] === T.kind)) T.kind = 'hi';
   const slots = upcomingSlots(16), ahead = apptsAhead();
   const compose = (fixed) => `<div class="compose">${fixed ? '' : `<label>To ${sel('tx-id', [['', 'Someone…']].concat(REL_ORDER.flatMap(r => (byRel[r] || []).map(id => [id, `${REL[r].icon} ${P(id).name}`]))), T.id)}</label>`}
@@ -15879,7 +15960,7 @@ function viewDesk() {
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + reputationHTML() + yearsHTML() + homePanel() + storyHTML();
-    case 'people': return troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
+    case 'people': return circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `<div class="cols two desk">

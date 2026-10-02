@@ -48,10 +48,14 @@ function payRate(j) {
   for (const p of ODD_JOBS) ODD_BY[p.k] = p;
 })();
 // Can you even apply? Some jobs want a degree or union training, unless your credits speak for you.
+// Which jobs are union jobs: the catalogue knows each job's union.
+let JOB_UNION = null;
+function isUnionJob(t) { if (!JOB_UNION) { JOB_UNION = {}; for (const j of JOBS.jobs) JOB_UNION[j.id] = !!j.un && !/^(non|none)/i.test(j.un); } return !!(t && t.jid && JOB_UNION[t.jid]); }
 function blockedFrom(t) {
   const M = S.me, me = ME();
   if (t.deg && !M.degrees.length && me.credits.length < 3) return 'Wants a degree';
-  if (t.union && !M.degrees.includes('union') && me.credits.length < 4) return 'Union training or 4 credits';
+  if (M.flags && M.flags.scab !== undefined && S.week - M.flags.scab < 104 && (t.union || isUnionJob(t))) return 'The union remembers you crossed the picket line';
+  if (t.union && !M.degrees.includes('union') && me.credits.length < 4 && !(M.flags && M.flags.organiser !== undefined)) return 'Union training or 4 credits';
   if ((t.tier || 1) >= 3 && careerLevel() < t.tier - 1) return `Needs experience: level ${t.tier - 1} or more`;
   if (t.req && subScore(t) < t.req - 4) return 'Needs stronger skills for this one';
   return null;

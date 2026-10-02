@@ -365,6 +365,7 @@ function textSomeone(a) {
   const M = S.me, me = ME(), id = a.id, k = M.known[id];
   if (!k || P(id).dead) return false;
   const q = P(id), rel = relOf(id), o = opinion(id);
+  if (a.kind === 'sorry') return typeof apologise === 'function' && apologise(id);
   if (a.kind === 'hi') {
     sms(-1, String(a.msg || '').trim().slice(0, 280) || pickLine(['how are you doing?', 'thinking of you, how\'s things', 'coffee soon?', 'saw this and thought of you'], id + S.week), 'mine', { to: id });
     if (k.hiW !== S.week) { k.hiW = S.week; addTie(me, q, o > 0 ? 1.5 : .5); k.seen = S.week; }
