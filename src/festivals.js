@@ -69,13 +69,15 @@ function festWinners(F, y) {
   const pool = (filmsByYear()[y] || []).filter(f => (F.kind !== 'doc' || f.genre === 'Documentary') && (F.kind !== 'anim' || f.genre === 'Animation') && (F.kind !== 'genre' || !F.genres || F.genres.includes(f.genre)));
   const score = f => f.q + (F.small && (f.tier === 3 || f.co === null) ? 6 : 0) + (HUBS[f.hub] && HUBS[F.hub] && HUBS[f.hub].m === HUBS[F.hub].m ? 3 : 0) + hashRand(f.id * 13 + F.k.length + y)() * 8;
   const ranked = pool.filter(f => f.q >= F.bar - 8).sort((a, b) => score(b) - score(a)), out = [];
-  (F.prizes || [[F.prize, 'star']]).forEach(([name], i) => { const f = ranked[i]; if (f) out.push({ y, cat: name, film: f.id, people: /Act|Perform|Volpi/.test(name) ? [f.cast[0]] : /Direct/.test(name) ? [f.dir] : [f.dir] }); });
+  const base = F.prizes || [[F.prize, 'star']], extra = [['Best Director', /Direct/], ['Best Performance', /Act|Perform|Volpi/], ['Best Screenplay', /Screenplay|Script|Writ/], ['Audience Award', /Audience|Public/]].filter(([, re]) => !base.some(([n]) => re.test(n))).map(([n]) => [n, 'plaque']);
+  const prizes = F.tier === 3 ? base.concat(extra.filter(([n]) => n === 'Audience Award')) : base.concat(extra);
+  prizes.forEach(([name], i) => { const f = ranked[i < base.length ? i : (base.length + hashRand(y * 7 + i)() * Math.min(6, ranked.length - base.length)) | 0] || ranked[i]; if (f) out.push({ y, cat: name, film: f.id, people: /Act|Perform|Volpi/.test(name) ? [f.cast[0]] : /Screenplay/.test(name) ? (f.wri || []).slice(0, 2) : [f.dir] }); });
   if (F.k === 'ouaga' && y % 2 === 0) out.length = 0;   // the pan-African festival is held in odd years
   FEST_CACHE.set(key, out); return out;
 }
 function festRecord(F) {
   const y0 = Math.max(F.founded || 1950, 1930), out = [], recorded = typeof filmAwardIndex === 'function' ? (filmAwardIndex()[F.name.replace(/^the /, '')] || filmAwardIndex()[F.prize] || []) : [];
-  for (let y = S.year - 1; y >= y0; y--) { const rec = recorded.filter(x => x.y === y); out.push(...(rec.length ? rec : festWinners(F, y))); }
+  for (let y = S.year - 1; y >= y0; y--) { const rec = recorded.filter(x => x.y === y); const have = new Set(rec.map(x => x.cat)); out.push(...rec, ...festWinners(F, y).filter(x => !have.has(x.cat) && !rec.some(r => r.film === x.film && x.cat.includes(r.cat.split(',')[0])))); }
   return out;
 }
 // ---- the statuettes ----
@@ -165,6 +167,6 @@ function festivalPage(F) {
     <h4>Prizes</h4><div class="shelf">${(F.prizes || []).map(([n, k]) => `<figure>${statuetteSVG(k, /Silver/.test(n) ? 'silver' : 'gold', 56)}<figcaption class="small"><b>${esc(n)}</b><br><span class="muted">${esc(STATUETTES[k][0])}</span></figcaption></figure>`).join('')}</div></section>
    <section class="panel"><h3>Who runs it, ${y}</h3><p class="small">${ppl.director !== null ? `Artistic director: ${pl(ppl.director)}` : ''}${ppl.programmers.length ? `<br>Programmers: ${ppl.programmers.map(pl).join(', ')}` : ''}</p><p class="small">${ppl.president !== null ? `Jury president: ${pl(ppl.president)}` : ''}${ppl.jury.length ? `<br>Jury: ${ppl.jury.map(pl).join(', ')}` : ''}</p>
     <label class="small">Year <select id="fest-y">${Array.from({ length: Math.min(60, S.year - F.founded + 1) }, (_, i) => S.year - i).map(v => `<option${v === y ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
-    <h4>Winners</h4><div class="tw" style="max-height:560px;overflow:auto"><table class="grid small"><thead><tr><th>Year</th><th>Prize</th><th>Film</th><th>To</th></tr></thead><tbody>${rec.slice(0, 150).map(w => `<tr><td>${w.y}</td><td>${esc(w.cat)}</td><td>${w.film !== undefined ? fl(w.film) : ''}</td><td>${(w.people || []).filter(id => P(id)).map(pl).join(', ')}</td></tr>`).join('') || '<tr><td colspan="4" class="empty">No winners yet.</td></tr>'}</tbody></table></div><p class="muted small">${years.length} editions on record.</p></section></div>`;
+    <h4>Line-up, ${y}</h4>${(() => { const LU = typeof festLineup === 'function' ? festLineup(F, y) : []; return LU.length ? `<ul class="plain small">${LU.map(x => `<li><span class="muted">${esc(x.sec)}</span> · ${fl(x.f.id)}</li>`).join('')}</ul>` : '<p class="muted small">No line-up on record for that year.</p>'; })()}<p class="muted small">${years.length} editions on record.</p></section></div>${(() => { const b = typeof awardBodies === 'function' ? awardBodies().find(x => x.fk === F.k) : null; return b && typeof awardTableHTML === 'function' ? awardTableHTML(b) : ''; })()}`;
 }
 function usdW(v) { return usd(v, S.me ? undefined : 'hollywood'); }
