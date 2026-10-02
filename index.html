@@ -170,6 +170,7 @@ details.yr { border-top: 1px solid var(--line); padding: 8px 0; } details.yr sum
 @media (max-width: 860px) { .feedwrap { grid-template-columns: minmax(0, 1fr); } .feedside { position: static; order: -1; } }
 .tbar { display: inline-block; width: 90px; height: 7px; background: var(--line); border-radius: 4px; overflow: hidden; vertical-align: middle; } .tbar i { display: block; height: 100%; background: var(--accent); } .jw { border-top: 1px solid var(--line); padding-top: 8px; } .jw:first-of-type { border-top: 0; } ul.tasks li.good { color: var(--good); } ul.tasks li.bad { color: var(--bad); }
 .compgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; } .comp { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; } .comp.fits { border-color: color-mix(in srgb, var(--good) 55%, var(--line)); } .comp .ch { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; } .comp p { margin: 2px 0; } .crow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; } .crow select { max-width: 160px; }
+.cohort tr.me td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
 .stratc { display: grid; gap: 4px; margin-bottom: 10px; } .stratc .hrow { grid-template-columns: 140px 1fr 28px; } .stratc .hbar i { background: var(--accent); }
 .pips { display: inline-flex; gap: 2px; vertical-align: middle; } .pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); } .pips i.on { background: var(--accent); }
 tr.jobrow { cursor: pointer; } tr.jobrow.mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); } tr.jobrow.open { background: color-mix(in srgb, var(--accent) 8%, transparent); } tr.jobopen td { padding-top: 0; }
@@ -10974,6 +10975,7 @@ function closeWeek(a) {
   storyWeek();
   stress += socialWeek();
   if (typeof consequenceWeek === 'function') consequenceWeek();
+  if (typeof cohortWeek === 'function') cohortWeek();
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -15472,6 +15474,52 @@ for (const s of LOW_ROAD) { ROAD_SCENES.push(s); SCENES.push(Object.assign({ eve
 for (const k in LOW_LIFE) { (LIFE_SCENES[k] = LIFE_SCENES[k] || []).push(...LOW_LIFE[k]); for (const s of LOW_LIFE[k]) SCENES.push(Object.assign({ event: 1, jobs: [] }, s)); }
 for (const fam in LOW_WORK) { (ROLE_SCENES[fam] = ROLE_SCENES[fam] || []).push(...LOW_WORK[fam]); for (const s of LOW_WORK[fam]) SCENES.push(Object.assign({ role: fam, jobs: [] }, s)); }
 // </life-scenes-low>
+// <cohort>
+// ---------------- Your cohort ----------------
+// The people who started when you did: a couple of friends, a rival, a wildcard from another craft. The world moves
+// them along like anyone else; you hear when they land something, and you can see who's ahead. Chosen once, by
+// hash and closeness, without dice: young people in your city with few credits, preferring those you've met.
+function pickCohort() {
+  const M = S.me, me = ME(), age = S.year - me.born;
+  const young = id => { const q = P(id); return q && !q.dead && !q.retired && !q.player && Math.abs((S.year - q.born) - age) <= 6 && q.credits.length <= 3; };
+  const met = Object.keys(M.known).map(Number).filter(young);
+  const pool = [...new Set(met.concat(ROLES.flatMap(r => S.pool[M.hub][r]).filter(young)))];
+  const score = id => (M.known[id] ? 100 : 0) + (P(id).role === me.role ? 30 : 0) - Math.abs(P(id).standing - me.standing) + hashRand(id * 17 + me.id)() * 20;
+  pool.sort((a, b) => score(b) - score(a));
+  const rival = met.find(id => M.known[id].tags.includes('Rival')) ?? pool.find(id => P(id).role === me.role && !M.known[id]) ?? pool[0];
+  const others = pool.filter(id => id !== rival);
+  const wild = others.find(id => P(id).role !== me.role && MAIN[P(id).role] !== MAIN[me.role]);
+  const L = [rival].concat(others.filter(id => id !== wild).slice(0, 2), wild !== undefined ? [wild] : []).filter(x => x !== undefined);
+  M.cohort = L.map(id => ({ id, kind: id === rival ? 'rival' : id === wild ? 'wild' : 'friend', cr: P(id).credits.length, since: S.week }));
+  for (const c of M.cohort) { meet(c.id, c.kind === 'rival' ? 'Rival' : 'Started out together', c.kind === 'rival' ? -5 : 8); }
+}
+function cohortWeek() {
+  const M = S.me;
+  if (!M.cohort) { if (M.stats.weeks >= 0 && Object.keys(M.known).length >= 3) pickCohort(); return; }
+  for (const c of M.cohort) {
+    const q = P(c.id); if (!q || q.dead) continue;
+    if (q.credits.length > c.cr) {
+      c.cr = q.credits.length;
+      const f = S.films[q.credits[q.credits.length - 1]], first = c.cr === 1;
+      if (c.kind === 'rival') inbox('note', `${q.name} again`, `Your old rival ${q.name} has ${first ? 'their first screen credit' : 'another credit'}${f ? ', on ' + f.title : ''}. ${ME().credits.length >= c.cr ? 'You still have more. For now.' : 'They\'re pulling ahead.'}`, { person: c.id });
+      else if (opinion(c.id) > 0) sms(c.id, pickLine(first ? ['I GOT A CREDIT. my name. on a film. I\'m shaking', 'first credit!!! drinks on me (one drink)', 'remember when we said we\'d both make it? one of us is on the way!!'] : ['another one in the bag', 'wrapped another one. tired. happy', `just finished on ${f ? f.title : 'a film'}. you'd have loved the crew`], c.id + S.week), 'life');
+    }
+  }
+}
+function cohortHTML() {
+  const M = S.me, me = ME();
+  if (!M.cohort || !M.cohort.length) return '';
+  const rows = [{ id: me.id, kind: 'you' }].concat(M.cohort).filter(c => P(c.id));
+  const sc = id => P(id).credits.length * 10 + P(id).standing;
+  rows.sort((a, b) => sc(b.id) - sc(a.id));
+  const ahead = M.cohort.filter(c => P(c.id) && sc(c.id) < sc(me.id)).length;
+  const lab = { you: 'You', rival: '⚔️ Rival', friend: '🙂 Started with you', wild: '🎲 Another craft' };
+  return `<section class="panel cohort"><h3>Your cohort</h3><p class="muted small">The people who started when you did. ${ahead === M.cohort.length ? 'You\'re ahead of all of them.' : ahead === 0 ? 'Everyone is ahead of you, for now.' : `You're ahead of ${ahead} of ${M.cohort.length}.`}</p>
+   <div class="tw"><table class="grid"><thead><tr><th></th><th>Name</th><th>Craft</th><th class="n">Credits</th><th class="n">Standing</th><th>Latest</th></tr></thead><tbody>
+   ${rows.map(c => { const q = P(c.id), last = q.credits.length ? S.films[q.credits[q.credits.length - 1]] : null; return `<tr${c.kind === 'you' ? ' class="me"' : ''}><td class="small">${lab[c.kind]}</td><td>${c.kind === 'you' ? '<b>' + esc(q.name) + '</b>' : pl(c.id)}${q.dead ? ' <span class="muted">(died)</span>' : q.retired ? ' <span class="muted">(left the business)</span>' : ''}</td><td>${esc(ROLE_LABEL[q.role])}</td><td class="n">${q.credits.length}</td><td class="n">${Math.round(q.standing)}</td><td>${last ? fl(last.id) : '<span class="muted">—</span>'}</td></tr>`; }).join('')}
+   </tbody></table></div></section>`;
+}
+// </cohort>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -16302,7 +16350,7 @@ function viewDesk() {
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + reputationHTML() + yearsHTML() + homePanel() + storyHTML();
-    case 'people': return circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
+    case 'people': return cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `<div class="cols two desk">

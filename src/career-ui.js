@@ -488,7 +488,7 @@ function viewDesk() {
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + reputationHTML() + yearsHTML() + homePanel() + storyHTML();
-    case 'people': return circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
+    case 'people': return cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `<div class="cols two desk">

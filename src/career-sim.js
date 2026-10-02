@@ -647,6 +647,7 @@ function closeWeek(a) {
   storyWeek();
   stress += socialWeek();
   if (typeof consequenceWeek === 'function') consequenceWeek();
+  if (typeof cohortWeek === 'function') cohortWeek();
   stress += livingWorldWeek();
   const fee = schoolWeek(L, gain);
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
