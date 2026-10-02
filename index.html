@@ -46,9 +46,30 @@
 :root[data-pal="viola"] { --bg: #F3EFF8; --panel: #FFFFFF; --ink: #1F1430; --muted: #6A5E80; --line: #DCD2EA; --accent: #C8102E; --accent-soft: #FADCE1; --data: #5B2D90; --data-soft: #E9E0F5; --gold: #C9971C; --gold-soft: #F5E7C2; --slate: #4B2683; --slate-2: #3A1D66; --slate-ink: #FFFFFF; --slate-muted: #CDBEE8; --hs-city: #7E6AA6; }
 }
 :root[data-pal="teal"] { }
+:root[data-theme="light"][data-pal="marquee"] { --bg: #F7F1E6; --panel: #FFFDF8; --ink: #22181A; --muted: #6E5F5C; --line: #E3D6C5; --accent: #C0392B; --accent-soft: #F7DCD6; --data: #8A5A12; --data-soft: #F1E3C8; --gold: #C9971C; --gold-soft: #F5E7C2; --slate: #3D1118; --slate-2: #2A0B10; --slate-ink: #FFF6E6; --slate-muted: #D9B8A8; --hs-city: #8C6F6A; }
+:root[data-theme="light"][data-pal="kodachrome"] { --bg: #FBF6E9; --panel: #FFFFFF; --ink: #1A1A1A; --muted: #5E5A50; --line: #E6DDC4; --accent: #D7261E; --accent-soft: #FADAD7; --data: #1F4E79; --data-soft: #DCE7F2; --gold: #E5A800; --gold-soft: #FBEBBE; --slate: #F2B705; --slate-2: #D99E00; --slate-ink: #1A1A1A; --slate-muted: #4A3B00; --hs-city: #6E7F95; }
+:root[data-theme="light"][data-pal="noir"] { --bg: #ECEAE5; --panel: #FAFAF7; --ink: #111111; --muted: #5C5C5C; --line: #D6D3CC; --accent: #B7791F; --accent-soft: #F3E6CF; --data: #333333; --data-soft: #E2E0DB; --gold: #C99A2E; --gold-soft: #F2E6C8; --slate: #111111; --slate-2: #000000; --slate-ink: #F4F1EA; --slate-muted: #A8A39A; --hs-city: #6A6A6A; }
+:root[data-theme="light"][data-pal="riviera"] { --bg: #FAF5EC; --panel: #FFFFFF; --ink: #142233; --muted: #5B6675; --line: #E4DCCD; --accent: #E8553E; --accent-soft: #FBDDD6; --data: #1C4E80; --data-soft: #DCE8F4; --gold: #E0A526; --gold-soft: #F8E9C6; --slate: #1C4E80; --slate-2: #133A61; --slate-ink: #FFFFFF; --slate-muted: #B9CDE3; --hs-city: #7A93AE; }
+:root[data-theme="light"][data-pal="viola"] { --bg: #F3EFF8; --panel: #FFFFFF; --ink: #1F1430; --muted: #6A5E80; --line: #DCD2EA; --accent: #C8102E; --accent-soft: #FADCE1; --data: #5B2D90; --data-soft: #E9E0F5; --gold: #C9971C; --gold-soft: #F5E7C2; --slate: #4B2683; --slate-2: #3A1D66; --slate-ink: #FFFFFF; --slate-muted: #CDBEE8; --hs-city: #7E6AA6; }
+/* the same palettes after dark */
+@media (prefers-color-scheme: dark) {
+:root[data-pal="marquee"]:not([data-theme="light"]) { --bg:#160C0E;--panel:#22141A;--ink:#F1E6DC;--muted:#B59C95;--line:#3A2529;--accent:#E8574B;--accent-soft:#3E1915;--data:#E0B060;--data-soft:#3A2C14;--gold:#E8B44A;--gold-soft:#3A2E12;--good:#5DBB85;--bad:#E47B6F;--slate:#3D1118;--slate-2:#2A0B10;--slate-ink:#FFF6E6;--slate-muted:#D9B8A8; color-scheme: dark; }
+:root[data-pal="kodachrome"]:not([data-theme="light"]) { --bg:#14130E;--panel:#1E1C15;--ink:#F4EFE0;--muted:#ABA48F;--line:#34301F;--accent:#F2554B;--accent-soft:#3E1715;--data:#6FA8DC;--data-soft:#182A3C;--gold:#F2B705;--gold-soft:#3A2E05;--good:#5DBB85;--bad:#E47B6F;--slate:#2B2408;--slate-2:#1A1604;--slate-ink:#F2B705;--slate-muted:#C9B66A; color-scheme: dark; }
+:root[data-pal="noir"]:not([data-theme="light"]) { --bg:#0D0D0D;--panel:#171717;--ink:#EDEAE3;--muted:#9C9890;--line:#2C2C2C;--accent:#D9A441;--accent-soft:#3A2C12;--data:#C9C4BA;--data-soft:#2A2A2A;--gold:#D9A441;--gold-soft:#3A2C12;--good:#7FC79A;--bad:#E07B6F;--slate:#000000;--slate-2:#000000;--slate-ink:#F4F1EA;--slate-muted:#A8A39A; color-scheme: dark; }
+:root[data-pal="riviera"]:not([data-theme="light"]) { --bg:#0B1420;--panel:#13202F;--ink:#EAF0F7;--muted:#9AAABD;--line:#24364A;--accent:#F06A53;--accent-soft:#3D1A14;--data:#6FA3DA;--data-soft:#15283D;--gold:#E8B44A;--gold-soft:#3A2E12;--good:#5DBB85;--bad:#E47B6F;--slate:#133A61;--slate-2:#0C2845;--slate-ink:#FFFFFF;--slate-muted:#B9CDE3; color-scheme: dark; }
+:root[data-pal="viola"]:not([data-theme="light"]) { --bg:#120C1C;--panel:#1C1429;--ink:#EFE8F8;--muted:#A898C2;--line:#33264A;--accent:#F0506A;--accent-soft:#3D1420;--data:#A985DB;--data-soft:#2A1D40;--gold:#E8B44A;--gold-soft:#3A2E12;--good:#5DBB85;--bad:#E47B6F;--slate:#2E1752;--slate-2:#1F0F38;--slate-ink:#FFFFFF;--slate-muted:#CDBEE8; color-scheme: dark; }
+}
+:root[data-theme="dark"][data-pal="marquee"] { --bg:#160C0E;--panel:#22141A;--ink:#F1E6DC;--muted:#B59C95;--line:#3A2529;--accent:#E8574B;--accent-soft:#3E1915;--data:#E0B060;--data-soft:#3A2C14;--gold:#E8B44A;--gold-soft:#3A2E12;--good:#5DBB85;--bad:#E47B6F;--slate:#3D1118;--slate-2:#2A0B10;--slate-ink:#FFF6E6;--slate-muted:#D9B8A8; color-scheme: dark; }
+:root[data-theme="dark"][data-pal="kodachrome"] { --bg:#14130E;--panel:#1E1C15;--ink:#F4EFE0;--muted:#ABA48F;--line:#34301F;--accent:#F2554B;--accent-soft:#3E1715;--data:#6FA8DC;--data-soft:#182A3C;--gold:#F2B705;--gold-soft:#3A2E05;--good:#5DBB85;--bad:#E47B6F;--slate:#2B2408;--slate-2:#1A1604;--slate-ink:#F2B705;--slate-muted:#C9B66A; color-scheme: dark; }
+:root[data-theme="dark"][data-pal="noir"] { --bg:#0D0D0D;--panel:#171717;--ink:#EDEAE3;--muted:#9C9890;--line:#2C2C2C;--accent:#D9A441;--accent-soft:#3A2C12;--data:#C9C4BA;--data-soft:#2A2A2A;--gold:#D9A441;--gold-soft:#3A2C12;--good:#7FC79A;--bad:#E07B6F;--slate:#000000;--slate-2:#000000;--slate-ink:#F4F1EA;--slate-muted:#A8A39A; color-scheme: dark; }
+:root[data-theme="dark"][data-pal="riviera"] { --bg:#0B1420;--panel:#13202F;--ink:#EAF0F7;--muted:#9AAABD;--line:#24364A;--accent:#F06A53;--accent-soft:#3D1A14;--data:#6FA3DA;--data-soft:#15283D;--gold:#E8B44A;--gold-soft:#3A2E12;--good:#5DBB85;--bad:#E47B6F;--slate:#133A61;--slate-2:#0C2845;--slate-ink:#FFFFFF;--slate-muted:#B9CDE3; color-scheme: dark; }
+:root[data-theme="dark"][data-pal="viola"] { --bg:#120C1C;--panel:#1C1429;--ink:#EFE8F8;--muted:#A898C2;--line:#33264A;--accent:#F0506A;--accent-soft:#3D1420;--data:#A985DB;--data-soft:#2A1D40;--gold:#E8B44A;--gold-soft:#3A2E12;--good:#5DBB85;--bad:#E47B6F;--slate:#2E1752;--slate-2:#1F0F38;--slate-ink:#FFFFFF;--slate-muted:#CDBEE8; color-scheme: dark; }
 .pals { display: inline-flex; gap: 6px; margin-left: 12px; vertical-align: middle; }
 .pal { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); cursor: pointer; padding: 0; }
 .pal.on { border-color: var(--ink); }
+.favres { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 2px; }
+.golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
 body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
 a { color: inherit; }
@@ -13635,27 +13656,37 @@ function viewNews() {
 function viewBoxOffice() {
   const st = UI.bo, m = st.m === 'ALL' ? null : st.m;
   const mOpts = [['ALL', 'Worldwide']].concat(Object.keys(MARKETS).map(k => [k, MARKETS[k].name]));
+  const years = [...new Set(S.films.filter(f => f.rel !== null).map(f => yearOf(f.rel)))].sort((a, b) => b - a);
+  const gross = f => m ? (f.gross[m] || 0) : f.total;
   let rows, title;
   if (st.view === 'week') {
     title = 'This week';
     rows = S.films.filter(f => f.rel !== null && S.week - f.rel < 14 && (!m || f.gross[m])).map(f => {
       const k = S.week - f.rel; let todate = 0; for (let i = 0; i <= k; i++) todate += weeklyGross(f, i, m);
       return { f, wk: k + 1, g: weeklyGross(f, k, m), todate };
-    }).sort((a, b) => b.g - a.g).slice(0, 20);
+    });
   } else {
-    title = `${S.year} so far`;
-    rows = S.films.filter(f => f.rel !== null && yearOf(f.rel) === S.year && (!m || f.gross[m])).map(f => {
-      const k = S.week - f.rel; let todate = 0; for (let i = 0; i <= Math.min(k, 40); i++) todate += weeklyGross(f, i, m);
+    const y = st.view === 'all' ? null : +(st.y || S.year);
+    title = y === null ? 'All time' : y === S.year ? `${y} so far` : `${y}`;
+    rows = S.films.filter(f => f.rel !== null && (y === null || yearOf(f.rel) === y) && (!m || f.gross[m])).map(f => {
+      const k = S.week - f.rel, todate = k > 40 ? gross(f) : (() => { let t = 0; for (let i = 0; i <= Math.min(k, 40); i++) t += weeklyGross(f, i, m); return t; })();
       return { f, wk: k + 1, g: todate, todate };
-    }).sort((a, b) => b.g - a.g).slice(0, 25);
+    });
   }
-  const max = rows.length ? rows[0].g : 1;
-  return `<div class="head"><h2>Box office</h2><p class="lede">Grosses in US dollars at the time of release.</p></div>
-  <div class="filters">${sel('bo-m', mOpts, st.m)}<span class="seg"><button class="pill${st.view === 'week' ? ' on' : ''}" data-bo="week">This week</button><button class="pill${st.view === 'year' ? ' on' : ''}" data-bo="year">Year to date</button></span></div>
-  <h3>${title}${m ? ' · ' + esc(MARKETS[m].name) : ''}</h3>
-  <div class="tw"><table class="grid"><thead><tr><th class="n">#</th><th>Title</th><th>Hub</th><th class="n">Wk</th><th class="n">${st.view === 'week' ? 'Weekend-week' : 'Gross'}</th><th class="barcol"></th><th class="n">To date</th><th class="n">Budget</th></tr></thead><tbody>
-  ${rows.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${fl(r.f.id)} <span class="muted">${esc(r.f.genre)}</span></td><td>${esc(hubName(r.f.hub))}</td><td class="n">${r.wk}</td><td class="n">${fmtM(r.g)}</td><td class="barcol">${bar(r.g, max, 'data')}</td><td class="n">${fmtM(r.todate)}</td><td class="n">${fmtM(r.f.cost)}</td></tr>`).join('') || '<tr><td colspan="8" class="empty">No films in release here right now.</td></tr>'}
-  </tbody></table></div>`;
+  const q = (st.q || '').toLowerCase().trim();
+  if (q) rows = rows.filter(r => r.f.title.toLowerCase().includes(q) || P(r.f.dir).name.toLowerCase().includes(q) || r.f.genre.toLowerCase().includes(q) || hubName(r.f.hub).toLowerCase().includes(q) || (r.f.real && r.f.real.toLowerCase().includes(q)));
+  const key = st.sort || 'g', dir = st.dir === 'asc' ? 1 : -1;
+  const val = { g: r => r.g, title: r => r.f.title, hub: r => hubName(r.f.hub), genre: r => r.f.genre, wk: r => r.wk, todate: r => r.todate, budget: r => r.f.cost, reviews: r => r.f.reviews ?? -1, profit: r => r.f.theatrical ?? 0, year: r => r.f.rel };
+  rows.sort((a, b) => { const x = val[key](a), y = val[key](b); return (typeof x === 'string' ? x.localeCompare(y) : x - y) * dir; });
+  const shown = rows.slice(0, st.more ? 500 : 100), max = Math.max(1e-9, ...shown.map(r => r.g));
+  const th = (k, l, n) => `<th class="${n ? 'n ' : ''}sortable${key === k ? ' on' : ''}"><button class="linkish" data-bosort="${k}">${l}${key === k ? (dir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`;
+  return `<div class="head"><h2>Box office</h2><p class="lede">Grosses in US dollars at the time of release. Click any column to sort.</p></div>
+  <div class="filters">${sel('bo-m', mOpts, st.m)}<span class="seg"><button class="pill${st.view === 'week' ? ' on' : ''}" data-bo="week">This week</button><button class="pill${st.view === 'year' ? ' on' : ''}" data-bo="year">By year</button><button class="pill${st.view === 'all' ? ' on' : ''}" data-bo="all">All time</button></span>
+   ${st.view === 'year' ? sel('bo-y', years.map(y => [y, y]), st.y || S.year) : ''}<input id="bo-q" type="search" placeholder="Search title, director, genre, city…" value="${esc(st.q || '')}"></div>
+  <h3>${title}${m ? ' · ' + esc(MARKETS[m].name) : ''} <span class="count">${rows.length} films</span></h3>
+  <div class="tw"><table class="grid"><thead><tr><th class="n">#</th>${th('title', 'Title')}${th('genre', 'Genre')}${th('hub', 'Hub')}${st.view === 'week' ? th('wk', 'Wk', 1) : th('year', 'Opened', 1)}${th('g', st.view === 'week' ? 'This week' : 'Gross', 1)}<th class="barcol"></th>${th('todate', 'To date', 1)}${th('budget', 'Budget', 1)}${th('reviews', 'Critics', 1)}${th('profit', 'Profit', 1)}</tr></thead><tbody>
+  ${shown.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${fl(r.f.id)}</td><td>${esc(r.f.genre)}</td><td>${esc(hubName(r.f.hub))}</td><td class="n">${st.view === 'week' ? r.wk : fmtDate(r.f.rel, true)}</td><td class="n">${fmtM(r.g)}</td><td class="barcol">${bar(r.g, max, 'data')}</td><td class="n">${fmtM(r.todate)}</td><td class="n">${fmtM(r.f.cost)}</td><td class="n">${r.f.reviews ?? '—'}</td><td class="n">${r.f.theatrical !== undefined ? money(r.f.theatrical) : '—'}</td></tr>`).join('') || '<tr><td colspan="11" class="empty">Nothing matches.</td></tr>'}
+  </tbody></table></div>${rows.length > shown.length ? `<p><button class="btn-s ghost" data-bomore="1">Show ${Math.min(500, rows.length) - shown.length} more</button></p>` : ''}`;
 }
 
 function viewFilms() {
@@ -13942,6 +13973,14 @@ function filmChoices() {
   for (const f of list) { byLabel[`${f.t} (${f.y})`] = f.id; byLabel[`${f.t} (${f.y}) · ${f.real}`] = f.id; }
   return (UI.filmIdx = { y: S.startYear, list, byLabel });
 }
+// Search by the game's title or the real one, but only ever show the game's version: you work out which is which.
+const fold = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+function favResults() {
+  const q = fold(UI.favq || '').trim(), c = UI.cc;
+  if (q.length < 2) return '';
+  const L = filmChoices().list.filter(f => !c.favs.includes(f.id) && (fold(f.t).includes(q) || fold(f.real).includes(q))).slice(0, 8);
+  return `<ul class="favres">${L.map(f => `<li><button class="linkish" data-cc="addfav" data-v="${esc(f.id)}"><b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span></button></li>`).join('') || '<li class="muted">Nothing matches. Try another word.</li>'}</ul>`;
+}
 // Random favourite: leans hard toward the genres you love, but almost anything can come up, weighted by how
 // widely seen and how cherished a film is.
 function randomFav(c) {
@@ -13969,7 +14008,7 @@ function viewCreator() {
   const left = SKILL_POINTS - ccSpent(c);
   const grid = (group, src) => `<div class="opts">${Object.entries(src).map(([k, o]) => optCard(group, k, o, c[group] === k)).join('')}</div>`;
   const fc = filmChoices();
-  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}">`}</li>`; };
+  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : (i === c.favs.length ? `<input class="favin" id="fav-q" value="${esc(UI.favq || '')}" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}" autocomplete="off">${favResults()}` : '<span class="muted">…</span>')}</li>`; };
   const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
   const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span> ${fxBadges(TRAITS[t])}</button>`; };
   return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
@@ -13996,7 +14035,6 @@ function viewCreator() {
    <p class="note">Jobs on films in a genre you love lower your stress and teach you faster; genres you hate wear you down.</p>
    <h4>Five favourite films <span class="count">optional</span></h4>
    <ol class="favs">${[0, 1, 2, 3, 4].map(favRow).join('')}</ol>
-   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y})" label="${esc(f.real)}">`).join('')}</datalist>
    <div class="ccrow"><button class="btn" data-cc="randfav">${c.favs.length >= 5 ? 'Reroll all five' : 'Fill the rest at random'}</button><span class="muted">Random picks lean toward your favourite genres, weighted by how widely seen and loved a film is.</span></div>
    <p class="note">Films you love sharpen the skills their genre leans on, and they come up in conversation.</p></section>
   <section class="panel cc"><h3>Something from your past</h3>${grid('quirk', ORIGIN.quirk)}</section>
@@ -14092,10 +14130,23 @@ const DAY_FLAVOUR = {
 };
 // The week as a strip of days: lived days show what happened, today's card has the button, later days can still change.
 // One inbox item: what happened, the choices if it's waiting on you, and how it turned out.
+// Where a message leads: the part of the desk (or the page) it's about.
+function inboxLinks(it) {
+  const L = [], T = it.title + ' ' + (it.text || '');
+  const go = (tab, label) => L.push(`<button class="linkish" data-dtab="${tab}">${label} ›</button>`);
+  if (it.kind === 'invite' || it.kind === 'ask') go('phone', 'Phone');
+  else if (it.kind === 'offer' || it.kind === 'interview' || /Shortlisted|rejection|No luck|Wrapped|Job done/.test(it.title)) go('work', 'Work');
+  else if (it.kind === 'option' || /script|Draft|option|Green light|festival|is a go|Festival|Producing|investors/i.test(T)) go('create', 'Create');
+  else if (/agent|course|school|rent|move|Your place/i.test(T)) go('life', 'Life');
+  if (/diary|Interview|Shortlisted/.test(T)) go('diary', 'Your week');
+  if (it.person !== undefined && it.person !== null && P(it.person)) L.push(`<a href="#" class="lk" data-go="person:${it.person}">${esc(P(it.person).name)} ›</a>`);
+  if (it.film !== undefined && it.film !== null && S.films[it.film]) L.push(`<a href="#" class="lk" data-go="film:${it.film}">${esc(S.films[it.film].title)} ›</a>`);
+  return L.length ? `<p class="golinks">${L.join(' ')}</p>` : '';
+}
 function inboxCard(it) {
   return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
     ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
-    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}`;
+    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}${inboxLinks(it)}`;
 }
 // Today, as it happens: a card for each block lived so far, any decision waiting, and what's next.
 function blockLabel(d, b) {
@@ -14404,6 +14455,7 @@ function careerClick(t) {
     else if (g === 'trait') { if (c.traits.includes(v)) c.traits = c.traits.filter(x => x !== v); else if (c.traits.length < 3 && !traitClash(c.traits, v)) c.traits.push(v); }
     else if (g === 'love' || g === 'hate') { const L = c[g]; if (L.includes(v)) c[g] = L.filter(x => x !== v); else if (L.length < (g === 'love' ? 3 : 2)) L.push(v); }
     else if (g === 'unfav') c.favs.splice(+v, 1);
+    else if (g === 'addfav') { if (S.cat.allFilms[v] && !c.favs.includes(v) && c.favs.length < 5) c.favs.push(v); UI.favq = ''; }
     else if (g === 'randfav') { if (c.favs.length >= 5) c.favs = []; while (c.favs.length < 5) { const id = randomFav(c); if (!id) break; c.favs.push(id); } }
     else if (g === 'go') {
       c.name = ($('#cc-name').value || '').trim() || suggestName(c.hub, c.g);
@@ -14626,7 +14678,7 @@ function render(keepScroll) {
   const top = document.scrollingElement.scrollTop;
   const d = dateOf(S.week);
   $('#date').innerHTML = `<span class="wk">Week ${Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 6048e5) + 1}${careerActive() ? ' · ' + BLOCKS[S.me.wk ? S.me.wk.block : 0].toLowerCase() : ''}</span><span class="dt">${careerActive() ? fmtDay(S.me.wk ? S.me.wk.day : 0) : fmtDate(S.week)}</span>`;
-  $('#pulse').innerHTML = `${S.people.filter(p => !p.retired).length.toLocaleString()} working · ${S.active.length} films in production · ${S.companies.filter(c => c.closed === null).length} companies <span class="pals" title="Colour scheme">${Object.entries(PALETTES).map(([k, c]) => `<button class="pal${palette() === k ? ' on' : ''}" data-pal="${k}" style="background:${c}" aria-label="${k} colours"></button>`).join('')}</span>`;
+  $('#pulse').innerHTML = `${S.people.filter(p => !p.retired).length.toLocaleString()} working · ${S.active.length} films in production · ${S.companies.filter(c => c.closed === null).length} companies <span class="pals" title="Colour scheme">${Object.entries(PALETTES).map(([k, c]) => `<button class="pal${palette() === k ? ' on' : ''}" data-pal="${k}" style="background:${c}" aria-label="${k} colours"></button>`).join('')}<button class="pal theme" data-pal="theme" aria-label="Switch light or dark" title="Light or dark"></button></span>`;
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
   let html;
@@ -14699,14 +14751,18 @@ function build(year, seed, depth) {
 }
 
 // Colour schemes: a per-browser preference, so it lives in localStorage (and works without it).
+// Light or dark: follows the system unless the player picks one here.
+function themePref() { try { return localStorage.getItem('applebox-theme') || ''; } catch (e) { return ''; } }
+function setTheme(v) { try { localStorage.setItem('applebox-theme', v); } catch (e) { /* this visit only */ } if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme; }
+if (typeof document !== 'undefined' && document.documentElement && themePref()) document.documentElement.dataset.theme = themePref();
 const PALETTES = { marquee: '#3D1118', kodachrome: '#F2B705', noir: '#111111', riviera: '#1C4E80', viola: '#4B2683', teal: '#0F3B3A' };
 function palette() { try { return localStorage.getItem('applebox-palette') || 'marquee'; } catch (e) { return 'marquee'; } }
 function setPalette(k) { if (!PALETTES[k]) return; try { localStorage.setItem('applebox-palette', k); } catch (e) { /* no storage: this visit only */ } document.documentElement.dataset.pal = k; }
 if (typeof document !== 'undefined' && document.documentElement) document.documentElement.dataset.pal = palette();
 document.addEventListener('click', e => {
   const pal = e.target.closest && e.target.closest('[data-pal]');
-  if (pal && pal.classList.contains('pal')) { setPalette(pal.dataset.pal); render(true); return; }
-  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-bo],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
+  if (pal && pal.classList.contains('pal')) { if (pal.dataset.pal === 'theme') { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; setTheme(dark ? 'light' : 'dark'); } else setPalette(pal.dataset.pal); render(true); return; }
+  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-bo],[data-bosort],[data-bomore],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
   if (!t) return;
   if (t.tagName === 'A') e.preventDefault();
   if (UI.busy && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;
@@ -14719,7 +14775,9 @@ document.addEventListener('click', e => {
   if (t.dataset.rolejump) { UI.tab = 'people'; UI.people.role = t.dataset.rolejump; UI.people.status = 'active'; render(); return; }
   if (t.dataset.cine) { UI.cine = !UI.cine; render(true); return; }
   if (t.dataset.ntype) { UI.news.type = t.dataset.ntype; render(true); return; }
-  if (t.dataset.bo) { UI.bo.view = t.dataset.bo; render(true); return; }
+  if (t.dataset.bo) { UI.bo.view = t.dataset.bo; UI.bo.more = 0; render(true); return; }
+  if (t.dataset.bosort) { const k = t.dataset.bosort; UI.bo.dir = UI.bo.sort === k && UI.bo.dir !== 'asc' ? 'asc' : 'desc'; UI.bo.sort = k; render(true); return; }
+  if (t.dataset.bomore) { UI.bo.more = 1; render(true); return; }
   if (t.dataset.fmode) { UI.films.mode = t.dataset.fmode; UI.films.sort = t.dataset.fmode === 'active' ? 'stage' : 'rel'; UI.films.dir = -1; render(true); return; }
   if (t.dataset.hubf) { UI.tab = 'films'; UI.films.hub = t.dataset.hubf; UI.films.mode = 'released'; render(); return; }
   if (t.dataset.sort) {
@@ -14736,7 +14794,7 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   if (careerChange(e)) return;
   const id = e.target.id, v = e.target.value;
-  const map = { 'bo-m': [UI.bo, 'm'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
+  const map = { 'bo-m': [UI.bo, 'm'], 'bo-y': [UI.bo, 'y'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
   if (map[id]) { map[id][0][map[id][1]] = v; render(true); return; }
   if (id === 'nw-year') { UI.nwYear = v === 'custom' ? 'custom' : +v; $('#nw-custom').hidden = v !== 'custom'; }
   if (id === 'nw-custom') UI.nwCustom = +v;
@@ -14745,6 +14803,8 @@ document.addEventListener('change', e => {
 let qTimer;
 document.addEventListener('input', e => {
   const id = e.target.id;
+  if (id === 'bo-q') { UI.bo.q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#bo-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
+  if (id === 'fav-q') { UI.favq = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#fav-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 150); return; }
   if (id !== 'f-q' && id !== 'p-q' && id !== 'j-q') return;
   (id === 'f-q' ? UI.films : id === 'j-q' ? UI.jobs : UI.people).q = e.target.value;
   clearTimeout(qTimer);

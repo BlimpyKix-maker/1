@@ -52,6 +52,14 @@ function filmChoices() {
   for (const f of list) { byLabel[`${f.t} (${f.y})`] = f.id; byLabel[`${f.t} (${f.y}) · ${f.real}`] = f.id; }
   return (UI.filmIdx = { y: S.startYear, list, byLabel });
 }
+// Search by the game's title or the real one, but only ever show the game's version: you work out which is which.
+const fold = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, '');
+function favResults() {
+  const q = fold(UI.favq || '').trim(), c = UI.cc;
+  if (q.length < 2) return '';
+  const L = filmChoices().list.filter(f => !c.favs.includes(f.id) && (fold(f.t).includes(q) || fold(f.real).includes(q))).slice(0, 8);
+  return `<ul class="favres">${L.map(f => `<li><button class="linkish" data-cc="addfav" data-v="${esc(f.id)}"><b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span></button></li>`).join('') || '<li class="muted">Nothing matches. Try another word.</li>'}</ul>`;
+}
 // Random favourite: leans hard toward the genres you love, but almost anything can come up, weighted by how
 // widely seen and how cherished a film is.
 function randomFav(c) {
@@ -79,7 +87,7 @@ function viewCreator() {
   const left = SKILL_POINTS - ccSpent(c);
   const grid = (group, src) => `<div class="opts">${Object.entries(src).map(([k, o]) => optCard(group, k, o, c[group] === k)).join('')}</div>`;
   const fc = filmChoices();
-  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : `<input class="favin" data-fav="${i}" list="cc-films" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}">`}</li>`; };
+  const favRow = (i) => { const id = c.favs[i], f = id ? S.cat.allFilms[id] : null; return `<li>${f ? `<b>${esc(f.t)}</b> <span class="muted">${f.y} · ${esc(f.g.toLowerCase())}</span> <button class="linkish" data-cc="unfav" data-v="${i}">Remove</button>` : (i === c.favs.length ? `<input class="favin" id="fav-q" value="${esc(UI.favq || '')}" placeholder="Type a title, real or in-game…" aria-label="Favourite film ${i + 1}" autocomplete="off">${favResults()}` : '<span class="muted">…</span>')}</li>`; };
   const genreChip = (g, kind) => { const on = c[kind].includes(g), other = kind === 'love' ? c.hate.includes(g) : c.love.includes(g), full = !on && c[kind].length >= (kind === 'love' ? 3 : 2); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="${kind}" data-v="${esc(g)}" aria-pressed="${on}" ${other || full ? 'disabled' : ''}>${esc(g)}</button>`; };
   const traitBtn = t => { const on = c.traits.includes(t), blocked = !on && (c.traits.length >= 3 || traitClash(c.traits, t)); return `<button class="chip trait tbtn${on ? ' on' : ''}" data-cc="trait" data-v="${esc(t)}" aria-pressed="${on}" ${blocked ? 'disabled' : ''} title="${esc(TRAITS[t].d)}">${esc(t)} <span class="muted">· ${esc(TRAITS[t].d)}</span> ${fxBadges(TRAITS[t])}</button>`; };
   return `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
@@ -106,7 +114,6 @@ function viewCreator() {
    <p class="note">Jobs on films in a genre you love lower your stress and teach you faster; genres you hate wear you down.</p>
    <h4>Five favourite films <span class="count">optional</span></h4>
    <ol class="favs">${[0, 1, 2, 3, 4].map(favRow).join('')}</ol>
-   <datalist id="cc-films">${fc.list.map(f => `<option value="${esc(f.t)} (${f.y})" label="${esc(f.real)}">`).join('')}</datalist>
    <div class="ccrow"><button class="btn" data-cc="randfav">${c.favs.length >= 5 ? 'Reroll all five' : 'Fill the rest at random'}</button><span class="muted">Random picks lean toward your favourite genres, weighted by how widely seen and loved a film is.</span></div>
    <p class="note">Films you love sharpen the skills their genre leans on, and they come up in conversation.</p></section>
   <section class="panel cc"><h3>Something from your past</h3>${grid('quirk', ORIGIN.quirk)}</section>
@@ -202,10 +209,23 @@ const DAY_FLAVOUR = {
 };
 // The week as a strip of days: lived days show what happened, today's card has the button, later days can still change.
 // One inbox item: what happened, the choices if it's waiting on you, and how it turned out.
+// Where a message leads: the part of the desk (or the page) it's about.
+function inboxLinks(it) {
+  const L = [], T = it.title + ' ' + (it.text || '');
+  const go = (tab, label) => L.push(`<button class="linkish" data-dtab="${tab}">${label} ›</button>`);
+  if (it.kind === 'invite' || it.kind === 'ask') go('phone', 'Phone');
+  else if (it.kind === 'offer' || it.kind === 'interview' || /Shortlisted|rejection|No luck|Wrapped|Job done/.test(it.title)) go('work', 'Work');
+  else if (it.kind === 'option' || /script|Draft|option|Green light|festival|is a go|Festival|Producing|investors/i.test(T)) go('create', 'Create');
+  else if (/agent|course|school|rent|move|Your place/i.test(T)) go('life', 'Life');
+  if (/diary|Interview|Shortlisted/.test(T)) go('diary', 'Your week');
+  if (it.person !== undefined && it.person !== null && P(it.person)) L.push(`<a href="#" class="lk" data-go="person:${it.person}">${esc(P(it.person).name)} ›</a>`);
+  if (it.film !== undefined && it.film !== null && S.films[it.film]) L.push(`<a href="#" class="lk" data-go="film:${it.film}">${esc(S.films[it.film].title)} ›</a>`);
+  return L.length ? `<p class="golinks">${L.join(' ')}</p>` : '';
+}
 function inboxCard(it) {
   return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
     ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
-    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}`;
+    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}${inboxLinks(it)}`;
 }
 // Today, as it happens: a card for each block lived so far, any decision waiting, and what's next.
 function blockLabel(d, b) {
@@ -514,6 +534,7 @@ function careerClick(t) {
     else if (g === 'trait') { if (c.traits.includes(v)) c.traits = c.traits.filter(x => x !== v); else if (c.traits.length < 3 && !traitClash(c.traits, v)) c.traits.push(v); }
     else if (g === 'love' || g === 'hate') { const L = c[g]; if (L.includes(v)) c[g] = L.filter(x => x !== v); else if (L.length < (g === 'love' ? 3 : 2)) L.push(v); }
     else if (g === 'unfav') c.favs.splice(+v, 1);
+    else if (g === 'addfav') { if (S.cat.allFilms[v] && !c.favs.includes(v) && c.favs.length < 5) c.favs.push(v); UI.favq = ''; }
     else if (g === 'randfav') { if (c.favs.length >= 5) c.favs = []; while (c.favs.length < 5) { const id = randomFav(c); if (!id) break; c.favs.push(id); } }
     else if (g === 'go') {
       c.name = ($('#cc-name').value || '').trim() || suggestName(c.hub, c.g);
