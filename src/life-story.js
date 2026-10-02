@@ -1,7 +1,7 @@
 // ---------------- Your story ----------------
 // The record of a life in film: a résumé that reads like one, a timeline of the moments that mattered, and what
 // became of the films you worked on. Milestones are written as they happen; the rest is gathered from the save.
-function milestone(t, kind = 'life') { const M = S.me; (M.milestones = M.milestones || []).push({ w: S.week, t, kind }); }
+function milestone(t, kind = 'life') { const M = S.me, m = { w: S.week, t, kind }; (M.milestones = M.milestones || []).push(m); if (typeof pressAboutYou === 'function' && M.id !== undefined) pressAboutYou(m); }
 // Called when the week closes: notice new levels and how your films are doing.
 // ---- Year in review ----
 // A snapshot each New Year; when the year turns, the difference becomes a recap in the inbox and on the Life tab.

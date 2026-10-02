@@ -41,6 +41,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/cohort.js` | `pickCohort` (no dice), `cohortWeek` news, `cohortHTML` ranking |
 | `src/campaign.js` | awards season Oct–Dec: `CAMPAIGN` moves add `f.camp`, which `nationalAwards` weighs |
 | `src/life-scenes-low.js` | early-career scenes: commutes, hunting, mixers, coffees, hustle, classes, evenings, junior work |
+| `src/clippings.js` | press about you (`pressAboutYou`, from `milestone`), `nextMoves` advisor (Feed sidebar), `AMBITIONS` ladder (Life tab) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working

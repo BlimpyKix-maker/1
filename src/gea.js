@@ -246,3 +246,18 @@ function filmReviewsHTML(f) {
   }
   return `<section class="panel reviews"><h3>What the critics said</h3><ul class="plain">${out.join('')}</ul></section>`;
 }
+// ---- the box-office run: the weekly shape of a film's takings, derived from its total and how well it held ----
+function filmRun(f) {
+  if (f.rel === null || !(f.total > 0)) return null;
+  const q = f.q || 50, hold = clamp(.42 + q / 220 + (f.cult || 0) / 600, .35, .88), wk = 10;   // good films lose fewer viewers each week
+  const w = Array.from({ length: wk }, (_, i) => Math.pow(hold, i)), sum = w.reduce((a, b) => a + b, 0);
+  return w.map(x => x / sum * f.total);
+}
+function filmRunHTML(f) {
+  const R = filmRun(f); if (!R) return '';
+  const max = R[0], W = 640, H = 110, bw = W / R.length;
+  const bars = R.map((v, i) => { const h = Math.max(2, v / max * (H - 18)), x = i * bw + 1, y = H - 14 - h; return `<g><title>Week ${i + 1}: ${fmtM(v)}</title><rect x="${x}" y="${y}" width="${bw - 2}" height="${h}" rx="3" fill="var(--accent)"/><rect x="${i * bw}" y="0" width="${bw}" height="${H}" fill="transparent"/></g>`; }).join('');
+  const half = R.findIndex((v, i) => R.slice(0, i + 1).reduce((a, b) => a + b, 0) >= f.total / 2) + 1;
+  return `<section class="panel run"><h3>Box office run</h3><svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Weekly box office for ${esc(f.title)}">${bars}<line x1="0" y1="${H - 13}" x2="${W}" y2="${H - 13}" stroke="var(--line)"/><text x="0" y="${H - 2}" font-size="9" fill="var(--muted)">Week 1</text><text x="${W}" y="${H - 2}" font-size="9" fill="var(--muted)" text-anchor="end">Week ${R.length}</text></svg>
+   <p class="small">Opening week ${fmtM(R[0])} · ${R[1] ? Math.round((1 - R[1] / R[0]) * 100) + '% drop in week two' : ''} · half its total by week ${half} · ${fmtM(f.total)} worldwide.</p></section>`;
+}
