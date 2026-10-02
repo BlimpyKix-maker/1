@@ -98,6 +98,35 @@
 .term-k { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
 @media (max-width: 700px) { .term-top { grid-template-columns: auto 1fr; } .term-top .spark { grid-column: 1 / -1; } }
 .family { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; }
+.phone .ph-cols { grid-template-columns: minmax(300px, 380px) 1fr; }
+.device { background: #111; border-radius: 38px; padding: 12px 10px 14px; box-shadow: 0 10px 30px rgba(0,0,0,.3); position: relative; max-width: 380px; }
+.device .notch { width: 110px; height: 22px; background: #000; border-radius: 0 0 14px 14px; margin: -12px auto 2px; }
+.device .status { display: flex; justify-content: space-between; color: #eee; font: 600 11px var(--f-data); padding: 0 16px 6px; }
+.device .screen { background: var(--panel); border-radius: 24px; padding: 10px; min-height: 460px; max-height: 560px; overflow-y: auto; }
+.device .homebar { width: 120px; height: 4px; background: #666; border-radius: 2px; margin: 10px auto 0; }
+.ph-bar { display: flex; align-items: center; gap: 8px; padding: 2px 4px 8px; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.ph-bar small { display: block; color: var(--muted); font-size: 11px; } .ph-bar a { margin-left: auto; }
+.pavatar { display: inline-grid; place-items: center; border-radius: 50%; overflow: hidden; background: var(--accent-soft); flex: none; }
+.pavatar svg { width: 100%; height: 100%; }
+.threads .thr { grid-template-columns: auto 1fr auto; align-items: center; }
+.threads .thr { text-align: left; column-gap: 10px; }
+.threads .thr .pavatar { grid-column: 1; grid-row: 1 / 3; }
+.threads .thr b { grid-column: 2; grid-row: 1; } .threads .thr time { grid-column: 3; grid-row: 1; } .threads .thr .prev { grid-column: 2 / 4; grid-row: 2; }
+.sms.thread li { border-radius: 16px 16px 16px 4px; max-width: 82%; }
+.sms.thread li.me { background: #2F7CF6; color: #fff; border-color: #2F7CF6; border-radius: 16px 16px 4px 16px; }
+.sms.thread li.me time { color: rgba(255,255,255,.7); }
+.sms.thread li time { display: block; font-size: 10px; text-align: right; }
+.quick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.quick .qr { all: unset; cursor: pointer; padding: 5px 10px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); font-size: 13px; }
+.quick .qr:hover, .quick .qr:focus-visible { border-color: var(--accent); }
+.compose.own { margin-top: 6px; } .compose.own input { flex: 1; min-width: 0; }
+@media (max-width: 700px) { .phone .ph-cols { grid-template-columns: 1fr; } .device { margin: 0 auto; } }
+.threads .thr2 { all: unset; box-sizing: border-box; cursor: pointer; display: flex; gap: 10px; align-items: center; width: 100%; padding: 7px 8px; border-bottom: 1px solid var(--line); }
+.threads .thr2:hover, .threads .thr2:focus-visible { background: var(--bg); }
+.thr2 .tb { flex: 1; min-width: 0; display: grid; }
+.thr2 .tt { display: flex; align-items: center; gap: 6px; } .thr2 .tt time { margin-left: auto; font-size: 11px; color: var(--muted); }
+.thr2 .prev { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.thr2.unread b { color: var(--accent); }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -11224,6 +11253,7 @@ function applyAct(a) {
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
+    case 'reply': return replyText(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
     case 'found': return foundCompany(a);
@@ -12602,13 +12632,14 @@ function seniorTo(id) { return P(id).standing - ME().standing >= 20; }
 function sms(from, t, kind = 'text', extra = {}) {
   const M = S.me, W = M.wk;
   M.phone = M.phone || [];
-  M.phone.push({ w: S.week, d: W ? W.day : 0, b: W ? W.block : 0, from, t, kind, ...extra });
+  if (from !== null && from !== undefined && from >= 0 && !extra.raw && typeof styleText === 'function' && P(from)) t = styleText(P(from), t, extra.mood || (kind === 'love' ? 'love' : kind === 'life' && /hospital|lost|over|fired|done/.test(t) ? 'sad' : 'happy'));
+  M.phone.push({ id: (M.phoneN || 0) + 1, w: S.week, d: W ? W.day : 0, b: W ? W.block : 0, from, t, kind, ...extra, replyable: extra.replyable || (from !== null && from !== undefined && from >= 0 && ['text', 'love', 'life', 'gossip', 'tip', 'advice'].includes(kind) ? 1 : 0) });
   if (M.phone.length > 120) M.phone.splice(0, M.phone.length - 120);
   M.phoneN = (M.phoneN || 0) + 1;
 }
 const HI_LINES = ['saw something today that made me think of you. how are you??', 'are you still alive? asking for me', 'ok who told you that you could disappear for a month', 'thinking about that night. we should do it again', 'how\'s the hustle', 'you\'ll never guess who I just stood behind in a coffee queue'];
 const PARTNER_LINES = ['missing you today', 'home late, save me some of whatever that was', 'I told my mum about you. she has questions', 'you were brilliant this morning. just saying', 'pick up milk? and also me, at 8', 'proud of you. that\'s all.'];
-const HOME_CALLS = ['Home calls. They want to know if you\'re eating properly.', 'Your family calls: a cousin is getting married, and are you coming?', 'A call from home. Everyone\'s fine. You feel lighter after.', 'A voicemail from home: "We saw a film. It was terrible. Call us."'];
+const HOME_CALLS = ['Home calls. They want to know if you\'re eating properly.', 'Your family calls: a cousin is getting married, and are you coming?', 'A call from home. Everyone\'s fine. You feel lighter after.', 'A voicemail from home: "We saw a film. It was terrible. Call us."', 'Your sister texts a photo of the dog wearing your old school jumper.', 'Home calls: the neighbour\'s son is "also in films" now. He does weddings.', 'Your dad forwards you an article about a film you didn\'t work on, with the message "is this you?"', 'A parcel from home: biscuits, socks, and a newspaper cutting about a cinema closing.', 'Your mum asks if you\'ve met anyone famous. You list three names. She knows none of them.', 'A late call from home. Nothing\'s wrong. They just wanted to hear your voice.', 'Your old teacher sends a card: "Still waiting to see your name on a screen."', 'The family group chat is arguing about a game show again.'];
 const GOSSIP_LINES = ['{a} and {b} aren\'t speaking since the wrap party. nobody will say why', 'did you hear {a} walked off a job on Tuesday?', '{a} is apparently writing something. everyone is writing something', 'heard {a} is up for something big. don\'t say I said', '{a} turned up to a meeting in a tuxedo. no explanation', 'apparently {a} and {b} are an item now??'];
 const MENTOR_TIPS = [
   'Arrive early, leave late, and never be the reason a setup waits.',
@@ -12630,7 +12661,8 @@ function phoneTick(d, b) {
   const onFilms = known.filter(id => S.active.some(i => keyIds(S.films[i]).includes(id) && S.films[i].hub === M.hub));
   const part = partnerOf(), men = mentorOf();
   const opts = [['gossip', 3], ['home', 1]];
-  if (friends.length) opts.push(['invite', 4], ['hi', 2], ['ask', 1]);
+  if (friends.length) opts.push(['invite', 4], ['hi', 4], ['ask', 1]);
+  else opts.push(['hi', 4]);   // acquaintances text too
   if (onFilms.length) opts.push(['tip', 1]);
   if (part !== null) opts.push(['partner', 3]);
   if (men !== null) opts.push(['mentor', 1]);
@@ -12643,8 +12675,8 @@ function phoneTick(d, b) {
       sms(from, pickLine(GOSSIP_LINES, a + b2).replace('{a}', P(a).name).replace('{b}', P(b2).name), 'gossip', { person: a });
       return;
     }
-    case 'home': sms(null, pickLine(HOME_CALLS, d + b), 'home'); M.wk.stress -= 1; return;
-    case 'hi': { const id = ppick(friends); sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
+    case 'home': sms(null, ppick(HOME_CALLS), 'home'); M.wk.stress -= 1; return;
+    case 'hi': { const id = ppick(friends.length ? friends : known); if (prnd() < .6) phoneExtra(id); else sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
     case 'partner': sms(part, pickLine(PARTNER_LINES, d + b), 'love'); return;
     case 'mentor': { sms(men, pickLine(MENTOR_TIPS, men + S.week), 'tip'); for (const s of Object.keys(CRAFTS[MAIN[P(men).role]].subs).slice(0, 2)) weekGain(s, .01); return; }
     case 'tip': {
@@ -13999,6 +14031,95 @@ function companyTerminal(c) {
     <h4>Analysts say</h4><p class="muted">${c.closed !== null ? 'Nothing: the company is gone.' : c.cash < 0 ? 'Debt is the story here. One more flop and the lenders take the keys.' : chg(12) !== null && chg(12) > 15 ? 'Momentum is real. The question is whether the next slate can match it.' : chg(12) !== null && chg(12) < -15 ? 'A rough year. Expect cost-cutting and a safer slate.' : hitRate > 55 ? 'A steady hand: more hits than misses, few surprises.' : 'Hard to read. Everything depends on the next couple of releases.'}</p></section></div></div>`;
 }
 // </companies>
+// <life-phone>
+// ---------------- The phone, properly ----------------
+// Everyone texts like themselves. A texting style comes from traits and age; familiarity warms it up (a stranger
+// writes "Hi, it's…", a close friend sends three messages and a meme). Messages you get can be answered: warm,
+// funny, flirty, brief, or in your own words, and they answer back in character. Replies move the relationship.
+const TEXT_STYLES = {
+  emoji: { label: 'emoji-happy' }, terse: { label: 'terse' }, formal: { label: 'formal' }, lower: { label: 'all lowercase' }, caps: { label: 'ALL CAPS energy' }, long: { label: 'long paragraphs' }
+};
+function textStyle(p) {
+  const t = p.traits || [], age = S.year - p.born, r = hashRand(p.id * 89 + 4)();
+  if (t.includes('Volatile') || t.includes('Reckless')) return 'caps';
+  if (t.includes('Gregarious') || t.includes('Charming') || t.includes('Party animal')) return 'emoji';
+  if (t.includes('Shy') || t.includes('Cynical') || t.includes('Workhorse') || t.includes('Disciplined')) return 'terse';
+  if (age > 55 || t.includes('Perfectionist') || t.includes('Diplomatic')) return 'formal';
+  if (t.includes('Anxious') || t.includes('Optimist')) return 'long';
+  return age < 32 ? (r < .6 ? 'lower' : 'emoji') : r < .5 ? 'lower' : 'terse';
+}
+const EMO = { happy: ['😂', '🙌', '✨', '🥹', '😄', '🎬'], sad: ['😩', '🫠', '😭'], love: ['❤️', '😘', '🥰'], none: ['👀', '🙃', '😅'] };
+function styleText(p, t, mood = 'happy') {
+  const M = S.me, st = textStyle(p), o = M && M.known[p.id] ? opinion(p.id) : 0, r = hashRand(p.id * 7 + (M ? M.phoneN || 0 : 0))(), first = M ? ME().name.split(' ')[0] : '';
+  let s = String(t);
+  if (/^\[/.test(s)) return s;   // a photo or a voice note speaks for itself
+  switch (st) {
+    case 'formal': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, ''); if (!/[.!?]$/.test(s)) s += '.'; if (o < 20) s = `Hello ${first}, ${s[0].toLowerCase()}${s.slice(1)}`; s += ` Best, ${p.name.split(' ')[0]}`; break;
+    case 'terse': s = s.split(/[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break;
+    case 'lower': s = s.toLowerCase().replace(/[.]$/, ''); break;
+    case 'caps': s = s.replace(/\b([a-z]{4,})\b/g, (w, _, i) => (hashRand(i + p.id)() < .35 ? w.toUpperCase() : w)) + (r < .5 ? '!!' : '!!!'); break;
+    case 'long': s = s[0].toUpperCase() + s.slice(1) + (r < .5 ? ' Anyway sorry, long message, I just think about this stuff a lot. How are YOU? Properly, I mean.' : ' Also, random, but I hope you\'re looking after yourself. This business eats people.'); break;
+    case 'emoji': s += ' ' + EMO[mood][Math.floor(r * EMO[mood].length)] + (o > 40 ? EMO[mood][Math.floor(r * 7) % EMO[mood].length] : ''); break;
+  }
+  if (o >= 55 && st !== 'formal' && r < .4) s = (relOf(p.id) === 'partner' ? pickLine(['babe ', 'hey you ', 'love, '], p.id) : pickLine(['ok ', 'listen ', 'mate ', 'right so '], p.id)) + s;
+  return s;
+}
+// More of everything people text about.
+const MORE_HI = ['what are you doing this weekend', 'I just walked past the place where we met and got weirdly emotional', 'random question: what\'s the best film you\'ve seen this year', 'did you see the trades this morning', 'need a recommendation. something sad but not TOO sad', 'my landlord is raising the rent again, I might move into the edit suite', 'I have a meeting tomorrow and nothing to wear. thoughts', 'how did the thing go', 'there\'s a screening on Thursday, free wine, you in', 'just finished a 16 hour day. I can\'t feel my feet', 'just got a parking ticket outside a studio that didn\'t hire me. poetic', 'thinking of quitting everything and opening a bakery. talk me out of it', 'you\'d have loved what happened on set today', 'are we still on for that thing', 'my mum asked about you'];
+const MEMES = ['[a photo of a dog in a director\'s chair]', '[a meme about call times]', '[a blurry photo of a famous actor in a supermarket]', '[a voice note, mostly laughing]', '[a screenshot of a terrible review]', '[a photo of a craft services table, captioned "living the dream"]'];
+const ASK_ADVICE = ['should I take a job abroad if it means leaving everyone', 'do I tell the director their script has a hole in it', 'got offered more money for a worse job. thoughts', 'is it weird to ask an ex for a reference', 'they want me to work for free "for exposure". do I'];
+function worldGripe() { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week).map(e => e.k) : []; const L = { heat: 'it is TOO HOT to make films', strike: 'how are you getting anywhere with no trains', walkout: 'this strike is killing me. I\'ve rewatched every film I own', recession: 'everyone\'s cutting budgets. scary out there', boom: 'every company in town is hiring, it\'s mad', storm: 'my street is a river', flu: 'half our crew is off sick', festival: 'the festival! are you going tonight', final: 'are you watching the match' }; const k = on.find(x => L[x]); return k ? L[k] : null; }
+// Extra phone traffic: called from phoneTick's quieter moments.
+function phoneExtra(id) {
+  const g = worldGripe(), r = prnd();
+  if (g && r < .25) return sms(id, g, 'text', { replyable: 1 });
+  if (r < .45) return sms(id, ppick(MEMES), 'text', { replyable: 1 });
+  if (r < .6) return sms(id, ppick(ASK_ADVICE), 'advice', { replyable: 1 });
+  return sms(id, ppick(MORE_HI), 'text', { replyable: 1 });
+}
+// ---- replying ----
+const REPLIES = {
+  warm: { label: '❤️ Warm', mine: ['aw, that means a lot', 'always here for you', 'miss you, let\'s fix a date', 'you\'re the best, you know that'] },
+  funny: { label: '😂 Funny', mine: ['I\'m legally obliged to say "that\'s showbiz"', 'please put that in a film', 'I\'ve read worse scripts', 'adding this to my memoir'] },
+  flirty: { label: '😏 Flirty', mine: ['you\'re trouble, you know that', 'thinking about you, for the record', 'save me a seat next to you'] },
+  brief: { label: '👍 Brief', mine: ['👍', 'ha, yeah', 'nice', 'ok!'] }
+};
+function replyOptions(m) {
+  const id = m.from, o = [['warm'], ['funny'], ['brief']];
+  if (id >= 0 && (relOf(id) === 'partner' || canRomance(id))) o.splice(2, 0, ['flirty']);
+  return o.map(x => x[0]);
+}
+function replyText(a) {
+  const M = S.me, m = (M.phone || []).find(x => x.id === a.mid);
+  if (!m || m.replied || m.from === null || m.from === undefined || m.from < 0 || !M.known[m.from] || P(m.from).dead) return false;
+  const q = P(m.from), me = ME(), rel = relOf(q.id), o = opinion(q.id);
+  m.replied = 1;
+  let mine, back, tieD = 0, mood = 'happy';
+  if (a.kind === 'own') {
+    mine = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 280);
+    if (!mine) return false;
+    const L = mine.toLowerCase();
+    back = /\?$/.test(mine) ? pickLine(['honestly? I don\'t know. ask me after coffee', 'yes. obviously yes', 'hmm. let me think about it', 'great question. terrible timing'], q.id + M.phoneN) : /love|miss|proud/.test(L) ? pickLine(['stop it, you\'ll make me cry', 'same. always', 'ok now I\'m smiling at my phone like an idiot'], q.id) : /sorry|apolog/.test(L) ? pickLine(['don\'t be silly, we\'re fine', 'water under the bridge', 'thank you for saying that'], q.id) : /haha|lol|😂/.test(L) ? pickLine(['HA', 'you\'re ridiculous', 'stop, I\'m in a meeting'], q.id) : pickLine(['fair', 'true', 'this is why I text you', 'noted, wise one'], q.id + M.phoneN);
+    tieD = 1 + (mine.length > 40 ? .5 : 0);
+  } else {
+    const R = REPLIES[a.kind]; if (!R) return false;
+    mine = pickLine(R.mine, q.id + M.phoneN);
+    if (a.kind === 'warm') { tieD = o > 0 ? 2 : .5; back = pickLine(['❤️', 'you too. seriously', 'ok let\'s actually do it this time'], q.id); }
+    else if (a.kind === 'funny') { const ok = prnd() < .35 + me.mind.cha / 40 + (has(me, 'Witty') ? .2 : 0); tieD = ok ? 2 : -.5; back = ok ? pickLine(['HAHAHA', 'I\'m screenshotting this', 'you\'re wasted in this business. or perfect for it'], q.id) : pickLine(['…ok', 'not your best', 'I\'ll allow it'], q.id); }
+    else if (a.kind === 'flirty') {
+      if (rel === 'partner') { tieD = 2.5; mood = 'love'; back = pickLine(['come home early then', 'stop, I\'m at work', 'you\'re lucky you\'re cute'], q.id); }
+      else if (o >= 30 && canRomance(q.id)) { tieD = 2; mood = 'love'; back = pickLine(['…is that a hint', 'well well well', 'ask me properly sometime'], q.id); (M.rel = M.rel || {})[q.id] = Object.assign(M.rel[q.id] || {}, { flirt: (M.rel[q.id] || {}).flirt + 1 || 1 }); }
+      else { tieD = -2; mood = 'none'; back = pickLine(['haha… ok', 'I think that was meant for someone else?', 'let\'s keep it professional'], q.id); }
+    } else { tieD = rel === 'close' || rel === 'partner' ? -.5 : 0; back = pickLine(['k', 'ok then', 'cool cool'], q.id); mood = 'none'; }
+  }
+  sms(-1, mine, 'mine', { to: q.id });
+  addTie(me, q, tieD); M.known[q.id].seen = S.week;
+  sms(q.id, back, 'text', { mood });
+  return true;
+}
+// Phone-like rendering helpers.
+function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
+// </life-phone>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -14622,14 +14743,17 @@ function phonePanel() {
     UI.seen[open] = (threads.get(open) || {}).n || 0;
     const msgs = all.filter(m => threadOf(m) === open).slice(-30);
     const q = open === 'home' ? null : P(open), rel = q ? relOf(open) : null;
-    left = `<div class="th-head"><button class="linkish" data-thread="">‹ All messages</button> <b>${q ? pl(open) : 'Home & gossip'}</b>${q ? ` <span class="muted small">${REL[rel].icon} ${esc(REL[rel].label)} · ${esc(q.occ || occupationOf(q))} · opinion ${Math.round(opinion(open))}</span>` : ''}</div>
-     <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><time>${when(m)}</time><p>${esc(m.t)}</p></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
-     ${q ? compose(true) : ''}`;
+    const lastIn = msgs.slice().reverse().find(m => m.from !== -1);
+    const canReply = q && lastIn && lastIn.replyable && !lastIn.replied && lastIn.id !== undefined;
+    left = `<div class="ph-bar"><button class="linkish" data-thread="">‹</button>${phoneAvatar(open, 28)}<div><b>${q ? esc(q.name) : 'Home & gossip'}</b>${q ? `<small>${REL[rel].icon} ${esc(REL[rel].label)} · texts ${esc(TEXT_STYLES[textStyle(q)].label)}</small>` : ''}</div>${q ? `<a href="#" class="lk small" data-go="person:${open}">Profile</a>` : ''}</div>
+     <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><p>${esc(m.t)}</p><time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
+     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${REPLIES[k].label}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div>` : q ? compose(true) : ''}`;
   } else {
-    left = `<ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr${unread > 0 ? ' unread' : ''}" data-thread="${t.k}"><b>${esc(nameOf(t.k))}${unread > 0 ? ` <span class="dot">${unread}</span>` : ''}</b> <time>${when(t.last)}</time><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
+    left = `<div class="ph-bar"><b>Messages</b></div><ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
   }
+  const W = M.wk, clock = W ? ['08:14', '14:37', '21:52'][W.block] : '09:00';
   return `<section class="panel phone"><h3>📱 Your phone</h3>
-   <div class="ph-cols"><div>${left}</div>
+   <div class="ph-cols"><div class="device"><div class="notch"></div><div class="status"><span>${clock}</span><span>${DAYS7[W ? W.day : 0].slice(0, 3)}</span><span>▮▮▮ ${Math.max(5, Math.round(M.energy))}%</span></div><div class="screen">${left}</div><div class="homebar"></div></div>
     <div><h4>Coming up</h4>${ahead.length ? `<ul class="plain appts">${ahead.slice(0, 8).map(x => `<li>${APPT_KINDS[x.kind].icon} <b>${esc(slotLabel(x))}</b>: ${esc(APPT_KINDS[x.kind].label)}${x.who != null ? ' with ' + pl(x.who) : ''}${x.what ? ` <span class="muted">(${esc(x.what)})</span>` : ''}</li>`).join('')}</ul>` : '<p class="muted small">Nothing booked. Text someone, or say yes to the next invitation.</p>'}
      <h4>Your people</h4>${REL_ORDER.filter(r => byRel[r] && r !== 'contact').map(r => `<p class="relrow"><span class="relk">${REL[r].icon} ${esc(REL[r].label)}${byRel[r].length > 1 && r !== 'partner' ? 's' : ''}</span> ${byRel[r].slice(0, 8).map(id => `<button class="linkish" data-thread="${id}">${esc(P(id).name)}</button>`).join(', ')}${byRel[r].length > 8 ? ` <span class="muted">+${byRel[r].length - 8}</span>` : ''}</p>`).join('') || '<p class="muted small">Nobody close yet. It takes time: see people, and keep seeing them.</p>'}
      ${byRel.contact ? `<p class="muted small">${byRel.contact.length} other contacts. People you don't see for a couple of months drift.</p>` : ''}</div></div></section>`;
@@ -14894,6 +15018,7 @@ function careerClick(t) {
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
   if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
+  if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
@@ -14917,7 +15042,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

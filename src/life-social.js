@@ -52,13 +52,14 @@ function seniorTo(id) { return P(id).standing - ME().standing >= 20; }
 function sms(from, t, kind = 'text', extra = {}) {
   const M = S.me, W = M.wk;
   M.phone = M.phone || [];
-  M.phone.push({ w: S.week, d: W ? W.day : 0, b: W ? W.block : 0, from, t, kind, ...extra });
+  if (from !== null && from !== undefined && from >= 0 && !extra.raw && typeof styleText === 'function' && P(from)) t = styleText(P(from), t, extra.mood || (kind === 'love' ? 'love' : kind === 'life' && /hospital|lost|over|fired|done/.test(t) ? 'sad' : 'happy'));
+  M.phone.push({ id: (M.phoneN || 0) + 1, w: S.week, d: W ? W.day : 0, b: W ? W.block : 0, from, t, kind, ...extra, replyable: extra.replyable || (from !== null && from !== undefined && from >= 0 && ['text', 'love', 'life', 'gossip', 'tip', 'advice'].includes(kind) ? 1 : 0) });
   if (M.phone.length > 120) M.phone.splice(0, M.phone.length - 120);
   M.phoneN = (M.phoneN || 0) + 1;
 }
 const HI_LINES = ['saw something today that made me think of you. how are you??', 'are you still alive? asking for me', 'ok who told you that you could disappear for a month', 'thinking about that night. we should do it again', 'how\'s the hustle', 'you\'ll never guess who I just stood behind in a coffee queue'];
 const PARTNER_LINES = ['missing you today', 'home late, save me some of whatever that was', 'I told my mum about you. she has questions', 'you were brilliant this morning. just saying', 'pick up milk? and also me, at 8', 'proud of you. that\'s all.'];
-const HOME_CALLS = ['Home calls. They want to know if you\'re eating properly.', 'Your family calls: a cousin is getting married, and are you coming?', 'A call from home. Everyone\'s fine. You feel lighter after.', 'A voicemail from home: "We saw a film. It was terrible. Call us."'];
+const HOME_CALLS = ['Home calls. They want to know if you\'re eating properly.', 'Your family calls: a cousin is getting married, and are you coming?', 'A call from home. Everyone\'s fine. You feel lighter after.', 'A voicemail from home: "We saw a film. It was terrible. Call us."', 'Your sister texts a photo of the dog wearing your old school jumper.', 'Home calls: the neighbour\'s son is "also in films" now. He does weddings.', 'Your dad forwards you an article about a film you didn\'t work on, with the message "is this you?"', 'A parcel from home: biscuits, socks, and a newspaper cutting about a cinema closing.', 'Your mum asks if you\'ve met anyone famous. You list three names. She knows none of them.', 'A late call from home. Nothing\'s wrong. They just wanted to hear your voice.', 'Your old teacher sends a card: "Still waiting to see your name on a screen."', 'The family group chat is arguing about a game show again.'];
 const GOSSIP_LINES = ['{a} and {b} aren\'t speaking since the wrap party. nobody will say why', 'did you hear {a} walked off a job on Tuesday?', '{a} is apparently writing something. everyone is writing something', 'heard {a} is up for something big. don\'t say I said', '{a} turned up to a meeting in a tuxedo. no explanation', 'apparently {a} and {b} are an item now??'];
 const MENTOR_TIPS = [
   'Arrive early, leave late, and never be the reason a setup waits.',
@@ -80,7 +81,8 @@ function phoneTick(d, b) {
   const onFilms = known.filter(id => S.active.some(i => keyIds(S.films[i]).includes(id) && S.films[i].hub === M.hub));
   const part = partnerOf(), men = mentorOf();
   const opts = [['gossip', 3], ['home', 1]];
-  if (friends.length) opts.push(['invite', 4], ['hi', 2], ['ask', 1]);
+  if (friends.length) opts.push(['invite', 4], ['hi', 4], ['ask', 1]);
+  else opts.push(['hi', 4]);   // acquaintances text too
   if (onFilms.length) opts.push(['tip', 1]);
   if (part !== null) opts.push(['partner', 3]);
   if (men !== null) opts.push(['mentor', 1]);
@@ -93,8 +95,8 @@ function phoneTick(d, b) {
       sms(from, pickLine(GOSSIP_LINES, a + b2).replace('{a}', P(a).name).replace('{b}', P(b2).name), 'gossip', { person: a });
       return;
     }
-    case 'home': sms(null, pickLine(HOME_CALLS, d + b), 'home'); M.wk.stress -= 1; return;
-    case 'hi': { const id = ppick(friends); sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
+    case 'home': sms(null, ppick(HOME_CALLS), 'home'); M.wk.stress -= 1; return;
+    case 'hi': { const id = ppick(friends.length ? friends : known); if (prnd() < .6) phoneExtra(id); else sms(id, pickLine(HI_LINES, id + d), 'text'); addTie(ME(), P(id), 1); return; }
     case 'partner': sms(part, pickLine(PARTNER_LINES, d + b), 'love'); return;
     case 'mentor': { sms(men, pickLine(MENTOR_TIPS, men + S.week), 'tip'); for (const s of Object.keys(CRAFTS[MAIN[P(men).role]].subs).slice(0, 2)) weekGain(s, .01); return; }
     case 'tip': {

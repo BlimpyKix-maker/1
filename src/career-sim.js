@@ -983,6 +983,7 @@ function applyAct(a) {
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
+    case 'reply': return replyText(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
     case 'found': return foundCompany(a);
