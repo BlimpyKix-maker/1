@@ -9,7 +9,7 @@ for (let c = 0; c < N; c++) {
   try {
     r(`newWorld(${2000 + c * 9}, ${7 + c}, 'quick'); while (archiving()) archiveStep(); while (warming()) tick(); finishWarm(); S.log = []; S.me = null;`);
     const roles = ['director', 'actor', 'writer', 'dp', 'editor', 'producer', 'composer', 'designer'];
-    r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Fuzz', role: '${roles[c % roles.length]}' }) })`);
+    r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Fuzz', role: '${roles[c % roles.length]}', field: '${['film', 'music', 'creator', 'podcast', 'stage'][c % 5]}' }) })`);
     for (let i = 0; i < 30 && !r('S.me.party.done'); i++) r(`(() => { const sc = partyScene(S.me.party); const L = sc.rooms || sc.opts; return doAct({ t: 'party', k: L[${Math.floor(rnd() * 9)} % L.length].k }); })()`);
     const acts = ['hunt', 'hunt', 'network', 'write', 'rest', 'train', 'study', 'catchup', 'hustle', 'home', 'out', 'read'], eves = ['home', 'out', 'write', 'read', 'v:rep', 'v:bar', 'v:openmic', 'v:gym'];
     for (let w = 0; w < WEEKS && !r('S.me.over'); w++) {
@@ -26,6 +26,7 @@ for (let c = 0; c < N; c++) {
       r(`S.me.cal = ${cal}; UI.apps = new Set(S.me.board.slice(0, appSlots()).map(p => p.id));`);
       if (rnd() < .15) r(`(() => { S.me.cash += 3000; const T = tripsAvailable(); if (T.length) doAct({ t: 'trip', k: T[${Math.floor(rnd() * 3)} % T.length].k }); for (const c of Object.keys(VENUE_CATS)) { UI.vcat = c; cityPanel(); } doAct({ t: 'focus', day: '${['hunt', 'craft', 'write', 'social', 'money', 'recover', 'balanced'][Math.floor(rnd() * 7)]}', eve: '${['quiet', 'social', 'culture', 'grind'][Math.floor(rnd() * 4)]}', auto: ${rnd() < .7} }); focusPanel(); })()`);
       if (rnd() < .2) r(`(() => { const L = campaignFilms(); const ks = Object.keys(CAMPAIGN); if (L.length) doAct({ t: 'campaign', film: L[0].id, k: ks[${Math.floor(rnd() * 5)}] }); campaignHTML(); })()`);
+      if (rnd() < .3) r(`(() => { S.me.cash += 500; if (S.me.make && S.me.make.ready) doAct({ t: 'releasework', promo: ${Math.floor(rnd() * 3)} }); if (!S.me.make) doAct({ t: 'startwork', type: Object.keys(WORK_TYPES)[${Math.floor(rnd() * 8)}] }); portfolioHTML(); })()`);
       if (rnd() < .25) r(`(() => { S.me.cash += 200; const L = COMPS.filter(c => compOpen(c) && !compEntered(c)); const c = L[${Math.floor(rnd() * 20)} % Math.max(1, L.length)]; if (c) doAct({ t: 'compete', k: c.k, script: ((S.me.scripts || []).find(x => x.grade) || {}).id }); for (const f of Object.keys(COMP_CAT)) { UI.compf = f; compPanel(); } UI.compf = 'all'; })()`);
       if (rnd() < .2) r(`(() => { for (const [k] of APPS) { UI.app = k; computerPanel(); } UI.app = null; const x = flickFeed()[0]; if (x) doAct({ t: 'like', post: x.id, who: x.who }); })()`);
       if (rnd() < .4) r(`(() => { const m = (S.me.phone || []).slice().reverse().find(m => m.replyable && !m.replied && m.from >= 0); if (m) doAct({ t: 'reply', mid: m.id, kind: '${['warm', 'funny', 'flirty', 'brief', 'own'][Math.floor(rnd() * 5)]}', text: 'haha you are ridiculous, miss you?' }); UI.thread = m ? m.from : null; phonePanel(); UI.thread = null; })()`);

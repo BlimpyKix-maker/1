@@ -19,7 +19,8 @@ const BLOCK_ACTS = {
   rest: { label: 'Rest', icon: '🛋️', e: -11, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
   home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night.' },
   out: { label: 'Out with friends', icon: '🍻', e: 12, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
-  read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' }
+  read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' },
+  make: { label: 'Make things', icon: '🎛️', e: 9, stress: .2, d: 'Work on your song, video, podcast or play (start one on the Create tab).' }
 };
 const EVENINGS = { home: BLOCK_ACTS.home, out: BLOCK_ACTS.out, latewrite: Object.assign({}, BLOCK_ACTS.write, { label: 'Write late' }), read: BLOCK_ACTS.read };
 const OLD_EVE = { latewrite: 'write' };
@@ -110,7 +111,7 @@ function commute() {
   W.stress += v.stress || 0;
   return v.commute[(S.week + W.day) % v.commute.length];
 }
-const AT_HOME = new Set(['rest', 'home', 'write', 'read']);
+const AT_HOME = new Set(['rest', 'home', 'write', 'read', 'make']);
 // A work block costs what the job asks of you: shooting days hardest, senior jobs harder, two jobs at once hardest of all.
 function workCost() {
   const M = S.me; let c = 12;
@@ -128,6 +129,7 @@ function runBlock(k) {
   const c = AT_HOME.has(k) || W.block === 2 ? null : commute();
   switch (k) {
     case 'work': L.push(...workDay()); break;
+    case 'make': if (typeof makeSession === 'function') makeSession(L); break;
     case 'hunt': W.hunted++; L.push(pickLine(HUNT_LINES, W.day + W.block)); break;
     case 'network': networkDay(W.L); break;
     case 'catchup': catchupDay(W.L); break;
@@ -198,6 +200,7 @@ const DAY_FOCUS = {
   write: { label: 'Writing', icon: '✍️', d: 'Pages, pages, pages. Your scripts move fastest.', days: [['write', 'write'], ['write', 'hunt'], ['write', 'write'], ['write', 'hunt'], ['write', 'write']] },
   social: { label: 'Networking', icon: '🥂', d: 'Mixers and coffees. More people, warmer ties; costs money.', days: [['hunt', 'network'], ['catchup', 'network'], ['hunt', 'network'], ['catchup', 'network'], ['hunt', 'hunt']] },
   money: { label: 'Pay the rent', icon: '🛵', d: 'Side hustles most days. Money now, no progress.', days: [['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle']] },
+  make: { label: 'Making things', icon: '🎛️', d: 'Your own work comes first: songs, videos, episodes, pages. Some hunting on the side.', days: [['make', 'make'], ['make', 'hunt'], ['make', 'make'], ['make', 'network'], ['make', 'hustle']] },
   recover: { label: 'Recover', icon: '🛋️', d: 'Rest and easy days. Energy and stress come back.', days: [['rest', 'read'], ['rest', 'hunt'], ['rest', 'read'], ['rest', 'hunt'], ['rest', 'read']] }
 };
 const EVE_STYLE = {
@@ -208,7 +211,7 @@ const EVE_STYLE = {
 };
 function autoCal() {
   const M = S.me, F = M.focus || {}, D = DAY_FOCUS[F.day] || DAY_FOCUS.balanced, E = EVE_STYLE[F.eve] || EVE_STYLE.quiet;
-  const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : 'read', E.eves[d]]);
+  const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : F.day === 'make' ? 'make' : 'read', E.eves[d]]);
   const life = ORIGIN.life[M.life];
   if (M.energy < 45) { cal[1][1] = 'rest'; cal[3][1] = 'rest'; }
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings

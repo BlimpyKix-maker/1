@@ -144,6 +144,10 @@ function startCareer(c) {
   M.party = makeParty(c);
   diary('You arrive in ' + HUBS[hub].name + ' with ' + fmtCash(M.cash) + (M.debt ? ' and ' + fmtCash(M.debt) + ' of student debt' : '') + '.');
   milestone(`Arrived in ${HUBS[hub].name} to become a ${ROLE_LABEL[c.role].toLowerCase()}, with ${fmtCash(M.cash)} to your name`, 'start');
+  // your field: what you set out to make. Outside film, you start with a first project on the go
+  S.me.field = FIELDS[c.field] ? c.field : 'film';
+  const first = { music: 'song', creator: 'video', podcast: 'podcast', stage: 'play' }[S.me.field];
+  if (first) { S.me.make = { type: first, title: workTitle(first, 0), prog: 0, need: WORK_TYPES[first].need, w: S.week, boost: 0 }; S.me.focus.day = 'make'; }
 }
 
 // Someone at the start of their career: a pool member with no credits, or a new arrival.
@@ -642,6 +646,7 @@ function closeWeek(a) {
   if (noes.length) { stress += (has(me, 'Thick-skinned') ? .5 : 2) * noes.length; inbox('note', noes.length === 1 ? 'No luck' : `${noes.length} rejections`, `${noes.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''}`).join('; ')}: ${noes.length === 1 ? 'they went with someone else' : 'they all went with someone else'}. ${noes.length > 2 ? 'It happens to everyone. It still stings.' : ''}`); }
   contestWeek();
   if (typeof compWeek === 'function') compWeek();
+  if (typeof mediaWeek === 'function') mediaWeek();
   if (typeof campaignFilms === 'function' && campaignSeason() && M.campY !== S.year && campaignFilms().length) { M.campY = S.year; inbox('note', 'Awards season', `Campaigns are starting for this year's films. ${campaignFilms().map(f => f.title).join(', ')} ${campaignFilms().length > 1 ? 'are' : 'is'} eligible. Screeners, trade ads, Q&As: it's all on the Contests tab.`); }
   dealsWeek();
   awardsWeek();
@@ -932,6 +937,7 @@ function resolvePick(it, k) {
   if (socialPick(it, k)) return true;
   if (dealPick(it, k)) return true;
   if (bidPick(it, k)) return true;
+  if (typeof sponsorPick === 'function' && sponsorPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -975,6 +981,8 @@ function askFavour(id) {
 function applyAct(a) {
   switch (a.t) {
     case 'create': startCareer(a.c); return true;
+    case 'startwork': return startWork(a);
+    case 'releasework': return releaseWork(a);
     case 'party': return partyPick(a.k);
     case 'pick': { const it = S.me.inbox.find(x => x.id === a.id); return it && !it.done ? resolvePick(it, a.k) : false; }
     case 'end': case 'day': case 'next': if (pending().length || !S.me.party.done || S.me.over) return false; liveOn(a); return true;
