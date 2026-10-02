@@ -124,9 +124,9 @@ function worldStrip() {
 // Called from closeWeek. Returns stress to add for the week.
 function livingWorldWeek() { npcLivesWeek(); return worldWeek(); }
 SCENES.push({ event: 1, jobs: [], id: 'ev_picket', title: 'The picket line', teach: 'Film unions bargain for whole crafts at once: when a contract runs out without a deal they strike, and crossing a picket line can follow a person for a career.', text: 'The strike is on. Outside the studio gates there\'s a picket line, a folding table of coffee and a lot of people you\'d like to work with one day.', opts: [
-  { k: 'walk', label: 'Walk the line with them', check: ['col', 10], ok: { tie: { mates: 4 }, meet: 1, stand: .3, stress: -2 }, bad: { tie: { mates: 2 }, energy: -6 }, t: 'Twelve hours, two blisters and a dozen new numbers. Solidarity is a network too.', tb: 'Long, cold and dull, but you showed up.' },
+  { k: 'walk', label: 'Walk the line with them', check: ['col', 10], ok: { tie: { mates: 4 }, meet: 1, stand: .3, stress: -2, flag: 'organiser' }, bad: { tie: { mates: 2 }, energy: -6 }, t: 'Twelve hours, two blisters and a dozen new numbers. Solidarity is a network too.', tb: 'Long, cold and dull, but you showed up.' },
   { k: 'organise', label: 'Help organise the strike fund', check: ['cha', 13], ok: { meet: 1, stand: .8, xp: { cha: .1 } }, bad: { stress: 4 }, t: 'The union reps learn your name. That kind of thing gets remembered.', tb: 'Meetings, spreadsheets, arguments. You burn out on it.' },
-  { k: 'cross', label: 'Take non-union work across town', ok: { cash: 400, stand: -1.5 }, t: 'The money helps. Someone takes a photo of you going in. It does the rounds.' }] });
+  { k: 'cross', label: 'Take non-union work across town', ok: { cash: 400, stand: -1.5, flag: 'scab' }, t: 'The money helps. Someone takes a photo of you going in. It does the rounds.' }] });
 
 // ---- Families ----
 // The business runs in families. Some newcomers are the children of established people: they carry the name, start

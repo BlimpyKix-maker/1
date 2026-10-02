@@ -26,6 +26,13 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/life-deals.js` | options, green lights, job on your own film, producing (market + pitches), your company, investors, casting, festivals, awards night |
 | `src/life-story.js` | milestones, résumé, timeline |
 | `src/trivia.js` | Cinephile notes: curated (fictionalised) + generated trivia, revealed by Taste |
+| `src/life-phone.js` | texting styles by personality, replies and conversations |
+| `src/computer.js` | the desk computer: mail, CrewList, trades, GEA search, bank, Flick, notes, Clapper Sweep |
+| `src/city-plus.js` | 26 venues in categories, weekly what's-on, weekend trips |
+| `src/gea.js` | the archive: posters, stills, trailers, loglines, full credits, bios |
+| `src/press.js` | trade press articles |
+| `src/companies.js` | company terminal: valuation, share price history, structure, logo, lore |
+| `src/strategy.js` | company departments, release strategy, reputation flags, Awards screen |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -57,7 +64,12 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Player company is exempt from the world's monthly overhead; pays a small weekly office cost instead.
 - Investors: you put in ≥25%; Finance roll; they take a share of returns; 4-week wait after a no.
 
-## Ideas queue
+## Ideas queue (after the big notes pass)
+- Avatars for real-world counterparts don't resemble the real people yet: would need a per-person look table (hair, skin, glasses, beard) for the famous names.
+- A few catalogue names are still close to real ones (e.g. a studio called "YRF Films"); run a rename pass on studios and people.
+- Distributors bidding for your films at festivals; hiring a composer and production designer; a troupe page.
+- Player-side family background (born into the business) as a character-creation option.
+
 1. Hire your own crew (DP, editor, composer) when producing/directing; a "troupe" of regulars who want to work with you again.
 2. Sell your company's films to distributors at festivals (bids, territories).
 3. Gentle difficulty tuning: energy/stress feel easy for steady jobs.

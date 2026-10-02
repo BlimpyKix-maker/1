@@ -381,6 +381,7 @@ function companyPanel() {
     const srcs = (M.scripts || []).filter(x => x.grade && !x.option && x.made === undefined).map(x => ['script', x]).concat((M.holdings || []).filter(h => h.made === undefined && !h.lapsed).map(h => ['holding', h]));
     co = `<p><a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a> ${'★'.repeat(4 - c.tier)} ${c.closed !== null ? '<span class="bad">closed</span>' : ''}· in the bank: <b class="${c.cash < 0 ? 'bad' : ''}">${fmtCash(Math.round(c.cash * 1e6))}</b> · ${c.films.length} film${c.films.length === 1 ? '' : 's'} · ${c.hits} hit${c.hits === 1 ? '' : 's'}</p>
      ${c.closed === null ? `<div class="ccrow"><label>Amount <input id="co-amt" type="number" min="100" step="100" value="${T.amt}"></label> <button class="btn-s ghost" data-comoney="invest">Put in</button> <button class="btn-s ghost" data-comoney="withdraw">Take out</button></div>
+     ${strategyPanel(c)}
      ${srcs.length ? `<h4>Make a film</h4>${srcs.map(([k, x]) => makeFilmForm(c, k, x)).join('')}<p class="muted small">A micro-budget costs a quarter, and the film will feel it. A famous lead costs more and sells more tickets. Directing takes you five days a week until release, and your directing craft shapes the film.</p>` : '<p class="muted small">Finish a script or option one to make a film with your company.</p>'}` : ''}`;
   }
   const festRow = f => { const done = (M.fests || []).filter(x => x.film === f.id); return festEligible(f) ? `<span class="fests">${FESTIVALS.map(F => { const e = done.find(x => x.k === F.k); return e ? `<span class="chip ${e.sel ? 'good' : e.done ? '' : 'hist'}">${esc(F.name.replace(/^the /, ''))}: ${e.done ? (e.sel ? 'selected' : 'no') : 'waiting'}</span>` : `<button class="btn-s ghost" data-fest="${f.id}:${F.k}" title="${esc(F.d)} Entry ${fmtCash(usd(F.fee))}">${esc(F.name.replace(/^the /, ''))}</button>`; }).join(' ')}</span>` : ''; };
@@ -484,7 +485,7 @@ function viewDesk() {
   <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
-    case 'life': return pathsPanel() + homePanel() + storyHTML();
+    case 'life': return pathsPanel() + reputationHTML() + homePanel() + storyHTML();
     case 'people': return `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
@@ -586,6 +587,8 @@ function careerClick(t) {
   if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
   if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
   if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
+  if (t.dataset.dept) { doAct({ t: 'dept', k: t.dataset.dept }); render(true); return true; }
+  if (t.dataset.release) { doAct({ t: 'release', k: t.dataset.release }); render(true); return true; }
   if (t.dataset.vcat) { UI.vcat = t.dataset.vcat; render(true); return true; }
   if (t.dataset.trip) { doAct({ t: 'trip', k: t.dataset.trip }); render(true); return true; }
   if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
@@ -613,7 +616,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

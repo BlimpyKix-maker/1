@@ -6,7 +6,7 @@
 const ROLE_SCENES = {
   set: [
     { id: 'rs_callsheet', title: 'The call sheet', text: 'The call sheet lands at 10 p.m.: call time 5:30, a company move after lunch and a night exterior.', teach: 'The call sheet, sent the night before by the second AD, is the bible of a shoot day: who is needed where and when.', opts: [
-      { k: 'early', label: 'Be there at 5:15 with coffee for your team', ok: { tie: { head: 4, mates: 2 }, energy: -4 }, t: 'Being early is being on time. People notice who is.' },
+      { k: 'early', label: 'Be there at 5:15 with coffee for your team', ok: { tie: { head: 4, mates: 2 }, energy: -4, flag: 'reliable' }, t: 'Being early is being on time. People notice who is.' },
       { k: 'ontime', label: 'Arrive at 5:30 on the dot', ok: {}, t: 'On time. Nobody says anything, which is the point.' }] },
     { id: 'rs_lunch', title: 'Lunch', text: 'Catering has set up under a tent. The head of department sits alone with a script. The crew table is loud and full.', teach: 'Lunch is called six hours after call; meal penalties cost productions real money if it slips.', opts: [
       { k: 'head', label: 'Ask {head} if you can join them', check: ['cha', 12], ok: { tie: { head: 7 } }, bad: { tie: { head: -2 } }, t: '{head} talks about their first job for twenty minutes. You listen to every word.', tb: '{head} is reading. You read the room too late.' },

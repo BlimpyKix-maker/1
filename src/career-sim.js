@@ -545,6 +545,7 @@ function hireFactors(post) {
   if (M.degrees.length && post.tier >= 2) F.push(['Your degree', M.degrees.includes('mfa') ? .4 : .25]);
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
+  if (typeof repFactors === 'function') F.push(...repFactors(post));
   return F;
 }
 function hireOdds(post) { return clamp(logistic(hireFactors(post).reduce((s, f) => s + f[1], 0)), .02, .96); }
@@ -888,6 +889,7 @@ function sceneResolve(it, k) {
   if (fx.cash) M.cash += usd(fx.cash);
   if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
   if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
+  if (fx.flag) (M.flags = M.flags || {})[fx.flag] = S.week;
   if (fx.rel && ctx.contact != null) setRel(ctx.contact, fx.rel === 'none' ? null : fx.rel);
   if (fx.cohab && ctx.contact != null) { M.cohab = ctx.contact; milestone(`Moved in with ${P(ctx.contact).name}`, 'love'); }
   if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
@@ -987,6 +989,8 @@ function applyAct(a) {
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);
     case 'trip': return bookTrip(a);
+    case 'dept': return investDept(a);
+    case 'release': return setRelease(a);
     case 'like': return likePost(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);

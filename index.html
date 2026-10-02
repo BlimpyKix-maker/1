@@ -152,6 +152,9 @@
 .fbar i { display: block; width: 100%; } .fbar i.hi { background: var(--good); } .fbar i.mid { background: var(--gold); } .fbar i.lo { background: var(--bad); }
 .forecast p { flex: 1; min-width: 220px; margin: 0; }
 .finetune summary { cursor: pointer; font-weight: 600; margin: 10px 0 6px; }
+.depts { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.dept { display: flex; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); } .dept .di { font-size: 24px; } .dept p { margin: 2px 0 6px; }
+.strat h4 { margin-top: 12px; }
 .golinks { margin: 4px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 4px 12px; }
 .pal.theme { background: linear-gradient(90deg, #F4EFE4 50%, #152020 50%); }
 * { box-sizing: border-box; }
@@ -637,6 +640,7 @@ tr.blocked td { opacity: .55; }
   <button data-tab="bo">Box office</button>
   <button data-tab="films" title="The Global Entertainment Archive: films and people">GEA</button>
   <button data-tab="cos">Companies</button>
+  <button data-tab="awards">Awards</button>
   <button data-tab="careers">Careers</button>
   <button data-tab="world">World</button>
 </div></nav>
@@ -9876,6 +9880,10 @@ function greenlight(hub, o = {}) {
     q: null, A: {}, gross: {}, total: 0, reviews: null, bd: null, status: 'Development'
   };
   if (o.score !== undefined) f.scriptScore = o.score;
+  if (o.qBonus) f.qBonus = o.qBonus;
+  if (o.hookBonus) f.hook = clamp(f.hook + o.hookBonus, 5, 99);
+  if (o.paMul) f.paMul = o.paMul;
+  if (o.fest) f.festFirst = 1;
   extendCredits(f);   // executive producers, story credits and bit parts
   S.films.push(f); S.active.push(f.id);
   if (co) co.films.push(f.id);
@@ -9980,7 +9988,7 @@ function computeQuality(f) {
   const tr = traitSum(d, 'q') + (traitSum(C[0], 'q') + avg(W.map(w => traitSum(w, 'q')))) * .4;
   const sd = 6 * traitMul(d, 'var') + (d.credits.length < 2 ? 3 : 0);
   const luck = gauss() * sd;
-  const q = clamp(base * chem * fit + ev + tr + luck, 1, 99);
+  const q = clamp(base * chem * fit + ev + tr + luck + (f.qBonus || 0), 1, 99);
   f.bd = { S: .3 * Sx, D: .3 * Dx, C: .25 * Cx, K: .15 * Kx, base, chem, fit, chemAdj: base * (chem - 1), fitAdj: base * chem * (fit - 1), ev, tr, luck, q };
   return q;
 }
@@ -10029,7 +10037,7 @@ function release(f) {
   f.foreign = f.total - (f.gross[f.m] || 0);
   f.reviews = Math.round(clamp(q + gauss() * (f.fixedQ != null ? 2 : 6) + (f.fixedQ != null ? 0 : (CRITIC_BIAS[f.genre] || 0)), 3, 99));
   // money: the theatrical P&L
-  f.pa = f.budget * [0, .55, .4, .2][f.tier] * (f.co === null ? .6 : 1) * (.8 + P(f.prod).sk.mkt / 50);
+  f.pa = f.budget * [0, .55, .4, .2][f.tier] * (f.co === null ? .6 : 1) * (.8 + P(f.prod).sk.mkt / 50) * (f.paMul || 1);
   f.rentals = 0;
   for (const m in f.gross) f.rentals += f.gross[m] * (m === f.m ? .5 : .4);
   const net = f.rentals - f.pa - f.cost;
@@ -10840,6 +10848,7 @@ function hireFactors(post) {
   if (M.degrees.length && post.tier >= 2) F.push(['Your degree', M.degrees.includes('mfa') ? .4 : .25]);
   F.push(['Competition', -post.comp]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
+  if (typeof repFactors === 'function') F.push(...repFactors(post));
   return F;
 }
 function hireOdds(post) { return clamp(logistic(hireFactors(post).reduce((s, f) => s + f[1], 0)), .02, .96); }
@@ -11183,6 +11192,7 @@ function sceneResolve(it, k) {
   if (fx.cash) M.cash += usd(fx.cash);
   if (fx.fame) me.fame = clamp((me.fame || 0) + fx.fame, 0, 100);
   if (fx.refs) M.freeRef = (M.freeRef || 0) + fx.refs;
+  if (fx.flag) (M.flags = M.flags || {})[fx.flag] = S.week;
   if (fx.rel && ctx.contact != null) setRel(ctx.contact, fx.rel === 'none' ? null : fx.rel);
   if (fx.cohab && ctx.contact != null) { M.cohab = ctx.contact; milestone(`Moved in with ${P(ctx.contact).name}`, 'love'); }
   if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
@@ -11282,6 +11292,8 @@ function applyAct(a) {
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);
     case 'trip': return bookTrip(a);
+    case 'dept': return investDept(a);
+    case 'release': return setRelease(a);
     case 'like': return likePost(a);
     case 'optionspec': return optionSpec(a);
     case 'pitch': return pitchSpec(a);
@@ -12059,7 +12071,7 @@ function forecastWeek() {
 const ROLE_SCENES = {
   set: [
     { id: 'rs_callsheet', title: 'The call sheet', text: 'The call sheet lands at 10 p.m.: call time 5:30, a company move after lunch and a night exterior.', teach: 'The call sheet, sent the night before by the second AD, is the bible of a shoot day: who is needed where and when.', opts: [
-      { k: 'early', label: 'Be there at 5:15 with coffee for your team', ok: { tie: { head: 4, mates: 2 }, energy: -4 }, t: 'Being early is being on time. People notice who is.' },
+      { k: 'early', label: 'Be there at 5:15 with coffee for your team', ok: { tie: { head: 4, mates: 2 }, energy: -4, flag: 'reliable' }, t: 'Being early is being on time. People notice who is.' },
       { k: 'ontime', label: 'Arrive at 5:30 on the dot', ok: {}, t: 'On time. Nobody says anything, which is the point.' }] },
     { id: 'rs_lunch', title: 'Lunch', text: 'Catering has set up under a tent. The head of department sits alone with a script. The crew table is loud and full.', teach: 'Lunch is called six hours after call; meal penalties cost productions real money if it slips.', opts: [
       { k: 'head', label: 'Ask {head} if you can join them', check: ['cha', 12], ok: { tie: { head: 7 } }, bad: { tie: { head: -2 } }, t: '{head} talks about their first job for twenty minutes. You listen to every word.', tb: '{head} is reading. You read the room too late.' },
@@ -13178,9 +13190,9 @@ function worldStrip() {
 // Called from closeWeek. Returns stress to add for the week.
 function livingWorldWeek() { npcLivesWeek(); return worldWeek(); }
 SCENES.push({ event: 1, jobs: [], id: 'ev_picket', title: 'The picket line', teach: 'Film unions bargain for whole crafts at once: when a contract runs out without a deal they strike, and crossing a picket line can follow a person for a career.', text: 'The strike is on. Outside the studio gates there\'s a picket line, a folding table of coffee and a lot of people you\'d like to work with one day.', opts: [
-  { k: 'walk', label: 'Walk the line with them', check: ['col', 10], ok: { tie: { mates: 4 }, meet: 1, stand: .3, stress: -2 }, bad: { tie: { mates: 2 }, energy: -6 }, t: 'Twelve hours, two blisters and a dozen new numbers. Solidarity is a network too.', tb: 'Long, cold and dull, but you showed up.' },
+  { k: 'walk', label: 'Walk the line with them', check: ['col', 10], ok: { tie: { mates: 4 }, meet: 1, stand: .3, stress: -2, flag: 'organiser' }, bad: { tie: { mates: 2 }, energy: -6 }, t: 'Twelve hours, two blisters and a dozen new numbers. Solidarity is a network too.', tb: 'Long, cold and dull, but you showed up.' },
   { k: 'organise', label: 'Help organise the strike fund', check: ['cha', 13], ok: { meet: 1, stand: .8, xp: { cha: .1 } }, bad: { stress: 4 }, t: 'The union reps learn your name. That kind of thing gets remembered.', tb: 'Meetings, spreadsheets, arguments. You burn out on it.' },
-  { k: 'cross', label: 'Take non-union work across town', ok: { cash: 400, stand: -1.5 }, t: 'The money helps. Someone takes a photo of you going in. It does the rounds.' }] });
+  { k: 'cross', label: 'Take non-union work across town', ok: { cash: 400, stand: -1.5, flag: 'scab' }, t: 'The money helps. Someone takes a photo of you going in. It does the rounds.' }] });
 
 // ---- Families ----
 // The business runs in families. Some newcomers are the children of established people: they carry the name, start
@@ -13255,8 +13267,8 @@ const MORE_SCENES = {
       { k: 'charm', label: 'Ask him, with charm and a production T-shirt', check: ['cha', 11], ok: { tie: { head: 4 } }, bad: { stress: 3 }, t: 'He stops. He asks for a selfie with the lead. You make no promises.', tb: 'He mows slower. On purpose.' },
       { k: 'radio', label: 'Radio it in and let the location manager pay him', ok: { tie: { head: -1 } }, t: 'Fifty dollars later, silence.' }] },
     { id: 'm_ad_overtime', title: 'Into overtime', text: 'At hour eleven, the director wants one more setup. The 1st AD looks at you: "Get me a number on the crew."', teach: 'ADs track hours against turnaround (the rest owed between wrap and next call). Breaking it costs money and safety; the AD has to say so even when the director doesn\'t want to hear it.', opts: [
-      { k: 'honest', label: 'Give the real number: we\'ll break turnaround', check: ['com', 12], ok: { tie: { head: 5 }, trust: { head: 5 } }, bad: { tie: { dir: -3 } }, t: 'The 1st AD uses your number to talk the director down. Good work.', tb: 'The director hears it as you being difficult.' },
-      { k: 'fudge', label: 'Round it down', ok: { stress: 3 }, t: 'One more setup. Someone falls asleep driving home. Nobody connects it to you.' }] },
+      { k: 'honest', label: 'Give the real number: we\'ll break turnaround', check: ['com', 12], ok: { tie: { head: 5 }, trust: { head: 5 }, flag: 'honest' }, bad: { tie: { dir: -3 }, flag: 'honest' }, t: 'The 1st AD uses your number to talk the director down. Good work.', tb: 'The director hears it as you being difficult.' },
+      { k: 'fudge', label: 'Round it down', ok: { stress: 3, flag: 'fudger' }, t: 'One more setup. Someone falls asleep driving home. Nobody connects it to you.' }] },
     { id: 'm_ad_sides', title: 'Sides', text: 'You printed tomorrow\'s sides and they\'re for the wrong scenes. Crew call is in forty minutes.', teach: 'Sides are miniature pages of just the day\'s scenes, handed out each morning. Printing, distributing and getting them right is a 2nd AD department job.', opts: [
       { k: 'run', label: 'Sprint to the production office printer', check: ['eth', 11], ok: { tie: { head: 3 } }, bad: { stress: 4, tie: { head: -2 } }, t: 'Warm sides in every hand by call time.', tb: 'The printer jams. You hand out photocopies of photocopies.' },
       { k: 'admit', label: 'Tell the 2nd AD immediately', ok: { trust: { head: 3 } }, t: 'They fix it with you. They also remember you told them.' }] },
@@ -13760,7 +13772,8 @@ function selfFund(a) {
   if (!src) return false;
   const lead = pickable(a.lead, 'actor'), dpPick = pickable(a.dp, 'dp'), edPick = pickable(a.ed, 'editor');
   const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
-  let budget = estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) : 0);
+  const edge = companyEdge(c, src);
+  let budget = (estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) * edge.leadMul : 0)) * edge.budgetMul;
   let share = 0, invest = 0;
   if (c.cash < budget * .9) {
     if (!a.inv || c.cash < budget * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) return false;
@@ -13768,7 +13781,7 @@ function selfFund(a) {
     if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
     invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
   }
-  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: src.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick });
+  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: edge.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick, qBonus: edge.qBonus, hookBonus: edge.hookBonus, paMul: edge.paMul, fest: edge.fest });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
   if (direct) takeJob(makePost(POST_BY.owndir, f));
@@ -13793,6 +13806,9 @@ function companyWeek() {
   const M = S.me, c = myCo();
   if (!c) return;
   if (c.closed === null) c.cash -= usd([0, 12000, 5000, 1500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
+  if (c.closed === null) c.cash -= deptUpkeep(c);
+  // festivals-first films go to the festivals by themselves
+  for (const id of c.films) { const f = S.films[id]; if (f.festFirst && f.rel !== null && !f.festSent && festEligible(f)) { f.festSent = 1; for (const F of FESTIVALS) if (!(M.fests || []).some(x => x.film === f.id && x.k === F.k)) (M.fests = M.fests || []).push({ film: f.id, k: F.k, due: S.week + 5 + Math.floor(prnd() * 5) }); } }
   payInvestors();
   if (c.closed !== null && !M.coClosedTold) { M.coClosedTold = 1; inbox('note', `${c.name} goes under`, 'The debts were bigger than the slate. Your company closes and its films go to whoever buys the library. You keep the stories.'); milestone(`${c.name} closed`, 'work'); }
   if (c.closed === null && c.tier === 3 && c.hits >= 2) { c.tier = 2; milestone(`${c.name} is now a mid-sized company`, 'work'); inbox('news', `${c.name} grows`, 'Two hits in, the phone rings differently. Agents send you better scripts; bigger names take meetings.'); }
@@ -14335,6 +14351,81 @@ function goOnTrip(x, L) {
   L.push(`${x.what}. ${F ? pickLine(['Three films a day and parties every night.', 'You sneak into a sold-out screening and nobody stops you.', 'A deal is signed at the table next to yours.'], S.week) : pickLine(['You visit a studio lot and a famous café.', 'A local crew adopts you for the night.', 'You eat everything and watch two local films.'], S.week)}${met.length ? ' You meet ' + met.join(', ') + '.' : ''}`);
 }
 // </city-plus>
+// <strategy>
+// ---------------- Strategy: departments, release tactics, reputation, the awards screen ----------------
+// Your company is something you build: invest in departments that each make your films better or cheaper in a
+// specific way, and pick how you release them. Your career has a reputation: some choices leave a mark that follows
+// you into every application. And the awards screen gathers every prize and deadline in one place.
+const CO_DEPTS = {
+  dev: { label: 'Development team', icon: '📚', d: 'Readers and script editors. Your films\' scripts score higher.', per: 'script +4' },
+  mkt: { label: 'Marketing department', icon: '📣', d: 'Trailers, posters, a publicist. Bigger openings, at a price.', per: 'audience appeal +8, marketing spend +10%' },
+  post: { label: 'Post house', icon: '🎚️', d: 'Your own edit suites and mixers. The crafts come together better.', per: 'quality +2' },
+  talent: { label: 'Talent relations', icon: '🤝', d: 'Someone who keeps the stars happy. Cheaper leads, better chemistry.', per: 'lead fees −12%, quality +1' },
+  stage: { label: 'Sound stage', icon: '🏗️', d: 'Your own stage: no renting, fewer weather days.', per: 'budgets −7%' }
+};
+const DEPT_COST = [0, 150000, 400000, 900000], DEPT_UPKEEP = [0, 1200, 3000, 7000];
+const RELEASE = {
+  wide: { label: 'Go wide', d: 'Big marketing push, every screen we can get. Best for crowd-pleasers.', hook: 6, pa: 1.25 },
+  fest: { label: 'Festivals first', d: 'Premiere at festivals, build word of mouth. Cheaper, critics love it, slower money.', hook: -4, pa: .8, fest: 1 },
+  platform: { label: 'Start small and build', d: 'A few cities, then expand if it works. Low risk, modest upside.', hook: 0, pa: .7 }
+};
+function deptLevel(k) { const c = typeof myCo === 'function' ? myCo() : null; return c && c.depts ? c.depts[k] || 0 : 0; }
+function investDept(a) {
+  const c = myCo(); if (!c || c.closed !== null || !CO_DEPTS[a.k]) return false;
+  c.depts = c.depts || {};
+  const lv = c.depts[a.k] || 0; if (lv >= 3) return false;
+  const cost = usd(DEPT_COST[lv + 1]) / 1e6; if (c.cash < cost) return false;
+  c.cash -= cost; c.depts[a.k] = lv + 1;
+  milestone(`${c.name} builds its ${CO_DEPTS[a.k].label.toLowerCase()} (level ${lv + 1})`, 'work');
+  return true;
+}
+function setRelease(a) { const c = myCo(); if (!c || !RELEASE[a.k]) return false; c.release = a.k; return true; }
+function deptUpkeep(c) { return Object.entries(c.depts || {}).reduce((s, [, lv]) => s + usd(DEPT_UPKEEP[lv]), 0) / 1e6; }
+// What the departments and release choice do to one of your company's films, applied when it's greenlit.
+function companyEdge(c, o) {
+  const d = c.depts || {}, R = RELEASE[c.release || 'wide'];
+  return { score: (o.score || 0) + (d.dev || 0) * 4, qBonus: (d.post || 0) * 2 + (d.talent || 0), hookBonus: (d.mkt || 0) * 8 + R.hook, paMul: (1 + (d.mkt || 0) * .1) * R.pa, budgetMul: 1 - (d.stage || 0) * .07, leadMul: 1 - (d.talent || 0) * .12, fest: !!R.fest };
+}
+// ---- reputation ----
+const REP_FLAGS = {
+  scab: { label: 'Crossed a picket line', d: 'Union crews remember. Harder to get on bigger productions.', hire: -.5, minTier: 2 },
+  organiser: { label: 'Strike organiser', d: 'Crews trust you; some producers are wary.', hire: .25 },
+  honest: { label: 'Straight talker', d: 'You told the truth when it cost you. Heads of department notice.', hire: .2 },
+  fudger: { label: 'Fudged the numbers', d: 'Someone noticed. A small mark against you with ADs and producers.', hire: -.15 },
+  reliable: { label: 'Reliable', d: 'Always on time, never the reason a setup waits.', hire: .2 }
+};
+function repFactors(post) {
+  const M = S.me, out = [];
+  for (const k in M.flags || {}) { const R = REP_FLAGS[k]; if (!R || S.week - M.flags[k] > 260) continue; if (R.minTier && (post.tier || 1) < R.minTier) continue; out.push([R.label, R.hire]); }
+  return out;
+}
+function reputationHTML() {
+  const M = S.me, L = Object.entries(M.flags || {}).filter(([k]) => REP_FLAGS[k]);
+  return `<section class="panel"><h3>Your reputation</h3>${L.length ? `<ul class="plain">${L.map(([k, w]) => `<li><b>${esc(REP_FLAGS[k].label)}</b> <span class="muted small">since ${fmtDate(w, true)}</span><br><span class="muted">${esc(REP_FLAGS[k].d)}</span></li>`).join('')}</ul><p class="muted small">Reputations fade after about five years.</p>` : '<p class="muted">Nothing sticks to you yet. Some choices will: how you act in a strike, whether you tell the truth on set.</p>'}</section>`;
+}
+// ---- the company's strategy panel ----
+function strategyPanel(c) {
+  if (!c || c.closed !== null) return '';
+  const d = c.depts || {}, rel = c.release || 'wide';
+  return `<div class="strat"><h4>Departments</h4><div class="depts">${Object.entries(CO_DEPTS).map(([k, D]) => { const lv = d[k] || 0, next = lv < 3 ? usd(DEPT_COST[lv + 1]) : null; return `<div class="dept"><span class="di">${D.icon}</span><div><b>${esc(D.label)}</b> <span class="lvl">${'●'.repeat(lv)}${'○'.repeat(3 - lv)}</span><p class="muted small">${esc(D.d)} Per level: ${esc(D.per)}.${lv ? ` Upkeep ${fmtCash(usd(DEPT_UPKEEP[lv]))}/wk.` : ''}</p>${next !== null ? `<button class="btn-s ghost" data-dept="${k}" ${c.cash * 1e6 < next ? 'disabled' : ''}>Build level ${lv + 1} · ${fmtCash(next)}</button>` : '<span class="muted small">Fully built</span>'}</div></div>`; }).join('')}</div>
+   <h4>How you release films</h4><div class="seg">${Object.entries(RELEASE).map(([k, R]) => `<button class="pill${rel === k ? ' on' : ''}" data-release="${k}" title="${esc(R.d)}">${esc(R.label)}</button>`).join('')}</div><p class="muted small">${esc(RELEASE[rel].d)}</p></div>`;
+}
+// ---- the awards screen ----
+function viewAwards() {
+  const M = S.me, me = S.me ? ME() : null, st = UI.aw = UI.aw || {};
+  const years = [...new Set((S.awards || []).map(a => a.y))].sort((a, b) => b - a), y = +(st.y || years[0] || S.year);
+  const rows = (S.awards || []).filter(a => a.y === y && (!st.q || a.name.toLowerCase().includes(st.q.toLowerCase())));
+  const mo = dateOf(S.week).getUTCMonth(), MON_ = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const cal = [].concat((typeof CONTESTS !== 'undefined' ? CONTESTS : []).map(c => ({ m: c.month, t: c.name, k: 'Screenplay contest', d: c.d })), (typeof FESTIVALS !== 'undefined' ? FESTIVALS : []).map(f => ({ m: f.month, t: f.name.replace(/^the /, 'The '), k: 'Festival', d: f.d })), [{ m: 1, t: 'The national Film Awards', k: 'Awards night', d: 'Best Film, Best Performance, Best Screenplay. Invitations go to nominees, their friends and people with standing.' }]).sort((a, b) => ((a.m - mo + 12) % 12) - ((b.m - mo + 12) % 12));
+  const mine = me ? (S.awards || []).filter(a => a.people.includes(me.id) || (M.past || []).some(p => p.film === a.film && p.credited)) : [];
+  return `<div class="head"><h2>Awards and recognition</h2><p class="lede">Prizes, festivals and contests: the other road to a name, beside the job board.</p></div>
+   <div class="cols two"><section class="panel"><h3>Coming up</h3><ul class="plain">${cal.map(x => `<li><b>${MON_[x.m]}</b> · ${esc(x.t)} <span class="chip">${esc(x.k)}</span><br><span class="muted small">${esc(x.d)}</span></li>`).join('')}</ul><p class="muted small">Enter scripts in contests and films in festivals from the Create tab.</p></section>
+   <section class="panel"><h3>Your recognition</h3>${mine.length ? `<ul class="plain">${mine.map(a => `<li>✦ ${esc(a.name)} ${a.y} · ${fl(a.film)}${a.people.includes(me.id) ? ' <b>(yours)</b>' : ''}</li>`).join('')}</ul>` : '<p class="muted">Nothing yet. Work on films that win, write scripts that place, or take your own films to festivals.</p>'}
+    ${M && (M.scripts || []).some(s => s.won) ? `<h4>Contests</h4><ul class="plain">${M.scripts.filter(s => s.won).map(s => `<li>${esc(s.title)}: ${esc(s.won.join(', '))}</li>`).join('')}</ul>` : ''}</section></div>
+   <h3>Winners</h3><div class="filters">${sel('aw-y', years.map(v => [v, v]), y)}<input id="aw-q" type="search" placeholder="Filter by award or country…" value="${esc(st.q || '')}"></div>
+   <div class="tw"><table class="grid"><thead><tr><th>Award</th><th>Film</th><th>Winners</th></tr></thead><tbody>${rows.map(a => `<tr><td>${esc(a.name)}</td><td>${fl(a.film)}</td><td>${a.people.map(pl).join(', ')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No awards recorded for this year yet.</td></tr>'}</tbody></table></div>`;
+}
+// </strategy>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15038,6 +15129,7 @@ function companyPanel() {
     const srcs = (M.scripts || []).filter(x => x.grade && !x.option && x.made === undefined).map(x => ['script', x]).concat((M.holdings || []).filter(h => h.made === undefined && !h.lapsed).map(h => ['holding', h]));
     co = `<p><a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a> ${'★'.repeat(4 - c.tier)} ${c.closed !== null ? '<span class="bad">closed</span>' : ''}· in the bank: <b class="${c.cash < 0 ? 'bad' : ''}">${fmtCash(Math.round(c.cash * 1e6))}</b> · ${c.films.length} film${c.films.length === 1 ? '' : 's'} · ${c.hits} hit${c.hits === 1 ? '' : 's'}</p>
      ${c.closed === null ? `<div class="ccrow"><label>Amount <input id="co-amt" type="number" min="100" step="100" value="${T.amt}"></label> <button class="btn-s ghost" data-comoney="invest">Put in</button> <button class="btn-s ghost" data-comoney="withdraw">Take out</button></div>
+     ${strategyPanel(c)}
      ${srcs.length ? `<h4>Make a film</h4>${srcs.map(([k, x]) => makeFilmForm(c, k, x)).join('')}<p class="muted small">A micro-budget costs a quarter, and the film will feel it. A famous lead costs more and sells more tickets. Directing takes you five days a week until release, and your directing craft shapes the film.</p>` : '<p class="muted small">Finish a script or option one to make a film with your company.</p>'}` : ''}`;
   }
   const festRow = f => { const done = (M.fests || []).filter(x => x.film === f.id); return festEligible(f) ? `<span class="fests">${FESTIVALS.map(F => { const e = done.find(x => x.k === F.k); return e ? `<span class="chip ${e.sel ? 'good' : e.done ? '' : 'hist'}">${esc(F.name.replace(/^the /, ''))}: ${e.done ? (e.sel ? 'selected' : 'no') : 'waiting'}</span>` : `<button class="btn-s ghost" data-fest="${f.id}:${F.k}" title="${esc(F.d)} Entry ${fmtCash(usd(F.fee))}">${esc(F.name.replace(/^the /, ''))}</button>`; }).join(' ')}</span>` : ''; };
@@ -15141,7 +15233,7 @@ function viewDesk() {
   <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
-    case 'life': return pathsPanel() + homePanel() + storyHTML();
+    case 'life': return pathsPanel() + reputationHTML() + homePanel() + storyHTML();
     case 'people': return `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
@@ -15243,6 +15335,8 @@ function careerClick(t) {
   if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
   if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
   if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
+  if (t.dataset.dept) { doAct({ t: 'dept', k: t.dataset.dept }); render(true); return true; }
+  if (t.dataset.release) { doAct({ t: 'release', k: t.dataset.release }); render(true); return true; }
   if (t.dataset.vcat) { UI.vcat = t.dataset.vcat; render(true); return true; }
   if (t.dataset.trip) { doAct({ t: 'trip', k: t.dataset.trip }); render(true); return true; }
   if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
@@ -15270,7 +15364,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = '[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = '[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -15447,7 +15541,7 @@ function render(keepScroll) {
   const cur = UI.stack[UI.stack.length - 1];
   let html;
   if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : viewCompany(cur.id));
-  else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld }[UI.tab];
+  else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards }[UI.tab];
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
   $('#main').innerHTML = html;
   if (UI.pendingSeen) UI.seenRoll = UI.pendingSeen;   // a roll tumbles in once
@@ -15560,7 +15654,7 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   if (careerChange(e)) return;
   const id = e.target.id, v = e.target.value;
-  const map = { 'bo-m': [UI.bo, 'm'], 'bo-y': [UI.bo, 'y'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
+  const map = { 'bo-m': [UI.bo, 'm'], 'bo-y': [UI.bo, 'y'], 'aw-y': [UI.aw = UI.aw || {}, 'y'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
   if (map[id]) { map[id][0][map[id][1]] = v; render(true); return; }
   if (id === 'nw-year') { UI.nwYear = v === 'custom' ? 'custom' : +v; $('#nw-custom').hidden = v !== 'custom'; }
   if (id === 'nw-custom') UI.nwCustom = +v;
@@ -15571,6 +15665,7 @@ document.addEventListener('input', e => {
   const id = e.target.id;
   if (id === 'pc-notes') { try { localStorage.setItem(notesKey(), e.target.value); } catch (err) { /* no storage */ } return; }
   if (id === 'cq' || id === 'gq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
+  if (id === 'aw-q') { (UI.aw = UI.aw || {}).q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#aw-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'bo-q') { UI.bo.q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#bo-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'fav-q') { UI.favq = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#fav-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 150); return; }
   if (id !== 'f-q' && id !== 'p-q' && id !== 'j-q') return;
