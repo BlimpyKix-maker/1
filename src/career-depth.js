@@ -77,6 +77,7 @@ function depthBoard(films) {
   const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null);
   for (let i = 0, n = biz.length ? 1 + (prnd() < .5 ? 1 : 0) + Math.floor(careerLevel() / 2) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
   if (typeof fieldPosts === 'function') out.push(...fieldPosts());
+  if (typeof corpPosts === 'function') out.push(...corpPosts());
   return out;
 }
 

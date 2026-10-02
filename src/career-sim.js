@@ -664,6 +664,7 @@ function closeWeek(a) {
   if (typeof mentorWeek === 'function') mentorWeek(gain);
   if (typeof convoWeek === 'function') convoWeek();
   if (typeof egofWeek === 'function') egofWeek();
+  if (typeof corpWeek === 'function') corpWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -946,6 +947,7 @@ function resolvePick(it, k) {
   if (dealPick(it, k)) return true;
   if (bidPick(it, k)) return true;
   if (typeof sponsorPick === 'function' && sponsorPick(it, k)) return true;
+  if (typeof corpPick === 'function' && corpPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
