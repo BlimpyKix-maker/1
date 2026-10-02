@@ -52,6 +52,8 @@ function blockedFrom(t) {
   const M = S.me, me = ME();
   if (t.deg && !M.degrees.length && me.credits.length < 3) return 'Wants a degree';
   if (t.union && !M.degrees.includes('union') && me.credits.length < 4) return 'Union training or 4 credits';
+  if ((t.tier || 1) >= 3 && careerLevel() < t.tier - 1) return `Needs experience: level ${t.tier - 1} or more`;
+  if (t.req && subScore(t) < t.req - 4) return 'Needs stronger skills for this one';
   return null;
 }
 // The extra listings each week: catalogue crew jobs on films around you, industry jobs at companies, internships.

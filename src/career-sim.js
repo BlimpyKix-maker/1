@@ -473,6 +473,18 @@ function headOf(f, key) {
 function postReq(t) { return t.req || 0; }
 function subScore(t) { const me = ME(); return avg(t.subs.map(s => s in me.sk ? me.sk[s] : me.mind[s] ?? 8)); }
 
+// Work elsewhere: a few postings from other cities in your language, and a couple from abroad. Taking one means moving.
+function awayBoard() {
+  const M = S.me, lang = HUBS[M.hub].lang, out = [];
+  const near = S.active.map(i => S.films[i]).filter(f => f.hub !== M.hub && HUBS[f.hub].lang === lang && f.stage >= 0 && f.stage < 4 && f.stageEnd - S.week >= 2);
+  const far = S.active.map(i => S.films[i]).filter(f => HUBS[f.hub].lang !== lang && f.stage >= 0 && f.stage < 4 && f.stageEnd - S.week >= 2 && f.tier <= 2);
+  for (const [L, n] of [[near, 5], [far, 4]]) for (let k = 0; k < n && L.length; k++) {
+    const f = L.splice(Math.floor(prnd() * L.length), 1)[0], opts = POSTS.filter(t => !t.cat && t.st.includes(f.stage) && headOf(f, t.head) !== null);
+    if (!opts.length) continue;
+    const p = makePost(ppick(opts), f); p.away = f.hub; p.rate = Math.round(p.rate * (HUBS[f.hub].lang === lang ? 1 : 1.15)); out.push(p);
+  }
+  return out;
+}
 // The board: what you hear about this week. Films in your hub post jobs for the stage they are in.
 function refreshBoard() {
   const M = S.me, hub = M.hub, out = [];
@@ -493,10 +505,10 @@ function refreshBoard() {
   out.sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0));
   // how much you hear about depends on who you are: a newcomer hears of a handful; a network, a reputation and an agent widen it
   const heard = 3 + careerLevel() * 2 + Math.floor(Object.keys(M.known).length / 8) + (M.agent ? 2 : 0) + (M.school ? 1 : 0);
-  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(14, heard) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
+  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(30, heard + 8) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
-  M.board = agentBoard(films).concat(film, depthBoard(films), odd);
+  M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
 }
 function makePost(t, f) {
@@ -600,11 +612,13 @@ function closeWeek(a) {
     if (j.done >= j.weeks || (j.film !== null && jobOver(j))) finishJob(j, L);
   }
   // applications
-  const apps = (a.apps || []).slice(0, Math.floor(hunted * 1.5));
-  const offers = [], noes = [], shortlisted = [];
+  const apps = (a.apps || []).slice(0, hunted * 3);
+  const offers = [], noes = [], shortlisted = [], auto = [];
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
-    if (!post || blockedFrom(tmplOf(post))) continue;
+    if (!post) continue;
+    const why = blockedFrom(tmplOf(post));
+    if (why) { M.stats.apps++; auto.push(`${post.t}: ${why.toLowerCase()}`); continue; }
     M.stats.apps++;
     if (post.odd && !tmplOf(post).cat) { if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post); }
     else if (prnd() < shortlistOdds(post)) { post.appt = bookInterview(post); shortlisted.push(post); }
@@ -612,6 +626,7 @@ function closeWeek(a) {
     if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
+  if (auto.length) inbox('note', auto.length === 1 ? 'Automatic rejection' : `${auto.length} automatic rejections`, `The system filtered you out before anyone read your application. ${auto.join('; ')}.`);
   if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${slotLabel(p.appt)})`).join('; ')}. It's in your diary; the interview decides it.`); for (const p of shortlisted) delete p.appt;
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
   // a rival in the same line of work sometimes gets there first
@@ -660,6 +675,7 @@ function offerText(o) {
 }
 function takeJob(post) {
   const M = S.me, f = post.film !== null ? S.films[post.film] : null;
+  if (post.away && post.away !== M.hub) relocate(post.away, `for ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`);
   const mates = f ? [...slotsOf(f)].filter(([id, s]) => id !== post.head && closeness(POST_BY[post.k].head === 'ad' ? 'ad' : POST_BY[post.k].head, s) >= .75).map(([id]) => id).slice(0, 3) : [];
   const j = { ...post, done: 0, mates, started: S.week };
   M.jobs.push(j);
@@ -668,6 +684,14 @@ function takeJob(post) {
   diary(`You start as ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}.`);
   if (!M.past.length && M.jobs.length === 1) milestone(`First job in the business: ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`, 'work');
   else if (post.tier >= 2 && f) milestone(`Hired as ${post.t.toLowerCase()} on ${f.title}`, 'work');
+}
+// Moving city for work: your contacts come with you (on the phone, at least); your home and the board don't.
+function relocate(hub, why) {
+  const M = S.me, me = ME(), from = M.hub;
+  M.hub = hub; me.hub = hub; M.rentOverride = null; M.home.layout = {}; M.hoodWhere = null;
+  if (M.agent && !agenciesIn(hub).some(a => a.name === M.agent.name)) inbox('note', 'Your agent is far away now', `${M.agent.name} can still pitch you, but their best contacts are back in ${hubName(from)}.`);
+  milestone(`Moved from ${hubName(from)} to ${hubName(hub)} ${why}`, 'life');
+  inbox('news', `You move to ${hubName(hub)}`, `New city, new board, new people. You find a ${ORIGIN.life[M.life].label.toLowerCase()} and start learning which café the crews use.`);
 }
 function finishJob(j, L, quit) {
   const M = S.me, me = ME();
@@ -893,7 +917,7 @@ function resolvePick(it, k) {
   }
   if (it.kind === 'offer') {
     if (k === 'yes') {
-      if (jobDays() + it.post.days > 5) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
+      if (jobDays() + it.post.days > 7) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
       const f = it.post.film !== null ? S.films[it.post.film] : null;
       if (f && (f.stage < 0 || f.stage >= 4)) { it.result = { t: 'Too late: the production has moved on.' }; it.done = true; return true; }
       takeJob(it.post); it.result = { t: 'You start on Monday.' };

@@ -9,7 +9,7 @@ const BLOCKS = ['Morning', 'Afternoon', 'Evening'], BEAT_NAMES = BLOCKS;
 // What a block can hold. e: energy it costs (negative restores); stress likewise. Venues add more (life-city.js).
 const BLOCK_ACTS = {
   work: { label: 'Work', icon: '🎬', e: 14, stress: 1.5 },
-  hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Every two blocks let you send three applications from the board.' },
+  hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Each block lets you send three applications from the board.' },
   write: { label: 'Write', icon: '✍️', e: 9, stress: .3, d: 'Work on your script. Your traits shape how it goes.' },
   train: { label: 'Take a class', icon: '🎓', e: 9, stress: .3, cost: 35, d: 'A class in one craft. Steady, always available.' },
   study: { label: 'Study', icon: '📚', e: 9, stress: .5, d: 'Classes for the course you\'re enrolled in.' },
@@ -46,12 +46,12 @@ function calOf() {
 function planBlocks() {
   const M = S.me, cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
   let need = jobDays();
-  for (let d = 0; d < 5 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }
+  for (let d = 0; d < 7 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }   // weekdays first, then weekends
   return M.wk && M.wk.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal;
 }
 function effectivePlan() { return planBlocks().map(r => r[1]); }   // the day's main activity, for older callers
 function countBlocks(k) { return planBlocks().reduce((n, r) => n + r.filter(x => x === k).length, 0); }
-function appSlots() { return Math.floor(countBlocks('hunt') * 1.5); }
+function appSlots() { return countBlocks('hunt') * 3; }
 function setPlan(a) {
   const M = S.me, W = M.wk, cal = calOf();
   const fromAbs = W ? W.day * 3 + W.block : 0;

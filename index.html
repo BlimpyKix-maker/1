@@ -222,6 +222,7 @@ table.pl { width: 100%; border-collapse: collapse; font-size: 14px; }
 .pl tr.sum td { font-weight: 600; border-bottom: 1px solid var(--ink); }
 .pl td.n { font-size: 13px; }
 .chip.hist { background: var(--data-soft); color: var(--data); }
+.chip.warn { background: var(--gold-soft); color: var(--ink); }
 .chip.list { background: var(--accent-soft); color: var(--accent); }
 .cine { border-left: 3px solid var(--data); margin-bottom: 14px; }
 .cine.off { padding: 8px 16px; }
@@ -10713,6 +10714,18 @@ function headOf(f, key) {
 function postReq(t) { return t.req || 0; }
 function subScore(t) { const me = ME(); return avg(t.subs.map(s => s in me.sk ? me.sk[s] : me.mind[s] ?? 8)); }
 
+// Work elsewhere: a few postings from other cities in your language, and a couple from abroad. Taking one means moving.
+function awayBoard() {
+  const M = S.me, lang = HUBS[M.hub].lang, out = [];
+  const near = S.active.map(i => S.films[i]).filter(f => f.hub !== M.hub && HUBS[f.hub].lang === lang && f.stage >= 0 && f.stage < 4 && f.stageEnd - S.week >= 2);
+  const far = S.active.map(i => S.films[i]).filter(f => HUBS[f.hub].lang !== lang && f.stage >= 0 && f.stage < 4 && f.stageEnd - S.week >= 2 && f.tier <= 2);
+  for (const [L, n] of [[near, 5], [far, 4]]) for (let k = 0; k < n && L.length; k++) {
+    const f = L.splice(Math.floor(prnd() * L.length), 1)[0], opts = POSTS.filter(t => !t.cat && t.st.includes(f.stage) && headOf(f, t.head) !== null);
+    if (!opts.length) continue;
+    const p = makePost(ppick(opts), f); p.away = f.hub; p.rate = Math.round(p.rate * (HUBS[f.hub].lang === lang ? 1 : 1.15)); out.push(p);
+  }
+  return out;
+}
 // The board: what you hear about this week. Films in your hub post jobs for the stage they are in.
 function refreshBoard() {
   const M = S.me, hub = M.hub, out = [];
@@ -10733,10 +10746,10 @@ function refreshBoard() {
   out.sort((a, b) => (b.ref ? 1 : 0) - (a.ref ? 1 : 0));
   // how much you hear about depends on who you are: a newcomer hears of a handful; a network, a reputation and an agent widen it
   const heard = 3 + careerLevel() * 2 + Math.floor(Object.keys(M.known).length / 8) + (M.agent ? 2 : 0) + (M.school ? 1 : 0);
-  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(14, heard) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
+  const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(30, heard + 8) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
-  M.board = agentBoard(films).concat(film, depthBoard(films), odd);
+  M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
 }
 function makePost(t, f) {
@@ -10840,11 +10853,13 @@ function closeWeek(a) {
     if (j.done >= j.weeks || (j.film !== null && jobOver(j))) finishJob(j, L);
   }
   // applications
-  const apps = (a.apps || []).slice(0, Math.floor(hunted * 1.5));
-  const offers = [], noes = [], shortlisted = [];
+  const apps = (a.apps || []).slice(0, hunted * 3);
+  const offers = [], noes = [], shortlisted = [], auto = [];
   for (const pid of apps) {
     const post = M.board.find(p => p.id === pid);
-    if (!post || blockedFrom(tmplOf(post))) continue;
+    if (!post) continue;
+    const why = blockedFrom(tmplOf(post));
+    if (why) { M.stats.apps++; auto.push(`${post.t}: ${why.toLowerCase()}`); continue; }
     M.stats.apps++;
     if (post.odd && !tmplOf(post).cat) { if (prnd() < hireOdds(post)) offers.push(post); else noes.push(post); }
     else if (prnd() < shortlistOdds(post)) { post.appt = bookInterview(post); shortlisted.push(post); }
@@ -10852,6 +10867,7 @@ function closeWeek(a) {
     if (M.freeRef) M.freeRef--;
     if (post.head !== null && M.refs[post.head]) M.refs[post.head] = Math.max(0, M.refs[post.head] - 1);
   }
+  if (auto.length) inbox('note', auto.length === 1 ? 'Automatic rejection' : `${auto.length} automatic rejections`, `The system filtered you out before anyone read your application. ${auto.join('; ')}.`);
   if (shortlisted.length) inbox('note', shortlisted.length === 1 ? 'Shortlisted' : `Shortlisted for ${shortlisted.length} jobs`, `${shortlisted.map(p => `${p.t}${p.film !== null ? ' on ' + S.films[p.film].title : ''} (${slotLabel(p.appt)})`).join('; ')}. It's in your diary; the interview decides it.`); for (const p of shortlisted) delete p.appt;
   if (offers.length) { M.stats.offers += offers.length; for (const o of offers) inbox('offer', `Offer: ${o.t}`, offerText(o), { post: o, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] }); }
   // a rival in the same line of work sometimes gets there first
@@ -10900,6 +10916,7 @@ function offerText(o) {
 }
 function takeJob(post) {
   const M = S.me, f = post.film !== null ? S.films[post.film] : null;
+  if (post.away && post.away !== M.hub) relocate(post.away, `for ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`);
   const mates = f ? [...slotsOf(f)].filter(([id, s]) => id !== post.head && closeness(POST_BY[post.k].head === 'ad' ? 'ad' : POST_BY[post.k].head, s) >= .75).map(([id]) => id).slice(0, 3) : [];
   const j = { ...post, done: 0, mates, started: S.week };
   M.jobs.push(j);
@@ -10908,6 +10925,14 @@ function takeJob(post) {
   diary(`You start as ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}.`);
   if (!M.past.length && M.jobs.length === 1) milestone(`First job in the business: ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`, 'work');
   else if (post.tier >= 2 && f) milestone(`Hired as ${post.t.toLowerCase()} on ${f.title}`, 'work');
+}
+// Moving city for work: your contacts come with you (on the phone, at least); your home and the board don't.
+function relocate(hub, why) {
+  const M = S.me, me = ME(), from = M.hub;
+  M.hub = hub; me.hub = hub; M.rentOverride = null; M.home.layout = {}; M.hoodWhere = null;
+  if (M.agent && !agenciesIn(hub).some(a => a.name === M.agent.name)) inbox('note', 'Your agent is far away now', `${M.agent.name} can still pitch you, but their best contacts are back in ${hubName(from)}.`);
+  milestone(`Moved from ${hubName(from)} to ${hubName(hub)} ${why}`, 'life');
+  inbox('news', `You move to ${hubName(hub)}`, `New city, new board, new people. You find a ${ORIGIN.life[M.life].label.toLowerCase()} and start learning which café the crews use.`);
 }
 function finishJob(j, L, quit) {
   const M = S.me, me = ME();
@@ -11133,7 +11158,7 @@ function resolvePick(it, k) {
   }
   if (it.kind === 'offer') {
     if (k === 'yes') {
-      if (jobDays() + it.post.days > 5) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
+      if (jobDays() + it.post.days > 7) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
       const f = it.post.film !== null ? S.films[it.post.film] : null;
       if (f && (f.stage < 0 || f.stage >= 4)) { it.result = { t: 'Too late: the production has moved on.' }; it.done = true; return true; }
       takeJob(it.post); it.result = { t: 'You start on Monday.' };
@@ -11518,6 +11543,8 @@ function blockedFrom(t) {
   const M = S.me, me = ME();
   if (t.deg && !M.degrees.length && me.credits.length < 3) return 'Wants a degree';
   if (t.union && !M.degrees.includes('union') && me.credits.length < 4) return 'Union training or 4 credits';
+  if ((t.tier || 1) >= 3 && careerLevel() < t.tier - 1) return `Needs experience: level ${t.tier - 1} or more`;
+  if (t.req && subScore(t) < t.req - 4) return 'Needs stronger skills for this one';
   return null;
 }
 // The extra listings each week: catalogue crew jobs on films around you, industry jobs at companies, internships.
@@ -11744,7 +11771,7 @@ const BLOCKS = ['Morning', 'Afternoon', 'Evening'], BEAT_NAMES = BLOCKS;
 // What a block can hold. e: energy it costs (negative restores); stress likewise. Venues add more (life-city.js).
 const BLOCK_ACTS = {
   work: { label: 'Work', icon: '🎬', e: 14, stress: 1.5 },
-  hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Every two blocks let you send three applications from the board.' },
+  hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Each block lets you send three applications from the board.' },
   write: { label: 'Write', icon: '✍️', e: 9, stress: .3, d: 'Work on your script. Your traits shape how it goes.' },
   train: { label: 'Take a class', icon: '🎓', e: 9, stress: .3, cost: 35, d: 'A class in one craft. Steady, always available.' },
   study: { label: 'Study', icon: '📚', e: 9, stress: .5, d: 'Classes for the course you\'re enrolled in.' },
@@ -11781,12 +11808,12 @@ function calOf() {
 function planBlocks() {
   const M = S.me, cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
   let need = jobDays();
-  for (let d = 0; d < 5 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }
+  for (let d = 0; d < 7 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }   // weekdays first, then weekends
   return M.wk && M.wk.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal;
 }
 function effectivePlan() { return planBlocks().map(r => r[1]); }   // the day's main activity, for older callers
 function countBlocks(k) { return planBlocks().reduce((n, r) => n + r.filter(x => x === k).length, 0); }
-function appSlots() { return Math.floor(countBlocks('hunt') * 1.5); }
+function appSlots() { return countBlocks('hunt') * 3; }
 function setPlan(a) {
   const M = S.me, W = M.wk, cal = calOf();
   const fromAbs = W ? W.day * 3 + W.block : 0;
@@ -14732,8 +14759,8 @@ function viewDesk() {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
     const block = blockedFrom(t);
-    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n">${p.rate ? fmtCash(p.rate) : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
-      <td>${block ? `<span class="muted small">${esc(block)}</span>` : `<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
+    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-jobinfo="${esc(p.jid)}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
+      <td>${`<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
   const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
     const q = P(id), k = M.known[id], o = opinion(id);
@@ -14765,7 +14792,7 @@ function viewDesk() {
      ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
-  <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
+  <div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${M.board.map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing on the board this week.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + homePanel() + storyHTML();
