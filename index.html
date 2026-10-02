@@ -83,6 +83,8 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .starm { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; } .starm li { display: grid; grid-template-columns: 26px 36px 1fr auto; gap: 8px; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--line); } .starm .rk { font: 700 16px var(--f-display); text-align: right; }
 .menubar { display: flex; justify-content: space-between; color: #eee; font: 500 12px var(--f-body, sans-serif); padding: 0 6px 8px; } .menubar .mb-r { display: flex; gap: 12px; }
 .widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; } .widget { background: rgba(255,255,255,.88); border-radius: 10px; padding: 10px 12px; box-shadow: 0 4px 14px rgba(0,0,0,.18); backdrop-filter: blur(6px); } .widget.wide { grid-column: span 2; } .widget h5 { margin: 0 0 6px; font: 600 12px var(--f-display); letter-spacing: .06em; text-transform: uppercase; } .widget p { margin: 2px 0; } .widget .wl { display: block; text-align: left; margin: 0 0 6px; } @media (max-width: 600px) { .widget.wide { grid-column: auto; } }
+.hub .alerts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; } .hub .alert { border: 1px solid var(--line); background: var(--paper, #fff); border-radius: 18px; padding: 6px 12px; cursor: pointer; font: 500 13px var(--f-body, sans-serif); display: inline-flex; gap: 6px; align-items: center; } .hub .alert:hover { border-color: var(--accent); } .hub .alert.bad { border-color: var(--bad); color: var(--bad); } .hub .alert.good { border-color: var(--good); }
+.hub .qa { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; } .hub .fits li { padding: 3px 0; } .hubtxt { padding: 6px 0; border-top: 1px solid var(--line); } .hubtxt .pavatar { vertical-align: middle; }
 .stills { display: flex; flex-wrap: wrap; gap: 8px; }
 .stills figure { margin: 0; } .stills figcaption { font-size: 11px; color: var(--muted); max-width: 240px; }
 .still { border-radius: 3px; display: block; }
@@ -10920,7 +10922,7 @@ function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
 function hireFactors(post) {
   const M = S.me, me = ME(), t = tmplOf(post), F = [];
   const lvl = careerLevel();
-  F.push(['Job level', post.odd && !t.cat ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
+  F.push(['Job level', post.odd && !t.cat && post.tier <= 1 ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
   if (post.tier === 0 && M.school) F.push(['You\'re a student', .7]);
   if (post.agent && M.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
   if (M.freeRef) F.push(['A word from your old teacher', .8]);
@@ -18115,6 +18117,41 @@ function desktopWidgets() {
 
 function curWall() { if (!UI.wall) { try { const w = typeof localStorage !== 'undefined' && localStorage.getItem('ab-wall'); UI.wall = w && WALLS[w] ? w : 'studio'; } catch (e) { UI.wall = 'studio'; } } return WALLS[UI.wall] ? UI.wall : 'studio'; }
 // </starmeter>
+// <hub>
+// ---------------- Today as a hub: what needs you, one click away ----------------
+// The Today page leads with alerts that jump straight to where you need to be (an offer in the mail, unread texts,
+// a reward to claim, jobs that fit, a song ready to release), quick actions for the common moves, the best jobs on
+// the board with apply boxes right there, and the latest texts with replies you can send without leaving the page.
+function hubAlerts() {
+  const M = S.me, out = [], add = (icon, t, go, cls = '') => out.push({ icon, t, go, cls });
+  const pend = pending().length; if (pend) add('⚖️', `${pend} decision${pend > 1 ? 's' : ''} waiting`, 'feed', 'bad');
+  const offers = (M.mail || []).filter(m => m.act && !m.done && S.week - m.w < 4);
+  for (const m of offers.slice(0, 2)) add('✉️', `${m.subj} (${m.from.split(',')[0]})`, `computer:mail:${m.id}`, 'good');
+  const unread = phoneUnread(); if (unread) add('💬', `${unread} unread text${unread > 1 ? 's' : ''}`, 'phone');
+  const cl = typeof ambClaimable === 'function' ? ambClaimable() : []; if (cl.length) add('✦', `${cl.length} reward${cl.length > 1 ? 's' : ''} to claim`, 'standing', 'good');
+  if (M.make && M.make.ready) add('🎵', `${M.make.title || 'Your work'} is ready to release`, 'create', 'good');
+  const fits = M.board.filter(p => !blockedFrom(tmplOf(p)) && hireOdds(p) >= .35 && S.week - (p.w || 0) <= 1).length; if (fits && !M.jobs.length) add('💼', `${fits} new job${fits > 1 ? 's' : ''} you could get`, 'work');
+  if (typeof COMPS !== 'undefined') { const c = COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length; if (c) add('🏆', `${c} contest${c > 1 ? 's' : ''} open that fit you`, 'compete'); }
+  if (M.energy < 30) add('🔋', `Energy ${Math.round(M.energy)}: plan some rest`, 'diary', 'bad');
+  if (M.cash < usd(ORIGIN.life[M.life].rent) * 2) add('💸', `Money's tight: ${fmtCash(M.cash)}`, 'diary', 'bad');
+  return out;
+}
+function bestFits(n = 4) { return S.me.board.filter(p => !blockedFrom(tmplOf(p))).map(p => [p, hireOdds(p)]).sort((a, b) => b[1] - a[1]).slice(0, n); }
+function todayHub() {
+  const M = S.me, A = hubAlerts(), slots = appSlots(), picked = [...UI.apps].filter(id => M.board.some(p => p.id === id)), B = bestFits();
+  const lastIn = (M.phone || []).filter(m => m.from >= 0 && m.replyable && !m.replied).slice(-2).reverse();
+  return `<section class="panel hub">${A.length ? `<div class="alerts">${A.map(a => `<button class="alert ${a.cls}" data-jump="${esc(a.go)}"><span>${a.icon}</span>${esc(a.t)} ›</button>`).join('')}</div>` : '<p class="muted small">All quiet. A good week to make something.</p>'}
+   <div class="qa"><b class="small">Quick actions</b> <button class="btn-s ghost" data-jump="diary">🗓️ Plan the week</button>${B.length && slots ? `<button class="btn-s ghost" data-applybest="1" title="Tick the best-odds jobs, up to your ${slots} applications">✓ Apply to the best fits</button>` : ''}<button class="btn-s ghost" data-jump="computer:mail">✉️ Mail</button><button class="btn-s ghost" data-jump="people">👥 Contacts</button><button class="btn-s ghost" data-jump="standing">⭐ Standing</button></div>
+   ${B.length && !M.jobs.length ? `<h4>Best fits on the board <span class="count">${picked.length} of ${slots} applications planned</span></h4><ul class="plain fits">${B.map(([p, o]) => `<li><label class="applyl"><input type="checkbox" data-apply="${p.id}" ${UI.apps.has(p.id) ? 'checked' : ''} ${!UI.apps.has(p.id) && picked.length >= slots ? 'disabled' : ''}></label> <a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a> <span class="muted small">${p.film !== null ? esc(S.films[p.film].title) : esc(p.mco || (tmplOf(p) || {}).biz || '')} · ${fmtCash(p.rate)}/day · ${p.weeks} wk</span> <span class="chip ${o >= .6 ? 'good' : o >= .35 ? '' : 'warn'}">${Math.round(o * 100)}%</span></li>`).join('')}</ul>${!slots ? '<p class="muted small">Plan some job-hunting blocks this week to send applications.</p>' : ''}` : ''}
+   ${lastIn.length ? `<h4>Texts</h4>${lastIn.map(m => `<div class="hubtxt">${phoneAvatar(m.from, 26)} <b>${esc(P(m.from).name.split(' ')[0])}</b>: ${esc(m.t.slice(0, 120))}<br>${replyOptions(m).slice(0, 4).map(k => `<button class="qr" data-reply="${m.id}:${k}">${replyLabel(m, k)}</button>`).join(' ')} <button class="linkish small" data-fthread="${m.from}">Open</button></div>`).join('')}` : ''}</section>`;
+}
+function hubClick(t) {
+  const d = t.dataset;
+  if (d.jump) { const [tab, app, x] = d.jump.split(':'); UI.tab = 'you'; UI.stack = []; UI.dtab = tab; if (app) { UI.app = app; if (x) UI.mailo = +x; } render(); return true; }
+  if (d.applybest) { const slots = appSlots(); UI.apps = new Set([...UI.apps].filter(id => S.me.board.some(p => p.id === id))); for (const [p] of bestFits(12)) { if (UI.apps.size >= slots) break; UI.apps.add(p.id); } render(true); return true; }
+  return false;
+}
+// </hub>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -18951,7 +18988,7 @@ function viewDesk() {
     case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
-    default: return `<div class="cols two desk">
+    default: return `${typeof todayHub === 'function' ? todayHub() : ''}<div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
     <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
    <div>${todayPanel()}
@@ -18981,7 +19018,7 @@ function playStep(t) {
   const w0 = S.week;
   doAct(endWeekAct(t));
   if (S.week !== w0) UI.apps = new Set();
-  if (pending().length || UI.dtab === undefined) UI.dtab = 'today';
+  if (pending().length || UI.dtab === undefined || S.week !== w0) UI.dtab = 'today';   // a new week starts on the hub
   UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
@@ -19004,6 +19041,7 @@ function careerClick(t) {
   if (typeof boardClick === 'function' && boardClick(t)) return true;
   if (typeof schoolClick === 'function' && schoolClick(t)) return true;
   if (typeof standingClick === 'function' && standingClick(t)) return true;
+  if (typeof hubClick === 'function' && hubClick(t)) return true;
   if (t.dataset.abf) { UI.abf = t.dataset.abf; render(true); return true; }
   if (t.dataset.schools !== undefined) { UI.schools = !!t.dataset.schools; render(true); return true; }
   if (t.dataset.cc) {
@@ -19093,7 +19131,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

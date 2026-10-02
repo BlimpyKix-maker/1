@@ -494,7 +494,7 @@ function viewDesk() {
     case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
-    default: return `<div class="cols two desk">
+    default: return `${typeof todayHub === 'function' ? todayHub() : ''}<div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
     <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
    <div>${todayPanel()}
@@ -524,7 +524,7 @@ function playStep(t) {
   const w0 = S.week;
   doAct(endWeekAct(t));
   if (S.week !== w0) UI.apps = new Set();
-  if (pending().length || UI.dtab === undefined) UI.dtab = 'today';
+  if (pending().length || UI.dtab === undefined || S.week !== w0) UI.dtab = 'today';   // a new week starts on the hub
   UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
@@ -547,6 +547,7 @@ function careerClick(t) {
   if (typeof boardClick === 'function' && boardClick(t)) return true;
   if (typeof schoolClick === 'function' && schoolClick(t)) return true;
   if (typeof standingClick === 'function' && standingClick(t)) return true;
+  if (typeof hubClick === 'function' && hubClick(t)) return true;
   if (t.dataset.abf) { UI.abf = t.dataset.abf; render(true); return true; }
   if (t.dataset.schools !== undefined) { UI.schools = !!t.dataset.schools; render(true); return true; }
   if (t.dataset.cc) {
@@ -636,7 +637,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

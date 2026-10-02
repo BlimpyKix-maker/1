@@ -532,7 +532,7 @@ function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
 function hireFactors(post) {
   const M = S.me, me = ME(), t = tmplOf(post), F = [];
   const lvl = careerLevel();
-  F.push(['Job level', post.odd && !t.cat ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
+  F.push(['Job level', post.odd && !t.cat && post.tier <= 1 ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
   if (post.tier === 0 && M.school) F.push(['You\'re a student', .7]);
   if (post.agent && M.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
   if (M.freeRef) F.push(['A word from your old teacher', .8]);
