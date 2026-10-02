@@ -104,7 +104,7 @@ const ROAD_SCENES = [
 ];
 for (const s of ROAD_SCENES) SCENES.push(Object.assign({ event: 1, jobs: [] }, s));
 function roadEvent() {
-  const M = S.me, v = M.vehicle || 'transit', L = ROAD_SCENES.filter(s => s.v.includes(v));
+  const M = S.me, v = M.vehicle || 'transit', L = ROAD_SCENES.filter(s => s.v.includes(v) && sceneFresh(s.id, 30));
   if (!L.length || prnd() > .05) return;
   const s = ppick(L);
   inbox('scene', s.title, s.text, { scene: s.id, ctx: { head: null, film: null, mates: [] }, choices: s.opts.map(o => ({ k: o.k, label: o.label, check: o.check })) });

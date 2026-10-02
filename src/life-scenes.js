@@ -218,8 +218,7 @@ const LIFE_SCENES = {
 };
 for (const k in LIFE_SCENES) for (const s of LIFE_SCENES[k]) SCENES.push(Object.assign({ event: 1, jobs: [] }, s));
 function lifeScene(pool) {
-  const M = S.me, recent = new Set(M.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 8).map(x => x.scene));
-  const L = pool.filter(s => !recent.has(s.id));
+  const M = S.me, L = pool.filter(s => sceneFresh(s.id));
   if (!L.length) return;
   const s = ppick(L), known = Object.keys(M.known).map(Number).filter(id => !P(id).dead);
   const ctx = { head: null, film: null, mates: [], contact: known.length ? ppick(known) : null, star: null };
@@ -235,8 +234,7 @@ function lifeDayEvent(act) {
     if (!j || prnd() > .2) return;
     const f = j.film !== null ? S.films[j.film] : null;
     const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : []);
-    const recent = new Set(M.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 6).map(x => x.scene));
-    const L = pool.filter(s => !recent.has(s.id));
+    const L = pool.filter(s => sceneFresh(s.id, 20));
     if (!L.length) return;
     const s = ppick(L);
     const ctx = { head: j.head, film: j.film, dir: f ? f.dir : null, lead: f ? f.cast[0] : null, dp: f ? f.dp : null, prod: f ? f.prod : null, mates: j.mates || [] };

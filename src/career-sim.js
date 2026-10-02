@@ -415,9 +415,12 @@ function endParty() {
 function inbox(kind, title, text, extra = {}) {
   const it = { id: S.me.seq++, w: S.week, kind, title, text, ...extra };
   S.me.inbox.push(it);
+  if (kind === 'scene' && extra.scene) { const M = S.me; (M.seenSc = M.seenSc || {})[extra.scene] = S.week; (M.seenN = M.seenN || {})[extra.scene] = (M.seenN[extra.scene] || 0) + 1; }
   if (S.me.inbox.length > 140) S.me.inbox = S.me.inbox.filter(x => x.choices && !x.done).concat(S.me.inbox.filter(x => !(x.choices && !x.done)).slice(-110));
   return it;
 }
+// A scene you've had waits at least half a year before it can come back, and longer each time after that.
+function sceneFresh(id, base = 26) { const M = S.me, w = (M.seenSc || {})[id]; return w === undefined || S.week - w >= base * Math.min(4, (M.seenN || {})[id] || 1); }
 function pending() { return S.me ? S.me.inbox.filter(x => x.choices && !x.done) : []; }
 function diary(t) { S.me.diary.push({ w: S.week, t }); if (S.me.diary.length > 400) S.me.diary.shift(); }
 
@@ -864,8 +867,7 @@ const SCENES = [
 ];
 function pickScene(j) {
   // scenes written for this job come up more than generic ones, and none repeats within a couple of months
-  const recent = new Set(S.me.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 8).map(x => x.scene));
-  const L = SCENES.filter(s => !s.event && (!s.jobs || s.jobs.includes(j.k)) && !recent.has(s.id) && !(j.film === null && /\{(film|dir|lead)\}/.test(s.text + JSON.stringify(s.opts))));
+  const L = SCENES.filter(s => !s.event && (!s.jobs || s.jobs.includes(j.k)) && sceneFresh(s.id) && !(j.film === null && /\{(film|dir|lead)\}/.test(s.text + JSON.stringify(s.opts))));
   if (!L.length) return null;
   let tw = 0; const ws = L.map(s => { const w = s.jobs ? 3 : 1; tw += w; return w; });
   let r = prnd() * tw, s = L[L.length - 1];

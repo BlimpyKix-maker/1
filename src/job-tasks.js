@@ -41,7 +41,7 @@ function jobTaskBlock(j, out) {
   const k = j.task; k.prog++;
   if (k.prog < k.need) { if (k.prog === 1) out.push(`New task: ${k.t}.`); else if (k.prog === Math.ceil(k.need / 2)) out.push(`${k.t}: halfway there.`); return; }
   const tier = jobTier(j), f = j.film !== null && j.film !== undefined ? S.films[j.film] : null;
-  const dc = Math.round(7 + tier * 1.4 + (f && f.stage === 2 ? 1 : 0));
+  const dc = Math.round(6 + tier * 1.4 + (f && f.stage === 2 ? 1 : 0));
   const ok = roll(k.s, dc), r = S.me.lastRoll, pts = ok ? (r.crit > 0 ? 2 : 1) : (r.crit < 0 ? -2 : tier <= 1 ? -.5 : -1);   // junior misses sting less
   (j.tasks = j.tasks || []).push({ t: k.t, pts, w: S.week });
   j.task = null;

@@ -6,7 +6,9 @@
 // 0 nobody, 1 a few weeks' work, 2 credits to your name, 3 a working professional, 4 in demand, 5 established.
 function careerLevel() {
   const M = S.me, me = ME();
-  return clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 60 + (M.agent ? .5 : 0)), 0, 5);
+  // time served counts a little; the quality of what you delivered counts more (job scores from the work itself)
+  const work = M.past.reduce((t, p) => t + clamp(p.score || 0, -4, 6), 0) + M.jobs.reduce((t, j) => t + clamp(j.score || 0, -4, 6), 0);
+  return clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5);
 }
 const LEVEL_NAME = ['Nobody yet', 'Getting work', 'Credits to your name', 'Working professional', 'In demand', 'Established'];
 
@@ -258,8 +260,7 @@ for (const e of LIFE_EVENTS) SCENES.push(Object.assign({ event: 1, jobs: [] }, e
 function maybeEvent() {
   const M = S.me, me = ME(), L = careerLevel();
   if (prnd() > .1 + L * .02) return;
-  const recent = new Set(M.inbox.filter(x => x.kind === 'scene' && S.week - x.w < 10).map(x => x.scene));
-  const ok = LIFE_EVENTS.filter(e => L >= e.lv[0] && L <= e.lv[1] && !recent.has(e.id) && (!e.fame || (me.fame || 0) >= e.fame));
+  const ok = LIFE_EVENTS.filter(e => L >= e.lv[0] && L <= e.lv[1] && sceneFresh(e.id, 40) && (!e.fame || (me.fame || 0) >= e.fame));
   if (!ok.length) return;
   let tw = ok.reduce((s, e) => s + e.w, 0), r = prnd() * tw, ev = ok[ok.length - 1];
   for (const e of ok) { r -= e.w; if (r <= 0) { ev = e; break; } }

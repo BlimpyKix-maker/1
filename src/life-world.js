@@ -88,7 +88,7 @@ const WORLD_EVENTS = [
   { k: 'boom', t: 'A boom', d: 'Money everywhere: new restaurants, new productions, rents climbing fast.', wk: [10, 26], rare: 1, fx: { hustle: 1.2, jobs: 1.2, rent: 1.1 } },
   { k: 'festival', t: 'The city festival', d: 'Parades, fireworks and street food. The whole city is out.', wk: [1, 1], fx: { out: -3, stress: -2 }, scene: 'ev_cityfest' },
   { k: 'final', t: 'The big final', d: 'The match everyone is watching. Bars are packed; sets break early.', wk: [1, 1], fx: { out: -2, hustle: 1.4 }, scene: 'ev_final' },
-  { k: 'flu', t: 'Flu season', d: 'Half the crew is coughing. Rest matters more than usual.', wk: [2, 5], months: [0, 1, 2, 10, 11], fx: { sleep: -3 }, scene: 'ev_flu' },
+  { k: 'flu', t: 'Flu season', d: 'Half the crew is coughing. Rest matters more than usual.', wk: [2, 5], months: [0, 1, 2, 10, 11], fx: { sleep: -3 }, scene: 'ev_fever' },
   { k: 'election', t: 'An election', d: 'Arguments at every dinner table. The news is all anyone talks about.', wk: [2, 3], fx: { stress: 1 }, scene: 'ev_election' },
   { k: 'storm', t: 'A big storm', d: 'Power cuts, flooded streets, a week of chaos.', wk: [1, 1], fx: { commute: 4, sleep: -2, stress: 2 }, scene: 'ev_storm' },
   { k: 'spring', t: 'The first warm week', d: 'Everyone is outside. The city remembers how to be happy.', wk: [1, 2], months: [2, 3, 4], fx: { stress: -2, sleep: 2 } },
@@ -157,7 +157,7 @@ const EV_SCENES = [
   { id: 'ev_final', title: 'The final', teach: 'Crews bond off set as much as on it; the people you watch a match with are the ones who call you for the next job.', text: 'Everyone is watching the final tonight. The crew are booking a back room at a bar.', opts: [
     { k: 'go', label: 'Go with the crew', ok: { tie: { mates: 3 }, energy: -5, cash: -40 }, t: 'You don\'t care about the sport. You care about the gaffer hugging you in extra time.' },
     { k: 'write', label: 'Use the empty city to write', ok: { xp: { vis: .1 }, stress: -1 }, t: 'Every bar roars at once and you get three good pages.' }] },
-  { id: 'ev_flu', title: 'The fever', teach: 'Working sick spreads illness through a crew fast; most productions would rather lose you for two days than the whole camera department for a week.', text: 'You wake up shivering, with a throat like sandpaper.', opts: [
+  { id: 'ev_fever', title: 'The fever', teach: 'Working sick spreads illness through a crew fast; most productions would rather lose you for two days than the whole camera department for a week.', text: 'You wake up shivering, with a throat like sandpaper.', opts: [
     { k: 'through', label: 'Power through it', check: ['eth', 13], ok: { stand: .2, energy: -12 }, bad: { energy: -18, tie: { mates: -3 } }, t: 'You get through the day on tea and stubbornness.', tb: 'You get through the day. So does the virus: half the crew is off by Friday.' },
     { k: 'rest', label: 'Call in sick and rest', ok: { energy: 12, stress: -1, stand: -.1 }, t: 'Soup, sleep, a terrible film on the laptop. You\'re back by Thursday.' }] },
   { id: 'ev_election', title: 'The canvasser', teach: 'Film unions and guilds often campaign at election time, because tax credits and arts funding are decided by whoever wins.', text: 'A colleague asks if you\'ll spend Saturday knocking on doors for the candidate who promised to keep the film tax credit.', opts: [
