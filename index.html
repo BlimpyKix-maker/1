@@ -157,6 +157,7 @@
 .strat h4 { margin-top: 12px; }
 .heat { display: grid; gap: 4px; } .hrow { display: grid; grid-template-columns: 110px 1fr 90px; gap: 8px; align-items: center; font-size: 14px; }
 .hbar { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; } .hbar i { display: block; height: 100%; }
+.tcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; } .tcard { display: flex; gap: 10px; align-items: center; padding: 6px; border: 1px solid var(--line); border-radius: 6px; } .tcard > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; } .tcard svg { flex: none; border-radius: 6px; }
 .stratc { display: grid; gap: 4px; margin-bottom: 10px; } .stratc .hrow { grid-template-columns: 140px 1fr 28px; } .stratc .hbar i { background: var(--accent); }
 .pips { display: inline-flex; gap: 2px; vertical-align: middle; } .pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); } .pips i.on { background: var(--accent); }
 tr.jobrow { cursor: pointer; } tr.jobrow.mine td:first-child { box-shadow: inset 3px 0 0 var(--accent); } tr.jobrow.open { background: color-mix(in srgb, var(--accent) 8%, transparent); } tr.jobopen td { padding-top: 0; }
@@ -5477,7 +5478,7 @@ studios: [
   { id: 'wanda', real: 'Wanda Pictures', n: 'Wonder Pictures', hub: 'beijing', f: 2011, c: null, tier: 1 },
   { id: 'enlight', real: 'Enlight Media', n: 'Bright Lantern Media', hub: 'beijing', f: 1998, c: null, tier: 1 },
   { id: 'dengfeng', real: 'Beijing Dengfeng International', n: 'Summit Peak International', hub: 'beijing', f: 2014, c: null, tier: 2 },
-  { id: 'yashraj_n', real: 'YRF (Yash Raj Films, 21st century)', n: 'YRF Films', hub: 'mumbai', f: 2000, c: null, tier: 1 },
+  { id: 'yashraj_n', real: 'YRF (Yash Raj Films, 21st century)', n: 'Yashodhara Studios', hub: 'mumbai', f: 2000, c: null, tier: 1 },
   { id: 'arka', real: 'Arka Media Works', n: 'Arc Media Works', hub: 'chennai', f: 2001, c: null, tier: 1 },
   { id: 'dvventertain', real: 'DVV Entertainment', n: 'DVD Entertainment', hub: 'chennai', f: 2006, c: null, tier: 2 },
   { id: 'mythri', real: 'Mythri Movie Makers', n: 'Mythic Movie Makers', hub: 'chennai', f: 2015, c: null, tier: 1 },
@@ -9871,7 +9872,7 @@ function greenlight(hub, o = {}) {
   // heads already hired like working with, weighted by how closely they will work together
   for (const cr of CREW) if (crewNeeded(cr, genre, S.year)) {
     const mates = [[D, closeness('dir', cr.k)], [P(dp), closeness('dp', cr.k)], [P(ed), closeness('ed', cr.k)], ...Object.entries(crew).map(([k, id]) => [P(id), closeness(k, cr.k)])];
-    crew[cr.k] = pickPerson(hub, cr.role, p => p.standing * .3 + gcraft(p, cr.c, genre) * 2.5 + mates.reduce((t, [m, w]) => t + tie(m, p) * w, 0) * .5 + rnd() * 20 + tierAdj(p, tier), ex, false); ex.add(crew[cr.k]);
+    crew[cr.k] = o.crew && o.crew[cr.k] !== undefined && !ex.has(o.crew[cr.k]) ? o.crew[cr.k] : pickPerson(hub, cr.role, p => p.standing * .3 + gcraft(p, cr.c, genre) * 2.5 + mates.reduce((t, [m, w]) => t + tie(m, p) * w, 0) * .5 + rnd() * 20 + tierAdj(p, tier), ex, false); ex.add(crew[cr.k]);
   }
   const amb = Math.sqrt(AMB[genre]);
   const dur = [ri(6, 26), ri(6, 12), Math.round(ri(5, 11) * amb), ri(10, 22)];
@@ -11386,7 +11387,7 @@ function npcLook(p) {
   const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
   return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), head: r() < .14 ? 1 + pk(7) : 0, ears: r() < (F ? .45 : .12) ? 1 + pk(3) : 0, mark: r() < .1 ? 1 + pk(4) : 0, neck: r() < .14 ? 1 + pk(5) : 0, wrist: 0, hairline: !F && r() < .45 ? 1 : 0 };
 }
-function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : npcLook(p); }
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : realLook(p, npcLook(p)); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
 let PORTRAIT_UID = 0;
 function portraitSVG(L, age, size = 96, bare = false) {
@@ -11485,7 +11486,8 @@ function portraitSVG(L, age, size = 96, bare = false) {
   }
   return `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
 }
-function portraitOf(p, size) { return portraitSVG(lookOf(p), (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born, size); }
+// The dead are remembered in their prime.
+function portraitOf(p, size) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, size); }
 // </portrait>
 // <home>
 // ---------------- Home ----------------
@@ -11704,7 +11706,7 @@ function schoolWeek(L, gain) {
 // focus: talent (actors), lit (writers and directors), crew (heads of department and below the line), all.
 // style: shark (bigger cut, more pitches, little patience), nurturer (patient, steady, opens doors), packager (puts
 // you in bigger rooms), boutique (small list, personal), quiet (cheap, does little).
-const AGENCY_NAMES = [['Paramount Talent Group', 3, 'all', 'packager'], ['Creative Arts Collective', 3, 'all', 'packager'], ['Morrow & Endeavour', 3, 'talent', 'shark'], ['United Talent Union', 2, 'lit', 'shark'], ['Gersh & Daughters', 2, 'lit', 'nurturer'], ['Silver Screen Associates', 2, 'talent', 'nurturer'], ['Paradigm Lost Agency', 2, 'all', 'quiet'], ['Kaplan Stewart Talent', 1, 'talent', 'boutique'], ['Lighthouse Management', 1, 'all', 'nurturer'], ['The Small Room Agency', 1, 'lit', 'boutique'], ['Second Act Artists', 1, 'talent', 'nurturer'], ['Rough Cut Representation', 1, 'crew', 'boutique'],
+const AGENCY_NAMES = [['Summit Ridge Talent Group', 3, 'all', 'packager'], ['Crossroads Artists Collective', 3, 'all', 'packager'], ['Morrow & Vance', 3, 'talent', 'shark'], ['Allied Story Union', 2, 'lit', 'shark'], ['Garnet & Daughters', 2, 'lit', 'nurturer'], ['Silver Screen Associates', 2, 'talent', 'nurturer'], ['Parallax Agency', 2, 'all', 'quiet'], ['Kaplan Stewart Talent', 1, 'talent', 'boutique'], ['Lighthouse Management', 1, 'all', 'nurturer'], ['The Small Room Agency', 1, 'lit', 'boutique'], ['Second Act Artists', 1, 'talent', 'nurturer'], ['Rough Cut Representation', 1, 'crew', 'boutique'],
   ['Below the Line Partners', 2, 'crew', 'nurturer'], ['Frame & Focus Artists', 2, 'crew', 'shark'], ['Northlight Crew Agency', 1, 'crew', 'quiet'], ['Hammer & Nail Talent', 1, 'talent', 'shark'], ['Inkwell Literary', 1, 'lit', 'nurturer'], ['Marquee Management', 2, 'talent', 'packager'], ['Blue Door Artists', 1, 'all', 'boutique'], ['Coastline Talent', 1, 'talent', 'quiet'], ['Long Take Agency', 2, 'lit', 'boutique'], ['Key Light Collective', 1, 'crew', 'nurturer'], ['Atlas International Talent', 3, 'all', 'shark'], ['Wexford Banks Agency', 3, 'lit', 'packager']];
 const AG_STYLE = {
   shark: { label: 'Shark', d: 'Takes 12%, pitches you hard and often, pushes rates up, drops you after twenty quiet weeks.', cut: .12, pitch: 1, pay: .06, patience: 20 },
@@ -13784,7 +13786,7 @@ function selfFund(a) {
   if (!c || c.closed !== null) return false;
   const src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id && x.grade && !x.option && x.made === undefined) : (M.holdings || []).find(x => x.id === a.id && x.made === undefined && !x.lapsed);
   if (!src) return false;
-  const lead = pickable(a.lead, 'actor'), dpPick = pickable(a.dp, 'dp'), edPick = pickable(a.ed, 'editor');
+  const lead = pickable(a.lead, 'actor'), dpPick = pickable(a.dp, 'dp'), edPick = pickable(a.ed, 'editor'), musPick = pickable(a.mus, 'composer'), pdPick = pickable(a.pd, 'designer');
   const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
   const edge = companyEdge(c, src);
   let budget = (estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) * edge.leadMul : 0)) * edge.budgetMul;
@@ -13795,13 +13797,13 @@ function selfFund(a) {
     if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
     invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
   }
-  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: edge.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick, qBonus: edge.qBonus, hookBonus: edge.hookBonus, paMul: edge.paMul, fest: edge.fest });
+  const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: edge.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick, crew: { mus: musPick, pd: pdPick }, qBonus: edge.qBonus, hookBonus: edge.hookBonus, paMul: edge.paMul, fest: edge.fest });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
   if (direct) takeJob(makePost(POST_BY.owndir, f));
   if (lead !== undefined) meet(lead, 'Cast in your film', 6);
   if (dirPick !== undefined) meet(dirPick, 'Directing your film', 6);
-  for (const id of [dpPick, edPick]) if (id !== undefined) meet(id, 'Hired for your film', 5);
+  for (const id of [dpPick, edPick, musPick, pdPick]) if (id !== undefined) meet(id, 'Hired for your film', 5);
   me.standing = clamp(me.standing + 1.5, 0, 100);
   if (a.src !== 'script') addTie(me, P(src.writer), 8);
   milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
@@ -13861,7 +13863,7 @@ function festWeek() {
     if (v >= F.bar + 14) { award(f, `${F.name.replace(/^the /, '')}: ${F.prize}`, [f.dir, f.prod].filter((x, i, A) => A.indexOf(x) === i)); me.fame = clamp((me.fame || 0) + 3, 0, 100); t += ` And it wins the ${F.prize}.`; milestone(`${f.title} won the ${F.prize} at ${F.name}`, 'prize'); }
     else milestone(`${f.title} selected for ${F.name}`, 'prize');
     inbox('news', `${F.name}`, t, { film: f.id });
-    if (f.rel === null && f.co === M.company && f.distBy === undefined && !pending().some(x => x.kind === 'bid' && x.film === f.id)) distributorBids(f, v >= F.bar + 14);
+    if (f.rel === null && f.co === M.company && TERRITORIES.some(t => !(f.dist || {})[t]) && !pending().some(x => x.kind === 'bid' && x.film === f.id)) distributorBids(f, v >= F.bar + 14);
     const slot = freeSlot({ days: [3, 4, 5], blocks: [2], from: 1 }), host = [f.prod, f.dir, f.cast[0]].find(id => id !== me.id);
     if (slot && host !== undefined) inbox('invite', `Go to ${F.name}?`, `Your film is screening. The premiere is ${slotLabel(slot)}: travel, a red carpet, and everyone who buys and sells films in one place.`, { person: host, ev: 'festival', slot, what: `the premiere at ${F.name}`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Stay home' }] });
   }
@@ -13885,31 +13887,41 @@ function troupeWeek() {
 // ---- Distributors ----
 // A festival selection brings buyers. Each bids an advance (the minimum guarantee) for the right to release your film,
 // keeping a share of what it earns. A big buyer means a big release; selling means less risk and less upside.
+// Rights are sold by territory: your home market, and the rest of the world. Sell either, both, or neither.
+const TERRITORIES = ['home', 'intl'];
+const TER_LABEL = { home: 'home-market rights', intl: 'international rights' };
 function distributorBids(f, prize) {
-  const M = S.me, q = preQ(f);
-  const buyers = S.companies.filter(b => b.closed === null && b.owner === undefined && b.tier <= 2 && b.cash > 0).sort((a, b) => hashRand(a.id * 7 + f.id)() - hashRand(b.id * 7 + f.id)()).slice(0, 3);
-  if (!buyers.length) return;
-  const bids = buyers.map(b => { const mg = f.budget * (.35 + q / 140 + (prize ? .45 : 0)) * (b.tier === 1 ? 1.3 : 1) * (.8 + prnd() * .4); return { b: b.id, mg, share: b.tier === 1 ? .5 : .4 }; });
-  inbox('bid', `Buyers want ${f.title}`, `After the festival screening, ${bids.length} distributor${bids.length > 1 ? 's' : ''} make offers. An advance now, and they take a share of what the film earns.`, { film: f.id, bids, choices: bids.map((x, i) => ({ k: 'b' + i, label: `${S.companies[x.b].name}: ${fmtCash(Math.round(x.mg * 1e6))} advance, ${Math.round(x.share * 100)}% to them` })).concat([{ k: 'self', label: 'Release it ourselves' }]) });
+  const q = preQ(f);
+  for (const ter of TERRITORIES) {
+    if ((f.dist || {})[ter]) continue;
+    const buyers = S.companies.filter(b => b.closed === null && b.owner === undefined && b.tier <= 2 && b.cash > 0 && (HUBS[b.hub].m === f.m) === (ter === 'home')).sort((a, b) => hashRand(a.id * 7 + f.id)() - hashRand(b.id * 7 + f.id)()).slice(0, 3);
+    if (!buyers.length) continue;
+    const w = ter === 'home' ? .55 : .45;
+    const bids = buyers.map(b => ({ b: b.id, mg: f.budget * w * (.35 + q / 140 + (prize ? .45 : 0)) * (b.tier === 1 ? 1.3 : 1) * (.8 + prnd() * .4), share: b.tier === 1 ? .5 : .4 }));
+    inbox('bid', `Buyers want the ${TER_LABEL[ter]} to ${f.title}`, `After the festival screening, ${bids.length} distributor${bids.length > 1 ? 's' : ''} bid for ${ter === 'home' ? `${MARKETS[f.m].name}` : 'everywhere outside ' + MARKETS[f.m].name}. An advance now; they take a share of what the film earns there.`, { film: f.id, ter, bids, choices: bids.map((x, i) => ({ k: 'b' + i, label: `${S.companies[x.b].name} (${MARKETS[HUBS[S.companies[x.b].hub].m].name}): ${fmtCash(Math.round(x.mg * 1e6))} advance, ${Math.round(x.share * 100)}% to them` })).concat([{ k: 'self', label: ter === 'home' ? 'Release it ourselves at home' : 'Keep the international rights' }]) });
+  }
 }
 function bidPick(it, k) {
   if (it.kind !== 'bid') return false;
-  const M = S.me, f = S.films[it.film], c = myCo();
+  const f = S.films[it.film], c = myCo(), ter = it.ter || 'home';
   it.done = true; it.picked = k;
   if (!f || f.rel !== null || !c) { it.result = { t: 'Too late: the film is already out.' }; return true; }
-  if (k === 'self') { it.result = { t: 'You keep it. All the risk, all the upside.' }; return true; }
+  if (k === 'self') { it.result = { t: 'You keep them. All the risk, all the upside.' }; return true; }
   const x = it.bids[+k.slice(1)], b = S.companies[x.b];
-  f.distBy = x.b; f.mg = x.mg; f.distShare = x.share; c.cash += x.mg;
-  f.hook = clamp(f.hook + (b.tier === 1 ? 14 : 8), 5, 99); f.paMul = (f.paMul || 1) * (b.tier === 1 ? 1.3 : 1.1);
-  milestone(`${f.title} sold to ${b.name} for ${fmtCash(Math.round(x.mg * 1e6))}`, 'credit');
-  it.result = { t: `Sold. ${b.name} will release it, wide. ${fmtCash(Math.round(x.mg * 1e6))} lands in the company account.` };
+  f.dist = f.dist || {}; f.dist[ter] = { b: x.b, mg: x.mg, share: x.share }; c.cash += x.mg;
+  if (ter === 'home') { f.hook = clamp(f.hook + (b.tier === 1 ? 12 : 7), 5, 99); f.paMul = (f.paMul || 1) * (b.tier === 1 ? 1.25 : 1.1); }
+  else { f.hook = clamp(f.hook + 4, 5, 99); f.paMul = (f.paMul || 1) * 1.05; }
+  milestone(`${TER_LABEL[ter].replace(/^./, m => m.toUpperCase())} to ${f.title} sold to ${b.name} for ${fmtCash(Math.round(x.mg * 1e6))}`, 'credit');
+  it.result = { t: `Sold. ${b.name} will release it ${ter === 'home' ? 'at home' : 'abroad'}. ${fmtCash(Math.round(x.mg * 1e6))} lands in the company account.` };
   return true;
 }
-// After release the distributor takes its share, and recoups the advance from yours.
+// After release each distributor takes its share of its territory, and recoups its advance from yours.
 function settleDistribution(c) {
-  for (const id of c.films) { const f = S.films[id]; if (f.distBy === undefined || f.distSettled || f.rel === null || f.rel > S.week || f.rentals === undefined) continue; f.distSettled = 1;
-    const back = Math.max(0, f.rentals - f.pa - f.backend), take = back * f.distShare + Math.min(f.mg, back * (1 - f.distShare));
-    c.cash -= take; inbox('note', `${f.title}: settling with ${S.companies[f.distBy].name}`, `The distributor keeps ${fmtCash(Math.round(take * 1e6))} (its share plus the advance it paid you). ${back * (1 - f.distShare) > f.mg ? 'The film earned past the advance: the rest is yours.' : 'It didn\'t earn past the advance, so the advance was the best money you\'ll see.'}`, { film: f.id }); }
+  for (const id of c.films) { const f = S.films[id]; if (!f.dist || f.rel === null || f.rel > S.week || f.rentals === undefined) continue;
+    for (const ter of TERRITORIES) { const d = f.dist[ter]; if (!d || d.settled) continue; d.settled = 1;
+      let r = 0; for (const m in f.gross) if ((m === f.m) === (ter === 'home')) r += f.gross[m] * (m === f.m ? .5 : .4);
+      const back = Math.max(0, r - (f.pa + f.backend) * (f.rentals > 0 ? r / f.rentals : 0)), take = back * d.share + Math.min(d.mg, back * (1 - d.share));
+      c.cash -= take; inbox('note', `${f.title}: settling the ${TER_LABEL[ter]} with ${S.companies[d.b].name}`, `The distributor keeps ${fmtCash(Math.round(take * 1e6))} (its share plus the advance it paid you). ${back * (1 - d.share) > d.mg ? 'The film earned past the advance there: the rest is yours.' : 'It didn\'t earn past the advance there, so the advance was the best money you\'ll see.'}`, { film: f.id }); } }
 }
 // </life-deals>
 // <gea>
@@ -14534,6 +14546,69 @@ function heatPanel(m) {
   return `<section class="panel"><h3>What audiences want in ${esc(MARKETS[m].name)}</h3><div class="heat">${rows.map(([g, v]) => `<div class="hrow"><span>${esc(g)}</span><span class="hbar"><i style="width:${Math.round(clamp((v + .6) / 2.1, .03, 1) * 100)}%" class="h-${heatOf(m, g)}"></i></span><span class="small">${HEAT_LABEL[heatOf(m, g)]}</span></div>`).join('')}</div><p class="muted small">Tastes drift with every hit and flop. Studios chase what's hot, so what's hot gets crowded.</p></section>`;
 }
 // </industry>
+// <real-looks>
+// ---------------- Faces for the famous ----------------
+// People reimagined from film history get a face that nods to the original: the hair, the glasses, the moustache,
+// the hat. Keyed by the hidden real name. Code letters: s skin, h hair, c hair colour, f facial hair, g glasses,
+// l receding hairline, t headwear, b build, e eyes, o outfit, m mark (see LOOK in portrait.js for the options).
+const REAL_LOOKS = {
+  'Charlie Chaplin': 's1h5c0f2t4o9', 'Buster Keaton': 's1h2c0t4o9', 'Harold Lloyd': 's1h3c0g1o9', 'Alfred Hitchcock': 's1h3c0l1b5o9',
+  'Orson Welles': 's1h4c0b5o9', 'John Ford': 's1h2c2g7t4', 'Stanley Kubrick': 's1h5c0f5', 'Steven Spielberg': 's1h2c1f4g2t1l1',
+  'Martin Scorsese': 's1h3c0g3l1b6', 'Francis Ford Coppola': 's2h2c0f5g3b5', 'George Lucas': 's1h3c1f4', 'Quentin Tarantino': 's1h3c0e0',
+  'Woody Allen': 's1h2c4g3b0', 'Spike Lee': 's7h1c0f3g3t1', 'Akira Kurosawa': 's2h3c0g7t4', 'Federico Fellini': 's1h3c0t4o9',
+  'Ingmar Bergman': 's0h3c1t1', 'Jean-Luc Godard': 's1h3c1g7l1', 'François Truffaut': 's1h3c0', 'Satyajit Ray': 's5h3c0b7',
+  'Christopher Nolan': 's0h3c5o8', 'Tim Burton': 's1h5c0g7', 'Peter Jackson': 's1h5c2f5g1b5', 'Guillermo del Toro': 's2h3c0f5g2b5',
+  'Wes Anderson': 's0h8c3o8', 'David Lynch': 's1h4c7o7', 'Werner Herzog': 's1h2c1', 'Pedro Almodóvar': 's2h5c7b4',
+  'Bong Joon-ho': 's2h5c0g3', 'Wong Kar-wai': 's2h2c0g7', 'Ang Lee': 's2h3c0', 'James Cameron': 's1h3c3', 'Ridley Scott': 's1h2c7f4l1',
+  'Sergio Leone': 's2h3c0f5g2b5', 'Clint Eastwood': 's1h3c3b7', 'Kathryn Bigelow': 's1h8c1b7', 'Greta Gerwig': 's0h8c6', 'Sofia Coppola': 's0h8c2',
+  'Jane Campion': 's0h7c7', 'Agnès Varda': 's1h7c4', 'Jordan Peele': 's6h1c0f4g2', 'Ava DuVernay': 's7h9c0', 'Barry Jenkins': 's7h1c0f5',
+  'Denis Villeneuve': 's1h2c1f1', 'Alfonso Cuarón': 's2h8c7f5', 'Alejandro González Iñárritu': 's2h8c7f5', 'Hayao Miyazaki': 's1h3c7f4g3',
+  'Sidney Lumet': 's1h2c7g3', 'Billy Wilder': 's1h3c0t4', 'Frank Capra': 's3h5c0', 'Roman Polanski': 's1h4c1b6', 'John Carpenter': 's1h8c7f5',
+  'David Fincher': 's1h1c1f1t1', 'Paul Thomas Anderson': 's1h8c2f1', 'Steven Soderbergh': 's1h1c1g3', 'Spike Jonze': 's1h5c1',
+  'Darren Aronofsky': 's1h5c0', 'Joel and Ethan Coen': 's1h8c0g2', 'Richard Linklater': 's1h3c1', 'Mel Brooks': 's1h2c0g3', 'Charlie Kaufman': 's1h5c0',
+  'Yasujirō Ozu': 's2h1c0t4', 'Fritz Lang': 's1h3c0', 'Sergei Eisenstein': 's1h5c1l1', 'Luis Buñuel': 's1h1c0', 'Andrei Tarkovsky': 's1h3c0f2',
+  'Abbas Kiarostami': 's3h3c7g7', 'Zhang Yimou': 's2h1c0', 'Park Chan-wook': 's2h3c0g2', 'Hirokazu Kore-eda': 's2h3c7', 'Chloé Zhao': 's2h8c0',
+  'Marilyn Monroe': 's0h5c6m4', 'Audrey Hepburn': 's1h7c0b0', 'Elizabeth Taylor': 's1h5c0e9', 'Grace Kelly': 's0h7c6', 'Humphrey Bogart': 's1h3c1t8o9',
+  'James Dean': 's1h4c3o4', 'Marlon Brando': 's1h1c1o0', 'Cary Grant': 's2h3c0o9', 'Gene Kelly': 's1h4c0', 'Fred Astaire': 's0h3c1l1b7',
+  'Paul Newman': 's0h3c3e5', 'John Wayne': 's1h3c2t4b4', 'Jack Nicholson': 's1h3c0l1g7', 'Robert De Niro': 's2h3c0m4', 'Al Pacino': 's2h5c0',
+  'Dustin Hoffman': 's2h3c1b6', 'Meryl Streep': 's0h8c6', 'Harrison Ford': 's1h3c3', 'Sylvester Stallone': 's2h3c0b8', 'Arnold Schwarzenegger': 's2h2c2b8',
+  'Tom Hanks': 's1h3c2', 'Tom Cruise': 's1h3c1', 'Denzel Washington': 's7h1c0f2', 'Morgan Freeman': 's7h1c7f2m3', 'Samuel L. Jackson': 's7h0c0f3t6',
+  'Will Smith': 's6h1c0', 'Eddie Murphy': 's7h1c0f2', 'Whoopi Goldberg': 's7h9c0', 'Julia Roberts': 's1h5c4', 'Nicole Kidman': 's0h5c4',
+  'Cate Blanchett': 's0h7c6', 'Leonardo DiCaprio': 's1h3c5', 'Brad Pitt': 's1h2c6f1', 'Johnny Depp': 's1h8c1f3g9', 'Keanu Reeves': 's2h8c0f5',
+  'Scarlett Johansson': 's0h7c6', 'Natalie Portman': 's1h7c1', 'Angelina Jolie': 's1h8c1', 'Jennifer Lawrence': 's0h8c5', 'Emma Stone': 's0h8c4',
+  'Margot Robbie': 's0h8c6', 'Timothée Chalamet': 's0h5c1', 'Zendaya': 's3h5c1', 'Viola Davis': 's7h1c0', 'Lupita Nyong’o': 's9h1c0', 'Idris Elba': 's8h1c0f5',
+  'Daniel Day-Lewis': 's0h3c1', 'Anthony Hopkins': 's1h2c3', 'Ian McKellen': 's1h3c7', 'Judi Dench': 's0h1c7', 'Helen Mirren': 's0h7c6',
+  'Michael Caine': 's0h3c6g3', 'Gary Oldman': 's1h3c2g4', 'Christopher Lee': 's1h3c0b7', 'Peter Cushing': 's0h3c7b7', 'Bruce Lee': 's3h3c0b8',
+  'Jackie Chan': 's3h2c0', 'Chow Yun-fat': 's2h3c0g7', 'Toshiro Mifune': 's3h3c0f1', 'Shah Rukh Khan': 's4h5c0', 'Amitabh Bachchan': 's5h3c0f5g3b7',
+  'Aamir Khan': 's3h2c0', 'Rajinikanth': 's5h4c0g7', 'Sophia Loren': 's3h8c0', 'Marcello Mastroianni': 's2h3c0g7o9', 'Brigitte Bardot': 's1h8c6',
+  'Alain Delon': 's1h3c1e5', 'Jean-Paul Belmondo': 's2h3c1', 'Catherine Deneuve': 's0h8c6', 'Isabelle Huppert': 's0h8c4m3', 'Gérard Depardieu': 's1h8c4b5',
+  'Greta Garbo': 's0h7c3', 'Marlene Dietrich': 's0h7c6t4', 'Charlton Heston': 's1h3c3b7', 'Kirk Douglas': 's1h3c5', 'Gregory Peck': 's1h3c0b7',
+  'James Stewart': 's0h3c1b7', 'Bette Davis': 's0h7c5', 'Katharine Hepburn': 's0h7c4m3', 'Joan Crawford': 's1h7c4', 'Ingrid Bergman': 's0h7c3',
+  'Rita Hayworth': 's1h5c4', 'Judy Garland': 's1h7c1', 'Sidney Poitier': 's8h1c0', 'Elvis Presley': 's1h4c0f6', 'Frank Sinatra': 's0h3c1t8e5',
+  'Stan Laurel': 's0h3c4t4', 'Oliver Hardy': 's1h3c0f2b5t4', 'Groucho Marx': 's1h3c0f2g1', 'Bill Murray': 's1h3c2', 'Robin Williams': 's1h3c1b3',
+  'Jim Carrey': 's1h3c1', 'Danny DeVito': 's1h2c0l1b6', 'Joe Pesci': 's2h2c1b6', 'Christopher Walken': 's0h4c1', 'Willem Dafoe': 's1h3c3',
+  'Tilda Swinton': 's0h4c6b7', 'Frances McDormand': 's0h7c3', 'Uma Thurman': 's0h7c0', 'Sigourney Weaver': 's0h5c1b7', 'Jodie Foster': 's0h7c5',
+  'Michelle Yeoh': 's2h8c0', 'Gong Li': 's2h8c0', 'Tony Leung Chiu-wai': 's2h3c0', 'Song Kang-ho': 's2h2c0', 'Ryan Gosling': 's0h3c5',
+  'Joaquin Phoenix': 's1h3c1f5', 'Heath Ledger': 's0h3c5', 'Matthew McConaughey': 's1h3c3', 'Hugh Jackman': 's1h3c1f6', 'Robert Downey Jr.': 's1h3c1f3g9',
+  'Chris Hemsworth': 's0h8c6b8', 'Charlize Theron': 's0h7c6', 'Halle Berry': 's5h1c0', 'Penélope Cruz': 's2h8c0', 'Javier Bardem': 's2h3c0',
+  'Antonio Banderas': 's2h8c0', 'Salma Hayek': 's3h8c0', 'Gael García Bernal': 's2h3c0f1', 'Mads Mikkelsen': 's0h3c2f1', 'Max von Sydow': 's0h3c6b7',
+  'Liv Ullmann': 's0h8c4', 'Bibi Andersson': 's0h7c6', 'Klaus Kinski': 's1h5c6', 'Bill Nighy': 's0h3c3g2b7', 'Steve Buscemi': 's1h8c1b7',
+  'John Travolta': 's1h4c0', 'Bruce Willis': 's1h0c2l1', 'Jason Statham': 's1h0c2f1l1', 'Vin Diesel': 's3h0c0b8', 'Dwayne Johnson': 's4h0c0b8',
+  'Mel Gibson': 's1h8c2', 'Kevin Costner': 's1h3c3', 'Sean Connery': 's1h2c0l1', 'Roger Moore': 's0h3c3', 'Daniel Craig': 's0h1c5e5',
+  'Pierce Brosnan': 's1h3c0', 'Hugh Grant': 's0h4c1', 'Colin Firth': 's0h3c1', 'Kate Winslet': 's0h8c5', 'Emma Thompson': 's0h7c3',
+  'Tom Hardy': 's1h1c1f4', 'Cillian Murphy': 's0h2c1e4', 'Benedict Cumberbatch': 's0h5c1', 'Michael Fassbender': 's0h2c4', 'Florence Pugh': 's0h7c6',
+  'Saoirse Ronan': 's0h8c6', 'Anya Taylor-Joy': 's0h8c6', 'Adam Driver': 's1h8c0b7', 'Oscar Isaac': 's2h5c0f4', 'Pedro Pascal': 's2h5c0f2',
+  'Mahershala Ali': 's7h1c0f4', 'Chadwick Boseman': 's7h1c0f3', 'Daniel Kaluuya': 's9h1c0', 'Michael B. Jordan': 's7h1c0f3', 'Austin Butler': 's0h4c6'
+};
+function realLook(p, L) {
+  const code = p.real && REAL_LOOKS[p.real];
+  if (!code) return L;
+  const K = { s: 'skin', h: 'hair', c: 'hairColor', f: 'facial', g: 'glasses', l: 'hairline', t: 'head', b: 'build', e: 'eyes', o: 'outfit', m: 'mark' };
+  Object.assign(L, { facial: 0, glasses: 0, head: 0, mark: 0, hairline: 0 });
+  for (const [, k, v] of code.matchAll(/([a-z])(\d)/g)) if (K[k]) L[K[k]] = +v;
+  return L;
+}
+// </real-looks>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -15362,7 +15437,7 @@ function viewDesk() {
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + reputationHTML() + homePanel() + storyHTML();
-    case 'people': return `<h3>Contacts <span class="count">${known.length}</span></h3>
+    case 'people': return troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `<div class="cols two desk">
@@ -15476,7 +15551,7 @@ function careerClick(t) {
   if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
-  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, micro: !!+F.micro, inv: !!+F.inv }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
@@ -15519,7 +15594,7 @@ function careerChange(e) {
   if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; calOf()[+id[4]][+id[6]] = v; render(true); return true; }
   if (e.target.dataset.autopilot) { doAct({ t: 'focus', auto: e.target.checked }); render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
-  if (/^mk-(micro|dir|lead|dp|ed)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
+  if (/^mk-(micro|dir|lead|dp|ed|mus|pd)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
   if (id === 'co-name') { (UI.co = UI.co || {}).name = v; return true; }
   if (/^pitch-\d+$/.test(id)) { (UI.pitch = UI.pitch || {})[+id.slice(6)] = v; render(true); return true; }
@@ -15544,9 +15619,18 @@ function makeFilmForm(c, k, x) {
   return `<div class="mkfilm"><b>${esc(x.title)}</b> <span class="chip" title="How audiences in your market feel about ${esc(x.genre.toLowerCase())} right now">${HEAT_LABEL[heatOf(HUBS[S.me.hub].m, x.genre)]}</span> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)}</span>
    <div class="mkrow"><label>Size ${sel('mk-micro-' + key, [['1', 'Micro-budget'], ['0', 'Full budget']], String(F.micro))}</label>
     <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, 'dir', x.genre))}`])), F.dir)}</label>
-    <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
+    <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}${crewSel('mus', 'composer', 'mus', 'Composer')}${crewSel('pd', 'designer', 'des', 'Production designer')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
    <p class="small">Cost about <b>${fmtCash(Math.round(total * 1e6))}</b> · company has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
    <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button></div>`;
+}
+// Your regulars: the people who'd work with you again, first in line when you hire.
+function troupePanel() {
+  const M = S.me, me = ME(), mine = new Set(me.credits);
+  const ids = Object.keys(M.known).map(Number).filter(id => M.known[id].tags.includes('Your regular') && !P(id).dead);
+  if (!ids.length) return '';
+  const together = id => P(id).credits.filter(f => mine.has(f)).length;
+  ids.sort((a, b) => together(b) - together(a) || opinion(b) - opinion(a));
+  return `<section class="panel troupe"><h3>Your regulars <span class="count">${ids.length}</span></h3><div class="tcards">${ids.map(id => { const p = P(id), free = available(id), n = together(id); return `<div class="tcard">${portraitOf(p, 56)}<div><b>${pl(id)}</b><span class="muted small">${esc(ROLE_LABEL[p.role])} · ${n} film${n === 1 ? '' : 's'} with you</span><span class="small">${free ? '<span class="good">Free now</span>' : p.retired ? 'Retired' : `Busy until ${fmtDate(p.busy, true)}`} · opinion ${Math.round(opinion(id))}</span></div></div>`; }).join('')}</div><p class="note">Crew and cast who liked working with you. They show up first (♥) when you pick a director, lead, cinematographer, editor, composer or designer.</p></section>`;
 }
 // Week focus: what your days are for, how your evenings go, and what that will probably do to you.
 function focusPanel() {

@@ -29,6 +29,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/life-phone.js` | texting styles by personality, replies and conversations |
 | `src/computer.js` | the desk computer: mail, CrewList, trades, GEA search, bank, Flick, notes, Clapper Sweep |
 | `src/city-plus.js` | 26 venues in categories, weekly what's-on, weekend trips |
+| `src/real-looks.js` | `REAL_LOOKS`: faces for famous real-based people (keyed by hidden real name; compact codes) |
 | `src/gea.js` | the archive: posters, stills, trailers, loglines, full credits, bios |
 | `src/press.js` | trade press articles |
 | `src/companies.js` | company terminal: valuation, share price history, structure, logo, lore |
@@ -65,12 +66,11 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Investors: you put in ≥25%; Finance roll; they take a share of returns; 4-week wait after a no.
 
 ## Ideas queue (after the big notes pass)
-- Avatars for real-world counterparts don't resemble the real people yet: would need a per-person look table (hair, skin, glasses, beard) for the famous names.
-- A few catalogue names are still close to real ones (e.g. a studio called "YRF Films"); run a rename pass on studios and people.
-- Hiring a composer and production designer; a troupe page.
-- Distribution territories (sell a film market by market rather than one worldwide buyer).
+- `REAL_LOOKS` covers ~230 famous names; extend it for more (codes documented at the top of the file). The dead are drawn at ≤50.
+- People and studios use deliberate parody names ("Harrison Fjord"); only exact real names were removed (YRF, agencies).
+- Done: festival bids are split into home-market and international rights, settled per territory.
 
-1. Hire your own crew (DP, editor, composer) when producing/directing; a "troupe" of regulars who want to work with you again.
+1. Done: hire DP, editor, composer, production designer; 'Your regulars' panel on the People tab.
 2. Done: festival selections bring distributor bids (advance + share, settled after release); the 'parent' background links you into a real family and gives a hiring edge. Careers screen runs job text through `deReal()` to hide real employers/unions.
 3. Gentle difficulty tuning: energy/stress feel easy for steady jobs.
 4. More scenes per job family and more NPC life events; more world events with choices.

@@ -486,7 +486,7 @@ function viewDesk() {
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
     case 'create': return writingDesk() + producingPanel() + companyPanel();
     case 'life': return pathsPanel() + reputationHTML() + homePanel() + storyHTML();
-    case 'people': return `<h3>Contacts <span class="count">${known.length}</span></h3>
+    case 'people': return troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `<div class="cols two desk">
@@ -600,7 +600,7 @@ function careerClick(t) {
   if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
-  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, micro: !!+F.micro, inv: !!+F.inv }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
@@ -643,7 +643,7 @@ function careerChange(e) {
   if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; calOf()[+id[4]][+id[6]] = v; render(true); return true; }
   if (e.target.dataset.autopilot) { doAct({ t: 'focus', auto: e.target.checked }); render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
-  if (/^mk-(micro|dir|lead|dp|ed)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
+  if (/^mk-(micro|dir|lead|dp|ed|mus|pd)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
   if (id === 'co-name') { (UI.co = UI.co || {}).name = v; return true; }
   if (/^pitch-\d+$/.test(id)) { (UI.pitch = UI.pitch || {})[+id.slice(6)] = v; render(true); return true; }
@@ -668,9 +668,18 @@ function makeFilmForm(c, k, x) {
   return `<div class="mkfilm"><b>${esc(x.title)}</b> <span class="chip" title="How audiences in your market feel about ${esc(x.genre.toLowerCase())} right now">${HEAT_LABEL[heatOf(HUBS[S.me.hub].m, x.genre)]}</span> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)}</span>
    <div class="mkrow"><label>Size ${sel('mk-micro-' + key, [['1', 'Micro-budget'], ['0', 'Full budget']], String(F.micro))}</label>
     <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, 'dir', x.genre))}`])), F.dir)}</label>
-    <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
+    <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}${crewSel('mus', 'composer', 'mus', 'Composer')}${crewSel('pd', 'designer', 'des', 'Production designer')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
    <p class="small">Cost about <b>${fmtCash(Math.round(total * 1e6))}</b> · company has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
    <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button></div>`;
+}
+// Your regulars: the people who'd work with you again, first in line when you hire.
+function troupePanel() {
+  const M = S.me, me = ME(), mine = new Set(me.credits);
+  const ids = Object.keys(M.known).map(Number).filter(id => M.known[id].tags.includes('Your regular') && !P(id).dead);
+  if (!ids.length) return '';
+  const together = id => P(id).credits.filter(f => mine.has(f)).length;
+  ids.sort((a, b) => together(b) - together(a) || opinion(b) - opinion(a));
+  return `<section class="panel troupe"><h3>Your regulars <span class="count">${ids.length}</span></h3><div class="tcards">${ids.map(id => { const p = P(id), free = available(id), n = together(id); return `<div class="tcard">${portraitOf(p, 56)}<div><b>${pl(id)}</b><span class="muted small">${esc(ROLE_LABEL[p.role])} · ${n} film${n === 1 ? '' : 's'} with you</span><span class="small">${free ? '<span class="good">Free now</span>' : p.retired ? 'Retired' : `Busy until ${fmtDate(p.busy, true)}`} · opinion ${Math.round(opinion(id))}</span></div></div>`; }).join('')}</div><p class="note">Crew and cast who liked working with you. They show up first (♥) when you pick a director, lead, cinematographer, editor, composer or designer.</p></section>`;
 }
 // Week focus: what your days are for, how your evenings go, and what that will probably do to you.
 function focusPanel() {

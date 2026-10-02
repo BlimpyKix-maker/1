@@ -53,7 +53,7 @@ function npcLook(p) {
   const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
   return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), head: r() < .14 ? 1 + pk(7) : 0, ears: r() < (F ? .45 : .12) ? 1 + pk(3) : 0, mark: r() < .1 ? 1 + pk(4) : 0, neck: r() < .14 ? 1 + pk(5) : 0, wrist: 0, hairline: !F && r() < .45 ? 1 : 0 };
 }
-function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : npcLook(p); }
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : realLook(p, npcLook(p)); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
 let PORTRAIT_UID = 0;
 function portraitSVG(L, age, size = 96, bare = false) {
@@ -152,4 +152,5 @@ function portraitSVG(L, age, size = 96, bare = false) {
   }
   return `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
 }
-function portraitOf(p, size) { return portraitSVG(lookOf(p), (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born, size); }
+// The dead are remembered in their prime.
+function portraitOf(p, size) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, size); }
