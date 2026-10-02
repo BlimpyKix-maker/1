@@ -42,7 +42,7 @@ const REPLY_LABELS = { laugh: '😂 Laugh', meme: '📸 Send one back', sympathy
 function replyLabel(m, k) { if (/^a[01]$/.test(k)) { const A = ADVICE[+msgTopic(m).slice(3)]; return '💬 ' + A.a[+k[1]]; } return REPLY_LABELS[k] || (REPLIES[k] ? REPLIES[k].label : k); }
 function replyOptions(m) {
   const id = m.from, top = msgTopic(m);
-  let o = /^adv\d+$/.test(top) ? ['a0', 'a1', 'notsure'] : top === 'work' ? ['workgood', 'workbad', 'worksecret'] : (REPLY_SETS[top] || REPLY_SETS.chat).slice();
+  let o = top === 'ask' ? ['askyes', 'askno', 'asklater'] : /^adv\d+$/.test(top) ? ['a0', 'a1', 'notsure'] : top === 'work' ? ['workgood', 'workbad', 'worksecret'] : (REPLY_SETS[top] || REPLY_SETS.chat).slice();
   if (id >= 0 && (relOf(id) === 'partner' || canRomance(id)) && !o.includes('flirty') && ['chat', 'question', 'good'].includes(top)) o.splice(o.length - 1, 0, 'flirty');
   return o;
 }
@@ -108,6 +108,7 @@ function replyText(a) {
     C.brief = k === 'brief' ? C.brief + 1 : 0;
     const P2 = (L, L2) => pickLine(o >= 25 ? L : L2 || L, r);
     if (/^a[01]$/.test(k)) { const A = ADVICE[+top.slice(3)], pick = +k[1]; mine = pickLine([`honestly? ${A.a[pick].toLowerCase()}`, `${A.a[pick].toLowerCase()}. trust me`, `if it were me: ${A.a[pick].toLowerCase()}`], r); scheduleAdvice(q.id, +top.slice(3), pick); d = 1.5; back = pickLine(['ok. you\'re right', 'that\'s what I needed to hear', 'hm. yeah. ok. thank you'], r); }
+    else if (/^ask(yes|no|later)$/.test(k)) { const R = askReply(q, m, k); mine = R.mine; back = R.back; d = R.d; if (k === 'askno') mood = 'none'; }
     else if (k === 'notsure') { mine = pickLine(['honestly I don\'t know. what does your gut say?', 'that\'s a hard one. sleep on it?'], r); d = .5; back = pickLine(['my gut says pizza', 'yeah. ok. sleeping on it'], r); }
     else if (k === 'laugh') { mine = pickLine(['😂😂😂', 'I am WHEEZING', 'this is the best thing I\'ve seen all week'], r); d = 1; back = pickLine(['knew you\'d get it', 'there\'s more where that came from', 'I have a whole folder'], r); }
     else if (k === 'meme') { mine = pickLine(['[a photo of your lunch, which is worse]', '[a video of a boom mic falling on someone]', '[a screenshot of your own terrible review]'], r); d = 1.5; C.jokes++; back = pickLine(['NO 😂', 'you win. you always win', 'ok that one\'s going in the group chat'], r); }

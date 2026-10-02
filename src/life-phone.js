@@ -24,7 +24,7 @@ function styleText(p, t, mood = 'happy') {
     case 'terse': s = s.split(/[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break;
     case 'lower': s = s.toLowerCase().replace(/[.]$/, ''); break;
     case 'caps': s = s.replace(/\b([a-z]{4,})\b/g, (w, _, i) => (hashRand(i + p.id)() < .35 ? w.toUpperCase() : w)) + (r < .5 ? '!!' : '!!!'); break;
-    case 'long': s = s[0].toUpperCase() + s.slice(1) + (r < .5 ? ' Anyway sorry, long message, I just think about this stuff a lot. How are YOU? Properly, I mean.' : ' Also, random, but I hope you\'re looking after yourself. This business eats people.'); break;
+    case 'long': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, '') + (/[.!?…)\]]$/.test(s.trim()) ? '' : '.') + (r < .5 ? ' Anyway sorry, long message, I just think about this stuff a lot. How are YOU? Properly, I mean.' : ' Also, random, but I hope you\'re looking after yourself. This business eats people.'); break;
     case 'emoji': s += ' ' + EMO[mood][Math.floor(r * EMO[mood].length)] + (o > 40 ? EMO[mood][Math.floor(r * 7) % EMO[mood].length] : ''); break;
   }
   if (o >= 55 && st !== 'formal' && r < .4) s = (relOf(p.id) === 'partner' ? pickLine(['babe ', 'hey you ', 'love, '], p.id) : pickLine(['ok ', 'listen ', 'mate ', 'right so '], p.id)) + s;

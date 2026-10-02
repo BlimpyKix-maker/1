@@ -295,10 +295,12 @@ function phonePanel() {
   if (open !== null && open !== 'home') T.id = String(open);
   const tid = T.id === '' ? null : +T.id, trel = tid !== null && M.known[tid] ? relOf(tid) : null;
   const kinds = [['hi', 'A message'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(tid !== null && opinion(tid) < -5 ? [['sorry', 'Apologise']] : []).concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
+  if (tid !== null && typeof topicAvail === 'function') kinds.push(...topicAvail(tid).map(k => [k, TOPICS[k].l]));
   if (!kinds.some(k => k[0] === T.kind)) T.kind = 'hi';
+  const free = T.kind === 'hi' || (typeof TOPICS !== 'undefined' && TOPICS[T.kind]);
   const slots = upcomingSlots(16), ahead = apptsAhead();
   const compose = (fixed) => `<div class="compose">${fixed ? '' : `<label>To ${sel('tx-id', [['', 'Someone…']].concat(REL_ORDER.flatMap(r => (byRel[r] || []).map(id => [id, `${REL[r].icon} ${P(id).name}`]))), T.id)}</label>`}
-     ${tid !== null ? `<label>${sel('tx-kind', kinds, T.kind)}</label>${T.kind === 'hi' ? `<label class="grow"><input id="tx-msg" maxlength="280" placeholder="Say something (or leave blank)" value="${esc(T.msg || '')}"></label>` : `<label>${sel('tx-slot', slots.map((s, i) => [i, slotLabel(s)]), T.slot)}</label>`}<button class="btn-s" data-sendtext="1">Send</button>` : ''}</div>`;
+     ${tid !== null ? `<label>${sel('tx-kind', kinds, T.kind)}</label>${free ? `<label class="grow"><input id="tx-msg" maxlength="280" placeholder="${T.kind === 'hi' ? 'Say something (or leave blank)' : 'In your own words (optional)'}" value="${esc(T.msg || '')}"></label>` : `<label>${sel('tx-slot', slots.map((s, i) => [i, slotLabel(s)]), T.slot)}</label>`}<button class="btn-s" data-sendtext="1">Send</button>` : ''}</div>`;
   let left;
   if (open !== null) {
     UI.seen[open] = (threads.get(open) || {}).n || 0;
@@ -308,7 +310,7 @@ function phonePanel() {
     const canReply = q && lastIn && lastIn.replyable && !lastIn.replied && lastIn.id !== undefined;
     left = `<div class="ph-bar"><button class="linkish" data-thread="">‹</button>${phoneAvatar(open, 28)}<div><b>${q ? esc(q.name) : 'Home & gossip'}</b>${q ? `<small>${REL[rel].icon} ${esc(REL[rel].label)} · texts ${esc(TEXT_STYLES[textStyle(q)].label)}</small>` : ''}</div>${q ? `<a href="#" class="lk small" data-go="person:${open}">Profile</a>` : ''}</div>
      <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}"><p>${esc(m.t)}</p><time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
-     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div>` : q ? compose(true) : ''}`;
+     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div><details class="newtopic"><summary class="small">Or change the subject…</summary>${compose(true)}</details>` : q ? compose(true) : ''}`;
   } else {
     left = `<div class="ph-bar"><b>Messages</b></div><ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
   }
@@ -612,7 +614,7 @@ function careerClick(t) {
   if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
-  if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' ? T.msg : undefined }; if (T.kind !== 'hi') { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
+  if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' || (typeof TOPICS !== 'undefined' && TOPICS[T.kind]) ? T.msg : undefined }; if (T.kind !== 'hi' && !(typeof TOPICS !== 'undefined' && TOPICS[T.kind])) { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
   if (t.dataset.startWork) { doAct({ t: 'startwork', type: UI.newWork || Object.keys(WORK_TYPES).find(workTypeOpen), title: ($('#new-work-title') || {}).value || '' }); render(true); return true; }
@@ -653,6 +655,7 @@ function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
   if (e.target.dataset.share && v) { doAct({ t: 'share', id: +e.target.dataset.share, to: +v }); render(true); return true; }
   if (typeof schoolChange === 'function' && schoolChange(id, v)) { render(true); return true; }
+  if (id === 'mc-kind' || id === 'mc-to') { UI.mc = UI.mc || {}; UI.mc.text = ($('#mc-text') || {}).value || UI.mc.text || ''; UI.mc[id.slice(3)] = v; render(true); return true; }
   if (id === 'fest-y') { UI.festY = +v; render(true); return true; }
   if (id === 'bf-sort') { (UI.bf = UI.bf || { ind: 'all', tier: 'all', fit: false }).sort = v; render(true); return true; }
   if (/^ns-(genre|theme|tone)$/.test(id)) { UI.newScript[id.slice(3)] = v; return true; }
