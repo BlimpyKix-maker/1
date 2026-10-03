@@ -149,6 +149,7 @@ function bazaarAct(a) {
     if (B.standing) me.standing = clamp(me.standing + B.standing, 0, 100);
     for (let i = 0; i < (B.meet || 0); i++) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 8) + hashRand(own.seed + i)() * 30 - (M.known[q.id] ? 99 : 0)); if (q && !M.known[q.id]) meet(q.id, `Met through ${it.name.toLowerCase()}`, 4); }
     if (B.cat === 'courses' || B.cat === 'books') own.used = 1;
+    if (B.cat === 'books' && typeof currBook === 'function') { const n = currBook(B.k); if (n) diary(`You read ${it.name}: ${n} lesson${n > 1 ? 's' : ''} for the Craft Library.`); }
     M.bz.push(own);
     diary(`Money: bought ${it.name} for ${fmtCash(cost)}.`);
     return true;

@@ -102,3 +102,17 @@ function playerArticle(n, r) {
   out.push(pk([`What comes next is anyone's guess. ${first} isn't saying.`, `Asked what's next, ${first} laughed: "Sleep, probably. Then the next one."`, `${first}'s next project is said to be ${pk(['already in the works', 'under wraps', 'the one people will remember'])}.`]));
   return out;
 }
+
+// ---- one search box for the whole world ----
+function worldSearchHTML(q) {
+  q = String(q || '').toLowerCase().trim(); if (q.length < 2) return '';
+  const cos = S.companies.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
+  const mcos = MEDIA_COS.map((c, i) => [c, i]).filter(([c]) => c.n.toLowerCase().includes(q)).slice(0, 6);
+  const figs = []; for (const h of HUB_IDS) { const L = mediaFigures(h); L.forEach((x, i) => { if (figs.length < 8 && x.name.toLowerCase().includes(q) && !figs.some(y => y.name === x.name)) figs.push(Object.assign({ hub: h, fid: h + '~' + i }, x)); }); }
+  const songs = []; for (const h of HUB_IDS) { if (songs.length >= 6) break; mediaFigures(h).forEach((x, i) => { if (songs.length >= 6) return; const fx = Object.assign({ hub: h, fid: h + '~' + i }, x); for (const s of figReleases(fx).slice(0, 12)) if (songTitle(fx, s).toLowerCase().includes(q) && songs.length < 6) songs.push([fx, s]); }); }
+  const prizes = typeof awardBodies === 'function' ? awardBodies().filter(b => b.name.toLowerCase().includes(q)).slice(0, 6) : [];
+  const lessons = typeof CURR !== 'undefined' ? Object.entries(CURR).flatMap(([f, C]) => C.lessons.map((L, i) => [f, i, L]).filter(([, , L]) => L[1].toLowerCase().includes(q))).slice(0, 6) : [];
+  const box = (t, items) => items.length ? `<div><h4>${t}</h4><ul class="plain">${items.join('')}</ul></div>` : '';
+  const out = [box('Film companies', cos.map(c => `<li>${cl(c.id)} <span class="muted small">${esc(hubName(c.hub))}</span></li>`)), box('Labels, networks, theatres', mcos.map(([c, i]) => `<li>${mcoLink(i)} <span class="muted small">${esc(MCO_TYPE[c.type] || '')}</span></li>`)), box('Artists and shows', figs.map(x => `<li>${figLink(x)} <span class="muted small">${esc(KIND_LABEL[x.kind] || '')}</span></li>`)), box('Songs and works', songs.map(([x, s]) => `<li>${songLink(x, s)} <span class="muted small">by ${esc(x.name)}</span></li>`)), box('Prizes and festivals', prizes.map(b => `<li><a href="#" class="lk" data-go="award:${b.id}">${esc(b.name)}</a></li>`)), box('Craft lessons', lessons.map(([f, i, L]) => `<li><button class="linkish" data-jump="computer:library" data-libf="${f}">${esc(CURR[f].icon + ' ' + L[1])}</button></li>`))].filter(Boolean);
+  return out.length ? `<div class="cols two wsearch">${out.join('')}</div>` : '';
+}

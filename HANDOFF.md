@@ -69,6 +69,8 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/awards2.js` | Full winners for every prize: `ceremonyRecord` (`CER_CATS`, `CER_ALIAS` canonical names, `CER_START`), `mediaRecord` (`MEDIA_CATS`), `contestRecord`, `allWinners` (cached), `awardTableHTML` (category chips, `ab-cat`/`ab-y`/`ab-sort`), `festLineup` |
 | `src/trailer2.js` | Trailers per film: `trailerPlan2` (genre scripts `TR_LINES`, voice-over `TR_VO`, freeze/stinger/laurel/sub segments, `titleNoun`/`plural`), `trailerScore` (genre sequencer `TR_SCORES`) |
 | `src/staff.js` | Company staffs in every industry: `coRef` keys (`f<id>` film, `m<idx>` media, `b<name>|<hub>` small business), `headcount`, `orgChart` (`DEPTS`, rank pyramid), `staffAt`, `bossOf`, `viewEmployee`, `staffDirectoryHTML` (routes `staff:`, `emp:`, `biz:`), `companyHistory`, `filmStaffHTML`; cache `ARCH` keyed to S |
+| `src/curric1.js`–`curric4.js` | `CURR`: 28 fields × three years of courses, ~190 lessons `[year, title, idea, how, decision, example, genre?]`; examples use tokens {F} {D} {P} {E} {A} {W} {C} {Y} resolved to this world's films |
+| `src/curriculum.js` | Teaching it: weekly classes at school (`currSchoolWeek`, inbox kind `lesson`, `currPick` grades A/B/C), learning on the job (`currWorkLearn` from `jobTaskBlock`), books (`currBook`), DC bonus on tasks (`currDCBonus`), Craft Library app (`libraryHTML`, `data-libf`), `syllabusHTML` on school pages; progress in `M.cur` |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working

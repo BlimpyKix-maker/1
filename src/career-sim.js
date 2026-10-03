@@ -675,6 +675,7 @@ function closeWeek(a) {
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
+  if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof achWeek === 'function') achWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -961,6 +962,7 @@ function resolvePick(it, k) {
   if (typeof sponsorPick === 'function' && sponsorPick(it, k)) return true;
   if (typeof corpPick === 'function' && corpPick(it, k)) return true;
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
+  if (typeof currPick === 'function' && currPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
