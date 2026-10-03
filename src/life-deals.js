@@ -113,6 +113,8 @@ function awardsWeek() {
 function awardsNight(x, L) {
   const M = S.me, me = ME(), wins = awardsThisYear();
   for (const a of wins) L.push(`${a.name.replace(/^[^:]*: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
+  const top = wins.length ? S.films[wins[0].film] : null, topLog = top && typeof storyLog === 'function' ? storyLog(top) : null;
+  if (topLog) L.push(`The night belonged to ${top.title}. ${topLog}`);
   const mineWon = wins.filter(a => M.past.some(p => p.film === a.film && p.credited) || a.people.includes(me.id));
   for (const a of mineWon) {
     const self = a.people.includes(me.id);

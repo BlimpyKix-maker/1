@@ -26,6 +26,12 @@ function filmTrivia(f) {
   if (note) out.push(['f', note, 0]);
   (key && FICTION.fact[key] || []).forEach(([k, t], i) => out.push([k === 'r' ? 'r' : 'f', t, k === 'r' ? 11 + i * 2 : 6 + i * 3]));
   for (const x of productionFacts(f)) out.push(x);
+  const st = typeof storyOf === 'function' ? storyOf(f) : null;
+  if (st) {
+    if (st.t) out.push(['f', `The poster's tagline: “${st.t}”`, 2]);
+    const fr = st.frames.length ? st.frames[Math.floor(hashRand(f.id * 4111 + 9)() * st.frames.length)] : null;
+    if (fr && fr.cap) out.push(['f', `The scene everyone remembers: ${fr.cap}.`, 5]);
+  }
   const r = hashRand(f.id * 7919 + 3), fill = t => t.replace('{lead}', nm(f.cast[0])).replace('{dir}', nm(f.dir));
   const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
   if (d && d.credits.length && d.credits[0] === f.id) out.push(['f', `${d.name}'s first film as director.`, 4]);

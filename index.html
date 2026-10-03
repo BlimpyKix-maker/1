@@ -219,6 +219,7 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 @media (prefers-reduced-motion: reduce) { #trailer .tv-shot { animation: none !important; } #trailer .tv-grain { animation: none; } }
 @media (max-width: 700px) { .filmhead { grid-template-columns: 1fr; } }
 .panel.cine { margin-top: 16px; }
+.fotY-b { display: flex; gap: 14px; align-items: flex-start; } .fotY-p { flex: 0 0 auto; } .fotY-b p { margin: 0 0 6px; }
 .article { max-width: 760px; } .article p { font-size: 16px; line-height: 1.6; } .art-media { float: right; margin: 0 0 10px 16px; }
 .feed .headline { text-decoration: none; } .feed .headline:hover { text-decoration: underline; }
 .term-top { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; margin-bottom: 12px; }
@@ -13932,6 +13933,12 @@ function filmTrivia(f) {
   if (note) out.push(['f', note, 0]);
   (key && FICTION.fact[key] || []).forEach(([k, t], i) => out.push([k === 'r' ? 'r' : 'f', t, k === 'r' ? 11 + i * 2 : 6 + i * 3]));
   for (const x of productionFacts(f)) out.push(x);
+  const st = typeof storyOf === 'function' ? storyOf(f) : null;
+  if (st) {
+    if (st.t) out.push(['f', `The poster's tagline: “${st.t}”`, 2]);
+    const fr = st.frames.length ? st.frames[Math.floor(hashRand(f.id * 4111 + 9)() * st.frames.length)] : null;
+    if (fr && fr.cap) out.push(['f', `The scene everyone remembers: ${fr.cap}.`, 5]);
+  }
   const r = hashRand(f.id * 7919 + 3), fill = t => t.replace('{lead}', nm(f.cast[0])).replace('{dir}', nm(f.dir));
   const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
   if (d && d.credits.length && d.credits[0] === f.id) out.push(['f', `${d.name}'s first film as director.`, 4]);
@@ -14109,6 +14116,8 @@ function awardsWeek() {
 function awardsNight(x, L) {
   const M = S.me, me = ME(), wins = awardsThisYear();
   for (const a of wins) L.push(`${a.name.replace(/^[^:]*: /, '')}: ${S.films[a.film].title}${a.people.length ? ' (' + a.people.map(id => id === me.id ? 'you' : P(id).name).join(', ') + ')' : ''}.`);
+  const top = wins.length ? S.films[wins[0].film] : null, topLog = top && typeof storyLog === 'function' ? storyLog(top) : null;
+  if (topLog) L.push(`The night belonged to ${top.title}. ${topLog}`);
   const mineWon = wins.filter(a => M.past.some(p => p.film === a.film && p.credited) || a.people.includes(me.id));
   for (const a of mineWon) {
     const self = a.people.includes(me.id);
@@ -14928,6 +14937,7 @@ function viewAwards() {
    <section class="panel"><h3>Your recognition</h3>${mine.length ? `<ul class="plain">${mine.map(a => `<li>✦ ${esc(a.name)} ${a.y} · ${fl(a.film)}${a.people.includes(me.id) ? ' <b>(yours)</b>' : ''}</li>`).join('')}</ul>` : '<p class="muted">Nothing yet. Work on films that win, write scripts that place, or take your own films to festivals.</p>'}
     ${M && (M.scripts || []).some(s => s.won) ? `<h4>Contests</h4><ul class="plain">${M.scripts.filter(s => s.won).map(s => `<li>${esc(s.title)}: ${esc(s.won.join(', '))}</li>`).join('')}</ul>` : ''}</section></div>
    ${typeof egofHTML === 'function' && S.me ? egofHTML() : ''}${typeof awardsCabinetHTML === 'function' ? awardsCabinetHTML() : typeof awardBodiesHTML === 'function' ? awardBodiesHTML() : ''}
+   ${(() => { const c = {}; rows.forEach(a => { c[a.film] = (c[a.film] || 0) + 1; }); const top = Object.keys(c).sort((a, b) => c[b] - c[a])[0]; if (top === undefined) return ''; const f = S.films[+top]; return `<section class="panel fotY"><h3>Film of ${y}</h3><div class="fotY-b">${typeof posterSVG === 'function' ? `<div class="fotY-p">${posterSVG(f, 110)}</div>` : ''}<div><p><b>${fl(f.id)}</b> · ${c[top]} award${c[top] === 1 ? '' : 's'}</p><p>${esc(filmLogline(f))}</p><p class="muted"><i>“${esc(filmTagline(f))}”</i></p></div></div></section>`; })()}
    <h3>Winners</h3><div class="filters">${sel('aw-y', years.map(v => [v, v]), y)}<input id="aw-q" type="search" placeholder="Filter by award or country…" value="${esc(st.q || '')}"></div>
    <div class="tw"><table class="grid"><thead><tr><th>Award</th><th>Film</th><th>Winners</th></tr></thead><tbody>${rows.map(a => `<tr><td>${typeof bodyLink === 'function' ? bodyLink(a.name) : esc(a.name)}</td><td>${fl(a.film)}</td><td>${a.people.map(pl).join(', ')}</td></tr>`).join('') || '<tr><td colspan="3" class="empty">No awards recorded for this year yet.</td></tr>'}</tbody></table></div>`;
 }
@@ -27132,7 +27142,7 @@ const UI = {
 // ---------- small components ----------
 const link = (kind, id, text) => `<a href="#" class="lk" data-go="${kind}:${id}">${esc(text)}</a>`;
 const pl = id => link('person', id, P(id).name);
-const fl = id => link('film', id, S.films[id].title);
+const fl = id => { const f = S.films[id], t = f.cat && typeof storyTag === 'function' ? storyTag(f) : null; return t ? `<a href="#" class="lk" data-go="film:${id}" title="${esc(t)}">${esc(f.title)}</a>` : link('film', id, f.title); };
 const cl = id => id === null ? '<span class="muted">Independent</span>' : link('company', id, S.companies[id].name);
 const hubName = h => HUBS[h].name;
 const chip = (t, cls = '') => `<span class="chip ${cls}">${esc(t)}</span>`;
@@ -27197,7 +27207,7 @@ function viewBoxOffice() {
   <div class="filt"><label><span>Market</span>${sel('bo-m', mOpts, st.m)}</label><label><span>Period</span>${sel('bo-p', [['week', 'This week'], ['all', 'All time'], ...years.map(y => ['y' + y, String(y)])], st.view === 'year' ? 'y' + (st.y || S.year) : st.view)}</label><label><span>Genre</span>${sel('bo-g', [['', 'All genres'], ...GENRES.map(g => [g, g])], st.g || '')}</label><label><span>Hub</span>${sel('bo-h', [['', 'Everywhere'], ...HUB_IDS.map(h => [h, hubName(h)])], st.h || '')}</label><label class="filt-q"><span>Search</span><input id="bo-q" type="search" placeholder="Title, director, city…" value="${esc(st.q || '')}"></label>${st.q || st.g || st.h ? '<button class="linkish" data-boclear="1">Clear filters</button>' : ''}</div>
   <h3>${title}${m ? ' · ' + esc(MARKETS[m].name) : ''} <span class="count">${rows.length} films</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th class="n">#</th>${th('title', 'Title')}${th('genre', 'Genre')}${th('hub', 'Hub')}${st.view === 'week' ? th('wk', 'Wk', 1) : th('year', 'Opened', 1)}${th('g', st.view === 'week' ? 'This week' : 'Gross', 1)}<th class="barcol"></th>${th('todate', 'To date', 1)}${th('budget', 'Budget', 1)}${th('reviews', 'Critics', 1)}${th('profit', 'Profit', 1)}</tr></thead><tbody>
-  ${shown.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${fl(r.f.id)}</td><td>${esc(r.f.genre)}</td><td>${esc(hubName(r.f.hub))}</td><td class="n">${st.view === 'week' ? r.wk : fmtDate(r.f.rel, true)}</td><td class="n">${fmtM(r.g)}</td><td class="barcol">${bar(r.g, max, 'data')}</td><td class="n">${fmtM(r.todate)}</td><td class="n">${fmtM(r.f.cost)}</td><td class="n">${r.f.reviews ?? '—'}</td><td class="n">${r.f.theatrical !== undefined ? money(r.f.theatrical) : '—'}</td></tr>`).join('') || '<tr><td colspan="11" class="empty">Nothing matches.</td></tr>'}
+  ${shown.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${fl(r.f.id)}${st.view === 'week' && i < 10 && r.f.cat && typeof storyTag === 'function' && storyTag(r.f) ? `<div class="muted small">${esc(storyTag(r.f))}</div>` : ''}</td><td>${esc(r.f.genre)}</td><td>${esc(hubName(r.f.hub))}</td><td class="n">${st.view === 'week' ? r.wk : fmtDate(r.f.rel, true)}</td><td class="n">${fmtM(r.g)}</td><td class="barcol">${bar(r.g, max, 'data')}</td><td class="n">${fmtM(r.todate)}</td><td class="n">${fmtM(r.f.cost)}</td><td class="n">${r.f.reviews ?? '—'}</td><td class="n">${r.f.theatrical !== undefined ? money(r.f.theatrical) : '—'}</td></tr>`).join('') || '<tr><td colspan="11" class="empty">Nothing matches.</td></tr>'}
   </tbody></table></div>${rows.length > shown.length ? `<p><button class="btn-s ghost" data-bomore="1">Show ${Math.min(500, rows.length) - shown.length} more</button></p>` : ''}`;
 }
 
