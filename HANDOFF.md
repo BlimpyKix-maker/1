@@ -74,6 +74,17 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/curric5.js` | `CURR_DEEP`: ~100 lessons rebuilt from NFTS MFA outlines, the AFI catalogue, Berklee scoring and the DGA AD trainee programme. Appended after the earlier lessons (no re-sort) so existing lesson ids stay stable |
 | `src/curric6.js` | `CURR_MODS` → `CURR[f].mods`: assessed programme projects per field `[year, name, brief, [call, [opt, stat, outcome]...]]` |
 | `src/numbers.js` | Industry by numbers (Library → 📊): `IMDB` aggregates from the IMDb non-commercial datasets (attribution line required on the page), `worldNumbers()` display-only cache, `numbersHTML`, `numClick` (`data-numdec`) |
+| `src/stories.js`, `src/story1.js`–`story6.js` | Real classic films told accurately: `ST(id, logline, tagline, stills, trailer lines)`; `storyOf`, `storyFrame` feed stills (cinema.js) and trailers (trailer2.js). 355 films (every catalogue film with q≥90); cast letters A/B/C must match the real cast order |
+| `src/awards3.js` | Every prize as a page: 25 more `STATUETTES`, trophies per body (`bodyTrophy`), lore and history (`bodyLore`), `bodyLoreHTML`, the awards cabinet (`awardsCabinetHTML`, search `abq`), laurels in hiring (`laurelFactors`) |
+| `src/careers.js` | Real career histories under in-world names (`CAREERS`, `EXEC_CAREERS`), `freshHeads()` updates studio heads (co-chairs at Daring Comics Studios etc.), `currentPost`, `careerPathHTML` |
+| `src/critics.js` | Roger That (reviews aggregator): outlets, critics, `filmReviews`, `rogerPanelHTML`, critic jobs and blogs (`writeReview`, `criticWeek`, work type `review`) |
+| `src/finance.js` | Economy and bank: rates, macro events, sectors and funds (`sTrade`, action `strade`), tips and insider fines, `bankOf`/`bankAct` (action `bank`), FATE events, `bankWeek` |
+| `src/osfold.js` | The computer is the hub: every desk tab and world screen as an app (`FOLD`), in-computer page stack (`UI.osStack`, `osCaptureGo`, back/close) |
+| `src/shop2.js` | Bazaar expansion (`bzAdd`, era-gated `from`/`to`, Collecting), monthly drops (`DROPS`, `bzDrops`, next month "in production"), relics (`RELICS`; Grand Auction, dealer, estate-sale dig; action `relic`), App Store tools and subscriptions (`M.subs`, `kitFx` folded into `homeFx`, `kitFactors` in hiring), two games, grander homes, vehicles, `FURN2` furniture drawn as icons |
+| `src/charts2.js` | Deep charts: `chartAt(field, hub, week)` for any week (this week's desk chart uses it), year-end, number ones, every artist, labels; `moreFigures` long tail (dated from the world's start year); freelance workforces as pseudo-companies `x<field>|<hub>` in staff.js; song crews, artist chart records |
+| `src/curric7.js`–`curric9.js` | ~400 more lessons appended per field (`CURR_LONG`, `CURR_MORE2`, `CURR_MORE3`); 699 in all, ≥20 per field. Loaded before curriculum.js |
+| `src/amb2.js` | ~580 more ambitions via `amb()`, new groups in `AMB_CAT`; `ambMemo`/`ambFresh` (every list walker must call `ambFresh()` first: replays depend on it) |
+| `src/boards.js` | The boardroom: stakes, seats (`M.boards`), quarterly votes (`AGENDA`, inbox kind `board`), bets, executive packages (`M.pkg`), tender offers and mergers (`M.deals`, `dealWeek`, `mergeInto`), controlled companies (`M.ctrl`, dividend policy), Boardroom app; action `board` |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -108,6 +119,9 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Producing: one pitch a week, each company says yes to you at most once a year.
 - Player company is exempt from the world's monthly overhead; pays a small weekly office cost instead.
 - Investors: you put in ≥25%; Finance roll; they take a share of returns; 4-week wait after a no.
+- Hiring has a "crowded field" penalty that standing cuts through (`applicantsFor`); headcounts are shown at real scale.
+- Burnout escalates within 26 weeks (1, 2, then 3 weeks off; `burnoutWeeks`); three missed weeks in a job risks being let go.
+- Controlled companies pay at most 35% of cash a year in dividends.
 
 ## Ideas queue (after the big notes pass)
 - `REAL_LOOKS` covers ~230 famous names; extend it for more (codes documented at the top of the file). The dead are drawn at ≤50.
