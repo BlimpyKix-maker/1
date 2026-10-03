@@ -73,7 +73,7 @@ function codexTime(topic, units, L, gain) {
 function codexWeek(L, gain) {
   const M = S.me;
   for (const j of M.jobs) { const t = FAM_TOPIC[familyOf(j)]; if (t) codexTime(t, 1, L, gain); }
-  if (M.school && schoolDays() > 0) { const t = CRAFT_TOPIC[M.school.craft]; if (t) codexTime(t, 1, L, gain); }
+  if (M.school && schoolDaysDone() > 0) { const t = CRAFT_TOPIC[M.school.craft]; if (t) codexTime(t, 1, L, gain); }
   if (M.mentor && (S.week - M.mentor.from) % 3 === 0) { const t = CRAFT_TOPIC[MAIN[P(M.mentor.id).role]]; if (t) codexTime(t, 1, L, gain); }
   for (const w of (M.works || []).filter(w => w.rel === S.week)) { const t = { song: 'music', score: 'mus', mv: 'creator', video: 'creator', blip: 'creator', podcast: 'podcast', play: 'stage', musical: 'stage' }[w.type]; if (t) codexTime(t, 2, L, gain); }
 }

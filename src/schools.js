@@ -113,7 +113,7 @@ function applySchool(a) {
   if (s[2] !== M.hub && typeof relocate === 'function') relocate(s[2], 'school');
   M.school = { prog: a.prog, craft: a.craft, done: 0, missed: 0, start: S.week, at: s[0], schol: schol ? 1 : 0 };
   milestone(`Accepted to ${s[1]}${schol ? ' on a scholarship' : ''}`, 'school');
-  inbox('news', `You're in: ${s[1]}`, `${P0.label}, ${CRAFTS[a.craft].label.toLowerCase()} track. ${schol ? 'And they\'re paying most of it: a scholarship. ' : ''}Plan ${P0.days} study days a week; four missed weeks and you're out.`, { roll: lr });
+  inbox('news', `You're in: ${s[1]}`, `${P0.label}, ${CRAFTS[a.craft].label.toLowerCase()} track. ${schol ? 'And they\'re paying most of it: a scholarship. ' : ''}Plan ${P0.days} study days a week (any day with a study block counts, and each one teaches a class); four short weeks and you're out.`, { roll: lr });
   return true;
 }
 // alumni: a famous school opens doors, and classmates become your network

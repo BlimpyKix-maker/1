@@ -103,7 +103,14 @@ const PROGRAMS = {
   mfa: { label: 'Film school (MFA)', d: 'Two years, four days a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
   union: { label: 'Union training programme', d: 'Paid on-set training for assistant directors. Hard to get into; the jobs that follow pay well.', weeks: 40, days: 4, fee: -260, grow: .04, deg: 'union', craft: 'dir', apply: ['eth', 13] }
 };
-function schoolDays() { return Math.floor(countBlocks('study') / 2); }
+function schoolDaysDone() { const M = S.me, W = M && M.wk; return W ? Object.keys(W.studyD || {}).length : (M && M.studyDone) || 0; }
+// Days at school this week: a day counts if you studied in any block of it. Days already lived count what you did;
+// days still ahead count what's planned.
+function schoolDays() {
+  const W = S.me && S.me.wk, plan = planBlocks(), done = (W && W.studyD) || {}, today = W ? W.day : 0;
+  let n = 0; for (let d = 0; d < 7; d++) if (done[d] || (d >= today && !(W && W.over) && plan[d] && plan[d].includes('study') && !(d === today && W && W.block >= 3))) n++;
+  return n;
+}
 function enrol(a) {
   const M = S.me, P0 = PROGRAMS[a.prog];
   if (!P0 || M.school || !CRAFTS[a.craft || P0.craft]) return false;
@@ -116,9 +123,9 @@ function enrol(a) {
 function schoolWeek(L, gain) {
   const M = S.me, me = ME(), sc = M.school;
   if (!sc) return 0;
-  const P0 = typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog], days = schoolDays();
+  const P0 = typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog], days = schoolDaysDone();   // the week is over: count the days you went
   for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * days);
-  if (days >= P0.days) { sc.done++; sc.missed = 0; } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} days).`); }
+  if (days >= P0.days) { sc.done++; sc.missed = 0; } else if (S.week - 1 <= sc.start) { /* the week you enrolled doesn't count against you */ } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} days).`); }
   if (P0.mates && days && prnd() < .08) { const q = youngNPC(M.hub, ppick(['director', 'writer', 'dp', 'editor', 'producer', 'actor'])); meet(q.id, 'Classmate', 8); L.push(`You get to know ${q.name}, a ${ROLE_LABEL[q.role].toLowerCase()} in your year.`); }
   if (sc.missed >= 4) { inbox('note', 'Dropped out', `You missed too many weeks of ${(sc.at ? P0.label : P0.label.toLowerCase())}. The school lets you go.`); M.school = null; return 0; }
   if (sc.done >= P0.weeks) {

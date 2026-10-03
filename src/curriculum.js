@@ -44,8 +44,14 @@ function nextClass(sc) {
   for (let y = 1; y <= yr; y++) for (let r = 0; r < fields.length; r++) { const f = fields[(r + S.week) % fields.length]; if (!CURR[f]) continue; const i = CURR[f].lessons.findIndex((L, k) => L[0] === y && !K[f + ':' + k]); if (i >= 0) return f + ':' + i; }
   return null;
 }
+// When your craft's syllabus for this year is used up, school days teach electives from every other field.
+function electiveClass(sc) {
+  const P0 = typeof schoolProg === 'function' ? schoolProg(sc) : { weeks: 90 }, yr = clamp(1 + Math.floor(sc.done / Math.max(1, P0.weeks / 3)), 1, 3), K = curMap(), F = Object.keys(CURR);
+  for (let y = 1; y <= yr; y++) for (let r = 0; r < F.length; r++) { const f = F[(r + S.week * 7) % F.length], i = CURR[f].lessons.findIndex((L, k) => L[0] === y && !K[f + ':' + k]); if (i >= 0) return f + ':' + i; }
+  return null;
+}
 function currSchoolWeek() {
-  const M = S.me, sc = M.school; if (!sc || typeof schoolDays !== 'function' || schoolDays() <= 0) return;
+  const M = S.me, sc = M.school; if (!sc || typeof schoolDaysDone !== 'function' || schoolDaysDone() <= 0) return;
   if (pending().some(x => x.kind === 'lesson')) return;
   const fields = CRAFT_FIELDS[sc.craft] || ['dir'], nM = fields.reduce((n, f) => n + (CURR[f] && CURR[f].mods ? CURR[f].mods.length : 0), 0);
   if (nM) {

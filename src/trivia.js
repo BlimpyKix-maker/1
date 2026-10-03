@@ -16,7 +16,7 @@ function triviaList(items) {
   const next = hid.length ? Math.min(...hid.map(x => x[2])) : null;
   return (fs.length ? `<h4>Trivia</h4><ul class="trivia">${fs.map(x => `<li>${factHTML(x[1])}</li>`).join('')}</ul>` : '')
     + (rs.length ? `<h4>Rumour has it</h4><ul class="trivia rumour">${rs.map(x => `<li>${factHTML(x[1])}</li>`).join('')}</ul><p class="muted small">Stories that went round at the time. Some are true, some grew in the telling.</p>` : '')
-    + (ss.length ? `<h4>The rumour mill</h4><ul class="trivia silly">${ss.map(x => `<li>${esc(x[1])}</li>`).join('')}</ul><p class="muted small">Almost certainly nonsense. Told here for fun.</p>` : '')
+    + (ss.length ? `<h4>The rumour mill</h4><ul class="trivia silly">${ss.map(x => `<li>${esc(x[1])}</li>`).join('')}</ul><p class="muted small">Almost certainly nonsense.</p>` : '')
     + (hid.length ? `<p class="locked">🔒 ${hid.length} more note${hid.length > 1 ? 's' : ''} you haven't picked up on yet. A Taste of ${next} would catch the next one${S.me ? ` (yours is ${Math.floor(tas)})` : ''}. Watch films, read scripts and go to screenings to sharpen it.</p>` : '');
 }
 function nm(id) { return id !== null && id !== undefined && P(id) ? P(id).name : 'the lead'; }
@@ -39,6 +39,7 @@ function filmTrivia(f) {
     if (!f.real) out.push(['r', fill(RUMOURS_FILM[Math.floor(r() * RUMOURS_FILM.length)]), 13]);
     if (!f.real && r() < .5) out.push(['r', fill(RUMOURS_FILM[Math.floor(r() * RUMOURS_FILM.length)]), 16]);
   }
+  if (typeof extraFilmTrivia === 'function') out.push(...extraFilmTrivia(f));
   return out.filter((x, i, a) => a.findIndex(y => y[1] === x[1]) === i);
 }
 function personTrivia(p) {
@@ -60,21 +61,22 @@ function personTrivia(p) {
   if (p.traits && p.traits.length) out.push(['f', `Reputation in the business: ${p.traits.join(', ').toLowerCase()}.`, 4]);
   if (p.standing > 20 && !p.catId) out.push(['r', RUMOURS_PERSON[Math.floor(r() * RUMOURS_PERSON.length)], 14]);
   for (let k = 0; k < 2; k++) out.push(['s', SILLY_PERSON[Math.floor(r() * SILLY_PERSON.length)], 0]);
-  return out;
+  if (typeof extraPersonTrivia === 'function') out.push(...extraPersonTrivia(p));
+  return out.filter((x, i, a) => a.findIndex(y => y[1] === x[1]) === i);
 }
 // Facts from the production itself: how long, how big, firsts, the people behind it.
 function productionFacts(f) {
   const r = hashRand(f.id * 4217 + 11), out = [], y = f.rel !== null ? yearOf(f.rel) : S.year, hub = hubName(f.hub);
   const rt = Math.round(({ Comedy: 95, Horror: 92, Animation: 88, Action: 118, War: 135, Period: 128, Musical: 122, Fantasy: 130, 'Sci-fi': 120, Documentary: 96 }[f.genre] || 108) + (r() - .4) * 30);
   out.push(['f', `Runs ${rt} minutes.`, 0]);
-  if (f.dur) out.push(['f', `Shot over ${f.dur[2]} week${f.dur[2] > 1 ? 's' : ''} in and around ${hub}, after ${f.dur[1]} weeks of preparation.`, 2]);
+  if (f.dur && f.dur[2] > 0) out.push(['f', `Shot over ${f.dur[2]} week${f.dur[2] > 1 ? 's' : ''} in and around ${hub}${f.dur[1] > 0 ? `, after ${f.dur[1]} week${f.dur[1] > 1 ? 's' : ''} of preparation` : ''}.`, 2]);
   out.push(['f', y < 1953 ? 'Shot in black and white, in the old square frame.' : y < 1968 && r() < .5 ? 'Shot in black and white, a deliberate choice by then.' : y < 2005 ? `Shot on 35mm film${r() < .4 ? ' in widescreen' : ''}.` : r() < .2 ? 'Shot on 35mm film, unusually for its time.' : 'Shot digitally.', 3]);
   if (['Action', 'War', 'Period', 'Musical', 'Fantasy', 'Martial arts'].includes(f.genre)) out.push(['f', `Its biggest scene used ${50 + Math.floor(r() * 900)} extras.`, 5]);
   const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
   if (lead && d && !d.credits.some(i => i !== f.id && keyIds(S.films[i]).includes(lead.id) && S.films[i].rel !== null && (f.rel === null || S.films[i].rel < f.rel))) out.push(['f', `The first time ${d.name} and ${lead.name} worked together.`, 6]);
   if (f.crew && f.crew.mus !== undefined) out.push(['f', `${P(f.crew.mus).name} wrote the score in ${2 + Math.floor(r() * 9)} weeks.`, 7]);
   if (f.crew && f.crew.pd !== undefined) out.push(['f', `${P(f.crew.pd).name}'s team built ${2 + Math.floor(r() * 30)} sets.`, 8]);
-  if (lead) out.push(['f', `${lead.name} needed ${1 + Math.floor(r() * 25)} takes to get the final scene.`, 9]);
+  if (lead) { const tk = 1 + Math.floor(r() * 25); out.push(['f', tk === 1 ? `${lead.name} got the final scene in a single take.` : `${lead.name} needed ${tk} takes to get the final scene.`, 9]); }
   if (f.awards && f.awards.length) out.push(['f', `It won ${f.awards.length} award${f.awards.length > 1 ? 's' : ''}, among them ${f.awards[0].replace(/ \d{4}$/, '')}.`, 2]);
   if (f.rel !== null) { const rivals = S.films.filter(g => g.rel !== null && g.genre === f.genre && g.m === f.m && yearOf(g.rel) === y); if (rivals.length > 2 && rivals.every(g => g.total <= f.total)) out.push(['f', `The biggest ${f.genre.toLowerCase()} of ${y} in ${MARKETS[f.m].name}.`, 4]); }
   const sr = hashRand(f.id * 389 + 17), fill = t => t.replace('{lead}', lead ? lead.name : 'The lead').replace('{dir}', d ? d.name : 'The director').replace('{title}', f.title);

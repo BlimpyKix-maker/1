@@ -147,7 +147,14 @@ function runBlock(k) {
     case 'catchup': catchupDay(W.L); break;
     case 'write': writeSession(L, .5); break;
     case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
-    case 'study': W.studied++; if (M.school) { for (const s in CRAFTS[M.school.craft].subs) weekGain(s, schoolProg(M.school).grow / 2); L.push(pickLine(CLASS_LINES, W.day + 3)); } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
+    case 'study': W.studied++; if (M.school) {
+        for (const s in CRAFTS[M.school.craft].subs) weekGain(s, schoolProg(M.school).grow / 2);
+        const first = !(W.studyD = W.studyD || {})[W.day]; W.studyD[W.day] = 1;
+        // every day at school teaches something: the next class on the syllabus goes into your Craft Library
+        const id = first && typeof nextClass === 'function' ? nextClass(M.school) || electiveClass(M.school) : null, X = id && lesson(id);
+        if (X) { learn(id, 'class', 'B'); const k = X.L[4] && X.L[4][1] && X.L[4][1][1]; if (k && (k in ME().sk || k in ME().mind)) weekGain(k, .05); L.push(`Class: ${X.L[1]} (${X.C.label.toLowerCase()}). ${X.L[3].split('. ')[0]}.`); }
+        else L.push(pickLine(CLASS_LINES, W.day + 3));
+      } else L.push('You meant to study, but you aren\'t enrolled anywhere.'); break;
     case 'hustle': W.cashIn += usd(Math.round(75 * worldFx().hustle)); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
     case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
     case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
@@ -229,7 +236,8 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
-  if (M.school) { cal[0][0] = 'study'; cal[2][0] = 'study'; if ((schoolProg(M.school) || {}).days > 2) cal[4][0] = 'study'; }
+  // as many study days as the programme asks for, spread through the week (a day with any study block counts)
+  if (M.school) { const n = clamp((schoolProg(M.school) || {}).days || 2, 1, 5), order = [0, 2, 4, 1, 3]; for (let i = 0; i < n; i++) cal[order[i]][0] = 'study'; }
   return cal;
 }
 function setFocus(a) {

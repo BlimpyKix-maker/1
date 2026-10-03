@@ -92,6 +92,7 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('charts2', '// ================= Apple Box — World Core UI ================='),
                      ('amb2', '// ================= Apple Box — World Core UI ================='),
                      ('boards', '// ================= Apple Box — World Core UI ================='),
+                     ('trivia2', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'
