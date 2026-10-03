@@ -11,8 +11,23 @@ let STORYC = {};
 function storyOf(f) {
   if (!f || !f.cat || !STORY[f.cat.id]) return null;
   const k = f.cat.id; if (STORYC[k]) return STORYC[k];
-  const raw = STORY[k], frames = raw.f.split('|').map(x => { const [set, tod, who, ...cap] = x.split('/'); return { set: SC_DRAW[set] ? set : 'street', tod: TOD_K[tod] ?? 0, who: who || '', cap: cap.join('/').trim() }; });
-  return STORYC[k] = { l: raw.l, t: raw.t, frames, lines: (raw.s || '').split('|').map(s => s.trim()).filter(Boolean) };
+  const raw = STORY[k], sc = storyScrubber(f), frames = raw.f.split('|').map(x => { const [set, tod, who, ...cap] = x.split('/'); return { set: SC_DRAW[set] ? set : 'street', tod: TOD_K[tod] ?? 0, who: who || '', cap: sc(cap.join('/').trim()) }; });
+  return STORYC[k] = { l: sc(raw.l), t: sc(raw.t, 1), frames, lines: (raw.s || '').split('|').map(s => sc(s.trim(), 1)).filter(Boolean) };
+}
+// The stories are written with the real titles and names; the world uses its own. Swap the real title for the
+// film's in-game title and real cast/director names for their in-game names. A one-word title is only swapped when
+// it is the whole line, so 'a hospital room' stays a room.
+function storyScrubber(f) {
+  const c = f.cat, src = (S.cat && S.cat.src && S.cat.src.people) || {}, esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), subs = [];
+  const real = (c.real || '').replace(/^['"]|['"]$/g, '');
+  if (real && real !== f.title) subs.push(real.includes(' ') ? [new RegExp('\\b' + esc(real) + '(?![\\w])', 'gi'), f.title] : [new RegExp('^' + esc(real) + '([.!?]*)$', 'i'), f.title + '$1']);
+  for (const key of [...(c.cast || []), ...[].concat(c.dir || [])]) {
+    const p = src[key]; if (!p || !p.real || !p.n || p.real === p.n) continue;
+    subs.push([new RegExp('\\b' + esc(p.real) + '\\b', 'g'), p.n]);
+    const a = p.real.split(' ').pop(), b = p.n.split(' ').pop();
+    if (a.length > 3 && a !== b) subs.push([new RegExp('\\b' + esc(a) + '\\b', 'g'), b]);
+  }
+  return (s, line) => { if (!s) return s; for (const [re, to] of subs) if (line || re.global) s = s.replace(re, to); return s; };
 }
 // A frame for still i, or null to use the genre frames.
 function storyFrame(f, i) {
