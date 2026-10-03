@@ -563,6 +563,7 @@ function hireFactors(post) {
   if (typeof starFactors === 'function') F.push(...starFactors(post));
   if (typeof codexFactors === 'function') F.push(...codexFactors(post));
   if (typeof repFactors === 'function') F.push(...repFactors(post));
+  if (typeof laurelFactors === 'function') F.push(...laurelFactors());
   if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;

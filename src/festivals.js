@@ -138,6 +138,7 @@ function trophyKind(name) {
   if (/Emmet/.test(name)) return ['emmet', 'gold'];
   if (/Golden Mic/.test(name)) return ['mic', 'gold'];
   for (const F of FESTIVALS) { const p = (F.prizes || []).find(([n]) => name.includes(n)); if (p && (name.includes(F.name.replace(/^the /, '')) || name.includes(F.prize))) return [p[1], /Silver/.test(p[0]) ? 'silver' : 'gold']; }
+  if (typeof bodyTrophy === 'function') { const b = awardBodies().find(x => [x.key, ...(x.alias || [])].some(k => name.startsWith(k) || name.includes(', ' + k))); if (b) return bodyTrophy(b); }
   if (/Film Awards|Awards|Prize/.test(name)) return ['star', 'gold'];
   return ['plaque', 'bronze'];
 }

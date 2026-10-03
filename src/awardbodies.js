@@ -81,7 +81,7 @@ function viewAwardBody(id) {
   const kindL = { ceremony: 'National film awards', festival: 'Film festival', music: 'Music awards', stage: 'Theatre awards', media: 'Screen and audio awards', contest: 'Competition' }[b.kind];
   const seeks = b.seeks || BODY_SEEKS[b.kind] || BODY_SEEKS.contest;
   const egof = EGOF.find(e => e[2] === b.key);
-  return `<div class="head"><p class="eyebrow">${esc(kindL)}${b.founded ? ' · since ' + b.founded : ''} · ${MON_[b.month]}</p><h2>${esc(b.name)}</h2><p class="lede">${esc(b.about || '')}</p></div>
+  return `<div class="head"><p class="eyebrow">${esc(kindL)}${b.founded ? ' · since ' + b.founded : ''} · ${MON_[b.month]}</p><h2>${esc(b.name)}</h2><p class="lede">${esc(b.about || '')}</p></div>${typeof bodyLoreHTML === 'function' ? bodyLoreHTML(b) : ''}
    <div class="cols two"><section class="panel"><h3>What it stands for</h3><p>${esc(seeks)}</p>${b.bar ? `<p class="small">Selection bar: films need to be about <b>${b.bar}/100</b> in quality. Small, independent films get a nudge. Entry fee ${fmtCash(usdW(b.fee))}.</p>` : ''}${b.prize ? `<p class="small">Prize: <b>${fmtCash(usdW(b.prize))}</b> · entry ${fmtCash(usdW(b.fee))} · enter from the Contests tab.</p>` : ''}${egof ? `<p class="small">One of the four EGOF prizes: the <b>${egof[1]}</b>.</p>` : ''}
     <h4>Categories</h4><p>${(typeof bodyCats === 'function' ? bodyCats(b) : b.cats).map(c => `<button class="pill" data-abcat="${esc(c)}">${esc(c)}</button>`).join(' ')}</p><p class="muted small">Prestige ${'★'.repeat(4 - b.prestige)}</p></section>
    ${b.fk && typeof festivalPage === 'function' ? '</div>' + festivalPage(FESTIVALS.find(F => F.k === b.fk)) + '<div>' : (typeof awardTableHTML === 'function' ? awardTableHTML(b) : '')}</div>`;
