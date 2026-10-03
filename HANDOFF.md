@@ -74,7 +74,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/curric5.js` | `CURR_DEEP`: ~100 lessons rebuilt from NFTS MFA outlines, the AFI catalogue, Berklee scoring and the DGA AD trainee programme. Appended after the earlier lessons (no re-sort) so existing lesson ids stay stable |
 | `src/curric6.js` | `CURR_MODS` → `CURR[f].mods`: assessed programme projects per field `[year, name, brief, [call, [opt, stat, outcome]...]]` |
 | `src/numbers.js` | Industry by numbers (Library → 📊): `IMDB` aggregates from the IMDb non-commercial datasets (attribution line required on the page), `worldNumbers()` display-only cache, `numbersHTML`, `numClick` (`data-numdec`) |
-| `src/stories.js`, `src/story1.js`–`story6.js` | Real classic films told accurately: `ST(id, logline, tagline, stills, trailer lines)`; `storyOf`, `storyFrame` feed stills (cinema.js) and trailers (trailer2.js). 355 films (every catalogue film with q≥90); cast letters A/B/C must match the real cast order |
+| `src/stories.js`, `src/story1.js`–`story7.js` | Real classic films told accurately: `ST(id, logline, tagline, stills, trailer lines)`; `storyOf`, `storyFrame` feed stills (cinema.js) and trailers (trailer2.js). 444 films (every catalogue film with q≥90, plus the first 88 of the q85–89 tier; ~417 of those remain); cast letters A/B/C must match the real cast order |
 | `src/awards3.js` | Every prize as a page: 25 more `STATUETTES`, trophies per body (`bodyTrophy`), lore and history (`bodyLore`), `bodyLoreHTML`, the awards cabinet (`awardsCabinetHTML`, search `abq`), laurels in hiring (`laurelFactors`) |
 | `src/careers.js` | Real career histories under in-world names (`CAREERS`, `EXEC_CAREERS`), `freshHeads()` updates studio heads (co-chairs at Daring Comics Studios etc.), `currentPost`, `careerPathHTML` |
 | `src/critics.js` | Roger That (reviews aggregator): outlets, critics, `filmReviews`, `rogerPanelHTML`, critic jobs and blogs (`writeReview`, `criticWeek`, work type `review`) |
@@ -85,6 +85,10 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/curric7.js`–`curric9.js` | ~400 more lessons appended per field (`CURR_LONG`, `CURR_MORE2`, `CURR_MORE3`); 699 in all, ≥20 per field. Loaded before curriculum.js |
 | `src/amb2.js` | ~580 more ambitions via `amb()`, new groups in `AMB_CAT`; `ambMemo`/`ambFresh` (every list walker must call `ambFresh()` first: replays depend on it) |
 | `src/boards.js` | The boardroom: stakes, seats (`M.boards`), quarterly votes (`AGENDA`, inbox kind `board`), bets, executive packages (`M.pkg`), tender offers and mergers (`M.deals`, `dealWeek`, `mergeInto`), controlled companies (`M.ctrl`, dividend policy), Boardroom app; action `board` |
+| `src/trivia2.js` | Extra rumour/silly lines plus `GENRE_NOTES`, `eraNote`, `JOB_NOTES` (made-up films/people only); hooks `extraFilmTrivia`, `extraPersonTrivia` in trivia.js |
+| `src/shorts.js` | Short films: work type `short`, platform `circuit`, `SHORT_FESTS`; `shortRelease`/`shortWeek`/`shortPick`, `thesisShort(sc)` at mfa/ba graduation; world shorts by future directors (`shortsOf`, `shortsBy`); pages `short`, `shortfest`; Shorts app |
+| `src/tv.js` | Television: `TV_NETS_RAW`, `TV_LEGENDS`, `tvAll()` (cached per year), Emmets (`tvEmmets`, September); pages `tvshow`, `tvnet`; Tele-Guide app; player pitches (`tvAct`, action `tv`), `tvWeek` (pilot → order → May renewals), `tv_*` jobs (`tv:1`, excluded from odd jobs) |
+| School attendance | `W.studyD[day]` marks days with any study block; `closeWeek` copies to `M.studyDone` before clearing `M.wk`; `schoolDaysDone()` reads either. Each study day auto-learns the next class (`nextClass`/`electiveClass`) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
