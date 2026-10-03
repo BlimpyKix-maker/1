@@ -61,6 +61,8 @@ function viewExtra(cur) {
   if (cur.kind === 'mco') return viewMediaCo(cur.id);
   if (cur.kind === 'chart' && typeof chartPage === 'function') return chartPage(cur.id);
   if (cur.kind === 'short' && typeof viewShort === 'function') return viewShort(cur.id);
+  if (cur.kind === 'tvshow' && typeof viewTvShow === 'function') return viewTvShow(cur.id);
+  if (cur.kind === 'tvnet' && typeof viewTvNet === 'function') return viewTvNet(cur.id);
   if (cur.kind === 'shortfest' && typeof viewShortFest === 'function') return viewShortFest(cur.id);
   if (cur.kind === 'work') return viewWork(cur.id);
   if (cur.kind === 'emp' && typeof viewEmployee === 'function') return viewEmployee(cur.id);

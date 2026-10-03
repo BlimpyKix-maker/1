@@ -515,7 +515,7 @@ function refreshBoard() {
   const heard = 3 + careerLevel() * 2 + Math.floor(Object.keys(M.known).length / 8) + (M.agent ? 2 : 0) + (M.school ? 1 : 0);
   const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(30, heard + 8) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
   const m = dateOf(S.week).getUTCMonth();
-  const odd = ODD_JOBS.filter(t => !t.cat && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
+  const odd = ODD_JOBS.filter(t => !t.cat && !t.tv && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   if (typeof nameBoard === 'function') nameBoard();
@@ -687,6 +687,7 @@ function closeWeek(a) {
   if (typeof shopWeek === 'function') shopWeek();
   if (typeof boardWeek === 'function') boardWeek();
   if (typeof shortWeek === 'function') shortWeek();
+  if (typeof tvWeek === 'function') tvWeek();
   if (typeof achWeek === 'function') achWeek();
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
@@ -1061,6 +1062,7 @@ function applyAct(a) {
     case 'bazaar': return typeof bazaarAct === 'function' && bazaarAct(a);
     case 'relic': return typeof relicAct === 'function' && relicAct(a);
     case 'board': return typeof boardAct === 'function' && boardAct(a);
+    case 'tv': return typeof tvAct === 'function' && tvAct(a);
     case 'email': return typeof emailAct === 'function' && emailAct(a);
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);

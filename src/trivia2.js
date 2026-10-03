@@ -215,6 +215,7 @@ function extraFilmTrivia(f) {
 function extraPersonTrivia(p) {
   const r = hashRand(p.id * 2741 + 31), out = [], J = JOB_NOTES[p.role];
   if (J && !p.catId) out.push(['f', J[Math.floor(r() * J.length)], 9]);
+  if (typeof tvCreditsOf === 'function') { const T = tvCreditsOf(p.id).map(([id, role]) => [tvShow(id), role]).filter(x => x[0]).sort((a, b) => (b[0].legend ? 1 : 0) - (a[0].legend ? 1 : 0) || b[0].seasons - a[0].seasons).slice(0, 3); for (const [s, role] of T) out.push(['f', `On television: ${s.title} (${TV_NETS[s.net].name}, ${s.y}${s.seasons > 1 ? '–' + Math.min(S.year, s.y + s.seasons - 1) : ''}), as ${role}.`, 2]); }
   if (p.role === 'director' && typeof shortsBy === 'function') for (const s of shortsBy(p.id).slice(0, 2)) out.push(['f', `Before features: ${s.title}, a short that ${s.won ? 'won the ' + SHORT_FEST[s.fk].prize + ' at' : 'played'} ${SHORT_FEST[s.fk].name} in ${s.y}.`, 3]);
   if (!p.catId && p.standing > 10 && r() < .6) out.push(['r', RUMOURS_PERSON[Math.floor(r() * RUMOURS_PERSON.length)], 17]);
   return out;
