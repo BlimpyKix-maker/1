@@ -370,6 +370,8 @@ h4 { font: 600 14px/1.2 var(--f-display); letter-spacing: .08em; text-transform:
 .count { font: 12px/1 var(--f-data); color: var(--muted); margin: 0 0 8px; }
 .empty { color: var(--muted); padding: 18px 8px; }
 
+.rung .rmore { display: grid; gap: 2px; } .rung .rmore summary { cursor: pointer; list-style: none; } .rung .rmore summary::-webkit-details-marker { display: none; } .rung .rmore[open] summary { display: none; }
+.fbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 10px; align-items: end; margin-bottom: 12px; } .fbar label { display: grid; gap: 3px; min-width: 0; } .fbar label > span { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); } .fbar select, .fbar input { width: 100%; box-sizing: border-box; background: var(--panel); color: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font: inherit; } .fbar .fbar-q { grid-column: span 2; } @media (max-width: 520px) { .fbar .fbar-q { grid-column: 1 / -1; } }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
 .filters select, .filters input { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; min-width: 0; max-width: 100%; }
 .filters input[type=search] { width: 240px; }
@@ -810,7 +812,7 @@ tr.blocked td { opacity: .55; }
   <button data-tab="you" class="on">Your career</button>
   <button data-tab="news">Trade press</button>
   <button data-tab="bo">Box office</button>
-  <button data-tab="films" title="The Global Entertainment Archive: films and people">GEA</button>
+  <button data-tab="films" title="The Recorded Entertainment Encyclopedia &amp; Library: films and people">REEL</button>
   <button data-tab="cos">Companies</button>
   <button data-tab="awards">Awards</button>
   <button data-tab="careers">Careers</button>
@@ -8422,7 +8424,7 @@ function gcraft(p, c, genre) {
 }
 
 function femaleShare(role, y) {
-  if (role === 'actor') return .5;
+  if (role === 'actor') return .4;   // women hold about 35% of principal acting credits (IMDb title.principals), steady for a century
   if (role === 'editor') return era([.3, .38, .45], y);
   if (role === 'costume') return era([.55, .65, .72], y);
   if (role === 'makeup') return era([.25, .45, .6], y);
@@ -9904,10 +9906,10 @@ function archiveFilm(hub, Y, relW, ros, cos) {
   };
   const dir = best('director', p => p.standing * .5 + p.c.dir * 2.5 + (co ? (co.favors[p.id] || 0) * 6 : 0) + rnd() * 20);
   const D = P(dir);
-  const wri = D.c.wri >= 11 && rnd() < .35 ? [dir] : [best('writer', p => p.c.wri * 2.5 + tie(D, p) * .4 + rnd() * 20)];
+  const wri = D.c.wri >= 9 && rnd() < .5 ? [dir] : [best('writer', p => p.c.wri * 2.5 + tie(D, p) * .4 + rnd() * 20)];
   // Writing teams are common: about a third of features credit two or more writers (IMDb title.crew).
   if (rnd() < .3) wri.push(best('writer', p => p.c.wri * 2 + tie(P(wri[0]), p) * .5 + rnd() * 20));
-  else if (wri[0] !== dir && D.c.wri >= 8 && rnd() < .25) wri.push(dir);
+  else if (wri[0] !== dir && D.c.wri >= 7 && rnd() < .35) wri.push(dir);
   const cast = [0, 1, 2].map(i => best('actor', p => p.fame * (tier === 1 ? .6 : .3) + p.c.act * 2 + tie(D, p) * .3 + rnd() * 20));
   const dp = best('dp', p => p.c.cam * 2.5 + tie(D, p) * .6 + rnd() * 20);
   const ed = best('editor', p => p.c.edt * 2.5 + tie(D, p) * .6 + rnd() * 20);
@@ -10019,11 +10021,11 @@ function greenlight(hub, o = {}) {
   const D = P(dir);
   let wri;
   if (o.wri) wri = o.wri;
-  else if (D.c.wri >= 11 && rnd() < (has(D, 'Auteur') ? .8 : .3)) wri = [dir];
+  else if (D.c.wri >= 9 && rnd() < (has(D, 'Auteur') ? .85 : .45)) wri = [dir];
   else {
     wri = [pickPerson(hub, 'writer', p => p.standing * .4 + gcraft(p, 'wri', genre) * 2.5 + tie(D, p) * .4 + rnd() * 25 + tierAdj(p, tier), ex, false)];
     if (rnd() < .3) { ex.add(wri[0]); wri.push(pickPerson(hub, 'writer', p => gcraft(p, 'wri', genre) * 2 + tie(P(wri[0]), p) * .5 + rnd() * 25, ex, false)); }
-    else if (D.c.wri >= 8 && rnd() < .25) wri.push(dir);   // the director takes a co-writing credit
+    else if (D.c.wri >= 7 && rnd() < .35) wri.push(dir);   // the director takes a co-writing credit
   }
   wri.forEach(i => ex.add(i));
   const cast = [];
@@ -11041,6 +11043,8 @@ function hireFactors(post) {
   if (M.quirk === 'viral') F.push(['Internet fame', t.actor ? .4 : -.15]);
   if (M.degrees.length && post.tier >= 2) F.push(['Your degree', M.degrees.includes('mfa') ? .4 : .25]);
   F.push(['Competition', -post.comp]);
+  // Hundreds apply for every real post; the better jobs draw a deeper pool. Standing and contacts cut through it.
+  F.push([`A crowded field (~${applicantsFor(post).toLocaleString()} applicants)`, -(.22 + .16 * Math.min(post.tier, 4)) * (1 - Math.min(.6, Math.max(0, me.standing) / 60))]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof fieldFactors === 'function') F.push(...fieldFactors(post));
   if (typeof almaFactors === 'function') F.push(...almaFactors(post));
@@ -11051,6 +11055,8 @@ function hireFactors(post) {
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;
 }
+// How many people apply for a post: scaled from the real workforce (more for the better and the public-facing jobs).
+function applicantsFor(post) { const h = hashRand(post.id * 977 + 13)(), t = tmplOf(post); return Math.round([60, 140, 320, 650, 1200, 2400][Math.min(5, post.tier)] * (t.actor ? 3 : 1) * (.6 + h * .9) * (typeof workforceScale === 'function' ? Math.sqrt(workforceScale()) : 1)); }
 function hireOdds(post) { return clamp(logistic(hireFactors(post).reduce((s, f) => s + f[1], 0)), .02, .96); }
 
 // ---------------- The week ----------------
@@ -14324,7 +14330,7 @@ function settleDistribution(c) {
 }
 // </life-deals>
 // <gea>
-// ---------------- GEA: the Global Entertainment Archive ----------------
+// ---------------- REEL (was GEA): the Recorded Entertainment Encyclopedia & Library ----------------
 // The world's film database. Every film gets a logline, a poster, set stills and a trailer card; every person a
 // short bio. All of it is drawn from the simulation and a hash of the film or person, so it costs nothing until you
 // look and never touches the world's random numbers. Full credits go deeper than the people the simulation casts:
@@ -14346,6 +14352,7 @@ const LOG_WANT = { family: 'must bring a scattered family back together', power:
 const LOG_WHERE = { Western: 'on the frontier', 'Sci-fi': 'on a station at the edge of known space', Fantasy: 'in a kingdom running out of magic', War: 'behind enemy lines', Period: 'in a society that forbids it', Horror: 'in a house that wants them to stay', Musical: 'on the biggest stage in town', 'Martial arts': 'in a city ruled by rival schools', Superhero: 'in a city that needs a hero and doesn\'t want one', Animation: 'in a world just beyond the garden fence', Documentary: '' };
 const LOG_TWIST = ['but the past won\'t stay buried', 'before time runs out', 'whatever it costs them', 'with nothing but each other', 'and the whole town is watching', 'while someone close is lying to them', ''];
 function filmLogline(f) {
+  if (typeof storyLog === 'function' && storyLog(f)) return storyLog(f);
   const M = S.me;
   const own = M && ((M.scripts || []).find(x => x.made === f.id) || (M.holdings || []).find(x => x.made === f.id));
   if (own && own.logline) return own.logline;
@@ -14355,7 +14362,7 @@ function filmLogline(f) {
   const t = `${pick(LOG_WHO)} ${LOG_WANT[th] || LOG_WANT.family}${where ? ' ' + where : ''}${(() => { const x = pick(LOG_TWIST); return x ? ', ' + x : ''; })()}.`;
   return t[0].toUpperCase() + t.slice(1);
 }
-function filmTagline(f) { const r = hashRand(f.id * 131 + 7); const L = TAGLINES[f.genre] || TAGLINES.Drama; return L[Math.floor(r() * L.length)]; }
+function filmTagline(f) { if (typeof storyTag === 'function' && storyTag(f)) return storyTag(f); const r = hashRand(f.id * 131 + 7); const L = TAGLINES[f.genre] || TAGLINES.Drama; return L[Math.floor(r() * L.length)]; }
 // ---- the poster ----
 function posterMotif(g, c, r) {
   const [d, a, l] = c, x = 100, y = 120;
@@ -14440,7 +14447,7 @@ function personBio(p) {
   return t;
 }
 // The archive's masthead: switch between films and people.
-function geaHead(cur) { return `<div class="geahead"><span class="gealogo">GEA</span><span class="muted">The Global Entertainment Archive</span><span class="seg"><button class="pill${cur === 'films' ? ' on' : ''}" data-gea="films">Films</button><button class="pill${cur === 'people' ? ' on' : ''}" data-gea="people">People</button></span></div>`; }
+function geaHead(cur) { return `<div class="geahead"><span class="gealogo">REEL</span><span class="muted">The Recorded Entertainment Encyclopedia &amp; Library</span><span class="seg"><button class="pill${cur === 'films' ? ' on' : ''}" data-gea="films">Films</button><button class="pill${cur === 'people' ? ' on' : ''}" data-gea="people">People</button></span></div>`; }
 // ---- what the critics said: three or four notices, in the key of the film's actual reviews ----
 const CRITIC_LINES = {
   rave: ['{dir} has made something close to perfect.', 'The best thing {lead} has ever done, and it isn\'t close.', 'I walked out into the street and the world looked different.', 'A {g} that will be studied for years.', 'Every frame earns its place.', 'Funny, furious and finally devastating.'],
@@ -14663,7 +14670,7 @@ function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar ho
 // A desktop with apps: mail, a crew job site, the trades, the archive, your bank, a social feed, notes and a game
 // for when you should be writing. Most open a window onto the game; a few are just for fiddling with.
 const APPS = [
-  ['mail', '✉️', 'Mail'], ['jobs', '💼', 'CrewList'], ['trades', '📰', 'The Daily Slate'], ['gea', '🎞️', 'GEA'], ['bank', '🏦', 'Bank'],
+  ['mail', '✉️', 'Mail'], ['jobs', '💼', 'CrewList'], ['trades', '📰', 'The Daily Slate'], ['gea', '🎞️', 'REEL'], ['bank', '🏦', 'Bank'],
   ['flick', '📸', 'Flick'], ['notes', '📝', 'Notes'], ['sweep', '🎬', 'Clapper Sweep'], ['weather', '⛅', 'Weather'], ['write', '✍️', 'Scriptwriter']
 ];
 // Flick: what your contacts post. Same posts every week for the same people (hash), plus their real life events.
@@ -14696,7 +14703,7 @@ function appWindow(k) {
     case 'mail': return mailApp();
     case 'jobs': { const q = (UI.cq || '').toLowerCase(); const L = M.board.filter(p => !q || p.t.toLowerCase().includes(q) || (p.away && hubName(p.away).toLowerCase().includes(q))); return `<p><input id="cq" type="search" placeholder="Search jobs, cities…" value="${esc(UI.cq || '')}"> <span class="muted small">${L.length} listings · apply from the board</span> <button class="linkish" data-dtab="work">Open the board ›</button></p><ul class="plain">${L.slice(0, 20).map(p => `<li><b>${esc(p.t)}</b> <span class="muted">${p.film !== null ? esc(S.films[p.film].title) + ' · ' : ''}${p.away ? esc(hubName(p.away)) + ' · ' : ''}${p.rate ? fmtCash(p.rate) + '/day' : 'unpaid'} · ${oddsBand(hireOdds(p))}</span></li>`).join('')}</ul>`; }
     case 'trades': { const L = []; for (let i = S.news.length - 1; i >= 0 && L.length < 14; i--) L.push(i); return `<p class="eyebrow">The Daily Slate · ${fmtDate(S.week, true)}</p><ul class="plain">${L.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`; }
-    case 'gea': { const tabsG = `<p class="bf-row"><span class="gealogo">GEA</span> <button class="pill${UI.geatab !== 'star' ? ' on' : ''}" data-geatab="search">Search</button><button class="pill${UI.geatab === 'star' ? ' on' : ''}" data-geatab="star">⭐ Starmeter</button></p>`; if (UI.geatab === 'star' && typeof starmeterHTML === 'function') return tabsG + starmeterHTML(); const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return tabsG + `<p><input id="gq" type="search" placeholder="Search everything: films, people, companies, artists, songs, prizes, lessons…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}${typeof worldSearchHTML === 'function' ? worldSearchHTML(q) : ''}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
+    case 'gea': { const tabsG = `<p class="bf-row"><span class="gealogo">REEL</span> <button class="pill${UI.geatab !== 'star' ? ' on' : ''}" data-geatab="search">Search</button><button class="pill${UI.geatab === 'star' ? ' on' : ''}" data-geatab="star">⭐ Buzz Index</button></p>`; if (UI.geatab === 'star' && typeof starmeterHTML === 'function') return tabsG + starmeterHTML(); const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return tabsG + `<p><input id="gq" type="search" placeholder="Search everything: films, people, companies, artists, songs, prizes, lessons…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}${typeof worldSearchHTML === 'function' ? worldSearchHTML(q) : ''}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
     case 'bank': { const life = ORIGIN.life[M.life], c = typeof myCo === 'function' ? myCo() : null; const money = M.diary.filter(d => /^Money:/.test(d.t)).slice(-6).reverse(); return `<div class="kpis mini"><div><span>Balance</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b></div><div><span>Rent</span><b>${fmtCash(usd(life.rent))}/wk</b></div><div><span>Owed</span><b>${fmtCash(M.debt + (M.shark || 0))}</b></div>${c ? `<div><span>${esc(c.name)}</span><b>${fmtCash(Math.round(c.cash * 1e6))}</b></div>` : ''}</div><h4>Recent weeks</h4><ul class="plain">${money.map(d => `<li><time>${fmtDate(d.w, true)}</time> ${esc(d.t.replace(/^Money: /, ''))}</li>`).join('') || '<li class="muted">Nothing yet.</li>'}</ul>`; }
     case 'flick': { const L = flickFeed(); return `<div class="flick">${L.map(x => `<div class="post">${phoneAvatar(x.who, 34)}<div><b>${pl(x.who)}</b> <span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w' : 'this week'}</span><p>${esc(x.t)}</p>${(M.liked || {})[x.id] ? '<span class="muted small">♥ Liked</span>' : `<button class="linkish" data-like="${x.id}|${x.who}">♡ Like</button>`}</div></div>`).join('') || '<p class="muted">Nobody you know has posted anything. Meet more people.</p>'}</div>`; }
     case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
@@ -17023,6 +17030,7 @@ const SC_DRAW = {
 const GRADES = { Horror: ['#2E6B5E', .14], Western: ['#C88A3A', .14], 'Sci-fi': ['#3AA0C8', .1], Crime: ['#2E3A55', .14], Thriller: ['#2E4A55', .1], War: ['#6B6A3A', .16], Romance: ['#E8857A', .1], Fantasy: ['#7A5AA6', .08], Musical: ['#E85A9A', .06], Superhero: ['#3A5AC8', .06], Period: ['#A8865F', .12] };
 // Which frame this is: setting, time, who is in it, what they're doing. The caption says it in words.
 function frameOf(f, i) {
+  const SF = typeof storyFrame === 'function' ? storyFrame(f, i) : null; if (SF) return SF;
   const r = hashRand(f.id * 71 + i * 13 + 5), era = f.rel !== null ? yearOf(f.rel) : S.year;
   const G = GENRE_SETTINGS[f.genre] || GENRE_SETTINGS.Drama;
   let setting = G[(i + Math.floor(r() * G.length)) % G.length];
@@ -17036,6 +17044,7 @@ function frameOf(f, i) {
 }
 function stillCaption(f, i) {
   const F = frameOf(f, i), names = F.who.map(id => P(id).name), where = SC_SETTINGS[F.setting];
+  if (F.cap) return names.length ? `${names.join(', ')}: ${F.cap}.`.replace(/\.\.$/, '.') : `${F.cap}.`.replace(/\.\.$/, '.');
   if (!names.length) return `The crew ${where}, between takes.`;
   const who = names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
   const when = ['', ', in the golden hour', ', at dusk', ', at night'][F.tod];
@@ -17061,7 +17070,7 @@ function stillSVG(f, i, w = 320, animated = false) {
   return `<svg class="still${animated ? ' moving' : ''}" viewBox="0 0 ${CW} ${CH}" width="${w}" height="${Math.round(w * CH / CW)}" role="img" aria-label="${esc(stillCaption(f, i))}"${old ? ' style="filter:grayscale(1) contrast(1.08) brightness(1.08)"' : ''}>${D.bg}${animated && D.anim ? D.anim : ''}${actors.join('')}${D.fg || ''}${grade ? `<rect width="${CW}" height="${CH}" fill="${grade[0]}" opacity="${grade[1]}" style="mix-blend-mode:multiply"/>` : ''}${T.night ? `<rect width="${CW}" height="${CH}" fill="#2A3F6E" opacity=".12"/>` : ''}${vign}${wide}</svg>`;
 }
 function stillsHTML(f) {
-  const r = hashRand(f.id * 19 + 3), n = 3 + Math.floor(r() * 3);
+  const r = hashRand(f.id * 19 + 3), st = typeof storyOf === 'function' ? storyOf(f) : null, n = st ? Math.min(6, st.frames.length) : 3 + Math.floor(r() * 3);
   return `<div class="stills">${Array.from({ length: n }, (_, i) => `<figure>${stillSVG(f, i, 240)}<figcaption>${esc(stillCaption(f, i))}</figcaption></figure>`).join('')}</div>`;
 }
 // ---- the trailer: a timeline of shots with motion, text over footage, a montage, a title slam ----
@@ -18202,7 +18211,7 @@ function standingClick(t) {
 // </standing>
 // <starmeter>
 // ---------------- Starmeter, endorsements and a proper market ----------------
-// GEA's Starmeter ranks who the world is talking about this week: recent hits, prizes, fame and work. It matters:
+// REEL's Buzz Index ranks who the world is talking about this week: recent hits, prizes, fame and work. It matters:
 // buzz helps actors and heads of department get hired and gets you more at the negotiating table, and brands pay
 // people with buzz to stand next to their products, in line with what they do. The Ticker gets a real market:
 // every listed company, your gains and losses, and the week's movers.
@@ -18232,13 +18241,13 @@ function starmeterHTML() {
   if (F.role !== 'all') L = L.filter(([id]) => F.role === 'crew' ? !['actor', 'director', 'writer', 'producer'].includes(P(id).role) : P(id).role === F.role);
   if (F.where === 'here') L = L.filter(([id]) => P(id).hub === M.hub);
   const rank = myStarRank();
-  return `<p class="eyebrow">GEA Starmeter · who the world is talking about this week</p>
+  return `<p class="eyebrow">REEL Buzz Index · who the world is talking about this week</p>
    <div class="bf-row">${[['all', 'Everyone'], ['actor', 'Actors'], ['director', 'Directors'], ['writer', 'Writers'], ['producer', 'Producers'], ['crew', 'Crew']].map(([k, l]) => `<button class="pill${F.role === k ? ' on' : ''}" data-smf="role:${k}">${l}</button>`).join('')} <button class="pill${F.where === 'here' ? ' on' : ''}" data-smf="where:${F.where === 'here' ? 'all' : 'here'}">In ${esc(hubName(M.hub))} only</button></div>
    <p class="small">You: <b>#${rank.toLocaleString()}</b> of ${starmeter().length.toLocaleString()} · buzz ${starScore(ME())}. ${rank <= 500 ? 'Agents notice the top 500.' : rank <= 5000 ? 'You\'re on the radar.' : 'Nobody\'s searching for you yet.'}</p>
    <ol class="starm">${L.slice(0, 25).map(([id, s], i) => { const p = P(id); return `<li><span class="rk">${i + 1}</span>${portraitOf(p, 34)}<span><b>${pl(id)}</b><br><span class="muted small">${esc(ROLE_LABEL[p.role])} · ${esc(hubName(p.hub))} · ${esc(whyTrending(p))}</span></span><span class="small ${p.heat > 30 ? 'good' : ''}">${p.heat > 30 ? '▲' : '•'} ${Math.round(s)}</span></li>`; }).join('')}</ol>`;
 }
 // buzz helps you get hired, especially in front of the camera and at the top
-function starFactors(post) { const t = tmplOf(post) || {}; if (!t.actor && (post.tier || 1) < 3) return []; const s = starScore(ME()); return s >= 12 ? [['Your Starmeter buzz', clamp((s - 12) / 40, 0, t.actor ? .9 : .5)]] : []; }
+function starFactors(post) { const t = tmplOf(post) || {}; if (!t.actor && (post.tier || 1) < 3) return []; const s = starScore(ME()); return s >= 12 ? [['Your Buzz Index score', clamp((s - 12) / 40, 0, t.actor ? .9 : .5)]] : []; }
 // ---- endorsements: brands that fit who you are ----
 const BRANDS = [
   ['Argentum Optics', 'a camera lens', ['dp', 'director'], 0], ['Field & Fern', 'an outdoor jacket', ['dp', 'stunts', 'director'], 0], ['Lumenra', 'a lighting kit', ['dp', 'creator'], 0],
@@ -18279,7 +18288,7 @@ function desktopWidgets() {
   return `<div class="widgets">
    <div class="widget"><h5>✉️ Mail</h5>${mails.length ? mails.map(m => `<button class="linkish wl" data-app="mail" data-mailo="${m.id}">${m.act && !m.done ? '● ' : ''}${esc(m.subj)}<br><span class="muted small">${esc(m.from)}</span></button>`).join('') : '<p class="muted small">Inbox zero.</p>'}</div>
    <div class="widget"><h5>📈 Markets</h5><p class="small">${idx}</p>${port.length ? `<p class="small">Your shares: <b>${fmtCash(Math.round(val))}</b></p>` : '<p class="muted small">You own no shares.</p>'}<button class="linkish small" data-app="ticker">Open Ticker ›</button></div>
-   <div class="widget"><h5>⭐ Starmeter</h5><p class="small">You: <b>#${myStarRank().toLocaleString()}</b></p>${top.map(([id], i) => `<p class="small">${i + 1}. ${pl(id)}</p>`).join('')}<button class="linkish small" data-app="gea" data-geatab="star">See the chart ›</button></div>
+   <div class="widget"><h5>⭐ Buzz Index</h5><p class="small">You: <b>#${myStarRank().toLocaleString()}</b></p>${top.map(([id], i) => `<p class="small">${i + 1}. ${pl(id)}</p>`).join('')}<button class="linkish small" data-app="gea" data-geatab="star">See the chart ›</button></div>
    <div class="widget"><h5>📅 Coming up</h5>${ap.length ? ap.map(a => `<p class="small">${esc((APPT_KINDS[a.kind] || {}).label || a.kind)}${a.who != null ? ' · ' + pl(a.who) : ''}<br><span class="muted">${esc(slotLabel(a))}</span></p>`).join('') : '<p class="muted small">Nothing booked.</p>'}</div>
    <div class="widget"><h5>🏦 Money</h5><p class="small"><b>${fmtCash(M.cash)}</b> in the bank</p><p class="small muted">Rent ${fmtCash(usd(ORIGIN.life[M.life].rent))}/wk${(M.deals || []).length ? ` · ${M.deals.length} brand deal${M.deals.length > 1 ? 's' : ''}` : ''}</p></div>
    <div class="widget wide"><h5>📰 The Daily Slate</h5>${news0.map(n => `<p class="small">${esc(n.text.slice(0, 140))}</p>`).join('')}</div>
@@ -19474,7 +19483,7 @@ function osHome() {
   const ap = typeof apptsAhead === 'function' ? apptsAhead().slice(0, 4) : [];
   const nw = osNetWorth(), news = S.news.map((n, i) => [n, i]).slice(-4).reverse();
   const kpi = (l, v, c = '') => `<div class="os-kpi"><span>${l}</span><b class="${c}">${v}</b></div>`;
-  return `<div class="os-kpis">${kpi('Cash', fmtCash(M.cash), M.cash < 0 ? 'bad' : '')}${kpi('Net worth', fmtCash(nw.total))}${kpi('Energy', Math.round(M.energy) + '%', M.energy < 30 ? 'bad' : '')}${kpi('Stress', Math.round(M.stress), M.stress > 70 ? 'bad' : '')}${kpi('Standing', Math.round(me.standing))}${typeof myStarRank === 'function' ? kpi('Starmeter', '#' + myStarRank().toLocaleString()) : ''}</div>
+  return `<div class="os-kpis">${kpi('Cash', fmtCash(M.cash), M.cash < 0 ? 'bad' : '')}${kpi('Net worth', fmtCash(nw.total))}${kpi('Energy', Math.round(M.energy) + '%', M.energy < 30 ? 'bad' : '')}${kpi('Stress', Math.round(M.stress), M.stress > 70 ? 'bad' : '')}${kpi('Standing', Math.round(me.standing))}${typeof myStarRank === 'function' ? kpi('Buzz Index', '#' + myStarRank().toLocaleString()) : ''}</div>
    <div class="os-grid">
     ${osCard('Needs you', A.length ? `<div class="os-alerts">${A.map(a => `<button class="os-alert ${a.cls}" data-jump="${esc(a.go)}"><span>${a.icon}</span>${esc(a.t)}<i>›</i></button>`).join('')}</div>` : '<p class="muted">All quiet. A good week to make something.</p>', 'wide')}
     ${!M.jobs.length && B.length ? osCard(`Best jobs for you <small>${picked} of ${slots} applications planned</small>`, `<ul class="os-list">${B.map(([p, o]) => `<li><label><input type="checkbox" data-apply="${p.id}" ${UI.apps.has(p.id) ? 'checked' : ''} ${!UI.apps.has(p.id) && picked >= slots ? 'disabled' : ''}></label><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a><span class="muted">${p.film !== null ? esc(S.films[p.film].title) : esc((tmplOf(p) || {}).biz || '')}</span><span class="os-pill ${o >= .6 ? 'good' : o >= .35 ? '' : 'bad'}">${Math.round(o * 100)}%</span></li>`).join('')}</ul>${!slots ? '<p class="muted small">Plan job-hunting blocks in your week to send applications.</p>' : ''}<button class="os-link" data-app="jobs">All listings ›</button>`, 'wide') : M.jobs.length ? osCard('On the job', `<ul class="os-list">${M.jobs.map(j => `<li><b>${esc(j.t)}</b><span class="muted">${j.film !== null && j.film !== undefined ? fl(j.film) : esc(j.mco || '')}</span><span class="os-pill">${Math.max(0, j.started + j.weeks - S.week)} wk left</span></li>`).join('')}</ul>`, 'wide') : ''}
@@ -19937,10 +19946,11 @@ function trailerPlan2(f) {
   const lead = f.cast[0] !== undefined ? P(f.cast[0]) : null, co2 = f.cast[1] !== undefined ? P(f.cast[1]) : null, co = f.co !== null ? S.companies[f.co] : null, dirP = P(f.dir);
   const prev = dirP.credits.map(i => S.films[i]).filter(x => x && x.id !== f.id && x.rel !== null && x.rel < (f.rel ?? S.week)).sort((a, b) => b.total - a.total)[0];
   const coHit = co ? co.films.map(i => S.films[i]).filter(x => x && x.id !== f.id && x.rel !== null && x.rel < (f.rel ?? S.week)).sort((a, b) => b.total - a.total)[0] : null;
-  const lines = (TR_LINES[fam] || TR_LINES.drama).slice(), line = () => trFill(lines.splice(Math.floor(r() * lines.length), 1)[0] || pick(TR_LINES.drama), f, r);
+  const story = typeof storyOf === 'function' ? storyOf(f) : null, said = story ? story.lines.slice() : [];
+  const lines = (TR_LINES[fam] || TR_LINES.drama).slice(), line = () => said.length ? said.shift() : trFill(lines.splice(Math.floor(r() * lines.length), 1)[0] || pick(TR_LINES.drama), f, r);
   const shot = (k, o = {}) => ({ shot: k, text: o.text || null, pos: o.pos || 'low', sub: o.sub || null, ms: Math.max(o.ms || 3200, readMs(o.text || o.sub)), move: o.move || mv(), cut: o.cut || 'fade', freeze: o.freeze, hush: o.hush });
   const card = (text, o = {}) => ({ shot: o.under ?? null, text, pos: 'card', vo: o.vo, ms: Math.max(o.ms || 0, readMs(text)), move: 'push', cut: o.cut || 'fade', dim: 1, laurel: o.laurel, hush: o.hush });
-  const vo = () => (TR_VO[fam] || TR_VO.drama).map(t => card(trFill(t, f, r), { vo: 1, ms: 1500, cut: 'hard' }));
+  const vo = () => story ? story.t.toUpperCase().split(/(?<=[.,;:!?])\s+/).filter(Boolean).slice(0, 3).map(t => card(t, { vo: 1, ms: 1700, cut: 'hard' })) : (TR_VO[fam] || TR_VO.drama).map(t => card(trFill(t, f, r), { vo: 1, ms: 1500, cut: 'hard' }));
   const montage = (n, hard) => Array.from({ length: n }, (_, k) => ({ shot: 10 + k, ms: Math.max(380, 820 - k * 90), move: k % 2 ? 'panl' : 'push', cut: hard ? 'hard' : 'flash' }));
   const logo = { shot: null, text: (co ? co.name : 'An independent picture').toUpperCase() + ' PRESENTS', pos: 'card', ms: 2600, cut: 'fade', logo: 1 };
   const title = { shot: null, text: f.title.toUpperCase(), pos: 'card', big: 1, ms: 4000, cut: 'flash', slam: 1 };
@@ -20903,7 +20913,70 @@ function numbersHTML() {
    <p class="muted small nb-src">Information courtesy of IMDb (<a href="https://www.imdb.com" target="_blank" rel="noopener">https://www.imdb.com</a>). Used with permission. Figures are computed from the IMDb non-commercial datasets (snapshot October 2026) and cover feature films unless noted; features with no year are left out. This world's figures come from its own released films.</p></div>`;
 }
 function numClick(t) { if (t.dataset.numdec) { UI.numDec = t.dataset.numdec; render(true); return true; } return false; }
+// The real size of the business. The world simulates a few thousand named people; this says how many real workers each
+// one stands for, so headcounts and applicant pools read at real scale. Rough global film, TV and music workforce,
+// interpolated by year from industry employment estimates (US film and TV alone is about 2.4M jobs today).
+const WORKFORCE = [[1900, 5e3], [1920, 1.2e5], [1950, 7e5], [1980, 1.6e6], [2000, 3.2e6], [2025, 6.5e6], [2100, 9e6]];
+function workforceAt(y) { for (let i = 1; i < WORKFORCE.length; i++) { const [y1, v1] = WORKFORCE[i]; if (y <= y1) { const [y0, v0] = WORKFORCE[i - 1]; return v0 + (v1 - v0) * (y - y0) / (y1 - y0); } } return WORKFORCE[WORKFORCE.length - 1][1]; }
+let WFC = null;
+function namedWorking() { if (WFC && WFC.S === S && WFC.w === S.week) return WFC.n; const n = S.people.filter(p => !p.retired && !p.dead && p.debut !== null).length; WFC = { S, w: S.week, n }; return n; }
+function workforceScale() { return Math.max(1, workforceAt(S.year) / Math.max(1, namedWorking())); }
 // </numbers>
+// <stories>
+// ---------------- Stories: the real films' own plots, for stills, trailers and synopses ----------------
+// The world's real classics are retold here in the game's own words: a logline, a tagline, the frames a still
+// photographer would actually have shot (where, when, who is in it, what is happening), and a few lines a trailer
+// would cut to. Frames are written against cast slots (A = lead, B = second, C = third), so the stills show the
+// film's own cast. Data lives in story1.js, story2.js...; anything without a story falls back to the genre frames.
+// Frame spec: 'setting/tod/who/caption'; tod: d day, g golden hour, u dusk, n night; who: '', 'A', 'AB', 'BC'...
+const STORY = {};
+function ST(id, logline, tagline, frames, lines) { STORY[id] = { l: logline, t: tagline, f: frames, s: lines }; }
+const TOD_K = { d: 0, g: 1, u: 2, n: 3 };
+let STORYC = {};
+function storyOf(f) {
+  if (!f || !f.cat || !STORY[f.cat.id]) return null;
+  const k = f.cat.id; if (STORYC[k]) return STORYC[k];
+  const raw = STORY[k], frames = raw.f.split('|').map(x => { const [set, tod, who, ...cap] = x.split('/'); return { set: SC_DRAW[set] ? set : 'street', tod: TOD_K[tod] ?? 0, who: who || '', cap: cap.join('/').trim() }; });
+  return STORYC[k] = { l: raw.l, t: raw.t, frames, lines: (raw.s || '').split('|').map(s => s.trim()).filter(Boolean) };
+}
+// A frame for still i, or null to use the genre frames.
+function storyFrame(f, i) {
+  const st = storyOf(f); if (!st || !st.frames.length) return null;
+  const fr = st.frames[i % st.frames.length], r = hashRand(f.id * 71 + i * 13 + 5), era = f.rel !== null ? yearOf(f.rel) : S.year, cast = f.cast || [];
+  const who = [...fr.who].map(c => cast['ABC'.indexOf(c)]).filter((x, k, A) => x !== undefined && P(x) && A.indexOf(x) === k);
+  return { r, era, setting: fr.set, tod: fr.tod, who, verb: '', cap: fr.cap };
+}
+// ---- extra places the real films need ----
+Object.assign(SC_SETTINGS, { ship: 'on deck', prison: 'in the cell block', snow: 'in the snow', jungle: 'in the jungle', church: 'in the church', farm: 'out on the farm', space: 'out in space', river: 'on the river', hotel: 'in the hotel', bedroom: 'in the bedroom', newsroom: 'in the newsroom', cockpit: 'in the cockpit', city: 'in the city at night', palace: 'in the palace', village: 'in the village', field: 'in the fields', theatre: 'at the theatre', mansion: 'at the mansion', bar: 'at the bar', school: 'at school' });
+Object.assign(SC_DRAW, {
+  ship: (T, r, P0) => ({ bg: `${skyRect(T, 'sh' + P0.uid)}${celestial(T, r, 240)}<rect y="96" width="${CW}" height="84" fill="${T.night ? '#1E3A5C' : '#2F6F9F'}"/><path d="M0 120 h${CW} v60 h-${CW}Z" fill="${T.night ? '#3A2A1E' : '#8A5A35'}"/><path d="M0 118 h${CW}" stroke="#E6E0D0" stroke-width="3"/>${Array.from({ length: 16 }, (_, i) => `<path d="M${i * 20 + 4} 118 v-16" stroke="#E6E0D0" stroke-width="2"/>`).join('')}<path d="M0 102 h${CW}" stroke="#E6E0D0" stroke-width="3"/><rect x="250" y="20" width="26" height="70" fill="#B23A3A"/><rect x="250" y="20" width="26" height="12" fill="#1E1E1E"/><path d="M60 100 v-90" stroke="#5A3A21" stroke-width="4"/>`, gy: 170, anim: `<g>${Array.from({ length: 5 }, (_, i) => `<circle cx="${262 + i * 6}" cy="${16 - i * 8}" r="${6 + i * 3}" fill="#CFCFCF" opacity="${.5 - i * .08}"/>`).join('')}<animateTransform attributeName="transform" type="translate" values="0 0;-10 -6;0 0" dur="5s" repeatCount="indefinite"/></g>` }),
+  river: (T, r, P0) => ({ bg: `${skyRect(T, 'rv' + P0.uid)}${celestial(T, r)}<path d="M0 90 Q80 70 160 86 T320 80 V120 H0Z" fill="${T.night ? '#24402F' : '#5E8A50'}"/><rect y="110" width="${CW}" height="70" fill="${T.night ? '#1E3A5C' : '#4A7A9A'}"/><path d="M60 150 h200 l-20 18 h-160Z" fill="#6B4A2B"/><path d="M150 150 v-40" stroke="#5A3A21" stroke-width="3"/>`, gy: 152, anim: `<g>${Array.from({ length: 8 }, (_, i) => `<path d="M${i * 44} ${130 + (i % 3) * 12} q10 -4 20 0" stroke="#FFFFFF" fill="none" opacity=".5"/>`).join('')}<animateTransform attributeName="transform" type="translate" values="0 0;30 0;0 0" dur="6s" repeatCount="indefinite"/></g>` }),
+  prison: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#8A8E8A"/>${Array.from({ length: 9 }, (_, i) => `<rect x="${i * 36}" y="0" width="34" height="120" fill="#7A7E7A" stroke="#6A6E6A"/>`).join('')}<rect x="200" y="20" width="60" height="30" fill="${T.night ? '#2E4570' : '#BFD8F2'}"/>${Array.from({ length: 5 }, (_, i) => `<rect x="${206 + i * 12}" y="20" width="3" height="30" fill="#333"/>`).join('')}<rect y="120" width="${CW}" height="60" fill="#6E726E"/>${Array.from({ length: 22 }, (_, i) => `<rect x="${i * 15}" y="0" width="4" height="180" fill="#2A2A2A" opacity=".85"/>`).join('')}`, gy: 170 }),
+  snow: (T, r, P0) => ({ bg: `${skyRect(T, 'sn' + P0.uid)}<path d="M0 110 L60 60 L110 100 L170 50 L240 105 L320 70 V180 H0Z" fill="#DDE6EE"/><rect y="130" width="${CW}" height="50" fill="#F2F6FA"/>${Array.from({ length: 7 }, (_, i) => `<path d="M${20 + i * 46} 130 l12 -40 l12 40Z" fill="#3E5A4A"/><path d="M${24 + i * 46} 112 l8 -18 l8 18Z" fill="#F2F6FA" opacity=".7"/>`).join('')}`, gy: 172, anim: `<g>${Array.from({ length: 50 }, () => `<circle cx="${r() * CW}" cy="${r() * CH}" r="${.8 + r() * 1.4}" fill="#FFFFFF" opacity=".9"/>`).join('')}<animateTransform attributeName="transform" type="translate" values="0 -20;8 20" dur="4s" repeatCount="indefinite"/></g>` }),
+  jungle: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="${T.night ? '#16301E' : '#2E5A2E'}"/>${Array.from({ length: 30 }, () => { const x = r() * CW, y = r() * 140; return `<ellipse cx="${x}" cy="${y}" rx="${18 + r() * 20}" ry="${8 + r() * 6}" fill="${['#3E7A3A', '#5E9A4A', '#2E6A3E'][Math.floor(r() * 3)]}" transform="rotate(${r() * 60 - 30} ${x} ${y})"/>`; }).join('')}${Array.from({ length: 6 }, (_, i) => `<path d="M${30 + i * 52} 0 q${r() * 20 - 10} 60 ${r() * 10} 120" stroke="#4A3A21" stroke-width="2" fill="none"/>`).join('')}<rect y="150" width="${CW}" height="30" fill="#3A2E1E"/>`, gy: 172 }),
+  church: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#C9BFA8"/><path d="M130 110 V40 Q160 4 190 40 V110Z" fill="${T.night ? '#2E4570' : '#7A9ACC'}" stroke="#8A6B4A" stroke-width="4"/>${[0, 1, 2].map(i => `<path d="M${140 + i * 13} 105 V55" stroke="#E3B23C" stroke-width="2"/>`).join('')}<circle cx="160" cy="48" r="10" fill="#E8553E" opacity=".8"/><rect y="120" width="${CW}" height="60" fill="#8A6B4A"/>${Array.from({ length: 4 }, (_, i) => `<rect x="10" y="${126 + i * 12}" width="110" height="6" fill="#5A3A21"/><rect x="200" y="${126 + i * 12}" width="110" height="6" fill="#5A3A21"/>`).join('')}${lampGlow(160, 60, '#FFE6A0', 60)}`, gy: 172 }),
+  farm: (T, r, P0) => ({ bg: `${skyRect(T, 'fm' + P0.uid)}${celestial(T, r)}<path d="M0 110 Q160 96 320 110 V180 H0Z" fill="${T.night ? '#3A4A2A' : '#C9B060'}"/>${Array.from({ length: 10 }, (_, i) => `<path d="M0 ${118 + i * 6} Q160 ${106 + i * 6} 320 ${118 + i * 6}" stroke="#A88A40" fill="none" opacity=".5"/>`).join('')}<path d="M220 110 V70 l26 -18 l26 18 V110Z" fill="#9A2E2E"/><rect x="238" y="86" width="16" height="24" fill="#5A1E1E"/><path d="M40 112 v-30" stroke="#5A3A21" stroke-width="3"/><circle cx="40" cy="76" r="14" fill="#5E8A50"/>`, gy: 170 }),
+  field: (T, r, P0) => ({ bg: `${skyRect(T, 'fd' + P0.uid)}${celestial(T, r)}<path d="M0 100 Q160 86 320 100 V180 H0Z" fill="${T.night ? '#2E4A2E' : '#7FA36E'}"/>${Array.from({ length: 60 }, () => `<path d="M${r() * CW} ${110 + r() * 70} v-8" stroke="${T.night ? '#3E5A3E' : '#E3C46A'}" stroke-width="1.5"/>`).join('')}`, gy: 172, anim: `<g>${Array.from({ length: 30 }, () => `<path d="M${r() * CW} ${130 + r() * 50} q2 -6 0 -10" stroke="#C9B060" fill="none"/>`).join('')}<animateTransform attributeName="transform" type="skewX" values="0;3;0" dur="3s" repeatCount="indefinite"/></g>` }),
+  village: (T, r, P0) => ({ bg: `${skyRect(T, 'vl' + P0.uid)}${celestial(T, r)}${Array.from({ length: 6 }, (_, i) => { const x = i * 56 - 10, h = 40 + r() * 20; return `<rect x="${x}" y="${120 - h}" width="48" height="${h}" fill="${['#C9A27A', '#B9765A', '#D8C8A8'][i % 3]}"/><path d="M${x - 4} ${120 - h} l28 -22 l28 22Z" fill="#6B4A2B"/><rect x="${x + 18}" y="${100}" width="12" height="20" fill="#5A3A21"/>`; }).join('')}<rect y="120" width="${CW}" height="60" fill="#B9A07A"/>`, gy: 172 }),
+  space: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#070B18"/>${Array.from({ length: 70 }, () => `<circle cx="${r() * CW}" cy="${r() * CH}" r="${.4 + r() * 1.1}" fill="#FFFFFF" opacity="${.4 + r() * .6}"/>`).join('')}<circle cx="250" cy="140" r="70" fill="${['#3F6FBF', '#C8553D', '#C9A27A'][Math.floor(r() * 3)]}" opacity=".85"/><circle cx="235" cy="125" r="70" fill="#070B18" opacity=".35"/><rect x="40" y="40" width="80" height="16" fill="#C9CDD2"/><rect x="70" y="30" width="20" height="36" fill="#9AA0A8"/>`, gy: 150, fly: 1, costume: 'space', helmet: 1, anim: `<g>${Array.from({ length: 20 }, () => `<circle cx="${r() * CW}" cy="${r() * CH}" r=".8" fill="#FFFFFF"/>`).join('')}<animateTransform attributeName="transform" type="translate" values="0 0;-14 0" dur="6s" repeatCount="indefinite"/></g>` }),
+  cockpit: (T, r, P0) => ({ bg: `${skyRect(T, 'cp' + P0.uid)}${celestial(T, r)}${Array.from({ length: 6 }, () => `<ellipse cx="${r() * CW}" cy="${40 + r() * 50}" rx="${30 + r() * 30}" ry="8" fill="#FFFFFF" opacity=".6"/>`).join('')}<path d="M0 0 L60 0 L100 110 L0 110Z M320 0 L260 0 L220 110 L320 110Z" fill="#2A3036"/><rect y="110" width="${CW}" height="70" fill="#3A4046"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${70 + i * 16}" cy="128" r="5" fill="#1E2226" stroke="#9AA0A8"/>`).join('')}`, gy: 182, sit: 1 }),
+  hotel: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#C9A27A"/><rect y="0" width="${CW}" height="8" fill="#8A5A35"/>${[50, 160, 270].map(x => `<rect x="${x - 6}" y="0" width="12" height="130" fill="#E8D8B0"/>`).join('')}<rect x="90" y="60" width="140" height="44" fill="#6B3A21"/><rect x="90" y="56" width="140" height="6" fill="#E3B23C"/><rect x="150" y="40" width="20" height="16" fill="#E8D8B0"/>${lampGlow(60, 40, '#FFE6A0', 40)}${lampGlow(260, 40, '#FFE6A0', 40)}<rect y="130" width="${CW}" height="50" fill="#7A2E2E"/>`, gy: 172, costume: 'suit' }),
+  bedroom: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="${T.night ? '#6E6A8A' : '#E6D8C0'}"/>${win(220, 24, 70, 70, T, '#F2EFE6')}<rect x="20" y="110" width="150" height="30" rx="4" fill="#F2EFE6"/><rect x="20" y="96" width="30" height="20" rx="4" fill="#FFFFFF"/><rect x="40" y="112" width="130" height="20" fill="${['#7A9ACC', '#C8553D', '#5E8A7A'][Math.floor(r() * 3)]}"/><rect x="180" y="110" width="26" height="30" fill="#8A5A35"/>${lampGlow(193, 100, '#FFD98A', 30)}<rect y="140" width="${CW}" height="40" fill="#8A6B4A"/>`, gy: 172 }),
+  newsroom: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#D6D8D2"/>${Array.from({ length: 5 }, (_, i) => `<rect x="${10 + i * 64}" y="96" width="56" height="10" fill="#8A6B4A"/><rect x="${20 + i * 64}" y="80" width="30" height="16" fill="#3A3E44"/>`).join('')}${Array.from({ length: 12 }, () => `<rect x="${r() * CW}" y="${10 + r() * 50}" width="16" height="20" fill="#FFFFFF" opacity=".8"/>`).join('')}<rect y="106" width="${CW}" height="74" fill="#9A9E98"/>`, gy: 172, costume: 'suit' }),
+  city: (T, r, P0) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#141C30"/>${Array.from({ length: 10 }, (_, i) => { const h = 60 + r() * 90, x = i * 34 - 6; return `<rect x="${x}" y="${CH - 40 - h}" width="30" height="${h}" fill="#1E2A44"/>${Array.from({ length: 10 }, () => `<rect x="${x + 3 + Math.floor(r() * 5) * 5}" y="${CH - 40 - h + 4 + Math.floor(r() * (h / 8)) * 8}" width="3" height="4" fill="#F4D27A" opacity=".85"/>`).join('')}`; }).join('')}<rect y="140" width="${CW}" height="40" fill="#22283A"/><rect y="146" width="${CW}" height="2" fill="#E8553E" opacity=".5"/>${lampGlow(60, 110, '#E85A9A', 30)}${lampGlow(250, 100, '#5AC8FA', 30)}`, gy: 172, anim: `<g>${Array.from({ length: 4 }, (_, i) => `<rect x="${-40 - i * 90}" y="${156 + (i % 2) * 6}" width="22" height="3" fill="${i % 2 ? '#E8553E' : '#FFF4CC'}"/>`).join('')}<animateTransform attributeName="transform" type="translate" values="0 0;460 0" dur="5s" repeatCount="indefinite"/></g>` }),
+  palace: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#E8D8B0"/>${[30, 110, 210, 290].map(x => `<rect x="${x - 8}" y="0" width="16" height="130" fill="#F2E8D0" stroke="#C9A24A"/>`).join('')}<path d="M130 130 V50 h60 V130" fill="#9A2E2E"/><path d="M140 50 q20 -24 40 0" fill="#C9A24A"/><rect x="150" y="80" width="20" height="24" fill="#C9A24A"/>${lampGlow(160, 30, '#FFE6A0', 60)}<rect y="130" width="${CW}" height="50" fill="#C9A27A"/><path d="M150 180 L158 130 h4 L170 180Z" fill="#9A2E2E"/>`, gy: 172, costume: 'robe' }),
+  theatre: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#3A1E2E"/><rect x="60" y="20" width="200" height="80" fill="#B23A3A"/><rect x="60" y="20" width="200" height="12" fill="#C9A24A"/>${lampGlow(160, 60, '#FFE6A0', 70)}${Array.from({ length: 30 }, (_, i) => `<circle cx="${(i % 15) * 22 + 6}" cy="${130 + Math.floor(i / 15) * 18}" r="8" fill="#1E1018"/>`).join('')}`, gy: 124 }),
+  mansion: (T, r, P0) => ({ bg: `${skyRect(T, 'mn' + P0.uid)}${celestial(T, r)}<rect x="40" y="40" width="240" height="90" fill="#E6DCC8"/><path d="M30 40 L160 8 L290 40Z" fill="#8A6B4A"/>${Array.from({ length: 8 }, (_, i) => `<rect x="${54 + i * 28}" y="54" width="14" height="26" fill="${T.night ? '#F4D27A' : '#7A9ACC'}"/><rect x="${54 + i * 28}" y="92" width="14" height="26" fill="${T.night ? '#F4D27A' : '#7A9ACC'}"/>`).join('')}<rect y="130" width="${CW}" height="50" fill="#6E8A50"/><path d="M140 180 L150 130 h20 L180 180Z" fill="#C9B89A"/>`, gy: 172 }),
+  bar: (T, r) => ({ bg: `<rect width="${CW}" height="${CH}" fill="#4A2E1E"/><rect x="0" y="20" width="${CW}" height="60" fill="#3A2216"/>${Array.from({ length: 18 }, (_, i) => `<rect x="${10 + i * 17}" y="${30 + (i % 2) * 22}" width="8" height="18" fill="${['#7FA36E', '#C8553D', '#E3B23C', '#8AB4D6'][i % 4]}" opacity=".85"/>`).join('')}<rect y="110" width="${CW}" height="16" fill="#8A5A35"/><rect y="126" width="${CW}" height="54" fill="#5A3A21"/>${lampGlow(80, 20, '#FFD98A', 40)}${lampGlow(240, 20, '#FFD98A', 40)}`, gy: 172 }),
+  school: (T, r, P0) => ({ bg: `${skyRect(T, 'sc' + P0.uid)}${celestial(T, r)}<rect x="30" y="40" width="260" height="90" fill="#B9765A"/>${Array.from({ length: 6 }, (_, i) => `<rect x="${46 + i * 42}" y="56" width="24" height="24" fill="${T.night ? '#F4D27A' : '#BFD8F2'}"/>`).join('')}<rect x="146" y="96" width="28" height="34" fill="#5A3A21"/><rect y="130" width="${CW}" height="50" fill="#9A9E98"/>`, gy: 172 })
+});
+// Hook the real plot into the film page, trailers and taglines.
+function storyLog(f) { const s = storyOf(f); return s ? s.l : null; }
+function storyTag(f) { const s = storyOf(f); return s ? s.t : null; }
+// </stories>
+// <story1>
+// ---------------- Stories, part one ----------------
+// </story1>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -20978,6 +21051,8 @@ function viewBoxOffice() {
       return { f, wk: k + 1, g: todate, todate };
     });
   }
+  if (st.g) rows = rows.filter(r => r.f.genre === st.g);
+  if (st.h) rows = rows.filter(r => r.f.hub === st.h);
   const q = (st.q || '').toLowerCase().trim();
   if (q) rows = rows.filter(r => r.f.title.toLowerCase().includes(q) || P(r.f.dir).name.toLowerCase().includes(q) || r.f.genre.toLowerCase().includes(q) || hubName(r.f.hub).toLowerCase().includes(q) || (r.f.real && r.f.real.toLowerCase().includes(q)));
   const key = st.sort || 'g', dir = st.dir === 'asc' ? 1 : -1;
@@ -20986,8 +21061,7 @@ function viewBoxOffice() {
   const shown = rows.slice(0, st.more ? 500 : 100), max = Math.max(1e-9, ...shown.map(r => r.g));
   const th = (k, l, n) => `<th class="${n ? 'n ' : ''}sortable${key === k ? ' on' : ''}"><button class="linkish" data-bosort="${k}">${l}${key === k ? (dir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`;
   return `<div class="head"><h2>Box office</h2><p class="lede">Grosses in US dollars at the time of release. Click any column to sort.</p></div>
-  <div class="filters">${sel('bo-m', mOpts, st.m)}<span class="seg"><button class="pill${st.view === 'week' ? ' on' : ''}" data-bo="week">This week</button><button class="pill${st.view === 'year' ? ' on' : ''}" data-bo="year">By year</button><button class="pill${st.view === 'all' ? ' on' : ''}" data-bo="all">All time</button></span>
-   ${st.view === 'year' ? sel('bo-y', years.map(y => [y, y]), st.y || S.year) : ''}<input id="bo-q" type="search" placeholder="Search title, director, genre, city…" value="${esc(st.q || '')}"></div>
+  <div class="fbar"><label><span>Market</span>${sel('bo-m', mOpts, st.m)}</label><label><span>Period</span>${sel('bo-p', [['week', 'This week'], ['all', 'All time'], ...years.map(y => ['y' + y, String(y)])], st.view === 'year' ? 'y' + (st.y || S.year) : st.view)}</label><label><span>Genre</span>${sel('bo-g', [['', 'All genres'], ...GENRES.map(g => [g, g])], st.g || '')}</label><label><span>Hub</span>${sel('bo-h', [['', 'Everywhere'], ...HUB_IDS.map(h => [h, hubName(h)])], st.h || '')}</label><label class="fbar-q"><span>Search</span><input id="bo-q" type="search" placeholder="Title, director, city…" value="${esc(st.q || '')}"></label>${st.q || st.g || st.h ? '<button class="linkish" data-boclear="1">Clear filters</button>' : ''}</div>
   <h3>${title}${m ? ' · ' + esc(MARKETS[m].name) : ''} <span class="count">${rows.length} films</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th class="n">#</th>${th('title', 'Title')}${th('genre', 'Genre')}${th('hub', 'Hub')}${st.view === 'week' ? th('wk', 'Wk', 1) : th('year', 'Opened', 1)}${th('g', st.view === 'week' ? 'This week' : 'Gross', 1)}<th class="barcol"></th>${th('todate', 'To date', 1)}${th('budget', 'Budget', 1)}${th('reviews', 'Critics', 1)}${th('profit', 'Profit', 1)}</tr></thead><tbody>
   ${shown.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${fl(r.f.id)}</td><td>${esc(r.f.genre)}</td><td>${esc(hubName(r.f.hub))}</td><td class="n">${st.view === 'week' ? r.wk : fmtDate(r.f.rel, true)}</td><td class="n">${fmtM(r.g)}</td><td class="barcol">${bar(r.g, max, 'data')}</td><td class="n">${fmtM(r.todate)}</td><td class="n">${fmtM(r.f.cost)}</td><td class="n">${r.f.reviews ?? '—'}</td><td class="n">${r.f.theatrical !== undefined ? money(r.f.theatrical) : '—'}</td></tr>`).join('') || '<tr><td colspan="11" class="empty">Nothing matches.</td></tr>'}
@@ -21100,14 +21174,14 @@ function viewCareers() {
     ${j.sk ? `<h4>What it takes</h4><p>${j.sk.map(x => esc(deReal(x))).join(' · ')}</p>` : ''}
     <p class="muted">${[j.to ? 'Reports to ' + esc(deReal(j.to)) : '', j.un && deReal(j.un) ? 'Union: ' + esc(deReal(j.un)) : '', j.cr ? 'Screen credit: ' + esc(deReal(j.cr) || j.cr.replace(/[()]/g, '')) : '', j.emp ? 'Seen at: ' + [...new Set(j.emp.map(deReal))].map(esc).join('; ') : '', j.posted && j.posted !== j.t ? 'Posted as “' + esc(j.posted) + '”' : ''].filter(Boolean).join('<br>')}</p>
     ${j.before || j.after ? `<p class="muted">${j.before ? 'Comes from: ' + esc(deReal(j.before)) : ''}${j.before && j.after ? '<br>' : ''}${j.after ? 'Leads to: ' + esc(deReal(j.after)) : ''}</p>` : ''}
-    ${j.role ? `<p><b>${working(j.role).toLocaleString()}</b> people in the world hold this job now. <button class="linkish" data-rolejump="${j.role}">See them</button></p>` : ''}
+    ${j.role ? `<p>About <b>${Math.round(working(j.role) * workforceScale()).toLocaleString()}</b> people hold this job worldwide; ${working(j.role).toLocaleString()} of them are named in this world. <button class="linkish" data-rolejump="${j.role}">See them</button></p>` : ''}
   </div>`;
   const ladder = myCraft ? JOBS.jobs.filter(j => j.craft === myCraft).sort((a, b) => a.lv - b.lv) : [];
   const rungs = LEVELS.map((l, i) => [l, ladder.filter(j => j.lv === i)]).filter(x => x[1].length);
   const sim = JOBS.jobs.filter(j => j.role).length;
   return `<div class="head"><h2>Careers</h2><p class="lede">Every job the business posts or credits, from set PA to studio chief. Open one to see what it involves, who it answers to and where it leads.</p></div>
-  <div class="kpis"><div><span>Jobs</span><b>${JOBS.jobs.length}</b></div><div><span>Sectors</span><b>${secs.length}</b></div><div><span>Played out in the world</span><b>${sim}</b></div><div><span>People working</span><b>${S.people.filter(p => !p.retired && !p.dead && p.debut !== null).length.toLocaleString()}</b></div></div>
-  ${rungs.length ? `<section class="panel ladder"><h3>Your ladder: ${esc(CRAFTS[myCraft].label)}</h3><div class="rungs">${rungs.map(([l, js]) => `<div class="rung"><span class="eyebrow">${esc(l)}</span>${js.slice(0, 4).map(j => `<a href="#" class="lk" data-job="${j.id}">${esc(j.t)}</a>`).join('')}${js.length > 4 ? `<span class="muted small">+${js.length - 4} more</span>` : ''}</div>`).join('<i class="rarr">→</i>')}</div></section>` : ''}
+  <div class="kpis"><div><span>Jobs</span><b>${JOBS.jobs.length}</b></div><div><span>Sectors</span><b>${secs.length}</b></div><div><span>Played out in the world</span><b>${sim}</b></div><div><span>Industry workforce (est.)</span><b>${Math.round(workforceAt(S.year)).toLocaleString()}</b></div><div><span>Named in this world</span><b>${namedWorking().toLocaleString()}</b></div></div><p class="small muted">The world follows ${namedWorking().toLocaleString()} named people; each stands for about ${Math.round(workforceScale()).toLocaleString()} real workers, so headcounts and applicant pools below are shown at real scale.</p>
+  ${rungs.length ? `<section class="panel ladder"><h3>Your ladder: ${esc(CRAFTS[myCraft].label)}</h3><div class="rungs">${rungs.map(([l, js]) => `<div class="rung"><span class="eyebrow">${esc(l)}</span>${js.slice(0, 4).map(j => `<a href="#" class="lk" data-job="${j.id}">${esc(j.t)}</a>`).join('')}${js.length > 4 ? `<details class="rmore"><summary class="muted small">+${js.length - 4} more</summary>${js.slice(4).map(j => `<a href="#" class="lk" data-job="${j.id}">${esc(j.t)}</a>`).join('')}</details>` : ''}</div>`).join('<i class="rarr">→</i>')}</div></section>` : ''}
   <div class="filters"><input id="j-q" type="search" placeholder="Search jobs and duties" value="${esc(st.q)}">${sel('j-sec', [['ALL', 'Every sector']].concat(secs.map(s => [s, s])), st.sec)}</div>
   <p class="count">${rows.length} jobs</p>
   ${Object.entries(groups).map(([g, js]) => `<section class="panel"><h3>${esc(g)}</h3><div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Level</th><th>Pay seen</th></tr></thead><tbody>
@@ -22172,7 +22246,7 @@ if (typeof document !== 'undefined' && document.documentElement) document.docume
 document.addEventListener('click', e => {
   const pal = e.target.closest && e.target.closest('[data-pal]');
   if (pal && pal.classList.contains('pal')) { if (pal.dataset.pal === 'theme') { const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; setTheme(dark ? 'light' : 'dark'); } else setPalette(pal.dataset.pal); render(true); return; }
-  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-trailer],[data-gea],[data-bo],[data-bosort],[data-bomore],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
+  const t = e.target.closest('[data-go],[data-tab],[data-back],[data-adv],[data-sort],[data-ntype],[data-trailer],[data-gea],[data-bo],[data-boclear],[data-bosort],[data-bomore],[data-fmode],[data-hubf],[data-cine],[data-job],[data-rolejump],#nw-go,' + CAREER_CLICKS);
   if (!t) return;
   if (t.tagName === 'A') e.preventDefault();
   if (UI.busy && !UI.earlyCC && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;
@@ -22187,6 +22261,7 @@ document.addEventListener('click', e => {
   if (t.dataset.ntype) { UI.news.type = t.dataset.ntype; render(true); return; }
   if (t.dataset.trailer) { playTrailer(+t.dataset.trailer); return; }
   if (t.dataset.gea) { UI.tab = t.dataset.gea; UI.stack = []; render(); return; }
+  if (t.dataset.boclear) { UI.bo.q = ''; UI.bo.g = ''; UI.bo.h = ''; render(true); return; }
   if (t.dataset.bo) { UI.bo.view = t.dataset.bo; UI.bo.more = 0; render(true); return; }
   if (t.dataset.bosort) { const k = t.dataset.bosort; UI.bo.dir = UI.bo.sort === k && UI.bo.dir !== 'asc' ? 'asc' : 'desc'; UI.bo.sort = k; render(true); return; }
   if (t.dataset.bomore) { UI.bo.more = 1; render(true); return; }
@@ -22208,6 +22283,8 @@ document.addEventListener('change', e => {
   const id = e.target.id, v = e.target.value;
   const map = { 'bo-m': [UI.bo, 'm'], 'bo-y': [UI.bo, 'y'], 'aw-y': [UI.aw = UI.aw || {}, 'y'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
   if (map[id]) { map[id][0][map[id][1]] = v; render(true); return; }
+  if (id === 'bo-p') { if (v[0] === 'y') { UI.bo.view = 'year'; UI.bo.y = +v.slice(1); } else UI.bo.view = v; UI.bo.more = 0; render(true); return; }
+  if (id === 'bo-g' || id === 'bo-h') { UI.bo[id === 'bo-g' ? 'g' : 'h'] = v; UI.bo.more = 0; render(true); return; }
   if (id === 'nw-year') { UI.nwYear = v === 'custom' ? 'custom' : +v; $('#nw-custom').hidden = v !== 'custom'; }
   if (id === 'nw-custom') UI.nwCustom = +v;
   if (id === 'nw-depth') UI.nwDepth = v;

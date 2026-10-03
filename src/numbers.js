@@ -72,3 +72,11 @@ function numbersHTML() {
    <p class="muted small nb-src">Information courtesy of IMDb (<a href="https://www.imdb.com" target="_blank" rel="noopener">https://www.imdb.com</a>). Used with permission. Figures are computed from the IMDb non-commercial datasets (snapshot October 2026) and cover feature films unless noted; features with no year are left out. This world's figures come from its own released films.</p></div>`;
 }
 function numClick(t) { if (t.dataset.numdec) { UI.numDec = t.dataset.numdec; render(true); return true; } return false; }
+// The real size of the business. The world simulates a few thousand named people; this says how many real workers each
+// one stands for, so headcounts and applicant pools read at real scale. Rough global film, TV and music workforce,
+// interpolated by year from industry employment estimates (US film and TV alone is about 2.4M jobs today).
+const WORKFORCE = [[1900, 5e3], [1920, 1.2e5], [1950, 7e5], [1980, 1.6e6], [2000, 3.2e6], [2025, 6.5e6], [2100, 9e6]];
+function workforceAt(y) { for (let i = 1; i < WORKFORCE.length; i++) { const [y1, v1] = WORKFORCE[i]; if (y <= y1) { const [y0, v0] = WORKFORCE[i - 1]; return v0 + (v1 - v0) * (y - y0) / (y1 - y0); } } return WORKFORCE[WORKFORCE.length - 1][1]; }
+let WFC = null;
+function namedWorking() { if (WFC && WFC.S === S && WFC.w === S.week) return WFC.n; const n = S.people.filter(p => !p.retired && !p.dead && p.debut !== null).length; WFC = { S, w: S.week, n }; return n; }
+function workforceScale() { return Math.max(1, workforceAt(S.year) / Math.max(1, namedWorking())); }

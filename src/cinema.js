@@ -143,6 +143,7 @@ const SC_DRAW = {
 const GRADES = { Horror: ['#2E6B5E', .14], Western: ['#C88A3A', .14], 'Sci-fi': ['#3AA0C8', .1], Crime: ['#2E3A55', .14], Thriller: ['#2E4A55', .1], War: ['#6B6A3A', .16], Romance: ['#E8857A', .1], Fantasy: ['#7A5AA6', .08], Musical: ['#E85A9A', .06], Superhero: ['#3A5AC8', .06], Period: ['#A8865F', .12] };
 // Which frame this is: setting, time, who is in it, what they're doing. The caption says it in words.
 function frameOf(f, i) {
+  const SF = typeof storyFrame === 'function' ? storyFrame(f, i) : null; if (SF) return SF;
   const r = hashRand(f.id * 71 + i * 13 + 5), era = f.rel !== null ? yearOf(f.rel) : S.year;
   const G = GENRE_SETTINGS[f.genre] || GENRE_SETTINGS.Drama;
   let setting = G[(i + Math.floor(r() * G.length)) % G.length];
@@ -156,6 +157,7 @@ function frameOf(f, i) {
 }
 function stillCaption(f, i) {
   const F = frameOf(f, i), names = F.who.map(id => P(id).name), where = SC_SETTINGS[F.setting];
+  if (F.cap) return names.length ? `${names.join(', ')}: ${F.cap}.`.replace(/\.\.$/, '.') : `${F.cap}.`.replace(/\.\.$/, '.');
   if (!names.length) return `The crew ${where}, between takes.`;
   const who = names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
   const when = ['', ', in the golden hour', ', at dusk', ', at night'][F.tod];
@@ -181,7 +183,7 @@ function stillSVG(f, i, w = 320, animated = false) {
   return `<svg class="still${animated ? ' moving' : ''}" viewBox="0 0 ${CW} ${CH}" width="${w}" height="${Math.round(w * CH / CW)}" role="img" aria-label="${esc(stillCaption(f, i))}"${old ? ' style="filter:grayscale(1) contrast(1.08) brightness(1.08)"' : ''}>${D.bg}${animated && D.anim ? D.anim : ''}${actors.join('')}${D.fg || ''}${grade ? `<rect width="${CW}" height="${CH}" fill="${grade[0]}" opacity="${grade[1]}" style="mix-blend-mode:multiply"/>` : ''}${T.night ? `<rect width="${CW}" height="${CH}" fill="#2A3F6E" opacity=".12"/>` : ''}${vign}${wide}</svg>`;
 }
 function stillsHTML(f) {
-  const r = hashRand(f.id * 19 + 3), n = 3 + Math.floor(r() * 3);
+  const r = hashRand(f.id * 19 + 3), st = typeof storyOf === 'function' ? storyOf(f) : null, n = st ? Math.min(6, st.frames.length) : 3 + Math.floor(r() * 3);
   return `<div class="stills">${Array.from({ length: n }, (_, i) => `<figure>${stillSVG(f, i, 240)}<figcaption>${esc(stillCaption(f, i))}</figcaption></figure>`).join('')}</div>`;
 }
 // ---- the trailer: a timeline of shots with motion, text over footage, a montage, a title slam ----

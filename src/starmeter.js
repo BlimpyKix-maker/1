@@ -1,5 +1,5 @@
 // ---------------- Starmeter, endorsements and a proper market ----------------
-// GEA's Starmeter ranks who the world is talking about this week: recent hits, prizes, fame and work. It matters:
+// REEL's Buzz Index ranks who the world is talking about this week: recent hits, prizes, fame and work. It matters:
 // buzz helps actors and heads of department get hired and gets you more at the negotiating table, and brands pay
 // people with buzz to stand next to their products, in line with what they do. The Ticker gets a real market:
 // every listed company, your gains and losses, and the week's movers.
@@ -29,13 +29,13 @@ function starmeterHTML() {
   if (F.role !== 'all') L = L.filter(([id]) => F.role === 'crew' ? !['actor', 'director', 'writer', 'producer'].includes(P(id).role) : P(id).role === F.role);
   if (F.where === 'here') L = L.filter(([id]) => P(id).hub === M.hub);
   const rank = myStarRank();
-  return `<p class="eyebrow">GEA Starmeter · who the world is talking about this week</p>
+  return `<p class="eyebrow">REEL Buzz Index · who the world is talking about this week</p>
    <div class="bf-row">${[['all', 'Everyone'], ['actor', 'Actors'], ['director', 'Directors'], ['writer', 'Writers'], ['producer', 'Producers'], ['crew', 'Crew']].map(([k, l]) => `<button class="pill${F.role === k ? ' on' : ''}" data-smf="role:${k}">${l}</button>`).join('')} <button class="pill${F.where === 'here' ? ' on' : ''}" data-smf="where:${F.where === 'here' ? 'all' : 'here'}">In ${esc(hubName(M.hub))} only</button></div>
    <p class="small">You: <b>#${rank.toLocaleString()}</b> of ${starmeter().length.toLocaleString()} · buzz ${starScore(ME())}. ${rank <= 500 ? 'Agents notice the top 500.' : rank <= 5000 ? 'You\'re on the radar.' : 'Nobody\'s searching for you yet.'}</p>
    <ol class="starm">${L.slice(0, 25).map(([id, s], i) => { const p = P(id); return `<li><span class="rk">${i + 1}</span>${portraitOf(p, 34)}<span><b>${pl(id)}</b><br><span class="muted small">${esc(ROLE_LABEL[p.role])} · ${esc(hubName(p.hub))} · ${esc(whyTrending(p))}</span></span><span class="small ${p.heat > 30 ? 'good' : ''}">${p.heat > 30 ? '▲' : '•'} ${Math.round(s)}</span></li>`; }).join('')}</ol>`;
 }
 // buzz helps you get hired, especially in front of the camera and at the top
-function starFactors(post) { const t = tmplOf(post) || {}; if (!t.actor && (post.tier || 1) < 3) return []; const s = starScore(ME()); return s >= 12 ? [['Your Starmeter buzz', clamp((s - 12) / 40, 0, t.actor ? .9 : .5)]] : []; }
+function starFactors(post) { const t = tmplOf(post) || {}; if (!t.actor && (post.tier || 1) < 3) return []; const s = starScore(ME()); return s >= 12 ? [['Your Buzz Index score', clamp((s - 12) / 40, 0, t.actor ? .9 : .5)]] : []; }
 // ---- endorsements: brands that fit who you are ----
 const BRANDS = [
   ['Argentum Optics', 'a camera lens', ['dp', 'director'], 0], ['Field & Fern', 'an outdoor jacket', ['dp', 'stunts', 'director'], 0], ['Lumenra', 'a lighting kit', ['dp', 'creator'], 0],
@@ -76,7 +76,7 @@ function desktopWidgets() {
   return `<div class="widgets">
    <div class="widget"><h5>✉️ Mail</h5>${mails.length ? mails.map(m => `<button class="linkish wl" data-app="mail" data-mailo="${m.id}">${m.act && !m.done ? '● ' : ''}${esc(m.subj)}<br><span class="muted small">${esc(m.from)}</span></button>`).join('') : '<p class="muted small">Inbox zero.</p>'}</div>
    <div class="widget"><h5>📈 Markets</h5><p class="small">${idx}</p>${port.length ? `<p class="small">Your shares: <b>${fmtCash(Math.round(val))}</b></p>` : '<p class="muted small">You own no shares.</p>'}<button class="linkish small" data-app="ticker">Open Ticker ›</button></div>
-   <div class="widget"><h5>⭐ Starmeter</h5><p class="small">You: <b>#${myStarRank().toLocaleString()}</b></p>${top.map(([id], i) => `<p class="small">${i + 1}. ${pl(id)}</p>`).join('')}<button class="linkish small" data-app="gea" data-geatab="star">See the chart ›</button></div>
+   <div class="widget"><h5>⭐ Buzz Index</h5><p class="small">You: <b>#${myStarRank().toLocaleString()}</b></p>${top.map(([id], i) => `<p class="small">${i + 1}. ${pl(id)}</p>`).join('')}<button class="linkish small" data-app="gea" data-geatab="star">See the chart ›</button></div>
    <div class="widget"><h5>📅 Coming up</h5>${ap.length ? ap.map(a => `<p class="small">${esc((APPT_KINDS[a.kind] || {}).label || a.kind)}${a.who != null ? ' · ' + pl(a.who) : ''}<br><span class="muted">${esc(slotLabel(a))}</span></p>`).join('') : '<p class="muted small">Nothing booked.</p>'}</div>
    <div class="widget"><h5>🏦 Money</h5><p class="small"><b>${fmtCash(M.cash)}</b> in the bank</p><p class="small muted">Rent ${fmtCash(usd(ORIGIN.life[M.life].rent))}/wk${(M.deals || []).length ? ` · ${M.deals.length} brand deal${M.deals.length > 1 ? 's' : ''}` : ''}</p></div>
    <div class="widget wide"><h5>📰 The Daily Slate</h5>${news0.map(n => `<p class="small">${esc(n.text.slice(0, 140))}</p>`).join('')}</div>

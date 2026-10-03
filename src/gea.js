@@ -1,4 +1,4 @@
-// ---------------- GEA: the Global Entertainment Archive ----------------
+// ---------------- REEL (was GEA): the Recorded Entertainment Encyclopedia & Library ----------------
 // The world's film database. Every film gets a logline, a poster, set stills and a trailer card; every person a
 // short bio. All of it is drawn from the simulation and a hash of the film or person, so it costs nothing until you
 // look and never touches the world's random numbers. Full credits go deeper than the people the simulation casts:
@@ -20,6 +20,7 @@ const LOG_WANT = { family: 'must bring a scattered family back together', power:
 const LOG_WHERE = { Western: 'on the frontier', 'Sci-fi': 'on a station at the edge of known space', Fantasy: 'in a kingdom running out of magic', War: 'behind enemy lines', Period: 'in a society that forbids it', Horror: 'in a house that wants them to stay', Musical: 'on the biggest stage in town', 'Martial arts': 'in a city ruled by rival schools', Superhero: 'in a city that needs a hero and doesn\'t want one', Animation: 'in a world just beyond the garden fence', Documentary: '' };
 const LOG_TWIST = ['but the past won\'t stay buried', 'before time runs out', 'whatever it costs them', 'with nothing but each other', 'and the whole town is watching', 'while someone close is lying to them', ''];
 function filmLogline(f) {
+  if (typeof storyLog === 'function' && storyLog(f)) return storyLog(f);
   const M = S.me;
   const own = M && ((M.scripts || []).find(x => x.made === f.id) || (M.holdings || []).find(x => x.made === f.id));
   if (own && own.logline) return own.logline;
@@ -29,7 +30,7 @@ function filmLogline(f) {
   const t = `${pick(LOG_WHO)} ${LOG_WANT[th] || LOG_WANT.family}${where ? ' ' + where : ''}${(() => { const x = pick(LOG_TWIST); return x ? ', ' + x : ''; })()}.`;
   return t[0].toUpperCase() + t.slice(1);
 }
-function filmTagline(f) { const r = hashRand(f.id * 131 + 7); const L = TAGLINES[f.genre] || TAGLINES.Drama; return L[Math.floor(r() * L.length)]; }
+function filmTagline(f) { if (typeof storyTag === 'function' && storyTag(f)) return storyTag(f); const r = hashRand(f.id * 131 + 7); const L = TAGLINES[f.genre] || TAGLINES.Drama; return L[Math.floor(r() * L.length)]; }
 // ---- the poster ----
 function posterMotif(g, c, r) {
   const [d, a, l] = c, x = 100, y = 120;
@@ -114,7 +115,7 @@ function personBio(p) {
   return t;
 }
 // The archive's masthead: switch between films and people.
-function geaHead(cur) { return `<div class="geahead"><span class="gealogo">GEA</span><span class="muted">The Global Entertainment Archive</span><span class="seg"><button class="pill${cur === 'films' ? ' on' : ''}" data-gea="films">Films</button><button class="pill${cur === 'people' ? ' on' : ''}" data-gea="people">People</button></span></div>`; }
+function geaHead(cur) { return `<div class="geahead"><span class="gealogo">REEL</span><span class="muted">The Recorded Entertainment Encyclopedia &amp; Library</span><span class="seg"><button class="pill${cur === 'films' ? ' on' : ''}" data-gea="films">Films</button><button class="pill${cur === 'people' ? ' on' : ''}" data-gea="people">People</button></span></div>`; }
 // ---- what the critics said: three or four notices, in the key of the film's actual reviews ----
 const CRITIC_LINES = {
   rave: ['{dir} has made something close to perfect.', 'The best thing {lead} has ever done, and it isn\'t close.', 'I walked out into the street and the world looked different.', 'A {g} that will be studied for years.', 'Every frame earns its place.', 'Funny, furious and finally devastating.'],

@@ -56,10 +56,11 @@ function trailerPlan2(f) {
   const lead = f.cast[0] !== undefined ? P(f.cast[0]) : null, co2 = f.cast[1] !== undefined ? P(f.cast[1]) : null, co = f.co !== null ? S.companies[f.co] : null, dirP = P(f.dir);
   const prev = dirP.credits.map(i => S.films[i]).filter(x => x && x.id !== f.id && x.rel !== null && x.rel < (f.rel ?? S.week)).sort((a, b) => b.total - a.total)[0];
   const coHit = co ? co.films.map(i => S.films[i]).filter(x => x && x.id !== f.id && x.rel !== null && x.rel < (f.rel ?? S.week)).sort((a, b) => b.total - a.total)[0] : null;
-  const lines = (TR_LINES[fam] || TR_LINES.drama).slice(), line = () => trFill(lines.splice(Math.floor(r() * lines.length), 1)[0] || pick(TR_LINES.drama), f, r);
+  const story = typeof storyOf === 'function' ? storyOf(f) : null, said = story ? story.lines.slice() : [];
+  const lines = (TR_LINES[fam] || TR_LINES.drama).slice(), line = () => said.length ? said.shift() : trFill(lines.splice(Math.floor(r() * lines.length), 1)[0] || pick(TR_LINES.drama), f, r);
   const shot = (k, o = {}) => ({ shot: k, text: o.text || null, pos: o.pos || 'low', sub: o.sub || null, ms: Math.max(o.ms || 3200, readMs(o.text || o.sub)), move: o.move || mv(), cut: o.cut || 'fade', freeze: o.freeze, hush: o.hush });
   const card = (text, o = {}) => ({ shot: o.under ?? null, text, pos: 'card', vo: o.vo, ms: Math.max(o.ms || 0, readMs(text)), move: 'push', cut: o.cut || 'fade', dim: 1, laurel: o.laurel, hush: o.hush });
-  const vo = () => (TR_VO[fam] || TR_VO.drama).map(t => card(trFill(t, f, r), { vo: 1, ms: 1500, cut: 'hard' }));
+  const vo = () => story ? story.t.toUpperCase().split(/(?<=[.,;:!?])\s+/).filter(Boolean).slice(0, 3).map(t => card(t, { vo: 1, ms: 1700, cut: 'hard' })) : (TR_VO[fam] || TR_VO.drama).map(t => card(trFill(t, f, r), { vo: 1, ms: 1500, cut: 'hard' }));
   const montage = (n, hard) => Array.from({ length: n }, (_, k) => ({ shot: 10 + k, ms: Math.max(380, 820 - k * 90), move: k % 2 ? 'panl' : 'push', cut: hard ? 'hard' : 'flash' }));
   const logo = { shot: null, text: (co ? co.name : 'An independent picture').toUpperCase() + ' PRESENTS', pos: 'card', ms: 2600, cut: 'fade', logo: 1 };
   const title = { shot: null, text: f.title.toUpperCase(), pos: 'card', big: 1, ms: 4000, cut: 'flash', slam: 1 };

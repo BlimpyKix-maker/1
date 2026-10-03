@@ -555,6 +555,8 @@ function hireFactors(post) {
   if (M.quirk === 'viral') F.push(['Internet fame', t.actor ? .4 : -.15]);
   if (M.degrees.length && post.tier >= 2) F.push(['Your degree', M.degrees.includes('mfa') ? .4 : .25]);
   F.push(['Competition', -post.comp]);
+  // Hundreds apply for every real post; the better jobs draw a deeper pool. Standing and contacts cut through it.
+  F.push([`A crowded field (~${applicantsFor(post).toLocaleString()} applicants)`, -(.22 + .16 * Math.min(post.tier, 4)) * (1 - Math.min(.6, Math.max(0, me.standing) / 60))]);
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof fieldFactors === 'function') F.push(...fieldFactors(post));
   if (typeof almaFactors === 'function') F.push(...almaFactors(post));
@@ -565,6 +567,8 @@ function hireFactors(post) {
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;
 }
+// How many people apply for a post: scaled from the real workforce (more for the better and the public-facing jobs).
+function applicantsFor(post) { const h = hashRand(post.id * 977 + 13)(), t = tmplOf(post); return Math.round([60, 140, 320, 650, 1200, 2400][Math.min(5, post.tier)] * (t.actor ? 3 : 1) * (.6 + h * .9) * (typeof workforceScale === 'function' ? Math.sqrt(workforceScale()) : 1)); }
 function hireOdds(post) { return clamp(logistic(hireFactors(post).reduce((s, f) => s + f[1], 0)), .02, .96); }
 
 // ---------------- The week ----------------
