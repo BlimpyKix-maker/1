@@ -39,6 +39,7 @@ function homeFx() {
     for (const k in f.grow || {}) out.grow[k] = (out.grow[k] || 0) + f.grow[k];
     if (f.train) out.train.push(f.train);
   }
+  if (typeof kitFx === 'function') kitFx(out);
   return out;
 }
 function homeSkyline(hub, w, h) {
@@ -63,7 +64,7 @@ function furnitureSVG(id, x, y) {
     case 'board': return `<g transform="translate(${x} ${y})"><rect width="58" height="44" fill="#C9A87A"/>${[[4, 4, '#FFFFFF'], [22, 6, 'var(--accent)'], [40, 4, '#E9E0F5'], [6, 24, 'var(--data)'], [26, 24, '#E3C27A'], [42, 24, '#FFFFFF']].map(([a, b, c]) => `<rect x="${a}" y="${b}" width="13" height="15" fill="${c}"/><circle cx="${a + 6}" cy="${b + 1}" r="1.2" fill="#C8102E"/>`).join('')}</g>`;
     case 'print': return `<g transform="translate(${x} ${y})"><rect width="48" height="58" fill="#3B3226"/><rect x="4" y="4" width="40" height="50" fill="#F3EFF8"/><path d="M24 14 l3 7 l7 0 l-6 4 l2 7 l-6 -4 l-6 4 l2 -7 l-6 -4 l7 0 z" fill="var(--accent)"/><text x="24" y="46" font-size="5" text-anchor="middle" fill="#1F1430" font-family="sans-serif">OFFICIAL SELECTION</text></g>`;
   }
-  return '';
+  return typeof furnitureSVG2 === 'function' ? furnitureSVG2(id, x, y) : '';
 }
 // The scene. day: 0–5 for the light through the window.
 function homeSceneSVG(day) {
@@ -98,6 +99,7 @@ function homeSceneSVG(day) {
   for (const w of W.filter(w => w.plat === 'stage').slice(-2)) wall2.push(`<rect width="18" height="26" fill="#7A2E2E"/><rect x="2" y="2" width="14" height="14" fill="#F3EFF8"/><text x="9" y="22" font-size="3.2" text-anchor="middle" fill="#fff" font-family="sans-serif">${esc(w.title.slice(0, 10).toUpperCase())}</text>`);
   wall2.forEach((g, i) => o.push(`<g transform="translate(${life === 'couch' ? 210 + i * 26 : 290 + (i % 4) * 26} ${life === 'couch' ? 30 : 30 + Math.floor(i / 4) * 30})">${g}</g>`));
   if (wins) o.push(`<g transform="translate(${life === 'couch' ? 12 : 60} 118)">${Array.from({ length: Math.min(5, wins) }, (_, i) => `<path d="M${i * 10} 0 l6 0 l-1 5 l-2 0 l0 2 l2 0 l0 1 l-6 0 l0 -1 l2 0 l0 -2 l-2 0 z" fill="#D4AF37"/>`).join('')}<rect x="-2" y="8" width="${Math.min(5, wins) * 10 + 2}" height="2" fill="#6B4E3A"/></g>`);
+  if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
   if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".38"/><circle cx="${life === 'couch' ? 120 : 330}" cy="40" r="60" fill="#FFE9A8" opacity=".12"/>`);
   o.push(`<g transform="translate(176 106)">${portraitSVG(lookOf(me), S.year - me.born, 64, true).replace('<svg class="portrait"', '<svg class="portrait" x="0" y="0"')}</g>`);
   return `<svg class="home-scene" viewBox="0 0 400 180" role="img" aria-label="Your place">${o.join('')}</svg>`;

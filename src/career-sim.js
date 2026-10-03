@@ -564,6 +564,7 @@ function hireFactors(post) {
   if (typeof codexFactors === 'function') F.push(...codexFactors(post));
   if (typeof repFactors === 'function') F.push(...repFactors(post));
   if (typeof laurelFactors === 'function') F.push(...laurelFactors());
+  if (typeof kitFactors === 'function') F.push(...kitFactors(post));
   if (typeof circleFactors === 'function') F.push(...circleFactors(post));
   { const par = (S.me.known && Object.keys(S.me.known).map(Number).find(id => S.me.known[id].tags.includes('Your parent'))); if (par !== undefined && post.head !== null && post.head !== undefined && (post.head === par || tie(P(par), P(post.head)) > 30)) F.push(['Family connection', .6]); }
   return F;
@@ -682,6 +683,7 @@ function closeWeek(a) {
   if (typeof msgWeek === 'function') msgWeek();
   if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
+  if (typeof shopWeek === 'function') shopWeek();
   if (typeof achWeek === 'function') achWeek();
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
@@ -1052,6 +1054,7 @@ function applyAct(a) {
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
     case 'text': return textSomeone(a);
     case 'bazaar': return typeof bazaarAct === 'function' && bazaarAct(a);
+    case 'relic': return typeof relicAct === 'function' && relicAct(a);
     case 'email': return typeof emailAct === 'function' && emailAct(a);
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);

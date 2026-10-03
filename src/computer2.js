@@ -15,8 +15,11 @@ const SHOP = {
 function appLocked(k) { return SHOP[k] && SHOP[k].kind === 'game' && !((S.me.owned2 || []).includes(k)); }
 function gearFor(type) { const G = S.me.gearF || {}; const f = { song: 'music', score: 'music', musical: 'music', mv: 'video', video: 'video', blip: 'video', podcast: 'podcast' }[type]; return f ? Math.min(3, G[f] || 0) : 0; }
 function buyApp(a) {
-  const M = S.me, it = SHOP[a.k]; if (!it || (M.owned2 || []).includes(a.k) || M.cash < usd(it.price)) return false;
-  M.cash -= usd(it.price); (M.owned2 = M.owned2 || []).push(a.k);
+  const M = S.me, it = SHOP[a.k];
+  if (a.cancel) { if (!it || !(M.subs || {})[a.k]) return false; delete M.subs[a.k]; M.owned2 = M.owned2.filter(x => x !== a.k); diary(`You cancel ${it.label}.`); return true; }
+  if (!it || (M.owned2 || []).includes(a.k) || (it.from && S.year < it.from) || M.cash < usd(it.price || it.sub || 0)) return false;
+  M.cash -= usd(it.price || 0); (M.owned2 = M.owned2 || []).push(a.k);
+  if (it.kind === 'sub') (M.subs = M.subs || {})[a.k] = S.week;
   if (it.gear) { M.gearF = M.gearF || {}; M.gearF[it.gear] = (M.gearF[it.gear] || 0) + 1; if (it.also) M.gearF[it.also] = (M.gearF[it.also] || 0) + 1; }
   diary(`You buy ${it.label}.`);
   return true;
@@ -187,7 +190,7 @@ function scrambleApp() {
 }
 function playGame(a) { const M = S.me, day = S.week * 7 + (M.wk ? M.wk.day : 0); if (M.playD === day) return false; M.playD = day; M.stress = clamp(M.stress - clamp(a.score || 1, 1, 4), 0, 100); return true; }
 function storeApp() {
-  const M = S.me;
+  const M = S.me; if (typeof storeHTML === 'function') return storeHTML();
   return `<p class="small muted">Games for the bad days; tools that make your work better.</p><div class="shop">${Object.entries(SHOP).map(([k, it]) => { const own = (M.owned2 || []).includes(k); return `<div class="sitem"><b>${esc(it.label)}</b><p class="small">${esc(it.d)}</p>${own ? '<span class="good small">Owned</span>' : `<button class="btn-s" data-buyapp="${k}" ${M.cash < usd(it.price) ? 'disabled' : ''}>Buy ${fmtCash(usd(it.price))}</button>`}</div>`; }).join('')}</div>`;
 }
 function appWindow2(k) {
@@ -209,6 +212,8 @@ function computerClick(t) {
   const d = t.dataset;
   if (typeof msgClick === 'function' && msgClick(t)) return true;
   if (typeof depthClick === 'function' && depthClick(t)) return true;
+  if (typeof relicClick === 'function' && relicClick(t)) return true;
+  if (typeof gamesClick === 'function' && gamesClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
   if (typeof osFoldClick === 'function' && osFoldClick(t)) return true;
   if (typeof libClick === 'function' && libClick(t)) return true;
@@ -262,4 +267,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

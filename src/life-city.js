@@ -30,7 +30,7 @@ const HOOD_KINDS = [
 // This hub's listings, the same every visit: six homes across the range, each in a named neighbourhood.
 function listingsIn(hub) {
   const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 3) >>> 0), places = HUBS[hub].places || ['the Heights', 'the Flats', 'Old Town'];
-  return ['couch', 'shared', 'studio', 'own', 'loft', 'house'].map((life, i) => { const hood = HOOD_KINDS[Math.floor(r() * HOOD_KINDS.length)], place = places[Math.floor(r() * places.length)];
+  return ['couch', 'shared', 'studio', 'own', 'loft', 'house', 'penthouse', 'beach', 'estate'].filter(l => ORIGIN.life[l]).map((life, i) => { const hood = HOOD_KINDS[Math.floor(r() * HOOD_KINDS.length)], place = places[Math.floor(r() * places.length)];
     return { i, life, hood: hood.k, where: `${place}, ${hood.name}`, rent: Math.round(ORIGIN.life[life].rent * (.85 + r() * .35) / 10) * 10 }; });
 }
 function hoodFx() { const M = S.me; return (HOOD_KINDS.find(h => h.k === M.hood) || { fx: {} }).fx; }
@@ -48,7 +48,7 @@ function moveHome(a) {
 }
 function buyVehicle(a) {
   const M = S.me, V = VEHICLES[a.v];
-  if (!V || M.vehicle === a.v || M.cash < usd(V.price)) return false;
+  if (!V || M.vehicle === a.v || (V.from && S.year < V.from) || M.cash < usd(V.price)) return false;
   const old = VEHICLES[M.vehicle || 'transit'];
   M.cash -= usd(V.price) - Math.round(usd(old.price) * .4);   // trade in the old one
   M.vehicle = a.v;

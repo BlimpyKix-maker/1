@@ -131,6 +131,7 @@ function bzValue(it) {
   const yrs = (S.week - it.w) / 52, mo = Math.floor(S.week / 4), n = hashRand((it.seed || 1) * 31 + mo)();
   if (it.film !== undefined) { const f = S.films[it.film]; return Math.round(lotBase(f, it.kind) * (1 + .06 * yrs) * (.8 + n * .45)); }
   const B = BZ_BY[it.k]; if (!B || !B.collect) return 0;
+  if (B.drift !== undefined) return Math.round(B.price * Math.max(.05, 1 + B.drift * yrs) * (1 - B.vol + n * 2 * B.vol));
   return Math.round(B.price * (it.k === 'art' ? (.4 + n * 1.6) * (1 + .1 * yrs) : it.k === 'wine' ? (1 + .08 * yrs) * (.85 + n * .3) : (.8 + .04 * yrs) * (.9 + n * .2)));
 }
 function bazaarAct(a) {
@@ -138,7 +139,7 @@ function bazaarAct(a) {
   if (a.k === 'buy') {
     let it;
     if (/^lot/.test(a.item)) { const L = bzLots().find(x => x.id === a.item); if (!L || M.bz.some(x => x.lot === L.id)) return false; it = { k: 'lot', lot: L.id, film: L.film, kind: L.kind, name: L.name, price: L.price }; }
-    else { const B = BZ_BY[a.item]; if (!B) return false; if ((B.fx || B.once || B.cat === 'luxury') && B.cat !== 'courses' && M.bz.some(x => x.k === B.k && !x.sold)) return false; it = { k: B.k, name: B.name, price: B.price }; }
+    else { const B = BZ_BY[a.item]; if (!B || B.cat === 'relics' || (typeof bzEra === 'function' && !bzEra(B)) || (B.cat === 'drops' && !(typeof bzDropOn === 'function' && bzDropOn(B.k)))) return false; if ((B.fx || B.once || B.collect || B.cat === 'luxury') && B.cat !== 'courses' && M.bz.some(x => x.k === B.k && !x.sold)) return false; it = { k: B.k, name: B.name, price: B.price }; }
     const cost = usd(it.price); if (!(cost > 0) || M.cash < cost) return false;
     M.cash -= cost; const B = BZ_BY[it.k] || {};
     const own = { id: M.seq++, k: it.k, name: it.name, w: S.week, paid: cost, seed: M.seq * 7 + 3 };
@@ -169,16 +170,20 @@ function bazaarWeek() {
   for (const it of (M.bz || []).filter(x => !x.sold && !x.used)) {
     const fx = (BZ_BY[it.k] || {}).fx; if (!fx) continue;
     if (fx.stress) M.stress = clamp(M.stress + fx.stress, 0, 100);
+    if (fx.energy) M.energy = clamp(M.energy + fx.energy, 0, 100);
+    if (fx.standing) me.standing = clamp(me.standing + fx.standing, 0, 100);
     for (const k in fx.grow || {}) if (k in me.sk || k in me.mind) growSub(me, k, fx.grow[k]);
   }
 }
 function bazaarApp() {
   const M = S.me, tab = UI.bzt || 'gear', own = (M.bz || []).filter(x => !x.sold);
-  const tabs = Object.entries(BAZAAR).map(([k, c]) => [k, c.label]).concat([['lots', '🏺 Collectibles'], ['mine', `📦 Yours (${own.length})`]]);
+  const tabs = Object.entries(BAZAAR).filter(([k]) => k !== 'drops').map(([k, c]) => [k, c.label]).concat(typeof bzDropsHTML === 'function' ? [['drops', '🆕 Drops']] : [], [['lots', '🎞️ Auction lots']], typeof relicsHTML === 'function' ? [['relics', '🏺 Relics']] : [], [['mine', `📦 Yours (${own.length})`]]);
   let body;
-  if (tab === 'lots') body = `<p class="muted small">Auction lots this month. Values move with the market and with how often a film is talked about; the auction house takes 12% when you sell.</p><div class="bzgrid">${bzLots().map(L => { const have = (M.bz || []).some(x => x.lot === L.id); return `<div class="bzc"><div class="bzi">${{ poster: '🖼️', script: '📜', prop: '🗝️', still: '🎞️' }[L.kind]}</div><b>${esc(L.name)}</b><span class="muted small">${yearOf(S.films[L.film].rel)} · <a href="#" class="lk" data-go="film:${L.film}">about the film</a></span><span class="bzp">${fmtCash(usd(L.price))}</span><button class="btn-s" data-bz="buy:${L.id}" ${have || M.cash < usd(L.price) ? 'disabled' : ''}>${have ? 'Yours' : 'Bid and win'}</button></div>`; }).join('')}</div>`;
+  if (tab === 'drops') body = bzDropsHTML();
+  else if (tab === 'relics') body = relicsHTML();
+  else if (tab === 'lots') body = `<p class="muted small">Auction lots this month. Values move with the market and with how often a film is talked about; the auction house takes 12% when you sell.</p><div class="bzgrid">${bzLots().map(L => { const have = (M.bz || []).some(x => x.lot === L.id); return `<div class="bzc"><div class="bzi">${{ poster: '🖼️', script: '📜', prop: '🗝️', still: '🎞️' }[L.kind]}</div><b>${esc(L.name)}</b><span class="muted small">${yearOf(S.films[L.film].rel)} · <a href="#" class="lk" data-go="film:${L.film}">about the film</a></span><span class="bzp">${fmtCash(usd(L.price))}</span><button class="btn-s" data-bz="buy:${L.id}" ${have || M.cash < usd(L.price) ? 'disabled' : ''}>${have ? 'Yours' : 'Bid and win'}</button></div>`; }).join('')}</div>`;
   else if (tab === 'mine') body = own.length ? `<table class="grid small"><thead><tr><th>Item</th><th>Paid</th><th>Worth now</th><th></th></tr></thead><tbody>${own.map(it => { const B = BZ_BY[it.k] || {}, coll = it.film !== undefined || B.collect, v = coll ? usd(bzValue(it)) : null; return `<tr><td>${esc(it.name)}${it.used ? ' <span class="muted">(used)</span>' : ''}</td><td>${fmtCash(it.paid)}</td><td>${v !== null ? `<b class="${v >= it.paid ? 'up' : 'down'}">${fmtCash(v)}</b>` : '<span class="muted">–</span>'}</td><td>${it.used ? '' : `<button class="btn-s ghost" data-bz="sell:${it.id}">${coll ? 'Sell' : 'Sell second-hand'}</button>`}</td></tr>`; }).join('')}</tbody></table>` : '<p class="muted">You don\'t own anything from here yet.</p>';
-  else body = `<div class="bzgrid">${Object.entries(BAZAAR[tab].items).map(([k, B]) => { const have = (M.bz || []).some(x => x.k === k && !x.sold) && tab !== 'courses'; return `<div class="bzc"><b>${esc(B.name)}</b><span class="muted small">${esc(B.d)}</span><span class="bzp">${fmtCash(usd(B.price))}</span><button class="btn-s" data-bz="buy:${k}" ${have || M.cash < usd(B.price) ? 'disabled' : ''}>${have ? 'Owned' : 'Buy'}</button></div>`; }).join('')}</div>`;
+  else body = `<div class="bzgrid">${Object.entries((BAZAAR[tab] || BAZAAR.gear).items).filter(([, B]) => typeof bzEra !== 'function' || bzEra(B)).map(([k, B]) => { const have = (M.bz || []).some(x => x.k === k && !x.sold) && tab !== 'courses'; return `<div class="bzc"><b>${esc(B.name)}</b><span class="muted small">${esc(B.d)}</span><span class="bzp">${fmtCash(usd(B.price))}</span><button class="btn-s" data-bz="buy:${k}" ${have || M.cash < usd(B.price) ? 'disabled' : ''}>${have ? 'Owned' : 'Buy'}</button></div>`; }).join('')}</div>`;
   return `<div class="bazaar"><p class="bf-row">${tabs.map(([k, l]) => `<button class="pill${tab === k ? ' on' : ''}" data-bzt="${k}">${l}</button>`).join('')} <span class="muted small" style="margin-left:auto">Balance ${fmtCash(M.cash)}</span></p>${body}</div>`;
 }
 function depthClick(t) {
