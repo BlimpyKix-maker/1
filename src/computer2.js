@@ -215,6 +215,7 @@ function computerClick(t) {
   if (typeof relicClick === 'function' && relicClick(t)) return true;
   if (typeof chartClick === 'function' && chartClick(t)) return true;
   if (typeof boardroomClick === 'function' && boardroomClick(t)) return true;
+  if (typeof shortsClick === 'function' && shortsClick(t)) return true;
   if (typeof gamesClick === 'function' && gamesClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
   if (typeof osFoldClick === 'function' && osFoldClick(t)) return true;
@@ -269,4 +270,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-board],[data-brt],[data-cht],[data-chpg],[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-sht],[data-board],[data-brt],[data-cht],[data-chpg],[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

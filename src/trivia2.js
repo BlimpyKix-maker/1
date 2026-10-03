@@ -215,6 +215,7 @@ function extraFilmTrivia(f) {
 function extraPersonTrivia(p) {
   const r = hashRand(p.id * 2741 + 31), out = [], J = JOB_NOTES[p.role];
   if (J && !p.catId) out.push(['f', J[Math.floor(r() * J.length)], 9]);
+  if (p.role === 'director' && typeof shortsBy === 'function') for (const s of shortsBy(p.id).slice(0, 2)) out.push(['f', `Before features: ${s.title}, a short that ${s.won ? 'won the ' + SHORT_FEST[s.fk].prize + ' at' : 'played'} ${SHORT_FEST[s.fk].name} in ${s.y}.`, 3]);
   if (!p.catId && p.standing > 10 && r() < .6) out.push(['r', RUMOURS_PERSON[Math.floor(r() * RUMOURS_PERSON.length)], 17]);
   return out;
 }

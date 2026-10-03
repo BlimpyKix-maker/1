@@ -686,6 +686,7 @@ function closeWeek(a) {
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof shopWeek === 'function') shopWeek();
   if (typeof boardWeek === 'function') boardWeek();
+  if (typeof shortWeek === 'function') shortWeek();
   if (typeof achWeek === 'function') achWeek();
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
@@ -973,6 +974,7 @@ function resolvePick(it, k) {
   if (typeof sponsorPick === 'function' && sponsorPick(it, k)) return true;
   if (typeof corpPick === 'function' && corpPick(it, k)) return true;
   if (typeof boardPick === 'function' && boardPick(it, k)) return true;
+  if (typeof shortPick === 'function' && shortPick(it, k)) return true;
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
   if (typeof currPick === 'function' && currPick(it, k)) return true;
   if (it.kind === 'agentoffer') {

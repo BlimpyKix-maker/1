@@ -78,9 +78,10 @@ function releaseWork(a) {
     w.v0 = Math.round(fol * T.eng + disc); w.z = z; w.df = w.v0 > 0 ? disc / w.v0 : 1;   // only newcomers become followers
     if (k.type === 'score') w.v0 = Math.max(0, Math.round((q - 35) / 12 + z));
   }
+  if (k.type === 'short' && typeof shortRelease === 'function') shortRelease(w);
   (M.works = M.works || []).push(w);
   M.make = null;
-  diary(`You release ${w.title}${T.plat === 'stage' ? '' : ' on ' + platName(T.plat)}.`);
+  diary(`You release ${w.title}${T.plat === 'stage' ? '' : T.plat === 'circuit' ? ' to the festival circuit' : ' on ' + platName(T.plat)}.`);
   if (T.plat === 'stage') inbox('note', `${w.title}: the run`, `Twelve nights in a ${k.type === 'musical' ? '180' : '90'}-seat room, ${Math.round(w.fill * 100)}% full on average. Your share of the door: ${fmtCash(w.earned)}${cost ? ` against ${fmtCash(cost)} in costs` : ''}.${w.pickup ? ' And a theatre wants to stage it properly: an advance on royalties is on its way.' : w.fill < .3 ? ' Some nights there were more people on stage than in the seats.' : ''}`);
   if (w.q >= 85) milestone(`Released ${w.title} (${T.label.toLowerCase()})`, 'write');
   return true;
@@ -91,7 +92,7 @@ function mediaWeek() {
   const M = S.me, me = ME(); if (!M.works) return;
   M.fol = M.fol || {};
   for (const w of M.works) {
-    if (w.plat === 'stage' || w.done) continue;
+    if (w.plat === 'stage' || w.plat === 'circuit' || w.done) continue;
     const T = WORK_TYPES[w.type], age = S.week - w.rel, P0 = PLATFORMS[w.plat];
     const units = Math.round(w.v0 * Math.pow(DECAY[w.type] || .6, age) + (age > 0 ? w.v0 * .01 * (w.q / 60) : 0));
     if (units < 1 && age > 8) { w.done = 1; continue; }

@@ -131,6 +131,7 @@ function schoolWeek(L, gain) {
   if (sc.done >= P0.weeks) {
     if (P0.deg && !M.degrees.includes(P0.deg)) M.degrees.push(P0.deg);
     if (typeof schoolGraduate === 'function') schoolGraduate(sc);
+    if ((P0.deg === 'mfa' || P0.deg === 'ba') && typeof thesisShort === 'function') thesisShort(sc);
     me.standing = clamp(me.standing + (P0.deg === 'mfa' ? 3 : 1) + (sc.at && SCHOOL_BY[sc.at] ? [0, 3, 1.5, 0][SCHOOL_BY[sc.at][4]] : 0), 0, 100);
     milestone(`Graduated: ${(sc.at ? P0.label : P0.label.toLowerCase())} in ${CRAFTS[sc.craft].label.toLowerCase()}`, 'school');
     inbox('news', 'Graduation', `You finish ${(sc.at ? P0.label : P0.label.toLowerCase())} in ${CRAFTS[sc.craft].label.toLowerCase()}.${P0.deg ? ' The certificate goes on the wall, and on every application.' : ''}`);
