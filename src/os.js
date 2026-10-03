@@ -58,8 +58,9 @@ function osHome() {
 function osNetWorth() {
   const M = S.me, shares = Object.entries(M.port || {}).reduce((t, [id, n]) => t + (n > 0 && S.companies[+id] && S.companies[+id].closed === null && typeof mktPrice === 'function' ? mktPrice(S.companies[+id]) * n : 0), 0);
   const things = (M.bz || []).filter(x => !x.sold && (x.film !== undefined || (BZ_BY[x.k] || {}).collect)).reduce((t, x) => t + usd(bzValue(x)), 0) + (M.trophies || []).filter(t => !t.sold).reduce((t, x) => t + (typeof trophyValue === 'function' ? trophyValue(x) : 0), 0);
-  const debt = (M.debt || 0) + (M.shark || 0) + Object.values(M.loans || {}).reduce((t, l) => t + l.amt, 0);
-  return { shares: Math.round(shares), things: Math.round(things), debt, total: Math.round(M.cash + shares + things - debt) };
+  const B = M.bank || { sav: 0, cds: [], loan: 0 }, banked = B.sav + B.cds.reduce((t, c) => t + c.amt, 0), sec = typeof sectorValue === 'function' ? sectorValue() : 0;
+  const debt = (M.debt || 0) + (M.shark || 0) + Object.values(M.loans || {}).reduce((t, l) => t + l.amt, 0) + Math.round(B.loan || 0);
+  return { shares: Math.round(shares + sec), things: Math.round(things), banked: Math.round(banked), debt, total: Math.round(M.cash + banked + shares + sec + things - debt) };
 }
 function osJobs() {
   const M = S.me, q = (UI.cq || '').toLowerCase(), slots = appSlots(), picked = [...UI.apps].filter(id => M.board.some(p => p.id === id)).length;
@@ -92,7 +93,7 @@ function osBank() {
   return `<div class="os-kpis">${kpi('Balance', fmtCash(M.cash), M.cash < 0 ? 'bad' : '')}${kpi('Net worth', fmtCash(nw.total))}${kpi('Shares', fmtCash(nw.shares))}${kpi('Collectibles & trophies', fmtCash(nw.things))}${kpi('Owed', fmtCash(nw.debt), nw.debt ? 'bad' : '')}${kpi('Runway', runway + ' wk', runway < 4 ? 'bad' : '')}</div>
    <div class="os-grid">${osCard('Every week', `<ul class="os-list"><li><b>Rent</b><span class="muted">${esc(life.label)}</span><span>${fmtCash(rent)}</span></li><li><b>Getting around</b><span class="muted">${esc(VEHICLES[M.vehicle || 'transit'].label)}</span><span>${fmtCash(car)}</span></li>${M.upkeep ? `<li><b>Upkeep</b><span class="muted">home and things</span><span>${fmtCash(M.upkeep)}</span></li>` : ''}${M.allowance ? `<li><b>Allowance</b><span class="muted">from home</span><span class="good">+${fmtCash(M.allowance)}</span></li>` : ''}${Object.entries(M.loans || {}).map(([id, l]) => `<li><b>Owe ${esc(P(+id).name)}</b><span class="muted">since ${fmtDate(l.w, true)}</span><span class="bad">${fmtCash(l.amt)}</span></li>`).join('')}</ul>${c ? `<p class="small">${esc(c.name)} holds ${fmtCash(Math.round(c.cash * 1e6))}.</p>` : ''}`)}
    ${osCard('Statement', `<ul class="os-list">${money.map(d => `<li><time class="muted">${fmtDate(d.w, true)}</time><span>${esc(d.t.replace(/^Money: /, ''))}</span></li>`).join('') || '<li class="muted">Nothing yet.</li>'}</ul>`, 'wide')}
-   ${osCard('Grow it', '<p class="small">Shares pay dividends; collectibles drift and appreciate; cash just sits there.</p><button class="os-btn" data-app="ticker">📈 The Bourse</button> <button class="os-btn" data-app="bazaar">🏷️ Bazaar</button>')}</div>`;
+   ${typeof bankHTML === 'function' ? '</div>' + bankHTML() + '<div class="os-grid">' : ''}${osCard('Grow it', '<p class="small">Shares pay dividends; collectibles drift and appreciate; cash just sits there.</p><button class="os-btn" data-app="ticker">📈 The Bourse</button> <button class="os-btn" data-app="bazaar">🏷️ Bazaar</button>')}</div>`;
 }
 function osClick(t) {
   const d = t.dataset;

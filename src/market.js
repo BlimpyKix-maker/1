@@ -25,7 +25,7 @@ function mktBar(c, w) {
   // noise: a slow mean-reverting wander (sum of a few weekly shocks) plus this week's shock and its events
   let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand(c.id * 7919 + (w - i) * 31)() - .5) * v * (1 - i / 7);
   const ev = eventsAt(c, w), jump = ev.reduce((s, e) => s + e[1], 0);
-  const close = Math.max(.05, anchor * (1 + wander + jump)), open = Math.max(.05, close / (1 + (r() - .5) * v * 1.4 + jump));
+  const close = Math.max(.05, anchor * (1 + wander + jump) * (typeof macroAt === 'function' ? Math.pow(macroAt(w), betaOf(c)) : 1)), open = Math.max(.05, close / (1 + (r() - .5) * v * 1.4 + jump));
   const high = Math.max(open, close) * (1 + r() * v * .6), low = Math.min(open, close) * (1 - r() * v * .6), vol = Math.round(sharesOf(c) * 1e6 * (.004 + r() * .01 + Math.abs(jump) * .2));
   const o = { w, o: open, c: close, h: high, l: low, v: vol, ev };
   MKT.cache.set(k, o); return o;
@@ -42,6 +42,7 @@ function tradeAct(a) {
   if (n > 0) { const cost = Math.round(px * n) + fee; if (M.cash < cost || px <= 0) return false; M.cash -= cost; M.port[a.co] = (M.port[a.co] || 0) + n; M.portCost[a.co] = (M.portCost[a.co] || 0) + cost; }
   else { const have = M.port[a.co] || 0, k = Math.min(have, -n); if (!k) return false; M.cash += Math.round(px * k) - fee; M.portCost[a.co] = Math.round((M.portCost[a.co] || 0) * (have - k) / have); M.port[a.co] = have - k; }
   (M.trades = M.trades || []).push({ w: S.week, co: a.co, n: n > 0 ? n : -Math.min(M.port[a.co] + (-n), -n), px: +px.toFixed(2) }); if (M.trades.length > 60) M.trades.shift();
+  if (n > 0 && typeof noteInsider === 'function') noteInsider(a.co, n);
   return true;
 }
 // dividends from the big studios, each quarter
@@ -63,13 +64,16 @@ const pctS = v => `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '
 function marketApp() {
   const M = S.me, T = UI.mkt = UI.mkt || { tab: 'market', sel: null, q: 10 }, L = listedCos();
   const idx = indexVal(S.week), idxW = indexVal(S.week - 1) || idx || 1, idxY = indexVal(S.week - 52) || idx || 1;
-  const tabs = [['market', 'Market'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['news', 'Market news']];
+  const tabs = [['market', 'Studios'], ['sectors', 'Sectors & funds'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
   const head = `<div class="bourse-h"><span class="bourse-logo">BOURSE</span><span><b>BOX-50</b> ${idx.toFixed(1)} ${pctS((idx / idxW - 1) * 100)} <span class="muted small">1Y ${pctS((idx / Math.max(1e-6, idxY) - 1) * 100)}</span></span>${[['box', '🎬 Box office'], ['music', '🎵 Music'], ['video', '📺 Online video'], ['pod', '🎙️ Podcasts']].map(([k, l]) => { const a = fieldIndex(k, S.week - 4), b = fieldIndex(k, S.week); return a > 0 ? `<span class="small">${l} ${pctS((b / a - 1) * 100)}</span>` : ''; }).join('')}</div>
    <div class="bf-row">${tabs.map(([k, l]) => `<button class="pill${T.tab === k ? ' on' : ''}" data-mkt="tab:${k}">${l}</button>`).join('')}</div>`;
   if (T.sel !== null && S.companies[T.sel]) return head + stockPage(S.companies[T.sel]);
   const row = c => { const n = (M.port || {})[c.id] || 0, star = (M.watch || []).includes(c.id); return `<tr><td><button class="linkish" data-mkt="star:${c.id}" title="Watchlist">${star ? '★' : '☆'}</button> <a href="#" class="lk" data-mkt="sel:${c.id}"><b>${esc(tickerOf(c))}</b></a></td><td class="small">${esc(c.name)}</td><td>${spark(c)}</td><td class="n" data-v="${mktPrice(c)}">$${mktPrice(c).toFixed(2)}</td><td class="n" data-v="${chg(c, 1)}">${pctS(chg(c, 1))}</td><td class="n" data-v="${chg(c, 13)}">${pctS(chg(c, 13))}</td><td class="n" data-v="${chg(c, 52)}">${pctS(chg(c, 52))}</td><td class="n" data-v="${mcap(c)}">${fmtM(mcap(c))}</td><td class="n">${n || ''}</td></tr>`; };
   const table = list => `<div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">3M</th><th class="n">1Y</th><th class="n">Mkt cap</th><th class="n">Own</th></tr></thead><tbody>${list.map(row).join('') || '<tr><td colspan="9" class="empty">Nothing here yet.</td></tr>'}</tbody></table></div>`;
   if (T.tab === 'watch') return head + table(L.filter(c => (M.watch || []).includes(c.id)));
+  if (T.tab === 'sectors' && typeof sectorsHTML === 'function') return head + sectorsHTML();
+  if (T.tab === 'tips' && typeof tipsHTML === 'function') return head + tipsHTML();
+  if (T.tab === 'econ' && typeof economyHTML === 'function') return head + economyHTML();
   if (T.tab === 'port') {
     const pos = Object.entries(M.port || {}).filter(([, n]) => n > 0).map(([id, n]) => [S.companies[+id], n]), val = pos.reduce((t, [c, n]) => t + mktPrice(c) * n, 0), cost = pos.reduce((t, [c]) => t + ((M.portCost || {})[c.id] || 0), 0);
     return head + `<div class="kpis mini"><div><span>Value</span><b>${fmtCash(Math.round(val))}</b></div><div><span>Cost</span><b>${fmtCash(Math.round(cost))}</b></div><div><span>Gain</span><b class="${val >= cost ? 'good' : 'bad'}">${fmtCash(Math.round(val - cost))}</b></div><div><span>Cash</span><b>${fmtCash(M.cash)}</b></div></div>

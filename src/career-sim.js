@@ -684,6 +684,7 @@ function closeWeek(a) {
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof achWeek === 'function') achWeek();
   if (typeof criticWeek === 'function') criticWeek();
+  if (typeof bankWeek === 'function') bankWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -1015,6 +1016,8 @@ function applyAct(a) {
     case 'startwork': return startWork(a);
     case 'mail': return mailAct(a);
     case 'trade': return tradeAct(a);
+    case 'bank': return typeof bankAct === 'function' && bankAct(a);
+    case 'strade': return typeof sTrade === 'function' && sTrade(a);
     case 'session': return appSession(a);
     case 'play': return playGame(a);
     case 'buyapp': return buyApp(a);
