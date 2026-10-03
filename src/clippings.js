@@ -79,12 +79,14 @@ const AMBITIONS = [
 ];
 function ambitionWeek() {
   const M = S.me, me = ME(); M.amb = M.amb || {};
+  const got = [];
   for (const A of AMBITIONS) {
     if (M.amb[A.k] !== undefined) continue;
-    const [c, n] = A.p(); if (c < n) continue;
-    M.amb[A.k] = S.week;
-    inbox('note', `Ambition reached: ${A.t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. Your reward is waiting on the Standing page. ${AMBITIONS.find(x => M.amb[x.k] === undefined) ? 'Next: ' + AMBITIONS.find(x => M.amb[x.k] === undefined).t.toLowerCase() + '.' : 'You\'ve done everything you set out to do. Time for bigger dreams.'}`);
+    let c = 0, n = 1; try { [c, n] = A.p(); } catch (e) { continue; } if (!(c >= n)) continue;
+    M.amb[A.k] = S.week; got.push(A);
   }
+  if (got.length === 1) inbox('note', `Ambition reached: ${got[0].t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. Your reward is waiting on the Standing page.`);
+  else if (got.length > 1) inbox('note', `${got.length} ambitions reached`, `${got.slice(0, 8).map(A => A.t).join(' · ')}${got.length > 8 ? ` and ${got.length - 8} more` : ''}. The rewards are waiting on the Standing page.`);
 }
 function ambitionsHTML() {
   const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined), next = AMBITIONS.filter(A => (M.amb || {})[A.k] === undefined).slice(0, 3);

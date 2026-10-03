@@ -71,6 +71,9 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('curric4', '// ================= Apple Box — World Core UI ================='),
                      ('curric5', '// ================= Apple Box — World Core UI ================='),
                      ('curric6', '// ================= Apple Box — World Core UI ================='),
+                     ('curric7', '// ================= Apple Box — World Core UI ================='),
+                     ('curric8', '// ================= Apple Box — World Core UI ================='),
+                     ('curric9', '// ================= Apple Box — World Core UI ================='),
                      ('numbers', '// ================= Apple Box — World Core UI ================='),
                      ('awards3', '// ================= Apple Box — World Core UI ================='),
                      ('careers', '// ================= Apple Box — World Core UI ================='),
@@ -87,6 +90,7 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('osfold', '// ================= Apple Box — World Core UI ================='),
                      ('shop2', '// ================= Apple Box — World Core UI ================='),
                      ('charts2', '// ================= Apple Box — World Core UI ================='),
+                     ('amb2', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

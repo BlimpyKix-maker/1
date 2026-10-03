@@ -55,12 +55,17 @@ function ambRow(A) {
   const M = S.me, done = (M.amb || {})[A.k] !== undefined, claimed = (M.ambClaim || {})[A.k], pinned = (M.ambPin || []).includes(A.k), [c, n] = A.p(), pct = clamp(c / n, 0, 1);
   return `<div class="ambrow${done ? ' done' : ''}"><span>${done ? (claimed ? '✓ ' : '★ ') : ''}${esc(A.t)}</span><span class="tbar"><i style="width:${Math.round((done ? 1 : pct) * 100)}%"></i></span><span class="small muted">${done ? (claimed ? 'claimed ' + fmtDate(claimed, true) : 'reached!') : A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n).toLocaleString() + ' / ' + n.toLocaleString()}</span><span>${done && !claimed ? `<button class="btn-s" data-ambclaim="${A.k}">Claim ${'✦'.repeat(Math.min(3, Math.ceil(A.rw / 3)))}</button>` : !done ? `<button class="linkish" data-ambpin="${A.k}" title="${pinned ? 'Unpin' : 'Pin to keep it in view'}">${pinned ? '📌 Pinned' : 'Pin'}</button>` : ''}</span></div>`;
 }
+// Within a group: rewards waiting first, then the goals you're closest to, then what's done.
+function ambSorted(L) {
+  const M = S.me, rank = A => { const done = (M.amb || {})[A.k] !== undefined; if (done) return (M.ambClaim || {})[A.k] ? 3 : -1; let c = 0, n = 1; try { [c, n] = A.p(); } catch (e) { /* not ready */ } return 1 - clamp(c / n, 0, 1); };
+  return L.map(A => [A, rank(A)]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+}
 function ambitionsPage() {
   const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined).length, pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), cl = ambClaimable();
   return `<section class="panel amb"><h3>Ambitions <span class="count">${done} of ${AMBITIONS.length}</span></h3>
    ${cl.length ? `<div class="claimbar">✦ ${cl.length} reward${cl.length > 1 ? 's' : ''} waiting: ${cl.map(A => `<button class="btn-s" data-ambclaim="${A.k}">${esc(A.t)}</button>`).join(' ')}</div>` : ''}
    ${pins.length ? `<h4>📌 Pinned</h4>${pins.map(ambRow).join('')}` : '<p class="muted small">Pin up to three goals to keep them on your Today page.</p>'}
-   ${Object.entries(AMB_CAT).map(([c, l]) => { const L = AMBITIONS.filter(A => A.c === c); return L.length ? `<details class="ambcat"${c === 'start' || c === 'craft' ? ' open' : ''}><summary><b>${l}</b> <span class="count">${L.filter(A => (M.amb || {})[A.k] !== undefined).length} of ${L.length}</span></summary>${L.map(ambRow).join('')}</details>` : ''; }).join('')}
+   ${Object.entries(AMB_CAT).map(([c, l]) => { const L = ambSorted(AMBITIONS.filter(A => A.c === c)); return L.length ? `<details class="ambcat"${c === 'start' || c === 'craft' ? ' open' : ''}><summary><b>${l}</b> <span class="count">${L.filter(A => (M.amb || {})[A.k] !== undefined).length} of ${L.length}</span></summary>${L.map(ambRow).join('')}</details>` : ''; }).join('')}
    <p class="muted small">Reach a goal and its reward waits here: standing, some cash, energy back and stress off. Bigger goals, bigger rewards.</p></section>`;
 }
 function pinnedAmbHTML() { const M = S.me, pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), cl = ambClaimable(); if (!pins.length && !cl.length) return ''; return `<section class="panel"><h4>Your goals</h4>${cl.length ? `<p class="small">✦ <button class="linkish" data-dtab="standing">${cl.length} reward${cl.length > 1 ? 's' : ''} to claim</button></p>` : ''}${pins.map(ambRow).join('')}</section>`; }
