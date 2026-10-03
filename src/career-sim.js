@@ -684,6 +684,7 @@ function closeWeek(a) {
   if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof shopWeek === 'function') shopWeek();
+  if (typeof boardWeek === 'function') boardWeek();
   if (typeof achWeek === 'function') achWeek();
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
@@ -970,6 +971,7 @@ function resolvePick(it, k) {
   if (bidPick(it, k)) return true;
   if (typeof sponsorPick === 'function' && sponsorPick(it, k)) return true;
   if (typeof corpPick === 'function' && corpPick(it, k)) return true;
+  if (typeof boardPick === 'function' && boardPick(it, k)) return true;
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
   if (typeof currPick === 'function' && currPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
@@ -1055,6 +1057,7 @@ function applyAct(a) {
     case 'text': return textSomeone(a);
     case 'bazaar': return typeof bazaarAct === 'function' && bazaarAct(a);
     case 'relic': return typeof relicAct === 'function' && relicAct(a);
+    case 'board': return typeof boardAct === 'function' && boardAct(a);
     case 'email': return typeof emailAct === 'function' && emailAct(a);
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);
