@@ -41,8 +41,8 @@ function startWork(a) {
   diary(`You start a new ${T.label.toLowerCase()}: ${title}.`);
   return true;
 }
-const WT_A = ['Midnight', 'Paper', 'Golden', 'Static', 'Velvet', 'Neon', 'Quiet', 'Electric', 'Borrowed', 'Northern', 'Salt', 'Broken', 'Little', 'Summer', 'Glass'];
-const WT_B = ['Hearts', 'Radio', 'Season', 'Signals', 'Rooms', 'Weather', 'Machines', 'Ghosts', 'Letters', 'Lights', 'Roads', 'Dreams', 'Hours', 'Kings', 'Rivers'];
+const WT_A = ['Midnight', 'Paper', 'Golden', 'Static', 'Velvet', 'Neon', 'Quiet', 'Electric', 'Borrowed', 'Northern', 'Salt', 'Broken', 'Little', 'Summer', 'Glass', 'Crimson', 'Silver', 'Hollow', 'Wild', 'Blue', 'Burning', 'Sunday', 'Restless', 'Lucky', 'Faded', 'Secret', 'Lonely', 'Dirty', 'Sweet', 'Distant'];
+const WT_B = ['Hearts', 'Radio', 'Season', 'Signals', 'Rooms', 'Weather', 'Machines', 'Ghosts', 'Letters', 'Lights', 'Roads', 'Dreams', 'Hours', 'Kings', 'Rivers', 'Highway', 'Satellites', 'Strangers', 'Thunder', 'Mornings', 'Horses', 'Diamonds', 'Rebels', 'Echoes', 'Lovers', 'Avenue', 'Fever', 'Mirrors', 'Promises', 'Waves'];
 function workTitle(type, n) { const r = hashRand(S.me.id * 13 + n * 7 + type.length); const t = `${WT_A[Math.floor(r() * WT_A.length)]} ${WT_B[Math.floor(r() * WT_B.length)]}`; return type === 'podcast' ? `The ${t} Podcast, ep. ${((S.me.works || []).filter(w => w.type === 'podcast').length) + 1}` : type === 'blip' ? `${t.toLowerCase()} #${n + 1}` : t; }
 // A block of making: the project moves along; a good session (a roll) adds a little quality.
 function makeSession(L) {

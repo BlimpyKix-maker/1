@@ -377,7 +377,7 @@ h4 { font: 600 14px/1.2 var(--f-display); letter-spacing: .08em; text-transform:
 .rt-top { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 8px; } .rt-top > div { display: grid; } .rt-big { font: 700 34px var(--f-display); line-height: 1; } .rt-top span { font-size: 12px; color: var(--muted); } .rt-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; } .rt-list li { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: start; } .rt-list q { display: block; font-style: italic; } .rt-list small { color: var(--muted); } .rt-list li.famous q { font-weight: 600; } .rt-list li.mine { border-left: 3px solid var(--accent); padding-left: 6px; } .rt-s { font: 700 16px var(--f-data); text-align: center; border-radius: 6px; padding: 4px 0; background: var(--line); } .rt-s.good { background: #2D7A4C; color: #fff; } .rt-s.bad { background: #B0362A; color: #fff; } .rt-badge b { font-family: var(--f-data); } .rt-brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; } .rt-brand b { font: 800 24px var(--f-display); color: #F2B705; letter-spacing: .02em; } .rt-brand span { color: var(--muted); font-size: 12px; }
 .bank-f { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; } .bank-f input { width: 110px; }
 .os-page .os-pagebody { margin-top: 10px; } .os-page .os-pagebody .head h2 { color: #fff; } .os-page .os-pagebody .panel { background: var(--panel); border-color: var(--line); } .os .panel { color: var(--ink); }
-.fbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 10px; align-items: end; margin-bottom: 12px; } .fbar label { display: grid; gap: 3px; min-width: 0; } .fbar label > span { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); } .fbar select, .fbar input { width: 100%; box-sizing: border-box; background: var(--panel); color: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font: inherit; } .fbar .fbar-q { grid-column: span 2; } @media (max-width: 520px) { .fbar .fbar-q { grid-column: 1 / -1; } }
+.filt { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 10px; align-items: end; margin-bottom: 12px; } .filt label { display: grid; gap: 3px; min-width: 0; } .filt label > span { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); } .filt select, .filt input { width: 100%; box-sizing: border-box; background: var(--panel); color: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font: inherit; } .filt .filt-q { grid-column: span 2; } @media (max-width: 520px) { .filt .filt-q { grid-column: 1 / -1; } }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
 .filters select, .filters input { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; min-width: 0; max-width: 100%; }
 .filters input[type=search] { width: 240px; }
@@ -15984,8 +15984,8 @@ function startWork(a) {
   diary(`You start a new ${T.label.toLowerCase()}: ${title}.`);
   return true;
 }
-const WT_A = ['Midnight', 'Paper', 'Golden', 'Static', 'Velvet', 'Neon', 'Quiet', 'Electric', 'Borrowed', 'Northern', 'Salt', 'Broken', 'Little', 'Summer', 'Glass'];
-const WT_B = ['Hearts', 'Radio', 'Season', 'Signals', 'Rooms', 'Weather', 'Machines', 'Ghosts', 'Letters', 'Lights', 'Roads', 'Dreams', 'Hours', 'Kings', 'Rivers'];
+const WT_A = ['Midnight', 'Paper', 'Golden', 'Static', 'Velvet', 'Neon', 'Quiet', 'Electric', 'Borrowed', 'Northern', 'Salt', 'Broken', 'Little', 'Summer', 'Glass', 'Crimson', 'Silver', 'Hollow', 'Wild', 'Blue', 'Burning', 'Sunday', 'Restless', 'Lucky', 'Faded', 'Secret', 'Lonely', 'Dirty', 'Sweet', 'Distant'];
+const WT_B = ['Hearts', 'Radio', 'Season', 'Signals', 'Rooms', 'Weather', 'Machines', 'Ghosts', 'Letters', 'Lights', 'Roads', 'Dreams', 'Hours', 'Kings', 'Rivers', 'Highway', 'Satellites', 'Strangers', 'Thunder', 'Mornings', 'Horses', 'Diamonds', 'Rebels', 'Echoes', 'Lovers', 'Avenue', 'Fever', 'Mirrors', 'Promises', 'Waves'];
 function workTitle(type, n) { const r = hashRand(S.me.id * 13 + n * 7 + type.length); const t = `${WT_A[Math.floor(r() * WT_A.length)]} ${WT_B[Math.floor(r() * WT_B.length)]}`; return type === 'podcast' ? `The ${t} Podcast, ep. ${((S.me.works || []).filter(w => w.type === 'podcast').length) + 1}` : type === 'blip' ? `${t.toLowerCase()} #${n + 1}` : t; }
 // A block of making: the project moves along; a good session (a roll) adds a little quality.
 function makeSession(L) {
@@ -16254,21 +16254,33 @@ function mediaFigures(hub) {
     out.push({ name, field, kind, hub, fans: Math.round(Math.pow(10, 3 + r() * 3.4)), from: S.year - Math.floor(r() * 12) });
   }
   for (const [name, field, kind, h, from, to] of MEDIA_LEGENDS) if (h === hub || (HUBS[h] && HUBS[h].m === H.m && !HUBS[hub].lang.localeCompare(HUBS[h].lang))) out.push({ name, field, kind, hub: h, fans: 4e6 + (name.length * 7919 % 9) * 1e6, from, to, legend: 1 });
+  if (typeof moreFigures === 'function') out.push(...moreFigures(hub, out));
   return (S.mfig[hub] = out);
 }
 function activeFigures(hub, field) { return mediaFigures(hub).filter(x => (!field || x.field === field) && x.from <= S.year && (!x.to || x.to >= S.year)); }
 // ---- weekly charts: the city's figures, ranked by fans and a weekly hash; your releases if they're big enough ----
 function chartFor(field, hub) {
+  if (typeof chartAt === 'function') return chartAt(field, hub, S.week, 10);
   const M = S.me, all = mediaFigures(hub), L = activeFigures(hub, field).map(x => { const r = hashRand((x.name.length * 131 + S.week) * 7 + x.fans % 97)(); return { name: x.name, by: x.kind, score: x.fans * (.4 + r), title: workTitleFor(x, S.week), fid: `${hub}~${all.indexOf(x)}`, slot: Math.floor(S.week / 6) }; });
   const plat = { music: 'spinly', creator: 'vidwire', podcast: 'podhaus' }[field];
   if (M && plat) for (const w of (M.works || []).filter(w => WORK_TYPES[w.type].field === field && w.wk && w.wk.length && S.week - w.rel < 8)) L.push({ name: ME().name, by: 'you', score: w.wk[w.wk.length - 1] * 8, title: w.title, mine: 1 });
   return L.sort((a, b) => b.score - a.score).slice(0, 10);
 }
-function workTitleFor(x, w) { const r = hashRand(x.name.length * 977 + Math.floor(w / 6)); return x.field === 'podcast' ? x.name : `${WT_A[Math.floor(r() * WT_A.length)]} ${WT_B[Math.floor(r() * WT_B.length)]}`; }
+// Titles are seeded by the whole name (not its length), so two acts never share a discography.
+const WT_SOLO = ['Tell Me Twice', 'All Night Long Again', 'Don\'t Look Back Now', 'Slow Burn', 'Wildfire', 'Heartbeat Avenue', 'Overgrown', 'Satellite', 'Undertow', 'Afterglow', 'Holding Pattern', 'Paper Planes and Promises', 'Say It Like You Mean It', 'Rearview', 'Daylight Robbery', 'Fever Dream', 'Bad Habits, Good Intentions', 'Lighthouse', 'The Long Way Home', 'Sugar on the Radio', 'Cold Water', 'Wrong Number', 'Dance Like Nobody\'s Filming', 'Gravity', 'Old Flames', 'Cheap Champagne', 'Ten Feet Tall', 'Heavy Weather', 'Last Bus Home', 'Glow', 'Hurricane Season', 'Velvet Underground Car Park', 'Kiss the Sky Goodbye', 'Postcards', 'Fool\'s Gold', 'Static Love', 'Moonlighting', 'Nobody\'s Business', 'Sweet Disaster', 'Copper Sun'];
+const PLAY_A = ['The Glass', 'The Last', 'A Winter', 'The Lonely', 'The House of', 'The Ballad of', 'Death of a', 'The Importance of', 'Waiting for', 'A Streetcar Called', 'Cat on a Hot', 'The Night of the'];
+const PLAY_B = ['Mechanic', 'Salesgirl', 'Tin Shed', 'Gordon', 'Desire', 'Ironing', 'Lear', 'Bernarda', 'Being Elsewhere', 'Rain', 'Harbour', 'Orchard', 'Sisters', 'Garden', 'Ferryman', 'Inheritance'];
+function nameHash(s) { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function workTitleFor(x, w) {
+  if (x.field === 'podcast') return x.name;
+  const r = hashRand(nameHash(x.name) % 1e7 * 13 + Math.floor(w / 6) * 977), f = r(), pk = L => L[Math.floor(r() * L.length)];
+  if (x.field === 'stage') return f < .7 ? `${pk(PLAY_A)} ${pk(PLAY_B)}` : pk(WT_SOLO);
+  return f < .5 ? `${pk(WT_A)} ${pk(WT_B)}` : f < .85 ? pk(WT_SOLO) : `${pk(WT_A)} ${pk(WT_B)} (${pk(['Live', 'Remix', 'Acoustic', 'Radio Edit', 'Reprise', 'Night Version'])})`;
+}
 function viewCharts() {
   const hub = S.me ? S.me.hub : 'hollywood', F = [['music', `${platName('spinly')} top ten`], ['creator', `${platName('vidwire')} trending`], ['podcast', `${platName('podhaus')} top shows`], ['stage', 'On stage now']];
   return `<div class="head"><h2>Charts</h2><p class="lede">What ${esc(HUBS[hub].name)} is listening to, watching and queuing for this week. Your own releases chart if enough people find them.</p></div>
-   <div class="cols two">${F.filter(([f]) => f !== 'creator' || platOpen('vidwire')).map(([f, lab]) => { const C = chartFor(f, hub); return `<section class="panel"><h3>${esc(lab)}</h3><ol class="chart">${C.map((c, i) => `<li${c.mine ? ' class="mine"' : ''}><span class="cn">${i + 1}</span><span><b>${c.fid ? `<a href="#" class="lk" data-go="${f === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(f === 'podcast' ? c.name : c.title)}</a>` : esc(f === 'podcast' ? c.name : c.title)}</b><br><span class="muted small">${f === 'podcast' ? (c.mine ? 'your show' : 'podcast') : c.fid ? `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>` : esc(c.name)}${c.mine ? ' (you)' : ''}</span></span></li>`).join('') || '<li class="muted">Nothing charting.</li>'}</ol></section>`; }).join('')}</div>
+   <div class="cols two">${F.filter(([f]) => f !== 'creator' || platOpen('vidwire')).map(([f, lab]) => { const C = chartFor(f, hub); return `<section class="panel"><h3><a href="#" class="lk" data-go="chart:${f}~${hub}">${esc(lab)} ›</a></h3><ol class="chart">${C.map((c, i) => `<li${c.mine ? ' class="mine"' : ''}><span class="cn">${i + 1}</span><span><b>${c.fid ? `<a href="#" class="lk" data-go="${f === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(f === 'podcast' ? c.name : c.title)}</a>` : esc(f === 'podcast' ? c.name : c.title)}</b><br><span class="muted small">${f === 'podcast' ? (c.mine ? 'your show' : 'podcast') : c.fid ? `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>` : esc(c.name)}${c.mine ? ' (you)' : ''}</span></span></li>`).join('') || '<li class="muted">Nothing charting.</li>'}</ol></section>`; }).join('')}</div>
    <section class="panel"><h3>Companies in these fields</h3><div class="tw"><table class="grid"><thead><tr><th>Company</th><th>Type</th><th>Based in</th><th>Since</th><th></th></tr></thead><tbody>${MEDIA_COS.filter(c => c.f <= S.year).map(c => `<tr><td><b><a href="#" class="lk" data-go="mco:${MEDIA_COS.indexOf(c)}">${esc(c.n)}</a></b></td><td>${esc(MCO_TYPE[c.type])}</td><td>${esc(hubName(c.hub))}</td><td>${c.f}</td><td class="small muted">${esc(c.d)}</td></tr>`).join('')}</tbody></table></div></section>`;
 }
 // ---- awards for the other fields, every January ----
@@ -16602,6 +16614,7 @@ function computerClick(t) {
   if (typeof msgClick === 'function' && msgClick(t)) return true;
   if (typeof depthClick === 'function' && depthClick(t)) return true;
   if (typeof relicClick === 'function' && relicClick(t)) return true;
+  if (typeof chartClick === 'function' && chartClick(t)) return true;
   if (typeof gamesClick === 'function' && gamesClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
   if (typeof osFoldClick === 'function' && osFoldClick(t)) return true;
@@ -16656,7 +16669,7 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-cht],[data-chpg],[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
 // </computer2>
 // <mentor>
 // ---------------- Mentors, your films' stories, the year in entertainment ----------------
@@ -19606,7 +19619,7 @@ function viewFigure(id) {
   const peers = activeFigures(x.hub, x.field).filter(y => y.name !== x.name).slice(0, 6);
   return `<div class="head"><p class="eyebrow">${esc(FIELD_LABEL[x.field] || x.field)} · ${esc(KIND_LABEL[x.kind] || x.kind)} · ${esc(hubName(x.hub))}</p><h2>${esc(x.name)}</h2><p class="lede">${x.legend ? 'A legend of the form. ' : ''}Active since ${x.from}${x.to ? `, until ${x.to}` : ''}. ${Math.round(x.fans).toLocaleString()} fans${lab ? `, signed to ${mcoLink(lab[1])}` : ''}.${pos >= 0 ? ` Number ${pos + 1} on this week's chart.` : ''}</p></div>
    <div class="cols two"><section class="panel"><h3>${x.field === 'podcast' ? 'Episodes and seasons' : x.field === 'stage' ? 'Productions' : 'Releases'}</h3><ul class="plain">${rel.slice(0, 16).map(s => `<li>${songLink(x, s)} <span class="muted small">${fmtDate(s * 6, true)}</span></li>`).join('') || '<li class="muted">Nothing released yet.</li>'}</ul></section>
-   <section class="panel"><h3>Awards</h3>${aw.length ? `<ul class="plain">${aw.map(a => `<li>🏆 ${typeof bodyLink === 'function' ? bodyLink(a.show) : esc(a.show)} ${a.y}: ${esc(a.c)}</li>`).join('')}</ul>` : '<p class="muted small">No wins yet.</p>'}<h3>In the press</h3>${newsList(newsAbout(x.name))}<h3>Also in ${esc(hubName(x.hub))}</h3><p>${peers.map(y => figLink(y)).join(' · ') || '<span class="muted">Nobody else yet.</span>'}</p></section></div>`;
+   <section class="panel"><h3>Awards</h3>${aw.length ? `<ul class="plain">${aw.map(a => `<li>🏆 ${typeof bodyLink === 'function' ? bodyLink(a.show) : esc(a.show)} ${a.y}: ${esc(a.c)}</li>`).join('')}</ul>` : '<p class="muted small">No wins yet.</p>'}<h3>In the press</h3>${newsList(newsAbout(x.name))}<h3>Also in ${esc(hubName(x.hub))}</h3><p>${peers.map(y => figLink(y)).join(' · ') || '<span class="muted">Nobody else yet.</span>'}</p></section></div>${typeof figExtraHTML === 'function' ? figExtraHTML(x) : ''}`;
 }
 function viewSong(id) {
   const parts = String(id).split('~'), x = figAt(parts[0] + '~' + parts[1]), slot = +parts[2]; if (!x) return '<p class="muted">Not found.</p>';
@@ -19617,7 +19630,7 @@ function viewSong(id) {
   const unit = { music: 'streams', creator: 'views', podcast: 'downloads', stage: 'tickets sold' }[x.field] || 'plays';
   return `<div class="head"><p class="eyebrow">${esc(FIELD_LABEL[x.field] || '')} · ${fmtDate(slot * 6, true)}</p><h2>${esc(songTitle(x, slot))}</h2><p class="lede">By ${figLink(x)}${lab ? ` · ${mcoLink(lab[1])}` : ''} · ${x.field === 'stage' ? 'running time ' + (80 + Math.floor(r() * 70)) + ' min' : x.field === 'podcast' ? (20 + Math.floor(r() * 60)) + ' min episodes' : `${mins}:${String(secs).padStart(2, '0')}`}</p></div>
    <div class="kpis mini"><div><span>${unit}</span><b>${streams.toLocaleString()}</b></div><div><span>Chart peak</span><b>#${peak}</b></div><div><span>Weeks charting</span><b>${Math.max(1, Math.round((41 - peak) / 4))}</b></div></div>
-   <section class="panel"><h3>Credits</h3><p>${x.field === 'stage' ? 'Written by' : 'Written by'} ${figLink(x)}${writers.length ? ', ' + writers.map(pl).join(', ') : ''}${prod.length ? `<br>Produced by ${prod.map(pl).join(', ')}` : ''}</p>${lab && typeof coRef === 'function' ? (() => { const R = coRef('m' + lab[1]), O = orgChart(R), A = O.D.find(d => /A&R|Creative|Production|Artistic/.test(d.dept)), Mk = O.D.find(d => /Marketing/.test(d.dept)); return `<p class="small">At ${mcoLink(lab[1])}: ${A ? 'A&R ' + empLink(R, A.start + Math.floor(r() * Math.min(A.n, 20))) : ''}${Mk ? ' · marketing ' + empLink(R, Mk.start + Math.floor(r() * Math.min(Mk.n, 20))) : ''}</p>`; })() : ''}<h3>More by ${esc(x.name)}</h3><p>${figReleases(x).filter(s => s !== slot).slice(0, 6).map(s => songLink(x, s)).join(' · ')}</p></section>`;
+   <section class="panel"><h3>Credits</h3><p>${x.field === 'stage' ? 'Written by' : 'Written by'} ${figLink(x)}${writers.length ? ', ' + writers.map(pl).join(', ') : ''}${prod.length ? `<br>Produced by ${prod.map(pl).join(', ')}` : ''}${typeof songCrew === 'function' ? songCrew(x, slot).map(([R, n]) => `<br>${esc(staffAt(R, n).title)}: ${empLink(R, n)}`).join('') : ''}</p>${lab && typeof coRef === 'function' ? (() => { const R = coRef('m' + lab[1]), O = orgChart(R), A = O.D.find(d => /A&R|Creative|Production|Artistic/.test(d.dept)), Mk = O.D.find(d => /Marketing/.test(d.dept)); return `<p class="small">At ${mcoLink(lab[1])}: ${A ? 'A&R ' + empLink(R, A.start + Math.floor(r() * Math.min(A.n, 20))) : ''}${Mk ? ' · marketing ' + empLink(R, Mk.start + Math.floor(r() * Math.min(Mk.n, 20))) : ''}</p>`; })() : ''}<h3>More by ${esc(x.name)}</h3><p>${figReleases(x).filter(s => s !== slot).slice(0, 6).map(s => songLink(x, s)).join(' · ')}</p></section>`;
 }
 function viewMediaCo(i) {
   const c = MEDIA_COS[+i]; if (!c) return '<p class="muted">Not found.</p>';
@@ -19640,6 +19653,7 @@ function viewExtra(cur) {
   if (cur.kind === 'fig') return viewFigure(cur.id);
   if (cur.kind === 'song') return viewSong(cur.id);
   if (cur.kind === 'mco') return viewMediaCo(cur.id);
+  if (cur.kind === 'chart' && typeof chartPage === 'function') return chartPage(cur.id);
   if (cur.kind === 'work') return viewWork(cur.id);
   if (cur.kind === 'emp' && typeof viewEmployee === 'function') return viewEmployee(cur.id);
   if (cur.kind === 'staff' && typeof staffDirectoryHTML === 'function') { const R = coRef(cur.id); return R ? staffDirectoryHTML(R, true) : ''; }
@@ -20095,10 +20109,12 @@ function coRef(key) {
   key = String(key); const t = key[0], rest = key.slice(1);
   if (t === 'f') { const c = S.companies[+rest]; if (!c) return null; return { key, name: c.name, kind: 'film', tier: c.tier, hub: c.hub, founded: c.founded, closed: c.closed, c }; }
   if (t === 'm') { const c = MEDIA_COS[+rest]; if (!c) return null; return { key, name: c.n, kind: ['label', 'publisher', 'podcast', 'creator', 'theatre'].includes(c.type) ? c.type : 'label', tier: c.tier || 2, hub: c.hub, founded: c.f, m: c, mi: +rest }; }
+  if (t === 'x' && typeof freeCoRef === 'function') return freeCoRef(key);
   if (t === 'b') { const [name, hub] = rest.split('|'); const kind = typeof bizKind === 'function' ? bizKind(name)[1] : 'office'; const r = hashRand([...name].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) >>> 0); return { key, name, kind: 'biz', bk: BIZ_T[kind] ? kind : 'office', tier: 3, hub: HUBS[hub] ? hub : 'hollywood', founded: S.year - 2 - Math.floor(r() * 40) }; }
   return null;
 }
 function headcount(R) {
+  if (R.free) return freeHeadcount(R.field, R.hub);
   const r = hashRand([...R.key].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 11) >>> 0)();
   const base = { film: [0, 12000, 1800, 160], label: [0, 7000, 900, 120], publisher: [0, 1600, 300, 40], podcast: [0, 900, 220, 40], creator: [0, 260, 90, 25], theatre: [0, 480, 160, 45], biz: [0, 30, 18, 9] }[R.kind] || [0, 50, 30, 10];
   const n = base[clamp(R.tier || 3, 1, 3)] * (.75 + r * .5) * (R.closed !== null && R.closed !== undefined ? .15 : 1);
@@ -20112,7 +20128,7 @@ function orgChart(R) {
   const H = headcount(R), D = R.kind === 'biz' ? DEPTS.biz : DEPTS[R.kind] || DEPTS.film, out = []; let start = 0;
   for (const [dept, share] of D) {
     const n = dept === 'Executive Office' ? Math.min(12, Math.max(3, Math.round(H * share))) : Math.max(1, Math.round(H * share));
-    const lad = dept === 'Executive Office' ? null : R.kind === 'biz' ? null : LADDER_T.slice(0, clamp(Math.round(Math.log10(n + 1) * 3.2), 3, LADDER_T.length));
+    const lad = dept === 'Executive Office' || R.free ? null : R.kind === 'biz' ? null : LADDER_T.slice(0, clamp(Math.round(Math.log10(n + 1) * 3.2), 3, LADDER_T.length));
     let ranks = [];   // counts from the top rung down
     if (lad) { const L = lad.length, w = Array.from({ length: L }, (_, ri) => Math.pow(1.9, ri)), sw = w.reduce((x, y) => x + y, 0); let left = n; for (let ri = 0; ri < L; ri++) { const c = ri === L - 1 ? left : Math.max(1, Math.min(left - (L - 1 - ri), Math.round(n * w[ri] / sw))); ranks.push(c); left -= c; } }
     out.push({ dept, n, start, lad, ranks }); start += n;
@@ -20126,6 +20142,7 @@ function staffAt(R, n) {
   const d = O.D.find(x => n >= x.start && n < x.start + x.n), i = n - d.start, r = hashRand(([...R.key].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 3) >>> 0) + n * 2654435761 % 1e9);
   let title, rank;
   if (d.dept === 'Executive Office') { title = EXEC_T[i] || 'Executive Assistant'; rank = i < 2 ? 12 : 10; }
+  else if (R.free) { title = freeTitle(R, d, r); rank = 1 + Math.floor(r() * 5); }
   else if (R.kind === 'biz') { const T = BIZ_T[R.bk] || BIZ_T.office; title = n === 0 ? T[0] : T[1 + Math.floor(r() * (T.length - 1))]; rank = n === 0 ? 8 : d.dept === 'Management' ? 5 : 2; }
   else { let acc = 0, ri = 0; for (; ri < d.ranks.length; ri++) { acc += d.ranks[ri]; if (i < acc) break; } const lvl = d.lad.length - 1 - Math.min(ri, d.lad.length - 1); rank = lvl; title = `${d.lad[lvl]}, ${d.dept}`; if (lvl >= 3 && r() < .012) title = QUIRK_T[Math.floor(r() * QUIRK_T.length)]; }
   const N = NAMES[(HUBS[R.hub] || HUBS.hollywood).lang] || NAMES.en, g = r() < .5 ? 'F' : 'M', first = N[g][Math.floor(r() * N[g].length)], last = N.L[Math.floor(r() * N.L.length)] + (r() < .06 ? '-' + N.L[Math.floor(r() * N.L.length)] : '');
@@ -20137,7 +20154,7 @@ function staffAt(R, n) {
 function leadersOf(R) { if (R.kind !== 'film' || typeof staffOf !== 'function' || !R.c || R.c.closed !== null) return []; return staffOf(R.c).filter(s => s.id !== null && s.r >= 4).sort((a, b) => b.r - a.r).map(s => ({ id: s.id, title: LADDER[s.r][0] })); }
 function bossOf(R, e) {
   const O = orgChart(R), d = O.D.find(x => x.dept === e.dept), ex = O.D[0];
-  if (!d) return null;
+  if (!d || R.free) return null;
   if (d.dept === 'Executive Office' || (R.kind === 'biz' && e.n === d.start)) return e.n === ex.start ? null : staffAt(R, ex.start);
   const L = []; let top = -1;
   for (let j = e.n - 1; j >= d.start && L.length < 200; j--) { const x = staffAt(R, j); if (x.rank > e.rank) { if (top < 0) top = x.rank; if (x.rank === top) L.push(x); else break; } }
@@ -20145,10 +20162,11 @@ function bossOf(R, e) {
   return L[Math.floor(e.r * L.length)];
 }
 function empLink(R, n, label) { const e = staffAt(R, n); return e ? `<a href="#" class="lk" data-go="emp:${R.key}~${n}">${esc(label || e.name)}</a>` : ''; }
-function coLink(R) { return R.kind === 'film' ? cl(R.c.id) : R.kind === 'biz' ? `<a href="#" class="lk" data-go="biz:${esc(R.key)}">${esc(R.name)}</a>` : mcoLink(R.mi); }
+function coLink(R) { return R.free ? `<a href="#" class="lk" data-go="staff:${esc(R.key)}">${esc(R.name)}</a>` : R.kind === 'film' ? cl(R.c.id) : R.kind === 'biz' ? `<a href="#" class="lk" data-go="biz:${esc(R.key)}">${esc(R.name)}</a>` : mcoLink(R.mi); }
 // What they worked on while they were there.
 function empProjects(R, e) {
   const out = [], since = e.since, r = hashRand(e.n * 7919 + 13);
+  if (R.free) return freeProjects(R, e);
   if (R.kind === 'film') { const role = { Marketing: 'marketing', Publicity: 'publicity', 'Post-production': 'post-production', 'Visual Effects': 'visual effects', Development: 'development', Production: 'production', 'Physical Production': 'physical production', 'Theatrical Distribution': 'distribution', 'International Sales': 'international sales', 'Home Entertainment & Streaming': 'home release', 'Consumer Products': 'merchandise', 'Business & Legal Affairs': 'deals', Finance: 'finance' }[e.dept]; if (!role) return out; const L = R.c.films.map(i => S.films[i]).filter(f => f && f.rel !== null && yearOf(f.rel) >= since); for (const f of L) if (r() < (e.rank >= 7 ? .9 : .35) && out.length < 10) out.push(`${fl(f.id)} <span class="muted small">(${role}, ${yearOf(f.rel)})</span>`); }
   else if (R.kind !== 'biz' && R.m) { const field = { label: 'music', publisher: 'music', podcast: 'podcast', creator: 'creator', theatre: 'stage' }[R.kind]; const roster = HUB_IDS.flatMap(h => activeFigures(h, field).map(x => Object.assign({ hub: h }, x))).filter(x => { const L = figLabel(x); return L && L[1] === R.mi; }); for (const x of roster) { if (r() < .5 && out.length < 8) { const rel = figReleases(x); const s = rel.find(s2 => yearOf(s2 * 6) >= since); if (s !== undefined) out.push(`${songLink(x, s)} by ${figLink(x)} <span class="muted small">(${e.dept.toLowerCase()})</span>`); } } }
   return out;
@@ -20164,11 +20182,12 @@ function viewEmployee(id) {
   const e = staffAt(R, +n); if (!e) return '<p class="muted">Not found.</p>';
   const boss = bossOf(R, e), O = orgChart(R), d = O.D.find(x => x.dept === e.dept), team = []; for (let j = d.start; j < d.start + d.n && team.length < 8; j++) if (j !== e.n && Math.abs(staffAt(R, j).rank - e.rank) <= 1) team.push(j);
   const proj = empProjects(R, e), prev = prevEmployers(R, e);
-  return `<div class="head"><p class="eyebrow">${esc(e.dept)} · ${coLink(R)} · ${esc(hubName(R.hub))}</p><h2>${esc(e.name)}</h2><p class="lede">${esc(e.title)}. ${e.age}, at the company since ${e.since}. ${esc(e.quip)}</p></div>
-   <div class="cols two"><section class="panel"><h3>Where they sit</h3><p>${boss ? `Reports to ${empLink(R, boss.n)} <span class="muted small">(${esc(boss.title)})</span>` : 'Reports to the board.'}</p>${team.length ? `<h4>Works alongside</h4><ul class="plain small">${team.map(j => `<li>${empLink(R, j)} <span class="muted">· ${esc(staffAt(R, j).title)}</span></li>`).join('')}</ul>` : ''}<p><a href="#" class="lk" data-go="staff:${esc(R.key)}">The whole ${esc(R.name)} directory ›</a></p>${prev.length ? `<h4>Before ${esc(R.name)}</h4><ul class="plain small">${prev.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}</section>
+  return `<div class="head"><p class="eyebrow">${esc(e.dept)} · ${coLink(R)} · ${esc(hubName(R.hub))}</p><h2>${esc(e.name)}</h2><p class="lede">${esc(e.title)}. ${e.age}, ${R.free ? 'working since' : 'at the company since'} ${e.since}. ${esc(e.quip)}</p></div>
+   <div class="cols two"><section class="panel"><h3>Where they sit</h3><p>${boss ? `Reports to ${empLink(R, boss.n)} <span class="muted small">(${esc(boss.title)})</span>` : R.free ? 'Freelance: works for whoever books them this week.' : 'Reports to the board.'}</p>${team.length ? `<h4>Works alongside</h4><ul class="plain small">${team.map(j => `<li>${empLink(R, j)} <span class="muted">· ${esc(staffAt(R, j).title)}</span></li>`).join('')}</ul>` : ''}<p><a href="#" class="lk" data-go="staff:${esc(R.key)}">The whole ${esc(R.name)} directory ›</a></p>${prev.length ? `<h4>Before ${esc(R.name)}</h4><ul class="plain small">${prev.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}</section>
    <section class="panel"><h3>Worked on</h3>${proj.length ? `<ul class="plain small">${proj.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="muted small">Nothing with their name on it. Every company runs on people like this.</p>'}</section></div>`;
 }
 function companyHistory(R) {
+  if (R.free) return [];
   const r = hashRand([...R.key].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 5) >>> 0), out = [[R.founded || 1950, R.kind === 'biz' ? `opens its doors in ${hubName(R.hub)}` : `is founded in ${hubName(R.hub)}`]];
   for (let y = (R.founded || 1950) + 3 + Math.floor(r() * 5); y < S.year; y += 5 + Math.floor(r() * 9)) out.push([y, HIST_Q[Math.floor(r() * HIST_Q.length)]]);
   if (R.kind === 'film' && R.c) { const top = R.c.films.map(i => S.films[i]).filter(f => f && f.rel !== null).sort((a, b) => b.total - a.total).slice(0, 4); for (const f of top) out.push([yearOf(f.rel), `releases ${f.title}, which takes ${fmtM(f.total)}`, f.id]); if (R.closed !== null && R.closed !== undefined) out.push([R.closed, 'closes its doors']); }
@@ -22727,6 +22746,166 @@ function relicSceneSVG(lay) {
 }
 for (const g of OS_GROUPS) if (g[0] === 'Play') g[1].push('hilo', 'yearq');
 // </shop2>
+// <charts2>
+// ---------------- The charts, all the way down ----------------
+// Every chart opens into a full page: the whole chart for any week back to when the form began, year-end charts,
+// every number one, the artists (all of them, searchable), the labels and theatres ranked by what their rosters
+// sell, and the people who do the work: session players, engineers, touring crews, stagehands, editors and
+// producers, in numbers sized from the real workforce, each one with a page. Artists rise over their first few
+// years and fade near the end, so old charts look like old charts.
+
+// ---- more artists: a long tail in every city, including acts who have since retired ----
+const HUB_W = h => ({ hollywood: 1, newyork: .9, london: .8, tokyo: .7, seoul: .5, mumbai: .5, paris: .45 })[h] || (HUBS[h] && HUBS[h].minor ? .12 : .35);
+const FIG_KINDS = { music: ['singer', 'singer', 'band', 'band', 'rapper', 'dj', 'duo', 'choir'], creator: ['creator', 'creator', 'blipper', 'streamer'], podcast: ['show'], stage: ['playwright', 'playwright', 'composer', 'troupe'] };
+const FIG_START = { music: 1950, creator: 2006, podcast: 2005, stage: 1940 };
+function moreFigures(hub, have) {
+  const taken = new Set((have || []).map(x => x.name)), H = HUBS[hub], N = NAMES[H.lang] || NAMES.en, r = hashRand(HUB_IDS.indexOf(hub) * 104729 + S.seed * 7 + 17), pick = L => L[Math.floor(r() * L.length)], out = [];
+  const n = Math.round(30 + 90 * HUB_W(hub));
+  for (let i = 0; i < n; i++) {
+    const x = r(), field = x < .46 ? 'music' : x < .64 ? 'stage' : x < .86 ? 'creator' : 'podcast', kind = pick(FIG_KINDS[field]);
+    const from = Math.max(FIG_START[field], S.year - Math.floor(Math.pow(r(), 1.4) * 60));
+    if (from > S.year) continue;
+    const to = from < S.year - 8 && r() < .45 ? Math.min(S.year - 1, from + 4 + Math.floor(r() * 24)) : undefined;
+    const person = `${pick(N.F.concat(N.M))} ${pick(N.L)}`;
+    const name = kind === 'band' ? `${pick(BAND_A)} ${pick(BAND_B)}` : kind === 'duo' ? `${pick(N.L)} & ${pick(N.L)}` : kind === 'choir' ? `The ${pick(N.L)} Singers` : kind === 'troupe' ? `The ${pick(BAND_B)} Company` : kind === 'dj' ? `DJ ${pick(N.L)}` : kind === 'show' ? `${pick(SHOW_A)} ${pick(SHOW_B)}` : person;
+    if (taken.has(name)) continue; taken.add(name);
+    out.push({ name, field, kind, hub, fans: Math.round(Math.pow(10, 2.6 + r() * 3.9)), from, to, tail: 1 });
+  }
+  return out;
+}
+Object.assign(KIND_LABEL, { duo: 'Duo', choir: 'Vocal group', streamer: 'Streamer', troupe: 'Theatre company' });
+// How big an act is in a given year: they climb for their first five years and fade in their last few.
+function figPull(x, y) { let g = clamp((y - x.from + 1) / 5, .15, 1); if (x.to) g *= clamp((x.to - y + 2) / 5, .25, 1); return g; }
+// The chart for any week. Same formula as the weekly charts, so this week's matches the desk.
+function chartAt(field, hub, w, n = 100) {
+  const y = yearOf(w), all = mediaFigures(hub), M = S.me;
+  const L = all.filter(x => x.field === field && x.from <= y && (!x.to || x.to >= y)).map(x => { const r = hashRand((x.name.length * 131 + w) * 7 + x.fans % 97)(); return { name: x.name, by: x.kind, score: x.fans * figPull(x, y) * (.4 + r), title: workTitleFor(x, w), fid: `${hub}~${all.indexOf(x)}`, slot: Math.floor(w / 6) }; });
+  const plat = { music: 'spinly', creator: 'vidwire', podcast: 'podhaus' }[field];
+  if (M && plat && hub === M.hub) for (const wk of (M.works || []).filter(x => WORK_TYPES[x.type].field === field && x.wk && x.wk.length && w >= x.rel && w - x.rel < 8)) { const v = wk.wk[Math.min(wk.wk.length - 1, w - wk.rel)] || 0; if (v) L.push({ name: ME().name, by: 'you', score: v * 8, title: wk.title, mine: 1, wid: wk.id }); }
+  return L.sort((a, b) => b.score - a.score).slice(0, n);
+}
+const CHART_NAME = { music: () => `${platName('spinly')} Hot 100`, creator: () => `${platName('vidwire')} Trending`, podcast: () => `${platName('podhaus')} Top Shows`, stage: () => 'Stage Grosses' };
+// Year-end: points over every week (100 for a number one, down to 1).
+function chartYear(field, hub, y) {
+  const A = archive(), k = `chy:${field}:${hub}:${y}`; if (A[k]) return A[k];
+  const pts = {}, w0 = weekOfYear(y), w1 = Math.min(weekOfYear(y + 1), S.week + 1);
+  for (let w = w0; w < w1; w++) chartAt(field, hub, w, 40).forEach((c, i) => { const id = c.fid || 'me'; (pts[id] = pts[id] || { c, p: 0, wks: 0, peak: 99 }).p += 40 - i; pts[id].wks++; pts[id].peak = Math.min(pts[id].peak, i + 1); });
+  return A[k] = Object.values(pts).sort((a, b) => b.p - a.p);
+}
+function numberOnes(field, hub, y) {
+  const A = archive(), k = `ch1:${field}:${hub}:${y}`; if (A[k]) return A[k];
+  const out = [], w0 = weekOfYear(y), w1 = Math.min(weekOfYear(y + 1), S.week + 1);
+  for (let w = w0; w < w1; w++) { const c = chartAt(field, hub, w, 1)[0]; if (!c) continue; const last = out[out.length - 1]; if (last && last.c.name === c.name && last.c.title === c.title) last.n++; else out.push({ w, c, n: 1 }); }
+  return A[k] = out;
+}
+const chLink = (field, c) => c.mine ? `<a href="#" class="lk" data-go="work:${c.wid}">${esc(c.title)}</a>` : `<a href="#" class="lk" data-go="${field === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(field === 'podcast' ? c.name : c.title)}</a>`;
+const chBy = (field, c) => field === 'podcast' ? (c.mine ? 'your show' : esc(KIND_LABEL[c.by] || 'podcast')) : c.mine ? `${esc(c.name)} (you)` : `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>`;
+function chartPage(id) {
+  const [field, hub0] = String(id).split('~');
+  if (!UI.ch || UI.ch.id !== id) UI.ch = { id, field, hub: HUBS[hub0] ? hub0 : (S.me ? S.me.hub : 'hollywood'), tab: 'week', y: S.year, w: S.week };
+  const st = UI.ch, hub = st.hub, tab = st.tab, y0 = Math.max(FIG_START[field] || 1950, S.year - 70), years = []; for (let y = S.year; y >= y0; y--) years.push(y);
+  const tabs = [['week', 'The chart'], ['year', 'Year-end'], ['ones', 'Number ones'], ['artists', 'Every artist'], ['labels', field === 'stage' ? 'Theatres' : field === 'music' ? 'Labels' : 'Networks'], ['people', 'Who works in it']];
+  const hubs = HUB_IDS.filter(h => mediaFigures(h).some(x => x.field === field));
+  const head = `<div class="head"><p class="eyebrow">Charts · ${esc(FIELD_LABEL[field] || field)} · ${esc(hubName(hub))}</p><h2>${esc(CHART_NAME[field] ? CHART_NAME[field]() : field)}</h2><p class="lede">Every week back to ${y0}. Click a title for its page, an artist for their career.</p></div>
+   <p class="bf-row">${tabs.map(([k, l]) => `<button class="pill${tab === k ? ' on' : ''}" data-cht="${k}">${l}</button>`).join('')}</p>
+   <div class="filt"><label><span>City</span>${sel('ch-hub', hubs.map(h => [h, hubName(h)]), hub)}</label>${['week', 'year', 'ones'].includes(tab) ? `<label><span>Year</span>${sel('ch-y', years.map(y => [y, String(y)]), st.y)}</label>` : ''}${tab === 'week' ? `<label><span>Week</span>${sel('ch-w', chartWeeks(st.y).map(w => [w, fmtDate(w, true)]), st.w)}</label>` : ''}${tab === 'artists' ? `<label class="filt-q"><span>Search</span><input id="chq" type="search" placeholder="Artist or act…" value="${esc(UI.chq || '')}"></label>` : ''}</div>`;
+  let body = '';
+  if (tab === 'week') {
+    const C = chartAt(field, hub, st.w, 100), prev = chartAt(field, hub, st.w - 1, 100), pos = c => prev.findIndex(p => p.name === c.name && p.title === c.title);
+    const row = (c, i) => { const p = pos(c), mv = p < 0 ? '<span class="good small">new</span>' : p > i ? `<span class="good small">▲${p - i}</span>` : p < i ? `<span class="bad small">▼${i - p}</span>` : '<span class="muted small">–</span>'; return `<tr${c.mine ? ' class="mine"' : ''}><td>${i + 1}</td><td>${mv}</td><td><b>${chLink(field, c)}</b></td><td>${chBy(field, c)}</td><td class="small muted">${p >= 0 ? '#' + (p + 1) : ''}</td></tr>`; };
+    body = `<div class="tw"><table class="grid small"><thead><tr><th>#</th><th></th><th>${field === 'podcast' ? 'Show' : 'Title'}</th><th>${field === 'podcast' ? 'Kind' : 'By'}</th><th>Last week</th></tr></thead><tbody>${C.slice(0, 40).map(row).join('')}</tbody></table></div>${C.length > 40 ? `<details class="rmore"><summary>Positions 41–${C.length}</summary><table class="grid small"><tbody>${C.slice(40).map((c, i) => row(c, i + 40)).join('')}</tbody></table></details>` : ''}`;
+  } else if (tab === 'year') {
+    const L = chartYear(field, hub, st.y);
+    body = `<p class="muted small">Points from every week of ${st.y}${st.y === S.year ? ' so far' : ''}: 40 for a number one, down to 1 for fortieth.</p><div class="tw"><table class="grid small"><thead><tr><th>#</th><th>Title</th><th>By</th><th>Peak</th><th>Weeks</th></tr></thead><tbody>${L.slice(0, 60).map((x, i) => `<tr><td>${i + 1}</td><td><b>${chLink(field, x.c)}</b></td><td>${chBy(field, x.c)}</td><td>${x.peak}</td><td>${x.wks}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Nothing charted.</td></tr>'}</tbody></table></div>`;
+  } else if (tab === 'ones') {
+    const L = numberOnes(field, hub, st.y);
+    body = `<p class="muted small">Every number one of ${st.y}, in order, with how many weeks it held the top.</p><ol class="plain small">${L.map(x => `<li><time>${fmtDate(x.w, true)}</time> <b>${chLink(field, x.c)}</b> · ${chBy(field, x.c)} <span class="muted">${x.n} week${x.n > 1 ? 's' : ''}</span></li>`).join('') || '<li class="muted">Nothing charted.</li>'}</ol>`;
+  } else if (tab === 'artists') {
+    const q = (UI.chq || '').toLowerCase().trim(), all = HUB_IDS.flatMap(h => mediaFigures(h).map((x, i) => ({ x, fid: `${h}~${i}` }))).filter(o => o.x.field === field && o.x.from <= S.year && (!q || o.x.name.toLowerCase().includes(q)));
+    const seen = new Set(), L = all.filter(o => !seen.has(o.x.name) && seen.add(o.x.name)).sort((a, b) => (a.x.hub === hub ? 0 : 1) - (b.x.hub === hub ? 0 : 1) || b.x.fans - a.x.fans);
+    const pg = clamp(st.pg || 0, 0, Math.max(0, Math.ceil(L.length / 60) - 1));
+    body = `<p class="muted small">${L.length.toLocaleString()} acts${q ? ' matching' : ''}, ${esc(hubName(hub))} first. <button class="btn-s ghost" data-chpg="${pg - 1}" ${pg ? '' : 'disabled'}>‹</button> page ${pg + 1} <button class="btn-s ghost" data-chpg="${pg + 1}" ${(pg + 1) * 60 < L.length ? '' : 'disabled'}>›</button></p><div class="tw"><table class="grid small"><thead><tr><th>Act</th><th>Kind</th><th>City</th><th>Active</th><th>Fans</th></tr></thead><tbody>${L.slice(pg * 60, pg * 60 + 60).map(o => `<tr><td><a href="#" class="lk" data-go="fig:${o.fid}">${esc(o.x.name)}</a>${o.x.legend ? ' <span class="chip t-Award">legend</span>' : ''}</td><td>${esc(KIND_LABEL[o.x.kind] || o.x.kind)}</td><td>${esc(hubName(o.x.hub))}</td><td>${o.x.from}–${o.x.to || 'now'}</td><td>${Math.round(o.x.fans).toLocaleString()}</td></tr>`).join('')}</tbody></table></div>`;
+  } else if (tab === 'labels') {
+    const t = FIELD_CO[field], rows = MEDIA_COS.map((c, i) => [c, i]).filter(([c]) => c.type === t && c.f <= S.year).map(([c, i]) => { let fans = 0, acts = 0; for (const h of HUB_IDS) for (const x of activeFigures(h, field)) { const L = figLabel(x); if (L && L[1] === i) { fans += x.fans; acts++; } } return { c, i, fans, acts, staff: headcount(coRef('m' + i)) }; }).sort((a, b) => b.fans - a.fans), tot = rows.reduce((s, r) => s + r.fans, 0) || 1;
+    body = `<div class="tw"><table class="grid small"><thead><tr><th>#</th><th>Company</th><th>Based in</th><th>Acts</th><th>Share of fans</th><th>Staff</th></tr></thead><tbody>${rows.map((r, k) => `<tr><td>${k + 1}</td><td><b>${mcoLink(r.i)}</b></td><td>${esc(hubName(r.c.hub))}</td><td>${r.acts}</td><td>${(r.fans / tot * 100).toFixed(1)}%</td><td><a href="#" class="lk" data-go="staff:m${r.i}">${r.staff.toLocaleString()}</a></td></tr>`).join('')}</tbody></table></div>`;
+  } else body = fieldWorkHTML(field, hub);
+  return head + `<section class="panel">${body}</section>`;
+}
+function chartWeeks(y) { const out = [], w0 = weekOfYear(y), w1 = Math.min(weekOfYear(y + 1) - 1, S.week); for (let w = w1; w >= w0; w--) out.push(w); return out; }
+
+// ---- who does the work: freelance workforces, sized from the real numbers ----
+const FREE_DEPTS = {
+  music: [['Session musicians', .2, ['Session guitarist', 'Session drummer', 'Session bassist', 'Session keyboardist', 'String player', 'Horn player', 'Backing vocalist', 'Percussionist']], ['Songwriters and topliners', .16, ['Songwriter', 'Topliner', 'Lyricist', 'Staff writer']], ['Producers and beatmakers', .1, ['Record producer', 'Beatmaker', 'Co-producer', 'Vocal producer']], ['Engineers', .09, ['Recording engineer', 'Mix engineer', 'Mastering engineer', 'Assistant engineer']], ['Touring crew', .14, ['Tour manager', 'Front-of-house engineer', 'Monitor engineer', 'Guitar tech', 'Lighting director', 'Backline tech', 'Merch manager', 'Rigger']], ['Managers and agents', .06, ['Artist manager', 'Booking agent', 'Business manager', 'Road manager']], ['Teachers and church musicians', .17, ['Piano teacher', 'Guitar teacher', 'Voice coach', 'Choir director', 'Church organist']], ['Wedding and function bands', .08, ['Function band singer', 'Wedding DJ', 'Cocktail pianist', 'Cover-band guitarist']]],
+  creator: [['Video editors', .28, ['Video editor', 'Short-form editor', 'Assistant editor']], ['Camera and lighting', .14, ['Camera operator', 'Videographer', 'Gaffer for hire']], ['Writers and researchers', .14, ['Scriptwriter', 'Researcher', 'Ideas producer']], ['Thumbnail and motion design', .16, ['Thumbnail designer', 'Motion designer', 'Animator']], ['Talent and brand managers', .1, ['Talent manager', 'Brand-deal manager', 'Agent']], ['Community and channel ops', .18, ['Community manager', 'Channel strategist', 'Moderator', 'Analytics lead']]],
+  podcast: [['Producers', .3, ['Podcast producer', 'Senior producer', 'Associate producer']], ['Audio editors and mixers', .28, ['Audio editor', 'Sound designer', 'Mix engineer']], ['Researchers and fact-checkers', .16, ['Researcher', 'Fact-checker', 'Archive producer']], ['Hosts for hire', .1, ['Host', 'Co-host', 'Narrator']], ['Voice and ad-read talent', .16, ['Voice artist', 'Ad-read voice', 'Promo voice']]],
+  stage: [['Stage actors', .28, ['Stage actor', 'Understudy', 'Swing', 'Ensemble member']], ['Stagehands and crew', .24, ['Carpenter', 'Fly operator', 'Deck electrician', 'Props master', 'Follow-spot operator', 'Automation operator']], ['Stage managers', .07, ['Production stage manager', 'Stage manager', 'Assistant stage manager']], ['Wardrobe, wigs and dressers', .11, ['Dresser', 'Wig master', 'Wardrobe supervisor', 'Stitcher']], ['Pit musicians', .1, ['Pit pianist', 'Musical director', 'Reed player', 'Pit drummer']], ['Dancers', .1, ['Dancer', 'Dance captain', 'Swing dancer']], ['Designers', .06, ['Set designer', 'Lighting designer', 'Sound designer', 'Costume designer']], ['Front of house', .04, ['House manager', 'Usher', 'Box-office clerk']]]
+};
+const FREE_BASE = { music: 52000, creator: 18000, podcast: 4200, stage: 26000 };
+for (const f in FREE_DEPTS) DEPTS['free_' + f] = FREE_DEPTS[f].map(([d, s]) => [d, s]);
+function freeHeadcount(field, hub) { return Math.round(FREE_BASE[field] * HUB_W(hub) * (field === 'stage' && hub === 'newyork' ? 1.8 : field === 'stage' && hub === 'london' ? 1.4 : 1) * (field === 'creator' && S.year < 2008 ? .1 : field === 'podcast' && S.year < 2006 ? .1 : 1)); }
+// Real-world reference: roughly how many Americans do these jobs (labour statistics and industry counts, rounded).
+const REAL_WORK = {
+  music: [['Musicians and singers', 172000], ['Music directors and composers', 60000], ['Sound engineering technicians', 17000], ['Music teachers (private and school)', 190000], ['Agents and managers of artists', 26000], ['Touring and live-event crew (approx.)', 90000]],
+  creator: [['Full-time online creators (approx.)', 50000], ['Film and video editors', 36000], ['Camera operators', 26000], ['Graphic and motion designers', 270000], ['Social media and community managers (approx.)', 100000]],
+  podcast: [['Podcast producers and editors (approx.)', 15000], ['Announcers and voice talent', 35000], ['Broadcast and sound technicians', 146000]],
+  stage: [['Actors (stage and screen)', 66000], ['Dancers and choreographers', 18000], ['Stage crew (union members, approx.)', 75000], ['Broadway jobs supported, incl. indirect (approx.)', 97000], ['Set and exhibit designers', 12000]]
+};
+function freeRef(field, hub) { return coRef('x' + field + '|' + hub); }
+function fieldWorkHTML(field, hub) {
+  const R = freeRef(field, hub), O = orgChart(R), t = FIELD_CO[field];
+  const cos = MEDIA_COS.map((c, i) => [c, i]).filter(([c]) => c.type === t && c.f <= S.year), staff = cos.reduce((s, [, i]) => s + headcount(coRef('m' + i)), 0);
+  const ppl = S.people.filter(p => !p.dead && p.hub === hub && (field === 'music' ? ['composer', 'sound'].includes(p.role) : field === 'stage' ? p.role === 'actor' && p.standing >= 20 : field === 'podcast' ? p.role === 'sound' : ['editor', 'dp'].includes(p.role))).sort((a, b) => b.standing - a.standing).slice(0, 12);
+  return `<h3>Who works in ${esc((FIELD_LABEL[field] || field).toLowerCase())} in ${esc(hubName(hub))}</h3><p>About <b>${(O.H + staff).toLocaleString()}</b> people: ${O.H.toLocaleString()} freelancers and ${staff.toLocaleString()} on staff at ${cos.length} companies. Every one of them has a page.</p>
+   <div class="cols two"><div><h4>Freelancers</h4><ul class="plain small">${O.D.map(d => `<li><a href="#" class="lk" data-go="staff:${esc(R.key)}">${esc(d.dept)}</a> <b>${d.n.toLocaleString()}</b></li>`).join('')}</ul><p><a href="#" class="lk" data-go="staff:${esc(R.key)}">Search every freelancer ›</a></p>
+   <h4>On staff</h4><ul class="plain small">${cos.slice(0, 14).map(([c, i]) => `<li>${mcoLink(i)} <span class="muted">· <a href="#" class="lk" data-go="staff:m${i}">${headcount(coRef('m' + i)).toLocaleString()} staff</a></span></li>`).join('')}</ul></div>
+   <div><h4>Names you might know</h4><ul class="plain small">${ppl.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('') || '<li class="muted">Nobody on the ladder yet.</li>'}</ul>
+   <h4>The real numbers</h4><p class="muted small">Roughly how many people do these jobs in the United States today, from labour statistics and industry counts. The game's cities are sized in proportion.</p><ul class="plain small">${(REAL_WORK[field] || []).map(([l, n]) => `<li>${esc(l)} <b>${n.toLocaleString()}</b></li>`).join('')}</ul></div></div>`;
+}
+// Freelance "companies" ride on the staff directory: a key like "xmusic|hollywood".
+function freeCoRef(key) {
+  const [field, hub] = key.slice(1).split('|'); if (!FREE_DEPTS[field] || !HUBS[hub]) return null;
+  return { key, name: `Freelance ${(FIELD_LABEL[field] || field).toLowerCase()}, ${hubName(hub)}`, kind: 'free_' + field, field, hub, tier: 3, founded: FIG_START[field], free: 1 };
+}
+function freeTitle(R, d, r) { const D = FREE_DEPTS[R.field].find(x => x[0] === d.dept); return D[2][Math.floor(r() * D[2].length)]; }
+function freeProjects(R, e) {
+  const r = hashRand(e.n * 7919 + 29), out = [], L = activeFigures(R.hub, R.field); if (!L.length) return out;
+  for (let k = 0; k < 6; k++) { const x = L[Math.floor(r() * L.length)], rel = figReleases(Object.assign({ hub: R.hub }, x)).filter(s => yearOf(s * 6) >= e.since); if (rel.length) out.push(`${songLink(Object.assign({ hub: R.hub, fid: figId(x) }, x), rel[Math.floor(r() * rel.length)])} by ${figLink(Object.assign({ hub: R.hub }, x))} <span class="muted small">(${esc(e.title.toLowerCase())})</span>`); }
+  return [...new Set(out)];
+}
+// Who played on it: a few freelancers credited on every release.
+function songCrew(x, slot) {
+  const R = freeRef(x.field, x.hub); if (!R) return [];
+  const O = orgChart(R), r = hashRand(x.name.length * 977 + slot * 13 + 5), out = [];
+  for (const d of O.D.slice(0, x.field === 'music' ? 4 : 5)) if (r() < .7) out.push(d.start + Math.floor(r() * d.n));
+  return out.map(n => [R, n]);
+}
+// An artist's chart record, from the last few years of weekly charts.
+function figChartRecord(x) {
+  const A = archive(), k = 'fcr:' + x.hub + ':' + x.name; if (A[k]) return A[k];
+  let best = 99, wks = 0, ones = 0; const w0 = Math.max(weekOfYear(x.from), S.week - 156), w1 = x.to ? Math.min(S.week, weekOfYear(x.to + 1)) : S.week;
+  for (let w = w0; w <= w1; w += 2) { const C = chartAt(x.field, x.hub, w, 40), i = C.findIndex(c => c.name === x.name); if (i >= 0) { wks += 2; best = Math.min(best, i + 1); if (!i) ones += 2; } }
+  return A[k] = { best, wks, ones };
+}
+function figExtraHTML(x) {
+  const rec = figChartRecord(x), crew = songCrew(x, Math.floor(S.week / 6)), r = hashRand(x.name.length * 31 + x.fans % 71), N = NAMES[(HUBS[x.hub] || HUBS.hollywood).lang] || NAMES.en;
+  const members = ['band', 'duo', 'choir', 'troupe'].includes(x.kind) ? Array.from({ length: x.kind === 'duo' ? 2 : 3 + Math.floor(r() * 3) }, () => `${N.F.concat(N.M)[Math.floor(r() * (N.F.length + N.M.length))]} ${N.L[Math.floor(r() * N.L.length)]}`) : [];
+  return `<section class="panel"><h3>Chart record <span class="count">last three years</span></h3><p>${rec.wks ? `Peak <b>#${rec.best}</b> · about <b>${rec.wks}</b> weeks in the top 40${rec.ones ? ` · <b>${rec.ones}</b> weeks at number one` : ''}.` : 'Not in the top 40 lately.'} <a href="#" class="lk" data-go="chart:${x.field}~${x.hub}">See the chart ›</a></p>
+   ${members.length ? `<h4>Members</h4><p class="small">${members.map(esc).join(' · ')}</p>` : ''}${crew.length ? `<h4>Their people</h4><p class="small">${crew.map(([R, n]) => `${empLink(R, n)} <span class="muted">(${esc(staffAt(R, n).title.toLowerCase())})</span>`).join(' · ')}</p>` : ''}</section>`;
+}
+function chartClick(t) {
+  const d = t.dataset;
+  if (d.cht) { UI.ch = UI.ch || {}; UI.ch.tab = d.cht; render(true); return true; }
+  if (d.chpg !== undefined) { UI.ch.pg = +d.chpg; render(true); return true; }
+  return false;
+}
+function chartChange(e) {
+  const id = e.target.id, v = e.target.value, st = UI.ch; if (!st) return false;
+  if (id === 'ch-hub') { st.hub = v; st.pg = 0; render(true); return true; }
+  if (id === 'ch-y') { st.y = +v; st.w = chartWeeks(+v)[0]; render(true); return true; }
+  if (id === 'ch-w') { st.w = +v; render(true); return true; }
+  return false;
+}
+// </charts2>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -22811,7 +22990,7 @@ function viewBoxOffice() {
   const shown = rows.slice(0, st.more ? 500 : 100), max = Math.max(1e-9, ...shown.map(r => r.g));
   const th = (k, l, n) => `<th class="${n ? 'n ' : ''}sortable${key === k ? ' on' : ''}"><button class="linkish" data-bosort="${k}">${l}${key === k ? (dir > 0 ? ' ▲' : ' ▼') : ''}</button></th>`;
   return `<div class="head"><h2>Box office</h2><p class="lede">Grosses in US dollars at the time of release. Click any column to sort.</p></div>
-  <div class="fbar"><label><span>Market</span>${sel('bo-m', mOpts, st.m)}</label><label><span>Period</span>${sel('bo-p', [['week', 'This week'], ['all', 'All time'], ...years.map(y => ['y' + y, String(y)])], st.view === 'year' ? 'y' + (st.y || S.year) : st.view)}</label><label><span>Genre</span>${sel('bo-g', [['', 'All genres'], ...GENRES.map(g => [g, g])], st.g || '')}</label><label><span>Hub</span>${sel('bo-h', [['', 'Everywhere'], ...HUB_IDS.map(h => [h, hubName(h)])], st.h || '')}</label><label class="fbar-q"><span>Search</span><input id="bo-q" type="search" placeholder="Title, director, city…" value="${esc(st.q || '')}"></label>${st.q || st.g || st.h ? '<button class="linkish" data-boclear="1">Clear filters</button>' : ''}</div>
+  <div class="filt"><label><span>Market</span>${sel('bo-m', mOpts, st.m)}</label><label><span>Period</span>${sel('bo-p', [['week', 'This week'], ['all', 'All time'], ...years.map(y => ['y' + y, String(y)])], st.view === 'year' ? 'y' + (st.y || S.year) : st.view)}</label><label><span>Genre</span>${sel('bo-g', [['', 'All genres'], ...GENRES.map(g => [g, g])], st.g || '')}</label><label><span>Hub</span>${sel('bo-h', [['', 'Everywhere'], ...HUB_IDS.map(h => [h, hubName(h)])], st.h || '')}</label><label class="filt-q"><span>Search</span><input id="bo-q" type="search" placeholder="Title, director, city…" value="${esc(st.q || '')}"></label>${st.q || st.g || st.h ? '<button class="linkish" data-boclear="1">Clear filters</button>' : ''}</div>
   <h3>${title}${m ? ' · ' + esc(MARKETS[m].name) : ''} <span class="count">${rows.length} films</span></h3>
   <div class="tw"><table class="grid"><thead><tr><th class="n">#</th>${th('title', 'Title')}${th('genre', 'Genre')}${th('hub', 'Hub')}${st.view === 'week' ? th('wk', 'Wk', 1) : th('year', 'Opened', 1)}${th('g', st.view === 'week' ? 'This week' : 'Gross', 1)}<th class="barcol"></th>${th('todate', 'To date', 1)}${th('budget', 'Budget', 1)}${th('reviews', 'Critics', 1)}${th('profit', 'Profit', 1)}</tr></thead><tbody>
   ${shown.map((r, i) => `<tr><td class="n">${i + 1}</td><td>${fl(r.f.id)}</td><td>${esc(r.f.genre)}</td><td>${esc(hubName(r.f.hub))}</td><td class="n">${st.view === 'week' ? r.wk : fmtDate(r.f.rel, true)}</td><td class="n">${fmtM(r.g)}</td><td class="barcol">${bar(r.g, max, 'data')}</td><td class="n">${fmtM(r.todate)}</td><td class="n">${fmtM(r.f.cost)}</td><td class="n">${r.f.reviews ?? '—'}</td><td class="n">${r.f.theatrical !== undefined ? money(r.f.theatrical) : '—'}</td></tr>`).join('') || '<tr><td colspan="11" class="empty">Nothing matches.</td></tr>'}
@@ -24033,6 +24212,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   if (careerChange(e)) return;
+  if (typeof chartChange === 'function' && chartChange(e)) return;
   const id = e.target.id, v = e.target.value;
   const map = { 'bo-m': [UI.bo, 'm'], 'bo-y': [UI.bo, 'y'], 'aw-y': [UI.aw = UI.aw || {}, 'y'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
   if (map[id]) { map[id][0][map[id][1]] = v; render(true); return; }
@@ -24046,7 +24226,7 @@ let qTimer;
 document.addEventListener('input', e => {
   const id = e.target.id;
   if (id === 'pc-notes') { try { localStorage.setItem(notesKey(), e.target.value); } catch (err) { /* no storage */ } return; }
-  if (id === 'cq' || id === 'gq' || id === 'npq' || id === 'stq' || id === 'abq' || id === 'rtq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
+  if (id === 'cq' || id === 'gq' || id === 'npq' || id === 'stq' || id === 'abq' || id === 'rtq' || id === 'chq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'aw-q') { (UI.aw = UI.aw || {}).q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#aw-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'bo-q') { UI.bo.q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#bo-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'fav-q') { UI.favq = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#fav-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 150); return; }

@@ -173,21 +173,33 @@ function mediaFigures(hub) {
     out.push({ name, field, kind, hub, fans: Math.round(Math.pow(10, 3 + r() * 3.4)), from: S.year - Math.floor(r() * 12) });
   }
   for (const [name, field, kind, h, from, to] of MEDIA_LEGENDS) if (h === hub || (HUBS[h] && HUBS[h].m === H.m && !HUBS[hub].lang.localeCompare(HUBS[h].lang))) out.push({ name, field, kind, hub: h, fans: 4e6 + (name.length * 7919 % 9) * 1e6, from, to, legend: 1 });
+  if (typeof moreFigures === 'function') out.push(...moreFigures(hub, out));
   return (S.mfig[hub] = out);
 }
 function activeFigures(hub, field) { return mediaFigures(hub).filter(x => (!field || x.field === field) && x.from <= S.year && (!x.to || x.to >= S.year)); }
 // ---- weekly charts: the city's figures, ranked by fans and a weekly hash; your releases if they're big enough ----
 function chartFor(field, hub) {
+  if (typeof chartAt === 'function') return chartAt(field, hub, S.week, 10);
   const M = S.me, all = mediaFigures(hub), L = activeFigures(hub, field).map(x => { const r = hashRand((x.name.length * 131 + S.week) * 7 + x.fans % 97)(); return { name: x.name, by: x.kind, score: x.fans * (.4 + r), title: workTitleFor(x, S.week), fid: `${hub}~${all.indexOf(x)}`, slot: Math.floor(S.week / 6) }; });
   const plat = { music: 'spinly', creator: 'vidwire', podcast: 'podhaus' }[field];
   if (M && plat) for (const w of (M.works || []).filter(w => WORK_TYPES[w.type].field === field && w.wk && w.wk.length && S.week - w.rel < 8)) L.push({ name: ME().name, by: 'you', score: w.wk[w.wk.length - 1] * 8, title: w.title, mine: 1 });
   return L.sort((a, b) => b.score - a.score).slice(0, 10);
 }
-function workTitleFor(x, w) { const r = hashRand(x.name.length * 977 + Math.floor(w / 6)); return x.field === 'podcast' ? x.name : `${WT_A[Math.floor(r() * WT_A.length)]} ${WT_B[Math.floor(r() * WT_B.length)]}`; }
+// Titles are seeded by the whole name (not its length), so two acts never share a discography.
+const WT_SOLO = ['Tell Me Twice', 'All Night Long Again', 'Don\'t Look Back Now', 'Slow Burn', 'Wildfire', 'Heartbeat Avenue', 'Overgrown', 'Satellite', 'Undertow', 'Afterglow', 'Holding Pattern', 'Paper Planes and Promises', 'Say It Like You Mean It', 'Rearview', 'Daylight Robbery', 'Fever Dream', 'Bad Habits, Good Intentions', 'Lighthouse', 'The Long Way Home', 'Sugar on the Radio', 'Cold Water', 'Wrong Number', 'Dance Like Nobody\'s Filming', 'Gravity', 'Old Flames', 'Cheap Champagne', 'Ten Feet Tall', 'Heavy Weather', 'Last Bus Home', 'Glow', 'Hurricane Season', 'Velvet Underground Car Park', 'Kiss the Sky Goodbye', 'Postcards', 'Fool\'s Gold', 'Static Love', 'Moonlighting', 'Nobody\'s Business', 'Sweet Disaster', 'Copper Sun'];
+const PLAY_A = ['The Glass', 'The Last', 'A Winter', 'The Lonely', 'The House of', 'The Ballad of', 'Death of a', 'The Importance of', 'Waiting for', 'A Streetcar Called', 'Cat on a Hot', 'The Night of the'];
+const PLAY_B = ['Mechanic', 'Salesgirl', 'Tin Shed', 'Gordon', 'Desire', 'Ironing', 'Lear', 'Bernarda', 'Being Elsewhere', 'Rain', 'Harbour', 'Orchard', 'Sisters', 'Garden', 'Ferryman', 'Inheritance'];
+function nameHash(s) { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
+function workTitleFor(x, w) {
+  if (x.field === 'podcast') return x.name;
+  const r = hashRand(nameHash(x.name) % 1e7 * 13 + Math.floor(w / 6) * 977), f = r(), pk = L => L[Math.floor(r() * L.length)];
+  if (x.field === 'stage') return f < .7 ? `${pk(PLAY_A)} ${pk(PLAY_B)}` : pk(WT_SOLO);
+  return f < .5 ? `${pk(WT_A)} ${pk(WT_B)}` : f < .85 ? pk(WT_SOLO) : `${pk(WT_A)} ${pk(WT_B)} (${pk(['Live', 'Remix', 'Acoustic', 'Radio Edit', 'Reprise', 'Night Version'])})`;
+}
 function viewCharts() {
   const hub = S.me ? S.me.hub : 'hollywood', F = [['music', `${platName('spinly')} top ten`], ['creator', `${platName('vidwire')} trending`], ['podcast', `${platName('podhaus')} top shows`], ['stage', 'On stage now']];
   return `<div class="head"><h2>Charts</h2><p class="lede">What ${esc(HUBS[hub].name)} is listening to, watching and queuing for this week. Your own releases chart if enough people find them.</p></div>
-   <div class="cols two">${F.filter(([f]) => f !== 'creator' || platOpen('vidwire')).map(([f, lab]) => { const C = chartFor(f, hub); return `<section class="panel"><h3>${esc(lab)}</h3><ol class="chart">${C.map((c, i) => `<li${c.mine ? ' class="mine"' : ''}><span class="cn">${i + 1}</span><span><b>${c.fid ? `<a href="#" class="lk" data-go="${f === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(f === 'podcast' ? c.name : c.title)}</a>` : esc(f === 'podcast' ? c.name : c.title)}</b><br><span class="muted small">${f === 'podcast' ? (c.mine ? 'your show' : 'podcast') : c.fid ? `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>` : esc(c.name)}${c.mine ? ' (you)' : ''}</span></span></li>`).join('') || '<li class="muted">Nothing charting.</li>'}</ol></section>`; }).join('')}</div>
+   <div class="cols two">${F.filter(([f]) => f !== 'creator' || platOpen('vidwire')).map(([f, lab]) => { const C = chartFor(f, hub); return `<section class="panel"><h3><a href="#" class="lk" data-go="chart:${f}~${hub}">${esc(lab)} ›</a></h3><ol class="chart">${C.map((c, i) => `<li${c.mine ? ' class="mine"' : ''}><span class="cn">${i + 1}</span><span><b>${c.fid ? `<a href="#" class="lk" data-go="${f === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(f === 'podcast' ? c.name : c.title)}</a>` : esc(f === 'podcast' ? c.name : c.title)}</b><br><span class="muted small">${f === 'podcast' ? (c.mine ? 'your show' : 'podcast') : c.fid ? `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>` : esc(c.name)}${c.mine ? ' (you)' : ''}</span></span></li>`).join('') || '<li class="muted">Nothing charting.</li>'}</ol></section>`; }).join('')}</div>
    <section class="panel"><h3>Companies in these fields</h3><div class="tw"><table class="grid"><thead><tr><th>Company</th><th>Type</th><th>Based in</th><th>Since</th><th></th></tr></thead><tbody>${MEDIA_COS.filter(c => c.f <= S.year).map(c => `<tr><td><b><a href="#" class="lk" data-go="mco:${MEDIA_COS.indexOf(c)}">${esc(c.n)}</a></b></td><td>${esc(MCO_TYPE[c.type])}</td><td>${esc(hubName(c.hub))}</td><td>${c.f}</td><td class="small muted">${esc(c.d)}</td></tr>`).join('')}</tbody></table></div></section>`;
 }
 // ---- awards for the other fields, every January ----

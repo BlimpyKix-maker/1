@@ -27,10 +27,12 @@ function coRef(key) {
   key = String(key); const t = key[0], rest = key.slice(1);
   if (t === 'f') { const c = S.companies[+rest]; if (!c) return null; return { key, name: c.name, kind: 'film', tier: c.tier, hub: c.hub, founded: c.founded, closed: c.closed, c }; }
   if (t === 'm') { const c = MEDIA_COS[+rest]; if (!c) return null; return { key, name: c.n, kind: ['label', 'publisher', 'podcast', 'creator', 'theatre'].includes(c.type) ? c.type : 'label', tier: c.tier || 2, hub: c.hub, founded: c.f, m: c, mi: +rest }; }
+  if (t === 'x' && typeof freeCoRef === 'function') return freeCoRef(key);
   if (t === 'b') { const [name, hub] = rest.split('|'); const kind = typeof bizKind === 'function' ? bizKind(name)[1] : 'office'; const r = hashRand([...name].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) >>> 0); return { key, name, kind: 'biz', bk: BIZ_T[kind] ? kind : 'office', tier: 3, hub: HUBS[hub] ? hub : 'hollywood', founded: S.year - 2 - Math.floor(r() * 40) }; }
   return null;
 }
 function headcount(R) {
+  if (R.free) return freeHeadcount(R.field, R.hub);
   const r = hashRand([...R.key].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 11) >>> 0)();
   const base = { film: [0, 12000, 1800, 160], label: [0, 7000, 900, 120], publisher: [0, 1600, 300, 40], podcast: [0, 900, 220, 40], creator: [0, 260, 90, 25], theatre: [0, 480, 160, 45], biz: [0, 30, 18, 9] }[R.kind] || [0, 50, 30, 10];
   const n = base[clamp(R.tier || 3, 1, 3)] * (.75 + r * .5) * (R.closed !== null && R.closed !== undefined ? .15 : 1);
@@ -44,7 +46,7 @@ function orgChart(R) {
   const H = headcount(R), D = R.kind === 'biz' ? DEPTS.biz : DEPTS[R.kind] || DEPTS.film, out = []; let start = 0;
   for (const [dept, share] of D) {
     const n = dept === 'Executive Office' ? Math.min(12, Math.max(3, Math.round(H * share))) : Math.max(1, Math.round(H * share));
-    const lad = dept === 'Executive Office' ? null : R.kind === 'biz' ? null : LADDER_T.slice(0, clamp(Math.round(Math.log10(n + 1) * 3.2), 3, LADDER_T.length));
+    const lad = dept === 'Executive Office' || R.free ? null : R.kind === 'biz' ? null : LADDER_T.slice(0, clamp(Math.round(Math.log10(n + 1) * 3.2), 3, LADDER_T.length));
     let ranks = [];   // counts from the top rung down
     if (lad) { const L = lad.length, w = Array.from({ length: L }, (_, ri) => Math.pow(1.9, ri)), sw = w.reduce((x, y) => x + y, 0); let left = n; for (let ri = 0; ri < L; ri++) { const c = ri === L - 1 ? left : Math.max(1, Math.min(left - (L - 1 - ri), Math.round(n * w[ri] / sw))); ranks.push(c); left -= c; } }
     out.push({ dept, n, start, lad, ranks }); start += n;
@@ -58,6 +60,7 @@ function staffAt(R, n) {
   const d = O.D.find(x => n >= x.start && n < x.start + x.n), i = n - d.start, r = hashRand(([...R.key].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 3) >>> 0) + n * 2654435761 % 1e9);
   let title, rank;
   if (d.dept === 'Executive Office') { title = EXEC_T[i] || 'Executive Assistant'; rank = i < 2 ? 12 : 10; }
+  else if (R.free) { title = freeTitle(R, d, r); rank = 1 + Math.floor(r() * 5); }
   else if (R.kind === 'biz') { const T = BIZ_T[R.bk] || BIZ_T.office; title = n === 0 ? T[0] : T[1 + Math.floor(r() * (T.length - 1))]; rank = n === 0 ? 8 : d.dept === 'Management' ? 5 : 2; }
   else { let acc = 0, ri = 0; for (; ri < d.ranks.length; ri++) { acc += d.ranks[ri]; if (i < acc) break; } const lvl = d.lad.length - 1 - Math.min(ri, d.lad.length - 1); rank = lvl; title = `${d.lad[lvl]}, ${d.dept}`; if (lvl >= 3 && r() < .012) title = QUIRK_T[Math.floor(r() * QUIRK_T.length)]; }
   const N = NAMES[(HUBS[R.hub] || HUBS.hollywood).lang] || NAMES.en, g = r() < .5 ? 'F' : 'M', first = N[g][Math.floor(r() * N[g].length)], last = N.L[Math.floor(r() * N.L.length)] + (r() < .06 ? '-' + N.L[Math.floor(r() * N.L.length)] : '');
@@ -69,7 +72,7 @@ function staffAt(R, n) {
 function leadersOf(R) { if (R.kind !== 'film' || typeof staffOf !== 'function' || !R.c || R.c.closed !== null) return []; return staffOf(R.c).filter(s => s.id !== null && s.r >= 4).sort((a, b) => b.r - a.r).map(s => ({ id: s.id, title: LADDER[s.r][0] })); }
 function bossOf(R, e) {
   const O = orgChart(R), d = O.D.find(x => x.dept === e.dept), ex = O.D[0];
-  if (!d) return null;
+  if (!d || R.free) return null;
   if (d.dept === 'Executive Office' || (R.kind === 'biz' && e.n === d.start)) return e.n === ex.start ? null : staffAt(R, ex.start);
   const L = []; let top = -1;
   for (let j = e.n - 1; j >= d.start && L.length < 200; j--) { const x = staffAt(R, j); if (x.rank > e.rank) { if (top < 0) top = x.rank; if (x.rank === top) L.push(x); else break; } }
@@ -77,10 +80,11 @@ function bossOf(R, e) {
   return L[Math.floor(e.r * L.length)];
 }
 function empLink(R, n, label) { const e = staffAt(R, n); return e ? `<a href="#" class="lk" data-go="emp:${R.key}~${n}">${esc(label || e.name)}</a>` : ''; }
-function coLink(R) { return R.kind === 'film' ? cl(R.c.id) : R.kind === 'biz' ? `<a href="#" class="lk" data-go="biz:${esc(R.key)}">${esc(R.name)}</a>` : mcoLink(R.mi); }
+function coLink(R) { return R.free ? `<a href="#" class="lk" data-go="staff:${esc(R.key)}">${esc(R.name)}</a>` : R.kind === 'film' ? cl(R.c.id) : R.kind === 'biz' ? `<a href="#" class="lk" data-go="biz:${esc(R.key)}">${esc(R.name)}</a>` : mcoLink(R.mi); }
 // What they worked on while they were there.
 function empProjects(R, e) {
   const out = [], since = e.since, r = hashRand(e.n * 7919 + 13);
+  if (R.free) return freeProjects(R, e);
   if (R.kind === 'film') { const role = { Marketing: 'marketing', Publicity: 'publicity', 'Post-production': 'post-production', 'Visual Effects': 'visual effects', Development: 'development', Production: 'production', 'Physical Production': 'physical production', 'Theatrical Distribution': 'distribution', 'International Sales': 'international sales', 'Home Entertainment & Streaming': 'home release', 'Consumer Products': 'merchandise', 'Business & Legal Affairs': 'deals', Finance: 'finance' }[e.dept]; if (!role) return out; const L = R.c.films.map(i => S.films[i]).filter(f => f && f.rel !== null && yearOf(f.rel) >= since); for (const f of L) if (r() < (e.rank >= 7 ? .9 : .35) && out.length < 10) out.push(`${fl(f.id)} <span class="muted small">(${role}, ${yearOf(f.rel)})</span>`); }
   else if (R.kind !== 'biz' && R.m) { const field = { label: 'music', publisher: 'music', podcast: 'podcast', creator: 'creator', theatre: 'stage' }[R.kind]; const roster = HUB_IDS.flatMap(h => activeFigures(h, field).map(x => Object.assign({ hub: h }, x))).filter(x => { const L = figLabel(x); return L && L[1] === R.mi; }); for (const x of roster) { if (r() < .5 && out.length < 8) { const rel = figReleases(x); const s = rel.find(s2 => yearOf(s2 * 6) >= since); if (s !== undefined) out.push(`${songLink(x, s)} by ${figLink(x)} <span class="muted small">(${e.dept.toLowerCase()})</span>`); } } }
   return out;
@@ -96,11 +100,12 @@ function viewEmployee(id) {
   const e = staffAt(R, +n); if (!e) return '<p class="muted">Not found.</p>';
   const boss = bossOf(R, e), O = orgChart(R), d = O.D.find(x => x.dept === e.dept), team = []; for (let j = d.start; j < d.start + d.n && team.length < 8; j++) if (j !== e.n && Math.abs(staffAt(R, j).rank - e.rank) <= 1) team.push(j);
   const proj = empProjects(R, e), prev = prevEmployers(R, e);
-  return `<div class="head"><p class="eyebrow">${esc(e.dept)} · ${coLink(R)} · ${esc(hubName(R.hub))}</p><h2>${esc(e.name)}</h2><p class="lede">${esc(e.title)}. ${e.age}, at the company since ${e.since}. ${esc(e.quip)}</p></div>
-   <div class="cols two"><section class="panel"><h3>Where they sit</h3><p>${boss ? `Reports to ${empLink(R, boss.n)} <span class="muted small">(${esc(boss.title)})</span>` : 'Reports to the board.'}</p>${team.length ? `<h4>Works alongside</h4><ul class="plain small">${team.map(j => `<li>${empLink(R, j)} <span class="muted">· ${esc(staffAt(R, j).title)}</span></li>`).join('')}</ul>` : ''}<p><a href="#" class="lk" data-go="staff:${esc(R.key)}">The whole ${esc(R.name)} directory ›</a></p>${prev.length ? `<h4>Before ${esc(R.name)}</h4><ul class="plain small">${prev.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}</section>
+  return `<div class="head"><p class="eyebrow">${esc(e.dept)} · ${coLink(R)} · ${esc(hubName(R.hub))}</p><h2>${esc(e.name)}</h2><p class="lede">${esc(e.title)}. ${e.age}, ${R.free ? 'working since' : 'at the company since'} ${e.since}. ${esc(e.quip)}</p></div>
+   <div class="cols two"><section class="panel"><h3>Where they sit</h3><p>${boss ? `Reports to ${empLink(R, boss.n)} <span class="muted small">(${esc(boss.title)})</span>` : R.free ? 'Freelance: works for whoever books them this week.' : 'Reports to the board.'}</p>${team.length ? `<h4>Works alongside</h4><ul class="plain small">${team.map(j => `<li>${empLink(R, j)} <span class="muted">· ${esc(staffAt(R, j).title)}</span></li>`).join('')}</ul>` : ''}<p><a href="#" class="lk" data-go="staff:${esc(R.key)}">The whole ${esc(R.name)} directory ›</a></p>${prev.length ? `<h4>Before ${esc(R.name)}</h4><ul class="plain small">${prev.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}</section>
    <section class="panel"><h3>Worked on</h3>${proj.length ? `<ul class="plain small">${proj.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p class="muted small">Nothing with their name on it. Every company runs on people like this.</p>'}</section></div>`;
 }
 function companyHistory(R) {
+  if (R.free) return [];
   const r = hashRand([...R.key].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 5) >>> 0), out = [[R.founded || 1950, R.kind === 'biz' ? `opens its doors in ${hubName(R.hub)}` : `is founded in ${hubName(R.hub)}`]];
   for (let y = (R.founded || 1950) + 3 + Math.floor(r() * 5); y < S.year; y += 5 + Math.floor(r() * 9)) out.push([y, HIST_Q[Math.floor(r() * HIST_Q.length)]]);
   if (R.kind === 'film' && R.c) { const top = R.c.films.map(i => S.films[i]).filter(f => f && f.rel !== null).sort((a, b) => b.total - a.total).slice(0, 4); for (const f of top) out.push([yearOf(f.rel), `releases ${f.title}, which takes ${fmtM(f.total)}`, f.id]); if (R.closed !== null && R.closed !== undefined) out.push([R.closed, 'closes its doors']); }
