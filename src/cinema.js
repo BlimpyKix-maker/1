@@ -157,7 +157,7 @@ function frameOf(f, i) {
 }
 function stillCaption(f, i) {
   const F = frameOf(f, i), names = F.who.map(id => P(id).name), where = SC_SETTINGS[F.setting];
-  if (F.cap) return names.length ? `${names.join(', ')}: ${F.cap}.`.replace(/\.\.$/, '.') : `${F.cap}.`.replace(/\.\.$/, '.');
+  if (F.cap) return names.length ? `${names.join(', ')}: ${F.cap}.`.replace(/\.\.$/, '.') : `${F.cap[0].toUpperCase()}${F.cap.slice(1)}.`.replace(/\.\.$/, '.');
   if (!names.length) return `The crew ${where}, between takes.`;
   const who = names.length === 1 ? names[0] : names.length === 2 ? `${names[0]} and ${names[1]}` : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
   const when = ['', ', in the golden hour', ', at dusk', ', at night'][F.tod];
