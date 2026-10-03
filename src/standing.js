@@ -61,6 +61,7 @@ function ambSorted(L) {
   return L.map(A => [A, rank(A)]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
 }
 function ambitionsPage() {
+  if (typeof ambFresh === 'function') ambFresh();
   const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined).length, pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), cl = ambClaimable();
   return `<section class="panel amb"><h3>Ambitions <span class="count">${done} of ${AMBITIONS.length}</span></h3>
    ${cl.length ? `<div class="claimbar">✦ ${cl.length} reward${cl.length > 1 ? 's' : ''} waiting: ${cl.map(A => `<button class="btn-s" data-ambclaim="${A.k}">${esc(A.t)}</button>`).join(' ')}</div>` : ''}
@@ -68,7 +69,11 @@ function ambitionsPage() {
    ${Object.entries(AMB_CAT).map(([c, l]) => { const L = ambSorted(AMBITIONS.filter(A => A.c === c)); return L.length ? `<details class="ambcat"${c === 'start' || c === 'craft' ? ' open' : ''}><summary><b>${l}</b> <span class="count">${L.filter(A => (M.amb || {})[A.k] !== undefined).length} of ${L.length}</span></summary>${L.map(ambRow).join('')}</details>` : ''; }).join('')}
    <p class="muted small">Reach a goal and its reward waits here: standing, some cash, energy back and stress off. Bigger goals, bigger rewards.</p></section>`;
 }
-function pinnedAmbHTML() { const M = S.me, pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), cl = ambClaimable(); if (!pins.length && !cl.length) return ''; return `<section class="panel"><h4>Your goals</h4>${cl.length ? `<p class="small">✦ <button class="linkish" data-dtab="standing">${cl.length} reward${cl.length > 1 ? 's' : ''} to claim</button></p>` : ''}${pins.map(ambRow).join('')}</section>`; }
+function pinnedAmbHTML() { if (typeof ambFresh === 'function') ambFresh(); const M = S.me, cl = ambClaimable(); let pins = (M.ambPin || []).map(k => AMBITIONS.find(A => A.k === k)).filter(Boolean), near = false;
+  // nothing pinned: offer the three goals you're closest to, so there's always something within reach
+  if (!pins.length) { near = true; const open = AMBITIONS.filter(A => { if ((M.amb || {})[A.k] !== undefined) return false; try { const [c, n] = A.p(); return c < n; } catch (e) { return false; } });
+    for (const cat of ['start', 'craft', 'money', 'fame', 'audience', 'power', 'collect', 'life', 'library', 'prizes', 'mastery']) { if (pins.length >= 3) break; const best = ambSorted(open.filter(A => A.c === cat))[0]; if (best) pins.push(best); } }
+  if (!pins.length && !cl.length) return ''; return `<section class="panel"><h4>${near ? 'Within reach' : 'Your goals'}</h4>${cl.length ? `<p class="small">✦ <button class="linkish" data-dtab="standing">${cl.length} reward${cl.length > 1 ? 's' : ''} to claim</button></p>` : ''}${pins.map(ambRow).join('')}</section>`; }
 // ---- reputation ----
 const FACETS = [['talent', 'Talent'], ['reliability', 'Reliability'], ['bankability', 'Bankability'], ['prestige', 'Prestige'], ['warmth', 'Warmth'], ['integrity', 'Integrity'], ['fame', 'Fame'], ['power', 'Power']];
 function facets() {

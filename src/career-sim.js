@@ -755,11 +755,11 @@ function finishJob(j, L, quit) {
   const T = j.tasks || [];
   M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
   if (T.length && L) L.push(`Your work as ${j.t.toLowerCase()}: ${T.length} task${T.length > 1 ? 's' : ''} delivered, ${T.filter(x => x.pts > 0).length} good, ${T.filter(x => x.pts < 0).length} rough${f && j.contrib ? `; it moved the film ${j.contrib > 0 ? 'up' : 'down'} ${Math.abs(j.contrib).toFixed(1)} points` : ''}.`);
-  if (j.head != null && P(j.head) && !quit) {
+  if (j.head != null && j.head !== M.id && P(j.head) && !quit) {   // you can't earn your own trust when you were the boss
     if (!M.known[j.head]) meet(j.head);
     const o = opinion(j.head), k = M.known[j.head];
-    k.trust = clamp(k.trust + (o > 10 ? 8 : 2), 0, 100);
-    if (!k.tags.includes('Worked for them')) k.tags.push('Worked for them');
+    if (k) k.trust = clamp(k.trust + (o > 10 ? 8 : 2), 0, 100);
+    if (k && !k.tags.includes('Worked for them')) k.tags.push('Worked for them');
     if (o > 20) M.refs[j.head] = (M.refs[j.head] || 0) + 1;
   }
   const txt = quit ? `You leave ${j.t.toLowerCase()}${f ? ' on ' + f.title : ''}.` : `${f ? f.title + ' wraps your part' : 'Your stint as ' + j.t.toLowerCase() + ' ends'}.${credited ? ' Your name will be in the credits.' : ''}${j.head !== null && opinion(j.head) > 20 ? ` ${P(j.head).name} says to call them for the next one.` : ''}`;
@@ -836,7 +836,7 @@ function afterTick(fresh) {
   if (M.quirk === 'secret' && !M.secretOut && S.week - M.startW > 20 && prnd() < .03) secretEvent();
   if (M.shark > 0 && (S.week - M.startW) % 8 === 7) inbox('debt', 'A visit about the loan', `The man you owe ${fmtCash(M.shark)} comes by. Interest is running at one percent a week.`, { choices: [{ k: 'pay', label: `Pay it all (${fmtCash(M.shark)})`, dis: M.cash < M.shark ? 'Not enough cash' : null }, { k: 'part', label: `Pay ${fmtCash(Math.round(M.shark / 4))} to buy time`, dis: M.cash < M.shark / 4 ? 'Not enough cash' : null }, { k: 'stall', label: 'Stall' }] });
   if (M.broke >= 6 && !pending().some(x => x.kind === 'broke')) inbox('broke', 'The rent is overdue', `You have been in the red for ${M.broke} weeks. Something has to give.`, { choices: [{ k: 'down', label: 'Move somewhere cheaper', dis: M.life === 'couch' ? 'Already on a couch' : null }, { k: 'borrow', label: 'Ask a friend for a loan', dis: bestFriend() === null ? 'Nobody close enough to ask' : null }, { k: 'leave', label: 'Leave the business and go home' }] });
-  if (M.stress >= 90 && !M.burnout) { M.burnout = 1; me.standing = Math.max(0, me.standing - 1); if (prnd() < .25 && !has(me, 'Volatile') && me.traits.length < 6) me.traits.push('Volatile'); inbox('note', 'Burnout', 'You hit a wall. Next week you sleep, cancel everything, and call in sick to any job you have.' + (has(me, 'Volatile') ? ' Something in you has frayed: you snap at people more now.' : '')); }
+  if (M.stress >= 90 && !M.burnout) { M.burnout = burnoutWeeks(); me.standing = Math.max(0, me.standing - 1); if (prnd() < .25 && !has(me, 'Volatile') && me.traits.length < 6) me.traits.push('Volatile'); inbox('note', 'Burnout', 'You hit a wall. Next week you sleep, cancel everything, and call in sick to any job you have.' + (has(me, 'Volatile') ? ' Something in you has frayed: you snap at people more now.' : '')); }
   refreshBoard();
 }
 function bestFriend() { const M = S.me; let b = null, bs = 30; for (const id in M.known) { const o = opinion(+id) + M.known[id].trust * .3; if (o > bs && !P(+id).dead) { bs = o; b = +id; } } return b; }

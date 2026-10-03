@@ -63,9 +63,21 @@ function setPlan(a) {
   if (a.train) M.train = a.train;
   if (a.catchWith !== undefined) M.catchWith = a.catchWith ?? null;
 }
+// Burnout escalates: the first is a week off; burn out again within six months and it takes longer, and costs more.
+function burnoutWeeks() {
+  const M = S.me, L = (M.burnW = (M.burnW || []).filter(w => S.week - w < 26)); L.push(S.week);
+  if (L.length >= 3) M.stress = Math.max(M.stress, 60);   // you come back fragile
+  return L.length >= 4 ? 3 : L.length >= 2 ? 2 : 1;
+}
 function startWeek() {
   const M = S.me, me = ME(), burnt = M.burnout > 0;
-  if (burnt) { for (const j of M.jobs) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4); } M.burnout--; }
+  if (burnt) {
+    for (const j of M.jobs.slice()) { j.missed = (j.missed || 0) + 1; if (j.head !== null) addTie(me, P(j.head), -4);
+      // a job will forgive one lost week; a pattern of them, less so
+      if (j.missed >= 3 && prnd() < .3 + (j.missed - 3) * .15) { finishJob(j, null, true); inbox('note', `Let go from ${j.t.toLowerCase()}`, 'They\'ve covered for you too many times. "Get some rest," says the email. "Properly." The job goes to someone who turns up.'); me.standing = clamp(me.standing - 1.5, 0, 100); }
+    }
+    M.burnout--;
+  }
   M.wk = { day: 0, block: 0, burnt, cashIn: 0, cashOut: 0, stress: 0, gains: {}, hunted: 0, studied: 0, L: [], cards: [], out: -1 };
 }
 // Live on: 'next' until the next notable thing, 'day' to the end of the day, 'end' to the end of the week.
@@ -152,7 +164,7 @@ function sleepNight() {
   const sleep = 19 + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
   M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
   const stressNow = M.stress + M.wk.stress;
-  if (stressNow >= 96 && !M.burnout) { M.burnout = 1; inbox('note', 'You hit the wall', 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
+  if (stressNow >= 96 && !M.burnout) { M.burnout = burnoutWeeks(); inbox('note', 'You hit the wall', M.burnout > 1 ? `Again. Your body has stopped negotiating: ${M.burnout} weeks of rest, whatever you planned. Bosses are starting to notice the pattern.` : 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
 }
 // ---- work days ----
 function workDay() {

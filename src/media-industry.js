@@ -170,7 +170,7 @@ function mediaFigures(hub) {
     const kind = field === 'music' ? pick(['singer', 'band', 'rapper', 'dj']) : field === 'creator' ? pick(['creator', 'blipper']) : field === 'podcast' ? 'show' : pick(['playwright', 'composer']);
     const person = `${pick(N.F.concat(N.M))} ${pick(N.L)}`;
     const name = kind === 'band' ? `${pick(BAND_A)} ${pick(BAND_B)}` : kind === 'dj' ? `DJ ${pick(N.L)}` : kind === 'show' ? `${pick(SHOW_A)} ${pick(SHOW_B)}` : person;
-    out.push({ name, field, kind, hub, fans: Math.round(Math.pow(10, 3 + r() * 3.4)), from: S.year - Math.floor(r() * 12) });
+    out.push({ name, field, kind, hub, fans: Math.round(Math.pow(10, 3 + r() * 3.4)), from: (S.startYear || S.year) - Math.floor(r() * 12) });   // fixed by the world, not by when you first look
   }
   for (const [name, field, kind, h, from, to] of MEDIA_LEGENDS) if (h === hub || (HUBS[h] && HUBS[h].m === H.m && !HUBS[hub].lang.localeCompare(HUBS[h].lang))) out.push({ name, field, kind, hub: h, fans: 4e6 + (name.length * 7919 % 9) * 1e6, from, to, legend: 1 });
   if (typeof moreFigures === 'function') out.push(...moreFigures(hub, out));

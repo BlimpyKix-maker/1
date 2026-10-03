@@ -80,6 +80,7 @@ const AMBITIONS = [
 function ambitionWeek() {
   const M = S.me, me = ME(); M.amb = M.amb || {};
   const got = [];
+  if (typeof ambFresh === 'function') ambFresh();
   for (const A of AMBITIONS) {
     if (M.amb[A.k] !== undefined) continue;
     let c = 0, n = 1; try { [c, n] = A.p(); } catch (e) { continue; } if (!(c >= n)) continue;
@@ -89,6 +90,7 @@ function ambitionWeek() {
   else if (got.length > 1) inbox('note', `${got.length} ambitions reached`, `${got.slice(0, 8).map(A => A.t).join(' · ')}${got.length > 8 ? ` and ${got.length - 8} more` : ''}. The rewards are waiting on the Standing page.`);
 }
 function ambitionsHTML() {
+  if (typeof ambFresh === 'function') ambFresh();
   const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined), next = AMBITIONS.filter(A => (M.amb || {})[A.k] === undefined).slice(0, 3);
   return `<section class="panel amb"><h3>Ambitions <span class="count">${done.length} of ${AMBITIONS.length}</span></h3>${next.map(A => { const [c, n] = A.p(), pct = clamp(c / n, 0, 1); return `<div class="ambrow"><span>${esc(A.t)}</span><span class="tbar"><i style="width:${Math.round(pct * 100)}%"></i></span><span class="small muted">${A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n) + ' / ' + n}</span></div>`; }).join('')}
    ${done.length ? `<p class="small muted">Done: ${done.map(A => esc(A.t.toLowerCase())).join(' · ')}</p>` : ''}</section>`;

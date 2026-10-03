@@ -5,9 +5,11 @@
 // own films and what they took. Progress is worked out from what you already have, so nothing new is stored but the
 // date each one was reached.
 Object.assign(AMB_CAT, { mastery: 'Mastery', library: 'The library', prizes: 'Every prize in the world', audience: 'Every platform, every form', collect: 'Collecting and living', life: 'A life in the business' });
-// Progress is checked for hundreds of goals at once; anything costly is worked out once per action.
-let AMB_MEMO = {}, AMB_KEY = '';
-function ambMemo(k, fn) { const key = S.week + '|' + (S.log ? S.log.length : 0) + '|' + (S.me ? S.me.id : 0); if (key !== AMB_KEY) { AMB_MEMO = {}; AMB_KEY = key; } return k in AMB_MEMO ? AMB_MEMO[k] : (AMB_MEMO[k] = fn()); }
+// Progress is checked for hundreds of goals at once; anything costly is worked out once per check. Every caller that
+// walks the list starts with ambFresh(), so a cached figure never outlives the moment it was read (replays depend on it).
+let AMB_MEMO = {};
+function ambFresh() { AMB_MEMO = {}; }
+function ambMemo(k, fn) { return k in AMB_MEMO ? AMB_MEMO[k] : (AMB_MEMO[k] = fn()); }
 const ambHave = new Set(AMBITIONS.map(A => A.k));
 function amb(k, c, t, p, rw, money) { if (ambHave.has(k)) return; ambHave.add(k); AMBITIONS.push({ k, c, t, p, rw, money }); }
 const nfmt = n => n >= 1e9 ? n / 1e9 + ' billion' : n >= 1e6 ? n / 1e6 + ' million' : n.toLocaleString();

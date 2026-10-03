@@ -14,9 +14,9 @@ function moreFigures(hub, have) {
   const n = Math.round(30 + 90 * HUB_W(hub));
   for (let i = 0; i < n; i++) {
     const x = r(), field = x < .46 ? 'music' : x < .64 ? 'stage' : x < .86 ? 'creator' : 'podcast', kind = pick(FIG_KINDS[field]);
-    const from = Math.max(FIG_START[field], S.year - Math.floor(Math.pow(r(), 1.4) * 60));
-    if (from > S.year) continue;
-    const to = from < S.year - 8 && r() < .45 ? Math.min(S.year - 1, from + 4 + Math.floor(r() * 24)) : undefined;
+    // dates are fixed by the world's start year (not by when the list is first read), and some acts debut years later
+    const Y0 = (S.startYear || S.year) + 25, from = Math.max(FIG_START[field], Y0 - Math.floor(Math.pow(r(), 1.4) * 85));
+    const to = from < Y0 - 8 && r() < .45 ? from + 4 + Math.floor(r() * 24) : undefined;
     const person = `${pick(N.F.concat(N.M))} ${pick(N.L)}`;
     const name = kind === 'band' ? `${pick(BAND_A)} ${pick(BAND_B)}` : kind === 'duo' ? `${pick(N.L)} & ${pick(N.L)}` : kind === 'choir' ? `The ${pick(N.L)} Singers` : kind === 'troupe' ? `The ${pick(BAND_B)} Company` : kind === 'dj' ? `DJ ${pick(N.L)}` : kind === 'show' ? `${pick(SHOW_A)} ${pick(SHOW_B)}` : person;
     if (taken.has(name)) continue; taken.add(name);
