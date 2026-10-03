@@ -109,6 +109,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 ```
 python3 tools/build.py
 node tools/playtest.js 60          # bot career; must print "replayed … IDENTICAL"
+node tools/rendertest.js 40        # same, opening every page each week; catches pages that roll dice
 node tools/fuzz.js 5 60            # random careers; every line must say "ok"
 NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SAVE OK", overflow 0
 ```

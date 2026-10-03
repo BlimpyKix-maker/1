@@ -1,0 +1,62 @@
+// Like playtest, but opens every page, app and desk tab each week of the live run (never in the replay):
+// a page that rolls the world's or the player's dice desyncs the save, and this catches it. Usage: node tools/rendertest.js [weeks]
+const path = require('path');
+const weeks = +(process.argv[2] || 52), depth = process.argv[3] || 'quick';
+function fresh() {
+  delete require.cache[require.resolve('./harness.js')];
+  const h = require('./harness.js');
+  h.run(`newWorld(2027, 2027, '${depth}'); while (archiving()) archiveStep(); while (warming()) tick(); finishWarm(); S.log = []; S.me = null;`);
+  return h;
+}
+const h = fresh();
+const r = c => h.run(c);
+r(`doAct({ t: 'create', c: { name: 'Test Person', g: 'X', age: 23, hub: 'hollywood', role: 'dp', wealth: 'gettingby', edu: 'filmcam', arrival: 'plusone', build: 'rugged', quirk: 'rival', points: { cam: 4, edt: 2, dir: 2, act: 1, pro: 1 }, traits: ['Workhorse', 'Charming', 'Lucky'], love: ['Horror', 'Sci-fi'], hate: ['Musical'], favs: Object.keys(S.cat.allFilms).filter(id => S.cat.allFilms[id].g === 'Horror').slice(0, 3), look: defaultLook() } })`);
+for (let i = 0; i < 20 && !r('S.me.party.done'); i++) r(`(() => { const sc = partyScene(S.me.party); return doAct({ t: 'party', k: sc.rooms ? sc.rooms[0].k : sc.opts[${i % 2}].k }); })()`);
+console.log('party:', r(`S.me.party.log.map(l => l.title + ': ' + l.choice + (l.roll ? ' [' + rollText(l.roll) + ']' : '')).join(' | ')`));
+console.log(r(`S.me.inbox.map(x => x.title + ': ' + x.text).join('\\n')`));
+console.log('contacts after party:', r(`Object.keys(S.me.known).map(id => P(+id).name + ' [' + S.me.known[id].tags.join(', ') + '] ' + Math.round(opinion(+id))).join('; ')`));
+const t0 = Date.now();
+for (let w = 0; w < weeks; w++) {
+  // decide everything pending: accept offers that fit, first choice otherwise
+  r(`for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }`);
+  // plan: job hunt when not fully employed, otherwise write/rest
+  r(`S.me.cal = (jobDays() >= 5 ? [['hunt','hunt','home'],['hunt','hunt','home'],['hunt','hunt','read'],['hunt','hunt','home'],['hunt','hunt','out'],['rest','rest','out'],['rest','home','home']] : [['hunt','hunt','home'],['hunt','network','home'],['hunt','train','read'],['hunt','hustle','home'],['hunt','write','out'],['rest','read','out'],['rest','home','home']]).map(r => r.slice()); S.me.train = 'cam';
+  if (S.week % 3 === 0) { const ids = aliveKnown().sort((a, b) => opinion(b) - opinion(a)); const s = upcomingSlots(8)[2]; if (ids.length && s) doAct(Object.assign({ t: 'text', id: ids[S.week % Math.min(3, ids.length)], kind: S.week % 2 ? 'coffee' : 'drinks' }, s)); }`);
+  r(`globalThis.ONLY = ${JSON.stringify(process.env.ONLY || '')}`);
+  r(`(() => { const T = (f) => { try { f(); } catch (e) { if (!globalThis.__e) globalThis.__e = String(e.stack).slice(0, 300); } };
+    if (!ONLY || ONLY === 'base') { T(() => viewDesk()); T(() => viewYou()); }
+    if (typeof OS_VIEWS !== 'undefined') for (const k in OS_VIEWS) if (!ONLY || ONLY === 'os:' + k || ONLY === 'os') T(() => OS_VIEWS[k]());
+    if (typeof APPS !== 'undefined') for (const [k] of APPS) if (!ONLY || ONLY === 'app') T(() => { UI.app = k; computerPanel(); }); UI.app = null;
+    for (const tab of ['today','feed','diary','phone','computer','work','create','compete','standing','life','people']) if (!ONLY || ONLY === 'tab:' + tab || ONLY === 'tab') T(() => { UI.dtab = tab; viewDesk(); }); UI.dtab = null;
+  })()`);
+  // live the week; answer anything that comes up on the way
+  const ok = r(`(() => { const apps = S.me.board.slice().sort((a, b) => (hireOdds(b) + (b.odd ? -.5 : 0)) - (hireOdds(a) + (a.odd ? -.5 : 0))).slice(0, appSlots()).map(p => p.id); const w0 = S.week;
+    for (let g = 0; g < 40 && S.week === w0 && !S.me.over; g++) {
+      for (const it of pending()) { const k = it.kind === 'offer' ? (jobDays() + it.post.days <= 5 ? 'yes' : 'no') : (it.choices.find(c => !c.dis) || it.choices[it.choices.length - 1]).k; doAct({ t: 'pick', id: it.id, k }); }
+      doAct({ t: 'end', cal: S.me.cal.map(r => r.slice()), apps, train: S.me.train, catchWith: null }); }
+    return S.week !== w0 || S.me.over; })()`);
+  if (!ok) { console.log('week stuck at', w, r(`JSON.stringify(pending().map(x => x.kind))`), r('S.me.over')); break; }
+}
+const sum = c => r(`(() => { const M = S.me, me = ME(); return JSON.stringify({ week: S.week, cash: M.cash, energy: Math.round(M.energy), stress: Math.round(M.stress), standing: +me.standing.toFixed(3), cam: +me.c.cam.toFixed(4), credits: me.credits.length, known: Object.keys(M.known).length, apps: M.stats.apps, offers: M.stats.offers, weeksWorked: M.stats.weeks, jobs: M.jobs.map(j => j.t), past: M.past.length, log: S.log.length, films: S.films.length }); })()`);
+const A = sum();
+console.log(`played ${weeks} weeks in ${Date.now() - t0}ms\n`, A);
+console.log('past jobs:', r(`S.me.past.map(p => p.t + (p.credited ? ' (credit)' : '') + (p.quit ? ' (quit)' : '')).join('; ')`));
+console.log('last diary:', r(`S.me.diary.slice(-8).map(d => d.t).join(' | ')`));
+// replay
+const log = JSON.parse(r('JSON.stringify(S.log)'));
+const h2 = fresh();
+h2.ctx.__log = log;
+const t1 = Date.now();
+h2.run(`for (const a of __log) if (!applyAct(a)) throw new Error('replay refused ' + JSON.stringify(a).slice(0, 120)); S.log = __log;`);
+const B = h2.run(`(() => { const M = S.me, me = ME(); return JSON.stringify({ week: S.week, cash: M.cash, energy: Math.round(M.energy), stress: Math.round(M.stress), standing: +me.standing.toFixed(3), cam: +me.c.cam.toFixed(4), credits: me.credits.length, known: Object.keys(M.known).length, apps: M.stats.apps, offers: M.stats.offers, weeksWorked: M.stats.weeks, jobs: M.jobs.map(j => j.t), past: M.past.length, log: S.log.length, films: S.films.length }); })()`);
+console.log(`replayed in ${Date.now() - t1}ms: ${A === B ? 'IDENTICAL' : 'DIFFERENT\n ' + B}`);
+console.log('inbox kinds:', r(`JSON.stringify(S.me.inbox.reduce((a, x) => (a[x.kind] = (a[x.kind] || 0) + 1, a), {}))`));
+console.log('scenes seen:', r(`S.me.inbox.filter(x => x.kind === 'scene').map(x => x.scene + (x.result ? (x.result.ok === false ? '✗' : '✓') : '')).join(' ')`));
+console.log('sample scene:', r(`(() => { const x = S.me.inbox.filter(x => x.kind === 'scene').pop(); return x ? x.title + ' — ' + x.text + ' → ' + (x.result && x.result.t) : 'none'; })()`));
+console.log('known tags:', r(`JSON.stringify(Object.values(S.me.known).flatMap(k => k.tags).reduce((a, t) => (a[t] = (a[t] || 0) + 1, a), {}))`));
+console.log('relationships:', r(`JSON.stringify(aliveKnown().reduce((a, id) => (a[relOf(id)] = (a[relOf(id)] || 0) + 1, a), {}))`), 'phone:', r('S.me.phoneN'), 'appts:', r(`JSON.stringify((S.me.appts || []).map(x => x.kind))`));
+console.log('last texts:', r(`S.me.phone.slice(-6).map(m => (m.from === -1 ? 'me' : m.from === null ? 'home' : P(m.from).name) + ': ' + m.t).join(' | ')`));
+console.log('milestones:', r(`(S.me.milestones || []).map(m => m.t).join(' | ')`));
+console.log('world:', r(`JSON.stringify((S.me.world || {}).ev || [])`), 'npc lives:', r(`aliveKnown().flatMap(id => (P(id).life || []).map(e => P(id).name + ' ' + e.t)).slice(-6).join(' | ')`));
+
+console.log('render error:', h.run('globalThis.__e || null'));

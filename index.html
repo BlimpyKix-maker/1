@@ -14983,7 +14983,7 @@ function companyStrategy(c) {
   if (c.tier === 1 && top && ['Superhero', 'Action', 'Sci-fi', 'Fantasy', 'Animation'].includes(top[0])) return 'Franchise machine';
   if (rev >= 70) return c.tier === 3 ? 'Indie darling' : 'Prestige house';
   if (top && ['Horror', 'Comedy', 'Thriller', 'Crime'].includes(top[0]) && c.tier >= 2) return 'Genre factory';
-  if (films.length && avg(films.map(f => f.cost)) < budgetFor(c.tier, c.hub, 'Drama', S.year) * .6) return 'Cost cutter';
+  if (films.length && avg(films.map(f => f.cost)) < [0, 3, 1, .35][c.tier] * budgetScale(S.year) * era(MARKETS[HUBS[c.hub].m].cost, S.year) * Math.pow(AMB.Drama, .7) * .6) return 'Cost cutter';   // the typical budget, no dice: this is read by pages
   return 'Generalist';
 }
 function heatPanel(m) {
