@@ -3,6 +3,8 @@
 // and a body. Home is a working dashboard (what needs you, best jobs with apply boxes, mail, diary, money, news,
 // your rank). CrewList plans your applications; Calendar shows the week and what's booked; Contacts is a little
 // CRM for the people who matter; Bank adds up your net worth. Every other app opens in the same frame.
+// Modules register extra apps here: OS_VIEWS[key] = () => html, OS_EXTRA[key] = [icon, name, subtitle].
+const OS_VIEWS = {};
 const OS_GROUPS = [
   ['Today', ['home', 'cal']],
   ['Work', ['jobs', 'mail', 'contacts']],
@@ -29,7 +31,7 @@ function osPanel() {
   const time = W ? ['08:12', '13:40', '21:05'][W.block] : '09:00';
   const side = groups.map(([g, ks]) => `<div class="os-g"><h6>${g}</h6>${ks.filter(osApp).map(x => { const a = osApp(x), b = osBadge(x), lock = typeof appLocked === 'function' && appLocked(x); return `<button class="os-i${x === k ? ' on' : ''}${lock ? ' locked' : ''}" data-app="${x}"><span class="os-ic">${a[1]}</span><span class="os-l">${esc(a[2])}</span>${b ? `<span class="os-b">${b}</span>` : lock ? '<span class="os-lock">🔒</span>' : ''}</button>`; }).join('')}</div>`).join('');
   let body;
-  try { body = k === 'home' ? osHome() : k === 'cal' ? osCal() : k === 'contacts' ? osContacts() : k === 'jobs' ? osJobs() : k === 'bank' ? osBank() : k === 'library' && typeof libraryHTML === 'function' ? libraryHTML() : k === 'trades' && typeof paperHTML === 'function' ? paperHTML() : appWindow(k); }
+  try { body = typeof OS_VIEWS !== 'undefined' && OS_VIEWS[k] ? OS_VIEWS[k]() : k === 'home' ? osHome() : k === 'cal' ? osCal() : k === 'contacts' ? osContacts() : k === 'jobs' ? osJobs() : k === 'bank' ? osBank() : k === 'library' && typeof libraryHTML === 'function' ? libraryHTML() : k === 'trades' && typeof paperHTML === 'function' ? paperHTML() : appWindow(k); }
   catch (e) { body = `<p class="muted">This app crashed: ${esc(String(e.message || e))}</p>`; }
   return `<section class="panel os-wrap"><div class="os${UI.wmax ? ' max' : ''}">
    <aside class="os-side"><div class="os-brand"><b>ApplOS</b><span>${W ? DAYS7[W.day].slice(0, 3) : ''} ${time}</span></div><div class="os-stat"><span title="Energy">🔋 ${Math.round(M.energy)}%</span><span title="Cash">💵 ${fmtCash(M.cash)}</span></div>${side}</aside>

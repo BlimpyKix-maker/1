@@ -211,6 +211,7 @@ function computerClick(t) {
   if (typeof depthClick === 'function' && depthClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
   if (typeof libClick === 'function' && libClick(t)) return true;
+  if (typeof rogerClick === 'function' && rogerClick(t)) return true;
   if (typeof paperClick === 'function' && paperClick(t)) return true;
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
   if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
@@ -259,4 +260,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

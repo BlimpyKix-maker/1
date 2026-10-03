@@ -65,6 +65,7 @@ function releaseWork(a) {
   const sk = T.subs.reduce((t, s) => t + skillOf(me, s), 0) / T.subs.length;
   const q = clamp(Math.round(sk * 3.6 + 12 + k.boost * 2 + gearFor(k.type) * 3 + (a.edit || 0) + pgauss() * 9), 3, 98);
   const w = { id: (M.works || []).length, type: k.type, title: k.title, q, rel: S.week, plat: T.plat, units: 0, earned: 0, wk: [], promo, cost };
+  if (k.type === 'review' && typeof reviewRelease === 'function') reviewRelease(w);
   if (T.plat === 'stage') {
     // a two-week fringe run: seats × nights × how full it is
     const seats = k.type === 'musical' ? 180 : 90, nights = 12, fill = clamp(.15 + (q - 40) / 90 + pgauss() * .12, .05, 1), price = usd(k.type === 'musical' ? 22 : 15);

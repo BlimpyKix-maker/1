@@ -683,6 +683,7 @@ function closeWeek(a) {
   if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof achWeek === 'function') achWeek();
+  if (typeof criticWeek === 'function') criticWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
