@@ -110,7 +110,7 @@ function headName(h) { return h[2] && S.cat.src.people[h[2]] ? S.cat.src.people[
 function headLink(h) { const id = h[2] !== null && S.cat.people ? S.cat.people[h[2]] : undefined; return id !== undefined && P(id) ? pl(id) : esc(headName(h)); }
 function headsHTML(c) {
   const L = STUDIO_HEADS[c.catId]; if (!L) return '';
-  return `<h4>Leadership through the years</h4><ul class="plain small">${L.filter(h => h[0] <= S.year).map(h => `<li>${h[0]}–${h[1] === null ? 'today' : h[1]} · <b>${headLink(h)}</b> <span class="muted">${esc(h[5])}</span></li>`).join('')}</ul>`;
+  return `<h4>Leadership through the years</h4><ul class="plain small">${L.filter(h => h[0] <= S.year).map(h => `<li>${h[0]}–${h[1] === null ? 'today' : h[1]} · <b>${headLink(h)}</b> <span class="muted">${esc(h[5])}</span>${typeof execCareerHTML === 'function' && !h[2] ? execCareerHTML(h[4]) : ''}</li>`).join('')}</ul>`;
 }
 // one real festival name slipped into the record: it's the Mountain Film Festival in this world
 for (const C of CATALOGUES) for (const f of C.films || []) if (f.aw) f.aw = f.aw.map(a => a.replace(/^Festival Sundance/, 'Mountain Film Festival'));
