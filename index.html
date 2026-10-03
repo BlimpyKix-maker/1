@@ -376,6 +376,7 @@ h4 { font: 600 14px/1.2 var(--f-display); letter-spacing: .08em; text-transform:
 .cpath { list-style: none; padding: 0; margin: 6px 0; display: grid; gap: 4px; border-left: 2px solid var(--gold); padding-left: 12px; } .cpath li { position: relative; } .cpath li::before { content: ''; position: absolute; left: -17px; top: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--gold); } .cpath .cy { font-family: var(--f-data); font-size: 12px; color: var(--muted); margin-right: 6px; } .execpath summary { cursor: pointer; color: var(--accent); }
 .rt-top { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 8px; } .rt-top > div { display: grid; } .rt-big { font: 700 34px var(--f-display); line-height: 1; } .rt-top span { font-size: 12px; color: var(--muted); } .rt-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; } .rt-list li { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: start; } .rt-list q { display: block; font-style: italic; } .rt-list small { color: var(--muted); } .rt-list li.famous q { font-weight: 600; } .rt-list li.mine { border-left: 3px solid var(--accent); padding-left: 6px; } .rt-s { font: 700 16px var(--f-data); text-align: center; border-radius: 6px; padding: 4px 0; background: var(--line); } .rt-s.good { background: #2D7A4C; color: #fff; } .rt-s.bad { background: #B0362A; color: #fff; } .rt-badge b { font-family: var(--f-data); } .rt-brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; } .rt-brand b { font: 800 24px var(--f-display); color: #F2B705; letter-spacing: .02em; } .rt-brand span { color: var(--muted); font-size: 12px; }
 .bank-f { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; } .bank-f input { width: 110px; }
+.os-page .os-pagebody { margin-top: 10px; } .os-page .os-pagebody .head h2 { color: #fff; } .os-page .os-pagebody .panel { background: var(--panel); border-color: var(--line); } .os .panel { color: var(--ink); }
 .fbar { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px 10px; align-items: end; margin-bottom: 12px; } .fbar label { display: grid; gap: 3px; min-width: 0; } .fbar label > span { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); } .fbar select, .fbar input { width: 100%; box-sizing: border-box; background: var(--panel); color: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 7px 8px; font: inherit; } .fbar .fbar-q { grid-column: span 2; } @media (max-width: 520px) { .fbar .fbar-q { grid-column: 1 / -1; } }
 .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
 .filters select, .filters input { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; min-width: 0; max-width: 100%; }
@@ -16593,6 +16594,7 @@ function computerClick(t) {
   if (typeof msgClick === 'function' && msgClick(t)) return true;
   if (typeof depthClick === 'function' && depthClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
+  if (typeof osFoldClick === 'function' && osFoldClick(t)) return true;
   if (typeof libClick === 'function' && libClick(t)) return true;
   if (typeof rogerClick === 'function' && rogerClick(t)) return true;
   if (typeof bankClick === 'function' && bankClick(t)) return true;
@@ -16644,7 +16646,7 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
 // </computer2>
 // <mentor>
 // ---------------- Mentors, your films' stories, the year in entertainment ----------------
@@ -19489,7 +19491,8 @@ function osPanel() {
   const time = W ? ['08:12', '13:40', '21:05'][W.block] : '09:00';
   const side = groups.map(([g, ks]) => `<div class="os-g"><h6>${g}</h6>${ks.filter(osApp).map(x => { const a = osApp(x), b = osBadge(x), lock = typeof appLocked === 'function' && appLocked(x); return `<button class="os-i${x === k ? ' on' : ''}${lock ? ' locked' : ''}" data-app="${x}"><span class="os-ic">${a[1]}</span><span class="os-l">${esc(a[2])}</span>${b ? `<span class="os-b">${b}</span>` : lock ? '<span class="os-lock">🔒</span>' : ''}</button>`; }).join('')}</div>`).join('');
   let body;
-  try { body = typeof OS_VIEWS !== 'undefined' && OS_VIEWS[k] ? OS_VIEWS[k]() : k === 'home' ? osHome() : k === 'cal' ? osCal() : k === 'contacts' ? osContacts() : k === 'jobs' ? osJobs() : k === 'bank' ? osBank() : k === 'library' && typeof libraryHTML === 'function' ? libraryHTML() : k === 'trades' && typeof paperHTML === 'function' ? paperHTML() : appWindow(k); }
+  const stackB = typeof osStackHTML === 'function' ? osStackHTML() : null;
+  if (stackB) body = stackB; else try { body = typeof OS_VIEWS !== 'undefined' && OS_VIEWS[k] ? OS_VIEWS[k]() : k === 'home' ? osHome() : k === 'cal' ? osCal() : k === 'contacts' ? osContacts() : k === 'jobs' ? osJobs() : k === 'bank' ? osBank() : k === 'library' && typeof libraryHTML === 'function' ? libraryHTML() : k === 'trades' && typeof paperHTML === 'function' ? paperHTML() : appWindow(k); }
   catch (e) { body = `<p class="muted">This app crashed: ${esc(String(e.message || e))}</p>`; }
   return `<section class="panel os-wrap"><div class="os${UI.wmax ? ' max' : ''}">
    <aside class="os-side"><div class="os-brand"><b>ApplOS</b><span>${W ? DAYS7[W.day].slice(0, 3) : ''} ${time}</span></div><div class="os-stat"><span title="Energy">🔋 ${Math.round(M.energy)}%</span><span title="Cash">💵 ${fmtCash(M.cash)}</span></div>${side}</aside>
@@ -22221,6 +22224,71 @@ function bankClick(t) {
   return false;
 }
 // </finance>
+// <osfold>
+// ---------------- The computer as home base ----------------
+// Almost everything opens inside ApplOS now: the box office, companies, awards, careers, charts and the world; your
+// work, creative projects, contests, standing, life and people; and every film, person or company you click opens as
+// a page inside the computer, with its own back button, instead of throwing you onto another screen.
+function stackPage(cur) { return cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id); }
+// A desk tab rendered on its own, cut from the career screen.
+function deskPart(k) {
+  const was = UI.dtab; UI.dtab = k;
+  let html = '';
+  try { html = viewYou(); } finally { UI.dtab = was; }
+  const i = html.indexOf('<div class="dstack">');
+  return i >= 0 ? html.slice(i) : html;
+}
+const FOLD = {
+  today: ['📥', 'Today', 'Decisions waiting on you, this week\'s news and your next steps', () => deskPart('today')],
+  feed: ['📰', 'Feed', 'Everything that happened to you, newest first', () => deskPart('feed')],
+  week: ['🗓️', 'Plan the week', 'Your diary, block by block, and the city', () => deskPart('diary')],
+  phoneapp: ['📱', 'Phone', 'Texts, calls and the people who text back', () => deskPart('phone')],
+  work: ['🧰', 'Work', 'Your jobs, the tasks on them and the full job board', () => deskPart('work')],
+  create: ['🎨', 'Create', 'Your portfolio, scripts, productions and company', () => deskPart('create')],
+  contests: ['🥇', 'Contests', 'Competitions to enter and awards campaigns', () => deskPart('compete')],
+  standing: ['⭐', 'Standing', 'Reputation, ambitions and achievements', () => deskPart('standing')],
+  life: ['🏡', 'Life', 'Your place, your story and the paths you\'ve taken', () => deskPart('life')],
+  people: ['🤝', 'People', 'Mentor, cohort, circle, regulars and every contact', () => deskPart('people')],
+  boxoffice: ['🎟️', 'Box Office', 'Grosses by week, by year and all time', () => viewBoxOffice()],
+  companies: ['🏢', 'Companies', 'Every studio, label, network and theatre', () => viewCompanies()],
+  awards: ['🏆', 'Awards', 'Every prize, its history and every winner', () => viewAwards()],
+  careers: ['🪜', 'Careers', 'Every job in the business and how to climb', () => viewCareers()],
+  charts: ['📊', 'Charts', 'Music, video, podcast and stage charts', () => viewCharts()],
+  world: ['🌍', 'World', 'Markets, tastes, trends and the industry weather', () => viewWorld()]
+};
+for (const k in FOLD) { const [i, n, d, fn] = FOLD[k]; OS_EXTRA[k] = [i, n, d]; OS_VIEWS[k] = fn; }
+// Regroup the sidebar around the computer being the whole desk.
+OS_GROUPS.splice(0, OS_GROUPS.length,
+  ['Today', ['home', 'today', 'feed', 'cal', 'week']],
+  ['Work', ['work', 'jobs', 'mail', 'phoneapp', 'contacts', 'people']],
+  ['Make', ['create', 'write', 'studio', 'cutroom', 'notes', 'contests']],
+  ['Money', ['bank', 'ticker', 'bazaar']],
+  ['Industry', ['trades', 'roger', 'gea', 'boxoffice', 'companies', 'awards', 'charts', 'careers', 'world', 'flick', 'weather']],
+  ['You', ['standing', 'life', 'library']],
+  ['Play', ['sweep', 'match', 'cue', 'scramble', 'store']]);
+// Pages opened from inside the computer stay inside it.
+function osStackHTML() {
+  const L = UI.osStack || []; if (!L.length) return null;
+  const cur = L[L.length - 1];
+  let body; try { body = stackPage(cur); } catch (e) { body = `<p class="muted">This page crashed: ${esc(String(e.message || e))}</p>`; }
+  return `<div class="os-page"><button class="os-btn" data-osback="1">‹ Back</button> ${L.length > 1 ? `<button class="os-link" data-osclose="1">Close all</button>` : ''}<div class="os-pagebody">${body}</div></div>`;
+}
+function osFoldClick(t, e) {
+  const d = t.dataset;
+  if (d.osback) { (UI.osStack || []).pop(); render(true); return true; }
+  if (d.osclose) { UI.osStack = []; render(true); return true; }
+  if (d.app && UI.osStack && UI.osStack.length) UI.osStack = [];
+  return false;
+}
+// Called before the global click handler: a data-go link inside the computer opens in the computer.
+function osCaptureGo(t) {
+  if (!t.dataset.go || !t.closest || !t.closest('.os')) return false;
+  const g = t.dataset.go, ci = g.indexOf(':'), kind = g.slice(0, ci), id = g.slice(ci + 1);
+  (UI.osStack = UI.osStack || []).push({ kind, id: /^-?\d+$/.test(id) ? +id : id });
+  if (UI.osStack.length > 30) UI.osStack.shift();
+  render(true); const m = document.querySelector('.os-main'); if (m) m.scrollTop = 0; return true;
+}
+// </osfold>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -23039,7 +23107,7 @@ function viewDesk() {
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
   ${deskNav()}
-  <div class="dstack">${(() => { switch (UI.dtab || 'feed') {
+  <div class="dstack">${(() => { switch (UI.dtab || 'computer') {
     case 'feed': return feedPanel();
     case 'compete': return campaignHTML() + compPanel();
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
@@ -23092,11 +23160,12 @@ function endWeekAct(t = 'end') { return { t, cal: calOf().map(r => r.slice()), a
 function playStep(t) {
   if (UI.busy || !careerActive()) return;
   if (typeof autoBeforeStep === 'function') autoBeforeStep();
-  if (pending().length) { UI.tab = 'you'; UI.dtab = 'today'; UI.stack = []; render(); return; }
+  if (pending().length) { UI.tab = 'you'; if (UI.dtab === 'computer') { UI.app = 'today'; UI.osStack = []; } else UI.dtab = 'today'; UI.stack = []; render(); return; }
   const w0 = S.week;
   doAct(endWeekAct(t));
   if (S.week !== w0) UI.apps = new Set();
-  if (pending().length || UI.dtab === undefined || S.week !== w0) UI.dtab = 'today';   // a new week starts on the hub
+  if (UI.dtab === undefined) UI.dtab = 'computer';   // the computer is home base
+  if (pending().length || S.week !== w0) { if (UI.dtab === 'computer') { UI.app = pending().length ? 'today' : 'home'; UI.osStack = []; } else UI.dtab = 'today'; }   // a new week starts on the hub
   UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
@@ -23299,7 +23368,7 @@ function focusPanel() {
 }
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {
-  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'feed';
+  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'computer';
   const tabs = [['today', 'Today', pend, 'bad'], ['feed', 'Feed', pend + unread, pend ? 'bad' : 'good'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['compete', 'Contests', COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length, 'good'], ['standing', 'Standing', typeof ambClaimable === 'function' ? ambClaimable().length : 0, 'good'], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
@@ -23495,6 +23564,7 @@ document.addEventListener('click', e => {
   if (!t) return;
   if (t.tagName === 'A') e.preventDefault();
   if (UI.busy && !UI.earlyCC && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;
+  if (typeof osCaptureGo === 'function' && osCaptureGo(t)) return;
   if (careerClick(t)) return;
   if (t.dataset.go) { const g = t.dataset.go, ci = g.indexOf(':'), kind = g.slice(0, ci), id = g.slice(ci + 1); UI.stack.push({ kind, id: /^-?\d+$/.test(id) ? +id : id }); render(); return; }
   if (t.dataset.tab) { UI.tab = t.dataset.tab; UI.stack = []; render(); return; }

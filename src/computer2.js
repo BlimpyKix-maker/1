@@ -210,6 +210,7 @@ function computerClick(t) {
   if (typeof msgClick === 'function' && msgClick(t)) return true;
   if (typeof depthClick === 'function' && depthClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
+  if (typeof osFoldClick === 'function' && osFoldClick(t)) return true;
   if (typeof libClick === 'function' && libClick(t)) return true;
   if (typeof rogerClick === 'function' && rogerClick(t)) return true;
   if (typeof bankClick === 'function' && bankClick(t)) return true;
@@ -261,4 +262,4 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';

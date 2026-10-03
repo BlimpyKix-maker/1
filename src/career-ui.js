@@ -472,7 +472,7 @@ function viewDesk() {
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${M.over ? `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>` : ''}
   ${deskNav()}
-  <div class="dstack">${(() => { switch (UI.dtab || 'feed') {
+  <div class="dstack">${(() => { switch (UI.dtab || 'computer') {
     case 'feed': return feedPanel();
     case 'compete': return campaignHTML() + compPanel();
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
@@ -525,11 +525,12 @@ function endWeekAct(t = 'end') { return { t, cal: calOf().map(r => r.slice()), a
 function playStep(t) {
   if (UI.busy || !careerActive()) return;
   if (typeof autoBeforeStep === 'function') autoBeforeStep();
-  if (pending().length) { UI.tab = 'you'; UI.dtab = 'today'; UI.stack = []; render(); return; }
+  if (pending().length) { UI.tab = 'you'; if (UI.dtab === 'computer') { UI.app = 'today'; UI.osStack = []; } else UI.dtab = 'today'; UI.stack = []; render(); return; }
   const w0 = S.week;
   doAct(endWeekAct(t));
   if (S.week !== w0) UI.apps = new Set();
-  if (pending().length || UI.dtab === undefined || S.week !== w0) UI.dtab = 'today';   // a new week starts on the hub
+  if (UI.dtab === undefined) UI.dtab = 'computer';   // the computer is home base
+  if (pending().length || S.week !== w0) { if (UI.dtab === 'computer') { UI.app = pending().length ? 'today' : 'home'; UI.osStack = []; } else UI.dtab = 'today'; }   // a new week starts on the hub
   UI.tab = 'you'; UI.stack = []; render(true);
 }
 function playWeeks(n) {
@@ -732,7 +733,7 @@ function focusPanel() {
 }
 // The desk's sections. Counts show what's waiting in each.
 function deskNav() {
-  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'feed';
+  const M = S.me, pend = pending().length, unread = phoneUnread(), cur = UI.dtab || 'computer';
   const tabs = [['today', 'Today', pend, 'bad'], ['feed', 'Feed', pend + unread, pend ? 'bad' : 'good'], ['diary', 'Your week'], ['phone', 'Phone', unread, 'good'], ['computer', 'Computer'], ['work', 'Work', M.board.length], ['create', 'Create', (M.market || []).length], ['compete', 'Contests', COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length, 'good'], ['standing', 'Standing', typeof ambClaimable === 'function' ? ambClaimable().length : 0, 'good'], ['life', 'Life'], ['people', 'People', Object.keys(M.known).length]];
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
