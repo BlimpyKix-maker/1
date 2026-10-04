@@ -104,16 +104,23 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .achgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; } .ach { display: grid; gap: 2px; padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); opacity: .55; filter: grayscale(1); } .ach.on { opacity: 1; filter: none; border: 2px solid var(--m); background: color-mix(in srgb, var(--m) 12%, transparent); } .ach .achi { font-size: 24px; } .ach small { color: var(--muted); font-size: 11px; line-height: 1.3; }
 .sms li.stake { box-shadow: 0 0 0 2px #E0A43A; } .stakechip { display: block; font-size: 11px; font-weight: 700; color: #B5781A; margin-top: 2px; }
 /* ---- ApplOS: the computer ---- */
+/* the computer takes its colours from the chosen palette: a dark desk lit in the palette's own accent */
+:root { --os-bg: #0F1116; --os-panel: #181B22; --os-panel2: #20242D; --os-line: #2A2F3A; --os-side: #0B0D11; --os-hover: #171A21; --os-nav: #C9CEDA; --os-muted: #98A0B0; --os-accent: #7BA7FF; --os-accent-soft: #1E2B45; --os-accent-line: rgba(123,167,255,.35); }
+:root[data-pal="marquee"] { --os-bg: #141012; --os-panel: #1D1719; --os-panel2: #272022; --os-line: #36292D; --os-side: #0E0B0C; --os-hover: #211A1C; --os-nav: #DCCFCB; --os-muted: #AC9C98; --os-accent: #F2937F; --os-accent-soft: #3E2024; --os-accent-line: rgba(242,147,127,.35); }
+:root[data-pal="kodachrome"] { --os-bg: #121110; --os-panel: #1B1A17; --os-panel2: #25231F; --os-line: #34312A; --os-side: #0C0B09; --os-hover: #1E1C18; --os-nav: #DAD5C6; --os-muted: #A8A293; --os-accent: #F2C14E; --os-accent-soft: #3A3115; --os-accent-line: rgba(242,193,78,.35); }
+:root[data-pal="noir"] { --os-bg: #101010; --os-panel: #191919; --os-panel2: #222222; --os-line: #303030; --os-side: #0A0A0A; --os-hover: #1C1C1C; --os-nav: #D6D3CC; --os-muted: #A09C94; --os-accent: #E0B055; --os-accent-soft: #3A2E15; --os-accent-line: rgba(224,176,85,.35); }
+:root[data-pal="viola"] { --os-bg: #110E18; --os-panel: #1A1524; --os-panel2: #241D31; --os-line: #342A47; --os-side: #0C0A12; --os-hover: #1E1829; --os-nav: #D7CEE8; --os-muted: #A597BF; --os-accent: #BC9BF5; --os-accent-soft: #2C2045; --os-accent-line: rgba(188,155,245,.35); }
+:root[data-pal="teal"] { --os-bg: #0D1313; --os-panel: #151D1D; --os-panel2: #1D2828; --os-line: #2A3838; --os-side: #091010; --os-hover: #172121; --os-nav: #CFE0DE; --os-muted: #93AAA7; --os-accent: #5FD1C1; --os-accent-soft: #163634; --os-accent-line: rgba(95,209,193,.35); }
 .os-wrap { padding: 0; overflow: hidden; border: 0; background: transparent; }
-.os { --bg: #0F1116; --panel: #181B22; --panel2: #20242D; --ink: #E8EBF1; --muted: #98A0B0; --line: #2A2F3A; --accent: #7BA7FF; --accent-soft: #1E2B45; --data: #7FD1C7; --data-soft: #17302E; --gold: #E8B44A; --gold-soft: #3A2E12; --good: #5FCB8C; --bad: #F07A6E;
+.os { --bg: var(--os-bg); --panel: var(--os-panel); --panel2: var(--os-panel2); --ink: #E8EBF1; --muted: var(--os-muted); --line: var(--os-line); --accent: var(--os-accent); --accent-soft: var(--os-accent-soft); --data: #7FD1C7; --data-soft: #17302E; --gold: #E8B44A; --gold-soft: #3A2E12; --good: #5FCB8C; --bad: #F07A6E;
   display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: 640px; background: var(--bg); color: var(--ink); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,.35); font: 400 14px/1.45 var(--f-body); color-scheme: dark; }
 .os.max { position: fixed; inset: 10px; z-index: 60; min-height: 0; }
-.os-side { background: #0B0D11; border-right: 1px solid var(--line); padding: 14px 10px; overflow-y: auto; }
+.os-side { background: var(--os-side); border-right: 1px solid var(--line); padding: 14px 10px; overflow-y: auto; }
 .os-brand { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px 10px; } .os-brand b { font: 700 18px var(--f-display); letter-spacing: .04em; color: #fff; } .os-brand span { color: var(--muted); font: 12px var(--f-data); }
 .os-stat { display: flex; justify-content: space-between; gap: 6px; padding: 0 6px 10px; font: 12px var(--f-data); color: var(--muted); border-bottom: 1px solid var(--line); margin-bottom: 8px; }
-.os-g h6 { margin: 10px 8px 4px; font: 600 10px var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: #6B7385; }
-.os-i { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border-radius: 8px; color: #C9CEDA; font-size: 14px; }
-.os-i:hover { background: #171A21; color: #fff; } .os-i.on { background: var(--accent-soft); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
+.os-g h6 { margin: 10px 8px 4px; font: 600 10px var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--os-muted); opacity: .8; }
+.os-i { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 8px; border-radius: 8px; color: var(--os-nav); font-size: 14px; }
+.os-i:hover { background: var(--os-hover); color: #fff; } .os-i.on { background: var(--accent-soft); color: #fff; box-shadow: inset 3px 0 0 var(--accent); }
 .os-i:focus-visible { outline: 2px solid var(--accent); }
 .os-ic { width: 22px; text-align: center; font-size: 16px; } .os-l { flex: 1; } .os-b { background: var(--bad); color: #fff; border-radius: 9px; font: 700 11px var(--f-data); padding: 1px 6px; } .os-lock { opacity: .6; font-size: 11px; } .os-i.locked { opacity: .55; }
 .os-main { display: flex; flex-direction: column; min-width: 0; }
@@ -139,13 +146,13 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .os-table { width: 100%; border-collapse: collapse; font-size: 13px; } .os-table th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--line); } .os-table td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; } .os-table tr:hover td { background: #1C2029; } .os-table tr.lead td { background: #142A1E; }
 .os-week td { height: 54px; width: 13%; font-size: 12px; } .os-week td small { display: block; color: var(--muted); } .os-week td.past { opacity: .4; } .os-week td.now { box-shadow: inset 0 0 0 2px var(--accent); } .os-week th.today { color: var(--accent); }
 .os-meter { display: inline-block; width: 80px; height: 6px; border-radius: 3px; background: var(--panel2); overflow: hidden; vertical-align: middle; } .os-meter i { display: block; height: 100%; }
-.os a.lk, .os .linkish, .os a { color: var(--accent); text-decoration-color: rgba(123,167,255,.35); } .os .muted { color: var(--muted); } .os .good { color: var(--good); } .os .bad { color: var(--bad); }
-.os input, .os select, .os textarea { background: #0B0D11; color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; } .os input:focus, .os select:focus, .os textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.os a.lk, .os .linkish, .os a { color: var(--accent); text-decoration-color: var(--os-accent-line); } .os .muted { color: var(--muted); } .os .good { color: var(--good); } .os .bad { color: var(--bad); }
+.os input, .os select, .os textarea { background: var(--os-side); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; font: inherit; } .os input:focus, .os select:focus, .os textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
 .os .btn-s { background: var(--accent); color: #0B1020; border: 0; } .os .btn-s.ghost { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); }
 .os .pill { background: var(--panel2); color: var(--ink); border: 1px solid var(--line); } .os .pill.on { background: var(--accent); color: #0B1020; border-color: var(--accent); }
 .os table.grid th, .os table.grid td { border-color: var(--line); } .os table.grid th { color: var(--muted); background: transparent; }
 .os .panel, .os section { background: transparent; } .os h4 { color: #fff; } .os .eyebrow { color: var(--gold); }
-.os .mailapp { grid-template-columns: 150px minmax(0, 1fr); } .os .mfold { align-items: stretch; } .os .mfold > * { all: unset; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: #C9CEDA; font-size: 13px; text-align: left; } .os .mfold > *:hover { background: var(--panel2); } .os .mfold > .on { background: var(--accent-soft); color: #fff; font-weight: 600; } .os .mfold > .btn-s { background: var(--accent); color: #0B1020; text-align: center; font-weight: 700; margin-bottom: 6px; } .os .mlist { max-height: 340px; } .os .mrow { border-color: var(--line); padding: 8px 10px; border-radius: 8px; } .os .mrow:hover, .os .mrow.on { background: var(--panel2); } .os .mread { border-color: var(--line); }
+.os .mailapp { grid-template-columns: 150px minmax(0, 1fr); } .os .mfold { align-items: stretch; } .os .mfold > * { all: unset; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--os-nav); font-size: 13px; text-align: left; } .os .mfold > *:hover { background: var(--panel2); } .os .mfold > .on { background: var(--accent-soft); color: #fff; font-weight: 600; } .os .mfold > .btn-s { background: var(--accent); color: #0B1020; text-align: center; font-weight: 700; margin-bottom: 6px; } .os .mlist { max-height: 340px; } .os .mrow { border-color: var(--line); padding: 8px 10px; border-radius: 8px; } .os .mrow:hover, .os .mrow.on { background: var(--panel2); } .os .mread { border-color: var(--line); }
 .os .bzc { background: var(--panel); border-color: var(--line); } .os .widget { background: var(--panel); color: var(--ink); }
 .os .chip { background: var(--panel2); color: var(--ink); }
 @media (max-width: 760px) { .os { grid-template-columns: 1fr; } .os-side { display: flex; gap: 4px; overflow-x: auto; padding: 8px; border-right: 0; border-bottom: 1px solid var(--line); } .os-brand, .os-stat, .os-g h6 { display: none; } .os-g { display: flex; gap: 4px; } .os-i { width: auto; flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 11px; } .os-i .os-b { position: absolute; } .os-card.wide { grid-column: auto; } .os-body { padding: 12px; } .os-table { display: block; overflow-x: auto; } }
@@ -841,6 +848,26 @@ tr.blocked td { opacity: .55; }
 .favin { width: min(100%, 360px); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; color: var(--ink); }
 .tbtn:disabled { opacity: .4; cursor: default; }
 @media (max-width: 560px) { .ccface { grid-template-columns: minmax(0, 1fr); } .partyhead { align-items: flex-start; } }
+
+/* ---- refinement pass: one rhythm for type, buttons and states, inside the computer and out ---- */
+.os-body h3 { text-transform: none; letter-spacing: .01em; font: 700 18px/1.25 var(--f-display); color: #fff; margin: 4px 0 10px; }
+.os-body h4 { text-transform: uppercase; letter-spacing: .1em; font: 600 11.5px var(--f-body); color: var(--os-nav); margin: 16px 0 8px; }
+.os-body h4::after { content: ''; display: block; height: 1px; margin-top: 6px; background: linear-gradient(90deg, var(--os-accent-line), transparent 70%); }
+.os-body > h4:first-child, .os-card h4:first-child { margin-top: 0; }
+.os-i, .os-btn, .os-alert, .os .pill, .os .btn-s, .btn-s, .pill, .os-link { transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease, transform .08s ease; }
+.os-btn:active, .os .btn-s:active, .btn-s:active, .os .pill:active, .pill:active { transform: translateY(1px); }
+.os-alert:hover { border-color: var(--os-accent); background: var(--os-hover); }
+.os-btn:focus-visible, .os .btn-s:focus-visible, .os .pill:focus-visible, .os-alert:focus-visible, .btn-s:focus-visible, .pill:focus-visible { outline: 2px solid var(--os-accent); outline-offset: 2px; }
+.os-kpi b, .os-big, .os-table td, .os table.grid td, .kpis b, table.grid td.n { font-variant-numeric: tabular-nums; }
+.os-kpi { transition: border-color .15s ease; } .os-kpi:hover { border-color: var(--os-accent-line); }
+.os-card { box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 6px 18px rgba(0,0,0,.18); }
+.os-head { background: linear-gradient(180deg, var(--os-panel), var(--os-bg)); }
+.os-side { scrollbar-width: thin; scrollbar-color: var(--os-line) transparent; } .os.max .os-body { scrollbar-width: thin; scrollbar-color: var(--os-line) transparent; }
+.os ::selection { background: var(--os-accent-soft); color: #fff; }
+.os-empty { display: grid; justify-items: center; gap: 4px; text-align: center; padding: 42px 16px; color: var(--os-muted); border: 1px dashed var(--os-line); border-radius: 12px; }
+.os-empty span { font-size: 30px; opacity: .85; } .os-empty b { color: var(--ink); font: 600 15px var(--f-body); } .os-empty p { margin: 0; max-width: 360px; font-size: 13px; }
+.os .angel { background: var(--os-panel); border-color: var(--os-line); } .os .ang-dc { background: var(--os-panel2); color: var(--os-accent); }
+.home-scene { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
 </style>
 
 <header class="slate"><div class="slate-in">
@@ -11823,10 +11850,11 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     const BH = fig ? 240 : 120;
     o.push(`<rect width="120" height="${BH}" rx="10" fill="url(#${uid}b)"/>`);
     if (fig) o.push(`<rect y="${BH - 30}" width="120" height="30" fill="${mixHex(cloth, '#000', .25)}" opacity=".18"/>`);
-    if (pat === 0) o.push(Array.from({ length: 12 }, (_, i) => { const a = i / 12 * Math.PI * 2; return `<path d="M60 44 L${60 + Math.cos(a) * 110} ${44 + Math.sin(a) * 110} L${60 + Math.cos(a + .2) * 110} ${44 + Math.sin(a + .2) * 110} Z" fill="#FFFFFF" opacity=".16"/>`; }).join(''));
-    else if (pat === 1) o.push(Array.from({ length: fig ? 66 : 36 }, (_, i) => `<circle cx="${8 + (i % 6) * 21}" cy="${8 + Math.floor(i / 6) * 21}" r="2.2" fill="#FFFFFF" opacity=".28"/>`).join(''));
-    else if (pat === 2) o.push(Array.from({ length: 8 }, (_, i) => `<rect x="${i * 16}" y="0" width="7" height="${fig ? 240 : 120}" fill="#FFFFFF" opacity=".14"/>`).join(''));
-    else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/>`);
+    // studio backdrops: out-of-focus lights, a soft beam, a painted sweep, a halo
+    if (pat === 0) o.push(Array.from({ length: fig ? 14 : 9 }, () => `<circle cx="${(pr() * 120).toFixed(1)}" cy="${(pr() * (fig ? 200 : 110)).toFixed(1)}" r="${(5 + pr() * 14).toFixed(1)}" fill="#FFFFFF" opacity="${(.08 + pr() * .16).toFixed(2)}"/>`).join(''));
+    else if (pat === 1) o.push(`<path d="M-10 0 L50 0 L130 ${BH} L70 ${BH} Z" fill="#FFFFFF" opacity=".16"/><path d="M60 0 L80 0 L130 ${BH * .6} L120 ${BH * .7} Z" fill="#FFFFFF" opacity=".1"/>`);
+    else if (pat === 2) o.push(`<ellipse cx="60" cy="${fig ? 120 : 70}" rx="70" ry="${fig ? 110 : 60}" fill="#FFFFFF" opacity=".2"/><ellipse cx="60" cy="${fig ? 120 : 70}" rx="44" ry="${fig ? 80 : 40}" fill="#FFFFFF" opacity=".14"/>`);
+    else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/><circle cx="60" cy="40" r="30" fill="#FFFFFF" opacity=".12"/>`);
   }
   // the sitter fills the frame: everything below is drawn a little larger than life
   o.push(bare || fig ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
@@ -11839,14 +11867,15 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   const hw = Math.max(fw / 2 + 2, Math.min(hairHalf, fw / 2 + 9));   // headwear half-width: wide enough for the hair under it
   if (covers) o.push(`<defs><clipPath id="${uid}"><rect x="0" y="${brim - 1}" width="120" height="${121 - brim}"/></clipPath></defs>`);
   const hairOpen = covers ? `<g clip-path="url(#${uid})">` : '', hairClose = covers ? '</g>' : '';
-  // hair behind the head
-  o.push(hairOpen);
+  // hair behind the head (in full-length figures the head is drawn a touch larger, as illustrators do)
+  const headIn = fig ? '<g transform="translate(60 84) scale(1.12) translate(-60 -84)">' : '<g>';
+  o.push(headIn + hairOpen);
   if (L.hair === 10) o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 10} Q${cx + fw / 2 + 12} ${cy - 4} ${cx + fw / 2 + 6} ${cy + 26} Q${cx + fw / 2 + 2} ${cy + 6} ${cx + fw / 2 - 4} ${cy - 2} Z" fill="${hc}"/>`);
   if (L.hair === 15) o.push(`<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${cy + 26} ${cx - fw / 2 + 4} ${cy + 30} L${cx + fw / 2 - 4} ${cy + 30} Q${cx + fw / 2 + 4} ${cy + 26} ${cx + fw / 2 + 3} ${cy} Z" fill="${hc}"/>`);
   if (L.hair === 14) o.push(`<path d="M${cx - fw / 2 - 4} ${cy - 8} Q${cx - fw / 2 - 8} ${cy + 30} ${cx - fw / 2} ${cy + 40} L${cx + fw / 2} ${cy + 40} Q${cx + fw / 2 + 8} ${cy + 30} ${cx + fw / 2 + 4} ${cy - 8} Z" fill="${hc}"/>`);
   if ([7, 8, 9].includes(L.hair)) o.push(`<path d="M${cx - fw / 2 - 4} ${cy - 8} Q${cx - fw / 2 - 8} ${cy + 30} ${cx - fw / 2 + (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} L${cx + fw / 2 - (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} Q${cx + fw / 2 + 8} ${cy + 30} ${cx + fw / 2 + 4} ${cy - 8} Z" fill="${hc}"/>`);
   if (L.hair === 6) o.push(`<circle cx="${cx}" cy="${top + 10}" r="${fw / 2 + 12}" fill="${hc}"/>`);
-  o.push(hairClose);
+  o.push(hairClose + '</g>');
   // body and clothes
   if (fig) figureBody(L, o, uid, cx, skin, cloth, pr); else o.push(`<path d="M${cx - bw} 122 Q${cx - bw - 1} 94 ${cx - bw + 12} 89 Q${cx - neck - 12} 84.5 ${cx - neck - 2} 84 L${cx + neck + 2} 84 Q${cx + neck + 12} 84.5 ${cx + bw - 12} 89 Q${cx + bw + 1} 94 ${cx + bw} 122 Z" fill="url(#${uid}c)"/><path d="M${cx - bw + 3} 118 Q${cx - bw + 4} 92 ${cx - neck - 6} 87" stroke="#FFFFFF" stroke-width="1.5" opacity=".18" fill="none"/>`);
   { const ny = cy + fh / 2 - 6; o.push(`<defs><linearGradient id="${uid}n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(skin, '#000', .3)}"/><stop offset=".45" stop-color="${shade}"/><stop offset="1" stop-color="${mixHex(skin, '#000', .1)}"/></linearGradient></defs><path d="M${cx - neck} ${ny} L${cx - neck} ${ny + 10} Q${cx - neck - 1} ${85} ${cx - neck - 5} 86.5 Q${cx} 92 ${cx + neck + 5} 86.5 Q${cx + neck + 1} 85 ${cx + neck} ${ny + 10} L${cx + neck} ${ny} Z" fill="url(#${uid}n)"/>`); }
@@ -11860,12 +11889,13 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   if (L.neck === 5) o.push(`<path d="M${cx - 9} 85 L${cx - 2} 106 M${cx + 9} 85 L${cx + 2} 106" stroke="#5B2D90" stroke-width="2"/><rect x="${cx - 6}" y="105" width="12" height="9" rx="1" fill="#F4F1F8" stroke="#5B2D90" stroke-width="1"/>`);
   if (L.neck === 7) o.push(`<path d="M${cx - 9} 86 Q${cx} 98 ${cx + 9} 86" fill="none" stroke="#C9A646" stroke-width="1.2"/><circle cx="${cx}" cy="97" r="2.6" fill="#2E8B57" stroke="#C9A646" stroke-width=".8"/>`);
   // head
+  o.push(headIn);
   o.push(`<ellipse cx="${cx - fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/><ellipse cx="${cx + fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/>`);
   o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="url(#${uid}f)"/><ellipse cx="${cx}" cy="${cy + fh / 2 + 1}" rx="${fw / 3}" ry="2.5" fill="${shade}" opacity=".35"/>`);
   if (L.ears) { const ex2 = fw / 2 + 1, ear = L.ears === 1 ? (x => `<circle cx="${x}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/>`) : L.ears === 2 ? (x => `<circle cx="${x}" cy="${cy + 12}" r="3.2" fill="none" stroke="#D4AF37" stroke-width="1.3"/>`) : L.ears === 3 ? (x => `<path d="M${x} ${cy - 2} l0 6" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round"/>`) : (x => `<circle cx="${x}" cy="${cy + 9}" r="2" fill="#E8F4FF" stroke="#9FC6E8" stroke-width=".8"/>`); o.push(ear(cx - ex2) + (L.ears === 3 ? '' : ear(cx + ex2))); }
   // eyes, brows, nose, mouth
   const ey = cy - 1, ex = fw * .2, ec = LOOK.eyes.opts[L.eyes];
-  o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.2" ry="2.2" fill="#fff"/><circle cx="${cx - ex}" cy="${ey}" r="1.7" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey}" r="1.7" fill="${ec}"/><circle cx="${cx - ex}" cy="${ey}" r=".8" fill="#111"/><circle cx="${cx + ex}" cy="${ey}" r=".8" fill="#111"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><path d="M${cx - ex - 3.4} ${ey - .6} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .6}" stroke="${line}" stroke-width=".9" fill="none"/>`);
+  o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.5" ry="2.5" fill="#FBF8F4"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.5" ry="2.5" fill="#FBF8F4"/><circle cx="${cx - ex}" cy="${ey + .1}" r="2" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey + .1}" r="2" fill="${ec}"/><circle cx="${cx - ex}" cy="${ey + .1}" r="2" fill="none" stroke="${mixHex(ec, '#000', .45)}" stroke-width=".4"/><circle cx="${cx + ex}" cy="${ey + .1}" r="2" fill="none" stroke="${mixHex(ec, '#000', .45)}" stroke-width=".4"/><circle cx="${cx - ex}" cy="${ey + .1}" r=".95" fill="#111"/><circle cx="${cx + ex}" cy="${ey + .1}" r=".95" fill="#111"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><path d="M${cx - ex - 3.4} ${ey - .6} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .6}" stroke="${line}" stroke-width=".9" fill="none"/>`);
   o.push(`<path d="M${cx - ex - 3.4} ${ey - .4} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .4}" stroke="${mixHex(line, '#000', .35)}" stroke-width="1.1" fill="none" stroke-linecap="round"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/>`);
   o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 4} Q${cx + fw / 2 - 1} ${cy + 10} ${cx + 4} ${cy + fh / 2 - 1} Q${cx + fw / 2 - 6} ${cy + 8} ${cx + fw / 2 - 5} ${cy - 4} Z" fill="${shade}" opacity=".22"/><path d="M${cx - 1.5} ${ey + 9.5} Q${cx + 1} ${ey + 11} ${cx + 3} ${ey + 9.5}" stroke="${shade}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>`);
   o.push(`<ellipse cx="${cx - ex - 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/><ellipse cx="${cx + ex + 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/>`);
@@ -11894,7 +11924,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     6: '',
     7: `<path d="M${cx - fw / 2 - 3} ${cy + 6} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy + 6} Q${cx + fw / 2 - 2} ${hairTop + 6} ${cx} ${hairTop + 8} Q${cx - fw / 2 + 2} ${hairTop + 6} ${cx - fw / 2 - 3} ${cy + 6} Z" fill="${hc}"/>`,
     8: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>`,
-    9: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-12, -4, 4, 12].map(d => `<path d="M${cx + d} ${hairTop} L${cx + d * 1.6} ${cy + 34}" stroke="${hc}" stroke-width="5" stroke-linecap="round"/>`).join(''),
+    9: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-15, -11, 11, 15].map(d => `<path d="M${cx + d} ${hairTop + 4} L${cx + d * 1.3} ${cy + 34}" stroke="${hc}" stroke-width="5" stroke-linecap="round"/>`).join(''),
     10: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx} ${hairTop + 3} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/><circle cx="${cx + fw / 2 - 1}" cy="${cy - 8}" r="2" fill="${mixHex(hc, '#E0457B', .5)}"/>`,
     11: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx} ${hairTop + 3} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/><circle cx="${cx}" cy="${hairTop - 8}" r="7" fill="${hc}"/>`,
     12: `<path d="M${cx - fw / 2 + 1} ${cy - 6} Q${cx - fw / 2} ${hairTop} ${cx} ${hairTop} Q${cx + fw / 2} ${hairTop} ${cx + fw / 2 - 1} ${cy - 6} Q${cx} ${hairTop + 5} ${cx - fw / 2 + 1} ${cy - 6} Z" fill="${hc}" opacity=".35"/><path d="M${cx - 4} ${hairTop + 6} Q${cx - 5} ${hairTop - 14} ${cx} ${hairTop - 16} Q${cx + 5} ${hairTop - 14} ${cx + 4} ${hairTop + 6} Z" fill="${hc}"/>`,
@@ -11930,7 +11960,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     const lens = g === 1 || g === 8 ? (x => `<circle cx="${x}" cy="${ey}" r="5" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : g === 5 ? (x => `<path d="M${x - 6} ${ey - 2} L${x + 6} ${ey - 4} L${x + 5} ${ey + 3} L${x - 5} ${ey + 3} Z" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : g === 6 ? (x => `<path d="M${x - 6} ${ey - 3} L${x + 6} ${ey - 3} L${x + 5} ${ey + 4} Q${x} ${ey + 7} ${x - 5} ${ey + 4} Z" fill="${fill}" stroke="${gc}" stroke-width="1.4"/>`) : (x => `<rect x="${x - 6}" y="${ey - 4}" width="12" height="${g === 8 ? 5 : 8}" rx="${g === 3 ? 1 : 2}" fill="${fill}" stroke="${gc}" stroke-width="${g === 3 ? 2.4 : 1.4}"/>`);
     o.push(lens(cx - ex) + lens(cx + ex) + `<path d="M${cx - ex + 5} ${ey - 1} L${cx + ex - 5} ${ey - 1}" stroke="${gc}" stroke-width="1.3"/>`);
   }
-  o.push('</g>');
+  o.push('</g></g>');
   if (!bare) o.push(`<rect width="120" height="${fig ? 240 : 120}" rx="10" fill="url(#${uid}v)"/>`);
   return fig ? `<svg class="portrait figure" viewBox="0 0 120 240" width="${Math.round(size / 2)}" height="${size}" role="img" aria-label="Full-length portrait">${o.join('')}</svg>` : `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
 }
@@ -11982,12 +12012,6 @@ function homeFx() {
   if (typeof kitFx === 'function') kitFx(out);
   return out;
 }
-function homeSkyline(hub, w, h) {
-  const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0);
-  let x = 0, o = '';
-  while (x < w) { const bw = 6 + r() * 12, bh = 12 + r() * (h - 18); o += `<rect x="${x.toFixed(1)}" y="${(h - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="var(--hs-city)"/>`; if (r() < .5) o += `<rect x="${(x + bw / 3).toFixed(1)}" y="${(h - bh + 4).toFixed(1)}" width="2" height="2" fill="var(--hs-lit)"/>`; x += bw + 1; }
-  return o;
-}
 function furnitureSVG(id, x, y) {
   const M = S.me;
   switch (id) {
@@ -12006,37 +12030,110 @@ function furnitureSVG(id, x, y) {
   }
   return typeof furnitureSVG2 === 'function' ? furnitureSVG2(id, x, y) : '';
 }
+function homeSkyline(hub, w, h, night) {
+  const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0), o = [];
+  for (const [layer, op, hmin, lit] of [[0, .45, .35, .25], [1, .95, .15, .45]]) {
+    let x = -4; while (x < w) { const bw = 7 + r() * 13, bh = h * (hmin + r() * (layer ? .55 : .4)), y = h - bh;
+      o.push(`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="var(--hs-city)" opacity="${layer ? 1 : .45}"${layer ? '' : ' style="filter:saturate(.6)"'}/>`);
+      if (layer && r() < .25) o.push(`<rect x="${(x + bw / 2 - .5).toFixed(1)}" y="${(y - 5).toFixed(1)}" width="1" height="5" fill="var(--hs-city)"/>`);
+      if (layer) for (let wy = y + 3; wy < h - 3; wy += 4.5) for (let wx = x + 2; wx < x + bw - 2; wx += 3.5) if (r() < (night ? lit : .12)) o.push(`<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="1.6" height="2" fill="${night ? '#FFD98A' : '#FFFFFF'}" opacity="${night ? .9 : .35}"/>`);
+      x += bw + (layer ? .6 : 2); }
+    if (!layer) o.push(`<rect width="${w}" height="${h}" fill="#FFFFFF" opacity=".08"/>`);
+  }
+  return o.join('');
+}
+// what fills an empty corner, by how well you live
+const ROOM_FILL = {
+  couch: [], shared: ['crate', 'rail', 'beanbag'], studio: ['crate', 'beanbag', 'rail'],
+  own: ['sofa', 'sidetable', 'floorlamp', 'bigplant'], loft: ['sofa', 'bigplant', 'metalshelf', 'floorlamp'],
+  house: ['sofa', 'armchair', 'sideboard', 'bigplant', 'floorlamp'], penthouse: ['sofa', 'armchair', 'sideboard', 'bigplant', 'floorlamp'], beach: ['sofa', 'armchair', 'bigplant', 'sideboard', 'floorlamp'], estate: ['sofa', 'armchair', 'sideboard', 'bigplant', 'floorlamp']
+};
+const FILL_W = { crate: 30, rail: 44, beanbag: 40, sofa: 92, sidetable: 30, floorlamp: 26, bigplant: 34, metalshelf: 44, armchair: 46, sideboard: 64 };
+function fillPieceSVG(k, x, y, accent, wood) {
+  const sh = w => `<ellipse cx="${w / 2}" cy="1" rx="${w / 2 + 4}" ry="3" fill="#000" opacity=".16"/>`;
+  switch (k) {
+    case 'crate': return `<g transform="translate(${x} ${y})">${sh(30)}<rect x="0" y="-24" width="30" height="24" fill="#B98A55"/>${[0, 8, 16].map(d => `<rect x="0" y="${-22 + d}" width="30" height="2" fill="#8C6236"/>`).join('')}<rect x="4" y="-32" width="10" height="8" fill="#F3EFF8"/><rect x="16" y="-30" width="9" height="6" rx="1" fill="${accent}"/></g>`;
+    case 'rail': return `<g transform="translate(${x} ${y})">${sh(44)}<path d="M2 0 L2 -58 L42 -58 L42 0" stroke="#888" stroke-width="2" fill="none"/>${[6, 14, 22, 30].map((d, i) => `<path d="M${d + 2} -57 l-5 8 l0 26 l12 0 l0 -26 z" fill="${['#2C4F7C', accent, '#E8E4DA', '#3B3B3B'][i]}" opacity=".95"/>`).join('')}</g>`;
+    case 'beanbag': return `<g transform="translate(${x} ${y})">${sh(40)}<path d="M2 0 Q-2 -22 18 -26 Q40 -24 38 0 Z" fill="${accent}"/><path d="M8 -18 Q18 -24 30 -16" stroke="#FFFFFF" stroke-width="1.4" opacity=".3" fill="none"/></g>`;
+    case 'sofa': return `<g transform="translate(${x} ${y})">${sh(92)}<rect x="4" y="-44" width="84" height="26" rx="8" fill="${mixHex(accent, '#000', .15)}"/><rect x="0" y="-24" width="92" height="18" rx="6" fill="${accent}"/><rect x="-2" y="-34" width="14" height="28" rx="6" fill="${mixHex(accent, '#000', .08)}"/><rect x="80" y="-34" width="14" height="28" rx="6" fill="${mixHex(accent, '#000', .08)}"/><rect x="16" y="-38" width="18" height="14" rx="4" fill="#F3EFF8" transform="rotate(-8 25 -31)"/><rect x="58" y="-36" width="16" height="12" rx="4" fill="#E3C27A"/><rect x="6" y="-6" width="3" height="6" fill="${wood}"/><rect x="83" y="-6" width="3" height="6" fill="${wood}"/><path d="M14 -22 L78 -22" stroke="#FFFFFF" stroke-width="1" opacity=".18"/></g>`;
+    case 'sidetable': return `<g transform="translate(${x} ${y})">${sh(30)}<rect x="0" y="-30" width="30" height="4" fill="${wood}"/><rect x="3" y="-26" width="3" height="26" fill="${mixHex(wood, '#000', .2)}"/><rect x="24" y="-26" width="3" height="26" fill="${mixHex(wood, '#000', .2)}"/><rect x="2" y="-10" width="26" height="3" fill="${mixHex(wood, '#000', .1)}"/><path d="M10 -30 L8 -46 L22 -46 L20 -30 Z" fill="#F3E2B8"/><rect x="14" y="-34" width="2" height="4" fill="#555"/><rect x="18" y="-36" width="7" height="6" rx="1" fill="${accent}" opacity=".8"/></g>`;
+    case 'floorlamp': return `<g transform="translate(${x} ${y})">${sh(26)}<ellipse cx="13" cy="-1" rx="9" ry="2" fill="#333"/><path d="M13 0 L13 -84" stroke="#333" stroke-width="2"/><path d="M2 -82 L6 -98 L20 -98 L24 -82 Z" fill="#F3E2B8"/><path d="M2 -82 L24 -82" stroke="#D9C38F" stroke-width="1"/></g>`;
+    case 'bigplant': return `<g transform="translate(${x} ${y})">${sh(34)}<path d="M6 -22 L28 -22 L25 0 L9 0 Z" fill="#E8E4DA"/><path d="M6 -22 L28 -22" stroke="#C9C3B6" stroke-width="2"/>${[[-26, -58], [-6, -70], [14, -62], [32, -50], [24, -76], [2, -84], [-14, -44]].map(([dx, dy], i) => `<path d="M17 -22 Q${17 + dx / 2} ${-22 + dy / 2} ${17 + dx} ${dy - 4}" stroke="#2E6B3F" stroke-width="1.4" fill="none"/><ellipse cx="${17 + dx}" cy="${dy - 4}" rx="7" ry="3.6" transform="rotate(${dx > 0 ? -30 : 30} ${17 + dx} ${dy - 4})" fill="${i % 2 ? '#3E8A50' : '#2E7A44'}"/>`).join('')}</g>`;
+    case 'metalshelf': return `<g transform="translate(${x} ${y})">${sh(44)}<path d="M2 0 L2 -80 M42 0 L42 -80" stroke="#555" stroke-width="2.4"/>${[-78, -54, -30, -6].map(d => `<rect x="1" y="${d}" width="42" height="2.5" fill="#666"/>`).join('')}<rect x="6" y="-74" width="6" height="20" fill="${accent}"/><rect x="13" y="-72" width="5" height="18" fill="#E8E4DA"/><rect x="20" y="-70" width="6" height="16" fill="#2C4F7C"/><circle cx="34" cy="-37" r="6" fill="#B9B5AE"/><rect x="8" y="-26" width="28" height="20" rx="2" fill="#B98A55"/></g>`;
+    case 'armchair': return `<g transform="translate(${x} ${y})">${sh(46)}<path d="M6 -50 Q23 -58 40 -50 L40 -22 L6 -22 Z" fill="${mixHex(accent, '#3B2516', .45)}"/><rect x="2" y="-24" width="42" height="16" rx="5" fill="${mixHex(accent, '#3B2516', .35)}"/><rect x="0" y="-36" width="9" height="28" rx="4" fill="${mixHex(accent, '#3B2516', .5)}"/><rect x="37" y="-36" width="9" height="28" rx="4" fill="${mixHex(accent, '#3B2516', .5)}"/><path d="M6 -8 L4 0 M40 -8 L42 0" stroke="${wood}" stroke-width="2.4"/></g>`;
+    case 'sideboard': return `<g transform="translate(${x} ${y})">${sh(64)}<rect x="0" y="-34" width="64" height="28" rx="2" fill="${wood}"/><rect x="0" y="-36" width="64" height="3" fill="${mixHex(wood, '#000', .2)}"/><path d="M21.5 -32 L21.5 -8 M42.5 -32 L42.5 -8" stroke="${mixHex(wood, '#000', .25)}" stroke-width="1"/>${[11, 32, 53].map(cx => `<circle cx="${cx}" cy="-20" r="1.2" fill="#E3C27A"/>`).join('')}<path d="M4 -6 L6 0 M60 -6 L58 0" stroke="${mixHex(wood, '#000', .3)}" stroke-width="2"/><path d="M10 -36 Q8 -50 14 -54 Q20 -50 18 -36 Z" fill="${accent}" opacity=".85"/><rect x="40" y="-48" width="16" height="12" rx="1" fill="#F3EFF8" stroke="#3B3226" stroke-width="1.4"/></g>`;
+  }
+  return '';
+}
+// something on an empty wall: a clock, a mirror, a small print
+function wallFillSVG(i, x, y, accent) {
+  const k = i % 5;
+  if (k === 3) return `<g transform="translate(${x} ${y + 14})"><rect x="0" y="0" width="44" height="3" fill="#7A5236"/><rect x="0" y="3" width="44" height="2" fill="#000" opacity=".1"/>${[0, 1, 2, 3, 4, 5].map(j => `<rect x="${3 + j * 5}" y="${-14 + (j % 3)}" width="4" height="${14 - (j % 3)}" fill="${['#2C4F7C', '#C8553D', '#E3C27A', '#2E5A3A', '#E8E4DA', accent][j]}"/>`).join('')}<path d="M34 0 L34 -6 Q37 -12 40 -6 L40 0 Z" fill="#B9B5AE"/></g>`;
+  if (k === 4) return `<g transform="translate(${x + 2} ${y + 2})"><rect x="2" y="3" width="40" height="30" fill="#000" opacity=".08"/><rect width="40" height="30" fill="#F4F0E6" stroke="#C9A646" stroke-width="2"/>${[0, 1, 2].map(j => `<rect x="${5 + j * 11}" y="6" width="8" height="18" fill="${mixHex(accent, ['#FFFFFF', '#000000', '#E3C27A'][j], .35)}"/>`).join('')}</g>`;
+  if (k === 0) return `<g transform="translate(${x + 8} ${y + 6})"><ellipse cx="14" cy="16" rx="15" ry="15" fill="#000" opacity=".08"/><circle cx="14" cy="14" r="13" fill="#FFFFFF" stroke="#3B3226" stroke-width="2"/><path d="M14 14 L14 6 M14 14 L19 16" stroke="#222" stroke-width="1.4" stroke-linecap="round"/>${[0, 1, 2, 3].map(j => `<circle cx="${14 + Math.cos(j * Math.PI / 2) * 10}" cy="${14 + Math.sin(j * Math.PI / 2) * 10}" r=".8" fill="#555"/>`).join('')}</g>`;
+  if (k === 1) return `<g transform="translate(${x + 4} ${y})"><rect x="2" y="3" width="30" height="40" rx="14" fill="#000" opacity=".08"/><rect width="30" height="40" rx="14" fill="#C9A646"/><rect x="3" y="3" width="24" height="34" rx="11" fill="#DDE7EE"/><path d="M8 10 L20 30" stroke="#FFFFFF" stroke-width="3" opacity=".6"/></g>`;
+  return `<g transform="translate(${x + 4} ${y + 2})"><rect x="2" y="3" width="34" height="26" fill="#000" opacity=".08"/><rect width="34" height="26" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="1.5"/><rect x="4" y="4" width="26" height="18" fill="${mixHex(accent, '#FFFFFF', .55)}"/><circle cx="12" cy="11" r="4" fill="${accent}"/><path d="M4 22 L14 14 L20 18 L30 10 L30 22 Z" fill="${mixHex(accent, '#000', .2)}"/></g>`;
+}
 // The scene. day: 0–5 for the light through the window.
 function homeSceneSVG(day) {
-  const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [];
-  const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#E8A36B', '#1E2A44'][clamp(day ?? 0, 0, 5)];
-  let wall = { couch: '#E6DCCB', shared: '#EDE4D3', studio: '#EFE8DA', own: '#F6F0E4', loft: '#D9D2C6', house: '#F3EBDD' }[life] || '#EDE4D3', floor = { couch: '#B59A7A', shared: '#A8865F', studio: '#9C7A55', own: '#8E6B4A', loft: '#6F6A63', house: '#8A6440' }[life] || '#A8865F';
+  const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [], d = clamp(day ?? 0, 0, 5), night = d >= 5;
+  const SKY = [['#9CC7EE', '#DDEBF7'], ['#A9CFF0', '#E6F0F8'], ['#F2C79A', '#FBE6CB'], ['#E79A6E', '#F6CFA0'], ['#B5677A', '#EBA37A'], ['#0E1730', '#26355E']][d];
+  const big = !['couch', 'shared', 'studio'].includes(life);
+  let wall = { couch: '#E6DCCB', shared: '#EDE4D3', studio: '#EFE8DA', own: '#F4EEE2', loft: '#D9D2C6', house: '#F3EBDD', penthouse: '#ECEBE7', beach: '#F2F0E6', estate: '#EFE6D6' }[life] || '#EDE4D3';
+  let floor = { couch: '#B59A7A', shared: '#A8865F', studio: '#9C7A55', own: '#8E6B4A', loft: '#6F6A63', house: '#8A6440', penthouse: '#4A4644', beach: '#D8C4A0', estate: '#7A5536' }[life] || '#A8865F';
   const RS = (M.home && M.home.style) || {};
   if (RS.paint) wall = ROOM_STYLE.paint.opts[RS.paint];
   if (RS.floor) floor = ['', '#C9A36A', '#5A3A22', '#EDEDED', '#D8CFC2', '#3E6B4A', '#D98FA8'][RS.floor] || floor;
-  const night = (day ?? 0) >= 5, wd = mixHex(wall, '#000000', .08);
-  const o = [`<defs><linearGradient id="hs-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(wall, '#FFFFFF', .2)}"/><stop offset="1" stop-color="${wall}"/></linearGradient><linearGradient id="hs-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(floor, '#000000', .12)}"/><stop offset="1" stop-color="${mixHex(floor, '#FFFFFF', .08)}"/></linearGradient></defs><rect width="400" height="180" fill="url(#hs-w)"/>`];
+  const wd = mixHex(wall, '#000000', .08), accent = LOOK.colour.opts[(lookOf(me).colour) || 0] || '#2C4F7C', sofaC = mixHex(accent, '#8C8A85', .35), wood = life === 'loft' || life === 'penthouse' ? '#3B3B3B' : '#7A5236';
+  const o = [`<defs>
+    <linearGradient id="hs-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(wall, '#000000', .06)}"/><stop offset=".55" stop-color="${mixHex(wall, '#FFFFFF', .12)}"/><stop offset="1" stop-color="${wall}"/></linearGradient>
+    <linearGradient id="hs-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(floor, '#000000', .25)}"/><stop offset="1" stop-color="${mixHex(floor, '#FFFFFF', .06)}"/></linearGradient>
+    <linearGradient id="hs-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${SKY[0]}"/><stop offset="1" stop-color="${SKY[1]}"/></linearGradient>
+    <linearGradient id="hs-side" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".12" stop-color="#000" stop-opacity="0"/><stop offset=".88" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
+    <radialGradient id="hs-vig" cx=".5" cy=".55" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>
+    <linearGradient id="hs-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${d >= 3 ? '#FFD9A0' : '#FFF6D8'}" stop-opacity=".45"/><stop offset="1" stop-color="${d >= 3 ? '#FFD9A0' : '#FFF6D8'}" stop-opacity="0"/></linearGradient>
+  </defs><rect width="400" height="180" fill="url(#hs-w)"/>`];
   // the walls say where you live: peeling paint, stripes, brick, wallpaper
   if (life === 'couch') o.push(Array.from({ length: 7 }, (_, i) => `<path d="M${30 + i * 55} ${20 + (i % 3) * 25} q6 -4 12 0 q-4 6 -12 0" fill="${wd}" opacity=".7"/>`).join(''));
-  else if (life === 'own') o.push(Array.from({ length: 20 }, (_, i) => `<rect x="${i * 20}" y="0" width="9" height="128" fill="${wd}" opacity=".35"/>`).join(''));
+  else if (life === 'own' || life === 'penthouse') o.push(Array.from({ length: 20 }, (_, i) => `<rect x="${i * 20}" y="0" width="9" height="128" fill="${wd}" opacity=".22"/>`).join(''));
   else if (life === 'loft') o.push(Array.from({ length: 13 }, (_, r) => Array.from({ length: 14 }, (_, c) => `<rect x="${c * 30 + (r % 2) * 15 - 15}" y="${r * 10}" width="28" height="8" rx="1" fill="#A65E46" opacity="${.18 + ((r * 7 + c * 3) % 5) * .03}"/>`).join('')).join(''));
-  else if (life === 'house') o.push(Array.from({ length: 60 }, (_, i) => `<path d="M${(i % 12) * 34 + 17} ${Math.floor(i / 12) * 26 + 10} l4 6 l-4 6 l-4 -6 z" fill="${wd}" opacity=".45"/>`).join(''));
-  else o.push(`<rect y="84" width="400" height="44" fill="${wd}" opacity=".45"/><rect y="84" width="400" height="2" fill="#FFFFFF" opacity=".5"/>`);
-  o.push(`<rect y="130" width="400" height="50" fill="url(#hs-f)"/>${Array.from({ length: 9 }, (_, i) => `<line x1="${i * 50 + (i % 2) * 20}" y1="130" x2="${i * 50 + (i % 2) * 20 - 30}" y2="180" stroke="#000" stroke-width=".6" opacity=".12"/>`).join('')}<rect y="126" width="400" height="5" fill="${mixHex(wall, '#FFFFFF', .5)}"/><rect y="130" width="400" height="2" fill="#000" opacity=".08"/>`);
+  else if (life === 'house' || life === 'estate') o.push(Array.from({ length: 60 }, (_, i) => `<path d="M${(i % 12) * 34 + 17} ${Math.floor(i / 12) * 26 + 10} l4 6 l-4 6 l-4 -6 z" fill="${wd}" opacity=".35"/>`).join(''));
+  else if (life === 'beach') o.push(Array.from({ length: 26 }, (_, i) => `<rect x="${i * 16}" y="0" width="15" height="128" fill="${i % 2 ? wd : 'none'}" opacity=".18"/>`).join(''));
+  else o.push(`<rect y="84" width="400" height="44" fill="${wd}" opacity=".4"/><rect y="84" width="400" height="2" fill="#FFFFFF" opacity=".5"/>`);
   o.push(roomPaperSVG(RS, wd));
+  // crown moulding and a skirting board
+  if (big) o.push(`<rect width="400" height="5" fill="${mixHex(wall, '#FFFFFF', .5)}"/><rect y="5" width="400" height="1.5" fill="#000" opacity=".07"/>`);
+  // the window: sky, the city, frame, sill and curtains
+  const wx = life === 'couch' ? 268 : 150, ww = big ? 124 : 90, wy = 16, wh = 78;
+  o.push(`<rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" fill="url(#hs-sky)"/>`);
+  if (night) o.push(Array.from({ length: 14 }, (_, i) => `<circle cx="${wx + 4 + (i * 37) % (ww - 8)}" cy="${wy + 3 + (i * 23) % 30}" r="${i % 4 ? .5 : .9}" fill="#FFFFFF" opacity=".8"/>`).join('') + `<circle cx="${wx + ww * .78}" cy="${wy + 14}" r="6" fill="#F4F1E1"/><circle cx="${wx + ww * .78 + 2.5}" cy="${wy + 12.5}" r="5" fill="${SKY[0]}"/>`);
+  else o.push(`<circle cx="${wx + ww * (d >= 3 ? .2 : .75)}" cy="${wy + (d >= 3 ? 40 : 16)}" r="${d >= 3 ? 9 : 6}" fill="${d >= 3 ? '#FFD27A' : '#FFF6D0'}" opacity=".9"/>` + [[.2, 12], [.55, 22]].map(([fx, fy]) => `<g opacity=".8"><ellipse cx="${wx + ww * fx}" cy="${wy + fy}" rx="10" ry="3" fill="#FFFFFF"/><ellipse cx="${wx + ww * fx + 5}" cy="${wy + fy - 2}" rx="6" ry="3" fill="#FFFFFF"/></g>`).join(''));
+  o.push(`<svg x="${wx}" y="${wy}" width="${ww}" height="${wh}" viewBox="0 0 ${ww} ${wh}">${homeSkyline(M.hub, ww, wh, night)}</svg>`);
+  o.push(`<rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="3"/><rect x="${wx - 4}" y="${wy - 4}" width="${ww + 8}" height="${wh + 8}" fill="none" stroke="#FFFFFF" stroke-width="5"/><path d="M${wx + ww / 2} ${wy} L${wx + ww / 2} ${wy + wh} M${wx} ${wy + wh * .42} L${wx + ww} ${wy + wh * .42}" stroke="#FFFFFF" stroke-width="2.4"/><rect x="${wx - 9}" y="${wy + wh + 2}" width="${ww + 18}" height="5" rx="1" fill="#FFFFFF"/><rect x="${wx - 9}" y="${wy + wh + 7}" width="${ww + 18}" height="2" fill="#000" opacity=".1"/>`);
+  if (life !== 'couch') { const cc = RS.paint ? mixHex(wall, '#000', .3) : mixHex(accent, '#FFFFFF', .35);
+    o.push(`<rect x="${wx - 18}" y="${wy - 10}" width="${ww + 36}" height="3" rx="1.5" fill="#3B3226"/>${[[wx - 18, 1], [wx + ww + 2, -1]].map(([x0, s]) => `<path d="M${x0} ${wy - 8} L${x0 + 16} ${wy - 8} Q${x0 + 8 + s * 3} ${wy + 40} ${x0 + 14 - (s > 0 ? 6 : -2)} ${wy + wh + 14} L${x0} ${wy + wh + 14} Z" fill="${cc}"/><path d="M${x0 + 5} ${wy - 6} L${x0 + 4} ${wy + wh + 12} M${x0 + 10} ${wy - 6} L${x0 + 10} ${wy + wh + 12}" stroke="#000" stroke-opacity=".1" stroke-width="1.4"/>`).join('')}`); }
+  if (life === 'loft') o.push(`<path d="M0 6 L400 6" stroke="#5E5A54" stroke-width="6"/><path d="M40 6 L40 128 M360 6 L360 128" stroke="#8A847C" stroke-width="5"/>`);
+  if (life === 'house' || life === 'estate') o.push(`<rect x="300" y="40" width="60" height="88" fill="#8E6B4A"/><rect x="306" y="46" width="48" height="36" fill="#7A5A3C"/><rect x="306" y="86" width="48" height="36" fill="#7A5A3C"/><circle cx="350" cy="86" r="2.5" fill="#E3C27A"/>`);
+  // floor: boards, skirting and the light coming in
+  o.push(`<rect y="128" width="400" height="52" fill="url(#hs-f)"/>`);
+  if (!RS.floor || [1, 2].includes(RS.floor)) o.push(Array.from({ length: 6 }, (_, j) => `<line x1="0" y1="${131 + j * 9 * (1 + j * .12)}" x2="400" y2="${131 + j * 9 * (1 + j * .12)}" stroke="#000" stroke-width=".5" opacity=".14"/>` + Array.from({ length: 6 }, (_, i) => `<line x1="${(i * 73 + j * 41) % 400}" y1="${131 + j * 9 * (1 + j * .12)}" x2="${(i * 73 + j * 41) % 400}" y2="${131 + (j + 1) * 9 * (1 + (j + 1) * .12)}" stroke="#000" stroke-width=".5" opacity=".12"/>`).join('')).join(''));
   if (RS.floor === 3) o.push(Array.from({ length: 20 }, (_, i) => Array.from({ length: 4 }, (_, j) => (i + j) % 2 ? `<rect x="${i * 20}" y="${130 + j * 12.5}" width="20" height="12.5" fill="#1E1E1E" opacity=".85"/>` : '').join('')).join(''));
   if (RS.floor === 4) o.push(Array.from({ length: 70 }, (_, i) => `<circle cx="${(i * 53) % 400}" cy="${132 + (i * 29) % 46}" r="${1 + i % 3}" fill="${['#C8553D', '#2E5A3A', '#E3C27A', '#5B3A6E'][i % 4]}" opacity=".5"/>`).join(''));
-  if (life !== 'couch' && RS.rug !== 5) o.push(RS.rug ? roomRugSVG(RS.rug) : `<ellipse cx="200" cy="160" rx="110" ry="14" fill="${['house', 'own'].includes(life) ? '#8C3B3B' : '#3E5A7A'}" opacity=".55"/><ellipse cx="200" cy="160" rx="96" ry="10" fill="none" stroke="#E3C27A" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`);
-  o.push(`<line x1="${life === 'couch' ? 120 : 330}" y1="0" x2="${life === 'couch' ? 120 : 330}" y2="22" stroke="#3B3B3B" stroke-width="1.2"/><path d="M${life === 'couch' ? 112 : 322} 22 h16 l-3 -6 h-10 z" fill="#3B3B3B"/><circle cx="${life === 'couch' ? 120 : 330}" cy="24" r="3" fill="#FFE9A8" opacity="${night ? 1 : .5}"/>`);
-  const wx = life === 'couch' ? 268 : 160, ww = ['own', 'loft', 'house'].includes(life) ? 110 : 80;
-  o.push(`<rect x="${wx}" y="18" width="${ww}" height="76" fill="${sky}"/><g transform="translate(${wx} 18)">${homeSkyline(M.hub, ww, 76)}</g><rect x="${wx - 4}" y="14" width="${ww + 8}" height="84" fill="none" stroke="#FFFFFF" stroke-width="6"/><path d="M${wx + ww / 2} 18 L${wx + ww / 2} 94" stroke="#FFFFFF" stroke-width="3"/><rect x="${wx - 8}" y="94" width="${ww + 16}" height="5" fill="#FFFFFF"/>`);
-  if (!night) o.push(`<path d="M${wx} 94 L${wx + ww} 94 L${wx + ww + 40} 180 L${wx - 20} 180 Z" fill="#FFF6D8" opacity=".22"/>`);   // daylight across the floor
-  if (life === 'loft') o.push(`<path d="M0 6 L400 6" stroke="#5E5A54" stroke-width="6"/><path d="M40 6 L40 128 M360 6 L360 128" stroke="#8A847C" stroke-width="5"/>`);
-  if (life === 'house') o.push(`<rect x="300" y="40" width="60" height="88" fill="#8E6B4A"/><circle cx="350" cy="86" r="2.5" fill="#E3C27A"/>`);
-  if (life === 'couch') o.push(`<g transform="translate(24 168)"><rect x="0" y="-40" width="140" height="28" rx="8" fill="#7A6E8E"/><rect x="0" y="-16" width="140" height="16" rx="4" fill="#5E536F"/><rect x="40" y="-34" width="34" height="16" rx="5" fill="#F3EFF8"/><rect x="76" y="-30" width="50" height="12" rx="3" fill="var(--data)" opacity=".8"/></g><text x="94" y="120" font-size="7" text-anchor="middle" fill="#6A5E80" font-family="sans-serif">a friend's couch</text>`);
-  else if (!lay.bed) o.push(`<g transform="translate(${['own', 'loft', 'house'].includes(life) ? 12 : 18} 168)"><rect x="0" y="-10" width="84" height="10" rx="2" fill="#FFFFFF"/><rect x="4" y="-16" width="22" height="7" rx="3" fill="#F3EFF8"/></g>`);   // a mattress on the floor until there's a bed
-  for (const [id, sp] of Object.entries(lay)) { const s = spots.find(x => x.id === sp); o.push(furnitureSVG(id, s.x, s.y)); }
-  if (me.credits.length && life !== 'couch') o.push(`<g transform="translate(${life === 'own' ? 190 : 120} 104)">${me.credits.slice(0, 6).map((_, i) => `<rect x="${i * 9}" y="0" width="7" height="9" fill="#3B3226"/><rect x="${i * 9 + 1}" y="1" width="5" height="7" fill="#FFFFFF"/>`).join('')}</g>`);
+  o.push(`<rect y="122" width="400" height="7" fill="${mixHex(wall, '#FFFFFF', .55)}"/><rect y="129" width="400" height="3" fill="#000" opacity=".1"/>`);
+  if (big) o.push(`<rect x="372" y="112" width="7" height="10" rx="1" fill="#FFFFFF" stroke="#000" stroke-opacity=".15"/>`);
+  if (!night) o.push(`<path d="M${wx} ${wy + wh + 4} L${wx + ww} ${wy + wh + 4} L${wx + ww + 50} 180 L${wx - 30} 180 Z" fill="url(#hs-beam)"/>`);
+  if (life !== 'couch' && RS.rug !== 5) o.push(`<ellipse cx="202" cy="164" rx="114" ry="15" fill="#000" opacity=".08"/>` + (RS.rug ? roomRugSVG(RS.rug) : `<ellipse cx="200" cy="160" rx="110" ry="14" fill="${big ? '#8C3B3B' : '#3E5A7A'}" opacity=".6"/><ellipse cx="200" cy="160" rx="96" ry="10" fill="none" stroke="#E3C27A" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`));
+  // the ceiling light
+  const lx = life === 'couch' ? 120 : 300; o.push(`<line x1="${lx}" y1="0" x2="${lx}" y2="8" stroke="#3B3B3B" stroke-width="1.2"/><path d="M${lx - 8} 17 Q${lx} 4 ${lx + 8} 17 Z" fill="#3B3B3B"/><ellipse cx="${lx}" cy="17" rx="8" ry="1.8" fill="#FFE9A8" opacity="${night ? 1 : .6}"/>${night ? `<path d="M${lx - 8} 17 L${lx - 60} 180 L${lx + 60} 180 L${lx + 8} 17 Z" fill="#FFE9A8" opacity=".1"/>` : ''}`);
+  if (life === 'couch') o.push(`<g transform="translate(24 168)"><ellipse cx="70" cy="1" rx="76" ry="3" fill="#000" opacity=".16"/><rect x="0" y="-44" width="140" height="30" rx="9" fill="#7A6E8E"/><rect x="0" y="-18" width="140" height="18" rx="5" fill="#5E536F"/><rect x="-4" y="-30" width="14" height="30" rx="6" fill="#6A5E80"/><rect x="130" y="-30" width="14" height="30" rx="6" fill="#6A5E80"/><rect x="40" y="-34" width="34" height="16" rx="5" fill="#F3EFF8"/><rect x="76" y="-30" width="50" height="12" rx="3" fill="var(--data)" opacity=".8"/></g><text x="94" y="120" font-size="7" text-anchor="middle" fill="#6A5E80" font-family="sans-serif">a friend's couch</text>`);
+  else if (!lay.bed) o.push(`<g transform="translate(${big ? 12 : 18} 168)"><ellipse cx="44" cy="1" rx="46" ry="3" fill="#000" opacity=".15"/><rect x="0" y="-12" width="88" height="12" rx="3" fill="#FFFFFF"/><rect x="0" y="-6" width="88" height="6" rx="2" fill="${mixHex(accent, '#FFFFFF', .5)}"/><rect x="4" y="-18" width="22" height="8" rx="3" fill="#F3EFF8"/></g>`);   // a mattress on the floor until there's a bed
+  // empty spots get the sort of thing people who live like this have
+  const used = new Set(Object.values(lay)), fill = (ROOM_FILL[life] || []).slice(), floorSpots = spots.filter(s => s.kind === 'floor').sort((a, b) => a.x - b.x);
+  for (let i = 0; i < floorSpots.length; i++) { const s = floorSpots[i]; if (used.has(s.id) || (!lay.bed && s.x < 100)) continue; const room = (floorSpots[i + 1] ? floorSpots[i + 1].x : 400) - s.x - 4, j = fill.findIndex(k => FILL_W[k] <= room && !(s.x < 230 && s.x + FILL_W[k] > 168)); if (j < 0) continue; o.push(fillPieceSVG(fill.splice(j, 1)[0], s.x, s.y, sofaC, wood)); }
+  if (big) spots.filter(s => s.kind === 'wall' && !used.has(s.id) && !((life === 'house' || life === 'estate') && s.x > 262 && s.x < 362)).forEach((s, i) => o.push(wallFillSVG(i + [...(M.hub || '')].reduce((a, c) => a + c.charCodeAt(0), 0), s.x, s.y + 6, accent)));
+  for (const [id, sp] of Object.entries(lay)) { const s = spots.find(x => x.id === sp); if (!s) continue; const F = FURNITURE[id]; if (F && F.kind !== 'wall') o.push(`<ellipse cx="${s.x + 24}" cy="${s.y + 1}" rx="28" ry="3" fill="#000" opacity=".14"/>`); else if (F) o.push(`<rect x="${s.x + 2}" y="${s.y + 3}" width="46" height="60" fill="#000" opacity=".07"/>`); o.push(furnitureSVG(id, s.x, s.y)); }
+  if (!spots.some(s => s.id === 'sill' && used.has('sill')) && life !== 'couch') o.push(`<g transform="translate(${wx + 8} ${wy + wh + 2})"><path d="M0 0 L10 0 L9 -8 L1 -8 Z" fill="#C8553D"/><path d="M5 -8 Q0 -16 -2 -14 M5 -8 Q10 -18 13 -14 M5 -8 L5 -18" stroke="#2E7A4C" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>`);
+  if (me.credits.length && life !== 'couch') o.push(`<g transform="translate(${big ? 70 : 120} 104)">${me.credits.slice(0, 6).map((_, i) => `<rect x="${i * 9}" y="0" width="7" height="9" fill="#3B3226"/><rect x="${i * 9 + 1}" y="1" width="5" height="7" fill="#FFFFFF"/>`).join('')}</g>`);
   // what you've made goes on the wall: gold discs, a plaque, a play poster, trophies
   const W = M.works || [], wins = (M.comps || []).filter(e => e.place === 'win').length;
   const gold = W.filter(w => w.type === 'song' && w.units >= 100000).length, plat = W.filter(w => w.type === 'song' && w.units >= 1000000).length;
@@ -12047,8 +12144,12 @@ function homeSceneSVG(day) {
   if (wins) o.push(`<g transform="translate(${life === 'couch' ? 12 : 60} 118)">${Array.from({ length: Math.min(5, wins) }, (_, i) => `<path d="M${i * 10} 0 l6 0 l-1 5 l-2 0 l0 2 l2 0 l0 1 l-6 0 l0 -1 l2 0 l0 -2 l-2 0 z" fill="#D4AF37"/>`).join('')}<rect x="-2" y="8" width="${Math.min(5, wins) * 10 + 2}" height="2" fill="#6B4E3A"/></g>`);
   if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
   o.push(roomGlowSVG(RS, life, night), roomExtraSVG(RS, life));
-  if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".38"/><circle cx="${life === 'couch' ? 120 : 330}" cy="40" r="60" fill="#FFE9A8" opacity=".12"/>`);
-  o.push(`<g transform="translate(178 76)">${portraitSVG(lookOf(me), S.year - me.born, 100, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
+  // you, standing in it, with a shadow
+  o.push(`<ellipse cx="203" cy="175" rx="24" ry="3.5" fill="#000" opacity=".22"/><g transform="translate(173 54)">${portraitSVG(lookOf(me), S.year - me.born, 122, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
+  o.push(`<rect width="400" height="180" fill="url(#hs-side)"/>`);
+  if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".34"/><circle cx="${lx}" cy="60" r="70" fill="#FFE9A8" opacity=".1"/>`);
+  else if (d >= 3) o.push(`<rect width="400" height="180" fill="#FF9E5E" opacity=".07"/>`);
+  o.push(`<rect width="400" height="180" fill="url(#hs-vig)"/>`);
   return `<svg class="home-scene" viewBox="0 0 400 180" role="img" aria-label="Your place">${o.join('')}</svg>`;
 }
 
@@ -16943,7 +17044,7 @@ function mailApp() {
   const list = f === 'compose' ? L.filter(m => m.folder === 'sent') : f === 'inbox' ? L.filter(inInbox) : L.filter(m => m.folder === f), open = L.find(m => m.id === UI.mailo);
   const cnt = k => L.filter(m => (k === 'inbox' ? inInbox(m) : m.folder === k) && k !== 'sent' && k !== 'spam' && !m.rd && S.week - m.w < 8).length;
   return `<div class="mailapp"><div class="mfold"><button class="btn-s${f === 'compose' ? '' : ' ghost'}" data-mailf="compose">✏️ New email</button>${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button></div>
-   <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}${m.rd ? '' : ' unread'}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || '<p class="muted">Nothing here.</p>'}</div>
+   <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}${m.rd ? '' : ' unread'}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || `<div class="os-empty"><span>${{ inbox: '📭', offers: '🤝', fans: '💌', news: '🗞️', sent: '📤', spam: '🧹' }[f] || '📭'}</span><b>${{ inbox: 'Inbox zero', offers: 'No offers yet', fans: 'No fan mail yet', news: 'No newsletters', sent: 'Nothing sent', spam: 'No spam. Lucky you.' }[f] || 'Nothing here'}</b><p>${{ inbox: 'Replies, invitations and offers land here. Write to someone to get things moving.', offers: 'Offers arrive as your name gets around: apply, network and finish what you start.', fans: 'Make things people see, and they write back.', sent: 'Use New email to write to anyone you know.' }[f] || ''}</p></div>`}</div>
    ${f === 'compose' && typeof composeMailHTML === 'function' ? composeMailHTML() : ''}${open && f !== 'old' && f !== 'compose' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.folder === 'fans' ? (open.replied ? '<p class="muted">You wrote back. It made their week.</p>' : `<p><button class="btn-s ghost" data-mailact="${open.id}:fan">Write back</button></p>`) : ''}${open.act ? (open.done ? `<p class="muted">${open.doneT ? esc(open.doneT) : { yes: 'You said yes.', more: 'You asked for more. See their reply.', asked: 'You asked a question. See their reply.' }[open.done] || 'You declined.'}</p>` : open.act.opts ? `<p>${open.act.opts.map(([k, l], i) => `<button class="btn-s${i ? ' ghost' : ''}" data-mailact="${open.id}:${k}">${esc(l)}</button>`).join(' ')}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">${open.act.k === 'favour' ? 'Help them' : 'Accept'}</button> ${(open.act.fee !== undefined || open.act.adv !== undefined) && !open.act.pushed ? `<button class="btn-s ghost" data-mailact="${open.id}:more" title="Ask for more money. They might say yes, hold firm, or walk away.">Negotiate</button> ` : ''}${!open.act.asked ? `<button class="btn-s ghost" data-mailact="${open.id}:ask">Ask a question</button> ` : ''}<button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
 }
 // ---- Ticker: the industry's market and its trends ----
@@ -28596,6 +28697,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const body = `M${cx - sw} ${sy + 3} Q${cx - sw - 1} ${sy - 3} ${cx - sw + 9} ${sy - 4} L${cx - 9} 84 Q${cx} 89 ${cx + 9} 84 L${cx + sw - 9} ${sy - 4} Q${cx + sw + 1} ${sy - 3} ${cx + sw} ${sy + 3} L${cx + ww + 1} ${wy} L${cx + lowW} ${long} L${cx - lowW} ${long} L${cx - ww - 1} ${wy} Z`;
   const tc = top === 19 ? '#F4F2EE' : cloth;
   o.push(`<path d="${body}" fill="${tc}" stroke="${mixHex(tc, '#000', .35)}" stroke-width=".9"/>`);
+  const shadeTop = `<defs><linearGradient id="${uid}ts" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".14"/><stop offset=".45" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".2"/></linearGradient></defs><path d="${body}" fill="url(#${uid}ts)"/>`;
   // pattern on top (Hawaiian shirts come patterned)
   const pat = top === 16 && !L.pattern ? 4 : top === 2 && !L.pattern ? 2 : L.pattern || 0;
   if (pat && top !== 19) { const pc = mixHex(cloth, pat === 6 ? '#3B2516' : '#FFFFFF', pat === 6 ? .6 : .55), P0 = {
@@ -28606,6 +28708,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
       8: `<circle cx="2" cy="3" r="2.4" fill="#4E5B3A" opacity=".6"/><circle cx="6.5" cy="6" r="2.2" fill="#2F3A24" opacity=".6"/><circle cx="6" cy="1.5" r="1.4" fill="#8C8A5A" opacity=".6"/>`,
       9: `<path d="M4 1.5 l.7 1.6 l1.7 .1 l-1.3 1.1 l.4 1.7 l-1.5 -.9 l-1.5 .9 l.4 -1.7 l-1.3 -1.1 l1.7 -.1 z" fill="${pc}"/>` }[pat];
     o.push(`<defs><pattern id="${uid}pt" width="8" height="8" patternUnits="userSpaceOnUse"${pat === 1 || pat === 7 ? ' patternTransform="rotate(90)"' : ''}>${P0}</pattern></defs><path d="${body}" fill="url(#${uid}pt)"/>`); }
+  o.push(shadeTop);
   // the garment's own details
   if (top === 19) o.push(`<path d="M${cx - ww} 104 L${cx + ww} 104 L${cx + ww + 1} ${wy} L${cx + hp + 1} ${hy + 4} L${cx - hp - 1} ${hy + 4} L${cx - ww - 1} ${wy} Z" fill="${cloth}"/><path d="M${cx - ww + 2} 104 L${cx - sw + 6} ${sy - 3} M${cx + ww - 2} 104 L${cx + sw - 6} ${sy - 3}" stroke="${cloth}" stroke-width="3"/><circle cx="${cx - ww + 3}" cy="106" r="1.3" fill="#E3C27A"/><circle cx="${cx + ww - 3}" cy="106" r="1.3" fill="#E3C27A"/><rect x="${cx - 5}" y="112" width="10" height="8" rx="1" fill="${dkc}"/>`);
   if (top === 13) o.push(`<path d="M${cx + 1} 98 L${cx - 5} 112 L${cx} 112 L${cx - 3} 124 L${cx + 6} 106 L${cx + 1} 106 L${cx + 4} 98 Z" fill="#FFE27A"/><circle cx="${cx}" cy="111" r="11" fill="none" stroke="#FFFFFF" stroke-width="1" opacity=".6"/>`);
@@ -28624,7 +28727,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
     if (short) o.push(`<path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${mixHex(sleeve, '#000', .35)}" stroke-width="${aw * 2 + 2.6}" stroke-linecap="round"/><path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${sleeve}" stroke-width="${aw * 2 + 1}" stroke-linecap="round"/>`);
     else if (wide) o.push(`<path d="M${(s[0] + e[0]) / 2} ${(s[1] + e[1]) / 2} Q${e[0]} ${e[1]} ${h[0] + (side < 0 ? -1 : 1) * 1} ${h[1] - 6}" stroke="${sleeve}" stroke-width="${aw * 2 + wide * 2}" stroke-linecap="round" fill="none"/>`);
     if (top === 11) o.push(`<path d="${path}" stroke="#FFFFFF" stroke-width="1.2" fill="none" transform="translate(${side * (aw - 1.5)} 0)"/>`);
-    o.push(`<circle cx="${h[0]}" cy="${h[1] + 2}" r="${aw * .82}" fill="${skin}"/>`);
+    o.push(figHand(h[0], h[1] + 2.5, aw, side, skin));
     if (tat === 1 && side < 0 && short) o.push(`<path d="M${e[0] - 2} ${e[1] + 4} q3 4 0 8 q-3 4 0 8" stroke="#2B3A66" stroke-width="1.6" fill="none" opacity=".75"/>`);
     if (tat === 2 && side < 0) o.push(`<circle cx="${h[0]}" cy="${h[1] - 4}" r="1.3" fill="#2B3A66" opacity=".75"/>`);
     if (tat === 3 && side > 0) o.push(`<path d="M${h[0] - 1.5} ${h[1] + 1} l3 0 l-1.5 2.5 z" fill="#2B3A66" opacity=".8"/>`);
@@ -28633,7 +28736,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const lS = [cx - sw + 3, sy + 3], rS = [cx + sw - 3, sy + 3];
   const down = side => [side < 0 ? lS : rS, [cx + side * (sw + 4), 118], [cx + side * (sw + 4), 146]];
   if (pose === 3) {   // arms crossed
-    o.push(`<path d="M${cx - sw + 2} 112 Q${cx} 106 ${cx + sw - 2} 116" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${cx + sw - 2} 110 Q${cx} 116 ${cx - sw + 2} 120" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${lS[0]} ${lS[1]} L${cx - sw + 1} 112 M${rS[0]} ${rS[1]} L${cx + sw - 1} 110" stroke="${sleeve}" stroke-width="${aw * 2}" stroke-linecap="round"/><circle cx="${cx + sw - 1}" cy="116" r="${aw * .8}" fill="${skin}"/><circle cx="${cx - sw + 1}" cy="120" r="${aw * .8}" fill="${skin}"/>`);
+    o.push(`<path d="M${cx - sw + 2} 112 Q${cx} 106 ${cx + sw - 2} 116" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${cx + sw - 2} 110 Q${cx} 116 ${cx - sw + 2} 120" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${lS[0]} ${lS[1]} L${cx - sw + 1} 112 M${rS[0]} ${rS[1]} L${cx + sw - 1} 110" stroke="${sleeve}" stroke-width="${aw * 2}" stroke-linecap="round"/>${figHand(cx + sw - 1, 116, aw, 1, skin)}${figHand(cx - sw + 1, 120, aw, -1, skin)}`);
   } else {
     arm(pose === 4 ? [lS, [cx - sw - 3, 118], [cx - hp + 3, 138]] : down(-1), -1);
     arm(pose === 1 ? [rS, [cx + sw + 12, 116], [cx + ww + 3, 132]] : pose === 2 ? [rS, [cx + sw + 12, 72], [cx + sw + 6, 50]] : pose === 4 ? [rS, [cx + sw + 3, 118], [cx + hp - 3, 138]] : down(1), 1);
@@ -28647,6 +28750,11 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (bag === 7) o.push(`<g transform="rotate(-8 ${cx - sw} 118)"><rect x="${cx - sw - 8}" y="110" width="13" height="17" fill="#FFFFFF" stroke="#BBB" stroke-width=".6"/><path d="M${cx - sw - 6} 114 h9 M${cx - sw - 6} 117 h7 M${cx - sw - 6} 120 h9" stroke="#999" stroke-width=".5"/></g>`);
   if (bag === 8 && pose !== 3) o.push(`<rect x="${hx - 3.5}" y="${hyy - 4}" width="7" height="10" rx="1" fill="#F4F2EE"/><rect x="${hx - 3.5}" y="${hyy - 1}" width="7" height="3" fill="#8A5A37"/><rect x="${hx - 4}" y="${hyy - 6}" width="8" height="2.5" rx="1" fill="#2B2B2B"/>`);
   if (bag === 9 && pose !== 3) o.push(`<circle cx="${hx + 1}" cy="${hyy + 6}" r="7" fill="#B9B5AE" stroke="#8A8680" stroke-width="1"/><circle cx="${hx + 1}" cy="${hyy + 6}" r="2" fill="#8A8680"/>`);
+}
+// a hand: palm, a thumb towards the body, a hint of knuckles
+function figHand(x, y, aw, side, skin) {
+  const d = mixHex(skin, '#000', .22);
+  return `<ellipse cx="${x}" cy="${y}" rx="${(aw * .72).toFixed(2)}" ry="${(aw * .95).toFixed(2)}" fill="${skin}" stroke="${d}" stroke-width=".5"/><ellipse cx="${(x - side * aw * .62).toFixed(2)}" cy="${(y - aw * .2).toFixed(2)}" rx="${(aw * .26).toFixed(2)}" ry="${(aw * .5).toFixed(2)}" transform="rotate(${side * 25} ${(x - side * aw * .62).toFixed(2)} ${(y - aw * .2).toFixed(2)})" fill="${skin}" stroke="${d}" stroke-width=".4"/><path d="M${(x - aw * .4).toFixed(2)} ${(y + aw * .55).toFixed(2)} Q${x} ${(y + aw * .8).toFixed(2)} ${(x + aw * .4).toFixed(2)} ${(y + aw * .55).toFixed(2)}" stroke="${d}" stroke-width=".4" fill="none" opacity=".7"/>`;
 }
 // head-to-toe, for the places with room
 function figureOf(p, h) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, h, false, true); }

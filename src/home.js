@@ -42,12 +42,6 @@ function homeFx() {
   if (typeof kitFx === 'function') kitFx(out);
   return out;
 }
-function homeSkyline(hub, w, h) {
-  const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0);
-  let x = 0, o = '';
-  while (x < w) { const bw = 6 + r() * 12, bh = 12 + r() * (h - 18); o += `<rect x="${x.toFixed(1)}" y="${(h - bh).toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="var(--hs-city)"/>`; if (r() < .5) o += `<rect x="${(x + bw / 3).toFixed(1)}" y="${(h - bh + 4).toFixed(1)}" width="2" height="2" fill="var(--hs-lit)"/>`; x += bw + 1; }
-  return o;
-}
 function furnitureSVG(id, x, y) {
   const M = S.me;
   switch (id) {
@@ -66,37 +60,110 @@ function furnitureSVG(id, x, y) {
   }
   return typeof furnitureSVG2 === 'function' ? furnitureSVG2(id, x, y) : '';
 }
+function homeSkyline(hub, w, h, night) {
+  const r = hashRand([...hub].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0), o = [];
+  for (const [layer, op, hmin, lit] of [[0, .45, .35, .25], [1, .95, .15, .45]]) {
+    let x = -4; while (x < w) { const bw = 7 + r() * 13, bh = h * (hmin + r() * (layer ? .55 : .4)), y = h - bh;
+      o.push(`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="var(--hs-city)" opacity="${layer ? 1 : .45}"${layer ? '' : ' style="filter:saturate(.6)"'}/>`);
+      if (layer && r() < .25) o.push(`<rect x="${(x + bw / 2 - .5).toFixed(1)}" y="${(y - 5).toFixed(1)}" width="1" height="5" fill="var(--hs-city)"/>`);
+      if (layer) for (let wy = y + 3; wy < h - 3; wy += 4.5) for (let wx = x + 2; wx < x + bw - 2; wx += 3.5) if (r() < (night ? lit : .12)) o.push(`<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="1.6" height="2" fill="${night ? '#FFD98A' : '#FFFFFF'}" opacity="${night ? .9 : .35}"/>`);
+      x += bw + (layer ? .6 : 2); }
+    if (!layer) o.push(`<rect width="${w}" height="${h}" fill="#FFFFFF" opacity=".08"/>`);
+  }
+  return o.join('');
+}
+// what fills an empty corner, by how well you live
+const ROOM_FILL = {
+  couch: [], shared: ['crate', 'rail', 'beanbag'], studio: ['crate', 'beanbag', 'rail'],
+  own: ['sofa', 'sidetable', 'floorlamp', 'bigplant'], loft: ['sofa', 'bigplant', 'metalshelf', 'floorlamp'],
+  house: ['sofa', 'armchair', 'sideboard', 'bigplant', 'floorlamp'], penthouse: ['sofa', 'armchair', 'sideboard', 'bigplant', 'floorlamp'], beach: ['sofa', 'armchair', 'bigplant', 'sideboard', 'floorlamp'], estate: ['sofa', 'armchair', 'sideboard', 'bigplant', 'floorlamp']
+};
+const FILL_W = { crate: 30, rail: 44, beanbag: 40, sofa: 92, sidetable: 30, floorlamp: 26, bigplant: 34, metalshelf: 44, armchair: 46, sideboard: 64 };
+function fillPieceSVG(k, x, y, accent, wood) {
+  const sh = w => `<ellipse cx="${w / 2}" cy="1" rx="${w / 2 + 4}" ry="3" fill="#000" opacity=".16"/>`;
+  switch (k) {
+    case 'crate': return `<g transform="translate(${x} ${y})">${sh(30)}<rect x="0" y="-24" width="30" height="24" fill="#B98A55"/>${[0, 8, 16].map(d => `<rect x="0" y="${-22 + d}" width="30" height="2" fill="#8C6236"/>`).join('')}<rect x="4" y="-32" width="10" height="8" fill="#F3EFF8"/><rect x="16" y="-30" width="9" height="6" rx="1" fill="${accent}"/></g>`;
+    case 'rail': return `<g transform="translate(${x} ${y})">${sh(44)}<path d="M2 0 L2 -58 L42 -58 L42 0" stroke="#888" stroke-width="2" fill="none"/>${[6, 14, 22, 30].map((d, i) => `<path d="M${d + 2} -57 l-5 8 l0 26 l12 0 l0 -26 z" fill="${['#2C4F7C', accent, '#E8E4DA', '#3B3B3B'][i]}" opacity=".95"/>`).join('')}</g>`;
+    case 'beanbag': return `<g transform="translate(${x} ${y})">${sh(40)}<path d="M2 0 Q-2 -22 18 -26 Q40 -24 38 0 Z" fill="${accent}"/><path d="M8 -18 Q18 -24 30 -16" stroke="#FFFFFF" stroke-width="1.4" opacity=".3" fill="none"/></g>`;
+    case 'sofa': return `<g transform="translate(${x} ${y})">${sh(92)}<rect x="4" y="-44" width="84" height="26" rx="8" fill="${mixHex(accent, '#000', .15)}"/><rect x="0" y="-24" width="92" height="18" rx="6" fill="${accent}"/><rect x="-2" y="-34" width="14" height="28" rx="6" fill="${mixHex(accent, '#000', .08)}"/><rect x="80" y="-34" width="14" height="28" rx="6" fill="${mixHex(accent, '#000', .08)}"/><rect x="16" y="-38" width="18" height="14" rx="4" fill="#F3EFF8" transform="rotate(-8 25 -31)"/><rect x="58" y="-36" width="16" height="12" rx="4" fill="#E3C27A"/><rect x="6" y="-6" width="3" height="6" fill="${wood}"/><rect x="83" y="-6" width="3" height="6" fill="${wood}"/><path d="M14 -22 L78 -22" stroke="#FFFFFF" stroke-width="1" opacity=".18"/></g>`;
+    case 'sidetable': return `<g transform="translate(${x} ${y})">${sh(30)}<rect x="0" y="-30" width="30" height="4" fill="${wood}"/><rect x="3" y="-26" width="3" height="26" fill="${mixHex(wood, '#000', .2)}"/><rect x="24" y="-26" width="3" height="26" fill="${mixHex(wood, '#000', .2)}"/><rect x="2" y="-10" width="26" height="3" fill="${mixHex(wood, '#000', .1)}"/><path d="M10 -30 L8 -46 L22 -46 L20 -30 Z" fill="#F3E2B8"/><rect x="14" y="-34" width="2" height="4" fill="#555"/><rect x="18" y="-36" width="7" height="6" rx="1" fill="${accent}" opacity=".8"/></g>`;
+    case 'floorlamp': return `<g transform="translate(${x} ${y})">${sh(26)}<ellipse cx="13" cy="-1" rx="9" ry="2" fill="#333"/><path d="M13 0 L13 -84" stroke="#333" stroke-width="2"/><path d="M2 -82 L6 -98 L20 -98 L24 -82 Z" fill="#F3E2B8"/><path d="M2 -82 L24 -82" stroke="#D9C38F" stroke-width="1"/></g>`;
+    case 'bigplant': return `<g transform="translate(${x} ${y})">${sh(34)}<path d="M6 -22 L28 -22 L25 0 L9 0 Z" fill="#E8E4DA"/><path d="M6 -22 L28 -22" stroke="#C9C3B6" stroke-width="2"/>${[[-26, -58], [-6, -70], [14, -62], [32, -50], [24, -76], [2, -84], [-14, -44]].map(([dx, dy], i) => `<path d="M17 -22 Q${17 + dx / 2} ${-22 + dy / 2} ${17 + dx} ${dy - 4}" stroke="#2E6B3F" stroke-width="1.4" fill="none"/><ellipse cx="${17 + dx}" cy="${dy - 4}" rx="7" ry="3.6" transform="rotate(${dx > 0 ? -30 : 30} ${17 + dx} ${dy - 4})" fill="${i % 2 ? '#3E8A50' : '#2E7A44'}"/>`).join('')}</g>`;
+    case 'metalshelf': return `<g transform="translate(${x} ${y})">${sh(44)}<path d="M2 0 L2 -80 M42 0 L42 -80" stroke="#555" stroke-width="2.4"/>${[-78, -54, -30, -6].map(d => `<rect x="1" y="${d}" width="42" height="2.5" fill="#666"/>`).join('')}<rect x="6" y="-74" width="6" height="20" fill="${accent}"/><rect x="13" y="-72" width="5" height="18" fill="#E8E4DA"/><rect x="20" y="-70" width="6" height="16" fill="#2C4F7C"/><circle cx="34" cy="-37" r="6" fill="#B9B5AE"/><rect x="8" y="-26" width="28" height="20" rx="2" fill="#B98A55"/></g>`;
+    case 'armchair': return `<g transform="translate(${x} ${y})">${sh(46)}<path d="M6 -50 Q23 -58 40 -50 L40 -22 L6 -22 Z" fill="${mixHex(accent, '#3B2516', .45)}"/><rect x="2" y="-24" width="42" height="16" rx="5" fill="${mixHex(accent, '#3B2516', .35)}"/><rect x="0" y="-36" width="9" height="28" rx="4" fill="${mixHex(accent, '#3B2516', .5)}"/><rect x="37" y="-36" width="9" height="28" rx="4" fill="${mixHex(accent, '#3B2516', .5)}"/><path d="M6 -8 L4 0 M40 -8 L42 0" stroke="${wood}" stroke-width="2.4"/></g>`;
+    case 'sideboard': return `<g transform="translate(${x} ${y})">${sh(64)}<rect x="0" y="-34" width="64" height="28" rx="2" fill="${wood}"/><rect x="0" y="-36" width="64" height="3" fill="${mixHex(wood, '#000', .2)}"/><path d="M21.5 -32 L21.5 -8 M42.5 -32 L42.5 -8" stroke="${mixHex(wood, '#000', .25)}" stroke-width="1"/>${[11, 32, 53].map(cx => `<circle cx="${cx}" cy="-20" r="1.2" fill="#E3C27A"/>`).join('')}<path d="M4 -6 L6 0 M60 -6 L58 0" stroke="${mixHex(wood, '#000', .3)}" stroke-width="2"/><path d="M10 -36 Q8 -50 14 -54 Q20 -50 18 -36 Z" fill="${accent}" opacity=".85"/><rect x="40" y="-48" width="16" height="12" rx="1" fill="#F3EFF8" stroke="#3B3226" stroke-width="1.4"/></g>`;
+  }
+  return '';
+}
+// something on an empty wall: a clock, a mirror, a small print
+function wallFillSVG(i, x, y, accent) {
+  const k = i % 5;
+  if (k === 3) return `<g transform="translate(${x} ${y + 14})"><rect x="0" y="0" width="44" height="3" fill="#7A5236"/><rect x="0" y="3" width="44" height="2" fill="#000" opacity=".1"/>${[0, 1, 2, 3, 4, 5].map(j => `<rect x="${3 + j * 5}" y="${-14 + (j % 3)}" width="4" height="${14 - (j % 3)}" fill="${['#2C4F7C', '#C8553D', '#E3C27A', '#2E5A3A', '#E8E4DA', accent][j]}"/>`).join('')}<path d="M34 0 L34 -6 Q37 -12 40 -6 L40 0 Z" fill="#B9B5AE"/></g>`;
+  if (k === 4) return `<g transform="translate(${x + 2} ${y + 2})"><rect x="2" y="3" width="40" height="30" fill="#000" opacity=".08"/><rect width="40" height="30" fill="#F4F0E6" stroke="#C9A646" stroke-width="2"/>${[0, 1, 2].map(j => `<rect x="${5 + j * 11}" y="6" width="8" height="18" fill="${mixHex(accent, ['#FFFFFF', '#000000', '#E3C27A'][j], .35)}"/>`).join('')}</g>`;
+  if (k === 0) return `<g transform="translate(${x + 8} ${y + 6})"><ellipse cx="14" cy="16" rx="15" ry="15" fill="#000" opacity=".08"/><circle cx="14" cy="14" r="13" fill="#FFFFFF" stroke="#3B3226" stroke-width="2"/><path d="M14 14 L14 6 M14 14 L19 16" stroke="#222" stroke-width="1.4" stroke-linecap="round"/>${[0, 1, 2, 3].map(j => `<circle cx="${14 + Math.cos(j * Math.PI / 2) * 10}" cy="${14 + Math.sin(j * Math.PI / 2) * 10}" r=".8" fill="#555"/>`).join('')}</g>`;
+  if (k === 1) return `<g transform="translate(${x + 4} ${y})"><rect x="2" y="3" width="30" height="40" rx="14" fill="#000" opacity=".08"/><rect width="30" height="40" rx="14" fill="#C9A646"/><rect x="3" y="3" width="24" height="34" rx="11" fill="#DDE7EE"/><path d="M8 10 L20 30" stroke="#FFFFFF" stroke-width="3" opacity=".6"/></g>`;
+  return `<g transform="translate(${x + 4} ${y + 2})"><rect x="2" y="3" width="34" height="26" fill="#000" opacity=".08"/><rect width="34" height="26" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="1.5"/><rect x="4" y="4" width="26" height="18" fill="${mixHex(accent, '#FFFFFF', .55)}"/><circle cx="12" cy="11" r="4" fill="${accent}"/><path d="M4 22 L14 14 L20 18 L30 10 L30 22 Z" fill="${mixHex(accent, '#000', .2)}"/></g>`;
+}
 // The scene. day: 0–5 for the light through the window.
 function homeSceneSVG(day) {
-  const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [];
-  const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#E8A36B', '#1E2A44'][clamp(day ?? 0, 0, 5)];
-  let wall = { couch: '#E6DCCB', shared: '#EDE4D3', studio: '#EFE8DA', own: '#F6F0E4', loft: '#D9D2C6', house: '#F3EBDD' }[life] || '#EDE4D3', floor = { couch: '#B59A7A', shared: '#A8865F', studio: '#9C7A55', own: '#8E6B4A', loft: '#6F6A63', house: '#8A6440' }[life] || '#A8865F';
+  const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [], d = clamp(day ?? 0, 0, 5), night = d >= 5;
+  const SKY = [['#9CC7EE', '#DDEBF7'], ['#A9CFF0', '#E6F0F8'], ['#F2C79A', '#FBE6CB'], ['#E79A6E', '#F6CFA0'], ['#B5677A', '#EBA37A'], ['#0E1730', '#26355E']][d];
+  const big = !['couch', 'shared', 'studio'].includes(life);
+  let wall = { couch: '#E6DCCB', shared: '#EDE4D3', studio: '#EFE8DA', own: '#F4EEE2', loft: '#D9D2C6', house: '#F3EBDD', penthouse: '#ECEBE7', beach: '#F2F0E6', estate: '#EFE6D6' }[life] || '#EDE4D3';
+  let floor = { couch: '#B59A7A', shared: '#A8865F', studio: '#9C7A55', own: '#8E6B4A', loft: '#6F6A63', house: '#8A6440', penthouse: '#4A4644', beach: '#D8C4A0', estate: '#7A5536' }[life] || '#A8865F';
   const RS = (M.home && M.home.style) || {};
   if (RS.paint) wall = ROOM_STYLE.paint.opts[RS.paint];
   if (RS.floor) floor = ['', '#C9A36A', '#5A3A22', '#EDEDED', '#D8CFC2', '#3E6B4A', '#D98FA8'][RS.floor] || floor;
-  const night = (day ?? 0) >= 5, wd = mixHex(wall, '#000000', .08);
-  const o = [`<defs><linearGradient id="hs-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(wall, '#FFFFFF', .2)}"/><stop offset="1" stop-color="${wall}"/></linearGradient><linearGradient id="hs-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(floor, '#000000', .12)}"/><stop offset="1" stop-color="${mixHex(floor, '#FFFFFF', .08)}"/></linearGradient></defs><rect width="400" height="180" fill="url(#hs-w)"/>`];
+  const wd = mixHex(wall, '#000000', .08), accent = LOOK.colour.opts[(lookOf(me).colour) || 0] || '#2C4F7C', sofaC = mixHex(accent, '#8C8A85', .35), wood = life === 'loft' || life === 'penthouse' ? '#3B3B3B' : '#7A5236';
+  const o = [`<defs>
+    <linearGradient id="hs-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(wall, '#000000', .06)}"/><stop offset=".55" stop-color="${mixHex(wall, '#FFFFFF', .12)}"/><stop offset="1" stop-color="${wall}"/></linearGradient>
+    <linearGradient id="hs-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(floor, '#000000', .25)}"/><stop offset="1" stop-color="${mixHex(floor, '#FFFFFF', .06)}"/></linearGradient>
+    <linearGradient id="hs-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${SKY[0]}"/><stop offset="1" stop-color="${SKY[1]}"/></linearGradient>
+    <linearGradient id="hs-side" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".12" stop-color="#000" stop-opacity="0"/><stop offset=".88" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient>
+    <radialGradient id="hs-vig" cx=".5" cy=".55" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></radialGradient>
+    <linearGradient id="hs-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${d >= 3 ? '#FFD9A0' : '#FFF6D8'}" stop-opacity=".45"/><stop offset="1" stop-color="${d >= 3 ? '#FFD9A0' : '#FFF6D8'}" stop-opacity="0"/></linearGradient>
+  </defs><rect width="400" height="180" fill="url(#hs-w)"/>`];
   // the walls say where you live: peeling paint, stripes, brick, wallpaper
   if (life === 'couch') o.push(Array.from({ length: 7 }, (_, i) => `<path d="M${30 + i * 55} ${20 + (i % 3) * 25} q6 -4 12 0 q-4 6 -12 0" fill="${wd}" opacity=".7"/>`).join(''));
-  else if (life === 'own') o.push(Array.from({ length: 20 }, (_, i) => `<rect x="${i * 20}" y="0" width="9" height="128" fill="${wd}" opacity=".35"/>`).join(''));
+  else if (life === 'own' || life === 'penthouse') o.push(Array.from({ length: 20 }, (_, i) => `<rect x="${i * 20}" y="0" width="9" height="128" fill="${wd}" opacity=".22"/>`).join(''));
   else if (life === 'loft') o.push(Array.from({ length: 13 }, (_, r) => Array.from({ length: 14 }, (_, c) => `<rect x="${c * 30 + (r % 2) * 15 - 15}" y="${r * 10}" width="28" height="8" rx="1" fill="#A65E46" opacity="${.18 + ((r * 7 + c * 3) % 5) * .03}"/>`).join('')).join(''));
-  else if (life === 'house') o.push(Array.from({ length: 60 }, (_, i) => `<path d="M${(i % 12) * 34 + 17} ${Math.floor(i / 12) * 26 + 10} l4 6 l-4 6 l-4 -6 z" fill="${wd}" opacity=".45"/>`).join(''));
-  else o.push(`<rect y="84" width="400" height="44" fill="${wd}" opacity=".45"/><rect y="84" width="400" height="2" fill="#FFFFFF" opacity=".5"/>`);
-  o.push(`<rect y="130" width="400" height="50" fill="url(#hs-f)"/>${Array.from({ length: 9 }, (_, i) => `<line x1="${i * 50 + (i % 2) * 20}" y1="130" x2="${i * 50 + (i % 2) * 20 - 30}" y2="180" stroke="#000" stroke-width=".6" opacity=".12"/>`).join('')}<rect y="126" width="400" height="5" fill="${mixHex(wall, '#FFFFFF', .5)}"/><rect y="130" width="400" height="2" fill="#000" opacity=".08"/>`);
+  else if (life === 'house' || life === 'estate') o.push(Array.from({ length: 60 }, (_, i) => `<path d="M${(i % 12) * 34 + 17} ${Math.floor(i / 12) * 26 + 10} l4 6 l-4 6 l-4 -6 z" fill="${wd}" opacity=".35"/>`).join(''));
+  else if (life === 'beach') o.push(Array.from({ length: 26 }, (_, i) => `<rect x="${i * 16}" y="0" width="15" height="128" fill="${i % 2 ? wd : 'none'}" opacity=".18"/>`).join(''));
+  else o.push(`<rect y="84" width="400" height="44" fill="${wd}" opacity=".4"/><rect y="84" width="400" height="2" fill="#FFFFFF" opacity=".5"/>`);
   o.push(roomPaperSVG(RS, wd));
+  // crown moulding and a skirting board
+  if (big) o.push(`<rect width="400" height="5" fill="${mixHex(wall, '#FFFFFF', .5)}"/><rect y="5" width="400" height="1.5" fill="#000" opacity=".07"/>`);
+  // the window: sky, the city, frame, sill and curtains
+  const wx = life === 'couch' ? 268 : 150, ww = big ? 124 : 90, wy = 16, wh = 78;
+  o.push(`<rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" fill="url(#hs-sky)"/>`);
+  if (night) o.push(Array.from({ length: 14 }, (_, i) => `<circle cx="${wx + 4 + (i * 37) % (ww - 8)}" cy="${wy + 3 + (i * 23) % 30}" r="${i % 4 ? .5 : .9}" fill="#FFFFFF" opacity=".8"/>`).join('') + `<circle cx="${wx + ww * .78}" cy="${wy + 14}" r="6" fill="#F4F1E1"/><circle cx="${wx + ww * .78 + 2.5}" cy="${wy + 12.5}" r="5" fill="${SKY[0]}"/>`);
+  else o.push(`<circle cx="${wx + ww * (d >= 3 ? .2 : .75)}" cy="${wy + (d >= 3 ? 40 : 16)}" r="${d >= 3 ? 9 : 6}" fill="${d >= 3 ? '#FFD27A' : '#FFF6D0'}" opacity=".9"/>` + [[.2, 12], [.55, 22]].map(([fx, fy]) => `<g opacity=".8"><ellipse cx="${wx + ww * fx}" cy="${wy + fy}" rx="10" ry="3" fill="#FFFFFF"/><ellipse cx="${wx + ww * fx + 5}" cy="${wy + fy - 2}" rx="6" ry="3" fill="#FFFFFF"/></g>`).join(''));
+  o.push(`<svg x="${wx}" y="${wy}" width="${ww}" height="${wh}" viewBox="0 0 ${ww} ${wh}">${homeSkyline(M.hub, ww, wh, night)}</svg>`);
+  o.push(`<rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" fill="none" stroke="#000" stroke-opacity=".12" stroke-width="3"/><rect x="${wx - 4}" y="${wy - 4}" width="${ww + 8}" height="${wh + 8}" fill="none" stroke="#FFFFFF" stroke-width="5"/><path d="M${wx + ww / 2} ${wy} L${wx + ww / 2} ${wy + wh} M${wx} ${wy + wh * .42} L${wx + ww} ${wy + wh * .42}" stroke="#FFFFFF" stroke-width="2.4"/><rect x="${wx - 9}" y="${wy + wh + 2}" width="${ww + 18}" height="5" rx="1" fill="#FFFFFF"/><rect x="${wx - 9}" y="${wy + wh + 7}" width="${ww + 18}" height="2" fill="#000" opacity=".1"/>`);
+  if (life !== 'couch') { const cc = RS.paint ? mixHex(wall, '#000', .3) : mixHex(accent, '#FFFFFF', .35);
+    o.push(`<rect x="${wx - 18}" y="${wy - 10}" width="${ww + 36}" height="3" rx="1.5" fill="#3B3226"/>${[[wx - 18, 1], [wx + ww + 2, -1]].map(([x0, s]) => `<path d="M${x0} ${wy - 8} L${x0 + 16} ${wy - 8} Q${x0 + 8 + s * 3} ${wy + 40} ${x0 + 14 - (s > 0 ? 6 : -2)} ${wy + wh + 14} L${x0} ${wy + wh + 14} Z" fill="${cc}"/><path d="M${x0 + 5} ${wy - 6} L${x0 + 4} ${wy + wh + 12} M${x0 + 10} ${wy - 6} L${x0 + 10} ${wy + wh + 12}" stroke="#000" stroke-opacity=".1" stroke-width="1.4"/>`).join('')}`); }
+  if (life === 'loft') o.push(`<path d="M0 6 L400 6" stroke="#5E5A54" stroke-width="6"/><path d="M40 6 L40 128 M360 6 L360 128" stroke="#8A847C" stroke-width="5"/>`);
+  if (life === 'house' || life === 'estate') o.push(`<rect x="300" y="40" width="60" height="88" fill="#8E6B4A"/><rect x="306" y="46" width="48" height="36" fill="#7A5A3C"/><rect x="306" y="86" width="48" height="36" fill="#7A5A3C"/><circle cx="350" cy="86" r="2.5" fill="#E3C27A"/>`);
+  // floor: boards, skirting and the light coming in
+  o.push(`<rect y="128" width="400" height="52" fill="url(#hs-f)"/>`);
+  if (!RS.floor || [1, 2].includes(RS.floor)) o.push(Array.from({ length: 6 }, (_, j) => `<line x1="0" y1="${131 + j * 9 * (1 + j * .12)}" x2="400" y2="${131 + j * 9 * (1 + j * .12)}" stroke="#000" stroke-width=".5" opacity=".14"/>` + Array.from({ length: 6 }, (_, i) => `<line x1="${(i * 73 + j * 41) % 400}" y1="${131 + j * 9 * (1 + j * .12)}" x2="${(i * 73 + j * 41) % 400}" y2="${131 + (j + 1) * 9 * (1 + (j + 1) * .12)}" stroke="#000" stroke-width=".5" opacity=".12"/>`).join('')).join(''));
   if (RS.floor === 3) o.push(Array.from({ length: 20 }, (_, i) => Array.from({ length: 4 }, (_, j) => (i + j) % 2 ? `<rect x="${i * 20}" y="${130 + j * 12.5}" width="20" height="12.5" fill="#1E1E1E" opacity=".85"/>` : '').join('')).join(''));
   if (RS.floor === 4) o.push(Array.from({ length: 70 }, (_, i) => `<circle cx="${(i * 53) % 400}" cy="${132 + (i * 29) % 46}" r="${1 + i % 3}" fill="${['#C8553D', '#2E5A3A', '#E3C27A', '#5B3A6E'][i % 4]}" opacity=".5"/>`).join(''));
-  if (life !== 'couch' && RS.rug !== 5) o.push(RS.rug ? roomRugSVG(RS.rug) : `<ellipse cx="200" cy="160" rx="110" ry="14" fill="${['house', 'own'].includes(life) ? '#8C3B3B' : '#3E5A7A'}" opacity=".55"/><ellipse cx="200" cy="160" rx="96" ry="10" fill="none" stroke="#E3C27A" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`);
-  o.push(`<line x1="${life === 'couch' ? 120 : 330}" y1="0" x2="${life === 'couch' ? 120 : 330}" y2="22" stroke="#3B3B3B" stroke-width="1.2"/><path d="M${life === 'couch' ? 112 : 322} 22 h16 l-3 -6 h-10 z" fill="#3B3B3B"/><circle cx="${life === 'couch' ? 120 : 330}" cy="24" r="3" fill="#FFE9A8" opacity="${night ? 1 : .5}"/>`);
-  const wx = life === 'couch' ? 268 : 160, ww = ['own', 'loft', 'house'].includes(life) ? 110 : 80;
-  o.push(`<rect x="${wx}" y="18" width="${ww}" height="76" fill="${sky}"/><g transform="translate(${wx} 18)">${homeSkyline(M.hub, ww, 76)}</g><rect x="${wx - 4}" y="14" width="${ww + 8}" height="84" fill="none" stroke="#FFFFFF" stroke-width="6"/><path d="M${wx + ww / 2} 18 L${wx + ww / 2} 94" stroke="#FFFFFF" stroke-width="3"/><rect x="${wx - 8}" y="94" width="${ww + 16}" height="5" fill="#FFFFFF"/>`);
-  if (!night) o.push(`<path d="M${wx} 94 L${wx + ww} 94 L${wx + ww + 40} 180 L${wx - 20} 180 Z" fill="#FFF6D8" opacity=".22"/>`);   // daylight across the floor
-  if (life === 'loft') o.push(`<path d="M0 6 L400 6" stroke="#5E5A54" stroke-width="6"/><path d="M40 6 L40 128 M360 6 L360 128" stroke="#8A847C" stroke-width="5"/>`);
-  if (life === 'house') o.push(`<rect x="300" y="40" width="60" height="88" fill="#8E6B4A"/><circle cx="350" cy="86" r="2.5" fill="#E3C27A"/>`);
-  if (life === 'couch') o.push(`<g transform="translate(24 168)"><rect x="0" y="-40" width="140" height="28" rx="8" fill="#7A6E8E"/><rect x="0" y="-16" width="140" height="16" rx="4" fill="#5E536F"/><rect x="40" y="-34" width="34" height="16" rx="5" fill="#F3EFF8"/><rect x="76" y="-30" width="50" height="12" rx="3" fill="var(--data)" opacity=".8"/></g><text x="94" y="120" font-size="7" text-anchor="middle" fill="#6A5E80" font-family="sans-serif">a friend's couch</text>`);
-  else if (!lay.bed) o.push(`<g transform="translate(${['own', 'loft', 'house'].includes(life) ? 12 : 18} 168)"><rect x="0" y="-10" width="84" height="10" rx="2" fill="#FFFFFF"/><rect x="4" y="-16" width="22" height="7" rx="3" fill="#F3EFF8"/></g>`);   // a mattress on the floor until there's a bed
-  for (const [id, sp] of Object.entries(lay)) { const s = spots.find(x => x.id === sp); o.push(furnitureSVG(id, s.x, s.y)); }
-  if (me.credits.length && life !== 'couch') o.push(`<g transform="translate(${life === 'own' ? 190 : 120} 104)">${me.credits.slice(0, 6).map((_, i) => `<rect x="${i * 9}" y="0" width="7" height="9" fill="#3B3226"/><rect x="${i * 9 + 1}" y="1" width="5" height="7" fill="#FFFFFF"/>`).join('')}</g>`);
+  o.push(`<rect y="122" width="400" height="7" fill="${mixHex(wall, '#FFFFFF', .55)}"/><rect y="129" width="400" height="3" fill="#000" opacity=".1"/>`);
+  if (big) o.push(`<rect x="372" y="112" width="7" height="10" rx="1" fill="#FFFFFF" stroke="#000" stroke-opacity=".15"/>`);
+  if (!night) o.push(`<path d="M${wx} ${wy + wh + 4} L${wx + ww} ${wy + wh + 4} L${wx + ww + 50} 180 L${wx - 30} 180 Z" fill="url(#hs-beam)"/>`);
+  if (life !== 'couch' && RS.rug !== 5) o.push(`<ellipse cx="202" cy="164" rx="114" ry="15" fill="#000" opacity=".08"/>` + (RS.rug ? roomRugSVG(RS.rug) : `<ellipse cx="200" cy="160" rx="110" ry="14" fill="${big ? '#8C3B3B' : '#3E5A7A'}" opacity=".6"/><ellipse cx="200" cy="160" rx="96" ry="10" fill="none" stroke="#E3C27A" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`));
+  // the ceiling light
+  const lx = life === 'couch' ? 120 : 300; o.push(`<line x1="${lx}" y1="0" x2="${lx}" y2="8" stroke="#3B3B3B" stroke-width="1.2"/><path d="M${lx - 8} 17 Q${lx} 4 ${lx + 8} 17 Z" fill="#3B3B3B"/><ellipse cx="${lx}" cy="17" rx="8" ry="1.8" fill="#FFE9A8" opacity="${night ? 1 : .6}"/>${night ? `<path d="M${lx - 8} 17 L${lx - 60} 180 L${lx + 60} 180 L${lx + 8} 17 Z" fill="#FFE9A8" opacity=".1"/>` : ''}`);
+  if (life === 'couch') o.push(`<g transform="translate(24 168)"><ellipse cx="70" cy="1" rx="76" ry="3" fill="#000" opacity=".16"/><rect x="0" y="-44" width="140" height="30" rx="9" fill="#7A6E8E"/><rect x="0" y="-18" width="140" height="18" rx="5" fill="#5E536F"/><rect x="-4" y="-30" width="14" height="30" rx="6" fill="#6A5E80"/><rect x="130" y="-30" width="14" height="30" rx="6" fill="#6A5E80"/><rect x="40" y="-34" width="34" height="16" rx="5" fill="#F3EFF8"/><rect x="76" y="-30" width="50" height="12" rx="3" fill="var(--data)" opacity=".8"/></g><text x="94" y="120" font-size="7" text-anchor="middle" fill="#6A5E80" font-family="sans-serif">a friend's couch</text>`);
+  else if (!lay.bed) o.push(`<g transform="translate(${big ? 12 : 18} 168)"><ellipse cx="44" cy="1" rx="46" ry="3" fill="#000" opacity=".15"/><rect x="0" y="-12" width="88" height="12" rx="3" fill="#FFFFFF"/><rect x="0" y="-6" width="88" height="6" rx="2" fill="${mixHex(accent, '#FFFFFF', .5)}"/><rect x="4" y="-18" width="22" height="8" rx="3" fill="#F3EFF8"/></g>`);   // a mattress on the floor until there's a bed
+  // empty spots get the sort of thing people who live like this have
+  const used = new Set(Object.values(lay)), fill = (ROOM_FILL[life] || []).slice(), floorSpots = spots.filter(s => s.kind === 'floor').sort((a, b) => a.x - b.x);
+  for (let i = 0; i < floorSpots.length; i++) { const s = floorSpots[i]; if (used.has(s.id) || (!lay.bed && s.x < 100)) continue; const room = (floorSpots[i + 1] ? floorSpots[i + 1].x : 400) - s.x - 4, j = fill.findIndex(k => FILL_W[k] <= room && !(s.x < 230 && s.x + FILL_W[k] > 168)); if (j < 0) continue; o.push(fillPieceSVG(fill.splice(j, 1)[0], s.x, s.y, sofaC, wood)); }
+  if (big) spots.filter(s => s.kind === 'wall' && !used.has(s.id) && !((life === 'house' || life === 'estate') && s.x > 262 && s.x < 362)).forEach((s, i) => o.push(wallFillSVG(i + [...(M.hub || '')].reduce((a, c) => a + c.charCodeAt(0), 0), s.x, s.y + 6, accent)));
+  for (const [id, sp] of Object.entries(lay)) { const s = spots.find(x => x.id === sp); if (!s) continue; const F = FURNITURE[id]; if (F && F.kind !== 'wall') o.push(`<ellipse cx="${s.x + 24}" cy="${s.y + 1}" rx="28" ry="3" fill="#000" opacity=".14"/>`); else if (F) o.push(`<rect x="${s.x + 2}" y="${s.y + 3}" width="46" height="60" fill="#000" opacity=".07"/>`); o.push(furnitureSVG(id, s.x, s.y)); }
+  if (!spots.some(s => s.id === 'sill' && used.has('sill')) && life !== 'couch') o.push(`<g transform="translate(${wx + 8} ${wy + wh + 2})"><path d="M0 0 L10 0 L9 -8 L1 -8 Z" fill="#C8553D"/><path d="M5 -8 Q0 -16 -2 -14 M5 -8 Q10 -18 13 -14 M5 -8 L5 -18" stroke="#2E7A4C" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>`);
+  if (me.credits.length && life !== 'couch') o.push(`<g transform="translate(${big ? 70 : 120} 104)">${me.credits.slice(0, 6).map((_, i) => `<rect x="${i * 9}" y="0" width="7" height="9" fill="#3B3226"/><rect x="${i * 9 + 1}" y="1" width="5" height="7" fill="#FFFFFF"/>`).join('')}</g>`);
   // what you've made goes on the wall: gold discs, a plaque, a play poster, trophies
   const W = M.works || [], wins = (M.comps || []).filter(e => e.place === 'win').length;
   const gold = W.filter(w => w.type === 'song' && w.units >= 100000).length, plat = W.filter(w => w.type === 'song' && w.units >= 1000000).length;
@@ -107,8 +174,12 @@ function homeSceneSVG(day) {
   if (wins) o.push(`<g transform="translate(${life === 'couch' ? 12 : 60} 118)">${Array.from({ length: Math.min(5, wins) }, (_, i) => `<path d="M${i * 10} 0 l6 0 l-1 5 l-2 0 l0 2 l2 0 l0 1 l-6 0 l0 -1 l2 0 l0 -2 l-2 0 z" fill="#D4AF37"/>`).join('')}<rect x="-2" y="8" width="${Math.min(5, wins) * 10 + 2}" height="2" fill="#6B4E3A"/></g>`);
   if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
   o.push(roomGlowSVG(RS, life, night), roomExtraSVG(RS, life));
-  if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".38"/><circle cx="${life === 'couch' ? 120 : 330}" cy="40" r="60" fill="#FFE9A8" opacity=".12"/>`);
-  o.push(`<g transform="translate(178 76)">${portraitSVG(lookOf(me), S.year - me.born, 100, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
+  // you, standing in it, with a shadow
+  o.push(`<ellipse cx="203" cy="175" rx="24" ry="3.5" fill="#000" opacity=".22"/><g transform="translate(173 54)">${portraitSVG(lookOf(me), S.year - me.born, 122, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
+  o.push(`<rect width="400" height="180" fill="url(#hs-side)"/>`);
+  if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".34"/><circle cx="${lx}" cy="60" r="70" fill="#FFE9A8" opacity=".1"/>`);
+  else if (d >= 3) o.push(`<rect width="400" height="180" fill="#FF9E5E" opacity=".07"/>`);
+  o.push(`<rect width="400" height="180" fill="url(#hs-vig)"/>`);
   return `<svg class="home-scene" viewBox="0 0 400 180" role="img" aria-label="Your place">${o.join('')}</svg>`;
 }
 

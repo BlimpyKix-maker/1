@@ -67,6 +67,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const body = `M${cx - sw} ${sy + 3} Q${cx - sw - 1} ${sy - 3} ${cx - sw + 9} ${sy - 4} L${cx - 9} 84 Q${cx} 89 ${cx + 9} 84 L${cx + sw - 9} ${sy - 4} Q${cx + sw + 1} ${sy - 3} ${cx + sw} ${sy + 3} L${cx + ww + 1} ${wy} L${cx + lowW} ${long} L${cx - lowW} ${long} L${cx - ww - 1} ${wy} Z`;
   const tc = top === 19 ? '#F4F2EE' : cloth;
   o.push(`<path d="${body}" fill="${tc}" stroke="${mixHex(tc, '#000', .35)}" stroke-width=".9"/>`);
+  const shadeTop = `<defs><linearGradient id="${uid}ts" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".14"/><stop offset=".45" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".2"/></linearGradient></defs><path d="${body}" fill="url(#${uid}ts)"/>`;
   // pattern on top (Hawaiian shirts come patterned)
   const pat = top === 16 && !L.pattern ? 4 : top === 2 && !L.pattern ? 2 : L.pattern || 0;
   if (pat && top !== 19) { const pc = mixHex(cloth, pat === 6 ? '#3B2516' : '#FFFFFF', pat === 6 ? .6 : .55), P0 = {
@@ -77,6 +78,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
       8: `<circle cx="2" cy="3" r="2.4" fill="#4E5B3A" opacity=".6"/><circle cx="6.5" cy="6" r="2.2" fill="#2F3A24" opacity=".6"/><circle cx="6" cy="1.5" r="1.4" fill="#8C8A5A" opacity=".6"/>`,
       9: `<path d="M4 1.5 l.7 1.6 l1.7 .1 l-1.3 1.1 l.4 1.7 l-1.5 -.9 l-1.5 .9 l.4 -1.7 l-1.3 -1.1 l1.7 -.1 z" fill="${pc}"/>` }[pat];
     o.push(`<defs><pattern id="${uid}pt" width="8" height="8" patternUnits="userSpaceOnUse"${pat === 1 || pat === 7 ? ' patternTransform="rotate(90)"' : ''}>${P0}</pattern></defs><path d="${body}" fill="url(#${uid}pt)"/>`); }
+  o.push(shadeTop);
   // the garment's own details
   if (top === 19) o.push(`<path d="M${cx - ww} 104 L${cx + ww} 104 L${cx + ww + 1} ${wy} L${cx + hp + 1} ${hy + 4} L${cx - hp - 1} ${hy + 4} L${cx - ww - 1} ${wy} Z" fill="${cloth}"/><path d="M${cx - ww + 2} 104 L${cx - sw + 6} ${sy - 3} M${cx + ww - 2} 104 L${cx + sw - 6} ${sy - 3}" stroke="${cloth}" stroke-width="3"/><circle cx="${cx - ww + 3}" cy="106" r="1.3" fill="#E3C27A"/><circle cx="${cx + ww - 3}" cy="106" r="1.3" fill="#E3C27A"/><rect x="${cx - 5}" y="112" width="10" height="8" rx="1" fill="${dkc}"/>`);
   if (top === 13) o.push(`<path d="M${cx + 1} 98 L${cx - 5} 112 L${cx} 112 L${cx - 3} 124 L${cx + 6} 106 L${cx + 1} 106 L${cx + 4} 98 Z" fill="#FFE27A"/><circle cx="${cx}" cy="111" r="11" fill="none" stroke="#FFFFFF" stroke-width="1" opacity=".6"/>`);
@@ -95,7 +97,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
     if (short) o.push(`<path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${mixHex(sleeve, '#000', .35)}" stroke-width="${aw * 2 + 2.6}" stroke-linecap="round"/><path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${sleeve}" stroke-width="${aw * 2 + 1}" stroke-linecap="round"/>`);
     else if (wide) o.push(`<path d="M${(s[0] + e[0]) / 2} ${(s[1] + e[1]) / 2} Q${e[0]} ${e[1]} ${h[0] + (side < 0 ? -1 : 1) * 1} ${h[1] - 6}" stroke="${sleeve}" stroke-width="${aw * 2 + wide * 2}" stroke-linecap="round" fill="none"/>`);
     if (top === 11) o.push(`<path d="${path}" stroke="#FFFFFF" stroke-width="1.2" fill="none" transform="translate(${side * (aw - 1.5)} 0)"/>`);
-    o.push(`<circle cx="${h[0]}" cy="${h[1] + 2}" r="${aw * .82}" fill="${skin}"/>`);
+    o.push(figHand(h[0], h[1] + 2.5, aw, side, skin));
     if (tat === 1 && side < 0 && short) o.push(`<path d="M${e[0] - 2} ${e[1] + 4} q3 4 0 8 q-3 4 0 8" stroke="#2B3A66" stroke-width="1.6" fill="none" opacity=".75"/>`);
     if (tat === 2 && side < 0) o.push(`<circle cx="${h[0]}" cy="${h[1] - 4}" r="1.3" fill="#2B3A66" opacity=".75"/>`);
     if (tat === 3 && side > 0) o.push(`<path d="M${h[0] - 1.5} ${h[1] + 1} l3 0 l-1.5 2.5 z" fill="#2B3A66" opacity=".8"/>`);
@@ -104,7 +106,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const lS = [cx - sw + 3, sy + 3], rS = [cx + sw - 3, sy + 3];
   const down = side => [side < 0 ? lS : rS, [cx + side * (sw + 4), 118], [cx + side * (sw + 4), 146]];
   if (pose === 3) {   // arms crossed
-    o.push(`<path d="M${cx - sw + 2} 112 Q${cx} 106 ${cx + sw - 2} 116" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${cx + sw - 2} 110 Q${cx} 116 ${cx - sw + 2} 120" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${lS[0]} ${lS[1]} L${cx - sw + 1} 112 M${rS[0]} ${rS[1]} L${cx + sw - 1} 110" stroke="${sleeve}" stroke-width="${aw * 2}" stroke-linecap="round"/><circle cx="${cx + sw - 1}" cy="116" r="${aw * .8}" fill="${skin}"/><circle cx="${cx - sw + 1}" cy="120" r="${aw * .8}" fill="${skin}"/>`);
+    o.push(`<path d="M${cx - sw + 2} 112 Q${cx} 106 ${cx + sw - 2} 116" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${cx + sw - 2} 110 Q${cx} 116 ${cx - sw + 2} 120" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${lS[0]} ${lS[1]} L${cx - sw + 1} 112 M${rS[0]} ${rS[1]} L${cx + sw - 1} 110" stroke="${sleeve}" stroke-width="${aw * 2}" stroke-linecap="round"/>${figHand(cx + sw - 1, 116, aw, 1, skin)}${figHand(cx - sw + 1, 120, aw, -1, skin)}`);
   } else {
     arm(pose === 4 ? [lS, [cx - sw - 3, 118], [cx - hp + 3, 138]] : down(-1), -1);
     arm(pose === 1 ? [rS, [cx + sw + 12, 116], [cx + ww + 3, 132]] : pose === 2 ? [rS, [cx + sw + 12, 72], [cx + sw + 6, 50]] : pose === 4 ? [rS, [cx + sw + 3, 118], [cx + hp - 3, 138]] : down(1), 1);
@@ -118,6 +120,11 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (bag === 7) o.push(`<g transform="rotate(-8 ${cx - sw} 118)"><rect x="${cx - sw - 8}" y="110" width="13" height="17" fill="#FFFFFF" stroke="#BBB" stroke-width=".6"/><path d="M${cx - sw - 6} 114 h9 M${cx - sw - 6} 117 h7 M${cx - sw - 6} 120 h9" stroke="#999" stroke-width=".5"/></g>`);
   if (bag === 8 && pose !== 3) o.push(`<rect x="${hx - 3.5}" y="${hyy - 4}" width="7" height="10" rx="1" fill="#F4F2EE"/><rect x="${hx - 3.5}" y="${hyy - 1}" width="7" height="3" fill="#8A5A37"/><rect x="${hx - 4}" y="${hyy - 6}" width="8" height="2.5" rx="1" fill="#2B2B2B"/>`);
   if (bag === 9 && pose !== 3) o.push(`<circle cx="${hx + 1}" cy="${hyy + 6}" r="7" fill="#B9B5AE" stroke="#8A8680" stroke-width="1"/><circle cx="${hx + 1}" cy="${hyy + 6}" r="2" fill="#8A8680"/>`);
+}
+// a hand: palm, a thumb towards the body, a hint of knuckles
+function figHand(x, y, aw, side, skin) {
+  const d = mixHex(skin, '#000', .22);
+  return `<ellipse cx="${x}" cy="${y}" rx="${(aw * .72).toFixed(2)}" ry="${(aw * .95).toFixed(2)}" fill="${skin}" stroke="${d}" stroke-width=".5"/><ellipse cx="${(x - side * aw * .62).toFixed(2)}" cy="${(y - aw * .2).toFixed(2)}" rx="${(aw * .26).toFixed(2)}" ry="${(aw * .5).toFixed(2)}" transform="rotate(${side * 25} ${(x - side * aw * .62).toFixed(2)} ${(y - aw * .2).toFixed(2)})" fill="${skin}" stroke="${d}" stroke-width=".4"/><path d="M${(x - aw * .4).toFixed(2)} ${(y + aw * .55).toFixed(2)} Q${x} ${(y + aw * .8).toFixed(2)} ${(x + aw * .4).toFixed(2)} ${(y + aw * .55).toFixed(2)}" stroke="${d}" stroke-width=".4" fill="none" opacity=".7"/>`;
 }
 // head-to-toe, for the places with room
 function figureOf(p, h) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, h, false, true); }

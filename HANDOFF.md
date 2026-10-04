@@ -100,9 +100,9 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/saves.js` | Snapshot saves: `snapBaseline` (field hashes of the freshly built world, after `finishWarm`), `snapData`/`snapApply` (changed entities field by field, ties entry by entry, RNG states `R.s`/`S.me.rng.s`), IndexedDB slots (`writeSlot`, `saveList`, gzip via CompressionStream), autosave cadence (`autoPref`, `autoCheck` from `doAct`), journal of actions since the last save (`journalAdd`, replayed on resume only), `bootTarget`/`bootFinish` at start-up, forgiving replay (`replayOne`) for old-style logs; Saves page (`savesHTML`, nav tab `saves`) |
 | `src/correspond.js` | Conversation: `parseMsg` (tone, topic: plan/did/mine/feel/thing, questions), `turn` (I→you), `answerOwn` (replaces the basic one, which is now `answerOwnBasic` in convo.js), `fresh` (per-person no-repeat lines in `M.used`), memory `C.mem` + `rememberWeek` follow-ups, scoops (`scoopText`, `scoopWeek`: leads, troubled productions, strong cuts, introductions), `mailEcho` (email replies answer what you wrote) |
 | `src/weather.js` | City climates (`CLIMATE`, `RAIN_BY`), `wxDay`, shoot effects (`weatherWeek`), opening-weekend crowds (`wxCrowd`, `wxBoxMul` hooked in `release()`, only once the player exists), Weather app |
-| `src/clapgram.js` | Clapgram (was Flick): feed from real events, stories, explore/follow (`cgFollow`), your posts (`cgPostAct`, action `cgpost`) |
+| `src/clapgram.js` | Clapgram (was Flick): feed from real events, stories, explore/follow (`cgFollow`), your posts (`cgPostAct`, action `cgpost`); 25 post kinds (`CG_KIND`: emoji, label, captions, scene emojis, style), `cgFill` placeholders ({city} {mate} {day} {n} {genre} {place} {y}), per-kind comments, suggested posts and ads |
 | `src/tv3.js` | TV pitching ways in (`tvRoutes`), staged development (`tvDevWeek`: script → notes → pilot), `emmetsHTML` (17 categories in `TV_CATS`), `primetimeHTML` |
-| `src/finance2.js` | One market (`mktRows`, `allMarketHTML`), sourced tips with track records (`tipsThisWeek`, `tipJudge`), `economyHTML`, private banking (securities line `sbl`, angels `angelsOf`/`angelAct`/`takeAngels` used by `selfFund`) |
+| `src/finance2.js` | One market (`mktRows`, `allMarketHTML`), sourced tips with track records (`tipsThisWeek`, `tipJudge`), `economyHTML`, private banking (securities line `sbl`, angels `angelsOf`/`angelAct`/`takeAngels` used by `selfFund`). Tips: 7 source kinds (`TIP_KIND`), angle-based reasons (`TIP_WHY`, `TIP_ANGLES`, `SECTOR_WHY`). Angels: `ANGEL_KIND` bios, `ANGEL_MOTIVE` (moves `angelDC`), `ANGEL_ASK` terms; success sends an `angeloffer` inbox (accept / haggle cha 14 / pass, `angelPick`), two new angels a year, `angelWeek` outreach every 4 weeks; `M.angelTry` keyed by name|kind |
 | `src/creative.js` | Scriptwriter (beat board `outlineAct`, `scriptSessAct`, coverage), Studio (mix, arrangement, podcast guest/order), CutRoom (clip sets, trims, packaging, predictions) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
@@ -119,6 +119,11 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
   rel, cohab. Hard checks (DC > 12) scale rewards up.
 - Money: player cash in dollars (`usd()` adjusts for place and era); companies/films in the world's millions.
 - Nothing about real films/people should be shown as fact; real titles survive only as hidden search aliases.
+
+## Art and palette notes
+- `homeSceneSVG` (home.js) draws sky by time of day, a two-layer skyline (`homeSkyline(hub,w,h,night)`), curtains, skirting, light shafts, a vignette; empty floor spots get tier furniture (`ROOM_FILL`, `fillPieceSVG`) and empty walls get clocks/mirrors/prints (`wallFillSVG`). Purely visual: no effects.
+- Portraits: studio backdrops (bokeh, beam, sweep, halo); full-length figures draw the head at 1.12× (`headIn` group) and hands with `figHand`.
+- The computer's colours are tokens (`--os-*`) set per palette on `:root[data-pal=…]`; don't hard-code blues inside `.os` rules.
 
 ## Tests (run all before publishing)
 ```
