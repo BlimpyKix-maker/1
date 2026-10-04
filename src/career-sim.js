@@ -625,12 +625,13 @@ function closeWeek(a) {
   // jobs
   const halted = worldFx().halt;
   if (halted && M.jobs.some(j => j.film !== null)) L.push('The strike holds. Your production is shut down, and nobody is paid until it ends.');
+  let wages = 0;
   for (const j of M.jobs.slice()) {
     if (burnt || (halted && j.film !== null)) continue;
     const t = tmplOf(j);
     const days = j.days;
     const pay = j.rate * days;
-    cashIn += pay; M.stats.earned += pay;
+    cashIn += pay; M.stats.earned += pay; wages += pay;
     if (M.agent) cashOut += Math.round(pay * M.agent.cut);
     M.stats.weeks++;
     j.done++;
@@ -689,6 +690,7 @@ function closeWeek(a) {
   if (typeof egofWeek === 'function') egofWeek();
   if (typeof corpWeek === 'function') corpWeek();
   if (typeof slateWeek === 'function') slateWeek();
+  if (typeof finWeek === 'function') finWeek();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -702,6 +704,7 @@ function closeWeek(a) {
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
   if (typeof lateWeek === 'function') lateWeek();
+  const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -724,7 +727,7 @@ function closeWeek(a) {
   M.stress = clamp(M.stress + stress * (stress > 0 ? traitMul(me, 'stress') * (has(me, 'Volatile') ? 1.2 : 1) : 1) * (1.1 - me.mind.com / 40), 0, 100);
   recalc(me);
   const gl = Object.entries(gains).filter(([, v]) => v >= .04).sort((x, y) => y[1] - x[1]).slice(0, 3);
-  L.unshift(`Money: ${fmtCash(cashIn)} in, ${fmtCash(cashOut)} out.${gl.length ? ' You got better at ' + gl.map(([k]) => (CRAFTS[SUB2C[k]] ? CRAFTS[SUB2C[k]].subs[k] : MINDS[k]).toLowerCase()).join(', ') + '.' : ''}`);
+  L.unshift(`Money: ${fmtCash(cashIn)} in, ${fmtCash(cashOut)} out${taxW ? ` (${fmtCash(taxW)} of it tax)` : ''}.${gl.length ? ' You got better at ' + gl.map(([k]) => (CRAFTS[SUB2C[k]] ? CRAFTS[SUB2C[k]].subs[k] : MINDS[k]).toLowerCase()).join(', ') + '.' : ''}`);
   for (const t of L) diary(t);
   // the world moves on
   const before = S.news.length;
@@ -996,6 +999,8 @@ function resolvePick(it, k) {
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
   if (typeof currPick === 'function' && currPick(it, k)) return true;
   if (typeof latePick === 'function' && latePick(it, k)) return true;
+  if (typeof coinvPick === 'function' && coinvPick(it, k)) return true;
+  if (typeof finPick === 'function' && finPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -1096,6 +1101,7 @@ function applyAct(a) {
     case 'found': return foundCompany(a);
     case 'invest': case 'withdraw': return coMoney(a);
     case 'selffund': return selfFund(a);
+    case 'coinv': return coinvAct(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);

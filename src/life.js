@@ -16,8 +16,8 @@ const BLOCK_ACTS = {
   network: { label: 'Industry mixer', icon: '🥂', e: 9, stress: .5, cost: 40, d: 'Meet new people in the business. Charisma decides how it goes.' },
   catchup: { label: 'Catch up with a contact', icon: '☕', e: 5, stress: -1, cost: 15, d: 'Coffee with someone you know; or text them from your phone to fix a time.' },
   hustle: { label: 'Side hustle', icon: '🛵', e: 16, stress: 1.5, d: 'Bar shifts and deliveries: $75 a block. Teaches nothing.' },
-  rest: { label: 'Rest', icon: '🛋️', e: -11, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
-  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night.' },
+  rest: { label: 'Rest', icon: '🛋️', e: -13, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
+  home: { label: 'Stay in', icon: '🏠', e: -6, stress: -1.5, d: 'Cook, call home, early night.' },
   out: { label: 'Out with friends', icon: '🍻', e: 12, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
   read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' },
   make: { label: 'Make things', icon: '🎛️', e: 9, stress: .2, d: 'Work on your song, video, podcast or play (start one on the Create tab).' }
@@ -48,7 +48,9 @@ function calOf() {
 // afternoon, weekdays first, the job with the most days first), and a course gets the study sessions it asks for,
 // placed in the least important free blocks still ahead (rest and nights in before job hunting or writing).
 // Burnout makes it all rest. M.autoOblig === false leaves study placement to you.
-const OBLIG_RANK = { rest: 0, home: 0, read: 1, out: 2, train: 2, hustle: 3, catchup: 3, network: 3, make: 4, write: 4, hunt: 5 };
+// what study displaces first: a class or a night out before your writing, and your rest last of all
+const OBLIG_RANK = { train: 0, out: 0, read: 1, make: 1, network: 2, catchup: 2, write: 3, hustle: 4, hunt: 4, home: 5, rest: 6 };
+const SLEEP_BASE = 20;
 const OBLIG_PREF = [[0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [3, 5, 7], [3, 5, 7]];
 function obligations() {
   const M = S.me, W = M.wk, now = W ? W.day * 3 + W.block : 0;
@@ -68,6 +70,23 @@ function obligations() {
     }
   }
   return { cal: W && W.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal, job, forced };
+}
+// After work and school, rest comes before everything else: if the week as planned would run you below a third of
+// your energy, the least necessary blocks (a night out, a hobby, a class, then writing and the job hunt; side
+// shifts last, because rent) become rest until it doesn't, starting with the ones before the low point.
+const REST_GIVE = { out: 0, make: 1, network: 1, train: 1, catchup: 2, write: 3, hunt: 3, read: 4, hustle: 5 };
+function restGuard(cal, forced, now) {
+  const M = S.me, rested = {}, v = vehicleOf(), sleep = SLEEP_BASE + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
+  const costOf = k => k === 'work' ? (M.jobs.length ? workCost() : 11) : ((BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest).e || 0);
+  const lowAt = () => { let e = M.energy; for (let a = now; a < 21; a++) { const d = Math.floor(a / 3), b = a % 3; if (b === 0 || a === now) { if (a !== now) e = clamp(e + clamp(sleep, 8, 40), 0, 100); if (cal[d].slice(b, 2).some(k => !AT_HOME.has(k))) e -= v.e || 0; } e -= costOf(cal[d][b]); if (e < 32) return a; } return -1; };
+  for (let n = 0; n < 8; n++) {
+    const low = lowAt(); if (low < 0) break;
+    let best = null;
+    for (let a = now; a <= Math.min(20, low + 2); a++) { const d = Math.floor(a / 3), b = a % 3, k = cal[d][b], r = k && k.startsWith('v:') ? 0 : REST_GIVE[k]; if (r === undefined || forced[d + '-' + b] || (typeof apptAt === 'function' && apptAt(d, b))) continue; if (!best || r < best.r || (r === best.r && a > best.a && a <= low)) best = { a, d, b, r }; }
+    if (!best) break;
+    cal[best.d][best.b] = best.b === 2 ? 'home' : 'rest'; rested[best.d + '-' + best.b] = 1;
+  }
+  return rested;
 }
 function planBlocks() { return obligations().cal; }
 // whose work day it is: with two part-time jobs, each has its own days
@@ -149,9 +168,9 @@ function commute() {
 const AT_HOME = new Set(['rest', 'home', 'write', 'read', 'make']);
 // A work block costs what the job asks of you: shooting days hardest, senior jobs harder, two jobs at once hardest of all.
 function workCost() {
-  const M = S.me; let c = 12;
-  for (const j of M.jobs) { const f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, t = tmplOf(j) || {}; c = Math.max(c, (f ? (f.stage === 2 ? 17 : 14) : 12) + Math.max(0, (t.lv ?? 2) - 2)); }
-  return Math.min(24, c + 4 * Math.max(0, M.jobs.length - 1));
+  const M = S.me; let c = 11;
+  for (const j of M.jobs) { const f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, t = tmplOf(j) || {}; c = Math.max(c, (f ? (f.stage === 2 ? 15 : 12) : 11) + Math.max(0, (t.lv ?? 2) - 2)); }
+  return Math.min(21, c + 3 * Math.max(0, M.jobs.length - 1));
 }
 const RESTFUL = new Set(['rest', 'home', 'read', 'out']);
 function runBlock(k) {
@@ -191,7 +210,7 @@ function runBlock(k) {
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
-  const sleep = 19 + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - (typeof ageSleepTax === 'function' ? ageSleepTax() : 0) - Math.max(0, M.stress - 40) / 5;
+  const sleep = SLEEP_BASE + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - (typeof ageSleepTax === 'function' ? ageSleepTax() : 0) - Math.max(0, M.stress - 40) / 5;
   M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
   const stressNow = M.stress + M.wk.stress;
   if (stressNow >= 96 && !M.burnout) { M.burnout = burnoutWeeks(); inbox('note', 'You hit the wall', M.burnout > 1 ? `Again. Your body has stopped negotiating: ${M.burnout} weeks of rest, whatever you planned. Bosses are starting to notice the pattern.` : 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
@@ -259,7 +278,12 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
-  // study sessions are fitted in by obligations() when the week runs
+  // study sessions are fitted in by obligations() when the week runs; then rest comes before everything else
+  const keep = M.cal; M.cal = cal;
+  const OB = obligations(), run = OB.cal.map(r => r.slice()), rested = restGuard(run, OB.forced, 0);
+  M.cal = keep;
+  for (const key in rested) { const [d, b] = key.split('-').map(Number); cal[d][b] = run[d][b]; }
+  M.calRested = rested;
   return cal;
 }
 function setFocus(a) {
@@ -272,7 +296,7 @@ function setFocus(a) {
 // What the plan will probably do: energy day by day, stress, money, applications. An estimate, not a promise.
 function forecastWeek() {
   const M = S.me, run = planBlocks(), W = M.wk, d0 = W ? W.day : 0, v = vehicleOf();
-  const sleep = 19 + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
+  const sleep = SLEEP_BASE + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
   let e = M.energy, st = 0, spend = 0, earn = 0; const days = [];
   for (let d = d0; d < 7; d++) {
     let out = false;

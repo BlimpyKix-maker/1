@@ -89,12 +89,27 @@ function sectorBar(s, w) {
   const key = s.k + ':' + w; if (SBC.m.has(key)) return SBC.m.get(key);
   let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand((s.seed || s.k.length * 7919 + s.tk.charCodeAt(0) * 13) + (w - i) * 31)() - .5) * (s.vol || .05) * (1 - i / 7);
   const mf = s.beta >= 0 ? Math.pow(macroAt(w), s.beta) : Math.pow(macroAt(w), s.beta);
-  const c = Math.max(.05, s.p0 * Math.pow(sectorDriver(s, w), .6) * mf * (1 + wander) * (typeof cpi === 'function' ? cpi(yearOf(w)) / cpi(2000) : 1));
+  // real growth on top of inflation, as listed companies have had over the long run (gold just keeps its value);
+  // anchored at 2026 so today's prices are where they were and the past is cheaper
+  const grow = Math.pow(1 + sGrowth(s), (w - weekOfYear(2026)) / 52);
+  const c = Math.max(.05, s.p0 * Math.pow(sectorDriver(s, w), .6) * mf * (1 + wander) * grow * (typeof cpi === 'function' ? cpi(yearOf(w)) / cpi(2000) : 1));
   const r = hashRand(s.tk.charCodeAt(1) * 977 + w)(), o = c / (1 + (r - .5) * .04);
   const bar = { w, o, c, h: Math.max(o, c) * 1.01, l: Math.min(o, c) * .99, v: Math.round(1e5 * (1 + r)), ev: [] };
   SBC.m.set(key, bar); return bar;
 }
 function sectorPrice(s, w = S.week) { return sectorBar(s, w).c; }
+// Real price growth a year, and the dividend yield, by kind of business: steady payers in radio, publishing and
+// cinemas, growth companies that pay nothing in streaming, games and creators, and gold that pays nothing at all.
+const S_YIELD = { 'Safe haven': 0, 'Streaming': 0, 'Online video': 0, 'Audio': 0, 'Video games': .008, 'Radio': .045, 'Publishing': .03, 'Music publishing': .025, 'TV networks': .035, 'Cable TV': .03, 'Premium TV': .02, 'Theme parks': .012, 'Ticketing': 0, 'Live events': 0 };
+function sYield(s) { return S_YIELD[s.sec] !== undefined ? S_YIELD[s.sec] : s.beta > 1.5 ? .005 : .02; }
+function sGrowth(s) { return s.drv === 'gold' || s.sec === 'Safe haven' ? .004 : .035 - sYield(s) * .5; }
+// each quarter the payers pay; the index fund passes on what its studios pay
+function sectorDivWeek() {
+  const M = S.me; if (!M || !M.sport || S.week % 13 !== 6) return;
+  let tot = 0; const by = [];
+  for (const [k, n] of Object.entries(M.sport)) { if (n <= 0) continue; const s = SECTOR[k], y = k === 'box50' ? .018 : s ? sYield(s) : 0; if (!y) continue; const d = Math.round((k === 'box50' ? fundPrice() : sectorPrice(s)) * n * y / 4); if (d > 0) { tot += d; by.push(s ? s.tk : 'BOX50'); } }
+  if (tot > 0) { M.cash += tot; (M.divs = M.divs || {})[S.year] = ((M.divs || {})[S.year] || 0) + tot; mail('news', 'Your broker', 'Dividends paid', `Quarterly dividends from ${by.slice(0, 5).join(', ')}${by.length > 5 ? ` and ${by.length - 5} more` : ''}: ${fmtCash(tot)}.`); }
+}
 function sChg(s, n) { return (sectorPrice(s) / sectorPrice(s, S.week - n) - 1) * 100; }
 function sSpark(s, n = 26, W = 80, H = 22) { const P0 = Array.from({ length: n }, (_, i) => sectorPrice(s, S.week - (n - 1 - i))), hi = Math.max(...P0), lo = Math.min(...P0), up = P0[n - 1] >= P0[0]; return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><polyline fill="none" stroke="${up ? 'var(--good)' : 'var(--bad)'}" stroke-width="1.5" points="${P0.map((v, i) => `${(i / (n - 1) * W).toFixed(1)},${(2 + (hi - v) / Math.max(1e-6, hi - lo) * (H - 4)).toFixed(1)}`).join(' ')}"/></svg>`; }
 // the index fund tracks the BOX-50
@@ -138,6 +153,27 @@ function bankAct(a) {
   else return false;
   return true;
 }
+// ---- tax ----
+// Earnings are taxed the way a single filer's are: payroll, federal and state together, so the effective rate climbs
+// from almost nothing on a first job to about two-fifths on a chief executive's pay. It's worked out on the year's
+// running total in 2027 dollars, so a big cheque is taxed at the rate it pushes you into. There was no income tax
+// before 1913, and much less of it before the war.
+const TAX_EFF = [[0, 0], [15000, .08], [40000, .17], [80000, .24], [150000, .29], [400000, .36], [1e6, .41], [1e7, .44]];
+function taxEff(I) { if (I <= 0) return 0; for (let i = 1; i < TAX_EFF.length; i++) { const [b, rb] = TAX_EFF[i]; if (I <= b) { const [a, ra] = TAX_EFF[i - 1]; return ra + (rb - ra) * (I - a) / (b - a); } } return .44; }
+function taxEra(y) { return y < 1913 ? 0 : y < 1941 ? .35 : 1; }
+function taxYear(M) {
+  const T = M.taxYr || (M.taxYr = { y: S.year, inc: 0, paid: 0 });
+  if (T.y !== S.year) { if (T.paid > 0) { (M.taxHist = M.taxHist || []).push({ y: T.y, inc: T.inc, paid: T.paid }); if (M.taxHist.length > 60) M.taxHist.shift(); mail('news', 'The tax office', `Your ${T.y} tax year`, `You earned ${fmtCash(Math.round(T.earned || 0))} in ${T.y} and paid ${fmtCash(Math.round(T.paid))} in tax along the way, ${Math.round(T.paid / Math.max(1, T.earned || 1) * 100)}% of it. Nothing more is owed.`); } Object.assign(T, { y: S.year, inc: 0, paid: 0, earned: 0 }); }
+  return T;
+}
+// the tax on money just earned (wages, fees, bonuses, royalties): what to hold back from it
+function taxOn(amt) {
+  const M = S.me; if (!M || !(amt > 0)) return 0;
+  const T = taxYear(M), f = Math.max(1e-6, wageF(M.hub)), real = amt / f, e = taxEra(S.year);
+  const due = Math.round(((T.inc + real) * taxEff(T.inc + real) - T.inc * taxEff(T.inc)) * f * e);
+  T.inc += real; T.earned = (T.earned || 0) + amt; T.paid += due;
+  return Math.max(0, Math.min(due, Math.round(amt * .5)));
+}
 // Weekly: interest, maturities, loan payments, and fate.
 const FATE = [
   ['A bank error in your favour', .4, 'A clerical slip lands in your account. The bank, to its credit, lets you keep it.'], ['An aunt you barely knew leaves you something', .8, 'The will is read; your name is on it.'],
@@ -149,6 +185,7 @@ const FATE = [
 ];
 function bankWeek() {
   const M = S.me; if (!M) return; const B = bankOf(M);
+  sectorDivWeek(); taxYear(M);
   if (B.sav > 0) { const i = Math.round(B.sav * savRate() / 100 / 52 * 100) / 100; B.sav += i; B.earned = (B.earned || 0) + i; }
   for (let k = B.cds.length - 1; k >= 0; k--) { const c = B.cds[k]; if (S.week >= c.due) { const pay = Math.round(c.amt * (1 + c.rate / 100 * (c.due - c.from) / 52)); M.cash += pay; B.cds.splice(k, 1); mail('news', 'Your bank', 'Term deposit matured', `${fmtCash(c.amt)} at ${c.rate.toFixed(2)}% has matured: ${fmtCash(pay)} has been paid into your account.`); } }
   if (B.loan > 0) {
@@ -183,6 +220,7 @@ function bankHTML() {
   const M = S.me, B = bankOf(M), lim = creditLimit(M);
   return `<div class="os-grid">${osCard('Savings', `<p class="os-big">${fmtCash(Math.round(B.sav))}</p><p class="small muted">${savRate().toFixed(2)}% a year, paid weekly. Earned so far ${fmtCash(Math.round(B.earned || 0))}.</p><div class="bank-f"><input id="bk-amt" type="number" min="1" placeholder="Amount" value="${UI.bkamt || ''}"><button class="os-btn" data-bank="deposit">Deposit</button><button class="os-btn" data-bank="withdraw">Withdraw</button></div>`)}
    ${osCard('Term deposits', `<p class="small">Lock money away for a better rate: 6 months ${cdRate(26).toFixed(2)}%, 1 year ${cdRate(52).toFixed(2)}%, 2 years ${cdRate(104).toFixed(2)}%. Breaking early costs 3%.</p><div class="bank-f"><button class="os-btn" data-bank="cd:0">6 months</button><button class="os-btn" data-bank="cd:1">1 year</button><button class="os-btn" data-bank="cd:2">2 years</button></div>${B.cds.length ? `<ul class="os-list">${B.cds.map((c, i) => `<li><b>${fmtCash(c.amt)}</b><span class="muted">${c.rate.toFixed(2)}% · matures ${fmtDate(c.due, true)}</span><button class="linkish" data-bank="breakcd:${i}">Break</button></li>`).join('')}</ul>` : ''}`)}
+   ${osCard('Tax', (() => { const T0 = M.taxYr, T = T0 && T0.y === S.year ? T0 : { y: S.year, inc: 0, paid: 0, earned: 0 }, H = (M.taxHist || []).slice(-1)[0]; return `<p class="small">This year you've earned <b>${fmtCash(Math.round(T.earned || 0))}</b> and paid <b>${fmtCash(Math.round(T.paid))}</b> in tax${T.earned ? ` (${Math.round(T.paid / T.earned * 100)}%)` : ''}. It comes out as you're paid, so nothing is owed at the end.</p>${H ? `<p class="small muted">Last year: ${fmtCash(Math.round(H.paid))} on ${fmtCash(Math.round(H.inc * wageF(M.hub)))}.</p>` : ''}<p class="small muted">Investment gains and dividends aren't taxed here.</p>`; })())}
    ${osCard('Borrowing', `<p class="small">Credit score <b>${B.score}</b> · limit ${fmtCash(lim)} · rate ${loanRate(M).toFixed(1)}%</p>${B.loan > 0 ? `<p>You owe <b class="bad">${fmtCash(Math.round(B.loan))}</b> at ${B.lrate.toFixed(1)}%. Payments come out weekly.</p>` : ''}<div class="bank-f"><button class="os-btn" data-bank="borrow">Borrow</button>${B.loan > 0 ? '<button class="os-btn" data-bank="repay">Repay</button>' : ''}</div><p class="small muted">Use loans to fund a film, a home or a bet on the market. Miss payments and the score falls, the rate rises and the limit shrinks.</p>`)}
    ${osCard('The economy', economyHTML())}</div>`;
 }

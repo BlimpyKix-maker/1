@@ -27,7 +27,7 @@ function dealPick(it, k) {
     if (ok) { fee = Math.round(fee * 1.5 / 50) * 50; extra = ' They grumble, then agree.'; } else { addTie(me, q, -3); extra = ' They hold firm, and you take it anyway.'; }
     it.result = { ok, roll: M.lastRoll };
   }
-  M.cash += fee;
+  M.cash += fee - taxOn(fee);
   sc.option = { by: it.person, from: S.week, to: S.week + OPTION_WEEKS, fee };
   addTie(me, q, 4);
   milestone(`${sc.title} optioned by ${q.name} for ${fmtCash(fee)}`, 'write');
@@ -49,7 +49,7 @@ function dealsWeek() {
         const f = greenlight(M.hub, { genre: sc.genre, wri: [me.id], title: sc.title, prod: q.role === 'producer' ? O.by : undefined, co: co ? co.id : undefined, score: sc.score });
         sc.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = 'Screenplay';
         const pay = clamp(Math.round(f.budget * 1e6 * .012 / 100) * 100, usd(20000), usd(300000));
-        M.cash += pay; me.standing = clamp(me.standing + 3, 0, 100);
+        M.cash += pay - taxOn(pay); me.standing = clamp(me.standing + 3, 0, 100);
         milestone(`${sc.title} is going into production`, 'credit');
         inbox('news', `Green light: ${sc.title}`, `${q.name} has done it. ${f.title} goes into production with a ${fmtM(f.budget)} budget, directed by ${P(f.dir).name}, starring ${P(f.cast[0]).name}. Your writer's fee: ${fmtCash(pay)}. Your name is on it.`, { film: f.id });
         sms(O.by, 'WE ARE MAKING YOUR FILM', 'tip');
@@ -183,7 +183,7 @@ function pitchSpec(a) {
   const f = greenlight(M.hub, { genre: h.genre, wri: [h.writer], title: h.title, prod: me.id, co: co.id, score: h.score });
   h.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = 'Producer'; (M.coYes = M.coYes || {})[co.id] = S.week;
   const fee = clamp(Math.round(f.budget * 1e6 * .015 / 100) * 100, usd(15000), usd(400000));
-  M.cash += fee; me.standing = clamp(me.standing + 3, 0, 100);
+  M.cash += fee - taxOn(fee); me.standing = clamp(me.standing + 3, 0, 100);
   addTie(me, P(h.writer), 10);
   sms(h.writer, 'THEY SAID YES. WE\'RE MAKING IT', 'tip');
   milestone(`${co.name} greenlit ${f.title}: you're producing`, 'credit');
@@ -256,16 +256,29 @@ function selfFund(a) {
   const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
   const edge = companyEdge(c, src);
   let budget = (estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) * edge.leadMul : 0)) * edge.budgetMul;
-  let share = 0, invest = 0;
-  if (c.cash < budget * .9) {
-    if (!a.inv || c.cash < budget * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) return false;
-    src.invTry = S.week;
-    if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
-    invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+  // the capital stack: incentive, pre-sales, a gap loan, then the company, then investors for the rest
+  let plan = finPlan(budget, { rb: a.rb, ps: a.ps, gap: a.gap, genre: src.genre, lead, dir: direct ? me.id : dirPick });
+  let share = 0, invest = 0, psNote = '';
+  if (plan.ps > 0) {
+    if (src.invTry !== undefined && S.week - src.invTry < 4) return false;
+    if (!roll('pack', presaleDC(src.genre, lead))) { psNote = 'The sales agent takes it to the market and comes back with nothing: no pre-sales. '; plan = finPlan(budget, { rb: a.rb, genre: src.genre }); }
   }
+  if (c.cash < plan.equity * .9) {
+    if (!a.inv || c.cash < plan.equity * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) { if (psNote) { src.invTry = S.week; inbox('note', `The financing on ${src.title} doesn't close`, `${psNote}Without that money there's a hole the company can't fill.`, { result: { ok: false, roll: M.lastRoll, t: 'No pre-sales.' } }); return true; } return false; }
+    src.invTry = S.week;
+    if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `${psNote}Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
+    invest = plan.equity - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+  }
+  // the outside money arrives at closing; the fees go straight out
+  for (const x of plan.parts) c.cash += x.amt;
+  c.cash -= plan.feeT;
   const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: edge.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick, crew: { mus: musPick, pd: pdPick }, qBonus: edge.qBonus, hookBonus: edge.hookBonus, paMul: edge.paMul, fest: edge.fest });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
+  f.fin = { reb: plan.reb, ps: plan.ps, gap: plan.gap, bonded: plan.bonded, insured: 1, log: [], pend: null };
+  f.fin.log.push({ w: S.week, t: `Financing closes: ${plan.parts.map(x => x.k === 'rebate' ? 'the incentive' : x.k === 'presale' ? 'foreign pre-sales' : 'a gap loan').concat(share ? ['equity investors'] : []).concat(['the company']).join(', ')}.`, tone: 'good' });
+  if (plan.ps > 0) { const b = S.companies.filter(x => x.closed === null && x.owner === undefined && x.tier <= 2 && HUBS[x.hub].m !== f.m).sort((x, y) => hashRand(x.id * 7 + f.id)() - hashRand(y.id * 7 + f.id)())[0]; if (b) { f.dist = f.dist || {}; f.dist.intl = { b: b.id, mg: plan.ps, share: .4, presale: 1 }; } }
+  f.status = 'Development and financing';
   if (direct) takeJob(makePost(POST_BY.owndir, f));
   if (lead !== undefined) meet(lead, 'Cast in your film', 6);
   if (dirPick !== undefined) meet(dirPick, 'Directing your film', 6);
@@ -273,7 +286,7 @@ function selfFund(a) {
   me.standing = clamp(me.standing + 1.5, 0, 100);
   if (a.src !== 'script') addTie(me, P(src.writer), 8);
   milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
-  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}${share ? `, ${fmtM(invest)} of it from investors who'll take ${Math.round(share * 100)}% of what it earns` : ''}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id, result: share ? { ok: true, roll: M.lastRoll, t: 'The investors are in.' } : undefined });
+  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}${share ? `, ${fmtM(invest)} of it from investors who'll take ${Math.round(share * 100)}% of what it earns` : ''}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. ${psNote ? ' ' + psNote : ''}${plan.parts.length ? ` The rest of the money: ${plan.parts.map(x => `${x.k === 'rebate' ? 'the production incentive' : x.k === 'presale' ? 'foreign pre-sales' : 'a gap loan'} (${fmtM(x.amt)})`).join(', ')}, and ${fmtM(plan.feeT)} of it goes straight out again in fees, the bond and insurance.` : ''} It's your money on the line, and anything can still go wrong.`, { film: f.id, result: share || plan.ps ? { ok: true, roll: M.lastRoll, t: plan.ps ? 'The pre-sales close.' : 'The investors are in.' } : undefined });
   return true;
 }
 // After release, investors take their share of what came back to the company.

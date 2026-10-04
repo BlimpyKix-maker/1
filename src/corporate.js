@@ -16,7 +16,8 @@ const LADDER = [
 ];
 const TIER_PAY = [0, 1, .6, .35];
 const SEATS = [4, 3, 3, 3, 2, 2, 1, 1];
-function rungPay(c, r) { return Math.round(LADDER[r][1] * TIER_PAY[c.tier] * (r === 7 && c.tier === 1 ? 5 : 1) / 1000) * 1000; }
+// salaries only: at the top the real money is the bonus and the shares (boards.js), as it is in life
+function rungPay(c, r) { return Math.round(LADDER[r][1] * TIER_PAY[c.tier] / 1000) * 1000; }
 for (let r = 0; r < LADDER.length; r++) { const t = { k: 'corp_' + r, t: LADDER[r][0], tier: LADDER[r][3], subs: r < 3 ? ['tas', 'eth'] : r < 6 ? ['tas', 'pack'] : ['pack', 'fin'], days: 5, rate: Math.round(LADDER[r][1] / 240), weeks: 104, biz: 'Company executive', fam: r >= 2 ? 'exec' : 'office', d: LADDER[r][2], corp: r }; ODD_JOBS.push(t); ODD_BY[t.k] = t; }
 // ---- who holds the chairs: real people from the town, the same answer all year ----
 // Worked out fresh from the town's people every time it's asked, so the simulation and the screen always agree.

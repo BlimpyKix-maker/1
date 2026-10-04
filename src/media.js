@@ -70,7 +70,7 @@ function releaseWork(a) {
     // a two-week fringe run: seats × nights × how full it is
     const seats = k.type === 'musical' ? 180 : 90, nights = 12, fill = clamp(.15 + (q - 40) / 90 + pgauss() * .12, .05, 1), price = usd(k.type === 'musical' ? 22 : 15);
     w.units = Math.round(seats * nights * fill); w.earned = Math.round(w.units * price * .6);
-    M.cash += w.earned; w.fill = fill;
+    M.cash += w.earned - taxOn(w.earned); w.fill = fill;
     if (q >= 78 && fill > .75) { w.pickup = 1; M.cash += usd(k.type === 'musical' ? 6000 : 2500); }
   } else {
     const z = pgauss(), fol = followers(T.plat);
@@ -100,7 +100,7 @@ function mediaWeek() {
     const monet = !P0.gate || followers(w.plat) >= P0.gate;
     let pay = Math.round(units * payNow(w.plat === 'spinly' && M.deal ? .0011 : P0.pay) * (monet ? 1 : 0));
     if (w.plat === 'spinly' && M.deal && M.deal.rec < M.deal.adv) { const r = Math.min(pay, M.deal.adv - M.deal.rec); M.deal.rec += r; pay -= r; }   // the advance is paid back first
-    w.earned += pay; M.cash += pay;
+    w.earned += pay; M.cash += pay - taxOn(pay);
     M.fol[w.plat] = (M.fol[w.plat] || 0) + units * (w.df ?? 1) * T.conv * (.5 + w.q / 100);
     if (w.type === 'mv') { const s = M.works.find(x => x.type === 'song' && !x.done); if (s) s.v0 += units * .002; }
     if (age === 0 && w.z > 2.1 && w.v0 > 5000) { inbox('news', `${w.title} is taking off`, `Something has happened: ${w.title} is everywhere this week. ${w.v0.toLocaleString()} ${P0.unit} and climbing. Your phone won't stop buzzing.`); milestone(`${w.title} went viral`, 'prize'); me.fame = clamp((me.fame || 0) + 4, 0, 100); }

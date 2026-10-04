@@ -96,6 +96,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/shorts.js` | Short films: work type `short`, platform `circuit`, `SHORT_FESTS`; `shortRelease`/`shortWeek`/`shortPick`, `thesisShort(sc)` at mfa/ba graduation; world shorts by future directors (`shortsOf`, `shortsBy`); pages `short`, `shortfest`; Shorts app |
 | `src/tv.js` | Television: `TV_NETS_RAW`, `TV_LEGENDS`, `tvAll()` (cached per year), Emmets (`tvEmmets`, September); pages `tvshow`, `tvnet`; Tele-Guide app; player pitches (`tvAct`, action `tv`), `tvWeek` (pilot → order → May renewals), `tv_*` jobs (`tv:1`, excluded from odd jobs) |
 | School attendance | `W.studyD[day]` marks days with any study block; `closeWeek` copies to `M.studyDone` before clearing `M.wk`; `schoolDaysDone()` reads either. Each study day auto-learns the next class (`nextClass`/`electiveClass`) |
+| `src/financing.js` | Film financing: `INCENTIVE` by hub, `presaleShare`/`presaleDC`, `finPlan` (incentive, pre-sales, gap, bond, insurance, equity) used by `selfFund`; `f.fin` on your films; `FIN_INC` incidents (people, money, acts of god) via `finWeek`/`finPick` (inbox kind `fin`); `finCollapse` abandons a film (banks repaid first); co-investing `coinvOpen`/`coinvAct` (action `coinv`)/`coinvWeek` statements; `finStackHTML` on film pages, `finPanelHTML` on the company panel |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -134,6 +135,11 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Hiring has a "crowded field" penalty that standing cuts through (`applicantsFor`); headcounts are shown at real scale.
 - Burnout escalates within 26 weeks (1, 2, then 3 weeks off; `burnoutWeeks`); three missed weeks in a job risks being let go.
 - Controlled companies pay at most 35% of cash a year in dividends.
+- Income tax (`taxOn`, finance.js): effective-rate curve on the year's running total in 2027 dollars (8% at $15k → 41% at $1M), none before 1913, 35% of it before 1941. Applies to wages, script/producer fees, media earnings, exec bonuses; not to investment returns.
+- Exec pay: salaries only on the ladder (CEO $4M at a major); packages add bonus (150% target for CEO) and share grants (6× salary over four years for CEO).
+- Sector stocks grow ~3.5% a year real (less the yield), anchored at 2026; quarterly dividends by sector yield (`sYield`); BOX50 yields 1.8%.
+- Energy: `SLEEP_BASE` 20, rest −13, stay in −6, work blocks 11/12/15 (+seniority, +3 per extra job, cap 21). `restGuard` (run by `autoCal`, so autopilot only, and every block stays editable) turns the least necessary blocks into rest when the plan would drop below 32 energy: work and school first, then rest, then hobbies. Study now displaces classes and nights out before rest (`OBLIG_RANK`).
+- Co-investment equity recoups 120% first, then half the rest; studio films are pro rata after a 15% fee. Statements at release +10 weeks, then yearly for three years.
 
 ## Ideas queue (after the big notes pass)
 - `REAL_LOOKS` covers ~230 famous names; extend it for more (codes documented at the top of the file). The dead are drawn at ≤50.

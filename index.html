@@ -184,6 +184,17 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .crewlist { columns: 2 220px; }
 .bio { font-size: 16px; line-height: 1.5; max-width: 820px; }
 .geahead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; } .reelseg { display: flex; flex-wrap: wrap; gap: 4px; }
+.finbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 6px 0; background: var(--line); }
+.finbar span { display: block; height: 100%; }
+.finleg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; }
+.finleg i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+.finplan { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.finfilm { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.road { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.road span { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: var(--line); color: var(--muted); }
+.road span.done { background: var(--data-soft); color: var(--data); }
+.road span.on { background: var(--accent); color: #fff; }
+li.bad { color: var(--bad); } li.good { color: var(--good); }
 .gealogo { font: 800 26px/1 var(--f-display); letter-spacing: .08em; padding: 4px 10px; border: 3px solid var(--accent); color: var(--accent); border-radius: 4px; }
 #trailer { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.92); display: grid; place-items: center; padding: 12px; }
 #trailer .tv { width: min(960px, 100%); display: grid; gap: 8px; }
@@ -11193,12 +11204,13 @@ function closeWeek(a) {
   // jobs
   const halted = worldFx().halt;
   if (halted && M.jobs.some(j => j.film !== null)) L.push('The strike holds. Your production is shut down, and nobody is paid until it ends.');
+  let wages = 0;
   for (const j of M.jobs.slice()) {
     if (burnt || (halted && j.film !== null)) continue;
     const t = tmplOf(j);
     const days = j.days;
     const pay = j.rate * days;
-    cashIn += pay; M.stats.earned += pay;
+    cashIn += pay; M.stats.earned += pay; wages += pay;
     if (M.agent) cashOut += Math.round(pay * M.agent.cut);
     M.stats.weeks++;
     j.done++;
@@ -11257,6 +11269,7 @@ function closeWeek(a) {
   if (typeof egofWeek === 'function') egofWeek();
   if (typeof corpWeek === 'function') corpWeek();
   if (typeof slateWeek === 'function') slateWeek();
+  if (typeof finWeek === 'function') finWeek();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -11270,6 +11283,7 @@ function closeWeek(a) {
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
   if (typeof lateWeek === 'function') lateWeek();
+  const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -11292,7 +11306,7 @@ function closeWeek(a) {
   M.stress = clamp(M.stress + stress * (stress > 0 ? traitMul(me, 'stress') * (has(me, 'Volatile') ? 1.2 : 1) : 1) * (1.1 - me.mind.com / 40), 0, 100);
   recalc(me);
   const gl = Object.entries(gains).filter(([, v]) => v >= .04).sort((x, y) => y[1] - x[1]).slice(0, 3);
-  L.unshift(`Money: ${fmtCash(cashIn)} in, ${fmtCash(cashOut)} out.${gl.length ? ' You got better at ' + gl.map(([k]) => (CRAFTS[SUB2C[k]] ? CRAFTS[SUB2C[k]].subs[k] : MINDS[k]).toLowerCase()).join(', ') + '.' : ''}`);
+  L.unshift(`Money: ${fmtCash(cashIn)} in, ${fmtCash(cashOut)} out${taxW ? ` (${fmtCash(taxW)} of it tax)` : ''}.${gl.length ? ' You got better at ' + gl.map(([k]) => (CRAFTS[SUB2C[k]] ? CRAFTS[SUB2C[k]].subs[k] : MINDS[k]).toLowerCase()).join(', ') + '.' : ''}`);
   for (const t of L) diary(t);
   // the world moves on
   const before = S.news.length;
@@ -11564,6 +11578,8 @@ function resolvePick(it, k) {
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
   if (typeof currPick === 'function' && currPick(it, k)) return true;
   if (typeof latePick === 'function' && latePick(it, k)) return true;
+  if (typeof coinvPick === 'function' && coinvPick(it, k)) return true;
+  if (typeof finPick === 'function' && finPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -11664,6 +11680,7 @@ function applyAct(a) {
     case 'found': return foundCompany(a);
     case 'invest': case 'withdraw': return coMoney(a);
     case 'selffund': return selfFund(a);
+    case 'coinv': return coinvAct(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);
@@ -12357,8 +12374,8 @@ const BLOCK_ACTS = {
   network: { label: 'Industry mixer', icon: '🥂', e: 9, stress: .5, cost: 40, d: 'Meet new people in the business. Charisma decides how it goes.' },
   catchup: { label: 'Catch up with a contact', icon: '☕', e: 5, stress: -1, cost: 15, d: 'Coffee with someone you know; or text them from your phone to fix a time.' },
   hustle: { label: 'Side hustle', icon: '🛵', e: 16, stress: 1.5, d: 'Bar shifts and deliveries: $75 a block. Teaches nothing.' },
-  rest: { label: 'Rest', icon: '🛋️', e: -11, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
-  home: { label: 'Stay in', icon: '🏠', e: -5, stress: -1.5, d: 'Cook, call home, early night.' },
+  rest: { label: 'Rest', icon: '🛋️', e: -13, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
+  home: { label: 'Stay in', icon: '🏠', e: -6, stress: -1.5, d: 'Cook, call home, early night.' },
   out: { label: 'Out with friends', icon: '🍻', e: 12, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
   read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' },
   make: { label: 'Make things', icon: '🎛️', e: 9, stress: .2, d: 'Work on your song, video, podcast or play (start one on the Create tab).' }
@@ -12389,7 +12406,9 @@ function calOf() {
 // afternoon, weekdays first, the job with the most days first), and a course gets the study sessions it asks for,
 // placed in the least important free blocks still ahead (rest and nights in before job hunting or writing).
 // Burnout makes it all rest. M.autoOblig === false leaves study placement to you.
-const OBLIG_RANK = { rest: 0, home: 0, read: 1, out: 2, train: 2, hustle: 3, catchup: 3, network: 3, make: 4, write: 4, hunt: 5 };
+// what study displaces first: a class or a night out before your writing, and your rest last of all
+const OBLIG_RANK = { train: 0, out: 0, read: 1, make: 1, network: 2, catchup: 2, write: 3, hustle: 4, hunt: 4, home: 5, rest: 6 };
+const SLEEP_BASE = 20;
 const OBLIG_PREF = [[0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [3, 5, 7], [3, 5, 7]];
 function obligations() {
   const M = S.me, W = M.wk, now = W ? W.day * 3 + W.block : 0;
@@ -12409,6 +12428,23 @@ function obligations() {
     }
   }
   return { cal: W && W.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal, job, forced };
+}
+// After work and school, rest comes before everything else: if the week as planned would run you below a third of
+// your energy, the least necessary blocks (a night out, a hobby, a class, then writing and the job hunt; side
+// shifts last, because rent) become rest until it doesn't, starting with the ones before the low point.
+const REST_GIVE = { out: 0, make: 1, network: 1, train: 1, catchup: 2, write: 3, hunt: 3, read: 4, hustle: 5 };
+function restGuard(cal, forced, now) {
+  const M = S.me, rested = {}, v = vehicleOf(), sleep = SLEEP_BASE + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
+  const costOf = k => k === 'work' ? (M.jobs.length ? workCost() : 11) : ((BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest).e || 0);
+  const lowAt = () => { let e = M.energy; for (let a = now; a < 21; a++) { const d = Math.floor(a / 3), b = a % 3; if (b === 0 || a === now) { if (a !== now) e = clamp(e + clamp(sleep, 8, 40), 0, 100); if (cal[d].slice(b, 2).some(k => !AT_HOME.has(k))) e -= v.e || 0; } e -= costOf(cal[d][b]); if (e < 32) return a; } return -1; };
+  for (let n = 0; n < 8; n++) {
+    const low = lowAt(); if (low < 0) break;
+    let best = null;
+    for (let a = now; a <= Math.min(20, low + 2); a++) { const d = Math.floor(a / 3), b = a % 3, k = cal[d][b], r = k && k.startsWith('v:') ? 0 : REST_GIVE[k]; if (r === undefined || forced[d + '-' + b] || (typeof apptAt === 'function' && apptAt(d, b))) continue; if (!best || r < best.r || (r === best.r && a > best.a && a <= low)) best = { a, d, b, r }; }
+    if (!best) break;
+    cal[best.d][best.b] = best.b === 2 ? 'home' : 'rest'; rested[best.d + '-' + best.b] = 1;
+  }
+  return rested;
 }
 function planBlocks() { return obligations().cal; }
 // whose work day it is: with two part-time jobs, each has its own days
@@ -12490,9 +12526,9 @@ function commute() {
 const AT_HOME = new Set(['rest', 'home', 'write', 'read', 'make']);
 // A work block costs what the job asks of you: shooting days hardest, senior jobs harder, two jobs at once hardest of all.
 function workCost() {
-  const M = S.me; let c = 12;
-  for (const j of M.jobs) { const f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, t = tmplOf(j) || {}; c = Math.max(c, (f ? (f.stage === 2 ? 17 : 14) : 12) + Math.max(0, (t.lv ?? 2) - 2)); }
-  return Math.min(24, c + 4 * Math.max(0, M.jobs.length - 1));
+  const M = S.me; let c = 11;
+  for (const j of M.jobs) { const f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, t = tmplOf(j) || {}; c = Math.max(c, (f ? (f.stage === 2 ? 15 : 12) : 11) + Math.max(0, (t.lv ?? 2) - 2)); }
+  return Math.min(21, c + 3 * Math.max(0, M.jobs.length - 1));
 }
 const RESTFUL = new Set(['rest', 'home', 'read', 'out']);
 function runBlock(k) {
@@ -12532,7 +12568,7 @@ function runBlock(k) {
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
-  const sleep = 19 + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - (typeof ageSleepTax === 'function' ? ageSleepTax() : 0) - Math.max(0, M.stress - 40) / 5;
+  const sleep = SLEEP_BASE + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - (typeof ageSleepTax === 'function' ? ageSleepTax() : 0) - Math.max(0, M.stress - 40) / 5;
   M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
   const stressNow = M.stress + M.wk.stress;
   if (stressNow >= 96 && !M.burnout) { M.burnout = burnoutWeeks(); inbox('note', 'You hit the wall', M.burnout > 1 ? `Again. Your body has stopped negotiating: ${M.burnout} weeks of rest, whatever you planned. Bosses are starting to notice the pattern.` : 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
@@ -12600,7 +12636,12 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
-  // study sessions are fitted in by obligations() when the week runs
+  // study sessions are fitted in by obligations() when the week runs; then rest comes before everything else
+  const keep = M.cal; M.cal = cal;
+  const OB = obligations(), run = OB.cal.map(r => r.slice()), rested = restGuard(run, OB.forced, 0);
+  M.cal = keep;
+  for (const key in rested) { const [d, b] = key.split('-').map(Number); cal[d][b] = run[d][b]; }
+  M.calRested = rested;
   return cal;
 }
 function setFocus(a) {
@@ -12613,7 +12654,7 @@ function setFocus(a) {
 // What the plan will probably do: energy day by day, stress, money, applications. An estimate, not a promise.
 function forecastWeek() {
   const M = S.me, run = planBlocks(), W = M.wk, d0 = W ? W.day : 0, v = vehicleOf();
-  const sleep = 19 + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
+  const sleep = SLEEP_BASE + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + ORIGIN.life[M.life].rest * .6 + traitSum(ME(), 'energy') * .5;
   let e = M.energy, st = 0, spend = 0, earn = 0; const days = [];
   for (let d = d0; d < 7; d++) {
     let out = false;
@@ -14247,7 +14288,7 @@ function dealPick(it, k) {
     if (ok) { fee = Math.round(fee * 1.5 / 50) * 50; extra = ' They grumble, then agree.'; } else { addTie(me, q, -3); extra = ' They hold firm, and you take it anyway.'; }
     it.result = { ok, roll: M.lastRoll };
   }
-  M.cash += fee;
+  M.cash += fee - taxOn(fee);
   sc.option = { by: it.person, from: S.week, to: S.week + OPTION_WEEKS, fee };
   addTie(me, q, 4);
   milestone(`${sc.title} optioned by ${q.name} for ${fmtCash(fee)}`, 'write');
@@ -14269,7 +14310,7 @@ function dealsWeek() {
         const f = greenlight(M.hub, { genre: sc.genre, wri: [me.id], title: sc.title, prod: q.role === 'producer' ? O.by : undefined, co: co ? co.id : undefined, score: sc.score });
         sc.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = 'Screenplay';
         const pay = clamp(Math.round(f.budget * 1e6 * .012 / 100) * 100, usd(20000), usd(300000));
-        M.cash += pay; me.standing = clamp(me.standing + 3, 0, 100);
+        M.cash += pay - taxOn(pay); me.standing = clamp(me.standing + 3, 0, 100);
         milestone(`${sc.title} is going into production`, 'credit');
         inbox('news', `Green light: ${sc.title}`, `${q.name} has done it. ${f.title} goes into production with a ${fmtM(f.budget)} budget, directed by ${P(f.dir).name}, starring ${P(f.cast[0]).name}. Your writer's fee: ${fmtCash(pay)}. Your name is on it.`, { film: f.id });
         sms(O.by, 'WE ARE MAKING YOUR FILM', 'tip');
@@ -14403,7 +14444,7 @@ function pitchSpec(a) {
   const f = greenlight(M.hub, { genre: h.genre, wri: [h.writer], title: h.title, prod: me.id, co: co.id, score: h.score });
   h.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = 'Producer'; (M.coYes = M.coYes || {})[co.id] = S.week;
   const fee = clamp(Math.round(f.budget * 1e6 * .015 / 100) * 100, usd(15000), usd(400000));
-  M.cash += fee; me.standing = clamp(me.standing + 3, 0, 100);
+  M.cash += fee - taxOn(fee); me.standing = clamp(me.standing + 3, 0, 100);
   addTie(me, P(h.writer), 10);
   sms(h.writer, 'THEY SAID YES. WE\'RE MAKING IT', 'tip');
   milestone(`${co.name} greenlit ${f.title}: you're producing`, 'credit');
@@ -14476,16 +14517,29 @@ function selfFund(a) {
   const direct = !!a.direct, dirPick = !direct && a.dir !== undefined && a.dir !== null && P(a.dir) && available(a.dir) ? a.dir : undefined;
   const edge = companyEdge(c, src);
   let budget = (estBudget(src.genre) * (a.micro ? .25 : 1) + (lead !== undefined ? leadFee(lead, src.genre, a.micro) * edge.leadMul : 0)) * edge.budgetMul;
-  let share = 0, invest = 0;
-  if (c.cash < budget * .9) {
-    if (!a.inv || c.cash < budget * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) return false;
-    src.invTry = S.week;
-    if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
-    invest = budget - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+  // the capital stack: incentive, pre-sales, a gap loan, then the company, then investors for the rest
+  let plan = finPlan(budget, { rb: a.rb, ps: a.ps, gap: a.gap, genre: src.genre, lead, dir: direct ? me.id : dirPick });
+  let share = 0, invest = 0, psNote = '';
+  if (plan.ps > 0) {
+    if (src.invTry !== undefined && S.week - src.invTry < 4) return false;
+    if (!roll('pack', presaleDC(src.genre, lead))) { psNote = 'The sales agent takes it to the market and comes back with nothing: no pre-sales. '; plan = finPlan(budget, { rb: a.rb, genre: src.genre }); }
   }
+  if (c.cash < plan.equity * .9) {
+    if (!a.inv || c.cash < plan.equity * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) { if (psNote) { src.invTry = S.week; inbox('note', `The financing on ${src.title} doesn't close`, `${psNote}Without that money there's a hole the company can't fill.`, { result: { ok: false, roll: M.lastRoll, t: 'No pre-sales.' } }); return true; } return false; }
+    src.invTry = S.week;
+    if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `${psNote}Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
+    invest = plan.equity - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+  }
+  // the outside money arrives at closing; the fees go straight out
+  for (const x of plan.parts) c.cash += x.amt;
+  c.cash -= plan.feeT;
   const f = greenlight(M.hub, { genre: src.genre, wri: a.src === 'script' ? [me.id] : [src.writer], title: src.title, prod: direct ? undefined : me.id, co: c.id, score: edge.score, dir: direct ? me.id : dirPick, budget, lead, dp: dpPick, ed: edPick, crew: { mus: musPick, pd: pdPick }, qBonus: edge.qBonus, hookBonus: edge.hookBonus, paMul: edge.paMul, fest: edge.fest });
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
+  f.fin = { reb: plan.reb, ps: plan.ps, gap: plan.gap, bonded: plan.bonded, insured: 1, log: [], pend: null };
+  f.fin.log.push({ w: S.week, t: `Financing closes: ${plan.parts.map(x => x.k === 'rebate' ? 'the incentive' : x.k === 'presale' ? 'foreign pre-sales' : 'a gap loan').concat(share ? ['equity investors'] : []).concat(['the company']).join(', ')}.`, tone: 'good' });
+  if (plan.ps > 0) { const b = S.companies.filter(x => x.closed === null && x.owner === undefined && x.tier <= 2 && HUBS[x.hub].m !== f.m).sort((x, y) => hashRand(x.id * 7 + f.id)() - hashRand(y.id * 7 + f.id)())[0]; if (b) { f.dist = f.dist || {}; f.dist.intl = { b: b.id, mg: plan.ps, share: .4, presale: 1 }; } }
+  f.status = 'Development and financing';
   if (direct) takeJob(makePost(POST_BY.owndir, f));
   if (lead !== undefined) meet(lead, 'Cast in your film', 6);
   if (dirPick !== undefined) meet(dirPick, 'Directing your film', 6);
@@ -14493,7 +14547,7 @@ function selfFund(a) {
   me.standing = clamp(me.standing + 1.5, 0, 100);
   if (a.src !== 'script') addTie(me, P(src.writer), 8);
   milestone(`${c.name} greenlights ${f.title}${direct ? ', and you\'ll direct it' : ''}`, 'credit');
-  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}${share ? `, ${fmtM(invest)} of it from investors who'll take ${Math.round(share * 100)}% of what it earns` : ''}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. It's your money on the line.`, { film: f.id, result: share ? { ok: true, roll: M.lastRoll, t: 'The investors are in.' } : undefined });
+  inbox('news', `${f.title} is a go`, `${c.name} puts ${fmtM(f.budget)} into ${f.title}${share ? `, ${fmtM(invest)} of it from investors who'll take ${Math.round(share * 100)}% of what it earns` : ''}. ${direct ? 'You\'re directing.' : `${P(f.dir).name} directs.`} Starring ${P(f.cast[0]).name}. ${psNote ? ' ' + psNote : ''}${plan.parts.length ? ` The rest of the money: ${plan.parts.map(x => `${x.k === 'rebate' ? 'the production incentive' : x.k === 'presale' ? 'foreign pre-sales' : 'a gap loan'} (${fmtM(x.amt)})`).join(', ')}, and ${fmtM(plan.feeT)} of it goes straight out again in fees, the bond and insurance.` : ''} It's your money on the line, and anything can still go wrong.`, { film: f.id, result: share || plan.ps ? { ok: true, roll: M.lastRoll, t: plan.ps ? 'The pre-sales close.' : 'The investors are in.' } : undefined });
   return true;
 }
 // After release, investors take their share of what came back to the company.
@@ -16316,7 +16370,7 @@ function releaseWork(a) {
     // a two-week fringe run: seats × nights × how full it is
     const seats = k.type === 'musical' ? 180 : 90, nights = 12, fill = clamp(.15 + (q - 40) / 90 + pgauss() * .12, .05, 1), price = usd(k.type === 'musical' ? 22 : 15);
     w.units = Math.round(seats * nights * fill); w.earned = Math.round(w.units * price * .6);
-    M.cash += w.earned; w.fill = fill;
+    M.cash += w.earned - taxOn(w.earned); w.fill = fill;
     if (q >= 78 && fill > .75) { w.pickup = 1; M.cash += usd(k.type === 'musical' ? 6000 : 2500); }
   } else {
     const z = pgauss(), fol = followers(T.plat);
@@ -16346,7 +16400,7 @@ function mediaWeek() {
     const monet = !P0.gate || followers(w.plat) >= P0.gate;
     let pay = Math.round(units * payNow(w.plat === 'spinly' && M.deal ? .0011 : P0.pay) * (monet ? 1 : 0));
     if (w.plat === 'spinly' && M.deal && M.deal.rec < M.deal.adv) { const r = Math.min(pay, M.deal.adv - M.deal.rec); M.deal.rec += r; pay -= r; }   // the advance is paid back first
-    w.earned += pay; M.cash += pay;
+    w.earned += pay; M.cash += pay - taxOn(pay);
     M.fol[w.plat] = (M.fol[w.plat] || 0) + units * (w.df ?? 1) * T.conv * (.5 + w.q / 100);
     if (w.type === 'mv') { const s = M.works.find(x => x.type === 'song' && !x.done); if (s) s.v0 += units * .002; }
     if (age === 0 && w.z > 2.1 && w.v0 > 5000) { inbox('news', `${w.title} is taking off`, `Something has happened: ${w.title} is everywhere this week. ${w.v0.toLocaleString()} ${P0.unit} and climbing. Your phone won't stop buzzing.`); milestone(`${w.title} went viral`, 'prize'); me.fame = clamp((me.fame || 0) + 4, 0, 100); }
@@ -18368,7 +18422,8 @@ const LADDER = [
 ];
 const TIER_PAY = [0, 1, .6, .35];
 const SEATS = [4, 3, 3, 3, 2, 2, 1, 1];
-function rungPay(c, r) { return Math.round(LADDER[r][1] * TIER_PAY[c.tier] * (r === 7 && c.tier === 1 ? 5 : 1) / 1000) * 1000; }
+// salaries only: at the top the real money is the bonus and the shares (boards.js), as it is in life
+function rungPay(c, r) { return Math.round(LADDER[r][1] * TIER_PAY[c.tier] / 1000) * 1000; }
 for (let r = 0; r < LADDER.length; r++) { const t = { k: 'corp_' + r, t: LADDER[r][0], tier: LADDER[r][3], subs: r < 3 ? ['tas', 'eth'] : r < 6 ? ['tas', 'pack'] : ['pack', 'fin'], days: 5, rate: Math.round(LADDER[r][1] / 240), weeks: 104, biz: 'Company executive', fam: r >= 2 ? 'exec' : 'office', d: LADDER[r][2], corp: r }; ODD_JOBS.push(t); ODD_BY[t.k] = t; }
 // ---- who holds the chairs: real people from the town, the same answer all year ----
 // Worked out fresh from the town's people every time it's asked, so the simulation and the screen always agree.
@@ -22573,12 +22628,27 @@ function sectorBar(s, w) {
   const key = s.k + ':' + w; if (SBC.m.has(key)) return SBC.m.get(key);
   let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand((s.seed || s.k.length * 7919 + s.tk.charCodeAt(0) * 13) + (w - i) * 31)() - .5) * (s.vol || .05) * (1 - i / 7);
   const mf = s.beta >= 0 ? Math.pow(macroAt(w), s.beta) : Math.pow(macroAt(w), s.beta);
-  const c = Math.max(.05, s.p0 * Math.pow(sectorDriver(s, w), .6) * mf * (1 + wander) * (typeof cpi === 'function' ? cpi(yearOf(w)) / cpi(2000) : 1));
+  // real growth on top of inflation, as listed companies have had over the long run (gold just keeps its value);
+  // anchored at 2026 so today's prices are where they were and the past is cheaper
+  const grow = Math.pow(1 + sGrowth(s), (w - weekOfYear(2026)) / 52);
+  const c = Math.max(.05, s.p0 * Math.pow(sectorDriver(s, w), .6) * mf * (1 + wander) * grow * (typeof cpi === 'function' ? cpi(yearOf(w)) / cpi(2000) : 1));
   const r = hashRand(s.tk.charCodeAt(1) * 977 + w)(), o = c / (1 + (r - .5) * .04);
   const bar = { w, o, c, h: Math.max(o, c) * 1.01, l: Math.min(o, c) * .99, v: Math.round(1e5 * (1 + r)), ev: [] };
   SBC.m.set(key, bar); return bar;
 }
 function sectorPrice(s, w = S.week) { return sectorBar(s, w).c; }
+// Real price growth a year, and the dividend yield, by kind of business: steady payers in radio, publishing and
+// cinemas, growth companies that pay nothing in streaming, games and creators, and gold that pays nothing at all.
+const S_YIELD = { 'Safe haven': 0, 'Streaming': 0, 'Online video': 0, 'Audio': 0, 'Video games': .008, 'Radio': .045, 'Publishing': .03, 'Music publishing': .025, 'TV networks': .035, 'Cable TV': .03, 'Premium TV': .02, 'Theme parks': .012, 'Ticketing': 0, 'Live events': 0 };
+function sYield(s) { return S_YIELD[s.sec] !== undefined ? S_YIELD[s.sec] : s.beta > 1.5 ? .005 : .02; }
+function sGrowth(s) { return s.drv === 'gold' || s.sec === 'Safe haven' ? .004 : .035 - sYield(s) * .5; }
+// each quarter the payers pay; the index fund passes on what its studios pay
+function sectorDivWeek() {
+  const M = S.me; if (!M || !M.sport || S.week % 13 !== 6) return;
+  let tot = 0; const by = [];
+  for (const [k, n] of Object.entries(M.sport)) { if (n <= 0) continue; const s = SECTOR[k], y = k === 'box50' ? .018 : s ? sYield(s) : 0; if (!y) continue; const d = Math.round((k === 'box50' ? fundPrice() : sectorPrice(s)) * n * y / 4); if (d > 0) { tot += d; by.push(s ? s.tk : 'BOX50'); } }
+  if (tot > 0) { M.cash += tot; (M.divs = M.divs || {})[S.year] = ((M.divs || {})[S.year] || 0) + tot; mail('news', 'Your broker', 'Dividends paid', `Quarterly dividends from ${by.slice(0, 5).join(', ')}${by.length > 5 ? ` and ${by.length - 5} more` : ''}: ${fmtCash(tot)}.`); }
+}
 function sChg(s, n) { return (sectorPrice(s) / sectorPrice(s, S.week - n) - 1) * 100; }
 function sSpark(s, n = 26, W = 80, H = 22) { const P0 = Array.from({ length: n }, (_, i) => sectorPrice(s, S.week - (n - 1 - i))), hi = Math.max(...P0), lo = Math.min(...P0), up = P0[n - 1] >= P0[0]; return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><polyline fill="none" stroke="${up ? 'var(--good)' : 'var(--bad)'}" stroke-width="1.5" points="${P0.map((v, i) => `${(i / (n - 1) * W).toFixed(1)},${(2 + (hi - v) / Math.max(1e-6, hi - lo) * (H - 4)).toFixed(1)}`).join(' ')}"/></svg>`; }
 // the index fund tracks the BOX-50
@@ -22622,6 +22692,27 @@ function bankAct(a) {
   else return false;
   return true;
 }
+// ---- tax ----
+// Earnings are taxed the way a single filer's are: payroll, federal and state together, so the effective rate climbs
+// from almost nothing on a first job to about two-fifths on a chief executive's pay. It's worked out on the year's
+// running total in 2027 dollars, so a big cheque is taxed at the rate it pushes you into. There was no income tax
+// before 1913, and much less of it before the war.
+const TAX_EFF = [[0, 0], [15000, .08], [40000, .17], [80000, .24], [150000, .29], [400000, .36], [1e6, .41], [1e7, .44]];
+function taxEff(I) { if (I <= 0) return 0; for (let i = 1; i < TAX_EFF.length; i++) { const [b, rb] = TAX_EFF[i]; if (I <= b) { const [a, ra] = TAX_EFF[i - 1]; return ra + (rb - ra) * (I - a) / (b - a); } } return .44; }
+function taxEra(y) { return y < 1913 ? 0 : y < 1941 ? .35 : 1; }
+function taxYear(M) {
+  const T = M.taxYr || (M.taxYr = { y: S.year, inc: 0, paid: 0 });
+  if (T.y !== S.year) { if (T.paid > 0) { (M.taxHist = M.taxHist || []).push({ y: T.y, inc: T.inc, paid: T.paid }); if (M.taxHist.length > 60) M.taxHist.shift(); mail('news', 'The tax office', `Your ${T.y} tax year`, `You earned ${fmtCash(Math.round(T.earned || 0))} in ${T.y} and paid ${fmtCash(Math.round(T.paid))} in tax along the way, ${Math.round(T.paid / Math.max(1, T.earned || 1) * 100)}% of it. Nothing more is owed.`); } Object.assign(T, { y: S.year, inc: 0, paid: 0, earned: 0 }); }
+  return T;
+}
+// the tax on money just earned (wages, fees, bonuses, royalties): what to hold back from it
+function taxOn(amt) {
+  const M = S.me; if (!M || !(amt > 0)) return 0;
+  const T = taxYear(M), f = Math.max(1e-6, wageF(M.hub)), real = amt / f, e = taxEra(S.year);
+  const due = Math.round(((T.inc + real) * taxEff(T.inc + real) - T.inc * taxEff(T.inc)) * f * e);
+  T.inc += real; T.earned = (T.earned || 0) + amt; T.paid += due;
+  return Math.max(0, Math.min(due, Math.round(amt * .5)));
+}
 // Weekly: interest, maturities, loan payments, and fate.
 const FATE = [
   ['A bank error in your favour', .4, 'A clerical slip lands in your account. The bank, to its credit, lets you keep it.'], ['An aunt you barely knew leaves you something', .8, 'The will is read; your name is on it.'],
@@ -22633,6 +22724,7 @@ const FATE = [
 ];
 function bankWeek() {
   const M = S.me; if (!M) return; const B = bankOf(M);
+  sectorDivWeek(); taxYear(M);
   if (B.sav > 0) { const i = Math.round(B.sav * savRate() / 100 / 52 * 100) / 100; B.sav += i; B.earned = (B.earned || 0) + i; }
   for (let k = B.cds.length - 1; k >= 0; k--) { const c = B.cds[k]; if (S.week >= c.due) { const pay = Math.round(c.amt * (1 + c.rate / 100 * (c.due - c.from) / 52)); M.cash += pay; B.cds.splice(k, 1); mail('news', 'Your bank', 'Term deposit matured', `${fmtCash(c.amt)} at ${c.rate.toFixed(2)}% has matured: ${fmtCash(pay)} has been paid into your account.`); } }
   if (B.loan > 0) {
@@ -22667,6 +22759,7 @@ function bankHTML() {
   const M = S.me, B = bankOf(M), lim = creditLimit(M);
   return `<div class="os-grid">${osCard('Savings', `<p class="os-big">${fmtCash(Math.round(B.sav))}</p><p class="small muted">${savRate().toFixed(2)}% a year, paid weekly. Earned so far ${fmtCash(Math.round(B.earned || 0))}.</p><div class="bank-f"><input id="bk-amt" type="number" min="1" placeholder="Amount" value="${UI.bkamt || ''}"><button class="os-btn" data-bank="deposit">Deposit</button><button class="os-btn" data-bank="withdraw">Withdraw</button></div>`)}
    ${osCard('Term deposits', `<p class="small">Lock money away for a better rate: 6 months ${cdRate(26).toFixed(2)}%, 1 year ${cdRate(52).toFixed(2)}%, 2 years ${cdRate(104).toFixed(2)}%. Breaking early costs 3%.</p><div class="bank-f"><button class="os-btn" data-bank="cd:0">6 months</button><button class="os-btn" data-bank="cd:1">1 year</button><button class="os-btn" data-bank="cd:2">2 years</button></div>${B.cds.length ? `<ul class="os-list">${B.cds.map((c, i) => `<li><b>${fmtCash(c.amt)}</b><span class="muted">${c.rate.toFixed(2)}% · matures ${fmtDate(c.due, true)}</span><button class="linkish" data-bank="breakcd:${i}">Break</button></li>`).join('')}</ul>` : ''}`)}
+   ${osCard('Tax', (() => { const T0 = M.taxYr, T = T0 && T0.y === S.year ? T0 : { y: S.year, inc: 0, paid: 0, earned: 0 }, H = (M.taxHist || []).slice(-1)[0]; return `<p class="small">This year you've earned <b>${fmtCash(Math.round(T.earned || 0))}</b> and paid <b>${fmtCash(Math.round(T.paid))}</b> in tax${T.earned ? ` (${Math.round(T.paid / T.earned * 100)}%)` : ''}. It comes out as you're paid, so nothing is owed at the end.</p>${H ? `<p class="small muted">Last year: ${fmtCash(Math.round(H.paid))} on ${fmtCash(Math.round(H.inc * wageF(M.hub)))}.</p>` : ''}<p class="small muted">Investment gains and dividends aren't taxed here.</p>`; })())}
    ${osCard('Borrowing', `<p class="small">Credit score <b>${B.score}</b> · limit ${fmtCash(lim)} · rate ${loanRate(M).toFixed(1)}%</p>${B.loan > 0 ? `<p>You owe <b class="bad">${fmtCash(Math.round(B.loan))}</b> at ${B.lrate.toFixed(1)}%. Payments come out weekly.</p>` : ''}<div class="bank-f"><button class="os-btn" data-bank="borrow">Borrow</button>${B.loan > 0 ? '<button class="os-btn" data-bank="repay">Repay</button>' : ''}</div><p class="small muted">Use loans to fund a film, a home or a bet on the market. Miss payments and the score falls, the rate rises and the limit shrinks.</p>`)}
    ${osCard('The economy', economyHTML())}</div>`;
 }
@@ -23975,9 +24068,9 @@ function boardPick(it, k) {
   }
   if (it.act === 'pkg') {
     const j = typeof corpJob === 'function' ? corpJob() : null, c = j && S.companies[j.co]; if (!c) { it.result = { t: 'The job is gone.' }; return true; }
-    const r = +j.k.slice(5), base = rungPay(c, r), P0 = { co: c.id, rung: r, since: S.week, salary: base, bonus: .5, grant: Math.round(base * 2 / Math.max(1, mktPrice(c))), vested: 0, para: 0, job: j.id };
+    const r = +j.k.slice(5), base = rungPay(c, r), P0 = { co: c.id, rung: r, since: S.week, salary: base, bonus: r >= 7 ? 1.5 : r >= 6 ? 1 : .5, grant: Math.round(base * (r >= 7 ? 6 : r >= 6 ? 3 : 2) / Math.max(1, mktPrice(c))), vested: 0, para: 0, job: j.id };
     let ok = null;
-    if (k === 'hard') { ok = roll('pack', 15); if (ok) Object.assign(P0, { bonus: 1, grant: P0.grant * 2, para: base * 2 }); else { P0.grant = Math.round(P0.grant * .8); ME().standing = clamp(ME().standing - 1, 0, 100); } }
+    if (k === 'hard') { ok = roll('pack', 15); if (ok) Object.assign(P0, { bonus: P0.bonus * 1.5, grant: P0.grant * 2, para: base * 2 }); else { P0.grant = Math.round(P0.grant * .8); ME().standing = clamp(ME().standing - 1, 0, 100); } }
     if (k === 'equity') { j.rate = Math.round(j.rate * .7); P0.salary = base * .7; P0.grant *= 3; }
     if (k === 'para') { ok = roll('cha', 13); if (ok) P0.para = base * 2.5; }
     M.pkg = P0;
@@ -24110,7 +24203,7 @@ function boardWeek() {
   if (M.pkg) {
     const P0 = M.pkg, c = S.companies[P0.co], still = j && j.id === P0.job;
     if (still && c && c.closed === null && (S.week - P0.since) % 13 === 12 && P0.vested < 16) { const n = Math.round(P0.grant / 16); M.port = M.port || {}; M.port[c.id] = (M.port[c.id] || 0) + n; P0.vested++; diary(`Money: ${n.toLocaleString()} ${c.name} shares vest (${P0.vested} of 16).`); }
-    if (still && c && (S.week - P0.since) % 52 === 51) { const perf = clamp(1 + chg(c, 52) / 100, 0, 2), b = Math.round(usd(P0.salary) * P0.bonus * perf * .5); if (b > 0) { M.cash += b; diary(`Money: your annual bonus at ${c.name}, ${fmtCash(b)} (the shares ${chg(c, 52) >= 0 ? 'rose' : 'fell'} ${Math.abs(chg(c, 52)).toFixed(0)}%).`); } }
+    if (still && c && (S.week - P0.since) % 52 === 51) { const perf = clamp(1 + chg(c, 52) / 100, 0, 2), b = Math.round(usd(P0.salary) * P0.bonus * perf * .5); if (b > 0) { M.cash += b - taxOn(b); diary(`Money: your annual bonus at ${c.name}, ${fmtCash(b)} before tax (the shares ${chg(c, 52) >= 0 ? 'rose' : 'fell'} ${Math.abs(chg(c, 52)).toFixed(0)}%).`); } }
     if (!still && !P0.over) { P0.over = S.week; if (P0.para && !(j && j.co === P0.co)) { const p = usd(P0.para); M.cash += p; diary(`Money: the golden parachute opens: ${fmtCash(p)}.`); } }
   }
 }
@@ -28567,14 +28660,14 @@ function sectorsHTML() {
   const L = SECTORS.map(s => SECTOR[s[0]]).filter(sectorOpen), M = S.me, groups = {};
   for (const s of L) (groups[s.sec] = groups[s.sec] || []).push(s);
   const nameOf = s => s.mco !== undefined && typeof mcoLink === 'function' ? mcoLink(s.mco) : s.net && typeof netLink === 'function' ? netLink(s.net) : esc(s.name);
-  const row = s => `<tr><td><b>${esc(s.tk)}</b></td><td class="small">${nameOf(s)}<br><span class="muted">${esc(s.d.length > 70 ? s.d.slice(0, 68) + '…' : s.d)}</span></td><td>${sSpark(s)}</td><td class="n" data-v="${sectorPrice(s)}">$${sectorPrice(s).toFixed(2)}</td><td class="n" data-v="${sChg(s, 1)}">${pctS(sChg(s, 1))}</td><td class="n" data-v="${sChg(s, 52)}">${pctS(sChg(s, 52))}</td><td class="n">${(M.sport || {})[s.k] || 0}</td><td><button class="btn-s" data-sec="buy:${s.k}">Buy</button> ${(M.sport || {})[s.k] ? `<button class="btn-s ghost" data-sec="sell:${s.k}">Sell</button>` : ''}</td></tr>`;
+  const row = s => `<tr><td><b>${esc(s.tk)}</b></td><td class="small">${nameOf(s)}<br><span class="muted">${esc(s.d.length > 70 ? s.d.slice(0, 68) + '…' : s.d)}${sYield(s) ? ` · yields ${(sYield(s) * 100).toFixed(1)}%` : ''}</span></td><td>${sSpark(s)}</td><td class="n" data-v="${sectorPrice(s)}">$${sectorPrice(s).toFixed(2)}</td><td class="n" data-v="${sChg(s, 1)}">${pctS(sChg(s, 1))}</td><td class="n" data-v="${sChg(s, 52)}">${pctS(sChg(s, 52))}</td><td class="n">${(M.sport || {})[s.k] || 0}</td><td><button class="btn-s" data-sec="buy:${s.k}">Buy</button> ${(M.sport || {})[s.k] ? `<button class="btn-s ghost" data-sec="sell:${s.k}">Sell</button>` : ''}</td></tr>`;
   const F = UI.secf || 'all', secs = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
   const shown = F === 'all' ? secs : secs.filter(x => x === F);
   const ix = sec => { const G = groups[sec], a = G.reduce((t, s) => t + sectorPrice(s, S.week - 52), 0), b = G.reduce((t, s) => t + sectorPrice(s), 0); return pctS((b / Math.max(1e-6, a) - 1) * 100); };
   return `<p class="small muted">${L.length} listed companies beyond the studios: music, television and streaming, theatre, audio, online video, games, theme parks, live events and the businesses that live off the films. Each follows its own part of the business, plus the economy.</p>
    <div class="bf-row"><button class="pill${F === 'all' ? ' on' : ''}" data-secf="all">Everything</button>${secs.map(x => `<button class="pill${F === x ? ' on' : ''}" data-secf="${esc(x)}">${esc(x)} <span class="muted small">${groups[x].length}</span></button>`).join('')}</div>
    ${shown.map(sec => `<h4>${esc(sec)} <span class="muted small">1Y ${ix(sec)}</span></h4><div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n">Own</th><th></th></tr></thead><tbody>${groups[sec].map(row).join('')}</tbody></table></div>`).join('')}
-   <h4>Funds</h4><div class="tw"><table class="grid small"><tbody><tr><td><b>BOX50</b></td><td class="small">BOX-50 index fund<br><span class="muted">Every listed studio at once</span></td><td></td><td class="n">$${fundPrice().toFixed(2)}</td><td class="n">${pctS((fundPrice() / fundPrice(S.week - 1) - 1) * 100)}</td><td class="n">${pctS((fundPrice() / fundPrice(S.week - 52) - 1) * 100)}</td><td class="n">${(M.sport || {}).box50 || 0}</td><td><button class="btn-s" data-sec="buy:box50">Buy</button> ${(M.sport || {}).box50 ? '<button class="btn-s ghost" data-sec="sell:box50">Sell</button>' : ''}</td></tr></tbody></table></div>`;
+   <h4>Funds</h4><div class="tw"><table class="grid small"><tbody><tr><td><b>BOX50</b></td><td class="small">BOX-50 index fund<br><span class="muted">Every listed studio at once · yields 1.8%</span></td><td></td><td class="n">$${fundPrice().toFixed(2)}</td><td class="n">${pctS((fundPrice() / fundPrice(S.week - 1) - 1) * 100)}</td><td class="n">${pctS((fundPrice() / fundPrice(S.week - 52) - 1) * 100)}</td><td class="n">${(M.sport || {}).box50 || 0}</td><td><button class="btn-s" data-sec="buy:box50">Buy</button> ${(M.sport || {}).box50 ? '<button class="btn-s ghost" data-sec="sell:box50">Sell</button>' : ''}</td></tr></tbody></table></div>`;
 }
 
 // the portfolio's other half: everything you hold beyond the studios
@@ -28656,6 +28749,260 @@ function worksCreditsHTML(p) {
   return `<h3>Music, video, podcasts and stage</h3><div class="tw"><table class="grid"><thead><tr><th>Released</th><th>Title</th><th>Kind</th><th class="n">Audience</th><th class="n">Quality</th></tr></thead><tbody>${W.map(w => `<tr><td>${fmtDate(w.rel, true)}</td><td><a href="#" class="lk" data-go="work:${w.id}">${esc(w.title)}</a></td><td>${esc((WORK_TYPES[w.type] || {}).label || w.type)}</td><td class="n">${Math.round(w.units || 0).toLocaleString()}</td><td class="n">${Math.round(w.q)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 // </reel2>
+// <financing>
+// ---------------- How a film is paid for, and how it falls apart ----------------
+// A film is rarely one cheque. Your own company's films are built from a capital stack, as real independents are:
+// the government's production incentive (cash-flowed by a bank against the rebate to come), foreign pre-sales (a
+// distributor's promise to pay on delivery, which a bank lends against), a gap loan against the rights still unsold,
+// equity investors who recoup first and then split the profit, and whatever your company can put in. Bank money
+// needs a completion bond, and every production carries insurance. Then the film walks the real road, Development
+// and financing, Pre-production, Shooting, Post-production, Release, and at any point it can wobble: a star walks,
+// a financier's cheque bounces, a buyer goes bust, a storm flattens the set. Some wobbles you can buy your way out
+// of. Some end the film. You can also put money into other people's films, and ride their luck.
+
+// production incentives, by city: [from year, share of qualifying spend]. About three-quarters of a budget qualifies.
+const INCENTIVE = {
+  hollywood: [[2009, .2], [2015, .25]], newyork: [[2004, .25], [2014, .3]], toronto: [[1997, .2], [2009, .28]], mexico: [[2006, .12], [2019, 0]],
+  london: [[1997, .12], [2007, .2], [2024, .255]], paris: [[2009, .2], [2016, .3]], rome: [[2008, .25], [2017, .4]], berlin: [[2007, .2], [2017, .25]],
+  madrid: [[2015, .2], [2019, .3]], tokyo: [[2019, .2]], seoul: [[2010, .2]], sydney: [[2007, .3]], wellington: [[2004, .15], [2014, .4]],
+  johannesburg: [[2004, .25]], prague: [[2010, .2]], budapest: [[2004, .2], [2009, .3]], warsaw: [[2019, .3]], helsinki: [[2017, .25]],
+  stockholm: [[2022, .25]], copenhagen: [[2025, .25]], bogota: [[2013, .4]], istanbul: [[2020, .3]], bangkok: [[2017, .15]], manila: [[2023, .2]]
+};
+function incentiveOf(hub, y = S.year) { let r = 0; for (const [from, v] of INCENTIVE[hub] || []) if (y >= from) r = v; return r; }
+// genres that sell abroad on a poster and a name, and the ones that don't travel
+const TRAVEL = { Action: .1, Horror: .1, Thriller: .07, 'Sci-fi': .08, Superhero: .1, Animation: .08, Fantasy: .06, 'Martial arts': .08, Comedy: -.04, Musical: -.03, Documentary: -.05 };
+// what the foreign buyers would advance, as a share of the budget: they pay for a face and a genre
+function presaleShare(genre, lead, dir) {
+  const fame = lead !== undefined ? P(lead).fame || 0 : 0, dst = dir !== undefined && dir !== null ? P(dir).standing : 0;
+  if (fame < 25 && dst < 45) return 0;   // no names, no pre-sales
+  const era = S.year < 1970 ? .3 : S.year < 1985 ? .7 : 1;
+  return clamp(.06 + fame / 220 + dst / 400 + (TRAVEL[genre] || 0), 0, .45) * era;
+}
+function presaleDC(genre, lead) { return Math.round(clamp(17 - (lead !== undefined ? (P(lead).fame || 0) / 12 : 0) - ME().standing / 25 - (S.me.agent ? 1 : 0), 7, 19)); }
+// The plan for one film: each piece of money, what it costs, and how much is left for the company and investors.
+function finPlan(budget, o) {
+  const parts = [], fees = [];
+  const reb = o.rb ? incentiveOf(S.me.hub) * .75 * budget : 0;
+  if (reb > 0) { parts.push({ k: 'rebate', label: `${hubName(S.me.hub)} production incentive (${Math.round(incentiveOf(S.me.hub) * 100)}% of local spend)`, amt: reb * .9 }); fees.push(['Bank discount on the incentive', reb * .1]); }
+  const ps = o.ps ? presaleShare(o.genre, o.lead, o.dir) * budget : 0;
+  if (ps > 0) { parts.push({ k: 'presale', label: 'Foreign pre-sales (paid on delivery; the bank lends against them)', amt: ps * .92, mg: ps }); fees.push(['Interest on the pre-sale loan', ps * .08]); }
+  const gap = o.gap && ps > 0 ? budget * .15 : 0;
+  if (gap > 0) parts.push({ k: 'gap', label: 'Gap loan against the unsold home rights (repaid with 12% from the first money in)', amt: gap });
+  const bonded = ps > 0 || gap > 0;
+  if (bonded) fees.push(['Completion bond (the guarantor\'s fee)', budget * .025]);
+  fees.push(['Production insurance', budget * .02]);
+  const feeT = fees.reduce((t, x) => t + x[1], 0), outside = parts.reduce((t, x) => t + x.amt, 0);
+  return { parts, fees, feeT, bonded, reb, ps, gap, equity: Math.max(0, budget + feeT - outside) };
+}
+
+// ---- the weekly road: incidents on your own films ----
+function finFilms() { const c = myCo(); return c ? c.films.map(i => S.films[i]).filter(f => f.fin && !f.fin.over) : []; }
+function finLog(f, t, tone = '') { f.fin.log.push({ w: S.week, t, tone }); }
+function finCost(f, pct, god) {
+  const add = f.budget * pct; f.cost += add;
+  let back = 0; if (god && f.fin.insured) { back = add * .7; myCo().cash += back; }
+  return back;
+}
+function finQ(f, v) { f.qBonus = (f.qBonus || 0) + v; }
+function finDelay(f, w) { f.stageEnd += w; for (const p of keyPeople(f)) if (p.busy >= S.week) p.busy += w; }
+// when the money runs past the contingency, the completion guarantor steps in, pays the rest, and takes the film
+function finBond(f) {
+  if (!f.fin.bonded || f.fin.bondTook || f.cost <= f.budget * 1.1) return '';
+  f.fin.bondTook = 1; const over = f.cost - f.budget * 1.1; f.cost = f.budget * 1.1; finQ(f, -2);
+  finLog(f, `Over the contingency: the completion guarantor takes control, pays the last ${fmtM(over)} and finishes the film its own way.`, 'bad');
+  return ` The overrun blows through the contingency, and the completion guarantor takes over the production. They pay the last ${fmtM(over)}; in return they make the decisions, and you lose final cut.`;
+}
+// the end of a film: what's unspent comes back, the banks are repaid first, the investors get what's left
+function finCollapse(f, why, god) {
+  const c = myCo(), F = f.fin, spent = [.2, .45, .8, .95][Math.max(0, f.stage)] || .95;
+  const R = f.budget * (1 - spent) + (god && F.insured ? f.cost * spent * .6 : 0);
+  const loans = (F.ps && !F.psGone ? F.ps * .92 : 0) + (F.reb ? F.reb * .9 : 0) + (F.gap || 0);
+  const left = R - loans, inv = f.investors ? Math.max(0, left) * f.investors.share : 0;
+  c.cash += left - inv;
+  if (f.investors) f.investors.paid = inv;
+  f.status = 'Abandoned'; f.stage = -1; S.active = S.active.filter(i => i !== f.id); freeFilm(f); F.over = 'collapsed'; F.dead = why;
+  if (f.dist) delete f.dist.intl;
+  const j = S.me.jobs.find(x => x.film === f.id); if (j) finishJob(j, null, true);
+  ME().standing = clamp(ME().standing - 2, 0, 100);
+  finLog(f, `The film collapses: ${why}.`, 'bad');
+  milestone(`${f.title} collapsed`, 'work');
+  news('Industry', `${f.title}, from ${c.name}, has shut down for good: ${why}.`, { film: f.id });
+  return ` ${f.title} is over. ${god && F.insured ? 'The insurers pay part of what was spent. ' : ''}${loans > 0 ? `The banks are repaid first (${fmtM(loans)}). ` : ''}${f.investors ? `The investors get ${inv > 0 ? fmtM(inv) : 'nothing'} back. ` : ''}The company is left with ${left - inv >= 0 ? fmtM(left - inv) + ' back' : 'a ' + fmtM(inv - left) + ' hole'}.`;
+}
+const FIN_PLACE = { hollywood: 'a wildfire', newyork: 'a blizzard', toronto: 'an ice storm', london: 'a month of rain', mumbai: 'the monsoon', chennai: 'a cyclone', manila: 'a typhoon', tokyo: 'an earthquake', sydney: 'bushfires', hongkong: 'a typhoon', bangkok: 'floods', jakarta: 'floods', rio: 'mudslides', istanbul: 'an earthquake', lagos: 'floods', dakar: 'a sandstorm' };
+const FIN_WALK = ['another film\'s dates have moved onto yours', 'creative differences over the script', 'a stint in rehab', 'a new agent who wants double', 'cold feet about the role', 'a family crisis'];
+const FIN_INC = [
+  { k: 'walk', st: [0, 1], kind: 'people', w: f => 1 + keyPeople(f).filter(p => has(p, 'Difficult') || has(p, 'Volatile')).length * .6,
+    title: f => `${P(f.cast[0]).name} drops out of ${f.title}`, text: f => `${P(f.cast[0]).name} has pulled out, citing ${pickLine(FIN_WALK, f.id + S.week)}.${f.fin.ps && !f.fin.psGone ? ' The foreign buyers bought the film on that name, and they are asking what happens now.' : ''}`,
+    opts: [{ k: 'pay', label: f => `Pay what it takes to keep them (${fmtM(f.budget * .06)})`, go: f => { finCost(f, .06); return 'They stay, for a price. The deal memo now has a second page.' + finBond(f); } },
+      { k: 'recast', label: () => 'Recast the part', check: ['pack', 13], go: (f, ok) => { finQ(f, ok ? -1 : -3); let t = ok ? 'You find someone hungry and good. It\'s a different film now, maybe not a worse one.' : 'The replacement is fine. Fine is the word everyone uses.'; if (f.fin.ps && !f.fin.psGone) { const cut = f.fin.ps * (ok ? .2 : .4); f.fin.ps -= cut; myCo().cash -= cut * .92; t += ` The foreign buyers re-price the film without the name: ${fmtM(cut)} less, and the bank wants it back now.`; } return t; } },
+      { k: 'wait', label: () => 'Push the start date and wait for them', go: f => { finDelay(f, 8); finCost(f, .03); if (prnd() < .55) return 'Eight weeks later they\'re back, apologetic and ready. The delay cost money, and some of the crew moved on.'; finQ(f, -2); return 'Eight weeks, and they never come back. You recast in a hurry.'; } }] },
+  { k: 'money', st: [0, 1], kind: 'money', w: f => f.investors ? 1.6 : 0,
+    title: f => `An investor in ${f.title} pulls out`, text: f => `${pickLine(['The fund behind the equity is being wound up after a bad year.', 'The investor\'s divorce has frozen every account.', 'The regulator is asking where the investor\'s money came from, and the lawyers say don\'t touch it.', 'The investor has read the script again, and wants to make a different film.'], f.id + S.week)} ${fmtM(f.investors.amount * .5)} of the money has gone.`,
+    opts: [{ k: 'cover', label: f => `Cover it from the company (${fmtM(f.investors.amount * .5)})`, go: f => { myCo().cash -= f.investors.amount * .5; f.investors.share *= .55; return 'You cover the hole. Less of the film belongs to other people now; more of the risk is yours.'; } },
+      { k: 'find', label: () => 'Find new money, fast', check: ['fin', 15], go: (f, ok) => { if (ok) { f.investors.share = clamp(f.investors.share * 1.2, .1, .85); finDelay(f, 2); return 'A new backer in nine days, on worse terms. The film goes on.'; } finDelay(f, 4); if (prnd() < .5) return finCollapse(f, 'the money never came') ; myCo().cash -= f.investors.amount * .5; return 'Nobody bites. In the end you cover it yourself, a month late.'; } },
+      { k: 'shut', label: () => 'Shut it down before it costs more', go: f => finCollapse(f, 'the financing fell apart') }] },
+  { k: 'bust', st: [1, 2, 3], kind: 'money', w: f => f.fin.ps && !f.fin.psGone ? .7 : 0,
+    title: f => `A buyer for ${f.title} goes bust`, text: f => `One of the foreign distributors who pre-bought ${f.title} has filed for bankruptcy. Their guarantee is worthless, and the bank that lent against it wants its money.`,
+    opts: [{ k: 'pay', label: f => `Repay the bank (${fmtM(f.fin.ps * .5 * .92)})`, go: f => { const v = f.fin.ps * .5; myCo().cash -= v * .92; f.fin.ps -= v; if (f.dist && f.dist.intl) f.dist.intl.mg = f.fin.ps; return 'Half the foreign money is gone. Those territories are unsold again; a festival might sell them.'; } }] },
+  { k: 'storm', st: [2], kind: 'god', w: f => FIN_PLACE[f.hub] ? 1.3 : .8,
+    title: f => `${(FIN_PLACE[f.hub] || 'a storm').replace(/^./, m => m.toUpperCase())} hits the ${f.title} shoot`, text: f => `${(FIN_PLACE[f.hub] || 'A storm').replace(/^./, m => m.toUpperCase())} takes out the main location: sets, generators, a week of schedule.${f.fin.insured ? ' The insurers will pay most of the damage, eventually.' : ''}`,
+    opts: [{ k: 'rebuild', label: f => `Rebuild and reshoot (${fmtM(f.budget * .14)})`, go: f => { const b = finCost(f, .14, 1); finDelay(f, 3); return `You rebuild. ${b ? `Insurance covers ${fmtM(b)}.` : ''}` + finBond(f); } },
+      { k: 'stage', label: f => `Move it onto a soundstage (${fmtM(f.budget * .07)})`, go: f => { const b = finCost(f, .07, 1); finQ(f, -1); return `It looks a little like a set now, because it is one.${b ? ` Insurance covers ${fmtM(b)}.` : ''}` + finBond(f); } },
+      { k: 'write', label: () => 'Rewrite around it', check: ['tas', 13], go: (f, ok) => { finQ(f, ok ? 1 : -2); return ok ? 'The rewrite is better than the scene you lost. Nobody will ever know.' : 'The hole in the story shows.'; } }] },
+  { k: 'ill', st: [1, 2], kind: 'god', w: () => .6,
+    title: f => `${P(f.cast[0]).name} is seriously ill`, text: f => `${P(f.cast[0]).name} is in hospital. The doctors say weeks, not days.${f.fin.insured ? ' The cast insurance kicks in.' : ''}`,
+    opts: [{ k: 'wait', label: () => 'Shut down and wait', go: f => { finDelay(f, 7); const b = finCost(f, .1, 1); return `Seven weeks of nothing, then back to work.${b ? ` Insurance covers ${fmtM(b)}.` : ''}` + finBond(f); } },
+      { k: 'around', label: () => 'Shoot around them with a double', check: ['pack', 14], go: (f, ok) => { finDelay(f, 2); finCost(f, .04, 1); finQ(f, ok ? 0 : -3); return ok ? 'Backs of heads, long lenses, a clever edit. It works.' : 'You can tell. The critics will tell everyone else.'; } }] },
+  { k: 'virus', st: [1, 2], kind: 'god', w: () => S.year >= 2020 && S.year <= 2022 ? 4 : .15,
+    title: f => `An outbreak shuts down ${f.title}`, text: f => `A virus goes through the unit, then the city. Production stops by order.${S.year >= 2021 ? ' Insurers stopped covering pandemics last year.' : ''}`,
+    opts: [{ k: 'wait', label: () => 'Wait it out', go: f => { finDelay(f, 12); finCost(f, .16, S.year < 2021); return 'Twelve weeks. Then testing, masks and a smaller crew, and it costs more to do less.' + finBond(f); } },
+      { k: 'shut', label: () => 'Close it down for good', go: f => finCollapse(f, 'the shutdown never ended', S.year < 2021) }] },
+  { k: 'accident', st: [2], kind: 'god', w: f => .4 + (f.genre === 'Action' || f.genre === 'War' || f.genre === 'Superhero' ? .8 : 0),
+    title: f => `An accident on the set of ${f.title}`, text: f => 'A stunt goes wrong. Nobody is killed, but people are hurt, and the safety inspectors close the set while they investigate.',
+    opts: [{ k: 'cooperate', label: () => 'Co-operate fully and make it right', go: f => { finDelay(f, 4); const b = finCost(f, .08, 1); ME().standing = clamp(ME().standing + .5, 0, 100); return `Four weeks, new rules, and a crew that trusts you more.${b ? ` Insurance covers ${fmtM(b)}.` : ''}` + finBond(f); } },
+      { k: 'push', label: () => 'Fight the closure and push on', check: ['cha', 15], go: (f, ok) => { if (ok) { finDelay(f, 1); return 'You\'re back in a week. Some of the crew won\'t look at you.'; } ME().standing = clamp(ME().standing - 3, 0, 100); finDelay(f, 6); finCost(f, .1); return 'The inspectors don\'t like being pushed. Six weeks, a fine, and a story in the trades.' + finBond(f); } }] },
+  { k: 'feud', st: [2], kind: 'people', w: f => .6 + keyPeople(f).filter(p => has(p, 'Difficult') || has(p, 'Volatile') || has(p, 'Perfectionist')).length * .8,
+    title: f => `War on the set of ${f.title}`, text: f => `${P(f.dir).name} and ${P(f.cast[0]).name} have stopped speaking. The schedule is slipping and everybody is choosing sides.`,
+    opts: [{ k: 'back', label: f => `Back ${P(f.dir).name}`, check: ['cha', 13], go: (f, ok) => { finQ(f, ok ? 1 : -2); if (!ok) finCost(f, .04); return ok ? 'The star sulks, then delivers. Anger looks good on camera.' : 'The star phones it in for the rest of the shoot.'; } },
+      { k: 'fire', label: f => `Fire ${P(f.dir).name}`, check: ['pack', 14], go: (f, ok) => { finDelay(f, ok ? 3 : 6); finCost(f, ok ? .05 : .1); finQ(f, ok ? -1 : -4); addTie(ME(), P(f.dir), -20); return (ok ? 'A safe pair of hands finishes the film. It\'s coherent, which is something.' : 'The replacement hates the footage, and it shows.') + finBond(f); } },
+      { k: 'mediate', label: () => 'Get them in a room', check: ['cha', 14], go: (f, ok) => { if (ok) return 'Two hours, one bottle of wine, and a handshake. Nobody will speak of it again.'; finQ(f, -2); finCost(f, .03); return 'It gets worse. Shouting is heard through two walls.'; } }] },
+  { k: 'overrun', st: [2], kind: 'money', w: f => .8 + (has(P(f.dir), 'Perfectionist') ? 1.5 : 0),
+    title: f => `${f.title} is falling behind`, text: f => `${P(f.dir).name} is shooting fourteen takes of everything, and the schedule is a week behind.`,
+    opts: [{ k: 'cut', label: () => 'Cut pages from the script', go: f => { finQ(f, -2); return 'Six pages go. The director calls it butchery, to anyone who\'ll listen.'; } },
+      { k: 'pay', label: f => `Approve the overtime (${fmtM(f.budget * .08)})`, go: f => { finCost(f, .08); return 'You pay. The days get longer.' + finBond(f); } },
+      { k: 'trust', label: f => `Let them shoot (${fmtM(f.budget * .15)} or more)`, go: f => { finCost(f, .15); finQ(f, 2); return 'You let them. The footage is extraordinary. So is the bill.' + finBond(f); } }] },
+  { k: 'audit', st: [3], kind: 'money', w: f => f.fin.reb ? .8 : 0,
+    title: f => `The incentive auditors query ${f.title}`, text: f => `The film office says some of the spend didn't qualify. They want ${fmtM(f.fin.reb * .2)} of the incentive back.`,
+    opts: [{ k: 'pay', label: () => 'Pay it', go: f => { myCo().cash -= f.fin.reb * .2; return 'You pay and resolve to keep better receipts.'; } },
+      { k: 'fight', label: () => 'Argue every line', check: ['fin', 14], go: (f, ok) => { if (ok) return 'Your accountant wins on every line. The film office apologises, in writing.'; myCo().cash -= f.fin.reb * .3; return 'You lose, and pay their costs too.'; } }] },
+  { k: 'lab', st: [2, 3], kind: 'god', w: () => .35,
+    title: f => `Footage lost on ${f.title}`, text: f => S.year < 2005 ? 'A lab accident ruins three days of negative.' : 'A drive fails and the backup was never made: three days of footage are gone.',
+    opts: [{ k: 'reshoot', label: f => `Reshoot (${fmtM(f.budget * .06)})`, go: f => { const b = finCost(f, .06, 1); finDelay(f, 2); return `You get the days back.${b ? ` Insurance covers ${fmtM(b)}.` : ''}` + finBond(f); } },
+      { k: 'cheat', label: () => 'Cheat it in the edit', check: ['tas', 14], go: (f, ok) => { finQ(f, ok ? 0 : -2); return ok ? 'The editor works a miracle. Nobody notices.' : 'The scene doesn\'t quite join up, and it shows.'; } }] },
+  // good news happens too
+  { k: 'market', st: [1, 2, 3], kind: 'luck', w: f => f.fin.ps ? .6 : .25,
+    title: f => `A buyer at the film market wants ${f.title}`, text: f => 'A sales agent shows ten minutes of footage at the market, and a buyer from a territory you hadn\'t sold makes an offer on the spot.',
+    opts: [{ k: 'take', label: f => `Take it (${fmtM(f.budget * .06)})`, go: f => { myCo().cash += f.budget * .06; f.fin.ps = (f.fin.ps || 0) + f.budget * .06; return 'Sold. One more flag on the map in the office.'; } }] }
+];
+function finWeek() {
+  const c = myCo(); if (!c) return;
+  for (const f of finFilms()) {
+    const F = f.fin;
+    if (f.rel !== null) {   // released: repay the gap loan, and the film is out of the woods
+      if (F.gap && !F.gapPaid) { F.gapPaid = 1; c.cash -= F.gap * 1.12; finLog(f, `Gap loan repaid with interest: ${fmtM(F.gap * 1.12)}.`); }
+      F.over = 'released'; continue;
+    }
+    if (f.stage < 0) { F.over = 'collapsed'; continue; }
+    if (F.pend || (F.last && S.week - F.last < 5)) continue;
+    const hz = [.025, .03, .045, .02][f.stage] || 0;
+    if (prnd() >= hz) continue;
+    const L = FIN_INC.filter(x => x.st.includes(f.stage) && !(F.seen || []).includes(x.k) && x.w(f) > 0), x = L.length ? wpickP(L, y => y.w(f)) : null; if (!x) continue;
+    F.pend = x.k; F.last = S.week; (F.seen = F.seen || []).push(x.k);
+    inbox('fin', x.title(f), x.text(f), { film: f.id, inc: x.k, choices: x.opts.map(o => ({ k: o.k, label: o.label(f), check: o.check })) });
+  }
+  coinvWeek();
+}
+function wpickP(L, w) { const t = L.reduce((s, x) => s + w(x), 0); let r = prnd() * t; for (const x of L) { r -= w(x); if (r <= 0) return x; } return L[L.length - 1]; }
+function finPick(it, k) {
+  if (it.kind !== 'fin' || it.coinv !== undefined) return false;
+  const f = S.films[it.film], x = FIN_INC.find(y => y.k === it.inc), o = x && x.opts.find(y => y.k === k);
+  it.done = true; it.picked = k; if (f && f.fin) f.fin.pend = null;
+  if (!f || !o || f.stage < 0 || f.rel !== null) { it.result = { t: 'It has sorted itself out.' }; return true; }
+  const ok = o.check ? roll(o.check[0], o.check[1]) : null;
+  const t = o.go(f, ok);
+  const lab = o.label(f).replace(/ \(.*\)$/, '');
+  finLog(f, `${x.title(f)}: ${lab[0].toLowerCase() + lab.slice(1)}.`, x.kind === 'luck' ? 'good' : '');
+  it.result = { ok, roll: ok !== null ? S.me.lastRoll : undefined, t };
+  return true;
+}
+
+// ---- co-investing in other people's films ----
+// Equity is the riskiest money in a film and gets paid first: it recoups 120% before anyone else's profit, then
+// splits what's left with the producers. On a studio film it's a slate deal, pro rata with the studio, and the
+// studio takes a distribution fee first. Most films lose money; development is where they die.
+function eqShare(f) { return f.tier === 1 && f.co !== null ? 1 : f.tier === 2 && f.co !== null ? .6 : .3 + hashRand(f.id * 41 + 7)() * .25; }
+function coinvOpen() {
+  const M = S.me, me = ME(), wide = me.standing >= 50 || M.cash >= usd(5e6);
+  const mine = new Set((M.coinv || []).map(x => x.f)), own = M.company;
+  return S.active.map(i => S.films[i]).filter(f => f.rel === null && (f.stage === 0 || f.stage === 1) && f.stageEnd - S.week >= 2 && f.co !== own && !mine.has(f.id) && (f.hub === M.hub || wide) && !keyIds(f).includes(me.id) && !(f.tier === 1 && f.co !== null && me.standing < 40))
+    .sort((a, b) => (a.hub === M.hub ? 0 : 1) - (b.hub === M.hub ? 0 : 1) || hashRand(a.id + S.week * 7)() - hashRand(b.id + S.week * 7)()).slice(0, 8);
+}
+function coinvAct(a) {
+  const M = S.me, f = S.films[a.f]; if (!f || f.rel !== null || f.stage < 0 || f.stage > 1) return false;
+  const amt = Math.round(f.cost * 1e6 * eqShare(f) * [.05, .1, .25][+a.p || 0]);
+  if (M.cash < amt || (M.coinv || []).some(x => x.f === f.id)) return false;
+  M.cash -= amt; (M.coinv = M.coinv || []).push({ f: f.id, amt, w: S.week, paid: 0, ev: f.events.length });
+  diary(`Money: put ${fmtCash(amt)} into ${f.title}.`);
+  if (f.prod !== null && P(f.prod)) meet(f.prod, 'You invested in their film', 4);
+  return true;
+}
+function coinvOwed(x) {
+  const f = S.films[x.f]; if (f.rel === null || f.rentals === undefined) return 0;
+  const eq = eqShare(f) * f.cost, pool = Math.max(0, f.rentals - f.pa - f.backend) + (f.afterTotal || 0) * .5;
+  let owed = Math.min(pool, eq * 1.2) + Math.max(0, pool - eq * 1.2) * .5;
+  if (f.tier === 1 && f.co !== null) owed = pool * .85;
+  return Math.round(owed * x.amt / Math.max(1e-6, eq));   // owed and eq in millions, amt in dollars
+}
+function coinvWeek() {
+  const M = S.me;
+  // now and then someone with a film comes looking for money, if you look like you have some
+  if (M.cash >= usd(400000) && prnd() < .025) { const o = coinvOpen()[0]; if (o && P(o.prod) && !P(o.prod).player) inbox('note', `${P(o.prod).name} is raising money for ${o.title}`, `${P(o.prod).name} is closing the financing on ${o.title}, ${o.genre.toLowerCase()} with ${P(o.cast[0]).name}, and wonders if you'd like a piece. Equity gets paid back first, if anything comes back. It's on your company page, under investing.`, { film: o.id, person: o.prod }); }
+  for (const x of M.coinv || []) {
+    if (x.done) continue;
+    const f = S.films[x.f];
+    if (f.stage < 0) { x.done = 1; x.lost = 1; inbox('note', `${f.title} is dead`, `${f.title} has been abandoned. Your ${fmtCash(x.amt)} went on development and lawyers, and none of it is coming back.`, { film: f.id }); continue; }
+    if (f.events.length > x.ev) { const e = f.events[f.events.length - 1]; x.ev = f.events.length; mail('news', `${P(f.prod).name}`, `From the set of ${f.title}`, `A note to the investors: ${e.t}`); }
+    if (f.rel === null && f.stage >= 1 && !x.call && prnd() < .006) { x.call = 1; inbox('fin', `A cash call on ${f.title}`, `${f.title} is over budget and the producers are asking every investor for 20% more. Pay, or see your share diluted.`, { film: f.id, coinv: f.id, choices: [{ k: 'pay', label: `Pay ${fmtCash(Math.round(x.amt * .2))}` }, { k: 'no', label: 'Decline and be diluted' }] }); }
+    if (f.rel !== null && S.week >= f.rel + 10) {
+      const due = [f.rel + 10, f.rel + 62, f.rel + 114, f.rel + 166].filter(w => S.week >= w).length;
+      if (due > (x.stmt || 0)) {
+        x.stmt = due; const owed = coinvOwed(x), pay = Math.max(0, owed - x.paid);
+        if (pay > 0) { M.cash += pay; x.paid += pay; }
+        inbox('note', `Statement: ${f.title}`, `${due === 1 ? 'The theatrical run is in.' : `Year ${due - 1} of television, streaming and home video.`} ${pay > 0 ? `Your share this time: ${fmtCash(pay)}.` : 'Nothing for the investors this time.'} So far you've had back ${fmtCash(x.paid)} on ${fmtCash(x.amt)}.`, { film: f.id });
+        if (due >= 4) x.done = 1;
+      }
+    }
+  }
+}
+function coinvPick(it, k) {
+  if (it.kind !== 'fin' || it.coinv === undefined) return false;
+  const M = S.me, x = (M.coinv || []).find(y => y.f === it.coinv); it.done = true; it.picked = k;
+  if (!x) { it.result = { t: 'Nothing to do.' }; return true; }
+  if (k === 'pay') { const v = Math.round(x.amt * .2); if (M.cash < v) { x.amt = Math.round(x.amt * .85); it.result = { t: 'You can\'t cover it. Your share is diluted.' }; return true; } M.cash -= v; x.amt += v; it.result = { t: 'You pay. The film goes on with your share intact.' }; }
+  else { x.amt = Math.round(x.amt * .85); it.result = { t: 'Others cover it, and your slice of the film gets thinner.' }; }
+  return true;
+}
+
+// ---- pages ----
+const FIN_COL = { equity: '#c9a227', rebate: '#4a9d7f', presale: '#4a7fbf', gap: '#9b6ab8', investors: '#c96a4a', studio: '#8a8f98', cofi: '#c9a227', defer: '#b0a070' };
+function stackBar(L) { const t = L.reduce((s, x) => s + x[1], 0) || 1; return `<div class="finbar">${L.filter(x => x[1] > 0).map(x => `<span style="width:${(x[1] / t * 100).toFixed(1)}%;background:${FIN_COL[x[2]] || '#888'}" title="${esc(x[0])}"></span>`).join('')}</div><ul class="plain small finleg">${L.filter(x => x[1] > 0).map(x => `<li><i style="background:${FIN_COL[x[2]] || '#888'}"></i>${esc(x[0])} <b>${fmtM(x[1])}</b> <span class="muted">${Math.round(x[1] / t * 100)}%</span></li>`).join('')}</ul>`; }
+// how any film in the world was paid for: your own films from their real plan, the rest from what's typical
+function finStackOf(f) {
+  if (f.fin) { const F = f.fin, L = []; if (F.reb) L.push(['Production incentive', F.reb, 'rebate']); if (F.ps) L.push(['Foreign pre-sales', F.ps, 'presale']); if (F.gap) L.push(['Gap loan', F.gap, 'gap']); if (f.investors) L.push(['Equity investors', f.investors.amount, 'investors']); const rest = f.budget - L.reduce((s, x) => s + x[1], 0); if (rest > 0) L.push(['Your company', rest, 'equity']); return L; }
+  const r = hashRand(f.id * 131 + 5), b = f.budget, inc = incentiveOf(f.hub, f.ry || yearOf(f.gl)) * .75;
+  if (f.co !== null && f.tier === 1) { const co = r() < .35 ? .25 + r() * .25 : 0; return [['Studio', b * (1 - co - inc), 'studio'], co ? ['Co-financing partner', b * co, 'cofi'] : null, inc ? ['Production incentive', b * inc, 'rebate'] : null].filter(Boolean); }
+  const eq = eqShare(f), ps = (f.ry || 2000) >= 1975 ? clamp(.1 + r() * .3, 0, 1 - eq - inc) : 0, gap = ps > .15 && r() < .5 ? .1 : 0, rest = Math.max(0, 1 - eq - ps - gap - inc);
+  return [[f.co !== null ? 'Company equity' : 'Private equity', b * eq, 'equity'], inc ? ['Production incentive', b * inc, 'rebate'] : null, ps ? ['Foreign pre-sales', b * ps, 'presale'] : null, gap ? ['Gap loan', b * gap, 'gap'] : null, rest > .01 ? [f.co !== null ? 'Distributor advance' : 'Deferred fees and favours', b * rest, f.co !== null ? 'cofi' : 'defer'] : null].filter(Boolean);
+}
+function finStackHTML(f) {
+  if (!f || f.archive) return '';
+  const L = finStackOf(f), F = f.fin;
+  return `<section class="panel"><h3>How it was paid for</h3>${stackBar(L)}${F ? `<p class="small muted">${F.bonded ? 'Bonded' : 'Not bonded'}${F.bondTook ? ', and the guarantor took it over' : ''} · insured · ${F.over === 'collapsed' ? `<span class="bad">collapsed: ${esc(F.dead || '')}</span>` : esc(f.status)}</p>${F.log.length ? `<ul class="plain small">${F.log.slice(-8).reverse().map(e => `<li class="${e.tone}">${fmtDate(e.w, true)} · ${esc(e.t)}</li>`).join('')}</ul>` : ''}` : `<p class="small muted">${f.co !== null && f.tier === 1 ? 'Studio money, mostly: the studio pays and owns it, sometimes with a partner who takes a slice of the risk.' : 'Independent money: pre-sales, incentives, a loan and equity that gets paid back first, if anything comes back.'}</p>`}</section>`;
+}
+const ROAD = ['Development and financing', 'Pre-production', 'Shooting', 'Post-production', 'Release'];
+function roadHTML(f) { return `<span class="road">${ROAD.map((s, i) => `<span class="${f.stage > i || f.rel !== null ? 'done' : f.stage === i ? 'on' : ''}">${s}</span>`).join('')}</span>`; }
+function finPanelHTML() {
+  const M = S.me, c = myCo(), mine = c ? c.films.map(i => S.films[i]).filter(f => f.fin && (f.rel === null || S.week - f.rel < 26)) : [];
+  const own = mine.length ? `<h4>On the road</h4>${mine.map(f => `<div class="finfilm"><b>${fl(f.id)}</b> ${f.fin.over === 'collapsed' ? '<span class="chip bad">collapsed</span>' : ''}<br>${roadHTML(f)}${stackBar(finStackOf(f))}<p class="small muted">Budget ${fmtM(f.budget)}${f.cost > f.budget ? `, running at ${fmtM(f.cost)}` : ''}${f.fin.bonded ? ' · bonded' : ''}${f.fin.bondTook ? ' · <span class="bad">the guarantor has control</span>' : ''}</p>${f.fin.log.length ? `<ul class="plain small">${f.fin.log.slice(-4).reverse().map(e => `<li class="${e.tone}">${fmtDate(e.w, true)} · ${esc(e.t)}</li>`).join('')}</ul>` : ''}</div>`).join('')}` : '';
+  const open = coinvOpen(), held = (M.coinv || []).slice().reverse().slice(0, 12);
+  const offer = f => { const amts = [.05, .1, .25].map(p => Math.round(f.cost * 1e6 * eqShare(f) * p)); return `<tr><td>${fl(f.id)}<br><span class="muted small">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${f.co !== null ? cl(f.co) : 'independent'}</span></td><td class="small">${pl(f.dir)}<br>${pl(f.cast[0])}</td><td class="n">${fmtM(f.cost)}</td><td class="small">${esc(f.status)}</td><td>${amts.map((v, i) => `<button class="btn-s ghost" data-coinv="${f.id}:${i}" ${M.cash < v ? 'disabled' : ''}>${fmtCash(v)}</button>`).join(' ')}</td></tr>`; };
+  return `${own}<h4>Invest in other people's films</h4><p class="small muted">Equity is the money that gets paid back first (120%, then half the profit), and the money that's lost first. On a studio film you're in a slate deal, pro rata, after the studio's fee. Most films lose money; development is where they die. Statements come after the run and then once a year for three years.</p>
+   ${open.length ? `<div class="tw"><table class="grid small"><thead><tr><th>Film</th><th>Director, lead</th><th class="n">Budget</th><th>Stage</th><th>Put in</th></tr></thead><tbody>${open.map(offer).join('')}</tbody></table></div>` : '<p class="muted small">Nothing raising money in town this week.</p>'}
+   ${held.length ? `<h4>Your stakes</h4><ul class="plain small">${held.map(x => { const f = S.films[x.f]; return `<li>${fl(f.id)} · in ${fmtCash(x.amt)} · ${x.lost ? '<span class="bad">lost</span>' : f.rel === null ? esc(f.status) : `back so far <b class="${x.paid >= x.amt ? 'good' : ''}">${fmtCash(x.paid)}</b>`}</li>`; }).join('')}</ul>` : ''}`;
+}
+function finClick(t) { if (t.dataset.coinv) { const [f, p] = t.dataset.coinv.split(':'); doAct({ t: 'coinv', f: +f, p: +p }); render(true); return true; } return false; }
+// </financing>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -28984,6 +29331,7 @@ function viewFilm(id) {
     </div><div class="cols two"><section class="panel"><h3>Story of the production</h3>${f.events.length ? `<ul class="plain">${f.events.map(e => `<li><time>${fmtDate(e.w, true)}</time> ${esc(e.t)}</li>`).join('')}</ul>` : '<p class="muted">An uneventful shoot.</p>'}
     ${f.awards.length ? `<h4>Awards</h4><ul class="plain">${f.awards.map(a => `<li>✦ ${typeof bodyLink === 'function' ? bodyLink(a) : esc(a)}</li>`).join('')}</ul>` : ''}${f.legacy ? `<h4>Legacy</h4><p>Rediscovered as a classic in ${f.legacy}.</p>` : ''}</section><div></div></div>` + (typeof rogerPanelHTML === 'function' ? rogerPanelHTML(f) : '') + (typeof filmStaffHTML === 'function' ? filmStaffHTML(f) : '') + cm;
   }
+  if (typeof finStackHTML === 'function' && f.tier) body += finStackHTML(f);
   return `<div class="head detail filmhead"><div class="posterwrap">${posterSVG(f, 170)}<button class="btn-s ghost" data-trailer="${f.id}">▶ Trailer</button></div><div><p class="eyebrow">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${released ? 'Released ' + fmtDate(f.rel, true) : 'Greenlit ' + fmtDate(f.gl, true)}</p><h2>${esc(f.title)}</h2>
   <p class="lede">${f.co === null ? 'An independent production' : { 1: 'A major-studio', 2: 'A mid-size', 3: 'A low-budget' }[f.tier] + ' production for ' + esc(S.companies[f.co].name)}, directed by ${esc(P(f.dir).name)}.</p><p class="logline">${esc(filmLogline(f))}</p><p class="tagline">“${esc(filmTagline(f))}”</p>${stillsHTML(f)}</div></div>${body}${typeof filmStoryHTML === "function" ? filmStoryHTML(f) : ""}${filmRunHTML(f)}${filmReviewsHTML(f)}${released ? '' : cinePanel(true, null, filmTriviaHTML(f))}`;
 }
@@ -29274,6 +29622,7 @@ function weekGrid() {
   };
   return `<div class="tw"><table class="cal"><thead><tr><th></th>${DAYS7.map((dn, i) => `<th class="${W && i === W.day ? 'now' : ''}">${dn.slice(0, 3)}<small>${dayDate(i).getUTCDate()}</small></th>`).join('')}</tr></thead>
    <tbody>${BLOCKS.map((bn, b) => `<tr><th>${bn}</th>${DAYS7.map((_, d) => cell(d, b)).join('')}</tr>`).join('')}</tbody></table></div>
+  ${(() => { const R = Object.keys((M.focus && M.focus.auto && M.calRested) || {}).filter(x => { const [d, b] = x.split('-').map(Number); return d * 3 + b >= now && (cal[d][b] === 'rest' || cal[d][b] === 'home'); }); return R.length ? `<p class="muted small">🛋️ Autopilot made ${R.length} block${R.length > 1 ? 's' : ''} rest (${R.map(x => { const [d, b] = x.split('-').map(Number); return DAYS7[d].slice(0, 3) + ' ' + BLOCKS[b].toLowerCase(); }).join(', ')}): otherwise you'd drop below a third of your energy. Work and school come first, then rest, then hobbies. You can still change any of them.</p>` : ''; })()}
   ${M.school || M.jobs.length > 1 ? `<p class="muted small">🗓️ Obligations are fitted in for you: each job gets its own days${M.school ? `, and your course gets its ${(schoolProg(M.school) || {}).days} study sessions in the least important free blocks. <button class="linkish" data-auto="oblig">${M.autoOblig === false ? 'Fit my study sessions for me' : 'Let me place study sessions myself'}</button>` : '.'}</p>` : ''}
   <p class="calquick muted small">Quick plans: <button class="linkish" data-calfill="grind">Job hunt all week</button> · <button class="linkish" data-calfill="craft">Craft week</button> · <button class="linkish" data-calfill="writer">Writing week</button> · <button class="linkish" data-calfill="balance">Balanced</button> · <button class="linkish" data-calfill="recover">Recover</button></p>
   <div class="skip"><span class="muted">Skip ahead with this plan (stops at any decision):</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
@@ -29398,7 +29747,7 @@ function companyPanel() {
   }
   const festRow = f => { const done = (M.fests || []).filter(x => x.film === f.id); return festEligible(f) ? `<span class="fests">${FESTIVALS.filter(F => done.some(x => x.k === F.k) || typeof festFits !== 'function' || festFits(F, f)).map(F => { const e = done.find(x => x.k === F.k); return e ? `<span class="chip ${e.sel ? 'good' : e.done ? '' : 'hist'}">${esc(F.name.replace(/^the /, ''))}: ${e.done ? (e.sel ? 'selected' : 'no') : 'waiting'}</span>` : `<button class="btn-s ghost" data-fest="${f.id}:${F.k}" title="${esc(F.d)} Entry ${fmtCash(usd(F.fee))}">${esc(F.name.replace(/^the /, ''))}</button>`; }).join(' ')}</span>` : ''; };
   return `<section class="panel"><h3>Your company and films</h3>${co}
-   ${films.length ? `<h4>Your films</h4><ul class="plain specs">${films.map(f => `<li>${fl(f.id)} <span class="muted">${esc((f.xc && f.xc[me.id]) || (f.dir === me.id ? 'Director' : f.prod === me.id ? 'Producer' : f.wri.includes(me.id) ? 'Writer' : 'Crew'))} · ${esc(f.status)}${f.rel !== null ? ` · ${f.reviews}/100 · ${fmtM(f.total)} worldwide · ${money(f.theatrical)} at the box office` : ''}</span>${f.rel === null && f.stage >= 0 ? `<br>${stageCell(f)} <span class="muted small">${fmtM(f.cost)} budget · ${f.stage < 4 ? 'next stage ' + fmtDate(f.stageEnd, true) : ''}${f.investors ? ` · investors take ${Math.round(f.investors.share * 100)}%` : ''}</span>` : ''}${festEligible(f) ? '<br>' + festRow(f) : ''}</li>`).join('')}</ul><p class="muted small">Released films can go to festivals for a year. Selection depends on quality; small independent films get a little extra love.</p>` : ''}</section>`;
+   ${films.length ? `<h4>Your films</h4><ul class="plain specs">${films.map(f => `<li>${fl(f.id)} <span class="muted">${esc((f.xc && f.xc[me.id]) || (f.dir === me.id ? 'Director' : f.prod === me.id ? 'Producer' : f.wri.includes(me.id) ? 'Writer' : 'Crew'))} · ${esc(f.status)}${f.rel !== null ? ` · ${f.reviews}/100 · ${fmtM(f.total)} worldwide · ${money(f.theatrical)} at the box office` : ''}</span>${f.rel === null && f.stage >= 0 ? `<br>${stageCell(f)} <span class="muted small">${fmtM(f.cost)} budget · ${f.stage < 4 ? 'next stage ' + fmtDate(f.stageEnd, true) : ''}${f.investors ? ` · investors take ${Math.round(f.investors.share * 100)}%` : ''}</span>` : ''}${festEligible(f) ? '<br>' + festRow(f) : ''}</li>`).join('')}</ul><p class="muted small">Released films can go to festivals for a year. Selection depends on quality; small independent films get a little extra love.</p>` : ''}${typeof finPanelHTML === 'function' ? finPanelHTML() : ''}</section>`;
 }
 // School and representation: the two longer roads.
 function pathsPanel() {
@@ -29640,7 +29989,8 @@ function careerClick(t) {
   if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
-  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.coinv && finClick(t)) return true;
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
@@ -29659,7 +30009,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -29695,6 +30045,7 @@ function careerChange(e) {
   if (id === 'new-work') { UI.newWork = v; render(true); return true; }
   if (id === 'rel-promo') { UI.relPromo = v; return true; }
   if (/^mk-(micro|dir|lead|dp|ed|mus|pd)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
+  if (e.target.dataset.mkfin) { const [a, b, f] = e.target.dataset.mkfin.split(':'); UI.mk[a + ':' + b][f] = e.target.checked ? 1 : 0; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
   if (id === 'co-name') { (UI.co = UI.co || {}).name = v; return true; }
   if (/^pitch-\d+$/.test(id)) { (UI.pitch = UI.pitch || {})[+id.slice(6)] = v; render(true); return true; }
@@ -29709,10 +30060,19 @@ function careerChange(e) {
 function livingPhrase() { const M = S.me; return ({ couch: 'You\'re couch-surfing', shared: 'You live in a shared flat', studio: 'You live in a studio flat', own: 'You have your own place', loft: 'You live in a converted warehouse loft', house: 'You live in a house with a garden' })[M.life] || 'You live in ' + ORIGIN.life[M.life].label.toLowerCase(); }
 // One form per script: size, who directs, who leads, investors, and what it all costs.
 function makeFilmForm(c, k, x) {
-  const key = k + ':' + x.id, F = (UI.mk = UI.mk || {})[key] = UI.mk[key] || { micro: 1, dir: '', lead: '', inv: 0 };
+  const key = k + ':' + x.id, F = (UI.mk = UI.mk || {})[key] = UI.mk[key] || { micro: 1, dir: '', lead: '', inv: 0, rb: 1, ps: 0, gap: 0 };
   const micro = !!+F.micro, est = estBudget(x.genre) * (micro ? .25 : 1), leadId = F.lead === '' ? undefined : +F.lead;
-  const total = est + (leadId !== undefined ? leadFee(leadId, x.genre, micro) : 0), cash = c.cash, need = total * .9;
-  const short = cash < need, wait = x.invTry !== undefined && S.week - x.invTry < 4, canInv = cash >= total * .25 && !wait;
+  const total = est + (leadId !== undefined ? leadFee(leadId, x.genre, micro) : 0), cash = c.cash;
+  const dirId = F.dir === 'me' ? ME().id : F.dir !== '' && F.dir !== undefined ? +F.dir : undefined;
+  const plan = finPlan(total, { rb: +F.rb, ps: +F.ps, gap: +F.gap, genre: x.genre, lead: leadId, dir: dirId }), need = plan.equity * .9;
+  const short = cash < need, wait = x.invTry !== undefined && S.week - x.invTry < 4, canInv = cash >= plan.equity * .25 && !wait;
+  const inc = incentiveOf(S.me.hub), psOK = presaleShare(x.genre, leadId, dirId) > 0;
+  const fin = `<div class="finplan small"><b>The money</b>
+    <label><input type="checkbox" data-mkfin="${key}:rb" ${+F.rb ? 'checked' : ''} ${inc ? '' : 'disabled'}> ${inc ? `Cash-flow the ${esc(hubName(S.me.hub))} incentive (${Math.round(inc * 100)}%)` : `No production incentive in ${esc(hubName(S.me.hub))} ${S.year < 2000 ? 'yet' : ''}`}</label>
+    <label><input type="checkbox" data-mkfin="${key}:ps" ${+F.ps ? 'checked' : ''} ${psOK ? '' : 'disabled'}> ${psOK ? `Pre-sell the foreign rights (${Math.round(presaleShare(x.genre, leadId, dirId) * 100)}% of the budget) ${+F.ps ? oddsBar('pack', presaleDC(x.genre, leadId)) : ''}` : 'Pre-sales need a name: a lead with some fame, or a director people know'}</label>
+    ${+F.ps && psOK ? `<label><input type="checkbox" data-mkfin="${key}:gap" ${+F.gap ? 'checked' : ''}> Gap loan against the home rights (15%)</label>` : ''}
+    ${stackBar(plan.parts.map(p => [p.k === 'rebate' ? 'Incentive' : p.k === 'presale' ? 'Pre-sales' : 'Gap loan', p.amt, p.k]).concat([['Company and investors', plan.equity, 'equity']]))}
+    <span class="muted">Fees, bond and insurance: ${fmtCash(Math.round(plan.feeT * 1e6))}.${plan.bonded ? ' Bank money means a completion bond: run far over budget and the guarantor takes the film.' : ''}</span></div>`;
   const dirs = dirOptions(x.genre), leads = castOptions(x.genre), M = S.me;
   const tag = p => M.known[p.id] ? (M.known[p.id].tags.includes('Your regular') ? ' ♥' : ' ★') : '';
   const crewSel = (f, role, craft, lab) => `<label>${lab} ${sel('mk-' + f + '-' + key, [['', 'Their choice']].concat(crewOptions(role, craft, x.genre).map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, craft, x.genre))}`])), F[f] || '')}</label>`;
@@ -29720,7 +30080,7 @@ function makeFilmForm(c, k, x) {
    <div class="mkrow"><label>Size ${sel('mk-micro-' + key, [['1', 'Micro-budget'], ['0', 'Full budget']], String(F.micro))}</label>
     <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, 'dir', x.genre))}`])), F.dir)}</label>
     <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}${crewSel('mus', 'composer', 'mus', 'Composer')}${crewSel('pd', 'designer', 'des', 'Production designer')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
-   <p class="small">Cost about <b>${fmtCash(Math.round(total * 1e6))}</b> · company has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
+   ${fin}<p class="small">Budget about <b>${fmtCash(Math.round(total * 1e6))}</b> · the company's part <b>${fmtCash(Math.round(plan.equity * 1e6))}</b> · it has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
    <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button></div>`;
 }
 // Your regulars: the people who'd work with you again, first in line when you hire.

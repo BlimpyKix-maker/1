@@ -74,9 +74,9 @@ function boardPick(it, k) {
   }
   if (it.act === 'pkg') {
     const j = typeof corpJob === 'function' ? corpJob() : null, c = j && S.companies[j.co]; if (!c) { it.result = { t: 'The job is gone.' }; return true; }
-    const r = +j.k.slice(5), base = rungPay(c, r), P0 = { co: c.id, rung: r, since: S.week, salary: base, bonus: .5, grant: Math.round(base * 2 / Math.max(1, mktPrice(c))), vested: 0, para: 0, job: j.id };
+    const r = +j.k.slice(5), base = rungPay(c, r), P0 = { co: c.id, rung: r, since: S.week, salary: base, bonus: r >= 7 ? 1.5 : r >= 6 ? 1 : .5, grant: Math.round(base * (r >= 7 ? 6 : r >= 6 ? 3 : 2) / Math.max(1, mktPrice(c))), vested: 0, para: 0, job: j.id };
     let ok = null;
-    if (k === 'hard') { ok = roll('pack', 15); if (ok) Object.assign(P0, { bonus: 1, grant: P0.grant * 2, para: base * 2 }); else { P0.grant = Math.round(P0.grant * .8); ME().standing = clamp(ME().standing - 1, 0, 100); } }
+    if (k === 'hard') { ok = roll('pack', 15); if (ok) Object.assign(P0, { bonus: P0.bonus * 1.5, grant: P0.grant * 2, para: base * 2 }); else { P0.grant = Math.round(P0.grant * .8); ME().standing = clamp(ME().standing - 1, 0, 100); } }
     if (k === 'equity') { j.rate = Math.round(j.rate * .7); P0.salary = base * .7; P0.grant *= 3; }
     if (k === 'para') { ok = roll('cha', 13); if (ok) P0.para = base * 2.5; }
     M.pkg = P0;
@@ -209,7 +209,7 @@ function boardWeek() {
   if (M.pkg) {
     const P0 = M.pkg, c = S.companies[P0.co], still = j && j.id === P0.job;
     if (still && c && c.closed === null && (S.week - P0.since) % 13 === 12 && P0.vested < 16) { const n = Math.round(P0.grant / 16); M.port = M.port || {}; M.port[c.id] = (M.port[c.id] || 0) + n; P0.vested++; diary(`Money: ${n.toLocaleString()} ${c.name} shares vest (${P0.vested} of 16).`); }
-    if (still && c && (S.week - P0.since) % 52 === 51) { const perf = clamp(1 + chg(c, 52) / 100, 0, 2), b = Math.round(usd(P0.salary) * P0.bonus * perf * .5); if (b > 0) { M.cash += b; diary(`Money: your annual bonus at ${c.name}, ${fmtCash(b)} (the shares ${chg(c, 52) >= 0 ? 'rose' : 'fell'} ${Math.abs(chg(c, 52)).toFixed(0)}%).`); } }
+    if (still && c && (S.week - P0.since) % 52 === 51) { const perf = clamp(1 + chg(c, 52) / 100, 0, 2), b = Math.round(usd(P0.salary) * P0.bonus * perf * .5); if (b > 0) { M.cash += b - taxOn(b); diary(`Money: your annual bonus at ${c.name}, ${fmtCash(b)} before tax (the shares ${chg(c, 52) >= 0 ? 'rose' : 'fell'} ${Math.abs(chg(c, 52)).toFixed(0)}%).`); } }
     if (!still && !P0.over) { P0.over = S.week; if (P0.para && !(j && j.co === P0.co)) { const p = usd(P0.para); M.cash += p; diary(`Money: the golden parachute opens: ${fmtCash(p)}.`); } }
   }
 }
