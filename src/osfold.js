@@ -2,7 +2,7 @@
 // Almost everything opens inside ApplOS now: the box office, companies, awards, careers, charts and the world; your
 // work, creative projects, contests, standing, life and people; and every film, person or company you click opens as
 // a page inside the computer, with its own back button, instead of throwing you onto another screen.
-function stackPage(cur) { return cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id); }
+function stackPage(cur) { return (typeof viewMine === 'function' && viewMine(cur)) || (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id)); }
 // A desk tab rendered on its own, cut from the career screen.
 function deskPart(k) {
   const was = UI.dtab; UI.dtab = k; UI.inPart = true;

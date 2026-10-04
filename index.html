@@ -155,7 +155,7 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .os .mailapp { grid-template-columns: 150px minmax(0, 1fr); } .os .mfold { align-items: stretch; } .os .mfold > * { all: unset; cursor: pointer; padding: 6px 10px; border-radius: 8px; color: var(--os-nav); font-size: 13px; text-align: left; } .os .mfold > *:hover { background: var(--panel2); } .os .mfold > .on { background: var(--accent-soft); color: #fff; font-weight: 600; } .os .mfold > .btn-s { background: var(--accent); color: #0B1020; text-align: center; font-weight: 700; margin-bottom: 6px; } .os .mlist { max-height: 340px; } .os .mrow { border-color: var(--line); padding: 8px 10px; border-radius: 8px; } .os .mrow:hover, .os .mrow.on { background: var(--panel2); } .os .mread { border-color: var(--line); }
 .os .bzc { background: var(--panel); border-color: var(--line); } .os .widget { background: var(--panel); color: var(--ink); }
 .os .chip { background: var(--panel2); color: var(--ink); }
-@media (max-width: 760px) { .os { grid-template-columns: 1fr; } .os-side { display: flex; gap: 4px; overflow-x: auto; padding: 8px; border-right: 0; border-bottom: 1px solid var(--line); } .os-brand, .os-stat, .os-g h6 { display: none; } .os-g { display: flex; gap: 4px; } .os-i { width: auto; flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 11px; } .os-i .os-b { position: absolute; } .os-card.wide { grid-column: auto; } .os-body { padding: 12px; } .os-table { display: block; overflow-x: auto; } }
+@media (max-width: 760px) { .os { grid-template-columns: 1fr; } .os-side { display: flex; gap: 4px; overflow-x: auto; padding: 8px; border-right: 0; border-bottom: 1px solid var(--line); } .os-brand, .os-stat, .os-g h6 { display: none; } .os-g { display: flex; gap: 4px; } .os-i { width: auto; flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 11px; } .os-i .os-b { position: absolute; } .os-card.wide { grid-column: auto; } .os-body { padding: 12px; } }
 .np-mast { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px double var(--line); padding-bottom: 6px; margin-bottom: 8px; } .np-mast b { font: 700 30px Georgia, 'Times New Roman', serif; letter-spacing: -.01em; } .np-mast span { color: var(--muted); font-size: 12px; }
 .np-tabs { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 14px; } .np-tabs button { all: unset; cursor: pointer; padding: 5px 10px; border-radius: 6px; font-weight: 600; font-size: 13px; color: var(--muted); } .np-tabs button.on, .np-tabs button:hover { background: var(--panel2, var(--line)); color: var(--ink); } .np-tabs input { margin-left: auto; min-width: 200px; }
 .np-front { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 14px; } .np-side { display: grid; gap: 8px; align-content: start; }
@@ -868,6 +868,117 @@ tr.blocked td { opacity: .55; }
 .os-empty span { font-size: 30px; opacity: .85; } .os-empty b { color: var(--ink); font: 600 15px var(--f-body); } .os-empty p { margin: 0; max-width: 360px; font-size: 13px; }
 .os .angel { background: var(--os-panel); border-color: var(--os-line); } .os .ang-dc { background: var(--os-panel2); color: var(--os-accent); }
 .home-scene { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+
+/* tables that would scroll sideways become labelled rows */
+.grid th, .os-table th { white-space: normal; }
+.grid td, .os-table td { overflow-wrap: anywhere; }
+table.stacked, table.stacked tbody, table.stacked tr, table.stacked td { display: block; width: auto !important; }
+table.stacked thead { display: none; }
+table.stacked tr { padding: 8px 4px; border-bottom: 1px solid var(--line); }
+table.stacked tr:last-child { border-bottom: 0; }
+table.stacked td { border: 0 !important; padding: 2px 8px !important; display: flex; gap: 10px; justify-content: space-between; align-items: baseline; text-align: right !important; min-height: 0; height: auto; }
+table.stacked td::before { content: attr(data-label); flex: none; max-width: 45%; text-align: left; color: var(--muted); font: 600 10.5px var(--f-body); letter-spacing: .06em; text-transform: uppercase; }
+table.stacked td[data-label=""]::before { content: none; }
+table.stacked td:first-child { justify-content: flex-start; text-align: left !important; font-weight: 600; }
+table.stacked td:first-child::before { content: none; }
+table.stacked td:empty { display: none; }
+
+.compgrid { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+.egofrow { grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr)); } .egofc { min-width: 0; } .egofc b { overflow-wrap: anywhere; }
+.cg-stories { flex-wrap: wrap; overflow-x: visible; }
+.os-body, .os-body > * { min-width: 0; } .os-body img, .os-body svg { max-width: 100%; }
+.os-body .pill, .os-body .os-pill { max-width: 100%; white-space: normal; overflow-wrap: anywhere; } .bf-row { flex-wrap: wrap; }
+table.stacked { min-width: 0 !important; table-layout: auto !important; border-spacing: 0 !important; }
+table.stacked tbody th { display: block; text-align: left; padding: 4px 8px; width: auto !important; }
+table.stacked td > *, table.stacked td select, table.stacked td input { max-width: 62%; min-width: 0 !important; } table.stacked td, table.stacked td * { white-space: normal !important; }
+table.stacked td.barcol, table.stacked .barcol { min-width: 0; width: auto; } table.stacked td.barcol > * { width: 40%; }
+
+/* Roger That, browsable */
+.rt-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin: 8px 0 12px; } .rt-how > div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: grid; gap: 2px; } .rt-how span { font-size: 12px; color: var(--muted); }
+.rt-tools select { max-width: 100%; } .rt-sort { color: inherit !important; font: inherit; text-transform: inherit; letter-spacing: inherit; } .rt-sort.on { color: var(--accent) !important; }
+.rt-cert, .rt-rot { font: 600 10.5px var(--f-body); padding: 1px 6px; border-radius: 999px; margin-left: 4px; white-space: nowrap; } .rt-cert { background: color-mix(in srgb, var(--good) 22%, transparent); color: var(--good); } .rt-rot { background: color-mix(in srgb, var(--bad) 20%, transparent); color: var(--bad); }
+.rt-explain { border-left: 3px solid var(--accent); padding: 6px 12px; margin: 0 0 12px; background: var(--panel2, transparent); border-radius: 0 8px 8px 0; font-size: 13px; } .rt-explain p { margin: 0; }
+.rt-critics { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr)); gap: 10px; }
+.rt-critic { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); min-width: 0; } .rt-critic header { display: flex; gap: 10px; align-items: center; } .rt-critic header > div { flex: 1; display: grid; min-width: 0; } .rt-critic p { margin: 6px 0; }
+.rt-ini { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font: 700 13px var(--f-display); background: var(--accent-soft); color: var(--accent); flex: none; }
+.rt-w { font: 700 13px var(--f-data); color: var(--accent); border: 1px solid var(--line); border-radius: 8px; padding: 2px 6px; }
+.rt-cstats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 6px 0; } .rt-cstats div { display: grid; text-align: center; background: var(--panel2, transparent); border-radius: 8px; padding: 4px; } .rt-cstats b { font: 600 14px var(--f-data); } .rt-cstats span { font-size: 10.5px; color: var(--muted); }
+.rt-list.mini li { padding: 4px 0; font-size: 12.5px; }
+
+/* Work: your week */
+.wk-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin: 6px 0 8px; }
+.wk-day { display: grid; gap: 3px; align-content: start; border: 1px solid var(--line); border-radius: 10px; padding: 6px; min-width: 0; } .wk-day > b { font: 600 12px var(--f-body); text-align: center; color: var(--muted); } .wk-day.today { border-color: var(--accent); } .wk-day.today > b { color: var(--accent); }
+.wk-b { display: block; font-size: 11px; line-height: 1.25; padding: 4px 5px; border-radius: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .wk-b.past { opacity: .4; }
+.wk-b.job { background: color-mix(in srgb, var(--accent) 22%, transparent); } .wk-b.study { background: color-mix(in srgb, var(--data, #7FD1C7) 22%, transparent); } .wk-b.appt { background: color-mix(in srgb, var(--gold) 22%, transparent); } .wk-b.free { border: 1px dashed var(--line); color: var(--muted); }
+.wk-jobs { display: grid; gap: 8px; } .wk-job { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; } .wk-job > div:first-child { flex: 1 1 260px; min-width: 0; } .wk-jact { display: flex; gap: 6px; flex-wrap: wrap; } .wk-job p { flex-basis: 100%; margin: 0; }
+.os-btn.danger { background: var(--bad); border-color: var(--bad); color: #fff; }
+.fit { font: 600 10.5px var(--f-body); padding: 1px 6px; border-radius: 999px; white-space: nowrap; } .fit.ok { color: var(--good); background: color-mix(in srgb, var(--good) 15%, transparent); } .fit.no { color: var(--gold); background: color-mix(in srgb, var(--gold) 15%, transparent); }
+@media (max-width: 760px) { .wk-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.mn-list { display: grid; gap: 6px; } .mn-list.two { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); } .mn-p { display: flex; gap: 8px; align-items: center; min-width: 0; } .mn-p > div { min-width: 0; }
+.mn-bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 6px 0 12px; } .mn-bar i { display: block; height: 100%; background: var(--accent); }
+
+/* decisions, up top */
+.decbox { position: sticky; top: var(--hdr, 52px); z-index: 4; margin: 0 0 12px; background: var(--panel); border: 2px solid var(--accent); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.18); max-height: 55vh; overflow-y: auto; }
+.decbox.min { padding: 0; border-width: 1px; } .dec-open { all: unset; cursor: pointer; display: flex; gap: 8px; align-items: center; width: 100%; box-sizing: border-box; padding: 8px 14px; } .dec-open span { margin-left: auto; color: var(--accent); font-weight: 600; }
+.dec-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; align-items: center; margin-bottom: 4px; } .dec-k { font: 700 12px var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); } .dec-nav { display: flex; gap: 12px; }
+.dec-body .mh { display: flex; gap: 10px; align-items: baseline; } .dec-body .mh b { font-size: 16px; } .dec-body p { margin: 4px 0 8px; }
+.decbox .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 8px; }
+.decbox .choice { margin: 0; height: 100%; }
+
+/* diary: pins and saved weeks */
+.dk { display: grid; gap: 8px; margin: 8px 0 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
+.dk-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .dk-t { display: flex; gap: 6px; align-items: center; cursor: pointer; } .dk-p { display: inline-flex; gap: 4px; align-items: center; } .dk-x { color: var(--bad) !important; }
+.dk input#cal-pname { min-width: 0; flex: 0 1 180px; }
+.calc { display: flex; gap: 2px; align-items: center; } .calc select { flex: 1; min-width: 0; } .calpin { all: unset; cursor: pointer; font-size: 11px; opacity: .25; filter: grayscale(1); padding: 2px; } .calpin:hover { opacity: .7; } .calpin.on { opacity: 1; filter: none; }
+td.pinned { box-shadow: inset 0 0 0 1px var(--gold); border-radius: 6px; }
+
+/* ---- the Make suite ---- */
+.sw-hd { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+.sw-tabs { margin: 10px 0; flex-wrap: wrap; }
+.sw-checks { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; margin: 6px 0; }
+#sw-log, #sw-pages, #st-lyrics, #nb-text, #pd-cold, #sn-what { width: 100%; box-sizing: border-box; font: 14px/1.5 var(--f-body); }
+.sw-chars { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 10px; margin: 8px 0; }
+.sw-char, .sw-cform { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel); } .sw-char header { display: flex; gap: 8px; align-items: center; } .sw-char header b { flex: 1; } .sw-char p { margin: 4px 0; } .sw-depth { color: var(--gold); letter-spacing: 2px; }
+.sw-cform label { display: grid; gap: 2px; margin: 6px 0; font-size: 12.5px; } .sw-cform input, .sw-cform select { width: 100%; box-sizing: border-box; } .sw-cf2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sw-cov { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; margin: 6px 0; }
+.sw-scenes { padding-left: 20px; } .sw-scenes li { border-bottom: 1px solid var(--line); padding: 6px 0; } .sw-scenes li > div { display: inline-block; width: calc(100% - 90px); vertical-align: top; } .sw-scenes p { margin: 2px 0; } .sw-sact { float: right; display: flex; gap: 8px; }
+.sw-sform { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .sw-sform input#sn-where { flex: 1 1 160px; text-transform: uppercase; }
+.sw-ed { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; } #sw-pages { font-family: 'Courier Prime', 'Courier New', monospace; font-size: 13px; min-height: 360px; }
+.sw-fp { background: #FBFAF6; color: #1a1a1a; border-radius: 6px; padding: 18px 22px; font: 12.5px/1.45 'Courier Prime', 'Courier New', monospace; max-height: 520px; overflow-y: auto; box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.fp-slug { font-weight: 700; margin: 10px 0 4px; } .fp-act { margin: 2px 0; } .fp-cue { margin: 10px 0 0 38%; } .fp-par { margin-left: 30%; font-style: italic; } .fp-dia { margin: 0 18% 0 22%; } .fp-tr { text-align: right; margin: 8px 0; } .fp-gap { height: 6px; }
+.pu { border-left: 3px solid var(--accent); padding: 4px 12px; font-family: 'Courier Prime', 'Courier New', monospace; } .pu p { margin: 4px 0; }
+.pu-opts { display: grid; gap: 8px; margin: 8px 0; } .pu-opts .choice { text-align: left; }
+@media (max-width: 760px) { .sw-ed { grid-template-columns: 1fr; } .sw-cf2 { grid-template-columns: 1fr; } }
+.np2-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 8px; margin: 8px 0; }
+.np2-t { all: unset; cursor: pointer; box-sizing: border-box; display: grid; gap: 2px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); } .np2-t span { font-size: 22px; } .np2-t small { font-size: 11.5px; color: var(--muted); } .np2-t.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; } .np2-t[disabled] { opacity: .45; cursor: not-allowed; }
+.np2-go { display: flex; gap: 8px; flex-wrap: wrap; } .np2-go input { flex: 1 1 220px; }
+.st-hd { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; } .st-hd > div:first-child { flex: 1 1 220px; } .st-score { display: grid; text-align: center; } .st-score span { font-size: 11px; color: var(--muted); } .st-score b { font: 700 20px var(--f-data); color: var(--accent); } .st-btns { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.drm, .proll { overflow: hidden; } .drow { display: grid; grid-template-columns: 54px repeat(16, minmax(0, 1fr)); gap: 3px; margin: 3px 0; align-items: center; } .drow span { font-size: 12px; color: var(--muted); }
+.stp { all: unset; cursor: pointer; height: 22px; border-radius: 4px; background: var(--panel2, #222); border: 1px solid var(--line); } .stp.dn { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); } .stp.on { background: var(--accent); border-color: var(--accent); }
+.proll { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)) 34px; gap: 3px; } .pr-col { display: grid; gap: 2px; border-radius: 4px; padding: 1px; } .pr-col.dn { background: color-mix(in srgb, var(--accent) 8%, transparent); } .pr-col.ph { background: color-mix(in srgb, var(--gold) 35%, transparent); }
+.pr { all: unset; cursor: pointer; height: 16px; border-radius: 3px; background: var(--panel2, #222); } .pr:hover { background: var(--line); } .pr.on { background: var(--gold); box-shadow: 0 0 6px var(--gold); } .proll.bass .pr.on { background: var(--data, #7FD1C7); box-shadow: none; }
+.pr-keys { display: grid; gap: 2px; font: 10px var(--f-data); color: var(--muted); } .pr-keys span { height: 16px; line-height: 16px; } .proll.bass { grid-template-columns: repeat(16, minmax(0, 1fr)); }
+.chs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; } .chs label { display: grid; gap: 2px; font-size: 12px; color: var(--muted); }
+.st-reads { margin-top: 10px; } .st-reads > div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; } .st-read { margin: 4px 0 0; } .st-read li { padding: 1px 0; }
+.cols.three { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 8px; }
+.ly { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; } #st-lyrics { min-height: 320px; font-family: Georgia, serif; } @media (max-width: 760px) { .ly { grid-template-columns: 1fr; } }
+.mixer { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; } .mixer .ch { display: grid; justify-items: center; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 10px; width: 64px; } .mixer .ch.fx { width: auto; min-width: 150px; justify-items: stretch; }
+.mixer input[type=range][orient=vertical] { writing-mode: vertical-lr; direction: rtl; height: 110px; width: 22px; } .vu { width: 8px; height: 60px; background: var(--panel2, #222); border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; } .vu i { display: block; width: 100%; background: linear-gradient(0deg, var(--good), var(--gold), var(--bad)); }
+.pd-qs { display: flex; flex-wrap: wrap; gap: 6px; }
+.sb { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(170px, 100%), 1fr)); gap: 10px; } .sb-f { display: grid; gap: 4px; } .sb-f select, .sb-f input { width: 100%; box-sizing: border-box; }
+.sb-pic { aspect-ratio: 16/9; border-radius: 8px; background: linear-gradient(160deg, #3b4a6b, #c98b6b); display: grid; place-items: center; position: relative; overflow: hidden; } .sb-pic span { font-size: 34px; } .sb-pic small { position: absolute; left: 6px; bottom: 4px; color: #fff; font-size: 11px; text-shadow: 0 1px 2px #000; } .sb-pic.big span { font-size: 60px; }
+.cut-tl2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr)); gap: 8px; } .cut-tl2 .cut-clip { display: grid; gap: 4px; }
+.gr-swatch { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin: 8px 0; } .gr-swatch > div { display: grid; gap: 2px; text-align: center; font-size: 11px; opacity: .7; } .gr-swatch > div.on { opacity: 1; outline: 2px solid var(--accent); border-radius: 8px; }
+.tb-wrap { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 14px; align-items: start; } @media (max-width: 760px) { .tb-wrap { grid-template-columns: 1fr; } }
+.tb { aspect-ratio: 16/9; border-radius: 10px; display: flex; align-items: center; gap: 8px; padding: 12px; box-sizing: border-box; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,.3); } .tb-s { font-size: 72px; line-height: 1; } .tb b { font: 900 26px/1 var(--f-display); text-transform: uppercase; text-shadow: 0 2px 0 rgba(0,0,0,.35); overflow-wrap: anywhere; }
+.pv { position: relative; aspect-ratio: 16/9; max-width: 640px; border-radius: 12px; overflow: hidden; background: #000; } .pv-f { position: absolute; inset: 0; opacity: 0; display: grid; align-content: center; justify-items: center; } .pv-f .sb-pic { position: absolute; inset: 0; border-radius: 0; aspect-ratio: auto; } .pv-f p { position: relative; color: #fff; font-size: 15px; text-shadow: 0 1px 3px #000; margin-top: 40%; padding: 0 16px; text-align: center; } .pv-cap { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.7); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+.pv.play .pv-f { animation-name: pvshow; animation-fill-mode: both; animation-timing-function: linear; } .pv.play .pv-idle { display: none; } .pv-idle { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; color: #fff; } .pv-idle span { font-size: 48px; }
+@keyframes pvshow { 0% { opacity: 0; transform: scale(1.04); } 8% { opacity: 1; } 92% { opacity: 1; } 100% { opacity: 0; transform: scale(1); } }
+.nb-add { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: start; } @media (max-width: 760px) { .nb-add { grid-template-columns: 1fr; } }
+.nb-spark { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--gold) 12%, transparent); }
+.nb-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 10px; margin: 8px 0; } .nb-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel); display: grid; gap: 4px; } .nb-card.used { opacity: .7; } .nb-card header { display: flex; gap: 8px; align-items: center; font-size: 12px; } .nb-card header span { flex: 1; } .nb-card p { margin: 0; } .nb-card footer { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mh-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 10px; } .mh-c { all: unset; cursor: pointer; box-sizing: border-box; display: grid; gap: 3px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); } .mh-c:hover { border-color: var(--accent); } .mh-c span { font-size: 26px; } .mh-c small { color: var(--muted); font-size: 12px; } .mh-c em { font-style: normal; font-size: 12px; color: var(--accent); }
 </style>
 
 <header class="slate"><div class="slate-in">
@@ -11058,6 +11169,7 @@ function inbox(kind, title, text, extra = {}) {
   // colleague" options only appear when there is a boss or a colleague to ask
   const fixPoss = t => typeof t === 'string' ? t.replace(/([^s'])s's\b/g, "$1s'") : t;
   title = fixPoss(title); text = fixPoss(text);
+  if (kind === 'offer' && S.me && S.me.jobs.length && extra.post && extra.choices && !extra.choices.some(c => c.k === 'swap') && jobDays() + extra.post.days > 7) extra.choices.splice(1, 0, { k: 'swap', label: 'Accept, and leave the job that clashes' });
   if (kind === 'scene' && extra.choices && extra.ctx && /^sit_/.test(extra.scene || '')) extra = Object.assign({}, extra, { choices: extra.choices.filter(c => !(c.k === 'ask' && (extra.ctx.head === null || extra.ctx.head === undefined)) && !(c.k === 'mate' && !(extra.ctx.mates || []).length)) });
   const it = { id: S.me.seq++, w: S.week, kind, title, text, ...extra };
   S.me.inbox.push(it);
@@ -11647,8 +11759,9 @@ function resolvePick(it, k) {
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
   }
   if (it.kind === 'offer') {
-    if (k === 'yes') {
-      if (jobDays() + it.post.days > 7) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
+    if (k === 'yes' || k === 'swap') {
+      if (k === 'swap' && typeof swapForOffer === 'function') swapForOffer(it.post);
+      if (jobDays() + it.post.days > 7) { it.result = { t: 'You can’t fit it around the work you already have. Leave a job first, or accept and quit what clashes.' }; it.done = true; return true; }
       const f = it.post.film !== null ? S.films[it.post.film] : null;
       if (f && (f.stage < 0 || f.stage >= 4)) { it.result = { t: 'Too late: the production has moved on.' }; it.done = true; return true; }
       takeJob(it.post); it.result = { t: 'You start on Monday.' };
@@ -11747,6 +11860,13 @@ function applyAct(a) {
     case 'angel': return angelAct(a);
     case 'outline': return outlineAct(a);
     case 'scriptsess': return scriptSessAct(a);
+    case 'calset': return calSetAct(a);
+    case 'swedit': return swEditAct(a);
+    case 'punchup': return punchAct(a);
+    case 'makesave': return makeSaveAct(a);
+    case 'idea': return ideaAct(a);
+    case 'calpin': return calPinAct(a);
+    case 'calpreset': return calPresetAct(a);
     case 'cgfollow': return cgFollow(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
@@ -12786,7 +12906,7 @@ function autoCal() {
   M.cal = keep;
   for (const key in rested) { const [d, b] = key.split('-').map(Number); cal[d][b] = run[d][b]; }
   M.calRested = rested;
-  return cal;
+  return typeof applyPins === 'function' ? applyPins(cal) : cal;
 }
 function setFocus(a) {
   const M = S.me;
@@ -15199,7 +15319,7 @@ function appWindow(k) {
     case 'gea': { const tabsG = `<p class="bf-row"><span class="gealogo">REEL</span> <button class="pill${UI.geatab !== 'star' ? ' on' : ''}" data-geatab="search">Search</button><button class="pill${UI.geatab === 'star' ? ' on' : ''}" data-geatab="star">⭐ Buzz Index</button></p>`; if (UI.geatab === 'star' && typeof starmeterHTML === 'function') return tabsG + starmeterHTML(); const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return tabsG + `<p><input id="gq" type="search" placeholder="Search everything: films, people, companies, artists, songs, prizes, lessons…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}${typeof worldSearchHTML === 'function' ? worldSearchHTML(q) : ''}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
     case 'bank': { const life = ORIGIN.life[M.life], c = typeof myCo === 'function' ? myCo() : null; const money = M.diary.filter(d => /^Money:/.test(d.t)).slice(-6).reverse(); return `<div class="kpis mini"><div><span>Balance</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b></div><div><span>Rent</span><b>${fmtCash(usd(life.rent))}/wk</b></div><div><span>Owed</span><b>${fmtCash(M.debt + (M.shark || 0))}</b></div>${c ? `<div><span>${esc(c.name)}</span><b>${fmtCash(Math.round(c.cash * 1e6))}</b></div>` : ''}</div><h4>Recent weeks</h4><ul class="plain">${money.map(d => `<li><time>${fmtDate(d.w, true)}</time> ${esc(d.t.replace(/^Money: /, ''))}</li>`).join('') || '<li class="muted">Nothing yet.</li>'}</ul>`; }
     case 'flick': if (typeof clapgramApp === 'function') return clapgramApp(); { const L = flickFeed(); return `<div class="flick">${L.map(x => `<div class="post">${phoneAvatar(x.who, 34)}<div><b>${pl(x.who)}</b> <span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w' : 'this week'}</span><p>${esc(x.t)}</p>${(M.liked || {})[x.id] ? '<span class="muted small">♥ Liked</span>' : `<button class="linkish" data-like="${x.id}|${x.who}">♡ Like</button>`}</div></div>`).join('') || '<p class="muted">Nobody you know has posted anything. Meet more people.</p>'}</div>`; }
-    case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
+    case 'notes': if (typeof notebookApp === 'function') return notebookApp(); { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
     case 'sweep': { if (!UI.sweep) sweepNew(); const G = UI.sweep; return `<p class="muted small">${G.over > 0 ? 'Cleared! That\'s a wrap.' : G.over < 0 ? 'Boom. Reshoot?' : 'Find the clean takes. Avoid the 9 bad ones.'} <button class="btn-s ghost" data-sweep="new">New game</button></p><div class="sweep" style="grid-template-columns:repeat(${G.n}, 28px)">${Array.from({ length: G.n * G.n }, (_, i) => { const o = G.open.includes(i), m = G.mines.includes(i), c = o && !m ? sweepCount(i) : 0; return `<button class="cell${o ? ' open' : ''}${o && m ? ' mine' : ''}" data-sweep="${i}" ${o || G.over ? 'disabled' : ''}>${o ? (m ? '💥' : c || '') : ''}</button>`; }).join('')}</div>`; }
     case 'weather': if (typeof weatherApp === 'function') return weatherApp(); { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
     case 'write': return typeof scriptwriterApp === 'function' ? scriptwriterApp() : '';
@@ -15806,7 +15926,7 @@ function jobWorkHTML() {
   return `<section class="panel jobwork"><h3>The work</h3>${M.jobs.map(j => {
     const tier = jobTier(j), T = j.tasks || [], f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, k = j.task || null;
     const good = T.filter(x => x.pts > 0).length, bad = T.filter(x => x.pts < 0).length;
-    return `<div class="jw"><p><b>${esc(j.t)}</b>${f ? ' · ' + fl(f.id) : ''} <span class="muted small">· week ${j.done + 1} of ${j.weeks} · ${['intern', 'junior', 'crew', 'mid-level', 'senior', 'head of department'][tier]} tasks</span></p>
+    return `<div class="jw"><p><b><a href="#" class="lk" data-go="myjob:${j.id}">${esc(j.t)}</a></b>${f ? ' · ' + fl(f.id) : ''} <span class="muted small">· week ${j.done + 1} of ${j.weeks} · ${['intern', 'junior', 'crew', 'mid-level', 'senior', 'head of department'][tier]} tasks</span></p>
      ${k ? `<p class="small">Now: <b>${esc(k.t)}</b> <span class="tbar"><i style="width:${Math.round(k.prog / k.need * 100)}%"></i></span> ${Math.round(k.prog / k.need * 100)}% · ${esc(statLabel(k.s))}</p>` : `<p class="small muted">Next task starts on your next work day.</p>`}
      ${T.length ? `<ul class="plain small tasks">${T.slice(-5).reverse().map(x => `<li class="${x.pts > 0 ? 'good' : 'bad'}">${x.pts > 1 ? '★' : x.pts > 0 ? '✔' : x.pts <= -2 ? '✘✘' : '✘'} ${esc(x.t)}</li>`).join('')}</ul>` : ''}
      <p class="small">${T.length} delivered: ${good} good, ${bad} rough.${f ? ` Your work so far adds <b class="${(j.contrib || 0) < 0 ? 'bad' : 'good'}">${(j.contrib || 0) >= 0 ? '+' : ''}${(j.contrib || 0).toFixed(1)}</b> to the film's quality${tier <= 1 ? ' (small jobs, small mark: it grows as you rise)' : ''}.` : ''}</p></div>`;
@@ -20105,7 +20225,7 @@ const OS_GROUPS = [
   ['Play', ['sweep', 'match', 'cue', 'scramble', 'store']]
 ];
 const OS_EXTRA = { library: ['📚', 'Craft Library', 'Every field\'s lessons: how it\'s done, the decisions, and examples from this world'], home: ['🏠', 'Home', 'Everything that needs you, at a glance'], cal: ['📅', 'Calendar', 'Your week and everything booked'], contacts: ['👥', 'Contacts', 'The people who matter, and when you last spoke'] };
-const OS_SUB = { mail: 'Offers, replies and fan mail', jobs: 'Every listing you\'ve heard about, with your odds', trades: 'The trade paper: this week and the archive', gea: 'Search everything: films, people, companies, artists, songs, prizes and lessons', bank: 'Balance, net worth and where the money went', flick: 'The industry\'s photo app: sets, wraps, premieres and pets', notes: 'Saved in this browser', sweep: 'Find the clean takes', weather: 'Conditions in your city', write: 'Your scripts', ticker: 'The Bourse: shares in the companies that make films', studio: 'Record and mix', cutroom: 'Cut your video', store: 'Games and pro software', match: 'A memory game', cue: 'Hit the cue on the beat', scramble: 'Unscramble film words', bazaar: 'Gear, books, experiences and film history' };
+const OS_SUB = { mail: 'Offers, replies and fan mail', jobs: 'Every listing you\'ve heard about, with your odds', trades: 'The trade paper: this week and the archive', gea: 'Search everything: films, people, companies, artists, songs, prizes and lessons', bank: 'Balance, net worth and where the money went', flick: 'The industry\'s photo app: sets, wraps, premieres and pets', notes: 'Your notebook: ideas, sparks and what your week gave you', sweep: 'Find the clean takes', weather: 'Conditions in your city', write: 'Story, characters, scenes and your own pages', ticker: 'The Bourse: shares in the companies that make films', studio: 'Compose, write lyrics, mix; plan podcasts', cutroom: 'Storyboard, cut, grade and package your videos', store: 'Games and pro software', match: 'A memory game', cue: 'Hit the cue on the beat', scramble: 'Unscramble film words', bazaar: 'Gear, books, experiences and film history' };
 function osApp(k) { if (OS_EXTRA[k]) return [k].concat(OS_EXTRA[k]); const A = APPS.find(a => a[0] === k); return A ? [A[0], A[1], A[2], OS_SUB[k] || ''] : null; }
 function osBadge(k) {
   const M = S.me;
@@ -22965,7 +23085,7 @@ function bankClick(t) {
 // Almost everything opens inside ApplOS now: the box office, companies, awards, careers, charts and the world; your
 // work, creative projects, contests, standing, life and people; and every film, person or company you click opens as
 // a page inside the computer, with its own back button, instead of throwing you onto another screen.
-function stackPage(cur) { return cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id); }
+function stackPage(cur) { return (typeof viewMine === 'function' && viewMine(cur)) || (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id)); }
 // A desk tab rendered on its own, cut from the career screen.
 function deskPart(k) {
   const was = UI.dtab; UI.dtab = k; UI.inPart = true;
@@ -30432,6 +30552,840 @@ function creativeChange(e) {
   return false;
 }
 // </creative>
+// <roger2>
+// ---------------- Roger That, browsable ----------------
+// Every list on the aggregator can be searched, filtered and sorted, and the critics get a proper directory: who they
+// write for, how much their voice counts, what they love and hate, how generous they are and what they said lately.
+// Display-only, like the rest of Roger That.
+const RT_TEMPER = {
+  warm: 'Generous and open-hearted; looks for what a film gets right.', tough: 'Hard to please; a good review from them means something.',
+  acid: 'Sharp-tongued and quotable; pans are a spectator sport.', fusty: 'Old-school and proper; distrusts violence, novelty and noise.',
+  auteurist: 'Reviews the director as much as the film; rewards a personal signature.', sharp: 'Precise and fair; weighs craft over hype.',
+  urbane: 'Witty, worldly, hard to fool; likes wit and polish.', scholarly: 'Thinks in film history; rewards ambition and seriousness.',
+  witty: 'Writes for laughs as much as verdicts; forgives a lot for a good time.', enthusiast: 'A fan first; genre films get a fair shake and then some.',
+  guidebook: 'Short, steady star ratings; rarely surprised, rarely cruel.', populist: 'Reviews for the audience in the cheap seats.',
+  poetic: 'Writes about feeling and image; drama and war move them.', theorist: 'Reads films as ideas; style is substance.',
+  polemic: 'Picks fights for a new kind of cinema; hates the polite and the old.', contrarian: 'Likes what everyone hates, hates what everyone likes.',
+  pun: 'Here for the one-liner on the poster.'
+};
+const RT_WEIGHT = { 1: 1.6, 2: 1.2, 3: .9 };
+const RT_TIER = { 1: 'Major outlet', 2: 'Specialist outlet', 3: 'Online / popular' };
+// films a critic reviewed, sampled from the archive (newest first)
+function criticRecord(c) {
+  RTC.S !== S && (RTC = { S, m: {} }); if (RTC.m[c.name]) return RTC.m[c.name];
+  const L = [], y0 = c.from, y1 = Math.min(c.to || S.year, S.year);
+  for (let i = S.films.length - 1; i >= 0 && L.length < 60; i--) { const f = S.films[i]; if (!f || f.rel === null || f.reviews === undefined || f.rel > S.week) continue; const y = yearOf(f.rel); if (y < y0 || y > y1) continue; const R = filmReviews(f); const v = R && R.list.find(x => x.who === c.name); if (v && v.sc !== null) L.push({ f: f.id, sc: v.sc, q: v.q, cons: R.score }); }
+  const avg = L.length ? L.reduce((s, x) => s + x.sc, 0) / L.length : null, off = L.length ? L.reduce((s, x) => s + Math.abs(x.sc - x.cons), 0) / L.length : null;
+  return RTC.m[c.name] = { L, avg, off };
+}
+let RTC = { S: null, m: {} };
+function rtFilmRows(L) {
+  const g = UI.rtg || '', d = UI.rtd || '', fl0 = UI.rtf || '', q = (UI.rtq || '').toLowerCase().trim(), mn = +UI.rtn || 0;
+  let rows = L.map(f => ({ f, R: filmReviews(f) })).filter(x => x.R);
+  if (g) rows = rows.filter(x => x.f.genre === g);
+  if (d) rows = rows.filter(x => Math.floor(yearOf(x.f.rel) / 10) * 10 === +d);
+  if (q) rows = rows.filter(x => x.f.title.toLowerCase().includes(q) || (x.f.real && x.f.real.toLowerCase().includes(q)) || (P(x.f.dir) && P(x.f.dir).name.toLowerCase().includes(q)));
+  if (mn) rows = rows.filter(x => x.R.n >= mn);
+  if (fl0 === 'approved') rows = rows.filter(x => x.R.thumbs >= 75 && x.R.n >= 20);
+  if (fl0 === 'rotten') rows = rows.filter(x => x.R.thumbs < 40);
+  if (fl0 === 'divisive') rows = rows.filter(x => Math.abs(x.R.score / 10 - x.R.aud) >= 1.8);
+  if (fl0 === 'crowd') rows = rows.filter(x => x.R.aud * 10 - x.R.score >= 15);
+  if (fl0 === 'critics') rows = rows.filter(x => x.R.score - x.R.aud * 10 >= 15);
+  const k = UI.rts || 'thumbs', dir = UI.rtdir === 'asc' ? 1 : -1;
+  const key = { thumbs: x => x.R.thumbs * 1000 + x.R.score, score: x => x.R.score, aud: x => x.R.aud, n: x => x.R.n, gap: x => Math.abs(x.R.score / 10 - x.R.aud), rel: x => x.f.rel, title: x => x.f.title }[k] || (x => x.R.thumbs);
+  rows.sort((a, b) => { const A = key(a), B = key(b); return (typeof A === 'string' ? A.localeCompare(B) : A - B) * (k === 'title' ? -dir : dir); });
+  return rows;
+}
+function rtFilmTable(L, max) {
+  const rows = rtFilmRows(L), shown = rows.slice(0, (UI.rtmore || 1) * (max || 40));
+  const H = (k, l, n, tip) => `<th class="${n ? 'n' : ''}"${tip ? ` title="${esc(tip)}"` : ''}><button class="linkish rt-sort${(UI.rts || 'thumbs') === k ? ' on' : ''}" data-rtsort="${k}">${l}${(UI.rts || 'thumbs') === k ? (UI.rtdir === 'asc' ? ' ▲' : ' ▼') : ''}</button></th>`;
+  const badge = R => R.thumbs >= 75 && R.n >= 20 ? '<span class="rt-cert" title="Roger Approved: 75% or more of at least 20 critics liked it">✔ Approved</span>' : R.thumbs < 40 ? '<span class="rt-rot" title="Fewer than 40% of critics liked it">✖ Panned</span>' : '';
+  return `<p class="small muted">${rows.length.toLocaleString()} film${rows.length === 1 ? '' : 's'} match.</p><table class="os-table rt-table"><thead><tr>${H('title', 'Film')}${H('rel', 'Released')}<th>Genre</th>${H('thumbs', 'Thumbs', 1, SCORE_HOW.thumbs)}${H('score', 'Rogerscore', 1, SCORE_HOW.roger)}${H('aud', 'Audience', 1, SCORE_HOW.aud)}${H('n', 'Critics', 1)}${H('gap', 'Gap', 1, 'How far the critics and the crowd disagree')}</tr></thead><tbody>${shown.map(({ f, R }) => `<tr><td>${fl(f.id)} ${badge(R)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n ${R.thumbs >= 60 ? 'good' : R.thumbs < 40 ? 'bad' : ''}">${R.thumbs}%</td><td class="n">${R.score}</td><td class="n">${R.aud.toFixed(1)}</td><td class="n muted">${R.n}</td><td class="n muted">${(Math.abs(R.score / 10 - R.aud)).toFixed(1)}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">Nothing matches. Loosen a filter.</td></tr>'}</tbody></table>${rows.length > shown.length ? `<button class="os-btn" data-rtmore="1">Show more (${(rows.length - shown.length).toLocaleString()} left)</button>` : ''}`;
+}
+function rtFilters(decades) {
+  const G = Object.keys(AMB).sort(), D = decades || [];
+  return `<div class="os-tools rt-tools"><input id="rtq" type="search" data-uiq="rtq" placeholder="Search a title or director…" value="${esc(UI.rtq || '')}">
+   <select data-ui="rtg" data-reset="rtmore" aria-label="Genre"><option value="">Every genre</option>${G.map(g => `<option ${UI.rtg === g ? 'selected' : ''}>${esc(g)}</option>`).join('')}</select>
+   ${D.length > 1 ? `<select data-ui="rtd" data-reset="rtmore" aria-label="Decade"><option value="">Every decade</option>${D.map(d => `<option value="${d}" ${+UI.rtd === d ? 'selected' : ''}>${d}s</option>`).join('')}</select>` : ''}
+   <select data-ui="rtf" data-reset="rtmore" aria-label="Show"><option value="">All verdicts</option>${[['approved', '✔ Roger Approved'], ['rotten', '✖ Panned'], ['divisive', 'Critics vs crowd'], ['crowd', 'Crowd-pleasers critics missed'], ['critics', 'Critics\' darlings crowds skipped']].map(([k, l]) => `<option value="${k}" ${UI.rtf === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+   <select data-ui="rtn" data-reset="rtmore" aria-label="Minimum critics"><option value="0">Any number of critics</option>${[10, 20, 40, 80].map(n => `<option value="${n}" ${+UI.rtn === n ? 'selected' : ''}>${n}+ critics</option>`).join('')}</select>
+   <select data-ui="rts" aria-label="Sort">${[['thumbs', 'Sort: Thumbs'], ['score', 'Sort: Rogerscore'], ['aud', 'Sort: Audience'], ['n', 'Sort: most reviewed'], ['gap', 'Sort: most divisive'], ['rel', 'Sort: newest'], ['title', 'Sort: title']].map(([k, l]) => `<option value="${k}" ${(UI.rts || 'thumbs') === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+   ${UI.rtg || UI.rtd || UI.rtf || +UI.rtn || UI.rtq ? '<button class="os-btn" data-rtclear="1">Clear filters</button>' : ''}</div>`;
+}
+function rtCritics() {
+  const y = S.year, st = UI.rtcs || 'active', ty = UI.rtct || '', tm = UI.rtcm || '', q = (UI.rtcq || '').toLowerCase().trim(), so = UI.rtco || 'weight';
+  let L = CRITICS.map(c => CRITIC[c[0]]).filter(c => c.from <= y);
+  if (st === 'active') L = L.filter(c => c.to === null || c.to >= y); else if (st === 'past') L = L.filter(c => c.to !== null && c.to < y);
+  if (ty) L = L.filter(c => String(OUTLET[c.out].tier) === ty);
+  if (tm) L = L.filter(c => c.style === tm);
+  if (q) L = L.filter(c => c.name.toLowerCase().includes(q) || OUTLET[c.out].name.toLowerCase().includes(q));
+  const rec = c => criticRecord(c);
+  const sorter = { weight: (a, b) => OUTLET[a.out].tier - OUTLET[b.out].tier || a.name.localeCompare(b.name), name: (a, b) => a.name.localeCompare(b.name), kind: (a, b) => (rec(b).avg ?? 0) - (rec(a).avg ?? 0), harsh: (a, b) => (rec(a).avg ?? 99) - (rec(b).avg ?? 99), maverick: (a, b) => (rec(b).off ?? 0) - (rec(a).off ?? 0), long: (a, b) => ((b.to || y) - b.from) - ((a.to || y) - a.from) }[so];
+  L.sort(sorter);
+  const styles = [...new Set(CRITICS.map(c => c[4]))].sort();
+  const card = c => { const O = OUTLET[c.out], R = rec(c), loves = Object.entries(c.taste).filter(e => e[1] > 0).sort((a, b) => b[1] - a[1]).map(e => e[0]), hates = Object.entries(c.taste).filter(e => e[1] < 0).sort((a, b) => a[1] - b[1]).map(e => e[0]), last = R.L.slice(0, 3);
+    return `<article class="rt-critic"><header><span class="rt-ini">${esc(c.name.split(' ').map(w => w[0]).join('').slice(0, 2))}</span><div><b>${esc(c.name)}</b><span class="muted small">${esc(O.name)} · ${esc(O.kind)} · ${c.from}–${c.to && c.to < y ? c.to : 'now'}</span></div><span class="rt-w" title="How much one review from this outlet counts in the Rogerscore">×${RT_WEIGHT[O.tier]}</span></header>
+     <p class="small"><b>${esc(c.style[0].toUpperCase() + c.style.slice(1))}.</b> <span class="muted">${esc(RT_TEMPER[c.style] || '')}</span></p>
+     <div class="rt-cstats"><div><b>${R.avg === null ? '–' : Math.round(R.avg)}</b><span>average score</span></div><div><b>${R.off === null ? '–' : Math.round(R.off)}</b><span>points from consensus</span></div><div><b>${R.L.length}${R.L.length >= 60 ? '+' : ''}</b><span>reviews on file</span></div><div><b>${esc(RT_TIER[O.tier])}</b><span>counts in Rogerscore</span></div></div>
+     ${loves.length || hates.length ? `<p class="small">${loves.length ? `<span class="good">♥ ${loves.map(esc).join(', ')}</span>` : ''}${loves.length && hates.length ? ' · ' : ''}${hates.length ? `<span class="bad">✖ ${hates.map(esc).join(', ')}</span>` : ''}</p>` : '<p class="small muted">No favourite genre: takes each film as it comes.</p>'}
+     ${last.length ? `<ul class="rt-list mini">${last.map(v => `<li><span class="rt-s ${v.sc >= 60 ? 'good' : v.sc < 40 ? 'bad' : ''}">${v.sc}</span><div>${fl(v.f)} <q>${esc(v.q)}</q></div></li>`).join('')}</ul>` : ''}</article>`; };
+  return `<div class="rt-explain"><p><b>Who counts.</b> Every review counts toward <b>Thumbs</b> (the share that liked it). Only the named critics below make the <b>Rogerscore</b>, and a review counts more from a bigger outlet: major papers, magazines and broadcasters ×1.6, specialist outlets ×1.2, online and popular outlets ×0.9. Famous takes on the classics count double. <b>Audience</b> is ticket buyers alone.</p></div>
+   <div class="os-tools rt-tools"><input id="rtcq" type="search" data-uiq="rtcq" placeholder="Search a critic or outlet…" value="${esc(UI.rtcq || '')}">
+    <select data-ui="rtcs"><option value="active" ${st === 'active' ? 'selected' : ''}>Writing now</option><option value="past" ${st === 'past' ? 'selected' : ''}>Retired</option><option value="all" ${st === 'all' ? 'selected' : ''}>Everyone</option></select>
+    <select data-ui="rtct"><option value="">Every kind of outlet</option>${[1, 2, 3].map(t => `<option value="${t}" ${ty === String(t) ? 'selected' : ''}>${RT_TIER[t]} (×${RT_WEIGHT[t]})</option>`).join('')}</select>
+    <select data-ui="rtcm"><option value="">Every temperament</option>${styles.map(s => `<option ${tm === s ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select>
+    <select data-ui="rtco">${[['weight', 'Sort: most influential'], ['name', 'Sort: name'], ['kind', 'Sort: most generous'], ['harsh', 'Sort: harshest'], ['maverick', 'Sort: furthest from consensus'], ['long', 'Sort: longest career']].map(([k, l]) => `<option value="${k}" ${so === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+   <p class="small muted">${L.length} critic${L.length === 1 ? '' : 's'}.</p><div class="rt-critics">${L.map(card).join('') || '<div class="os-empty"><span>🧐</span><b>No critics match</b></div>'}</div>`;
+}
+function rtOutlets() {
+  const y = S.year, L = OUTLETS.map(o => OUTLET[o[0]]).filter(o => o.from <= y).sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
+  return `<table class="os-table"><thead><tr><th>Outlet</th><th>Kind</th><th>Since</th><th class="n">Weight</th><th>Critics</th></tr></thead><tbody>${L.map(o => `<tr><td><b>${esc(o.name)}</b>${o.to && o.to < y ? ' <span class="muted small">(closed ' + o.to + ')</span>' : ''}</td><td class="muted">${esc(o.kind)}</td><td class="muted">${o.from}</td><td class="n">×${RT_WEIGHT[o.tier]}</td><td class="small">${CRITICS.filter(c => c[1] === o.k && c[2] <= y).map(c => esc(c[0])).join(', ') || '<span class="muted">staff reviewers</span>'}</td></tr>`).join('')}</tbody></table>`;
+}
+function rogerApp() {
+  const t = UI.rt || 'now', y = S.year;
+  const tabs = [['now', 'Now showing'], ['year', 'Best of ' + y], ['all', 'Every film'], ['critics', 'Critics'], ['outlets', 'Outlets'], ['mine', 'Your reviews']];
+  const rel = S.films.filter(f => f.rel !== null && f.reviews !== undefined && f.rel <= S.week);
+  let body = '';
+  if (t === 'now') body = rtFilters() + rtFilmTable(rel.filter(f => S.week - f.rel < 12), 40);
+  else if (t === 'year') body = rtFilters() + rtFilmTable(rel.filter(f => yearOf(f.rel) === y), 40);
+  else if (t === 'all') { const D = [...new Set(rel.map(f => Math.floor(yearOf(f.rel) / 10) * 10))].sort((a, b) => b - a); body = rtFilters(D) + rtFilmTable(rel, 50); }
+  else if (t === 'critics') body = rtCritics();
+  else if (t === 'outlets') body = rtOutlets();
+  else body = myReviewsHTML();
+  return `<div class="rtapp"><div class="rt-brand"><b>Roger That</b><span>${rel.length.toLocaleString()} films · three ways to read the reviews</span></div>
+   <div class="rt-how"><div><b>👍 Thumbs</b><span>${esc(SCORE_HOW.thumbs)}</span></div><div><b>🎯 Rogerscore</b><span>${esc(SCORE_HOW.roger)}</span></div><div><b>🍿 Audience</b><span>${esc(SCORE_HOW.aud)}</span></div></div>
+   <div class="np-tabs">${tabs.map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-rt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
+}
+function roger2Click(t) {
+  if (t.dataset.rtsort) { const k = t.dataset.rtsort; if ((UI.rts || 'thumbs') === k) UI.rtdir = UI.rtdir === 'asc' ? 'desc' : 'asc'; else { UI.rts = k; UI.rtdir = k === 'title' ? 'asc' : 'desc'; } render(true); return true; }
+  if (t.dataset.rtmore) { UI.rtmore = (UI.rtmore || 1) + 1; render(true); return true; }
+  if (t.dataset.rtclear) { for (const k of ['rtg', 'rtd', 'rtf', 'rtn', 'rtq', 'rtmore']) UI[k] = ''; render(true); return true; }
+  if (t.dataset.rt) UI.rtmore = 1;
+  return false;
+}
+// </roger2>
+// <work2>
+// ---------------- Work: your week at a glance ----------------
+// The Work page opens on what your week already holds: which days your jobs take, when you study, the appointments in
+// the diary, and how many days are still free for another job. Each job can be left from here (twice to confirm),
+// and every listing on the board says whether it fits around what you have.
+function workWeekHTML() {
+  const M = S.me, run = planBlocks(), OB = obligations(), W = M.wk, jd = jobDays(), free = Math.max(0, 7 - jd);
+  const jobOf = d => M.jobs.find(j => j.id === OB.job[d]) || null;
+  const cell = (d, b) => {
+    const k = run[d][b], ap = typeof apptAt === 'function' ? apptAt(d, b) : null, past = W && (d < W.day || (d === W.day && b < W.block));
+    if (k === 'work') { const j = jobOf(d); return `<span class="wk-b job${past ? ' past' : ''}" title="${esc(j ? j.t : 'Work')}">💼 ${esc(j ? j.t : 'Work')}</span>`; }
+    if (ap) return `<span class="wk-b appt${past ? ' past' : ''}">${APPT_KINDS[ap.kind] ? APPT_KINDS[ap.kind].icon : '📌'} ${esc(APPT_KINDS[ap.kind] ? APPT_KINDS[ap.kind].label : 'Appointment')}</span>`;
+    if (k === 'study') return `<span class="wk-b study${past ? ' past' : ''}">🎓 Study</span>`;
+    const A = BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) || BLOCK_ACTS.rest;
+    return `<span class="wk-b free${past ? ' past' : ''}" title="Free: planned for ${esc(A.label)}">${esc(A.label)}</span>`;
+  };
+  const days = SLOT_NAMES.map((n, d) => `<div class="wk-day${W && d === W.day ? ' today' : ''}${OB.job[d] !== null ? ' busy' : ''}"><b>${n}</b>${[0, 1, 2].map(b => cell(d, b)).join('')}</div>`).join('');
+  const school = M.school && typeof schoolProg === 'function' ? schoolProg(M.school) : null;
+  const jobs = M.jobs.map(j => { const f = j.film !== null ? S.films[j.film] : null, left = Math.max(0, j.weeks - j.done), conf = UI.quitc === j.id;
+    return `<article class="wk-job"><div><b><a href="#" class="lk" data-go="myjob:${j.id}">${esc(j.t)}</a></b>${f ? ` on ${fl(f.id)}` : ''}<br><span class="muted small">${j.days} day${j.days > 1 ? 's' : ''} a week · ${left ? `about ${left} week${left > 1 ? 's' : ''} left` : 'wrapping up'}${j.rate ? ` · ${fmtCash(j.rate)} a day (${fmtCash(j.rate * j.days)} a week)` : ' · unpaid'}${j.head !== null && P(j.head) ? ` · reports to ${pl(j.head)}` : ''}</span></div>
+     <div class="wk-jact"><button class="os-btn" data-go="myjob:${j.id}">Details</button>${conf ? `<button class="os-btn danger" data-quit="${j.id}">Yes, quit</button><button class="os-btn" data-quitc="">Keep it</button>` : `<button class="os-btn" data-quitc="${j.id}">Quit…</button>`}</div>
+     ${conf ? `<p class="small bad">Leaving early costs you some goodwill${j.head !== null && P(j.head) ? ' with ' + esc(P(j.head).name) : ''}${j.t && (tmplOf(j) || {}).cr ? ', and you won\'t get the credit' : ''}. The days free up straight away.</p>` : ''}</article>`; }).join('');
+  return `<section class="panel wk-panel"><h3>Your week <span class="count">${jd} of 7 days on jobs · ${free} free</span></h3>
+   <div class="wk-grid">${days}</div>
+   <p class="small muted">${free >= 5 ? 'Plenty of room for a job: anything on the board up to ' + free + ' days a week fits.' : free ? `Room for a job of up to ${free} day${free > 1 ? 's' : ''} a week. Anything longer means leaving something.` : 'Your week is full of work. To take another job, leave one first.'}${school ? ` Your course needs ${school.days || 0} study session${(school.days || 0) === 1 ? '' : 's'} a week; they're fitted around your jobs.` : ''} Change the rest in <a href="#" class="lk" data-app="week">Plan the week</a>.</p>
+   ${jobs ? `<div class="wk-jobs">${jobs}</div>` : '<p class="muted">No job right now. Plan blocks to look for work, then tick jobs on the board below.</p>'}</section>`;
+}
+// does a listing fit around the jobs you have?
+function fitChip(p) { const free = 7 - jobDays(); return p.days <= free ? '<span class="fit ok" title="Fits around your current jobs">fits</span>' : `<span class="fit no" title="You'd need to leave a job first">needs ${p.days - free} more day${p.days - free > 1 ? 's' : ''}</span>`; }
+// take an offer and leave whatever is in the way: the lowest-paid jobs go first
+function swapForOffer(post) {
+  const M = S.me; let n = 0;
+  while (M.jobs.length && jobDays() + post.days > 7 && n++ < 8) { const j = M.jobs.slice().sort((a, b) => (a.rate || 0) * a.days - (b.rate || 0) * b.days)[0]; if (j.head !== null && P(j.head)) addTie(ME(), P(j.head), -6); finishJob(j, null, true); }
+  return jobDays() + post.days <= 7;
+}
+function work2Click(t) {
+  if (!S.me) return false;
+  if (t.dataset.quitc !== undefined) { UI.quitc = t.dataset.quitc === '' ? null : +t.dataset.quitc; render(true); return true; }
+  return false;
+}
+// </work2>
+// <mine>
+// ---------------- Your job and your school, as places ----------------
+// Click your job or your course anywhere and you get its page: what it is, how far along you are, what it pays or
+// costs, and the people in it: the production's heads of department and crew, a company's chain of command, a school's
+// faculty, your year and its famous alumni. Faculty, year-mates and alumni are drawn from the town's real people, the
+// same answer all year. Display-only.
+const CRAFT_ROLE = { dir: 'director', wri: 'writer', cam: 'dp', edt: 'editor', pro: 'producer', des: 'designer', act: 'actor', mus: 'composer', fx: 'vfx', snd: 'sound' };
+const FAC_TITLES = ['Dean of the school', 'Chair of the programme', 'Professor', 'Professor', 'Associate professor', 'Senior lecturer', 'Visiting artist', 'Adjunct lecturer'];
+function personRow(id, sub, extra) {
+  const p = P(id); if (!p) return '';
+  const k = S.me.known[id];
+  return `<li class="mn-p">${typeof phoneAvatar === 'function' ? phoneAvatar(id, 34) : ''}<div><a href="#" class="lk" data-go="person:${id}">${esc(p.name)}</a>${k ? ' <span class="chip good" title="You know them">known</span>' : ''}<br><span class="muted small">${esc(sub)}</span></div>${extra || ''}</li>`;
+}
+function myJobPage(id) {
+  const M = S.me, j = M.jobs.find(x => x.id === +id); if (!j) return '<div class="os-empty"><span>🧳</span><b>That job is over</b><p>It\'s in your history now.</p></div>';
+  const t = tmplOf(j) || {}, f = j.film !== null ? S.films[j.film] : null, c = j.co !== undefined && j.co !== null ? S.companies[j.co] : f && f.co !== null ? S.companies[f.co] : null;
+  const left = Math.max(0, j.weeks - j.done), pct = Math.round(clamp(j.done / Math.max(1, j.weeks), 0, 1) * 100);
+  let people = '';
+  if (f) {
+    const sl = [...slotsOf(f)], heads = sl.filter(([, s]) => ['dir', 'prod', 'dp', 'ed', 'wri'].includes(s)), cast = sl.filter(([, s]) => s === 'cast'), crew = sl.filter(([, s]) => !['dir', 'prod', 'dp', 'ed', 'wri', 'cast'].includes(s));
+    const lab = s => ({ dir: 'Director', prod: 'Producer', dp: 'Cinematographer', ed: 'Editor', wri: 'Writer', cast: 'Cast' })[s] || CREW_LABEL[s] || s;
+    people = `<div class="cols two"><section class="panel"><h3>Heads of department</h3><ul class="plain mn-list">${heads.map(([pid, s]) => personRow(pid, lab(s) + (pid === j.head ? ' · your boss' : ''))).join('')}${crew.map(([pid, s]) => personRow(pid, lab(s) + (pid === j.head ? ' · your boss' : ''))).join('')}</ul></section>
+     <section class="panel"><h3>Cast</h3><ul class="plain mn-list">${cast.slice(0, 10).map(([pid]) => personRow(pid, P(pid).fame > 50 ? 'Star' : 'Cast')).join('') || '<li class="muted">Not cast yet.</li>'}</ul>
+     ${(j.mates || []).length ? `<h3>The people you work beside</h3><ul class="plain mn-list">${j.mates.map(pid => personRow(pid, 'Your department')).join('')}</ul>` : ''}</section></div>`;
+  } else if (c && typeof staffOf === 'function') {
+    const L = staffOf(c).filter(x => x.id !== null).sort((a, b) => b.r - a.r);
+    people = `<section class="panel"><h3>Who works at ${esc(c.name)}</h3><ul class="plain mn-list two">${L.slice(0, 24).map(x => personRow(x.id, LADDER[x.r] ? LADDER[x.r][0] : 'Staff')).join('') || '<li class="muted">A small office: just a handful of people.</li>'}</ul></section>`;
+  } else if (j.head !== null && P(j.head)) people = `<section class="panel"><h3>Who you work for</h3><ul class="plain mn-list">${personRow(j.head, 'Your boss')}</ul></section>`;
+  return `<div class="head"><p class="eyebrow">Your job${t.biz ? ' · ' + esc(t.biz) : ''} · ${esc(hubName(M.hub))}</p><h2>${esc(j.t)}</h2><p class="lede">${esc(t.d || '')}</p></div>
+   <div class="kpis mini"><div><span>Pay a day</span><b>${j.rate ? fmtCash(j.rate) : 'Unpaid'}</b></div><div><span>Days a week</span><b>${j.days}</b></div><div><span>Weeks</span><b>${j.done} of ~${j.weeks}</b></div><div><span>Left</span><b>${left ? left + ' wk' : 'Wrapping'}</b></div><div><span>Screen credit</span><b>${t.cr ? 'Yes' : 'No'}</b></div>${j.head !== null && P(j.head) ? `<div><span>Boss's opinion</span><b>${Math.round(opinion(j.head))}</b></div>` : ''}</div>
+   <div class="mn-bar"><i style="width:${pct}%"></i></div>
+   ${f ? `<section class="panel"><h3>The production</h3><p>${fl(f.id)} · ${esc(f.genre)} · ${esc(f.status || '')}${f.budget ? ' · budget ' + fmtM(f.budget) : ''}${c ? ` · <a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a>` : ''}${f.stageEnd ? ` · next stage around ${fmtDate(f.stageEnd, true)}` : ''}</p>${typeof storyOf === 'function' && storyOf(f) ? `<p class="muted small">${esc((storyOf(f).logline || '').slice(0, 260))}</p>` : ''}</section>` : c ? `<section class="panel"><h3>The company</h3><p><a href="#" class="lk" data-go="co:${c.id}">${esc(c.name)}</a> · ${esc(hubName(c.hub))}</p></section>` : ''}
+   ${people}
+   <p>${UI.quitc === j.id ? `<button class="os-btn danger" data-quit="${j.id}">Yes, quit this job</button> <button class="os-btn" data-quitc="">Keep it</button>` : `<button class="os-btn" data-quitc="${j.id}">Quit this job…</button>`}</p>`;
+}
+function schoolPeople(sId, hub, crafts) {
+  const roles = new Set(crafts.map(c => CRAFT_ROLE[c]).filter(Boolean)), y = S.year, r = hashRand([...sId].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) + y * 13);
+  const pool = S.people.filter(p => p && !p.dead && !p.player && p.hub === hub && roles.has(p.role));
+  const fac = pool.filter(p => y - p.born >= 44 && !p.retired || p.retired && y - p.born < 80).map(p => [p, p.standing + r() * 30]).sort((a, b) => b[1] - a[1]).slice(0, 7).map(x => x[0]);
+  const kids = pool.filter(p => y - p.born <= 29 && y - p.born >= 19 && !fac.includes(p)).map(p => [p, r()]).sort((a, b) => a[1] - b[1]).slice(0, 10).map(x => x[0]);
+  const alumni = pool.filter(p => (p.catId || p.fame > 45) && y - p.born > 30 && !fac.includes(p)).map(p => [p, (p.fame || 0) + r() * 25]).sort((a, b) => b[1] - a[1]).slice(0, 6).map(x => x[0]);
+  return { fac, kids, alumni };
+}
+function mySchoolPage() {
+  const M = S.me, sc = M.school; if (!sc) return '<div class="os-empty"><span>🎓</span><b>Not enrolled</b><p>Find a course in the Library or the schools list.</p></div>';
+  const P0 = schoolProg(sc), s = sc.at ? SCHOOL_BY[sc.at] : null, crafts = s ? (SCHOOL_PROGS[sc.prog] || {}).crafts || [sc.craft] : [sc.craft], hub = s ? s[2] : M.hub;
+  const name = s ? s[1] : `${hubName(M.hub)} ${sc.prog === 'cc' ? 'Community College' : sc.prog === 'short' ? 'Evening School' : 'Polytechnic'}`;
+  const pct = Math.round(clamp(sc.done / Math.max(1, P0.weeks), 0, 1) * 100), X = schoolPeople(s ? s[0] : 'local-' + sc.prog, hub, crafts);
+  const mates = Object.entries(M.known).filter(([, k]) => (k.tags || []).includes('Classmate')).map(([id]) => +id);
+  const year = [...new Set(mates.concat(X.kids.map(p => p.id)))].slice(0, 12);
+  return `<div class="head"><p class="eyebrow">Your school · ${esc(hubName(hub))}${s ? ` · founded ${s[5]} · rated ${schoolRating(s).toFixed(1)}/10` : ''}</p><h2>${esc(name)}</h2><p class="lede">${esc(s ? s[8] : (PROGRAMS[sc.prog] || {}).d || '')}</p></div>
+   <div class="kpis mini"><div><span>Course</span><b>${esc((SCHOOL_PROGS[sc.prog] || PROGRAMS[sc.prog] || {}).label || P0.label)}</b></div><div><span>Your craft</span><b>${esc(CRAFTS[sc.craft].label)}</b></div><div><span>Progress</span><b>${sc.done} of ${P0.weeks} wk</b></div><div><span>Sessions a week</span><b>${P0.days}</b></div><div><span>Fees</span><b>${P0.fee > 0 ? fmtCash(usd(P0.fee)) + '/wk' : P0.fee < 0 ? 'Stipend' : 'Free'}</b></div><div><span>Missed weeks</span><b class="${sc.missed >= 2 ? 'bad' : ''}">${sc.missed || 0} of 4</b></div></div>
+   <div class="mn-bar"><i style="width:${pct}%"></i></div>${sc.schol ? '<p class="good small">You\'re on a scholarship.</p>' : ''}
+   ${typeof syllabusHTML === 'function' && SCHOOL_PROGS[sc.prog] ? `<section class="panel"><h3>What you study</h3>${syllabusHTML(sc.prog)}</section>` : ''}
+   <div class="cols two"><section class="panel"><h3>Faculty</h3><ul class="plain mn-list">${X.fac.map((p, i) => personRow(p.id, `${FAC_TITLES[i] || 'Lecturer'} · ${ROLE_LABEL[p.role] || p.role}${p.credits && p.credits.length ? ' · ' + p.credits.length + ' credits' : ''}`)).join('') || '<li class="muted">Working professionals teach most classes here.</li>'}</ul></section>
+    <section class="panel"><h3>Your year</h3><ul class="plain mn-list">${year.map(id => personRow(id, `${ROLE_LABEL[P(id).role] || ''} · ${mates.includes(id) ? 'classmate you know' : 'in your year'}`)).join('') || '<li class="muted">You haven\'t met anyone yet. Go to class.</li>'}</ul></section></div>
+   ${X.alumni.length ? `<section class="panel"><h3>Famous alumni</h3><ul class="plain mn-list two">${X.alumni.map(p => personRow(p.id, `${ROLE_LABEL[p.role] || ''} · class of ${p.born + 23}`)).join('')}</ul></section>` : ''}
+   <p class="small muted">Miss four weeks in a row and they let you go. Your study sessions are fitted into your diary automatically around your jobs.</p>`;
+}
+function viewMine(cur) {
+  if (cur.kind === 'myjob') return myJobPage(cur.id);
+  if (cur.kind === 'myschool') return mySchoolPage();
+  return '';
+}
+function mineClick(t) {
+  if (!S.me) return false;
+  if (t.dataset.jobpage !== undefined) { UI.stack.push({ kind: 'myjob', id: +t.dataset.jobpage }); render(); return true; }
+  if (t.dataset.schoolpage !== undefined) { UI.stack.push({ kind: 'myschool', id: 0 }); render(); return true; }
+  return false;
+}
+// </mine>
+// <decide>
+// ---------------- Decisions, up top ----------------
+// Anything waiting on you sits in one box at the top of the screen, whatever page you're on: the situation, then
+// the choices side by side with their odds. One at a time, with a pager when several are waiting; it can be folded
+// away to a single line and opened again.
+function decisionBoxHTML() {
+  if (UI.building || !S.me || typeof careerActive !== 'function' || !careerActive()) return '';
+  const L = pending(); if (!L.length) return '';
+  const i = clamp(UI.decI || 0, 0, L.length - 1), it = L[i];
+  if (UI.decMin) return `<div class="decbox min"><button class="dec-open" data-decmin="0">❗ ${L.length} decision${L.length > 1 ? 's' : ''} waiting: <b>${esc(it.title)}</b> <span>Open ▾</span></button></div>`;
+  return `<section class="decbox" aria-live="polite"><div class="dec-top"><span class="dec-k">❗ ${L.length > 1 ? `Decision ${i + 1} of ${L.length}` : 'Your decision'}</span><span class="dec-nav">${L.length > 1 ? `<button class="linkish" data-decnav="-1" ${i === 0 ? 'disabled' : ''}>‹ Previous</button><button class="linkish" data-decnav="1" ${i === L.length - 1 ? 'disabled' : ''}>Next ›</button>` : ''}<button class="linkish" data-decmin="1" title="Fold this away">Hide ▴</button></span></div><div class="dec-body">${inboxCard(it)}</div></section>`;
+}
+function decideClick(t) {
+  if (!S.me) return false;
+  if (t.dataset.decmin !== undefined) { UI.decMin = t.dataset.decmin === '1'; render(true); return true; }
+  if (t.dataset.decnav) { UI.decI = clamp((UI.decI || 0) + +t.dataset.decnav, 0, Math.max(0, pending().length - 1)); render(true); return true; }
+  if (t.dataset.pick) UI.decMin = false;
+  return false;
+}
+// </decide>
+// <diary2>
+// ---------------- Your own week, kept ----------------
+// Changes you make block by block are actions like any other (so saves replay them), and they can be pinned: a
+// pinned block survives autopilot, which plans around it every week. Whole weeks can be saved as named plans and
+// put back with one click. Jobs and study sessions still take their blocks when the week runs.
+function calOk(d, b, k) { return d >= 0 && d < 7 && b >= 0 && b < 3 && k !== 'work' && (BLOCK_ACTS[k] || (b === 2 && typeof venueAsEvening === 'function' && venueAsEvening(k))); }
+function calSetAct(a) {
+  const M = S.me, d = +a.d, b = +a.b, k = String(a.k || ''); if (!calOk(d, b, k)) return false;
+  calOf()[d][b] = k;
+  if (M.calPinAll) (M.calPins = M.calPins || {})[d + '-' + b] = k;
+  return true;
+}
+function calPinAct(a) {
+  const M = S.me, key = String(a.key || '');
+  if (a.all !== undefined) { M.calPinAll = !!a.all; if (M.calPinAll) { M.calPins = M.calPins || {}; const c = calOf(); if (a.snap) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (c[d][b] !== 'work') M.calPins[d + '-' + b] = c[d][b]; } return true; }
+  if (a.clear) { M.calPins = {}; M.calPinAll = false; return true; }
+  if (!/^[0-6]-[0-2]$/.test(key)) return false;
+  M.calPins = M.calPins || {};
+  if (M.calPins[key] !== undefined) delete M.calPins[key]; else { const [d, b] = key.split('-').map(Number); M.calPins[key] = calOf()[d][b]; }
+  return true;
+}
+function calPresetAct(a) {
+  const M = S.me, L = M.calPresets = M.calPresets || [];
+  if (a.op === 'save') { const name = String(a.name || '').replace(/\s+/g, ' ').trim().slice(0, 28) || `Plan ${L.length + 1}`; if (L.length >= 6) return false; L.push({ name, cal: calOf().map(r => r.slice()) }); return true; }
+  const i = +a.i; if (!L[i]) return false;
+  if (a.op === 'del') { L.splice(i, 1); return true; }
+  if (a.op === 'use') { M.cal = L[i].cal.map(r => r.map(k => k === 'work' ? 'rest' : k)); if (M.focus) M.focus.auto = false; if (a.pin) { M.calPins = {}; for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) M.calPins[d + '-' + b] = M.cal[d][b]; } return true; }
+  return false;
+}
+// autopilot plans the week, then puts your pinned blocks back
+function applyPins(cal) { const P0 = S.me.calPins || {}; for (const key in P0) { const [d, b] = key.split('-').map(Number); if (cal[d] && calOk(d, b, P0[key])) cal[d][b] = P0[key]; } return cal; }
+function diaryKeepHTML() {
+  const M = S.me, pins = Object.keys(M.calPins || {}).length, L = M.calPresets || [];
+  return `<div class="dk"><div class="dk-row"><label class="dk-t"><input type="checkbox" data-calpinall="1" ${M.calPinAll ? 'checked' : ''}> <b>📌 Keep my changes every week</b></label><span class="muted small">${M.calPinAll ? 'Every block you change from now on is pinned: autopilot plans around it each week.' : 'Tick it, or click 📌 on any block, and autopilot keeps your choices instead of replanning them.'}</span>
+    ${pins ? `<span class="chip">${pins} pinned</span> <button class="linkish" data-calpinclear="1">Unpin all</button>` : ''}<button class="os-btn" data-calpinsnap="1" title="Pin every block of this week as it stands">Pin this whole week</button></div>
+   <div class="dk-row"><b class="small">Saved weeks</b>${L.map((p, i) => `<span class="dk-p"><button class="os-btn" data-caluse="${i}" title="Load this plan into the diary">${esc(p.name)}</button><button class="linkish" data-caluse="${i}" data-calpinuse="1" title="Load it and pin every block">load + pin</button><button class="linkish dk-x" data-caldel="${i}" title="Delete">✕</button></span>`).join('') || '<span class="muted small">None yet.</span>'}
+    ${L.length < 6 ? `<input id="cal-pname" maxlength="28" placeholder="Name this week…" value="${esc(UI.calpname || '')}"><button class="os-btn" data-calsave="1">Save this week</button>` : '<span class="muted small">Six saved: delete one to save another.</span>'}</div></div>`;
+}
+function diary2Click(t) {
+  if (!S.me) return false;
+  const d = t.dataset;
+  if (d.calpin) { doAct({ t: 'calpin', key: d.calpin }); UI.fineOpen = true; render(true); return true; }
+  if (d.calpinall) { doAct({ t: 'calpin', all: t.checked }); UI.fineOpen = true; render(true); return true; }
+  if (d.calpinsnap) { doAct({ t: 'calpin', all: true, snap: 1 }); UI.fineOpen = true; render(true); return true; }
+  if (d.calpinclear) { doAct({ t: 'calpin', clear: 1 }); render(true); return true; }
+  if (d.calsave) { const el = document.getElementById('cal-pname'); doAct({ t: 'calpreset', op: 'save', name: el ? el.value : '' }); UI.calpname = ''; UI.fineOpen = true; render(true); return true; }
+  if (d.caluse !== undefined) { doAct({ t: 'calpreset', op: 'use', i: +d.caluse, pin: d.calpinuse ? 1 : 0 }); UI.fineOpen = true; render(true); return true; }
+  if (d.caldel !== undefined) { doAct({ t: 'calpreset', op: 'del', i: +d.caldel }); render(true); return true; }
+  return false;
+}
+// </diary2>
+// <make2>
+// ---------------- The Make suite ----------------
+// Every Make app is a workshop you can start in, not a door to the Create page. The Scriptwriter has the desk, the
+// story (logline workshop and beat board), characters, scene cards, your own pages in screenplay format, a daily
+// punch-up and the coverage; what you build there lifts the draft. Saved work is game state, so it survives reloads
+// and replays: every change that matters is an action.
+
+// ---- Scriptwriter ----
+const SW_TABS = [['desk', '🗂️ Desk'], ['story', '🧭 Story'], ['chars', '🧍 Characters'], ['scenes', '🎬 Scenes'], ['pages', '📄 Pages'], ['punch', '🥊 Punch-up'], ['notes', '📝 Coverage']];
+const CH_ROLES = ['Protagonist', 'Antagonist', 'Love interest', 'Mentor', 'Ally', 'Rival', 'Trickster', 'Wildcard'];
+const SC_PURPOSE = { setup: 'Set-up', reveal: 'Reveal', conflict: 'Conflict', turn: 'Turn', payoff: 'Payoff', breather: 'Breather' };
+const CLIP = (v, n) => String(v || '').replace(/\r/g, '').slice(0, n);
+// what makes a logline work: someone specific, wanting something, against something, with a twist of irony
+function loglineChecks(t) {
+  const s = String(t || ''), w = s.split(/\s+/).filter(Boolean).length;
+  return [
+    ['A specific hero', /\b(a|an|the)\s+([a-z-]+\s+){0,3}(who|whose|with|named)\b|\b[a-z]+-[a-z]+\b|\b(ageing|aging|retired|young|disgraced|failed|lonely|grieving|reluctant|former|rookie|widowed)\b/i.test(s)],
+    ['Something they want', /\b(wants?|must|needs?|tries|trying|sets out|has to|determined|desperate|hopes?|plans?|races?|fights?)\b/i.test(s)],
+    ['Something in the way', /\b(but|until|before|when|while|against|despite|only to|unless|except)\b/i.test(s)],
+    ['A hook or irony', /\b(only|last|first|secretly|own|wrong|impossible|accidentally|discovers?|learns?|realises?|realizes?)\b/i.test(s)],
+    ['Tight (15–45 words)', w >= 15 && w <= 45]
+  ];
+}
+function charDepth(c) { return ['want', 'need', 'flaw', 'secret'].filter(k => String(c[k] || '').trim().length >= 6).length; }
+// screenplay markup: sluglines, character cues, parentheticals, dialogue, action, transitions
+function fountain(text) {
+  const out = []; let afterCue = false;
+  for (const raw of String(text || '').split('\n')) {
+    const l = raw.trim();
+    if (!l) { afterCue = false; out.push('<div class="fp-gap"></div>'); continue; }
+    if (/^(INT\.|EXT\.|INT\/EXT|I\/E)/i.test(l)) { afterCue = false; out.push(`<div class="fp-slug">${esc(l.toUpperCase())}</div>`); continue; }
+    if (/^[A-Z][A-Z .'\-]{1,30}(\s\((V\.O\.|O\.S\.|CONT'D)\))?$/.test(l) && !/TO:$/.test(l)) { afterCue = true; out.push(`<div class="fp-cue">${esc(l)}</div>`); continue; }
+    if (/TO:$/.test(l) || /^FADE (IN|OUT)/.test(l)) { afterCue = false; out.push(`<div class="fp-tr">${esc(l)}</div>`); continue; }
+    if (afterCue && /^\(.*\)$/.test(l)) { out.push(`<div class="fp-par">${esc(l)}</div>`); continue; }
+    if (afterCue) { out.push(`<div class="fp-dia">${esc(l)}</div>`); continue; }
+    out.push(`<div class="fp-act">${esc(l)}</div>`);
+  }
+  return out.join('');
+}
+function pageStats(text) {
+  const L = String(text || '').split('\n').map(x => x.trim()).filter(Boolean); let cues = 0, dia = 0, act = 0, slug = 0, after = false; const lines = [];
+  for (const l of L) { if (/^(INT\.|EXT\.|INT\/EXT|I\/E)/i.test(l)) { slug++; after = false; } else if (/^[A-Z][A-Z .'\-]{1,30}(\s\(.*\))?$/.test(l)) { cues++; after = true; } else if (after && !/^\(.*\)$/.test(l)) { dia++; lines.push(l); } else { act++; after = false; } }
+  const words = String(text || '').split(/\s+/).filter(Boolean).length;
+  return { words, pages: Math.round(words / 180 * 10) / 10, slug, cues, dia, act, best: lines.filter(x => x.length > 12 && x.length < 110).sort((a, b) => (b.match(/[?!—…]/g) || []).length - (a.match(/[?!—…]/g) || []).length || b.length - a.length)[0] || '' };
+}
+// ---- actions ----
+function scriptOf(id) { return (S.me.scripts || []).find(x => x.id === +id); }
+function swEditAct(a) {
+  const M = S.me, sc = scriptOf(a.id); if (!sc) return false;
+  const day = S.week * 7 + (M.wk ? M.wk.day : 0);
+  if (a.f === 'logline') {
+    const t = CLIP(a.v, 400).replace(/\s+/g, ' ').trim(); if (!t) return false; sc.logline = t; sc.premise = t;
+    const ok = loglineChecks(t).filter(x => x[1]).length;
+    if (ok >= 4 && sc.logOk !== sc.draft) { sc.logOk = sc.draft; sc.prep = Math.min(7, (sc.prep || 0) + .6); diary(`You sharpen the logline for ${sc.title} until it sells itself.`); }
+    return true;
+  }
+  if (a.f === 'title') { const t = CLIP(a.v, 60).replace(/\s+/g, ' ').trim(); if (!t || sc.made !== undefined) return false; sc.title = t; return true; }
+  if (a.f === 'char') {
+    sc.chars = sc.chars || [];
+    if (a.op === 'del') { sc.chars.splice(+a.i, 1); return true; }
+    const c = { name: CLIP(a.c && a.c.name, 40).trim() || 'Unnamed', role: CH_ROLES.includes(a.c && a.c.role) ? a.c.role : 'Ally', want: CLIP(a.c && a.c.want, 160), need: CLIP(a.c && a.c.need, 160), flaw: CLIP(a.c && a.c.flaw, 160), secret: CLIP(a.c && a.c.secret, 160) };
+    if (a.op === 'add') { if (sc.chars.length >= 10) return false; sc.chars.push(c); } else if (a.op === 'set' && sc.chars[+a.i]) sc.chars[+a.i] = Object.assign(sc.chars[+a.i], c); else return false;
+    sc.charBonus = sc.charBonus || {};
+    sc.chars.forEach((x, i) => { if (charDepth(x) >= 4 && !sc.charBonus[x.name]) { sc.charBonus[x.name] = 1; if (Object.keys(sc.charBonus).length <= 4) { sc.prep = Math.min(7, (sc.prep || 0) + .35); growSub(ME(), 'char', .01); } } });
+    return true;
+  }
+  if (a.f === 'scene') {
+    sc.scenes = sc.scenes || [];
+    if (a.op === 'del') { sc.scenes.splice(+a.i, 1); return true; }
+    if (a.op === 'up' || a.op === 'down') { const i = +a.i, j = a.op === 'up' ? i - 1 : i + 1; if (!sc.scenes[i] || !sc.scenes[j]) return false; [sc.scenes[i], sc.scenes[j]] = [sc.scenes[j], sc.scenes[i]]; return true; }
+    const s = { ie: ['INT.', 'EXT.', 'INT./EXT.'].includes(a.s && a.s.ie) ? a.s.ie : 'INT.', where: CLIP(a.s && a.s.where, 50).toUpperCase() || 'SOMEWHERE', when: ['DAY', 'NIGHT', 'DAWN', 'DUSK', 'CONTINUOUS'].includes(a.s && a.s.when) ? a.s.when : 'DAY', beat: Math.max(0, Math.min(7, +(a.s && a.s.beat) || 0)), purpose: SC_PURPOSE[a.s && a.s.purpose] ? a.s.purpose : 'conflict', what: CLIP(a.s && a.s.what, 300) };
+    if (a.op === 'add') { if (sc.scenes.length >= 60) return false; sc.scenes.push(s); } else if (a.op === 'set' && sc.scenes[+a.i]) sc.scenes[+a.i] = s; else return false;
+    const covered = new Set(sc.scenes.map(x => x.beat)).size;
+    if (covered >= 8 && sc.sceneOk !== sc.draft) { sc.sceneOk = sc.draft; sc.prep = Math.min(7, (sc.prep || 0) + 1); growSub(ME(), 'struc', .015); diary(`Every beat of ${sc.title} has a scene now. You can see the whole film.`); }
+    return true;
+  }
+  if (a.f === 'pages') {
+    const text = CLIP(a.v, 40000), st = pageStats(text); sc.text = text;
+    if (sc.stage !== 'writing') return true;
+    // your own pages count: a page for every 180 words you add, up to three pages a day
+    const was = sc.ownW || 0, add = Math.max(0, st.words - was), me = ME();
+    M.ownD = M.ownD === day ? day : (M.ownN = 0, day);
+    const n = Math.min(3 - (M.ownN || 0), Math.floor(add / 180));
+    if (n > 0) {
+      M.ownN = (M.ownN || 0) + n; sc.ownW = was + n * 180;
+      const skill = avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])), craft = (st.slug ? .5 : 0) + (st.cues >= 3 ? .5 : 0) + (st.dia >= 4 && st.act >= 2 ? .5 : 0);
+      sc.pages = Math.min(sc.target, sc.pages + n); sc.sessions++; sc.q += (skill + (sc.prep || 0) * .5 + craft) * n;
+      for (const k of ['dial', 'struc']) growSub(me, k, .006 * n);
+      diary(`You write ${n} page${n > 1 ? 's' : ''} of ${sc.title} yourself, line by line.`);
+      if (sc.pages >= sc.target) { const L = []; finishDraft(sc, L); L.forEach(t => diary(t)); }
+    }
+    return true;
+  }
+  return false;
+}
+// the daily punch-up: three ways to land the last line of a flat exchange
+const PU_SET = [
+  { a: 'I can\'t do this anymore.', b: 'Then don\'t.', opts: [['I mean it. I really can\'t do this anymore, and it hurts.', 'nose'], ['(she keeps folding the shirt) It still smells like him.', 'sub'], ['Great. More laundry for me.', 'joke']] },
+  { a: 'Are you scared?', b: 'Should I be?', opts: [['Yes. You should be very scared of what\'s coming.', 'nose'], ['They locked the doors from the outside.', 'sub'], ['Only of my cooking.', 'joke']] },
+  { a: 'You came back.', b: 'I forgot my keys.', opts: [['That\'s a lie. You came back because you love me.', 'nose'], ['You don\'t have keys. You never did.', 'sub'], ['Classic you. Which keys?', 'joke']] },
+  { a: 'We\'re going to lose.', b: 'Probably.', opts: [['But we have to try, because it\'s the right thing.', 'nose'], ['(he laces his boots) Probably isn\'t certainly.', 'sub'], ['Can we at least lose before lunch?', 'joke']] },
+  { a: 'Tell me the truth.', b: 'Which one?', opts: [['The truth about what happened that night with my father.', 'nose'], ['The one you buried in the garden.', 'sub'], ['Start with the cheapest.', 'joke']] },
+  { a: 'Is it safe?', b: 'It\'s fine.', opts: [['No, it isn\'t safe at all, and I\'m lying to you.', 'nose'], ['(the floor creaks under her) Mostly fine.', 'sub'], ['Define safe. Then define fine.', 'joke']] },
+  { a: 'Why did you lie?', b: 'You wouldn\'t have stayed.', opts: [['I lied because I was afraid you would leave me.', 'nose'], ['I packed your bag the day we met.', 'sub'], ['To be fair, you also lied about the cat.', 'joke']] },
+  { a: 'You look tired.', b: 'I\'m fine.', opts: [['I\'m exhausted because I haven\'t slept since the accident.', 'nose'], ['I counted the ceiling tiles again. Two hundred and twelve.', 'sub'], ['This is my face. I was born tired.', 'joke']] }
+];
+function punchOf(sc) { const r = hashRand(sc.id * 997 + S.week * 7 + (S.me.wk ? S.me.wk.day : 0)), P0 = PU_SET[Math.floor(r() * PU_SET.length)], order = [0, 1, 2].sort(() => r() - .5); return { P: P0, order }; }
+function punchBest(sc) { const funny = ['Comedy', 'Animation', 'Musical'].includes(sc.genre) || sc.tone === 'light' || sc.tone === 'absurd'; return funny ? 'joke' : 'sub'; }
+function punchAct(a) {
+  const M = S.me, sc = scriptOf(a.id), day = S.week * 7 + (M.wk ? M.wk.day : 0); if (!sc || sc.stage !== 'writing' || M.punchD === day) return false;
+  const { P: P0 } = punchOf(sc), o = P0.opts[+a.pick]; if (!o) return false;
+  M.punchD = day; const best = punchBest(sc), me = ME(), good = o[1] === best, ok = o[1] !== 'nose';
+  sc.q += good ? 4 + skillOf(me, 'dial') * .4 : ok ? 1 : -3; growSub(me, 'dial', good ? .02 : .008);
+  (sc.lines = sc.lines || []).push(o[0]); if (sc.lines.length > 12) sc.lines.shift();
+  M.lastPunch = { w: day, good, kind: o[1], best };
+  return true;
+}
+// ---- the app ----
+function swDesk(M) { return typeof writingDesk === 'function' ? writingDesk() : ''; }
+function swStory(sc) {
+  const chk = loglineChecks(UI.swlog !== undefined && UI.swlogId === sc.id ? UI.swlog : sc.logline), cards = beatCards(sc), pick = UI.beats && UI.beats.id === sc.id && UI.beats.d === sc.draft ? UI.beats.p : (UI.beats = { id: sc.id, d: sc.draft, p: BEAT_SLOTS.map(() => '') }).p;
+  return `<h5>Logline workshop</h5><p class="small muted">One sentence that sells the film: a specific hero, what they want, what stands in the way, and the twist that makes it yours. Four of five and the draft gets a lift.</p>
+   <textarea id="sw-log" rows="3" maxlength="400" data-swlog="${sc.id}">${esc(UI.swlogId === sc.id && UI.swlog !== undefined ? UI.swlog : sc.logline || '')}</textarea>
+   <div class="sw-checks">${chk.map(([l, ok]) => `<span class="${ok ? 'good' : 'muted'}">${ok ? '✔' : '○'} ${l}</span>`).join('')}</div>
+   <p><button class="btn-s" data-swsave="logline:${sc.id}">Save logline</button>${sc.logOk === sc.draft ? ' <span class="chip good">logline bonus earned</span>' : ''}</p>
+   <h5>Beat board ${sc.outlined === sc.draft ? '<span class="chip good">outline locked</span>' : ''}</h5>
+   ${sc.outlined === sc.draft ? `<ol class="small">${(sc.outline || []).map((ci, i) => `<li><b>${BEAT_SLOTS[i][0]}</b>: ${esc((cards.find(c => c.i === ci) || {}).t || '')}</li>`).join('')}</ol>` : `<p class="small muted">Put a scene card on each beat. Two cards don't belong anywhere. A good outline makes every page after it better (and rolls your Structure).</p>
+    <div class="sw-beats">${BEAT_SLOTS.map(([l], i) => `<label><span>${l}</span>${sel('sw-beat-' + i, [['', 'Choose a scene…'], ...cards.map(c => [String(c.i), c.t])], String(pick[i]))}</label>`).join('')}</div>
+    <button class="btn-s" data-swoutline="${sc.id}" ${pick.some(x => x === '') ? 'disabled' : ''}>Lock the outline</button>`}`;
+}
+function swChars(sc) {
+  const L = sc.chars || [], E = UI.swch || {};
+  const form = (c, i) => `<div class="sw-cform"><div class="sw-cf2"><label>Name<input id="ch-name" maxlength="40" value="${esc(c.name || '')}"></label><label>Role${sel('ch-role', CH_ROLES.map(r => [r, r]), c.role || 'Protagonist')}</label></div>
+    <label>Wants <span class="muted small">(the goal they chase out loud)</span><input id="ch-want" maxlength="160" value="${esc(c.want || '')}"></label><label>Needs <span class="muted small">(what would actually fix them)</span><input id="ch-need" maxlength="160" value="${esc(c.need || '')}"></label>
+    <label>Flaw<input id="ch-flaw" maxlength="160" value="${esc(c.flaw || '')}"></label><label>Secret<input id="ch-secret" maxlength="160" value="${esc(c.secret || '')}"></label>
+    <p><button class="btn-s" data-swchar="${i === undefined ? 'add' : 'set:' + i}:${sc.id}">${i === undefined ? 'Add character' : 'Save'}</button>${i !== undefined ? ` <button class="linkish" data-swchopen="">Cancel</button>` : ''}</p></div>`;
+  return `<p class="small muted">Drawn characters write themselves. Give each a want, a need that's different, a flaw and a secret: every fully drawn character (up to four) lifts the draft and your Character craft.</p>
+   <div class="sw-chars">${L.map((c, i) => E.i === i ? form(c, i) : `<article class="sw-char"><header><b>${esc(c.name)}</b><span class="chip">${esc(c.role)}</span><span class="sw-depth" title="How fully drawn">${'●'.repeat(charDepth(c))}${'○'.repeat(4 - charDepth(c))}</span></header>
+     ${c.want ? `<p class="small"><b>Wants</b> ${esc(c.want)}</p>` : ''}${c.need ? `<p class="small"><b>Needs</b> ${esc(c.need)}</p>` : ''}${c.flaw ? `<p class="small"><b>Flaw</b> ${esc(c.flaw)}</p>` : ''}${c.secret ? `<p class="small"><b>Secret</b> ${esc(c.secret)}</p>` : ''}
+     ${c.want && c.need && c.want.trim().toLowerCase() === c.need.trim().toLowerCase() ? '<p class="small bad">Their want and need are the same: there\'s no arc.</p>' : ''}
+     <p><button class="linkish" data-swchopen="${i}">Edit</button> · <button class="linkish" data-swchar="del:${i}:${sc.id}">Delete</button></p></article>`).join('')}</div>
+   ${L.length < 10 && E.i === undefined ? `<h5>New character</h5>${form({ role: L.length ? 'Ally' : 'Protagonist' })}` : ''}`;
+}
+function swScenes(sc) {
+  const L = sc.scenes || [], cov = new Set(L.map(x => x.beat)), br = L.filter(x => x.purpose === 'breather').length;
+  return `<p class="small muted">Scene cards, in order. Tie each to a beat; once every beat has a scene, the draft gets a structure bonus.</p>
+   <div class="sw-cov">${BEAT_SLOTS.map(([l], i) => `<span class="${cov.has(i) ? 'good' : 'muted'}">${cov.has(i) ? '■' : '□'} ${l}</span>`).join('')}</div>
+   ${L.length > 6 && br / L.length > .3 ? '<p class="small bad">Too many breathers: the film stops moving.</p>' : ''}
+   <ol class="sw-scenes">${L.map((s, i) => `<li><div><b>${esc(s.ie)} ${esc(s.where)} – ${esc(s.when)}</b> <span class="chip">${esc(BEAT_SLOTS[s.beat][0])}</span> <span class="chip">${esc(SC_PURPOSE[s.purpose])}</span><p class="small">${esc(s.what)}</p></div><span class="sw-sact"><button class="linkish" data-swscene="up:${i}:${sc.id}" ${i === 0 ? 'disabled' : ''}>↑</button><button class="linkish" data-swscene="down:${i}:${sc.id}" ${i === L.length - 1 ? 'disabled' : ''}>↓</button><button class="linkish" data-swscene="del:${i}:${sc.id}">✕</button></span></li>`).join('')}</ol>
+   ${L.length < 60 ? `<h5>New scene</h5><div class="sw-sform">${sel('sn-ie', [['INT.', 'INT.'], ['EXT.', 'EXT.'], ['INT./EXT.', 'INT./EXT.']], 'INT.')}<input id="sn-where" maxlength="50" placeholder="LOCATION"> ${sel('sn-when', ['DAY', 'NIGHT', 'DAWN', 'DUSK', 'CONTINUOUS'].map(x => [x, x]), 'DAY')} ${sel('sn-beat', BEAT_SLOTS.map(([l], i) => [String(i), l]), String(Math.min(7, cov.size)))} ${sel('sn-purpose', Object.entries(SC_PURPOSE), 'conflict')}
+    <textarea id="sn-what" rows="2" maxlength="300" placeholder="What happens, and what changes by the end of it"></textarea><button class="btn-s" data-swscene="add:0:${sc.id}">Add scene</button></div>` : ''}`;
+}
+function swPages(sc) {
+  const t = UI.swpgId === sc.id && UI.swpg !== undefined ? UI.swpg : sc.text || '', st = pageStats(t), M = S.me, today = S.week * 7 + (M.wk ? M.wk.day : 0), left = 3 - (M.ownD === today ? M.ownN || 0 : 0), pend = Math.max(0, st.words - (sc.ownW || 0));
+  return `<p class="small muted">Write it yourself. Sluglines start INT. or EXT.; a name in CAPITALS on its own line is a character, the lines under it their dialogue; (parentheses) are directions. Every 180 new words count as a page of the draft, up to three pages a day, weighted by your craft.</p>
+   <div class="sw-ed"><textarea id="sw-pages" data-swpg="${sc.id}" rows="18" spellcheck="true" placeholder="INT. DINER – NIGHT&#10;&#10;Rain on the windows. MARA (40s) counts coins.&#10;&#10;MARA&#10;(not looking up)&#10;You're late.">${esc(t)}</textarea><div class="sw-fp">${fountain(t) || '<p class="muted">Your pages appear here, formatted.</p>'}</div></div>
+   <p class="small">${st.words.toLocaleString()} words · about ${st.pages} pages · ${st.slug} scenes · ${st.cues} speeches${pend ? ` · ${pend} words not yet counted` : ''} · ${left > 0 ? `${left} page${left > 1 ? 's' : ''} left to count today` : 'today\'s pages counted'}</p>
+   <p><button class="btn-s" data-swsave="pages:${sc.id}">Save pages</button>${st.best ? ` <span class="muted small">Your best line so far: <q>${esc(st.best)}</q></span>` : ''}</p>`;
+}
+function swPunch(sc) {
+  const M = S.me, day = S.week * 7 + (M.wk ? M.wk.day : 0), { P: P0, order } = punchOf(sc), done = M.punchD === day, lp = M.lastPunch && M.lastPunch.w === day ? M.lastPunch : null;
+  return `<p class="small muted">A flat exchange from your draft. Pick the last line that does the most work. One punch-up a day.</p>
+   <div class="pu"><p><b>A:</b> ${esc(P0.a)}</p><p><b>B:</b> ${esc(P0.b)}</p><p><b>A:</b> …</p></div>
+   <div class="pu-opts">${order.map(i => `<button class="choice" data-swpunch="${i}:${sc.id}" ${done ? 'disabled' : ''}><b>${esc(P0.opts[i][0])}</b></button>`).join('')}</div>
+   ${lp ? `<p class="${lp.good ? 'good' : lp.kind === 'nose' ? 'bad' : ''}">${lp.good ? 'That\'s the one: it says it without saying it.' : lp.kind === 'nose' ? 'On the nose: the character says exactly what they feel, and the scene goes flat.' : 'Not bad, but not the best line for this ' + (lp.best === 'joke' ? 'comedy: it wanted the laugh.' : 'story: it wanted the subtext.')}</p>` : ''}
+   ${(sc.lines || []).length ? `<h5>Lines you've kept</h5><ul class="plain small">${sc.lines.slice().reverse().map(l => `<li><q>${esc(l)}</q></li>`).join('')}</ul>` : ''}`;
+}
+function swCoverage(sc, done) {
+  const st = pageStats(sc.text), chars = (sc.chars || []).filter(c => charDepth(c) >= 3).length, cov = new Set((sc.scenes || []).map(x => x.beat)).size;
+  const more = [['Logline', sc.logOk === sc.draft ? 'Sells itself.' : 'Doesn\'t yet say who wants what, and what\'s in the way.'], ['Characters', chars >= 3 ? `${chars} fully drawn: a cast actors will want.` : chars ? 'One or two real people; the rest are functions.' : 'Nobody here is drawn yet.'], ['Scene plan', cov >= 8 ? 'Every beat has a scene.' : `${cov} of 8 beats have scenes.`], ['Your pages', st.words ? `${st.words.toLocaleString()} words of your own.${st.best ? ` Best line: “${st.best}”` : ''}` : 'Nothing written by hand yet.']];
+  return `<h5>Reader's notes on the draft in progress</h5><ul class="plain small">${coverageOf(sc).concat(more).map(([k, v]) => `<li><b>${k}:</b> ${esc(v)}</li>`).join('')}</ul>
+   ${done.length ? `<h5>Coverage on finished scripts</h5>${done.map(x => `<details class="sw-cov2"><summary><b>${esc(x.title)}</b> <span class="grade g${x.grade}">${x.grade}</span> <span class="muted small">${x.score}/100 · draft ${x.draft}</span></summary><ul class="plain small">${coverageOf(x).map(([k, v]) => `<li><b>${k}:</b> ${esc(v)}</li>`).join('')}</ul></details>`).join('')}` : ''}`;
+}
+function scriptwriterApp() {
+  const M = S.me, L = M.scripts || [], sc = activeScript(), done = L.filter(x => x.grade).slice(-6).reverse(), today = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0);
+  let t = UI.swt || (sc ? 'story' : 'desk'); if (!sc && t !== 'desk' && t !== 'notes') t = 'desk';
+  const head = sc ? (() => { const pct = Math.round(sc.pages / Math.max(1, sc.target) * 100), perPage = sc.pages ? sc.q / sc.pages : 0, proj = clamp(Math.round(38 + (perPage - 6) * 5 + (sc.draft - 1) * 7), 5, 98);
+    return `<div class="sw-page"><div class="sw-hd"><div><p class="sw-title">${esc(sc.title.toUpperCase())}</p><p class="muted small">${esc(sc.genre)} · ${esc(THEMES[sc.theme] || '')} · ${esc(TONES[sc.tone] || '')} · draft ${sc.draft}</p></div>${L.filter(x => x.stage === 'writing').length > 1 ? `<span>${sel('sw-active', L.filter(x => x.stage === 'writing').map(x => [String(x.id), x.title]), String(sc.id))}</span>` : ''}</div>
+      <div class="sw-prog"><i style="width:${pct}%"></i></div><p class="small">${sc.pages} of ${sc.target} pages · ${sc.sessions} sessions · heading for <b>${gradeOf(proj)}</b> on what's written so far${sc.prep ? ` · preparation bonus +${(+sc.prep).toFixed(1)}` : ''}</p>
+      <div class="bf-row">${Object.entries(WRITE_FOCUS).map(([k, F]) => `<button class="btn-s ghost" data-swsess="${k}" ${today ? 'disabled' : ''} title="${esc(F[1])}">${F[0]}</button>`).join('')}<span class="muted small">${today ? 'Session done today.' : 'One quick session a day, on top of your diary\'s writing blocks.'}</span></div></div>`; })() : '';
+  const body = t === 'desk' ? swDesk(M) : t === 'story' ? swStory(sc) : t === 'chars' ? swChars(sc) : t === 'scenes' ? swScenes(sc) : t === 'pages' ? swPages(sc) : t === 'punch' ? swPunch(sc) : sc ? swCoverage(sc, done) : (done.length ? swCoverage({ id: 0, text: '', chars: [], scenes: [] }, done) : '<p class="muted">Finish a draft to get coverage.</p>');
+  return `<div class="swapp">${head}<div class="np-tabs sw-tabs">${SW_TABS.filter(([k]) => sc || k === 'desk' || k === 'notes').map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-swt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
+}
+function make2Click(t) {
+  if (!S.me || !careerActive()) return false;
+  const d = t.dataset;
+  if (d.swt) { UI.swt = d.swt; render(true); return true; }
+  if (d.swsave) { const [f, id] = d.swsave.split(':'); const el = document.getElementById(f === 'logline' ? 'sw-log' : 'sw-pages'); doAct({ t: 'swedit', id: +id, f, v: el ? el.value : '' }); if (f === 'logline') UI.swlog = undefined; else UI.swpg = undefined; render(true); return true; }
+  if (d.swchopen !== undefined) { UI.swch = d.swchopen === '' ? {} : { i: +d.swchopen }; render(true); return true; }
+  if (d.swchar) { const [op, i, id] = d.swchar.split(':'), v = k => (document.getElementById('ch-' + k) || {}).value || ''; const [o2, i2] = op === 'set' ? ['set', i] : [op, op === 'add' ? 0 : +i];
+    if (op === 'set' || op === 'add') doAct({ t: 'swedit', id: +id, f: 'char', op: o2, i: op === 'set' ? +i2 : 0, c: { name: v('name'), role: v('role'), want: v('want'), need: v('need'), flaw: v('flaw'), secret: v('secret') } });
+    else doAct({ t: 'swedit', id: +id, f: 'char', op: 'del', i: +i });
+    UI.swch = {}; render(true); return true; }
+  if (d.swscene) { const [op, i, id] = d.swscene.split(':'), v = k => (document.getElementById('sn-' + k) || {}).value || '';
+    doAct(op === 'add' ? { t: 'swedit', id: +id, f: 'scene', op: 'add', s: { ie: v('ie'), where: v('where'), when: v('when'), beat: +v('beat'), purpose: v('purpose'), what: v('what') } } : { t: 'swedit', id: +id, f: 'scene', op, i: +i }); render(true); return true; }
+  if (d.swpunch) { const [i, id] = d.swpunch.split(':'); doAct({ t: 'punchup', id: +id, pick: +i }); render(true); return true; }
+  return false;
+}
+function make2Input(e) {
+  if (!S.me || !careerActive()) return false;
+  const id = e.target.id;
+  if (id === 'sw-log') { UI.swlog = e.target.value; UI.swlogId = +e.target.dataset.swlog; const box = document.querySelector('.sw-checks'); if (box) box.innerHTML = loglineChecks(UI.swlog).map(([l, ok]) => `<span class="${ok ? 'good' : 'muted'}">${ok ? '✔' : '○'} ${l}</span>`).join(''); return true; }
+  if (id === 'sw-pages') { UI.swpg = e.target.value; UI.swpgId = +e.target.dataset.swpg; const fp = document.querySelector('.sw-fp'); if (fp) fp.innerHTML = fountain(UI.swpg); return true; }
+  return false;
+}
+function make2Change(e) {
+  if (!S.me || !careerActive()) return false;
+  if (e.target.id === 'sw-active') { doAct({ t: 'activescript', id: +e.target.value }); render(true); return true; }
+  return false;
+}
+// </make2>
+// <make3>
+// ---------------- The Make suite, part two: Studio, CutRoom, Notebook, the Create hub ----------------
+// Studio: start a song, score, musical or podcast right here. Compose in a key: drums, a bass line and a melody on a
+// piano roll, four bars of chords, then lyrics with a live read on rhyme, meter and hook, and a mixing desk. It plays
+// through your speakers. CutRoom: storyboard every shot, order and trim the timeline, pick transitions, a grade and a
+// sound mix, design the thumbnail, and watch a preview. Notebook: ideas you can turn into projects with one click.
+// All of it is saved with the project (action 'makesave'), and a session's score is what the work earns.
+const AUDIO_TYPES = ['song', 'score', 'musical', 'podcast'], VIDEO_TYPES = ['video', 'blip', 'mv'];
+const MKEYS = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+const SCALES = { major: ['Major (bright)', [0, 2, 4, 5, 7, 9, 11]], minor: ['Minor (dark)', [0, 2, 3, 5, 7, 8, 10]], dorian: ['Dorian (soulful)', [0, 2, 3, 5, 7, 9, 10]], penta: ['Pentatonic (safe)', [0, 2, 4, 7, 9, 12, 14]] };
+const CHORDS = ['I', 'ii', 'iii', 'IV', 'V', 'vi'], CH_DEG = { I: 0, ii: 1, iii: 2, IV: 3, V: 4, vi: 5 };
+const GROOVES = {
+  four: ['Four on the floor', { k: [0, 4, 8, 12], s: [4, 12], h: [2, 6, 10, 14] }],
+  boom: ['Boom bap', { k: [0, 7, 10], s: [4, 12], h: [0, 2, 4, 6, 8, 10, 12, 14] }],
+  ballad: ['Ballad', { k: [0, 10], s: [8], h: [0, 4, 8, 12] }],
+  bossa: ['Bossa', { k: [0, 3, 8, 11], s: [3, 6, 10, 13], h: [0, 2, 4, 6, 8, 10, 12, 14] }],
+  march: ['Marching', { k: [0, 4, 8, 12], s: [2, 6, 10, 14, 15], h: [] }]
+};
+const N16 = 16, MEL_ROWS = 8;
+function st2() {
+  const M = S.me, k = M.make;
+  if (UI.st2 && UI.st2.w === (k && k.w) && UI.st2.t === (k && k.title)) return UI.st2;
+  const saved = k && k.studio, base = { key: 0, scale: 'major', bpm: 108, drums: { k: Array(N16).fill(0), s: Array(N16).fill(0), h: Array(N16).fill(0) }, bass: Array(N16).fill(-1), mel: Array(N16).fill(-1), chords: ['I', 'I', 'I', 'I'], lv: [60, 60, 60, 60, 60, 60], verb: 0, comp: 0, lyrics: '', arr: ARR.slice() };
+  UI.st2 = Object.assign(base, saved ? JSON.parse(JSON.stringify(saved)) : {}, { w: k && k.w, t: k && k.title });
+  return UI.st2;
+}
+// ---- reading the music ----
+function melodyRead(X) {
+  const notes = X.mel.map((v, i) => [i, v]).filter(x => x[1] >= 0), n = notes.length, out = []; let s = 0;
+  if (!n) return { s: 0, notes: ['No melody yet: click the piano roll.'] };
+  const dens = n / N16; if (dens >= .35 && dens <= .8) { s += 2; out.push('Room to breathe between notes.'); } else out.push(dens < .35 ? 'Sparse: the tune barely starts.' : 'Wall-to-wall notes: nowhere to breathe.');
+  const iv = notes.slice(1).map((x, i) => Math.abs(x[1] - notes[i][1])), step = iv.length ? iv.filter(x => x <= 2).length / iv.length : 0;
+  if (step >= .55) { s += 2; out.push('Mostly stepwise: easy to sing.'); } else out.push('Lots of leaps: hard to sing along.');
+  const range = Math.max(...notes.map(x => x[1])) - Math.min(...notes.map(x => x[1])); if (range >= 3 && range <= 6) { s += 1.5; out.push('A good range: it goes somewhere.'); } else out.push(range < 3 ? 'Stays on a couple of notes.' : 'Wide range: only a trained voice will manage it.');
+  const a = X.mel.slice(0, 4).join(','), b = X.mel.slice(8, 12).join(','); if (a === b && X.mel.slice(0, 4).some(v => v >= 0)) { s += 2.5; out.push('A motif that comes back: that\'s your hook.'); } else if (X.mel.slice(0, 4).map(v => v >= 0).join() === X.mel.slice(8, 12).map(v => v >= 0).join()) { s += 1; out.push('The rhythm repeats; the notes could too.'); }
+  const last = notes[n - 1][1]; if (last === 0 || last === 7) { s += 2; out.push('Ends home on the tonic.'); } else out.push('Ends up in the air: unresolved.');
+  return { s: Math.min(10, s), notes: out };
+}
+function grooveRead(X) {
+  const D = X.drums, out = []; let s = 0;
+  if (D.k[0]) { s += 2; out.push('Kick on the one.'); } else out.push('No kick on the one: the groove floats.');
+  if (D.s[4] && D.s[12]) { s += 2; out.push('Snare on the backbeat.'); } else if (D.s.some(Boolean)) s += .5;
+  const h = D.h.filter(Boolean).length; if (h >= 4) { s += 2; out.push('Hats keep time.'); }
+  const bassDown = [0, 4, 8, 12].filter(i => X.bass[i] >= 0).length; if (bassDown >= 3) { s += 2; out.push('The bass locks with the downbeats.'); } else if (X.bass.some(v => v >= 0)) { s += .5; out.push('The bass wanders off the beat.'); } else out.push('No bass line yet.');
+  const busy = D.k.filter(Boolean).length + D.s.filter(Boolean).length + h; if (busy > 30) out.push('Very busy: thin it out.'); else s += 2;
+  return { s: Math.min(10, s), notes: out };
+}
+function chordRead(X) {
+  const C = X.chords, out = []; let s = 2;
+  const prog = C.join('-'), pops = ['I-V-vi-IV', 'vi-IV-I-V', 'I-vi-IV-V', 'IV-I-V-vi', 'I-IV-V-I', 'ii-V-I-I', 'I-IV-vi-V'];
+  if (pops.includes(prog)) { s += 4; out.push('A progression a million songs trust.'); }
+  if (C[3] === 'V' || C[3] === 'IV') { s += 1.5; out.push('The last bar pulls back to the start.'); }
+  if (C[0] === 'I' || C[0] === 'vi') { s += 1.5; out.push('Opens on solid ground.'); }
+  if (new Set(C).size === 1) { s -= 2; out.push('One chord all the way: a drone.'); } else if (new Set(C).size >= 3) s += 1;
+  return { s: clamp(s, 0, 10), notes: out };
+}
+function mixRead(X) {
+  const lv = X.lv, out = []; let s = 2;
+  const spread = Math.max(...lv) - Math.min(...lv); if (spread <= 40) { s += 2; out.push('Balanced: everything sits together.'); } else out.push('Something is buried, something is shouting.');
+  if (lv[5] >= Math.max(...lv.slice(0, 5)) - 5) { s += 2; out.push('The lead sits on top.'); } else out.push('The lead is lost in the band.');
+  if (X.verb >= 10 && X.verb <= 45) { s += 2; out.push('Reverb gives it a room.'); } else out.push(X.verb < 10 ? 'Bone dry.' : 'Drowned in reverb.');
+  if (X.comp >= 20 && X.comp <= 65) { s += 2; out.push('Glued together, still breathing.'); } else out.push(X.comp < 20 ? 'Loose and uneven.' : 'Squashed flat.');
+  return { s: Math.min(10, s), notes: out };
+}
+const CLICHES = ['heart of gold', 'set me free', 'fire inside', 'baby baby', 'dance the night away', 'tears like rain', 'end of the road', 'touch the sky', 'one more time', 'love is blind', 'rise above', 'broken heart', 'never let go', 'shine like', 'until the end'];
+function syl(w) { w = w.toLowerCase().replace(/[^a-z]/g, ''); if (!w) return 0; if (w.length <= 3) return 1; w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, ''); const m = w.match(/[aeiouy]{1,2}/g); return m ? m.length : 1; }
+function lyricRead(text, title) {
+  const raw = String(text || ''), L = raw.split('\n').map(x => x.trim()), lines = L.filter(x => x && !/^\[.*\]$/.test(x)), out = []; let s = 0;
+  if (!lines.length) return { s: 0, notes: ['No lyrics yet.'], lines: 0 };
+  if (lines.length >= 12) { s += 1.5; out.push(`${lines.length} lines: a full song.`); } else out.push(`${lines.length} lines: keep going.`);
+  const secs = L.filter(x => /^\[.*\]$/.test(x)).map(x => x.toLowerCase()); if (secs.some(x => x.includes('chorus')) && secs.some(x => x.includes('verse'))) { s += 1.5; out.push('Verses and a chorus.'); } else out.push('Mark sections with [Verse] and [Chorus].');
+  const end = lines.map(x => (x.toLowerCase().match(/[a-z']+(?=[^a-z']*$)/) || [''])[0]); let rh = 0; for (let i = 1; i < end.length; i++) { const a = end[i], b = end[i - 1], c = end[i - 2] || ''; if (a && ((b && a !== b && a.slice(-2) === b.slice(-2)) || (c && a !== c && a.slice(-2) === c.slice(-2)))) rh++; }
+  const rr = rh / Math.max(1, lines.length - 1); if (rr >= .35) { s += 2; out.push('It rhymes where it should.'); } else out.push('Few rhymes: it reads like prose.');
+  const sy = lines.map(x => x.split(/\s+/).reduce((t, w) => t + syl(w), 0)), mean = sy.reduce((a, b) => a + b, 0) / sy.length, dev = Math.sqrt(sy.reduce((t, v) => t + (v - mean) ** 2, 0) / sy.length);
+  if (dev <= 2.5) { s += 2; out.push(`Even meter (about ${Math.round(mean)} syllables a line).`); } else out.push('The line lengths fight the tune.');
+  const tl = String(title || '').toLowerCase().replace(/[^a-z ]/g, '').trim(), chorus = (raw.toLowerCase().split(/\[chorus\]/)[1] || '').split(/\[/)[0];
+  if (tl && chorus.includes(tl)) { s += 2; out.push('The title is in the chorus: the hook lands.'); } else if (tl && raw.toLowerCase().includes(tl)) { s += 1; out.push('The title is in there; put it in the chorus.'); } else out.push('Sing the title somewhere: that\'s the hook.');
+  const cl = CLICHES.filter(c => raw.toLowerCase().includes(c)); if (cl.length) { s -= cl.length * .75; out.push(`Clichés: "${cl.slice(0, 3).join('", "')}".`); } else { s += 1; out.push('No clichés we can see.'); }
+  return { s: clamp(s, 0, 10), notes: out, lines: lines.length };
+}
+function studioScore(k) {
+  const X = st2(), m = melodyRead(X).s, g = grooveRead(X).s, c = chordRead(X).s, x = mixRead(X).s, ly = k.type === 'song' || k.type === 'musical' ? lyricRead(X.lyrics, k.title).s : null;
+  let s = ly === null ? m * .35 + g * .25 + c * .2 + x * .2 : m * .3 + g * .2 + c * .15 + x * .15 + ly * .2;
+  if (k.type === 'score' && X.scale !== 'major' && X.bpm <= 100) s += .8; if (k.type === 'song' && X.bpm >= 85 && X.bpm <= 135) s += .5;
+  return clamp(Math.round(s), 0, 10);
+}
+// ---- sound ----
+function st2Play() {
+  if (typeof window === 'undefined' || !(window.AudioContext || window.webkitAudioContext)) return;
+  const ctx = UI.actx = UI.actx || new (window.AudioContext || window.webkitAudioContext)(), X = st2(), sc = SCALES[X.scale][1], step = 60 / X.bpm / 4, t0 = ctx.currentTime + .08, root = 57 + X.key;
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12), deg = (d, oct) => root + 12 * oct + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7);
+  const out = ctx.createGain(); out.gain.value = .55; out.connect(ctx.destination);
+  const lvl = i => X.lv[i] / 100;
+  const tone = (f, t, d, type, g, cut) => { const o = ctx.createOscillator(), v = ctx.createGain(), fl = ctx.createBiquadFilter(); o.type = type; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.value = cut || 4000; v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(g, t + .01); v.gain.exponentialRampToValueAtTime(.0008, t + d); o.connect(fl); fl.connect(v); v.connect(out); o.start(t); o.stop(t + d + .05); };
+  const noise = (t, d, g, hp) => { const b = ctx.createBuffer(1, ctx.sampleRate * d, ctx.sampleRate), a = b.getChannelData(0); for (let i = 0; i < a.length; i++) a[i] = Math.random() * 2 - 1; const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), v = ctx.createGain(); s.buffer = b; f.type = 'highpass'; f.frequency.value = hp; v.gain.setValueAtTime(g, t); v.gain.exponentialRampToValueAtTime(.0008, t + d); s.connect(f); f.connect(v); v.connect(out); s.start(t); };
+  for (let loop = 0; loop < 2; loop++) for (let i = 0; i < N16; i++) {
+    const t = t0 + (loop * N16 + i) * step;
+    if (X.drums.k[i]) { const o = ctx.createOscillator(), v = ctx.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + .14); v.gain.setValueAtTime(.9 * lvl(0), t); v.gain.exponentialRampToValueAtTime(.001, t + .22); o.connect(v); v.connect(out); o.start(t); o.stop(t + .25); }
+    if (X.drums.s[i]) noise(t, .16, .45 * lvl(1), 1200);
+    if (X.drums.h[i]) noise(t, .05, .2 * lvl(2), 7000);
+    if (X.bass[i] >= 0) tone(hz(deg(X.bass[i], -2)), t, step * 1.8, 'triangle', .5 * lvl(3), 900);
+    if (i % 4 === 0) { const c = CH_DEG[X.chords[i / 4]] || 0; for (const d of [c, c + 2, c + 4]) tone(hz(deg(d, -1)), t, step * 3.8, 'sawtooth', .07 * lvl(4), 1400); }
+    if (X.mel[i] >= 0) tone(hz(deg(X.mel[i], 0)), t, step * 1.6, 'square', .12 * lvl(5), 2600);
+  }
+  // a playhead across the grid
+  const cells = () => document.querySelectorAll('.pr-col'); let n = 0; const tick = () => { cells().forEach((c, j) => c.classList.toggle('ph', j === n % N16)); n++; if (n < N16 * 2) UI.phT = setTimeout(tick, step * 1000); else cells().forEach(c => c.classList.remove('ph')); };
+  clearTimeout(UI.phT); setTimeout(tick, 80);
+}
+// ---- the Studio app ----
+function newProjectForm(types, label) {
+  const M = S.me, T = types.filter(t => WORK_TYPES[t] && workTypeOpen(t)), cur = UI.np2 && T.includes(UI.np2) ? UI.np2 : T[0];
+  if (M.make) return `<div class="os-empty"><span>${WORK_TYPES[M.make.type].icon}</span><b>You're working on ${esc(M.make.title)}</b><p>One project at a time. ${AUDIO_TYPES.includes(M.make.type) ? 'Open it in the Studio.' : VIDEO_TYPES.includes(M.make.type) ? 'Open it in the CutRoom.' : 'Finish it from Create.'}</p></div>`;
+  return `<div class="np2"><h5>Start something ${label}</h5><div class="np2-types">${T.map(t => { const W = WORK_TYPES[t], blocked = W.needs === 'song' && !(M.works || []).some(w => w.type === 'song' && w.rel !== undefined); return `<button class="np2-t${t === cur ? ' on' : ''}" data-np2="${t}" ${blocked ? 'disabled title="Release a song first"' : ''}><span>${W.icon}</span><b>${esc(W.label)}</b><small>${esc(W.d)}</small>${W.cost ? `<small class="muted">Costs ${fmtCash(usd(W.cost))}</small>` : ''}</button>`; }).join('')}</div>
+   <div class="np2-go"><input id="np2-title" maxlength="60" placeholder="Title (or leave blank and we'll suggest one)"><button class="btn-s" data-np2go="${cur}">Start ${esc(WORK_TYPES[cur].label.toLowerCase())}</button></div></div>`;
+}
+function readList(R) { return `<ul class="plain small st-read">${R.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>`; }
+function studioApp() {
+  const M = S.me, k = M.make;
+  const rel = (M.works || []).filter(w => AUDIO_TYPES.includes(w.type)).slice(-5).reverse();
+  if (!k || !AUDIO_TYPES.includes(k.type)) return `<div class="st2">${newProjectForm(AUDIO_TYPES, 'to listen to')}${rel.length ? `<h5>Released</h5><ul class="os-list">${rel.map(w => `<li><a href="#" class="lk" data-go="work:${w.id}">${esc(w.title)}</a><span class="muted">${esc(WORK_TYPES[w.type].label)} · ${Math.round(w.units || 0).toLocaleString()} ${w.type === 'podcast' ? 'downloads' : 'plays'}</span></li>`).join('')}</ul>` : ''}</div>`;
+  if (k.type === 'podcast') return podcastApp(k);
+  const X = st2(), t = UI.stt || 'compose', done = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0), score = studioScore(k), sc = SCALES[X.scale][1];
+  const noteName = d => { const semi = (X.key + sc[((d % 7) + 7) % 7] + 12 * Math.floor(d / 7)) % 12; return MKEYS[semi]; };
+  const head = `<div class="st-hd"><div><b>${esc(k.title)}</b> <span class="muted small">${esc(WORK_TYPES[k.type].label)} · ${k.prog}/${k.need} sessions</span><div class="pbar"><i style="width:${Math.round(k.prog / k.need * 100)}%"></i></div></div>
+    <div class="st-score"><span>Predicted</span><b>${score}/10</b></div><div class="st-btns"><button class="btn-s ghost" data-st2play="1">▶ Play</button><button class="btn-s ghost" data-st2save="1">💾 Save</button>${done ? '<span class="muted small">Session done today</span>' : `<button class="btn-s" data-st2bounce="1">Bounce the session</button>`}</div></div>`;
+  const tabs = [['compose', '🎹 Compose'], ['lyrics', '✍️ Lyrics'], ['mix', '🎚️ Mix & arrange']].filter(([kk]) => kk !== 'lyrics' || k.type !== 'score');
+  let body = '';
+  if (t === 'compose') {
+    const step = i => i % 4 === 0 ? ' dn' : '';
+    body = `<div class="filt"><label><span>Key</span>${sel('st-key', MKEYS.map((n, i) => [String(i), n]), String(X.key))}</label><label><span>Scale</span>${sel('st-scale', Object.entries(SCALES).map(([kk, v]) => [kk, v[0]]), X.scale)}</label><label><span>Tempo</span><input id="st-bpm" type="number" min="60" max="180" value="${X.bpm}"> BPM</label><label><span>Start from a groove</span>${sel('st-groove', [['', 'Choose…'], ...Object.entries(GROOVES).map(([kk, v]) => [kk, v[0]])], '')}</label></div>
+     <h5>Drums</h5><div class="drm">${[['k', 'Kick'], ['s', 'Snare'], ['h', 'Hats']].map(([r, l]) => `<div class="drow"><span>${l}</span>${X.drums[r].map((v, i) => `<button class="stp${v ? ' on' : ''}${step(i)}" data-st2d="${r}:${i}"></button>`).join('')}</div>`).join('')}</div>
+     <h5>Melody <span class="muted small">one note per step; click again to clear</span></h5>
+     <div class="proll">${Array.from({ length: N16 }, (_, i) => `<div class="pr-col${step(i)}">${Array.from({ length: MEL_ROWS }, (_, r) => { const d = MEL_ROWS - 1 - r; return `<button class="pr${X.mel[i] === d ? ' on' : ''}" data-st2m="${i}:${d}" title="${noteName(d)}"></button>`; }).join('')}</div>`).join('')}<div class="pr-keys">${Array.from({ length: MEL_ROWS }, (_, r) => `<span>${noteName(MEL_ROWS - 1 - r)}</span>`).join('')}</div></div>
+     <h5>Bass</h5><div class="proll bass">${Array.from({ length: N16 }, (_, i) => `<div class="pr-col${step(i)}">${Array.from({ length: 5 }, (_, r) => { const d = 4 - r; return `<button class="pr${X.bass[i] === d ? ' on' : ''}" data-st2b="${i}:${d}" title="${noteName(d)}"></button>`; }).join('')}</div>`).join('')}</div>
+     <h5>Chords <span class="muted small">four bars</span></h5><div class="chs">${X.chords.map((c, i) => `<label>Bar ${i + 1}${sel('st-ch-' + i, CHORDS.map(x => [x, `${x} (${noteName(CH_DEG[x])})`]), c)}</label>`).join('')}</div>
+     <div class="cols three st-reads"><div><b>Melody ${Math.round(melodyRead(X).s)}/10</b>${readList(melodyRead(X))}</div><div><b>Groove ${Math.round(grooveRead(X).s)}/10</b>${readList(grooveRead(X))}</div><div><b>Harmony ${Math.round(chordRead(X).s)}/10</b>${readList(chordRead(X))}</div></div>`;
+  } else if (t === 'lyrics') {
+    const R = lyricRead(X.lyrics, k.title);
+    body = `<p class="small muted">Write the words. Mark sections with [Verse], [Chorus], [Bridge]. The read updates as you type: rhyme, meter, the hook, and clichés to cut.</p>
+     <div class="ly"><textarea id="st-lyrics" rows="16" maxlength="4000" placeholder="[Verse]&#10;…&#10;&#10;[Chorus]&#10;…">${esc(X.lyrics)}</textarea><div><b>Lyrics <span id="ly-score">${Math.round(R.s)}</span>/10</b><div id="ly-read">${readList(R)}</div></div></div>`;
+  } else {
+    const tracks = ['Kick', 'Snare', 'Hats', 'Bass', 'Chords', 'Lead'];
+    body = `<div class="mixer">${tracks.map((n, i) => `<div class="ch"><span class="vu"><i style="height:${X.lv[i]}%"></i></span><input type="range" min="0" max="100" value="${X.lv[i]}" id="st-lv-${i}" orient="vertical"><b>${n}</b><small>${X.lv[i]}</small></div>`).join('')}
+     <div class="ch fx"><b>Reverb</b><input type="range" min="0" max="80" value="${X.verb}" id="st-verb"><small>${X.verb}%</small><b>Compression</b><input type="range" min="0" max="100" value="${X.comp}" id="st-comp"><small>${X.comp}%</small></div></div>
+     <div class="st-reads"><b>Mix ${Math.round(mixRead(X).s)}/10</b>${readList(mixRead(X))}</div>
+     <h5>Arrangement <span class="muted small">click two sections to swap</span></h5><div class="timeline">${X.arr.map((x, i) => `<button class="clip2${UI.arrPick === i ? ' on' : ''}" data-st2arr="${i}">${esc(x)}</button>`).join('')}</div>`;
+  }
+  return `<div class="st2">${head}<div class="np-tabs">${tabs.map(([kk, l]) => `<button class="${t === kk ? 'on' : ''}" data-stt="${kk}">${l}</button>`).join('')}</div>${body}</div>`;
+}
+// ---- podcasts ----
+const POD_QS = [['How did it start, really?', 1], ['Was it hard?', 0], ['What did nobody tell you?', 1], ['Do you like your job?', 0], ['Walk me through the worst day.', 1], ['Isn\'t it true you were fired?', 0], ['What would you do differently?', 1], ['Is that right?', 0], ['What surprised you most?', 1], ['You must be proud, yes?', 0]];
+function pod2() { const k = S.me.make; if (!UI.pod2 || UI.pod2.w !== k.w || UI.pod2.t !== k.title) UI.pod2 = Object.assign({ topic: '', guest: '', qs: [], cold: '', order: ['Cold open', 'Intro music', 'Interview', 'Listener mail', 'Sign-off'] }, k.studio && k.studio.pod ? JSON.parse(JSON.stringify(k.studio.pod)) : {}, { w: k.w, t: k.title }); return UI.pod2; }
+function podScore2() {
+  const P0 = pod2(), segs = podSegs(), cut = UI.cuts || []; let s = clamp(Math.round(cut.reduce((t, i) => t + (segs[i] === 'talk' ? -2 : 1), 0) / Math.max(1, segs.filter(x => x !== 'talk').length) * 10), 0, 10) * .4;
+  if (P0.order[0] === 'Cold open') s += 1; if (P0.order[P0.order.length - 1] === 'Sign-off') s += .5;
+  if (P0.guest !== '' && P(+P0.guest)) s += Math.min(2, (P(+P0.guest).fame || 0) / 30 + .5);
+  const good = P0.qs.filter(i => POD_QS[i] && POD_QS[i][1]).length; s += good * .6 - (P0.qs.length - good) * .4;
+  if (P0.cold.trim().length >= 60) s += 1; if (P0.topic.trim().length >= 8) s += .5;
+  return clamp(Math.round(s), 0, 10);
+}
+function podcastApp(k) {
+  const M = S.me, P0 = pod2(), t = UI.stt === 'edit' ? 'edit' : 'plan', segs = podSegs(), cut = UI.cuts || [], done = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0), guests = aliveKnown().slice(0, 40).map(id => [String(id), P(id).name + (P(id).fame > 30 ? ' ★' : '')]);
+  const head = `<div class="st-hd"><div><b>${esc(k.title)}</b> <span class="muted small">Podcast · ${k.prog}/${k.need} sessions</span><div class="pbar"><i style="width:${Math.round(k.prog / k.need * 100)}%"></i></div></div><div class="st-score"><span>Predicted</span><b>${podScore2()}/10</b></div><div class="st-btns"><button class="btn-s ghost" data-st2save="1">💾 Save</button>${done ? '<span class="muted small">Session done today</span>' : '<button class="btn-s" data-st2bounce="1">Export the episode</button>'}</div></div>`;
+  const body = t === 'plan' ? `<div class="filt"><label class="filt-q"><span>This week's topic</span><input id="pd-topic" maxlength="80" value="${esc(P0.topic)}" placeholder="The worst set I ever worked on"></label><label><span>Guest</span>${sel('pd-guest', [['', 'No guest: just you'], ...guests], P0.guest)}</label></div>
+     <h5>Questions <span class="muted small">pick up to four for the interview</span></h5><div class="pd-qs">${POD_QS.map(([q], i) => `<button class="pill${P0.qs.includes(i) ? ' on' : ''}" data-pdq="${i}" ${!P0.qs.includes(i) && P0.qs.length >= 4 ? 'disabled' : ''}>${esc(q)}</button>`).join('')}</div><p class="small muted">Open questions get stories; yes-or-no questions get yes or no.</p>
+     <h5>Cold open <span class="muted small">the first thirty seconds, in your words</span></h5><textarea id="pd-cold" rows="3" maxlength="500" placeholder="So there I was, holding a boom pole in a hailstorm…">${esc(P0.cold)}</textarea>
+     <h5>Running order <span class="muted small">click two to swap</span></h5><div class="timeline">${P0.order.map((x, i) => `<button class="clip2${UI.podPick === i ? ' on' : ''}" data-pd2ord="${i}">${esc(x)}</button>`).join('')}</div>`
+    : `<h5>The edit <span class="muted small">cut the ums and dead air, keep the talk</span></h5><div class="wave">${segs.map((s, i) => `<button class="seg ${s}${cut.includes(i) ? ' cut' : ''}" data-podcut="${i}" title="${s === 'um' ? 'um…' : s === 'gap' ? 'silence' : 'talking'}"><i style="height:${s === 'talk' ? 26 + (i * 7) % 14 : s === 'um' ? 10 : 3}px"></i></button>`).join('')}</div>`;
+  return `<div class="st2">${head}<div class="np-tabs"><button class="${t === 'plan' ? 'on' : ''}" data-stt="plan">🗒️ Plan</button><button class="${t === 'edit' ? 'on' : ''}" data-stt="edit">✂️ Edit</button></div>${body}</div>`;
+}
+// ---- CutRoom ----
+const SHOTS = { wide: ['Wide', '🏞️'], medium: ['Medium', '🧍'], close: ['Close-up', '🙂'], insert: ['Insert', '🔍'], pov: ['Point of view', '👁️'], drone: ['Aerial', '🚁'] };
+const TRANS = { cut: 'Cut', dissolve: 'Dissolve', whip: 'Whip pan', match: 'Match cut', jump: 'Jump cut' };
+const CGRADES = { natural: ['Natural', 'none'], warm: ['Warm', 'sepia(.25) saturate(1.2)'], cool: ['Cool', 'hue-rotate(15deg) saturate(.9)'], teal: ['Teal & orange', 'saturate(1.4) contrast(1.1)'], mono: ['Black & white', 'grayscale(1) contrast(1.2)'], stylised: ['Stylised', 'saturate(1.8) hue-rotate(-20deg)'] };
+const THUMB_BG = ['#E0457B', '#1FA3A0', '#F2C14E', '#2F5BD3', '#151515', '#F4F2EE'], THUMB_SUBJ = ['😲', '😂', '🤯', '🎬', '🔥', '💰', '🧟', '🐶'];
+function cut2(k) {
+  const C = cutState(k);
+  if (!C.shots) { const sv = k.studio && k.studio.cut; if (sv && sv.order && sv.order.length === C.order.length) Object.assign(C, JSON.parse(JSON.stringify(sv))); }
+  C.shots = C.shots || C.order.map(() => ({ shot: 'medium', cap: '' }));
+  C.trans = C.trans || C.order.map(() => 'cut'); C.voice = C.voice ?? 70; C.mus = C.mus ?? 45; C.tb = C.tb || { bg: 0, subj: 0, text: '' };
+  return C;
+}
+function cutScore2(k) {
+  const C = cut2(k), base = cutPredict(k); let s = base.score;
+  let run = 1, worst = 1; for (let i = 1; i < C.shots.length; i++) { run = C.shots[i].shot === C.shots[i - 1].shot ? run + 1 : 1; worst = Math.max(worst, run); }
+  const variety = new Set(C.shots.map(x => x.shot)).size; s += variety >= 4 ? 1 : variety >= 3 ? .5 : -.5; if (worst >= 3) s -= 1;
+  const capped = C.shots.filter(x => x.cap.trim().length >= 8).length / C.shots.length; s += capped * 1.5;
+  const tr = C.trans.filter(x => x !== 'cut').length; s += tr === 0 ? 0 : tr <= 2 ? .5 : -1;
+  if (C.voice >= C.mus + 10) s += .5;
+  const words = C.tb.text.trim().split(/\s+/).filter(Boolean).length, tctr = (C.tb.subj <= 2 ? 1.2 : .6) + (words >= 1 && words <= 4 ? 1.2 : words ? .3 : 0) + ([0, 2, 3, 4].includes(C.tb.bg) ? .6 : 0);
+  return { score: clamp(Math.round(s), 0, 10), ret: clamp(base.ret + (variety >= 4 ? 5 : 0) - (worst >= 3 ? 8 : 0), 10, 90), ctr: +(base.ctr * .6 + tctr * 1.4).toFixed(1) };
+}
+function cutroomApp() {
+  const M = S.me, k = M.make;
+  const rel = (M.works || []).filter(w => VIDEO_TYPES.includes(w.type)).slice(-5).reverse();
+  if (!k || !VIDEO_TYPES.includes(k.type)) return `<div class="st2">${newProjectForm(VIDEO_TYPES, 'to watch')}${rel.length ? `<h5>Published</h5><ul class="os-list">${rel.map(w => `<li><a href="#" class="lk" data-go="work:${w.id}">${esc(w.title)}</a><span class="muted">${esc(WORK_TYPES[w.type].label)} · ${Math.round(w.units || 0).toLocaleString()} views</span></li>`).join('')}</ul>` : ''}</div>`;
+  const C = cut2(k), P0 = cutScore2(k), t = UI.crt || 'board', done = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0), G = CGRADES[C.grade] || CGRADES.natural;
+  const head = `<div class="st-hd"><div><b>${esc(k.title)}</b> <span class="muted small">${esc(WORK_TYPES[k.type].label)} · ${k.prog}/${k.need} sessions</span><div class="pbar"><i style="width:${Math.round(k.prog / k.need * 100)}%"></i></div></div>
+    <div class="st-score"><span>Edit</span><b>${P0.score}/10</b></div><div class="st-score"><span>Retention</span><b>${P0.ret}%</b></div><div class="st-score"><span>Click-through</span><b>${P0.ctr}%</b></div><div class="st-btns"><button class="btn-s ghost" data-cr2save="1">💾 Save</button>${done ? '<span class="muted small">Session done today</span>' : '<button class="btn-s" data-cr2render="1">Render the cut</button>'}</div></div>`;
+  const tabs = [['board', '🖼️ Storyboard'], ['tl', '🎞️ Timeline'], ['look', '🎨 Look & sound'], ['pack', '📦 Packaging'], ['prev', '▶ Preview']];
+  let body = '';
+  if (t === 'board') body = `<p class="small muted">What's in every shot. Mix your framings (three of the same in a row drags), and write what we see: specific beats general.</p><div class="sb">${C.order.map((c, i) => `<div class="sb-f"><div class="sb-pic" style="filter:${G[1]}"><span>${SHOTS[C.shots[i].shot][1]}</span><small>${esc(c)}</small></div>${sel('cr-shot-' + i, Object.entries(SHOTS).map(([kk, v]) => [kk, v[0]]), C.shots[i].shot)}<input id="cr-cap-${i}" maxlength="80" placeholder="What we see" value="${esc(C.shots[i].cap)}"></div>`).join('')}</div>`;
+  else if (t === 'tl') body = `<p class="small muted">Click two clips to swap them; set each one's length and the transition into the next.</p><div class="cut-tl2">${C.order.map((c, i) => `<div class="cut-clip${UI.pickC === i ? ' on' : ''}"><button class="clip2" data-clip2="${i}">${SHOTS[C.shots[i].shot][1]} ${esc(c)}</button>${sel('cut-len-' + i, [['0', 'Tight'], ['1', 'Normal'], ['2', 'Long']], String(C.len[i]))}${i < C.order.length - 1 ? sel('cr-tr-' + i, Object.entries(TRANS), C.trans[i]) : ''}</div>`).join('')}</div>
+    <div class="cut-pred"><div><span class="muted small">Predicted retention</span><div class="cut-curve">${Array.from({ length: 10 }, (_, i) => `<i style="height:${Math.round(100 * Math.pow(P0.ret / 100, i / 9))}%"></i>`).join('')}</div></div></div>`;
+  else if (t === 'look') body = `<div class="filt"><label><span>Grade</span>${sel('cr-grade', Object.entries(CGRADES).map(([kk, v]) => [kk, v[0]]), C.grade in CGRADES ? C.grade : 'natural')}</label><label><span>Music bed</span>${sel('cut-music', [['upbeat', 'Upbeat'], ['moody', 'Moody'], ['trending', 'Trending sound'], ['none', 'None']], C.music)}</label><label><span>Captions</span>${sel('cut-caps', [['1', 'On'], ['0', 'Off']], String(C.caps))}</label></div>
+    <div class="gr-swatch">${Object.entries(CGRADES).map(([kk, v]) => `<div class="${C.grade === kk ? 'on' : ''}"><div class="sb-pic" style="filter:${v[1]}"><span>🌆</span></div><small>${v[0]}</small></div>`).join('')}</div>
+    <h5>Sound mix</h5><div class="filt"><label><span>Voice ${C.voice}</span><input type="range" id="cr-voice" min="0" max="100" value="${C.voice}"></label><label><span>Music ${C.mus}</span><input type="range" id="cr-mus" min="0" max="100" value="${C.mus}"></label></div><p class="small muted">${C.voice >= C.mus + 10 ? 'Every word is clear.' : 'The music fights the voice: viewers leave when they can\'t hear.'}</p>`;
+  else if (t === 'pack') body = `<div class="filt"><label class="filt-q"><span>Title</span><input id="cut-title" maxlength="80" placeholder="What makes someone click?" value="${esc(C.title)}"></label></div>
+    <div class="tb-wrap"><div class="tb" style="background:${THUMB_BG[C.tb.bg]};color:${C.tb.bg === 5 ? '#151515' : '#fff'}"><span class="tb-s">${THUMB_SUBJ[C.tb.subj]}</span><b>${esc(C.tb.text || 'YOUR TEXT')}</b></div>
+     <div><p class="small">Background ${THUMB_BG.map((c, i) => `<button class="swb${C.tb.bg === i ? ' on' : ''}" style="background:${c}" data-tbbg="${i}"></button>`).join('')}</p><p class="small">Subject ${THUMB_SUBJ.map((e, i) => `<button class="pill${C.tb.subj === i ? ' on' : ''}" data-tbsubj="${i}">${e}</button>`).join('')}</p><label class="small">Thumbnail text <input id="cr-tbtext" maxlength="24" value="${esc(C.tb.text)}" placeholder="3 WORDS MAX"></label><p class="small muted">A face, a big feeling, three words or fewer, a colour that pops: that's a click.</p></div></div>`;
+  else body = `<div class="pv${UI.crplay ? ' play' : ''}" style="--n:${C.order.length}">${C.order.map((c, i) => `<div class="pv-f" style="animation-delay:${C.order.slice(0, i).reduce((s, _, j) => s + [0.8, 1.3, 2][C.len[j]], 0)}s;animation-duration:${[0.8, 1.3, 2][C.len[i]]}s"><div class="sb-pic big" style="filter:${G[1]}"><span>${SHOTS[C.shots[i].shot][1]}</span></div><p>${esc(C.shots[i].cap || c)}</p>${C.caps ? `<small class="pv-cap">${esc(C.shots[i].cap || c)}</small>` : ''}</div>`).join('')}<div class="pv-idle"><span>▶</span><small>Press play to watch the cut</small></div></div><p><button class="btn-s" data-crplay="1">▶ Play preview</button></p>`;
+  return `<div class="st2">${head}<div class="np-tabs">${tabs.map(([kk, l]) => `<button class="${t === kk ? 'on' : ''}" data-crt="${kk}">${l}</button>`).join('')}</div>${body}</div>`;
+}
+// ---- Notebook ----
+const IDEA_KINDS = { film: ['🎬', 'Film idea'], song: ['🎵', 'Song idea'], video: ['▶️', 'Video idea'], character: ['🧍', 'Character'], line: ['💬', 'A line'], joke: ['😂', 'Joke'], place: ['📍', 'A place'] };
+const SPARKS = ['What if the {job} was the only one who knew?', 'A {genre} set entirely in one {place}.', 'Two {who} who hate each other must {verb} together.', 'The last {thing} in the world, and someone wants it.', 'A {who} lies about one small thing. It grows.', 'Tell a {genre} story backwards, from the ending.', 'Someone returns to {place} after twenty years. Nothing changed but them.', 'A song that only makes sense on the night bus.'];
+const SPARK_W = { job: ['night porter', 'lighthouse keeper', 'wedding singer', 'film projectionist', 'stunt double'], genre: ['heist', 'ghost story', 'romance', 'western', 'thriller'], place: ['lift', 'laundrette', 'airport chapel', 'motel pool', 'ferry'], who: ['rival chefs', 'sisters', 'ex-partners', 'retired spies', 'teenage rivals'], verb: ['bury a secret', 'win a talent show', 'cross a desert', 'raise a goat'], thing: ['cinema', 'payphone', 'honeybee', 'record shop'] };
+function sparkOf(n) { const r = hashRand(S.week * 31 + n * 7 + (S.me.wk ? S.me.wk.day : 0)); return SPARKS[Math.floor(r() * SPARKS.length)].replace(/\{(\w+)\}/g, (_, k) => SPARK_W[k][Math.floor(r() * SPARK_W[k].length)]); }
+function ideaAct(a) {
+  const M = S.me, L = M.ideas = M.ideas || [];
+  if (a.op === 'add') { const t = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 400); if (!t || L.length >= 120) return false; L.push({ id: M.seq++, k: IDEA_KINDS[a.k] ? a.k : 'film', t, w: S.week }); return true; }
+  const x = L.find(i => i.id === +a.id); if (!x) return false;
+  if (a.op === 'del') { L.splice(L.indexOf(x), 1); return true; }
+  if (a.op === 'star') { x.star = !x.star; return true; }
+  if (a.op === 'used') { x.used = S.week; return true; }
+  return false;
+}
+function notebookApp() {
+  const M = S.me, L = (M.ideas || []).slice().reverse(), f = UI.nbk || '', q = (UI.nbq || '').toLowerCase(), life = (M.diary || []).slice(-60).filter(d => !/^Money:|^Scriptwriter:/.test(d.t) && d.t.length > 40).slice(-5).reverse();
+  let free = ''; try { free = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ }
+  const shown = L.filter(i => (!f || i.k === f) && (!q || i.t.toLowerCase().includes(q))).sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0));
+  return `<div class="nb"><div class="nb-add"><select id="nb-k">${Object.entries(IDEA_KINDS).map(([k, v]) => `<option value="${k}" ${UI.nbadd === k ? 'selected' : ''}>${v[0]} ${v[1]}</option>`).join('')}</select><textarea id="nb-text" rows="2" maxlength="400" placeholder="Write it down before it's gone…"></textarea><button class="btn-s" data-nbadd="1">Keep it</button></div>
+   <div class="nb-spark"><span>✨ Spark: <b>${esc(sparkOf(UI.nbspark || 0))}</b></span><button class="linkish" data-nbspark="1">Another</button><button class="linkish" data-nbkeep="1">Keep this one</button></div>
+   <div class="os-tools"><input type="search" id="nbq" data-uiq="nbq" placeholder="Search your ideas…" value="${esc(UI.nbq || '')}"><span class="bf-row"><button class="pill${!f ? ' on' : ''}" data-nbk="">All ${L.length}</button>${Object.entries(IDEA_KINDS).filter(([k]) => L.some(i => i.k === k)).map(([k, v]) => `<button class="pill${f === k ? ' on' : ''}" data-nbk="${k}">${v[0]} ${L.filter(i => i.k === k).length}</button>`).join('')}</span></div>
+   <div class="nb-cards">${shown.map(i => `<article class="nb-card${i.used ? ' used' : ''}"><header><span>${IDEA_KINDS[i.k][0]} ${IDEA_KINDS[i.k][1]}</span><small class="muted">${fmtDate(i.w, true)}</small><button class="linkish" data-nbstar="${i.id}" title="Star">${i.star ? '★' : '☆'}</button></header><p>${esc(i.t)}</p>
+     <footer>${i.k === 'film' || i.k === 'character' || i.k === 'place' ? `<button class="btn-s ghost" data-nbdev="script:${i.id}">→ Start a script</button>` : ''}${i.k === 'song' ? `<button class="btn-s ghost" data-nbdev="song:${i.id}">→ Start a song</button>` : ''}${i.k === 'video' || i.k === 'joke' ? `<button class="btn-s ghost" data-nbdev="video:${i.id}">→ Start a video</button>` : ''}${i.used ? '<span class="muted small">developed</span>' : ''}<button class="linkish dk-x" data-nbdel="${i.id}">Delete</button></footer></article>`).join('') || '<div class="os-empty"><span>💡</span><b>No ideas yet</b><p>Ideas are free. Write down anything: a title, a face on the bus, a line overheard in a queue.</p></div>'}</div>
+   ${life.length ? `<h5>From your week <span class="muted small">raw material</span></h5><ul class="plain small nb-life">${life.map(d => `<li>${esc(d.t)} <button class="linkish" data-nbfrom="${esc(d.t.slice(0, 380))}">Keep as an idea</button></li>`).join('')}</ul>` : ''}
+   <details><summary>Scratchpad</summary><textarea id="pc-notes" rows="8" placeholder="Anything at all…">${esc(free)}</textarea><p class="muted small">Saved on this device only.</p></details></div>`;
+}
+// ---- the Create hub ----
+function makeHubHTML() {
+  const M = S.me, sc = typeof activeScript === 'function' ? activeScript() : null, k = M.make, ideas = (M.ideas || []).length;
+  const card = (app, ic, name, line, cur) => `<button class="mh-c" data-app="${app}"><span>${ic}</span><b>${name}</b><small>${line}</small>${cur ? `<em>${cur}</em>` : ''}</button>`;
+  return `<section class="panel mhub"><h3>Your studio</h3><div class="mh-g">
+   ${card('write', '✍️', 'Scriptwriter', 'Loglines, characters, scenes, your own pages, punch-ups, coverage.', sc ? `Writing ${esc(sc.title)}: ${sc.pages}/${sc.target} pages` : 'Start a script')}
+   ${card('studio', '🎚️', 'Studio', 'Compose in a key, write lyrics, mix, plan podcasts.', k && AUDIO_TYPES.includes(k.type) ? `${esc(k.title)}: ${k.prog}/${k.need}` : 'Start a song or podcast')}
+   ${card('cutroom', '🎞️', 'CutRoom', 'Storyboard, timeline, grade, sound, thumbnail, preview.', k && VIDEO_TYPES.includes(k.type) ? `${esc(k.title)}: ${k.prog}/${k.need}` : 'Start a video')}
+   ${card('notes', '📝', 'Notebook', 'Ideas, sparks and raw material from your week.', ideas ? `${ideas} idea${ideas > 1 ? 's' : ''}` : 'Empty')}
+   ${card('contests', '🥇', 'Contests', 'Send your best work where judges will read it.', '')}</div></section>`;
+}
+// ---- clicks, typing, changes ----
+function make3Click(t) {
+  if (!S.me || !careerActive()) return false;
+  const d = t.dataset, M = S.me, k = M.make;
+  if (d.np2) { UI.np2 = d.np2; render(true); return true; }
+  if (d.np2go) { const el = document.getElementById('np2-title'); doAct({ t: 'startwork', type: d.np2go, title: el ? el.value : '' }); UI.st2 = null; UI.cut = null; UI.pod2 = null; render(true); return true; }
+  if (d.stt) { UI.stt = d.stt; render(true); return true; }
+  if (d.crt) { UI.crt = d.crt; UI.crplay = 0; render(true); return true; }
+  if (d.st2d) { const [r, i] = d.st2d.split(':'), X = st2(); X.drums[r][+i] = X.drums[r][+i] ? 0 : 1; render(true); return true; }
+  if (d.st2m) { const [i, v] = d.st2m.split(':').map(Number), X = st2(); X.mel[i] = X.mel[i] === v ? -1 : v; render(true); return true; }
+  if (d.st2b) { const [i, v] = d.st2b.split(':').map(Number), X = st2(); X.bass[i] = X.bass[i] === v ? -1 : v; render(true); return true; }
+  if (d.st2arr !== undefined) { const X = st2(), i = +d.st2arr; if (UI.arrPick === undefined || UI.arrPick === null) UI.arrPick = i; else { [X.arr[UI.arrPick], X.arr[i]] = [X.arr[i], X.arr[UI.arrPick]]; UI.arrPick = null; } render(true); return true; }
+  if (d.st2play) { st2Play(); return true; }
+  if (d.st2save || d.st2bounce) { if (!k) return true;
+    const data = k.type === 'podcast' ? { pod: (({ topic, guest, qs, cold, order }) => ({ topic, guest, qs, cold, order }))(pod2()) } : (({ key, scale, bpm, drums, bass, mel, chords, lv, verb, comp, lyrics, arr }) => ({ key, scale, bpm, drums, bass, mel, chords, lv, verb, comp, lyrics, arr }))(st2());
+    doAct({ t: 'makesave', data });
+    if (d.st2bounce) { const score = k.type === 'podcast' ? podScore2() : studioScore(k); if (k.type === 'podcast') UI.cuts = []; doAct({ t: 'session', score }); }
+    render(true); return true; }
+  if (d.pdq !== undefined) { const P0 = pod2(), i = +d.pdq, j = P0.qs.indexOf(i); if (j >= 0) P0.qs.splice(j, 1); else if (P0.qs.length < 4) P0.qs.push(i); render(true); return true; }
+  if (d.pd2ord !== undefined) { const P0 = pod2(), i = +d.pd2ord; if (UI.podPick === undefined || UI.podPick === null) UI.podPick = i; else { [P0.order[UI.podPick], P0.order[i]] = [P0.order[i], P0.order[UI.podPick]]; UI.podPick = null; } render(true); return true; }
+  if (d.tbbg !== undefined && k) { cut2(k).tb.bg = +d.tbbg; render(true); return true; }
+  if (d.tbsubj !== undefined && k) { cut2(k).tb.subj = +d.tbsubj; render(true); return true; }
+  if (d.crplay) { UI.crplay = 0; render(true); requestAnimationFrame(() => { UI.crplay = 1; const pv = document.querySelector('.pv'); if (pv) pv.classList.add('play'); }); return true; }
+  if (d.cr2save || d.cr2render) { if (!k) return true; const C = cut2(k); doAct({ t: 'makesave', data: { cut: { order: C.order, len: C.len, grade: C.grade, music: C.music, caps: C.caps, title: C.title, thumb: C.thumb, shots: C.shots, trans: C.trans, voice: C.voice, mus: C.mus, tb: C.tb } } });
+    if (d.cr2render) { C.thumb = C.tb.subj <= 2 ? 0 : 3; const score = cutScore2(k).score; UI.cut = null; doAct({ t: 'session', score }); }
+    render(true); return true; }
+  // notebook
+  if (d.nbadd) { const el = document.getElementById('nb-text'), kk = (document.getElementById('nb-k') || {}).value; UI.nbadd = kk; doAct({ t: 'idea', op: 'add', k: kk, text: el ? el.value : '' }); render(true); return true; }
+  if (d.nbspark) { UI.nbspark = (UI.nbspark || 0) + 1; render(true); return true; }
+  if (d.nbkeep) { doAct({ t: 'idea', op: 'add', k: 'film', text: sparkOf(UI.nbspark || 0) }); render(true); return true; }
+  if (d.nbfrom) { doAct({ t: 'idea', op: 'add', k: 'film', text: d.nbfrom }); render(true); return true; }
+  if (d.nbk !== undefined) { UI.nbk = d.nbk; render(true); return true; }
+  if (d.nbstar) { doAct({ t: 'idea', op: 'star', id: +d.nbstar }); render(true); return true; }
+  if (d.nbdel) { doAct({ t: 'idea', op: 'del', id: +d.nbdel }); render(true); return true; }
+  if (d.nbdev) { const [kind, id] = d.nbdev.split(':'), x = (M.ideas || []).find(i => i.id === +id); if (!x) return true;
+    if (kind === 'script') { UI.newScript = Object.assign(UI.newScript || {}, { premise: x.k === 'film' ? x.t : '', hero: x.k === 'character' ? x.t.slice(0, 120) : '', setting: x.k === 'place' ? x.t.slice(0, 120) : '', title: '' }); UI.app = 'write'; UI.swt = 'desk'; UI.osStack = []; }
+    else { const type = kind === 'song' ? 'song' : 'video'; if (!M.make) doAct({ t: 'startwork', type, title: x.t.split(/[.!?]/)[0].slice(0, 60) }); UI.app = kind === 'song' ? 'studio' : 'cutroom'; UI.osStack = []; }
+    doAct({ t: 'idea', op: 'used', id: x.id }); render(true); return true; }
+  return false;
+}
+function make3Input(e) {
+  if (!S.me || !careerActive()) return false;
+  const id = e.target.id, v = e.target.value, k = S.me && S.me.make;
+  if (id === 'st-lyrics') { st2().lyrics = v; const R = lyricRead(v, k && k.title), a = document.getElementById('ly-read'), b = document.getElementById('ly-score'); if (a) a.innerHTML = readList(R); if (b) b.textContent = Math.round(R.s); return true; }
+  if (id === 'pd-topic') { pod2().topic = v; return true; }
+  if (id === 'pd-cold') { pod2().cold = v; return true; }
+  let m; if (k && (m = id.match(/^cr-cap-(\d+)$/))) { cut2(k).shots[+m[1]].cap = v.slice(0, 80); return true; }
+  if (k && id === 'cr-tbtext') { cut2(k).tb.text = v.slice(0, 24).toUpperCase(); const b = document.querySelector('.tb b'); if (b) b.textContent = cut2(k).tb.text || 'YOUR TEXT'; return true; }
+  return false;
+}
+function make3Change(e) {
+  if (!S.me || !careerActive()) return false;
+  const id = e.target.id, v = e.target.value, k = S.me && S.me.make; let m;
+  if (id === 'st-key') { st2().key = +v; render(true); return true; }
+  if (id === 'st-scale') { st2().scale = SCALES[v] ? v : 'major'; render(true); return true; }
+  if (id === 'st-bpm') { st2().bpm = clamp(+v || 108, 60, 180); render(true); return true; }
+  if (id === 'st-groove') { const G = GROOVES[v]; if (G) { const X = st2(); for (const r of ['k', 's', 'h']) X.drums[r] = Array.from({ length: N16 }, (_, i) => G[1][r].includes(i) ? 1 : 0); } render(true); return true; }
+  if ((m = id.match(/^st-ch-(\d)$/))) { st2().chords[+m[1]] = CHORDS.includes(v) ? v : 'I'; render(true); return true; }
+  if ((m = id.match(/^st-lv-(\d)$/))) { st2().lv[+m[1]] = +v; render(true); return true; }
+  if (id === 'st-verb') { st2().verb = +v; render(true); return true; }
+  if (id === 'st-comp') { st2().comp = +v; render(true); return true; }
+  if (id === 'pd-guest') { pod2().guest = v; render(true); return true; }
+  if (k && (m = id.match(/^cr-shot-(\d+)$/))) { cut2(k).shots[+m[1]].shot = SHOTS[v] ? v : 'wide'; render(true); return true; }
+  if (k && (m = id.match(/^cr-tr-(\d+)$/))) { cut2(k).trans[+m[1]] = TRANS[v] ? v : 'cut'; render(true); return true; }
+  if (k && id === 'cr-grade') { cut2(k).grade = CGRADES[v] ? v : 'natural'; render(true); return true; }
+  if (k && id === 'cr-voice') { cut2(k).voice = +v; render(true); return true; }
+  if (k && id === 'cr-mus') { cut2(k).mus = +v; render(true); return true; }
+  if (id === 'cr-tbtext' || /^cr-cap-/.test(id) || id === 'pd-topic' || id === 'pd-cold' || id === 'st-lyrics') { render(true); return true; }
+  return false;
+}
+// what a project keeps between sessions
+function makeSaveAct(a) {
+  const M = S.me, k = M.make; if (!k || !a.data || typeof a.data !== 'object') return false;
+  let s; try { s = JSON.stringify(a.data); } catch (e) { return false; } if (s.length > 12000) return false;
+  k.studio = Object.assign(k.studio || {}, JSON.parse(s));
+  return true;
+}
+// </make3>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -31031,7 +31985,7 @@ function todayPanel() {
   const rest = [b + 1, b + 2].filter(x => x < 3).map(x => { const [i, l] = blockLabel(d, x); return `<span class="chip">${i} ${esc(BLOCKS[x])}: ${esc(l)}</span>`; }).join(' ');
   return `<section class="panel today"><h3>${esc(fmtDay(d))}</h3>${worldStrip()}
    <ol class="beats">${cards.map(c => `<li class="beat done"><span class="bi">${c.icon}</span><div><b>${BLOCKS[c.b]} · ${esc(c.title)}</b>${c.lines.map(l => `<p>${esc(l)}</p>`).join('')}${rollCard(c.roll, true)}</div></li>`).join('')}
-    ${pend.map(it => `<li class="beat decide"><span class="bi">❗</span><div>${inboxCard(it)}</div></li>`).join('')}
+    ${pend.length ? `<li class="beat decide"><span class="bi">❗</span><div><b>${pend.length} decision${pend.length > 1 ? 's' : ''} waiting</b><p class="muted small">In the box at the top of the screen. The day carries on once you've chosen.</p></div></li>` : ''}
     ${pend.length ? '' : `<li class="beat next"><span class="bi">${ic}</span><div><b>Next: ${BLOCKS[b]} · ${esc(lab)}</b>${rest ? `<p class="muted small">Later: ${rest}</p>` : ''}<p><button class="btn-s" data-next="1">Live on <kbd>space</kbd></button> <button class="btn-s ghost" data-day="1">Rest of the day</button></p></div></li>`}</ol>
    ${conditionsHTML()}</section>`;
 }
@@ -31051,7 +32005,8 @@ function weekGrid() {
     if (burnt) return '<td><span class="bad">Rest</span></td>';
     if (k === 'work') { const j = M.jobs.length > 1 ? M.jobs.find(x => x.id === OB.job[d]) : null; return `<td class="${abs === now ? 'now' : ''}"><span class="chip" title="${j ? esc(j.t) : 'Work'}">🎬 ${j ? esc(j.t.length > 16 ? j.t.slice(0, 15) + '…' : j.t) : 'Work'}</span></td>`; }
     if (OB.forced[d + '-' + b]) return `<td class="${abs === now ? 'now' : ''}"><span class="chip good" title="Your course needs this session; fitted in automatically">📚 Study</span></td>`;
-    return `<td class="${abs === now ? 'now' : ''}">${sel(`cal-${d}-${b}`, opts(b), cal[d][b])}</td>`;
+    const pin = (M.calPins || {})[d + '-' + b] !== undefined;
+    return `<td class="${abs === now ? 'now' : ''}${pin ? ' pinned' : ''}"><span class="calc">${sel(`cal-${d}-${b}`, opts(b), cal[d][b])}<button class="calpin${pin ? ' on' : ''}" data-calpin="${d}-${b}" title="${pin ? 'Pinned: autopilot keeps this. Click to unpin.' : 'Pin this block so autopilot keeps it'}">📌</button></span></td>`;
   };
   return `<div class="tw"><table class="cal"><thead><tr><th></th>${DAYS7.map((dn, i) => `<th class="${W && i === W.day ? 'now' : ''}">${dn.slice(0, 3)}<small>${dayDate(i).getUTCDate()}</small></th>`).join('')}</tr></thead>
    <tbody>${BLOCKS.map((bn, b) => `<tr><th>${bn}</th>${DAYS7.map((_, d) => cell(d, b)).join('')}</tr>`).join('')}</tbody></table></div>
@@ -31186,7 +32141,7 @@ function companyPanel() {
 function pathsPanel() {
   const M = S.me, ags = agenciesIn(M.hub).sort((x, y) => agFits(y) - agFits(x));
   const sc = M.school, P0 = sc ? (typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog]) : null;
-  const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. <b>${P0.days} study session${P0.days > 1 ? 's' : ''}</b> a week (${schoolDays()} planned this week; fitted into your diary automatically)${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
+  const school = sc ? `<p><b><a href="#" class="lk" data-go="myschool:0">${esc(P0.label)}</a></b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. <b>${P0.days} study session${P0.days > 1 ? 's' : ''}</b> a week (${schoolDays()} planned this week; fitted into your diary automatically)${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
     : !UI.courses ? `<p class="muted">Courses grow one craft fast; degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ((typeof DEG_LABEL !== 'undefined' && DEG_LABEL[d]) || 'a ' + d + ' degree')).join(', ')}.` : ''}</p><p><button class="btn-s ghost" data-courses="1">Browse courses</button></p>`
     : `<p class="muted"><button class="linkish" data-courses="">Hide courses</button> Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ((typeof DEG_LABEL !== 'undefined' && DEG_LABEL[d]) || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
       <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} study session${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
@@ -31246,7 +32201,7 @@ function viewDesk() {
     const f = p.film !== null ? S.films[p.film] : null, odds = hireOdds(p), on = UI.apps.has(p.id), t = tmplOf(p);
     const why = hireFactors(p).filter(x => Math.abs(x[1]) >= .1).map(x => `${x[0]} ${x[1] > 0 ? '+' : '−'}`).join(', ');
     const block = blockedFrom(t);
-    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.mco ? `${esc(p.mco)} <span class="muted">${esc(t.biz || '')}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
+    return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.mco ? `${esc(p.mco)} <span class="muted">${esc(t.biz || '')}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w${typeof fitChip === 'function' ? '<br>' + fitChip(p) : ''}</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
       <td>${`<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
   const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
@@ -31269,7 +32224,7 @@ function viewDesk() {
     case 'compete': return campaignHTML() + compPanel();
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
      ${focusPanel()}
-     <details class="finetune"${M.focus && M.focus.auto && !UI.fineOpen ? '' : ' open'}><summary>Fine-tune the diary, block by block</summary>${weekGrid()}</details>
+     <details class="finetune"${M.focus && M.focus.auto && !UI.fineOpen ? '' : ' open'}><summary>Fine-tune the diary, block by block${Object.keys(M.calPins || {}).length ? ` <span class="chip">📌 ${Object.keys(M.calPins).length} pinned</span>` : ''}</summary>${typeof diaryKeepHTML === 'function' ? diaryKeepHTML() : ''}${weekGrid()}</details>
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(BLOCK_ACTS).filter(([k, a]) => plan.includes(k) && a.d).map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))} a block)` : ''}`).join(' ')}</p>
@@ -31278,13 +32233,12 @@ function viewDesk() {
      ${cityPanel()}`;
     case 'phone': return phonePanel();
     case 'computer': return computerPanel();
-    case 'work': return jobWorkHTML() + (typeof slateHTML === 'function' ? slateHTML() : '') + `<section class="panel"><h3>Work</h3>${M.jobs.length ? `<ul class="plain">${M.jobs.map(j => `<li><b>${esc(j.t)}</b>${j.film !== null ? ' on ' + fl(j.film) : ''} · ${j.days} days a week · week ${j.done + 1} of about ${j.weeks}${j.head !== null ? ' · under ' + pl(j.head) : ''} <button class="linkish" data-quit="${j.id}">Quit</button></li>`).join('')}</ul>` : '<p class="muted">No job right now. Plan days to look for work, then tick jobs on the board below.</p>'}
-     ${M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : ''}</section>
+    case 'work': return (typeof workWeekHTML === 'function' ? workWeekHTML() : '') + jobWorkHTML() + (typeof slateHTML === 'function' ? slateHTML() : '') + (M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : '') + `
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
   ${typeof boardFilterHTML === 'function' ? boardFilterHTML() : ''}<div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${(typeof boardView === 'function' ? boardView() : M.board).map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing matches. Try another industry or level.</td></tr>'}</tbody></table></div>
   ${UI.jobinfo ? jobInfoPanel(UI.jobinfo) : ''}`;
-    case 'create': return portfolioHTML() + writingDesk() + producingPanel() + companyPanel();
+    case 'create': return (typeof makeHubHTML === 'function' ? makeHubHTML() : '') + portfolioHTML() + writingDesk() + producingPanel() + companyPanel();
     case 'standing': return standingHTML();
     case 'life': return pathsPanel() + (typeof legacyPanel === 'function' && !M.over ? legacyPanel() : '') + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
     case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
@@ -31447,7 +32401,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -31476,7 +32430,7 @@ function careerChange(e) {
     if (k === 'age' && c.age < 26) c.traits = c.traits.filter(t => t !== 'Late bloomer');
     render(true); return true;
   }
-  if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; doAct({ t: 'calset', d: +id[4], b: +id[6], k: v }); render(true); return true; }
   if (e.target.dataset.huntpause) { doAct({ t: 'focus', noHunt: e.target.checked }); render(true); return true; }
   if (e.target.dataset.autopilot) { doAct({ t: 'focus', auto: e.target.checked }); render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
@@ -31576,7 +32530,7 @@ if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
   if (ov) { e.preventDefault(); const b = ov.querySelector('.ro-ok'); if (b) b.click(); return; }
   if (typeof careerActive !== 'function' || !careerActive() || UI.busy) return;
   e.preventDefault();
-  if (pending().length && UI.tab === 'you' && !UI.stack.length && UI.app === 'today') { const d = document.querySelector('.beat.decide, .msg.open'); if (d) d.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  if (pending().length && UI.tab === 'you' && !UI.stack.length && UI.app === 'today') { const d = document.querySelector('.decbox'); if (d) window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   playStep('next');
 });
 
@@ -31647,6 +32601,20 @@ function phoneUnread() {
 }
 // </career-ui>
 // ---------- render & routing ----------
+// Tables never scroll sideways: every cell learns its column's name, and a table too wide for its box is drawn as
+// a stack of labelled rows instead.
+function fitTables() {
+  if (typeof document === 'undefined') return;
+  for (const t of document.querySelectorAll('#main table')) {
+    t.classList.remove('stacked');
+    const heads = [...t.querySelectorAll('thead th')].map(th => th.textContent.replace(/[▲▼↑↓]/g, '').trim());
+    if (heads.length) for (const tr of t.querySelectorAll('tbody tr')) { let i = 0; for (const td of tr.children) { if (!td.dataset.label) td.dataset.label = heads[i] || ''; i += +(td.colSpan || 1); } }
+    const box = t.closest('.tw') || t.parentElement; if (!box || !t.offsetWidth) continue;
+    if (t.offsetWidth > box.clientWidth + 2 || box.scrollWidth > box.clientWidth + 2) t.classList.add('stacked');
+  }
+}
+if (typeof window !== 'undefined' && window.addEventListener && typeof document !== 'undefined' && document.addEventListener) { let fitT = 0; window.addEventListener('resize', () => { clearTimeout(fitT); fitT = setTimeout(fitTables, 150); }); document.addEventListener('toggle', () => fitTables(), true); }
+
 function render(keepScroll) {
   const top = document.scrollingElement.scrollTop;
   const d = dateOf(S.week);
@@ -31655,11 +32623,14 @@ function render(keepScroll) {
   document.querySelectorAll('nav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === UI.tab && !UI.stack.length));
   const cur = UI.stack[UI.stack.length - 1];
   let html;
-  if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id));
+  if (cur) html = `<button class="back" data-back="1">← Back</button>` + ((typeof viewMine === 'function' && viewMine(cur)) || (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id)));
   else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts, tv: typeof viewTv === 'function' ? viewTv : viewWorld, saves: typeof savesHTML === 'function' ? () => `<div class="head"><h2>Saves</h2></div>` + savesHTML() : viewWorld }[UI.tab] || (typeof reelView === 'function' ? reelView(UI.tab) : null) || viewWorld;
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
+  if (typeof decisionBoxHTML === 'function') html = decisionBoxHTML() + html;
   $('#main').innerHTML = html;
+  { const hd = document.querySelector('header.slate'); if (hd) document.documentElement.style.setProperty('--hdr', hd.offsetHeight + 'px'); }
   if (typeof applyTableSorts === 'function') applyTableSorts();
+  fitTables();
   if (UI.pendingSeen) UI.seenRoll = UI.pendingSeen;   // a roll tumbles in once
   const adv = $('#adv'), mode = UI.building ? 'setup' : careerActive() ? 'career' : S.me && !S.me.over ? 'setup' : 'watch';
   if (adv.dataset.mode !== mode) {
@@ -31747,6 +32718,13 @@ document.addEventListener('click', e => {
   if (UI.busy && !UI.earlyCC && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;
   if (typeof osCaptureGo === 'function' && osCaptureGo(t)) return;
   if (typeof savesClick === 'function' && savesClick(t)) return;
+  if (typeof roger2Click === 'function' && roger2Click(t)) return;
+  if (typeof work2Click === 'function' && work2Click(t)) return;
+  if (typeof mineClick === 'function' && mineClick(t)) return;
+  if (typeof decideClick === 'function' && decideClick(t)) return;
+  if (typeof diary2Click === 'function' && diary2Click(t)) return;
+  if (typeof make2Click === 'function' && make2Click(t)) return;
+  if (typeof make3Click === 'function' && make3Click(t)) return;
   if (typeof creativeClick === 'function' && creativeClick(t)) return;
   if (careerClick(t)) return;
   if (t.dataset.go) { const g = t.dataset.go, ci = g.indexOf(':'), kind = g.slice(0, ci), id = g.slice(ci + 1); UI.stack.push({ kind, id: /^-?\d+$/.test(id) ? +id : id }); render(); return; }
@@ -31777,9 +32755,12 @@ document.addEventListener('click', e => {
   }
 });
 document.addEventListener('change', e => {
+  if (e.target.dataset && e.target.dataset.ui) { const k = e.target.dataset.ui; UI[k] = e.target.type === 'checkbox' ? e.target.checked : e.target.value; if (e.target.dataset.reset) for (const r of e.target.dataset.reset.split(',')) UI[r] = 0; render(true); return; }
   if (typeof savesChange === 'function' && savesChange(e)) return;
   if (typeof weatherChange === 'function' && weatherChange(e)) return;
   if (typeof mktChange === 'function' && mktChange(e)) return;
+  if (typeof make2Change === 'function' && make2Change(e)) return;
+  if (typeof make3Change === 'function' && make3Change(e)) return;
   if (typeof creativeChange === 'function' && creativeChange(e)) return;
   if (e.target.id === 'os-q') { UI.osq = e.target.value; render(true); const q = document.getElementById('os-q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
   if (careerChange(e)) return;
@@ -31799,6 +32780,9 @@ document.addEventListener('change', e => {
 });
 let qTimer;
 document.addEventListener('input', e => {
+  if (typeof make2Input === 'function' && make2Input(e)) return;
+  if (typeof make3Input === 'function' && make3Input(e)) return;
+  if (e.target.dataset && e.target.dataset.uiq) { const k = e.target.dataset.uiq, id = e.target.id; UI[k] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = id && document.getElementById(id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (e.target.id === 'os-q') { UI.osq = e.target.value; render(true); const q = document.getElementById('os-q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
   const id = e.target.id;
   if (id === 'pc-notes') { try { localStorage.setItem(notesKey(), e.target.value); } catch (err) { /* no storage */ } return; }

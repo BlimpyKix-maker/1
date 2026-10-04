@@ -151,6 +151,13 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('tv3', '// ================= Apple Box — World Core UI ================='),
                      ('finance2', '// ================= Apple Box — World Core UI ================='),
                      ('creative', '// ================= Apple Box — World Core UI ================='),
+                     ('roger2', '// ================= Apple Box — World Core UI ================='),
+                     ('work2', '// ================= Apple Box — World Core UI ================='),
+                     ('mine', '// ================= Apple Box — World Core UI ================='),
+                     ('decide', '// ================= Apple Box — World Core UI ================='),
+                     ('diary2', '// ================= Apple Box — World Core UI ================='),
+                     ('make2', '// ================= Apple Box — World Core UI ================='),
+                     ('make3', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

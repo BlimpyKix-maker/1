@@ -287,7 +287,7 @@ function autoCal() {
   M.cal = keep;
   for (const key in rested) { const [d, b] = key.split('-').map(Number); cal[d][b] = run[d][b]; }
   M.calRested = rested;
-  return cal;
+  return typeof applyPins === 'function' ? applyPins(cal) : cal;
 }
 function setFocus(a) {
   const M = S.me;

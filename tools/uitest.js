@@ -55,13 +55,13 @@ const out = process.argv[2] || '.';
   console.log('phone after text:', await page.evaluate(() => S.me.phone.slice(-2).map(m => m.t).join(' / ')), 'appts', await page.evaluate(() => JSON.stringify((S.me.appts || []).map(x => [x.kind, x.d, x.b]))));
   await page.click('.os [data-app="today"]');
   // live with the space bar, answering decisions as they come
-  for (let d = 0; d < 9; d++) { const c = await page.$('.beat.decide [data-pick]:not([disabled])'); if (c) { await c.click(); await page.waitForTimeout(150); continue; } await page.locator('body').focus().catch(() => {}); await page.evaluate(() => document.activeElement && document.activeElement.blur()); await page.keyboard.press('Space'); await page.waitForTimeout(50); }
+  for (let d = 0; d < 9; d++) { const c = await page.$('.decbox [data-pick]:not([disabled])'); if (c) { await c.click(); await page.waitForTimeout(150); continue; } await page.locator('body').focus().catch(() => {}); await page.evaluate(() => document.activeElement && document.activeElement.blur()); await page.keyboard.press('Space'); await page.waitForTimeout(50); }
   await page.waitForTimeout(1300);
   await page.screenshot({ path: out + '/3b-days.png', fullPage: true });
   console.log('mid-week day/beat', await page.evaluate(() => S.me.wk && [S.me.wk.day, S.me.wk.block]));
   for (let w = 0; w < 6; w++) {
     // answer anything pending
-    for (let k = 0; k < 30; k++) { const c = await page.$('.beat.decide [data-pick]:not([disabled])'); if (c) { await c.click(); continue; } const w = await page.evaluate(() => S.week); await page.click('header [data-endweek="1"]'); await page.waitForFunction(() => !UI.busy); if (await page.evaluate(w0 => S.week !== w0, w)) break; }
+    for (let k = 0; k < 30; k++) { const c = await page.$('.decbox [data-pick]:not([disabled])'); if (c) { await c.click(); continue; } const w = await page.evaluate(() => S.week); await page.click('header [data-endweek="1"]'); await page.waitForFunction(() => !UI.busy); if (await page.evaluate(w0 => S.week !== w0, w)) break; }
     await page.waitForFunction(() => !UI.busy);
   }
   await page.screenshot({ path: out + '/4-desk-later.png', fullPage: true });

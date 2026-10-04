@@ -422,6 +422,7 @@ function inbox(kind, title, text, extra = {}) {
   // colleague" options only appear when there is a boss or a colleague to ask
   const fixPoss = t => typeof t === 'string' ? t.replace(/([^s'])s's\b/g, "$1s'") : t;
   title = fixPoss(title); text = fixPoss(text);
+  if (kind === 'offer' && S.me && S.me.jobs.length && extra.post && extra.choices && !extra.choices.some(c => c.k === 'swap') && jobDays() + extra.post.days > 7) extra.choices.splice(1, 0, { k: 'swap', label: 'Accept, and leave the job that clashes' });
   if (kind === 'scene' && extra.choices && extra.ctx && /^sit_/.test(extra.scene || '')) extra = Object.assign({}, extra, { choices: extra.choices.filter(c => !(c.k === 'ask' && (extra.ctx.head === null || extra.ctx.head === undefined)) && !(c.k === 'mate' && !(extra.ctx.mates || []).length)) });
   const it = { id: S.me.seq++, w: S.week, kind, title, text, ...extra };
   S.me.inbox.push(it);
@@ -1011,8 +1012,9 @@ function resolvePick(it, k) {
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
   }
   if (it.kind === 'offer') {
-    if (k === 'yes') {
-      if (jobDays() + it.post.days > 7) { it.result = { t: 'You can’t fit it around the work you already have.' }; it.done = true; return true; }
+    if (k === 'yes' || k === 'swap') {
+      if (k === 'swap' && typeof swapForOffer === 'function') swapForOffer(it.post);
+      if (jobDays() + it.post.days > 7) { it.result = { t: 'You can’t fit it around the work you already have. Leave a job first, or accept and quit what clashes.' }; it.done = true; return true; }
       const f = it.post.film !== null ? S.films[it.post.film] : null;
       if (f && (f.stage < 0 || f.stage >= 4)) { it.result = { t: 'Too late: the production has moved on.' }; it.done = true; return true; }
       takeJob(it.post); it.result = { t: 'You start on Monday.' };
@@ -1111,6 +1113,13 @@ function applyAct(a) {
     case 'angel': return angelAct(a);
     case 'outline': return outlineAct(a);
     case 'scriptsess': return scriptSessAct(a);
+    case 'calset': return calSetAct(a);
+    case 'swedit': return swEditAct(a);
+    case 'punchup': return punchAct(a);
+    case 'makesave': return makeSaveAct(a);
+    case 'idea': return ideaAct(a);
+    case 'calpin': return calPinAct(a);
+    case 'calpreset': return calPresetAct(a);
     case 'cgfollow': return cgFollow(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);

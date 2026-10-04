@@ -68,7 +68,7 @@ function jobWorkHTML() {
   return `<section class="panel jobwork"><h3>The work</h3>${M.jobs.map(j => {
     const tier = jobTier(j), T = j.tasks || [], f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, k = j.task || null;
     const good = T.filter(x => x.pts > 0).length, bad = T.filter(x => x.pts < 0).length;
-    return `<div class="jw"><p><b>${esc(j.t)}</b>${f ? ' · ' + fl(f.id) : ''} <span class="muted small">· week ${j.done + 1} of ${j.weeks} · ${['intern', 'junior', 'crew', 'mid-level', 'senior', 'head of department'][tier]} tasks</span></p>
+    return `<div class="jw"><p><b><a href="#" class="lk" data-go="myjob:${j.id}">${esc(j.t)}</a></b>${f ? ' · ' + fl(f.id) : ''} <span class="muted small">· week ${j.done + 1} of ${j.weeks} · ${['intern', 'junior', 'crew', 'mid-level', 'senior', 'head of department'][tier]} tasks</span></p>
      ${k ? `<p class="small">Now: <b>${esc(k.t)}</b> <span class="tbar"><i style="width:${Math.round(k.prog / k.need * 100)}%"></i></span> ${Math.round(k.prog / k.need * 100)}% · ${esc(statLabel(k.s))}</p>` : `<p class="small muted">Next task starts on your next work day.</p>`}
      ${T.length ? `<ul class="plain small tasks">${T.slice(-5).reverse().map(x => `<li class="${x.pts > 0 ? 'good' : 'bad'}">${x.pts > 1 ? '★' : x.pts > 0 ? '✔' : x.pts <= -2 ? '✘✘' : '✘'} ${esc(x.t)}</li>`).join('')}</ul>` : ''}
      <p class="small">${T.length} delivered: ${good} good, ${bad} rough.${f ? ` Your work so far adds <b class="${(j.contrib || 0) < 0 ? 'bad' : 'good'}">${(j.contrib || 0) >= 0 ? '+' : ''}${(j.contrib || 0).toFixed(1)}</b> to the film's quality${tier <= 1 ? ' (small jobs, small mark: it grows as you rise)' : ''}.` : ''}</p></div>`;
