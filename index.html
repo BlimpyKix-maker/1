@@ -820,6 +820,7 @@ tr.blocked td { opacity: .55; }
   <button data-tab="you" class="on">Your career</button>
   <button data-tab="news">Trade press</button>
   <button data-tab="bo">Box office</button>
+  <button data-tab="tv">TV</button>
   <button data-tab="films" title="The Recorded Entertainment Encyclopedia &amp; Library: films and people">REEL</button>
   <button data-tab="cos">Companies</button>
   <button data-tab="awards">Awards</button>
@@ -11115,7 +11116,7 @@ function closeWeek(a) {
   const M = S.me, me = ME(), W = M.wk, burnt = W.burnt, L = W.L, gains = W.gains, hunted = W.hunted;
   let energy = M.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
   const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) gains[k] = (gains[k] || 0) + g; };
-  M.studyDone = Object.keys(W.studyD || {}).length;   // the school checks below run after the week object is cleared
+  M.studyDone = W.studyB || 0;   // the school checks below run after the week object is cleared
   M.wk = null; M.closing = true;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
   // jobs
@@ -12000,23 +12001,24 @@ function occupationOf(p) {
 // ---- School ----
 const PROGRAMS = {
   short: { label: 'Short course', d: 'Eight weeks of evenings in one craft. A certificate and a few new faces.', weeks: 8, days: 1, fee: 80, grow: .03, deg: null },
-  cc: { label: 'Community college certificate', d: 'A year of practical classes, two days a week. Cheap and useful.', weeks: 40, days: 2, fee: 70, grow: .035, deg: 'cert' },
-  ba: { label: 'Degree, part-time', d: 'Three days a week for two years. Opens the doors that ask for a degree.', weeks: 100, days: 3, fee: 230, grow: .03, deg: 'ba' },
-  mfa: { label: 'Film school (MFA)', d: 'Two years, four days a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
+  cc: { label: 'Community college certificate', d: 'A year of practical classes, two sessions a week. Cheap and useful.', weeks: 40, days: 2, fee: 70, grow: .035, deg: 'cert' },
+  ba: { label: 'Degree, part-time', d: 'Three study sessions a week for two years. Opens the doors that ask for a degree.', weeks: 100, days: 3, fee: 230, grow: .03, deg: 'ba' },
+  mfa: { label: 'Film school (MFA)', d: 'Two years, four study sessions a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
   union: { label: 'Union training programme', d: 'Paid on-set training for assistant directors. Hard to get into; the jobs that follow pay well.', weeks: 40, days: 4, fee: -260, grow: .04, deg: 'union', craft: 'dir', apply: ['eth', 13] }
 };
-function schoolDaysDone() { const M = S.me, W = M && M.wk; return W ? Object.keys(W.studyD || {}).length : (M && M.studyDone) || 0; }
+// A course asks for study sessions a week (blocks of study, any day): `days` on a programme is that number.
+function schoolDaysDone() { return studySessionsDone(); }
 // Days at school this week: a day counts if you studied in any block of it. Days already lived count what you did;
 // days still ahead count what's planned.
 function schoolDays() {
-  const W = S.me && S.me.wk, plan = planBlocks(), done = (W && W.studyD) || {}, today = W ? W.day : 0;
-  let n = 0; for (let d = 0; d < 7; d++) if (done[d] || (d >= today && !(W && W.over) && plan[d] && plan[d].includes('study') && !(d === today && W && W.block >= 3))) n++;
+  const W = S.me && S.me.wk, plan = planBlocks(), now = W ? W.day * 3 + W.block : 0;
+  let n = studySessionsDone(); for (let a = now; a < 21; a++) if (plan[Math.floor(a / 3)][a % 3] === 'study') n++;
   return n;
 }
 function enrol(a) {
   const M = S.me, P0 = PROGRAMS[a.prog];
   if (!P0 || M.school || !CRAFTS[a.craft || P0.craft]) return false;
-  if (P0.apply) { const ok = roll(P0.apply[0], P0.apply[1]); inbox('note', ok ? `In: ${P0.label}` : `Not this year: ${P0.label}`, ok ? 'You start next week. Plan your study days.' : 'Hundreds applied for a handful of places. You can try again in six months.', { roll: M.lastRoll }); if (!ok) { M.schoolTry = S.week; return true; } }
+  if (P0.apply) { const ok = roll(P0.apply[0], P0.apply[1]); inbox('note', ok ? `In: ${P0.label}` : `Not this year: ${P0.label}`, ok ? 'You start next week. Your study sessions go in your diary automatically.' : 'Hundreds applied for a handful of places. You can try again in six months.', { roll: M.lastRoll }); if (!ok) { M.schoolTry = S.week; return true; } }
   M.school = { prog: a.prog, craft: a.craft || P0.craft, done: 0, missed: 0, start: S.week };
   diary(`You enrol: ${P0.label.toLowerCase()} (${CRAFTS[M.school.craft].label.toLowerCase()}).`);
   return true;
@@ -12026,8 +12028,8 @@ function schoolWeek(L, gain) {
   const M = S.me, me = ME(), sc = M.school;
   if (!sc) return 0;
   const P0 = typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog], days = schoolDaysDone();   // the week is over: count the days you went
-  for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * days);
-  if (days >= P0.days) { sc.done++; sc.missed = 0; } else if (S.week - 1 <= sc.start) { /* the week you enrolled doesn't count against you */ } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} days).`); }
+  for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * Math.min(days, P0.days));
+  if (days >= P0.days) { sc.done++; sc.missed = 0; } else if (S.week - 1 <= sc.start) { /* the week you enrolled doesn't count against you */ } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} study sessions).`); }
   if (P0.mates && days && prnd() < .08) { const q = youngNPC(M.hub, ppick(['director', 'writer', 'dp', 'editor', 'producer', 'actor'])); meet(q.id, 'Classmate', 8); L.push(`You get to know ${q.name}, a ${ROLE_LABEL[q.role].toLowerCase()} in your year.`); }
   if (sc.missed >= 4) { inbox('note', 'Dropped out', `You missed too many weeks of ${(sc.at ? P0.label : P0.label.toLowerCase())}. The school lets you go.`); M.school = null; return 0; }
   if (sc.done >= P0.weeks) {
@@ -12233,13 +12235,36 @@ function calOf() {
   if (!M.cal) M.cal = Array.from({ length: 7 }, (_, d) => { const a = (M.plan || [])[d] || 'rest', e = (M.eve || [])[d] || 'home'; return [a, a, OLD_EVE[e] || e]; });
   return M.cal;
 }
-// The plan as it will run: job days take the morning and afternoon of the first weekdays; burnout makes it all rest.
-function planBlocks() {
-  const M = S.me, cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
-  let need = jobDays();
-  for (let d = 0; d < 7 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }   // weekdays first, then weekends
-  return M.wk && M.wk.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal;
+// The plan as it will run. Your obligations are fitted in for you: each job gets its own run of days (morning and
+// afternoon, weekdays first, the job with the most days first), and a course gets the study sessions it asks for,
+// placed in the least important free blocks still ahead (rest and nights in before job hunting or writing).
+// Burnout makes it all rest. M.autoOblig === false leaves study placement to you.
+const OBLIG_RANK = { rest: 0, home: 0, read: 1, out: 2, train: 2, hustle: 3, catchup: 3, network: 3, make: 4, write: 4, hunt: 5 };
+const OBLIG_PREF = [[0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [3, 5, 7], [3, 5, 7]];
+function obligations() {
+  const M = S.me, W = M.wk, now = W ? W.day * 3 + W.block : 0;
+  const cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
+  const job = Array(7).fill(null), forced = {};
+  let d = 0;
+  for (const j of M.jobs.slice().sort((a, b) => b.days - a.days || a.id - b.id)) for (let n = 0; n < j.days && d < 7; n++, d++) { job[d] = j.id; cal[d][0] = 'work'; cal[d][1] = 'work'; }
+  if (M.school && M.autoOblig !== false && typeof schoolProg === 'function') {
+    const need = (schoolProg(M.school) || {}).days || 0, done = W ? studySessionsDone() : 0;
+    let planned = 0; for (let a = now; a < 21; a++) if (cal[Math.floor(a / 3)][a % 3] === 'study') planned++;
+    let short = need - done - planned;
+    if (short > 0) {
+      const C = [];
+      for (let a = now; a < 21; a++) { const dd = Math.floor(a / 3), b = a % 3, k = cal[dd][b]; if (k === 'work' || k === 'study' || (typeof apptAt === 'function' && apptAt(dd, b))) continue; C.push({ dd, b, a, r: (OBLIG_RANK[k] ?? 2) * 10 + OBLIG_PREF[dd][b] }); }
+      C.sort((x, y) => x.r - y.r || x.a - y.a);
+      for (const c of C.slice(0, short)) { cal[c.dd][c.b] = 'study'; forced[c.dd + '-' + c.b] = 1; }
+    }
+  }
+  return { cal: W && W.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal, job, forced };
 }
+function planBlocks() { return obligations().cal; }
+// whose work day it is: with two part-time jobs, each has its own days
+function workJobOn(d) { const id = obligations().job[d]; return S.me.jobs.find(j => j.id === id) || null; }
+// study sessions this week: lived blocks of study
+function studySessionsDone() { const W = S.me && S.me.wk; return W ? (W.studyB || 0) : (S.me && S.me.studyDone) || 0; }
 function effectivePlan() { return planBlocks().map(r => r[1]); }   // the day's main activity, for older callers
 function countBlocks(k) { return planBlocks().reduce((n, r) => n + r.filter(x => x === k).length, 0); }
 function appSlots() { return countBlocks('hunt') * 3; }
@@ -12336,9 +12361,9 @@ function runBlock(k) {
     case 'catchup': catchupDay(W.L); break;
     case 'write': writeSession(L, .5); break;
     case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
-    case 'study': W.studied++; if (M.school) {
+    case 'study': W.studied++; if (M.school) W.studyB = (W.studyB || 0) + 1; if (M.school) {
         for (const s in CRAFTS[M.school.craft].subs) weekGain(s, schoolProg(M.school).grow / 2);
-        const first = !(W.studyD = W.studyD || {})[W.day]; W.studyD[W.day] = 1;
+        (W.studyD = W.studyD || {})[W.day] = 1; const first = true;   // every session is a class
         // every day at school teaches something: the next class on the syllabus goes into your Craft Library
         const id = first && typeof nextClass === 'function' ? nextClass(M.school) || electiveClass(M.school) : null, X = id && lesson(id);
         if (X) { learn(id, 'class', 'B'); const k = X.L[4] && X.L[4][1] && X.L[4][1][1]; if (k && (k in ME().sk || k in ME().mind)) weekGain(k, .05); L.push(`Class: ${X.L[1]} (${X.C.label.toLowerCase()}). ${X.L[3].split('. ')[0]}.`); }
@@ -12364,8 +12389,8 @@ function sleepNight() {
 }
 // ---- work days ----
 function workDay() {
-  const M = S.me, me = ME(), out = [];
-  for (const j of M.jobs) {
+  const M = S.me, me = ME(), out = [], today = workJobOn(M.wk.day);
+  for (const j of today ? [today] : M.jobs) {
     const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
     out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day * 3 + M.wk.block + j.id)}`);
     if (typeof jobTaskBlock === 'function') jobTaskBlock(j, out);
@@ -12425,8 +12450,7 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
-  // as many study days as the programme asks for, spread through the week (a day with any study block counts)
-  if (M.school) { const n = clamp((schoolProg(M.school) || {}).days || 2, 1, 5), order = [0, 2, 4, 1, 3]; for (let i = 0; i < n; i++) cal[order[i]][0] = 'study'; }
+  // study sessions are fitted in by obligations() when the week runs
   return cal;
 }
 function setFocus(a) {
@@ -12686,10 +12710,10 @@ function lifeScene(pool) {
 function lifeDayEvent(act) {
   const M = S.me;
   if (act === 'work') {
-    const j = M.jobs.length ? M.jobs[(S.week + M.wk.day) % M.jobs.length] : null;
+    const j = M.jobs.length ? (workJobOn(M.wk.day) || M.jobs[(S.week + M.wk.day) % M.jobs.length]) : null;
     if (!j || prnd() > .2) return;
     const f = j.film !== null ? S.films[j.film] : null;
-    const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : []);
+    const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : [], j.show && ROLE_SCENES.tv ? ROLE_SCENES.tv : []);
     const L = pool.filter(s => sceneFresh(s.id, 20));
     if (!L.length) return;
     const s = ppick(L);
@@ -13090,7 +13114,7 @@ function storyHTML() {
    ${credited.length ? `<div class="tw"><table class="grid"><thead><tr><th>Film</th><th>Your job</th><th>Under</th><th class="n">Critics</th><th class="n">Gross</th><th>Honours</th></tr></thead><tbody>${credited.map(filmRow).join('')}</tbody></table></div>` : '<p class="muted">No screen credits yet.</p>'}
    ${Object.entries(byDept).map(([fam, L]) => `<p class="resume-line"><b>${esc(FAM_NAME[fam] || fam)}:</b> ${L.map(p => `${esc(p.t)}${p.film !== null ? ' on ' + esc(S.films[p.film].title) : ''} <span class="muted">(${Math.max(1, Math.round((p.to - p.from)))} wk${p.quit ? ', left' : ''})</span>`).join('; ')}</p>`).join('')}
    ${(M.scripts || []).length ? `<p class="resume-line"><b>Scripts:</b> ${M.scripts.map(sc => `${esc(sc.title)} <span class="muted">(${esc(sc.genre.toLowerCase())}, draft ${sc.draft}${sc.grade ? ', ' + sc.grade : ', in progress'}${sc.won ? ', ' + esc(sc.won.join(', ')) : ''})</span>`).join('; ')}</p>` : ''}
-   <h4>Timeline</h4><ol class="timeline">${ms.length ? ms.map(m => `<li class="tl-${m.kind || 'life'}"><time>${fmtDate(m.w, true)}</time><span>${esc(m.t)}</span></li>`).join('') : '<li class="muted">Your story starts here.</li>'}</ol></section>`;
+   <h4>Timeline</h4><ol class="timeline">${ms.length ? ms.map(m => `<li class="tl-${m.kind || 'life'}"><time>${fmtDate(m.w, true)}</time><span>${linkPrizes(esc(m.t))}</span></li>`).join('') : '<li class="muted">Your story starts here.</li>'}</ol></section>`;
 }
 // </life-story>
 // <life-social>
@@ -14954,7 +14978,7 @@ function viewAwards() {
   const cal = [].concat((typeof CONTESTS !== 'undefined' ? CONTESTS : []).map(c => ({ m: c.month, t: c.name, k: 'Screenplay contest', d: c.d })), (typeof FESTIVALS !== 'undefined' ? FESTIVALS : []).map(f => ({ m: f.month, t: f.name.replace(/^the /, 'The '), k: 'Festival', d: f.d })), [{ m: 1, t: S.me ? 'The ' + ceremony(awardsMarket()) : 'The national film awards', k: 'Awards night', d: 'Best Film, Best Performance, Best Screenplay. Invitations go to nominees, their friends and people with standing.' }]).sort((a, b) => ((a.m - mo + 12) % 12) - ((b.m - mo + 12) % 12));
   const mine = me ? (S.awards || []).filter(a => a.people.includes(me.id) || (M.past || []).some(p => p.film === a.film && p.credited)) : [];
   return `<div class="head"><h2>Awards and recognition</h2><p class="lede">Prizes, festivals and contests: the other road to a name, beside the job board.</p></div>
-   <div class="cols two"><section class="panel"><h3>Coming up</h3><ul class="plain">${cal.map(x => `<li><b>${MON_[x.m]}</b> · ${typeof bodyLink === 'function' ? bodyLink(x.t.replace(/^The (?=Academy|Mountain|Festival|Lagoon|Northern|Harbour)/, '')) : esc(x.t)} <span class="chip">${esc(x.k)}</span><br><span class="muted small">${esc(x.d)}</span></li>`).join('')}</ul><p class="muted small">Enter scripts in contests and films in festivals from the Create tab.</p></section>
+   <div class="cols two"><section class="panel"><h3>Coming up</h3><ul class="plain">${cal.map(x => `<li><b>${MON_[x.m]}</b> · ${linkPrizes(esc(x.t))} <span class="chip">${esc(x.k)}</span><br><span class="muted small">${esc(x.d)}</span></li>`).join('')}</ul><p class="muted small">Enter scripts in contests and films in festivals from the Create tab.</p></section>
    <section class="panel"><h3>Your recognition</h3>${mine.length ? `<ul class="plain">${mine.map(a => `<li>✦ ${esc(a.name)} ${a.y} · ${fl(a.film)}${a.people.includes(me.id) ? ' <b>(yours)</b>' : ''}</li>`).join('')}</ul>` : '<p class="muted">Nothing yet. Work on films that win, write scripts that place, or take your own films to festivals.</p>'}
     ${M && (M.scripts || []).some(s => s.won) ? `<h4>Contests</h4><ul class="plain">${M.scripts.filter(s => s.won).map(s => `<li>${esc(s.title)}: ${esc(s.won.join(', '))}</li>`).join('')}</ul>` : ''}</section></div>
    ${typeof egofHTML === 'function' && S.me ? egofHTML() : ''}${typeof awardsCabinetHTML === 'function' ? awardsCabinetHTML() : typeof awardBodiesHTML === 'function' ? awardBodiesHTML() : ''}
@@ -15576,6 +15600,14 @@ function compWeek() {
     if (e.place === 'win') milestone(`Won ${c.name}${sc ? ' with ' + sc.title : ''}`, c.tier === 'fun' ? 'life' : 'prize');
   }
 }
+// On a contest's own page: the rules, when it runs, your odds, and every time you've entered.
+function contestRulesHTML(c) {
+  const M = S.me, T = COMP_TIER[c.tier], mine = ((M && M.comps) || []).filter(e => e.k === c.k).slice().reverse();
+  return `<section class="panel"><h3>How it works</h3><p>${chip(T[0], T[1])} ${esc(c.d)}</p>
+   <p class="small">Closes in <b>${MON[c.month]}</b>, entries open the month before · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''} · judged on <b>${esc(statLabel(c.stat).toLowerCase())}</b>${c.need === 'script' ? ' · needs a finished script' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''}${c.energy ? ' · a hard weekend' : ''}.</p>
+   ${M ? `<p class="small">Your odds today: ${oddsBar(c.stat, c.dc)}${compFits(c) ? ' ' + chip('Fits you', 'good') : ''}</p><p class="small">${compOpen(c) ? (compEntered(c) ? '<b>You\'ve entered this year.</b>' : 'Entries are open now: <button class="linkish" data-dtab="compete">enter from the Contests tab</button>.') : `Entries open in ${MON[(c.month + 11) % 12]}.`}</p>
+   <h4>Your entries</h4>${mine.length ? `<ul class="plain small">${mine.map(e => `<li>${e.y}: ${e.told ? `<b>${PLACE_LABEL[e.place]}</b>` : 'waiting on the judges'}</li>`).join('')}</ul>` : '<p class="muted small">You haven\'t entered yet.</p>'}` : ''}</section>`;
+}
 function compPanel() {
   const M = S.me, f = UI.compf || 'all', y = yearOf(S.week), scripts = (M.scripts || []).filter(x => x.grade);
   let L = COMPS.slice().sort((a, b) => ((a.month - dateOf(S.week).getUTCMonth() + 12) % 12) - ((b.month - dateOf(S.week).getUTCMonth() + 12) % 12));
@@ -15585,14 +15617,14 @@ function compPanel() {
   const card = c => {
     const open = compOpen(c), done = compEntered(c), e = (M.comps || []).find(x => x.k === c.k && x.y === y), fits = compFits(c), T = COMP_TIER[c.tier];
     const scSel = c.need === 'script' ? (scripts.length ? sel('comp-sc-' + c.k, scripts.map(s => [String(s.id), `${s.title} (${s.grade})`]), UI['comp-sc-' + c.k] || String(scripts[scripts.length - 1].id)) : '<span class="muted small">Needs a finished script</span>') : '';
-    return `<div class="comp${fits ? ' fits' : ''}"><div class="ch"><b>${esc(c.name)}</b> ${chip(T[0], T[1])}${fits ? ' ' + chip('Fits you', 'good') : ''}</div><p class="small">${esc(c.d)}</p>
+    return `<div class="comp${fits ? ' fits' : ''}"><div class="ch"><b>${compLink(c)}</b> ${chip(T[0], T[1])}${fits ? ' ' + chip('Fits you', 'good') : ''}</div><p class="small">${esc(c.d)}</p>
      <p class="small muted">Closes in ${MON[c.month]} · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''}${c.energy ? ' · a hard weekend' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''} · judged on ${esc(statLabel(c.stat).toLowerCase())}</p>
      ${done ? `<p class="small"><b>Entered.</b> ${e.told ? PLACE_LABEL[e.place] : 'Waiting on the judges.'}</p>` : open ? `<div class="crow">${scSel}${oddsBar(c.stat, c.dc)}<button class="btn-s" data-comp="${c.k}" ${(c.need === 'script' && !scripts.length) || M.cash < usd(c.fee) ? 'disabled' : ''}>Enter</button></div>` : `<p class="small muted">Opens ${MON[(c.month + 11) % 12]}.</p>`}</div>`;
   };
   return `<section class="panel comps"><h3>Competitions</h3><p class="muted small">Entries open the month before each deadline. Your craft sets the odds; the roll on the day decides. Major prizes open doors; the fun ones give you trophies, stories and new friends.</p>
    <div class="fchips">${Object.entries(COMP_CAT).map(([k, l]) => `<button class="fchip${f === k ? ' on' : ''}" data-compf="${k}">${esc(l)}</button>`).join('')}</div>
    <div class="compgrid">${L.map(card).join('')}</div></section>
-   <section class="panel"><h3>Your trophy shelf</h3>${shelf.length ? `<ul class="plain">${shelf.map(e => { const c = COMPS.find(x => x.k === e.k); return `<li>${e.place === 'win' ? '🏆' : e.place === 'runner' ? '🥈' : e.place === 'final' ? '🎖️' : '📜'} <b>${PLACE_LABEL[e.place]}</b>, ${esc(c.name)} <span class="muted small">${e.y}</span></li>`; }).join('')}</ul>` : '<p class="muted">Nothing on the shelf yet.</p>'}</section>`;
+   <section class="panel"><h3>Your trophy shelf</h3>${shelf.length ? `<ul class="plain">${shelf.map(e => { const c = COMPS.find(x => x.k === e.k); return `<li>${e.place === 'win' ? '🏆' : e.place === 'runner' ? '🥈' : e.place === 'final' ? '🎖️' : '📜'} <b>${PLACE_LABEL[e.place]}</b>, ${compLink(c)} <span class="muted small">${e.y}</span></li>`; }).join('')}</ul>` : '<p class="muted">Nothing on the shelf yet.</p>'}</section>`;
 }
 // </competitions>
 // <life-scenes-low>
@@ -15943,14 +15975,27 @@ function pressAboutYou(m) {
   if (kind === 'feud' && (M.press || []).some(c => c.kind === 'feud' && S.week - c.w < 26)) return;   // the gossip columns don't run the same story twice
   const r = hashRand(S.week * 31 + (M.milestones || []).length * 7 + me.id), L = PRESS_HEAD[kind];
   const h = L[Math.floor(r() * L.length)].replace('{n}', me.name), paper = PAPERS[Math.floor(r() * PAPERS.length)];
-  (M.press = M.press || []).push({ w: S.week, paper, h, sub: m.t, kind });
+  (M.press = M.press || []).push({ w: S.week, paper, h, sub: m.t, kind, ni: S.news.length });
   if (M.press.length > 60) M.press.shift();
   news(kind === 'prize' ? 'Award' : 'People', `${h}. ${m.t}.`, { person: me.id });
+}
+// the article behind a clipping (older saves didn't keep its index: find it by its headline)
+function clipNi(c) {
+  if (c.ni !== undefined && S.news[c.ni]) return c.ni;
+  for (let i = S.news.length - 1; i >= 0 && S.news[i].w >= c.w; i--) if (S.news[i].w === c.w && S.news[i].text.startsWith(c.h)) return (c.ni = i);
+  return null;
+}
+// Everything the papers have run about someone, newest first, each opening the article.
+function pressAboutHTML(id, n = 8) {
+  const out = [];
+  for (let i = S.news.length - 1; i >= 0 && out.length < n; i--) { const x = S.news[i]; if (x.ref && x.ref.person === id) out.push(i); }
+  if (!out.length) return '';
+  return `<section class="panel"><h3>In the press</h3><ul class="plain">${out.map(i => { const x = S.news[i]; return `<li><span class="muted small">${fmtDate(x.w, true)}</span> ${chip(x.type, 't-' + x.type)} <a href="#" class="lk" data-go="article:${i}">${esc(x.text.length > 140 ? x.text.slice(0, 137) + '…' : x.text)}</a></li>`; }).join('')}</ul></section>`;
 }
 function clippingsHTML() {
   const L = (S.me.press || []).slice().reverse();
   if (!L.length) return '';
-  return `<section class="panel clips"><h3>Press clippings</h3><div class="cliplist">${L.slice(0, 12).map(c => `<div class="clip"><span class="eyebrow">${esc(c.paper)} · ${fmtDate(c.w, true)}</span><b>${esc(c.h)}</b><p class="small muted">${esc(c.sub)}</p></div>`).join('')}</div></section>`;
+  return `<section class="panel clips"><h3>Press clippings</h3><div class="cliplist">${L.slice(0, 12).map(c => `<div class="clip"><span class="eyebrow">${esc(c.paper)} · ${fmtDate(c.w, true)}</span><b>${clipNi(c) !== null ? `<a href="#" class="lk" data-go="article:${clipNi(c)}">${esc(c.h)}</a>` : esc(c.h)}</b><p class="small muted">${linkPrizes(esc(c.sub))}</p></div>`).join('')}</div></section>`;
 }
 // ---- next moves: what would help most right now ----
 function nextMoves() {
@@ -16010,7 +16055,7 @@ function ambitionWeek() {
 function ambitionsHTML() {
   if (typeof ambFresh === 'function') ambFresh();
   const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined), next = AMBITIONS.filter(A => (M.amb || {})[A.k] === undefined).slice(0, 3);
-  return `<section class="panel amb"><h3>Ambitions <span class="count">${done.length} of ${AMBITIONS.length}</span></h3>${next.map(A => { const [c, n] = A.p(), pct = clamp(c / n, 0, 1); return `<div class="ambrow"><span>${esc(A.t)}</span><span class="tbar"><i style="width:${Math.round(pct * 100)}%"></i></span><span class="small muted">${A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n) + ' / ' + n}</span></div>`; }).join('')}
+  return `<section class="panel amb"><h3>Ambitions <span class="count">${done.length} of ${AMBITIONS.length}</span></h3>${next.map(A => { const [c, n] = A.p(), pct = clamp(c / n, 0, 1); return `<div class="ambrow"><span>${linkPrizes(esc(A.t))}</span><span class="tbar"><i style="width:${Math.round(pct * 100)}%"></i></span><span class="small muted">${A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n) + ' / ' + n}</span></div>`; }).join('')}
    ${done.length ? `<p class="small muted">Done: ${done.map(A => esc(A.t.toLowerCase())).join(' · ')}</p>` : ''}</section>`;
 }
 // </clippings>
@@ -17931,7 +17976,7 @@ function applySchool(a) {
   if (s[2] !== M.hub && typeof relocate === 'function') relocate(s[2], 'school');
   M.school = { prog: a.prog, craft: a.craft, done: 0, missed: 0, start: S.week, at: s[0], schol: schol ? 1 : 0 };
   milestone(`Accepted to ${s[1]}${schol ? ' on a scholarship' : ''}`, 'school');
-  inbox('news', `You're in: ${s[1]}`, `${P0.label}, ${CRAFTS[a.craft].label.toLowerCase()} track. ${schol ? 'And they\'re paying most of it: a scholarship. ' : ''}Plan ${P0.days} study days a week (any day with a study block counts, and each one teaches a class); four short weeks and you're out.`, { roll: lr });
+  inbox('news', `You're in: ${s[1]}`, `${P0.label}, ${CRAFTS[a.craft].label.toLowerCase()} track. ${schol ? 'And they\'re paying most of it: a scholarship. ' : ''}${P0.days} study sessions a week go into your diary automatically (each one teaches a class); four short weeks and you're out.`, { roll: lr });
   return true;
 }
 // alumni: a famous school opens doors, and classmates become your network
@@ -17954,7 +17999,7 @@ function schoolsHTML() {
 function schoolPage(s) {
   const M = S.me, wait = M.schoolApp && M.schoolApp[s[0]] !== undefined && S.week - M.schoolApp[s[0]] < 26, alumni = (M.alma || []).includes(s[0]);
   return `<section class="panel jobd"><h3>${esc(s[1])} <button class="linkish" data-schopen="">Close</button></h3><p class="eyebrow">${esc(hubName(s[2]))} · founded ${s[5]} · ${'★'.repeat(4 - s[4])}${alumni ? ' · your alma mater' : ''}</p><p>${esc(s[8])}</p>
-   ${progsAt(s).map(k => { const P0 = SCHOOL_PROGS[k], fee = Math.round(P0.fee * s[7]); return `<div class="course">${typeof syllabusHTML === 'function' ? syllabusHTML(k) : ''}<b>${esc(P0.label)}</b> <span class="muted small">${Math.round(P0.weeks / 40 * 10) / 10} years · ${P0.days} days a week · ${fee ? fmtCash(usd(fee)) + '/wk' : 'no tuition'} · leads to ${esc(DEG_LABEL[P0.deg] || 'a degree')}</span><p class="small">${P0.crafts.map(c => `<button class="btn-s ghost" data-schapply="${s[0]}:${k}:${c}" ${M.school || wait ? 'disabled' : ''}>Apply: ${esc(CRAFTS[c].label)} (DC ${schoolDC(s, c)})</button>`).join(' ')}</p></div>`; }).join('')}
+   ${progsAt(s).map(k => { const P0 = SCHOOL_PROGS[k], fee = Math.round(P0.fee * s[7]); return `<div class="course">${typeof syllabusHTML === 'function' ? syllabusHTML(k) : ''}<b>${esc(P0.label)}</b> <span class="muted small">${Math.round(P0.weeks / 40 * 10) / 10} years · ${P0.days} study sessions a week · ${fee ? fmtCash(usd(fee)) + '/wk' : 'no tuition'} · leads to ${esc(DEG_LABEL[P0.deg] || 'a degree')}</span><p class="small">${P0.crafts.map(c => `<button class="btn-s ghost" data-schapply="${s[0]}:${k}:${c}" ${M.school || wait ? 'disabled' : ''}>Apply: ${esc(CRAFTS[c].label)} (DC ${schoolDC(s, c)})</button>`).join(' ')}</p></div>`; }).join('')}
    <p class="muted small">Applying costs ${fmtCash(usd(s[4] === 1 ? 120 : 60))} and rolls ${['drama', 'music'].some(k => s[3].includes(k)) ? 'Charisma for auditions or Vision for portfolios' : 'Vision for your portfolio'}. Credits, finished work and skill in the craft lower the bar. Beat it by six and you get a scholarship. ${s[2] !== M.hub ? 'Getting in means moving to ' + esc(hubName(s[2])) + '.' : ''}${wait ? ' You applied recently: wait six months.' : ''}</p></section>`;
 }
 function schoolClick(t) {
@@ -18001,7 +18046,7 @@ function egofWeek() {
 }
 function egofHTML() {
   const W = egofWins(), M = S.me;
-  return `<section class="panel egof"><h3>The EGOF ${M && M.egof ? '<span class="chip good">Complete</span>' : `<span class="count">${Object.keys(W).length} of 4</span>`}</h3><div class="egofrow">${EGOF.map(([k, n, show, what]) => `<div class="egofc${W[k] ? ' won' : ''}"><b>${k}</b><span>${n}</span><small>${esc(what)}</small><small>${W[k] ? 'Won ' + yearOf(W[k]) : esc(show)}</small></div>`).join('')}</div><p class="muted small">Entertainment's grand slam. Win an Emmet (series and online video), a Gramophone (music), an Oswald (cinema, at the Academy Oswalds) and a Footlight (theatre). It takes several careers' worth of crossing over.</p></section>`;
+  return `<section class="panel egof"><h3>The EGOF ${M && M.egof ? '<span class="chip good">Complete</span>' : `<span class="count">${Object.keys(W).length} of 4</span>`}</h3><div class="egofrow">${EGOF.map(([k, n, show, what]) => `<div class="egofc${W[k] ? ' won' : ''}"><b>${k}</b><span>${n}</span><small>${esc(what)}</small><small>${W[k] ? 'Won ' + yearOf(W[k]) : linkPrizes(esc(show))}</small></div>`).join('')}</div><p class="muted small">Entertainment's grand slam. Win an Emmet (series and online video), a Gramophone (music), an Oswald (cinema, at the Academy Oswalds) and a Footlight (theatre). It takes several careers' worth of crossing over.</p></section>`;
 }
 // ---- the bodies ----
 const BODY_SEEKS = {
@@ -18025,6 +18070,24 @@ function awardBodies() {
   L.forEach((b, i) => b.id = i);
   AB_FOR = S; AW_IDX = null; return AB_CACHE = L;
 }
+// Any prize named in a piece of (already escaped) text becomes a link to its page: awards lists, timelines,
+// ambitions, trivia, the inbox. Longest names first, and never inside an existing link or tag.
+let PRIZE_RX = null, PRIZE_MAP = null, PRIZE_FOR = null;
+function linkPrizes(html) {
+  if (!html) return html;
+  const B = awardBodies();
+  if (PRIZE_FOR !== B) {
+    const pairs = [];
+    for (const b of B) for (const n of [b.name, b.key, ...(b.alias || [])]) if (n && n.length > 7) pairs.push([esc(n), b.id]);
+    pairs.sort((a, c) => c[0].length - a[0].length);
+    PRIZE_MAP = new Map(); for (const [n, id] of pairs) if (!PRIZE_MAP.has(n)) PRIZE_MAP.set(n, id);
+    PRIZE_RX = new RegExp('(<a[\\s>][\\s\\S]*?</a>|<button[\\s>][\\s\\S]*?</button>|<[^>]+>)|(' + [...PRIZE_MAP.keys()].map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+    PRIZE_FOR = B;
+  }
+  return html.replace(PRIZE_RX, (m, tag, name) => tag ? tag : `<a href="#" class="lk" data-go="award:${PRIZE_MAP.get(name)}">${name}</a>`);
+}
+// the page for a contest in COMPS
+function compLink(c, text) { const b = awardBodies().find(x => x.comp === c.k); return b ? `<a href="#" class="lk" data-go="award:${b.id}">${esc(text || c.name)}</a>` : esc(text || c.name); }
 function bodyWinners(b) {
   const out = [];
   if (b.kind === 'festival' && b.fk && typeof festRecord === 'function') return festRecord(FESTIVALS.find(F => F.k === b.fk));
@@ -18048,12 +18111,13 @@ function viewAwardBody(id) {
   const b = awardBodies()[id]; if (!b) return '<p>Not found.</p>';
   const W = bodyWinners(b), MON_ = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const kindL = { ceremony: 'National film awards', festival: 'Film festival', music: 'Music awards', stage: 'Theatre awards', media: 'Screen and audio awards', contest: 'Competition' }[b.kind];
-  const seeks = b.seeks || BODY_SEEKS[b.kind] || BODY_SEEKS.contest;
+  const cc = b.comp && typeof COMPS !== 'undefined' ? COMPS.find(c => c.k === b.comp) : null;
+  const seeks = b.seeks || (cc ? `The judges look for ${statLabel(cc.stat).toLowerCase()} above all. ${cc.tier === 'major' ? 'Hundreds enter; a handful are read past the first round.' : cc.tier === 'fun' ? 'Nobody takes it too seriously, which is the point.' : 'A working jury, a real prize and a crowd that matters.'}` : null) || BODY_SEEKS[b.kind] || BODY_SEEKS.contest;
   const egof = EGOF.find(e => e[2] === b.key);
   return `<div class="head"><p class="eyebrow">${esc(kindL)}${b.founded ? ' · since ' + b.founded : ''} · ${MON_[b.month]}</p><h2>${esc(b.name)}</h2><p class="lede">${esc(b.about || '')}</p></div>${typeof bodyLoreHTML === 'function' ? bodyLoreHTML(b) : ''}
    <div class="cols two"><section class="panel"><h3>What it stands for</h3><p>${esc(seeks)}</p>${b.bar ? `<p class="small">Selection bar: films need to be about <b>${b.bar}/100</b> in quality. Small, independent films get a nudge. Entry fee ${fmtCash(usdW(b.fee))}.</p>` : ''}${b.prize ? `<p class="small">Prize: <b>${fmtCash(usdW(b.prize))}</b> · entry ${fmtCash(usdW(b.fee))} · enter from the Contests tab.</p>` : ''}${egof ? `<p class="small">One of the four EGOF prizes: the <b>${egof[1]}</b>.</p>` : ''}
     <h4>Categories</h4><p>${(typeof bodyCats === 'function' ? bodyCats(b) : b.cats).map(c => `<button class="pill" data-abcat="${esc(c)}">${esc(c)}</button>`).join(' ')}</p><p class="muted small">Prestige ${'★'.repeat(4 - b.prestige)}</p></section>
-   ${b.fk && typeof festivalPage === 'function' ? '</div>' + festivalPage(FESTIVALS.find(F => F.k === b.fk)) + '<div>' : (typeof awardTableHTML === 'function' ? awardTableHTML(b) : '')}</div>`;
+   ${b.comp && typeof contestRulesHTML === 'function' ? contestRulesHTML(COMPS.find(c => c.k === b.comp)) : ''}${b.fk && typeof festivalPage === 'function' ? '</div>' + festivalPage(FESTIVALS.find(F => F.k === b.fk)) + '<div>' : (typeof awardTableHTML === 'function' ? awardTableHTML(b) : '')}</div>`;
 }
 function awardBodiesHTML() {
   const B = awardBodies(), F = UI.abf = UI.abf || 'all', kinds = { all: 'All', ceremony: 'Film awards', festival: 'Festivals', music: 'Music', stage: 'Theatre', media: 'Screens & audio', contest: 'Competitions' };
@@ -18251,7 +18315,7 @@ function pinAmb(a) { const M = S.me, L = M.ambPin = M.ambPin || []; if (!AMBITIO
 function ambClaimable() { const M = S.me; return AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined && !(M.ambClaim || {})[A.k]); }
 function ambRow(A) {
   const M = S.me, done = (M.amb || {})[A.k] !== undefined, claimed = (M.ambClaim || {})[A.k], pinned = (M.ambPin || []).includes(A.k), [c, n] = A.p(), pct = clamp(c / n, 0, 1);
-  return `<div class="ambrow${done ? ' done' : ''}"><span>${done ? (claimed ? '✓ ' : '★ ') : ''}${esc(A.t)}</span><span class="tbar"><i style="width:${Math.round((done ? 1 : pct) * 100)}%"></i></span><span class="small muted">${done ? (claimed ? 'claimed ' + fmtDate(claimed, true) : 'reached!') : A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n).toLocaleString() + ' / ' + n.toLocaleString()}</span><span>${done && !claimed ? `<button class="btn-s" data-ambclaim="${A.k}">Claim ${'✦'.repeat(Math.min(3, Math.ceil(A.rw / 3)))}</button>` : !done ? `<button class="linkish" data-ambpin="${A.k}" title="${pinned ? 'Unpin' : 'Pin to keep it in view'}">${pinned ? '📌 Pinned' : 'Pin'}</button>` : ''}</span></div>`;
+  return `<div class="ambrow${done ? ' done' : ''}"><span>${done ? (claimed ? '✓ ' : '★ ') : ''}${linkPrizes(esc(A.t))}</span><span class="tbar"><i style="width:${Math.round((done ? 1 : pct) * 100)}%"></i></span><span class="small muted">${done ? (claimed ? 'claimed ' + fmtDate(claimed, true) : 'reached!') : A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n).toLocaleString() + ' / ' + n.toLocaleString()}</span><span>${done && !claimed ? `<button class="btn-s" data-ambclaim="${A.k}">Claim ${'✦'.repeat(Math.min(3, Math.ceil(A.rw / 3)))}</button>` : !done ? `<button class="linkish" data-ambpin="${A.k}" title="${pinned ? 'Unpin' : 'Pin to keep it in view'}">${pinned ? '📌 Pinned' : 'Pin'}</button>` : ''}</span></div>`;
 }
 // Within a group: rewards waiting first, then the goals you're closest to, then what's done.
 function ambSorted(L) {
@@ -18560,7 +18624,7 @@ function codexHTML() {
 // choice, so the week flows; anything that matters (offers, interviews, deals, invitations) still waits for you.
 // Every auto choice goes through the action log like a click, so saves replay the same.
 function autoOn(k) { const A = (S.me && S.me.auto) || {}; return A[k] !== false; }
-function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
+function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'oblig') { M.autoOblig = M.autoOblig === false ? true : false; return true; } if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
 // the sensible choice: an option with no roll and no cost, else the first
 function sensibleChoice(it) { const L = (it.choices || []).filter(c => !c.dis); return (L.find(c => !c.check && !/quit|leave|skip|refuse|no thanks/i.test(c.label || '')) || L[0] || {}).k; }
 function autoBeforeStep() {
@@ -19808,6 +19872,7 @@ function worldSearchHTML(q) {
   const lessons = typeof CURR !== 'undefined' ? Object.entries(CURR).flatMap(([f, C]) => C.lessons.map((L, i) => [f, i, L]).filter(([, , L]) => L[1].toLowerCase().includes(q))).slice(0, 6) : [];
   const box = (t, items) => items.length ? `<div><h4>${t}</h4><ul class="plain">${items.join('')}</ul></div>` : '';
   const out = [box('Film companies', cos.map(c => `<li>${cl(c.id)} <span class="muted small">${esc(hubName(c.hub))}</span></li>`)), box('Labels, networks, theatres', mcos.map(([c, i]) => `<li>${mcoLink(i)} <span class="muted small">${esc(MCO_TYPE[c.type] || '')}</span></li>`)), box('Artists and shows', figs.map(x => `<li>${figLink(x)} <span class="muted small">${esc(KIND_LABEL[x.kind] || '')}</span></li>`)), box('Songs and works', songs.map(([x, s]) => `<li>${songLink(x, s)} <span class="muted small">by ${esc(x.name)}</span></li>`)), box('Prizes and festivals', prizes.map(b => `<li><a href="#" class="lk" data-go="award:${b.id}">${esc(b.name)}</a></li>`)), box('Craft lessons', lessons.map(([f, i, L]) => `<li><button class="linkish" data-jump="computer:library" data-libf="${f}">${esc(CURR[f].icon + ' ' + L[1])}</button></li>`))].filter(Boolean);
+  if (typeof tvSearchHTML === 'function') { const tv = tvSearchHTML(q); if (tv) out.push(tv); }
   return out.length ? `<div class="cols two wsearch">${out.join('')}</div>` : '';
 }
 // </archive2>
@@ -24415,8 +24480,8 @@ function tvPools() {
 }
 function tvPickPerson(r, m, role, y) {
   const L = ((tvPools()[m] || tvPools().US || {})[role]) || [];
-  for (let k = 0; k < 12 && L.length; k++) { const id = L[Math.floor(r() * L.length)], p = P(id); if (p && p.born <= y - 20 && p.born >= y - 75) return id; }
-  return L.length ? L[Math.floor(r() * L.length)] : null;
+  for (let k = 0; k < 12 && L.length; k++) { const id = L[Math.floor(r() * L.length)], p = P(id); if (p && !p.player && p.born <= y - 20 && p.born >= y - 75) return id; }
+  if (!L.length) return null; const id = L[Math.floor(r() * L.length)]; return P(id) && P(id).player ? null : id;   // you are never cast in the past
 }
 function genreFor(net, y, r) {
   if (TV_LOCAL[net.k] && r() < .7) return TV_LOCAL[net.k];
@@ -24506,7 +24571,7 @@ function viewTvNet(k) {
 }
 // ---- the app ----
 function tvApp() {
-  const M = S.me, tab = UI.tvt || 'now', all = tvAll();
+  const M = S.me, tab = UI.tvt || 'now', all = typeof tvAllPlus === 'function' ? tvAllPlus() : tvAll();
   const tabs = [['now', '📺 This week'], ['nets', '📡 Channels'], ['shows', '🔎 Every show'], ['year', '📅 Year by year'], ['emmets', '🏆 The Emmets'], ['mine', '🎬 Your TV']];
   let body = '';
   if (tab === 'now') {
@@ -24583,6 +24648,7 @@ function tvWeek() {
       milestone(`${win ? 'Won' : 'Nominated'} at The Emmets: ${cat}, for ${s.title}`, 'prize'); me.standing = clamp(me.standing + (win ? 6 : 3), 0, 100); me.fame = clamp((me.fame || 0) + (win ? 5 : 2), 0, 100);
       if (win) { me.awards.push(`The Emmets ${cat} ${S.year}`); news('Award', `${s.title} wins ${cat} at the Emmets.`, { person: me.id }); } inbox('note', win ? `${s.title} wins the Emmet` : `${s.title} is nominated`, win ? 'You carry a winged statuette back to the writers\' room and put it on the coffee machine.' : 'Nominated. The party afterwards is better than the ceremony.'); }
   }
+  if (typeof tvNewsWeek === 'function') tvNewsWeek();
 }
 function tvNewSeason(s) {
   const M = S.me, me = ME(), net = TV_NETS[s.net], G = TV_GENRES[s.g], prev = s.seas[s.seas.length - 1];
@@ -27751,6 +27817,7 @@ function lateMorning() {
   const M = S.me, W = M && M.wk; if (!W) return;
   const L = careerLevel(), rich = lateRich();
   if (W.day === 1 && (rich || L >= 5)) { const ch = (L >= 7 ? .45 : L >= 6 ? .35 : L >= 5 ? .25 : .12) + (rich ? .1 : 0); if (prnd() < ch) lateOffer('late'); }
+  if (W.day === 2 && typeof tvShowrunnerWeek === 'function') tvShowrunnerWeek();
   if ((W.day === 4 || W.day === 6) && !W.beats) weekBeat();
 }
 function weekBeat() {
@@ -27779,6 +27846,147 @@ function indieHTML() {
     <div class="qa"><button class="btn-s ghost" data-jump="create">✍️ Your projects</button><button class="btn-s ghost" data-jump="people">👥 Call someone</button><button class="btn-s ghost" data-jump="compete">🏆 Contests</button></div>${hold}</div>`;
 }
 // </late-game>
+// <tv2>
+// ---------------- Television, part two: a front door, credits, the work itself, running a show ----------------
+// tv.js builds the world's television. This file puts it where people look: a TV tab beside the box office,
+// television credits on everyone's page, shows in the search box, your own shows in the ratings, the industry
+// news of a television year (upfronts in May, premieres in September, the Emmets), scenes from the writers'
+// room and the stage floor, and the decisions that come with running your own show.
+
+// ---- the TV tab ----
+function viewTv() {
+  const M = S.me, mkt = M ? (HUBS[M.hub] || {}).m || 'US' : 'US', on = tvAllPlus().filter(s => s.m === mkt && tvOnAir(s, S.year));
+  return `<div class="head"><p class="eyebrow">Television · ${esc(MARKETS[mkt] ? MARKETS[mkt].name : mkt)} · ${S.year}</p><h2>Television</h2><p class="lede">${on.length} shows on air here this year across ${Object.values(TV_NETS).filter(n => n.founded <= S.year && (HUBS[n.hub] || {}).m === mkt).length} channels. Ratings, channels, every show ever made, the Emmets, and your own television career.</p></div>
+   <section class="panel">${tvApp()}</section>`;
+}
+// the world's shows and yours together
+function tvAllPlus() { return tvAll().concat((S.me && S.me.shows) || []); }
+
+// ---- a person's television ----
+function tvCreditsHTML(p) {
+  const rows = tvCreditsOf(p.id).map(([id, role]) => [tvShow(id), role]).filter(x => x[0]);
+  if (p.player && S.me) { for (const s of S.me.shows || []) rows.push([s, 'creator and showrunner']); for (const [id, r] of Object.entries(S.me.tvCred || {})) { const s = tvShow(id); if (s && !rows.some(x => x[0] === s)) rows.push([s, r]); } }
+  if (!rows.length) return '';
+  const seen = new Set(), L = rows.filter(([s, r]) => { const k = s.id + r; if (seen.has(k)) return false; seen.add(k); return true; }).sort((a, b) => b[0].y - a[0].y);
+  const yrs = s => `${s.y}${s.seasons > 1 || tvStatus(s) === 'on air' ? '–' + (tvStatus(s) === 'on air' ? '' : Math.min(S.year, s.y + s.seasons - 1)) : ''}`;
+  return `<h3>Television</h3><div class="tw"><table class="grid"><thead><tr><th>Years</th><th>Show</th><th>Channel</th><th>Role</th><th class="n">Seasons</th></tr></thead><tbody>${L.slice(0, 30).map(([s, r]) => `<tr><td>${yrs(s)}</td><td>${tvLink(s)}${s.legend ? ' <span class="aw">✦</span>' : ''}</td><td>${netLink(s.net)}</td><td>${esc(r.charAt(0).toUpperCase() + r.slice(1))}</td><td class="n">${s.seasons}</td></tr>`).join('')}</tbody></table></div>${L.length > 30 ? `<p class="muted small">And ${L.length - 30} more.</p>` : ''}`;
+}
+
+// ---- search ----
+function tvSearchHTML(q) {
+  if (!q || q.length < 2) return '';
+  const shows = tvAllPlus().filter(s => s.title.toLowerCase().includes(q)).sort((a, b) => (b.legend ? 1 : 0) - (a.legend ? 1 : 0) || b.seasons - a.seasons).slice(0, 8);
+  const nets = Object.values(TV_NETS).filter(n => n.name.toLowerCase().includes(q)).slice(0, 5);
+  if (!shows.length && !nets.length) return '';
+  return `<div><h4>Television</h4><ul class="plain">${shows.map(s => `<li>${tvLink(s)} <span class="muted small">${esc(TV_NETS[s.net].name)} · ${s.y}</span></li>`).join('')}${nets.map(n => `<li>${netLink(n.k)} <span class="muted small">${esc(n.kind)} channel</span></li>`).join('')}</ul></div>`;
+}
+
+// ---- the television year in the trade press ----
+function tvNewsWeek() {
+  const M = S.me; if (!M) return;
+  const d = dateOf(S.week), month = d.getUTCMonth(), first = d.getUTCDate() <= 7, mkt = (HUBS[M.hub] || {}).m || 'US';
+  if (!first || (month !== 4 && month !== 8)) return;
+  const L = tvAll().filter(s => s.m === mkt), sr = s => { const p = tvPeople(s); return p.showrunner !== null && p.showrunner !== undefined ? { person: p.showrunner } : undefined; };
+  if (month === 4) {   // the upfronts: renewals and cancellations
+    const ended = L.filter(s => s.y + s.seasons - 1 === S.year - 1 && s.seasons <= 3 && s.last < 9999).sort((a, b) => b.pop - a.pop).slice(0, 2);
+    const renewed = L.filter(s => tvOnAir(s, S.year) && s.y < S.year).sort((a, b) => tvViewers(b, S.year - b.y + 1) - tvViewers(a, S.year - a.y + 1)).slice(0, 2);
+    for (const s of renewed) news('Industry', `Upfronts: ${TV_NETS[s.net].name} renews ${s.title} for a season ${S.year - s.y + 1}.`, sr(s));
+    for (const s of ended) news('Industry', `Upfronts: ${TV_NETS[s.net].name} cancels ${s.title} after ${s.seasons} season${s.seasons > 1 ? 's' : ''}.`, sr(s));
+  } else {   // September: premieres, and the Emmets
+    const prem = L.filter(s => s.y === S.year).sort((a, b) => b.q - a.q).slice(0, 3);
+    for (const s of prem) news('Industry', `Premiere week: ${s.title}, a new ${TV_GENRES[s.g].label.toLowerCase()} on ${TV_NETS[s.net].name}, ${s.q >= 70 ? 'opens to raves' : s.q >= 50 ? 'opens to decent notices' : 'opens to a shrug'}.`, sr(s));
+    const E = tvEmmets(S.year - 0).filter(e => /Series$/.test(e.cat));
+    for (const e of E.slice(0, 2)) { const s = tvShow(e.show); if (s) news('Award', `The Emmets: ${s.title} wins ${e.cat}.`, sr(s)); }
+  }
+}
+
+// ---- scenes from television work: the room, the stage, the network ----
+const TV_SCENES = [
+  { id: 'tv_room', title: 'Breaking story', text: 'Day three of breaking episode six in the writers\' room. The whiteboard is full, the act-three turn doesn\'t work, and {head} has gone very quiet.', teach: 'TV writers "break" each episode as a group in the writers\' room, beat by beat on a whiteboard, before anyone writes a page; the showrunner decides what stays.', opts: [
+    { k: 'pitch', label: 'Pitch the turn nobody wants to say out loud', check: ['struc', 13], ok: { tie: { head: 5 }, stand: .4, xp: { struc: .3 } }, bad: { stress: 4 }, t: 'Silence, then {head} says "yes. That." It goes on the board in red.', tb: 'The room moves on without comment. That\'s worse than a no.' },
+    { k: 'support', label: 'Build on someone else\'s idea', check: ['col', 11], ok: { tie: { mates: 3 }, xp: { col: .2 } }, t: 'Your tweak makes their idea work. They remember who helped.' },
+    { k: 'snacks', label: 'Order lunch and watch how it\'s done', ok: { xp: { struc: .15 }, energy: 3 }, t: 'You learn more listening than you would have talking. Also: the good sandwich place.' }] },
+  { id: 'tv_tableread', title: 'The table read', text: 'Thirty people around a long table: cast, writers, network executives, a stenographer. Your scene is next, and the lead is reading it flat.', teach: 'Every TV episode starts with a table read: the cast reads the script aloud for writers and the network, and jokes or scenes that die in the room get rewritten that afternoon.', opts: [
+    { k: 'fix', label: 'Rewrite it at lunch', check: ['dial', 13], ok: { stand: .4, xp: { dial: .3 }, tie: { head: 3 } }, bad: { stress: 4 }, t: 'Your new pages get a laugh from the network in the afternoon run.', tb: 'The rewrite is worse. The old version goes back in.' },
+    { k: 'talk', label: 'Have a quiet word with the actor', check: ['cha', 13], ok: { tie: { head: 2 }, stand: .2 }, bad: { stand: -.2 }, t: 'They were tired, not bored. The next run is alive.', tb: 'They don\'t take notes from writers. Now everyone knows you tried.' }] },
+  { id: 'tv_notes', title: 'Network notes', text: 'The network\'s notes arrive at 11pm: make the lead "more likeable", cut the subplot everyone in the room loves, and add a dog.', teach: 'Networks and streamers give notes on every outline, script and cut; the craft of TV is absorbing notes without losing the show.', opts: [
+    { k: 'push', label: 'Push back on the subplot, give them the dog', check: ['pack', 13], ok: { tie: { head: 4 }, stand: .3, xp: { pack: .2 } }, bad: { stress: 5 }, t: 'The subplot survives. The dog is very good, honestly.', tb: 'The subplot goes. So does the dog.' },
+    { k: 'take', label: 'Take all the notes', ok: { stress: 2 }, t: 'The episode is smoother and a little less itself.' }] },
+  { id: 'tv_floor', title: 'Eight pages a day', text: 'It\'s 6pm on a procedural set and you\'re two scenes behind with the location lost at eight. The guest star is in hair.', teach: 'Television shoots fast: often eight or more script pages a day against a film\'s two or three, with the episode\'s director a guest who must match the show\'s house style.', opts: [
+    { k: 'merge', label: 'Merge two set-ups into one moving shot', check: ['stag', 13], ok: { stand: .4, xp: { stag: .3 } }, bad: { stress: 5 }, t: 'One move covers both scenes. You wrap at 7:58.', tb: 'The shot\'s too ambitious. You lose the location and owe a day.' },
+    { k: 'cut', label: 'Cut a scene and tell the writers', check: ['pack', 12], ok: { tie: { head: 2 } }, bad: { tie: { head: -3 } }, t: 'The writers grumble and fix it in the edit. Nobody misses it.', tb: 'It was the scene the episode was about.' }] },
+  { id: 'tv_live', title: 'Tape night', text: 'A multi-camera sitcom in front of a live audience of two hundred. The warm-up comic is flagging and the biggest joke of the night has just died.', teach: 'Multi-camera sitcoms tape in front of a studio audience; writers rewrite jokes between takes ("punch-ups") and the audience laugh is the test.', opts: [
+    { k: 'punch', label: 'Punch up the joke between takes', check: ['comic', 13], ok: { stand: .5, xp: { comic: .3 } }, bad: { stress: 3 }, t: 'The new line gets the biggest laugh of the night. It airs.', tb: 'The new line gets a smaller laugh. They use the first take.' },
+    { k: 'crowd', label: 'Help the warm-up comic with the crowd', check: ['cha', 12], ok: { fame: .5, stress: -2 }, t: 'You do five minutes about the lunch truck. The room is back.' }] },
+  { id: 'tv_ratings', title: 'Ratings Monday', text: 'The overnights are in. Down 12% on last week. The network is "monitoring the situation" and the room is very quiet.', teach: 'Shows live and die by the ratings: overnights the next morning, then delayed viewing over seven days; streamers measure minutes watched, and tell nobody.', opts: [
+    { k: 'calm', label: 'Keep the room calm and focused', check: ['com', 12], ok: { tie: { mates: 3 }, stress: -2 }, t: 'Week two is back up. Nobody panicked, and you get some credit for that.' },
+    { k: 'theory', label: 'Dig into why', check: ['tas', 13], ok: { xp: { tas: .3 }, tie: { head: 3 } }, t: 'It was the football. It\'s always the football.' }] },
+  { id: 'tv_upfronts', title: 'The upfronts', text: 'A ballroom in May, a stage, the network\'s new season and a thousand advertisers drinking warm white wine. You\'re there to smile.', teach: 'At the "upfronts" each May, networks announce their autumn schedule to advertisers, who commit their money in advance; renewals and cancellations land the same week.', opts: [
+    { k: 'work', label: 'Work the room', check: ['cha', 13], ok: { stand: .4, meet: 1 }, bad: { energy: -5 }, t: 'You end up talking to the network chief about a show you haven\'t written yet.', tb: 'You talk to three people in a row who sell car insurance.' },
+    { k: 'leave', label: 'Smile for an hour and leave', ok: { energy: 4 }, t: 'Nobody notices you leave. That\'s fine.' }] },
+  { id: 'tv_staffing', title: 'Staffing season', text: 'Spring: every show is hiring writers for next season and every writer in town is reading everything. Your agent sends you three pilots to read by Friday.', teach: '"Staffing season" each spring is when TV writers are hired for the next season\'s rooms; writers read the new pilots and meet showrunners in a frantic few weeks.', opts: [
+    { k: 'read', label: 'Read them all properly', check: ['tas', 12], ok: { xp: { tas: .2 }, refs: 1 }, t: 'One of them is brilliant. You say so in the meeting, specifically. It helps.' },
+    { k: 'skim', label: 'Skim and wing it', ok: { energy: 4 }, t: 'You get the names of two characters wrong. It\'s spring; everyone does.' }] },
+  { id: 'tv_guest', title: 'The guest star', text: 'This week\'s guest star is a film actor slumming it, and wants their character to be "less of a cliché" on the morning of the shoot.', teach: 'TV guest stars play one-episode parts; famous guests can lift ratings, and sometimes want rewrites the schedule can\'t afford.', opts: [
+    { k: 'meet', label: 'Find them a line or two that matters', check: ['char', 13], ok: { stand: .3, xp: { char: .2 }, tie: { head: 2 } }, bad: { stress: 4 }, t: 'Two new lines and a better exit. They\'re delighted and tell the press it was their idea.', tb: 'They want more than two lines. The day runs long.' },
+    { k: 'no', label: 'Politely hold the line', check: ['eth', 12], ok: { tie: { head: 2 } }, t: 'They sulk for an hour and then are very good.' }] },
+  { id: 'tv_finale', title: 'The finale', text: 'The season finale needs a cliffhanger that brings the audience back in September, and a network that keeps you in May.', teach: 'Season finales end on cliffhangers to bring viewers back after the summer and make the renewal case to the network.', opts: [
+    { k: 'big', label: 'Kill a main character', check: ['vis', 14], ok: { stand: .6, fame: .5, xp: { vis: .3 } }, bad: { stand: -.2 }, t: 'The internet loses its mind. The network is thrilled.', tb: 'The internet loses its mind in the bad way. The actor\'s fans write letters.' },
+    { k: 'quiet', label: 'A quiet, devastating last scene', check: ['char', 13], ok: { stand: .5, xp: { char: .3 } }, t: 'The critics single it out. The audience cries and comes back.' }] }
+];
+for (const s of TV_SCENES) SCENES.push(Object.assign({ role: 'tv', jobs: [] }, s));
+ROLE_SCENES.tv = TV_SCENES;
+
+// ---- running your own show ----
+// Your show's current season, while it airs this year
+function myAiring() {
+  const M = S.me; if (!M) return null;
+  for (const s of M.shows || []) { const z = s.seas.find(x => x.y === S.year); if (z && s.status === 'on air') return [s, z]; }
+  return null;
+}
+function tvTweak(dq, vm) { const A = myAiring(); if (!A) return; const z = A[1]; z.q = clamp(z.q + dq, 5, 99); z.v = Math.round(z.v * vm * 10) / 10; }
+const tvShowName = () => { const A = myAiring(); return A ? A[0].title : 'your show'; };
+LATE.push(
+  { id: 'tv_arc', pool: 'tv', need: () => !!myAiring(), title: 'What is this season about?', text: () => `The room is back for ${tvShowName()}. Before anyone writes a page, you have to say what this season is about.`,
+    opts: [
+      { k: 'bold', label: () => 'Something bold: blow up the premise', check: ['vis', 14], go: (c, ok) => { tvTweak(ok ? 8 : -6, ok ? 1.05 : .85); lateFx(ok ? { stand: .8, xp: { vis: .3 } } : { stress: 6 }); return ok ? 'The critics call it the best season of television this year. Some of the audience is confused, then hooked.' : 'Half the audience leaves by episode four. The other half writes essays about it.'; } },
+      { k: 'deep', label: () => 'Go deeper into the characters', check: ['char', 13], go: (c, ok) => { tvTweak(ok ? 5 : -2, ok ? 1.05 : .97); lateFx({ xp: { char: .25 } }); return ok ? 'Quiet, rich, and the cast\'s best work. Viewing ticks up.' : 'It drifts. Nothing happens beautifully for six episodes.'; } },
+      { k: 'safe', label: () => 'More of what worked last time', go: c => { tvTweak(-2, 1.04); return 'The audience gets what it came for. The critics notice the formula.'; } }] },
+  { id: 'tv_netnotes', pool: 'tv', need: () => !!myAiring(), title: 'The network wants changes', text: () => `The network has notes on ${tvShowName()}: a younger love interest, shorter cold opens, and "a reason for teenagers to watch".`,
+    opts: [
+      { k: 'fight', label: () => 'Fight for the show', check: ['pack', 14], go: (c, ok) => { tvTweak(ok ? 3 : 0, ok ? 1 : .95); lateFx(ok ? { stand: .5 } : { stress: 8 }); return ok ? 'They back down on everything except the cold opens. You can live with shorter cold opens.' : 'They overrule you and remind you who owns the show. They do.'; } },
+      { k: 'take', label: () => 'Give them most of it', go: c => { tvTweak(-3, 1.06); return 'Ratings tick up. The show gets a little more ordinary.'; } }] },
+  { id: 'tv_raise', pool: 'tv', need: () => !!myAiring() && (myAiring()[0].cast || []).length > 0, mk: c => { const A = myAiring(); c.who = A[0].cast[0]; c.amt = lateAmt(.02, 15000, 400000); }, title: 'Your star wants a raise', text: c => `${lname(c.who)}, the lead of ${tvShowName()}, wants a raise, a producer credit and a director's chair for one episode. Their agent mentions "other offers".`,
+    opts: [
+      { k: 'pay', label: c => `Pay it, partly out of your own fee (${fmtCash(c.amt)})`, cost: c => c.amt, go: c => { lateFx({ tie: 10 }, c); tvTweak(1, 1.02); return 'They sign for two more seasons and direct a very good episode.'; } },
+      { k: 'deal', label: () => 'Negotiate: the credit, not the money', check: ['pack', 13], go: (c, ok) => { lateFx({ tie: ok ? 4 : -8 }, c); if (!ok) tvTweak(-4, .9); return ok ? 'They take the credit and a director\'s chair. Everyone saves face.' : 'They walk. You write them out in a plane crash. The audience is furious.'; } }] },
+  { id: 'tv_bottle', pool: 'tv', need: () => !!myAiring(), title: 'A bottle episode', text: () => `You're over budget on ${tvShowName()}. A "bottle episode", one set and the main cast only, would save money. Or it could be the best thing you ever make.`,
+    opts: [
+      { k: 'yes', label: () => 'Write it yourself, one room, one night', check: ['dial', 14], go: (c, ok) => { tvTweak(ok ? 6 : -1, 1); lateFx(ok ? { stand: .6, cash: usd(20000) } : { cash: usd(20000) }); return ok ? 'The episode people will still be talking about in ten years.' : 'It saves the money. That\'s all it does.'; } },
+      { k: 'no', label: () => 'Find the money elsewhere', go: c => 'You cut the helicopter from the finale. Nobody misses the helicopter.' }] },
+  { id: 'tv_slot', pool: 'tv', need: () => !!myAiring() && TV_NETS[myAiring()[0].net].kind !== 'streaming', title: 'A new time slot', text: () => `The network wants to move ${tvShowName()} to Friday nights, which everyone knows is where shows go to die.`,
+    opts: [
+      { k: 'fight', label: () => 'Fight the move', check: ['pack', 15], go: (c, ok) => { tvTweak(0, ok ? 1 : .8); lateFx(ok ? { stand: .4 } : { stress: 6 }); return ok ? 'You keep Tuesday. The other showrunner gets Friday.' : 'Friday it is. The audience halves.'; } },
+      { k: 'campaign', label: () => 'Accept it, and rally the fans', check: ['cha', 13], go: (c, ok) => { tvTweak(0, ok ? .95 : .8); lateFx(ok ? { fame: 1 } : {}); return ok ? 'The fans follow you to Friday. The network is surprised.' : 'Some fans follow you. Not enough.'; } }] },
+  { id: 'tv_spinoff', pool: 'tv', once: 1, need: () => { const A = myAiring(); return !!A && A[0].seas.length >= 3 && A[1].v >= netBaseViewers(TV_NETS[A[0].net].kind, S.year); }, title: 'A spin-off', text: () => `The network wants a spin-off of ${tvShowName()}, built around the most popular supporting character.`,
+    opts: [
+      { k: 'yes', label: () => 'Develop it', go: c => { lateFx({ stand: 1, cash: usd(60000), stress: 6, mile: `Developed a spin-off of ${tvShowName()}` }); return 'You write the pilot on weekends. The network loves it. Your main show suffers a little.'; } },
+      { k: 'no', label: () => 'Protect the main show', go: c => { tvTweak(2, 1); return 'They give it to someone else. It runs for one season.'; } }] },
+  { id: 'tv_leak', pool: 'tv', need: () => !!myAiring(), title: 'The finale leaks', text: () => `The finale of ${tvShowName()} has leaked online, a week early, all forty-four minutes.`,
+    opts: [
+      { k: 'own', label: () => 'Own it with a funny statement', check: ['cha', 13], go: (c, ok) => { tvTweak(0, ok ? 1.08 : .95); lateFx(ok ? { fame: 1 } : { stress: 5 }); return ok ? 'Your statement goes viral. More people watch the real broadcast than ever.' : 'Your statement reads as rattled. The broadcast numbers dip.'; } },
+      { k: 'shoot', label: () => 'Shoot a different ending in four days', check: ['vstory', 15], go: (c, ok) => { tvTweak(ok ? 4 : -3, ok ? 1.12 : .95); lateFx({ energy: -20, stress: 8 }); return ok ? 'The leaked ending was a fake, you tell everyone afterwards. It wasn\'t. The new one is better.' : 'Four days wasn\'t enough. The new ending shows the seams.'; } }] },
+  { id: 'tv_library', pool: 'tv', once: 1, need: () => (S.me.shows || []).some(s => s.seas.length >= 3), mk: c => { const s = (S.me.shows || []).find(x => x.seas.length >= 3); c.t = s.title; c.amt = Math.round(usd(40000 * s.seas.length) / 1000) * 1000; }, title: 'A streamer wants your back catalogue', text: c => `A streamer wants every season of ${c.t} for its library. Your share would be ${fmtCash(c.amt)}.`,
+    opts: [
+      { k: 'yes', label: () => 'Sign', go: c => { lateFx({ cash: c.amt, fame: 1 }); return 'A whole new generation finds the show. You get letters from teenagers.'; } },
+      { k: 'hold', label: () => 'Hold out for more', check: ['fin', 14], go: (c, ok) => { lateFx(ok ? { cash: c.amt * 1.6 } : {}); return ok ? `They come back at ${fmtCash(c.amt * 1.6)}.` : 'They buy a rival show instead.'; } }] }
+);
+for (const t of LATE) LATE_BY[t.id] = t;
+function tvShowrunnerWeek() {
+  const M = S.me; if (!M || !myAiring()) return;
+  if (prnd() < .12) lateOffer('tv');
+}
+// </tv2>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -27899,7 +28107,7 @@ function reviewCell(r) { const c = r >= 75 ? 'good' : r < 45 ? 'bad' : ''; retur
 function histChip(f) { return (f.real ? ' ' + chip('History', 'hist') : '') + (f.onList ? ' ' + chip('On your list', 'list') : ''); }
 // Trivia and rumours from the catalogue. {id} marks a real person, shown under their game name.
 function factPlain(t) { return t.replace(/\{(\w+)\}/g, (m, id) => (S.cat.people[id] !== undefined ? P(S.cat.people[id]).name : S.cat.src.people[id] ? S.cat.src.people[id].n : id)); }
-function factHTML(t) { return esc(t).replace(/\{(\w+)\}/g, (m, id) => S.cat.people[id] !== undefined ? `<a data-p="${S.cat.people[id]}">${esc(P(S.cat.people[id]).name)}</a>` : esc(S.cat.src.people[id] ? S.cat.src.people[id].n : id)); }
+function factHTML(t) { return (typeof linkPrizes === 'function' ? linkPrizes(esc(t)) : esc(t)).replace(/\{(\w+)\}/g, (m, id) => S.cat.people[id] !== undefined ? `<a data-p="${S.cat.people[id]}">${esc(P(S.cat.people[id]).name)}</a>` : esc(S.cat.src.people[id] ? S.cat.src.people[id].n : id)); }
 function triviaHTML(key) {
   const L = (S.cat.facts || {})[key];
   if (!L || !L.length) return '';
@@ -28053,13 +28261,15 @@ function viewPerson(id) {
     <h3>Reputation</h3>${repRow('Standing', p.standing, 'accent')}${repRow('Fame at home', p.fame, 'data')}${repRow('Fame abroad', p.intl, 'data')}${repRow('Heat', p.heat, 'warm')}</section>
    <section class="panel"><h3>Relationships</h3>${friends.length ? `<ul class="ties">${friends.map(([k, v]) => `<li>${pl(k)} <span class="muted">${ROLE_LABEL[P(k).role]}</span><b class="good">+${Math.round(v)}</b></li>`).join('')}</ul>` : '<p class="muted">No close collaborators yet.</p>'}
     ${foes.length ? `<h4>Bad blood</h4><ul class="ties">${foes.map(([k, v]) => `<li>${pl(k)} <span class="muted">${ROLE_LABEL[P(k).role]}</span><b class="bad">${Math.round(v)}</b></li>`).join('')}</ul>` : ''}
-    ${p.awards.length ? `<h4>Awards</h4><ul class="plain">${p.awards.slice().reverse().map(a => `<li>✦ ${esc(a)}</li>`).join('')}</ul>` : ''}</section>
+    ${p.awards.length ? `<h4>Awards</h4><ul class="plain">${p.awards.slice().reverse().map(a => `<li>✦ ${typeof linkPrizes === 'function' ? linkPrizes(esc(a)) : esc(a)}</li>`).join('')}</ul>` : ''}</section>
   </div>
   ${current.length ? `<h3>Now working on</h3><ul class="plain">${current.map(f => `<li>${fl(f.id)} · ${esc(roleIn(f))} · ${esc(f.status)}</li>`).join('')}</ul>` : ''}
   <h3>Filmography</h3>
   <div class="tw"><table class="grid"><thead><tr><th>Year</th><th>Title</th><th>Role</th><th>Genre</th><th class="n">Critics</th><th class="n">Gross</th></tr></thead><tbody>
   ${credits.map(f => `<tr><td>${yearOf(f.rel)}</td><td>${fl(f.id)}${f.awards.length ? ' <span class="aw">✦</span>' : ''}${histChip(f)}</td><td>${esc(roleIn(f))}</td><td>${esc(f.genre)}</td><td class="n">${reviewCell(f.reviews)}</td><td class="n">${fmtM(f.total)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No released credits yet.</td></tr>'}
   </tbody></table></div>
+${typeof tvCreditsHTML === 'function' ? tvCreditsHTML(p) : ''}
+${typeof pressAboutHTML === 'function' ? pressAboutHTML(p.id) : ''}
 ${p.player ? '' : cinePanel(true, null, personTriviaHTML(p) + (p.real ? `<p class="muted">A figure from film history: films marked as history below happened; the rest of this filmography is this world's own.</p>` : ''))}`;
 }
 
@@ -28351,7 +28561,7 @@ function inboxLinks(it) {
   return L.length ? `<p class="golinks">${L.join(' ')}</p>` : '';
 }
 function inboxCard(it) {
-  return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${esc(it.text)}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
+  return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${linkPrizes(esc(it.text))}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
     ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
     ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}${inboxLinks(it)}`;
 }
@@ -28381,18 +28591,20 @@ function conditionsHTML() {
 // The week ahead as a diary: seven days, three blocks each. Lived blocks are fixed; job days are taken;
 // appointments show where they land. Everything else you can change until it happens.
 function weekGrid() {
-  const M = S.me, W = M.wk, cal = calOf(), run = planBlocks(), now = W ? W.day * 3 + W.block : 0, burnt = M.burnout && W && W.burnt;
+  const M = S.me, W = M.wk, cal = calOf(), OB = obligations(), run = OB.cal, now = W ? W.day * 3 + W.block : 0, burnt = M.burnout && W && W.burnt;
   const opts = b => Object.entries(BLOCK_ACTS).filter(([k]) => k !== 'work' && (k !== 'study' || M.school)).map(([k, A]) => [k, `${A.icon} ${A.label}`]).concat(b === 2 && typeof cityEveningOpts === 'function' ? cityEveningOpts() : []);
   const cell = (d, b) => {
     const abs = d * 3 + b, ap = (M.appts || []).find(x => x.w === S.week && x.d === d && x.b === b && (!x.done || abs < now)), k = run[d][b];
     if (abs < now) { const c = W.cards.filter(x => x.d === d && x.b === b).pop(); return `<td class="past"><span class="muted">${c ? c.icon + ' ' + esc(c.title) : ''}</span></td>`; }
     if (ap) { const A = APPT_KINDS[ap.kind]; return `<td class="appt${abs === now ? ' now' : ''}"><span class="chip good">${A.icon} ${esc(A.label)}${ap.who != null ? ' · ' + esc(P(ap.who).name.split(' ')[0]) : ''}</span></td>`; }
     if (burnt) return '<td><span class="bad">Rest</span></td>';
-    if (k === 'work') return `<td class="${abs === now ? 'now' : ''}"><span class="chip">🎬 Work</span></td>`;
+    if (k === 'work') { const j = M.jobs.length > 1 ? M.jobs.find(x => x.id === OB.job[d]) : null; return `<td class="${abs === now ? 'now' : ''}"><span class="chip" title="${j ? esc(j.t) : 'Work'}">🎬 ${j ? esc(j.t.length > 16 ? j.t.slice(0, 15) + '…' : j.t) : 'Work'}</span></td>`; }
+    if (OB.forced[d + '-' + b]) return `<td class="${abs === now ? 'now' : ''}"><span class="chip good" title="Your course needs this session; fitted in automatically">📚 Study</span></td>`;
     return `<td class="${abs === now ? 'now' : ''}">${sel(`cal-${d}-${b}`, opts(b), cal[d][b])}</td>`;
   };
   return `<div class="tw"><table class="cal"><thead><tr><th></th>${DAYS7.map((dn, i) => `<th class="${W && i === W.day ? 'now' : ''}">${dn.slice(0, 3)}<small>${dayDate(i).getUTCDate()}</small></th>`).join('')}</tr></thead>
    <tbody>${BLOCKS.map((bn, b) => `<tr><th>${bn}</th>${DAYS7.map((_, d) => cell(d, b)).join('')}</tr>`).join('')}</tbody></table></div>
+  ${M.school || M.jobs.length > 1 ? `<p class="muted small">🗓️ Obligations are fitted in for you: each job gets its own days${M.school ? `, and your course gets its ${(schoolProg(M.school) || {}).days} study sessions in the least important free blocks. <button class="linkish" data-auto="oblig">${M.autoOblig === false ? 'Fit my study sessions for me' : 'Let me place study sessions myself'}</button>` : '.'}</p>` : ''}
   <p class="calquick muted small">Quick plans: <button class="linkish" data-calfill="grind">Job hunt all week</button> · <button class="linkish" data-calfill="craft">Craft week</button> · <button class="linkish" data-calfill="writer">Writing week</button> · <button class="linkish" data-calfill="balance">Balanced</button> · <button class="linkish" data-calfill="recover">Recover</button></p>
   <div class="skip"><span class="muted">Skip ahead with this plan (stops at any decision):</span> <button class="btn-s ghost" data-endweek="1">Rest of the week</button> <button class="btn-s ghost" data-endweek="2">2 weeks</button> <button class="btn-s ghost" data-endweek="4">4 weeks</button> <button class="btn-s ghost" data-endweek="12">12 weeks</button></div>`;
 }
@@ -28522,10 +28734,10 @@ function companyPanel() {
 function pathsPanel() {
   const M = S.me, ags = agenciesIn(M.hub).sort((x, y) => agFits(y) - agFits(x));
   const sc = M.school, P0 = sc ? (typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog]) : null;
-  const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. Plan <b>${P0.days} study day${P0.days > 1 ? 's' : ''}</b> a week${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
+  const school = sc ? `<p><b>${esc(P0.label)}</b> in ${esc(CRAFTS[sc.craft].label.toLowerCase())}: week ${sc.done} of ${P0.weeks}. <b>${P0.days} study session${P0.days > 1 ? 's' : ''}</b> a week (${schoolDays()} planned this week; fitted into your diary automatically)${sc.missed ? ` <span class="bad">(missed ${sc.missed} week${sc.missed > 1 ? 's' : ''}; four and you're out)</span>` : ''}. ${P0.fee > 0 ? fmtCash(usd(P0.fee)) + ' a week.' : 'Pays ' + fmtCash(usd(-P0.fee)) + ' a week.'}</p><div class="pbar"><i style="width:${Math.round(sc.done / P0.weeks * 100)}%"></i></div><p><button class="linkish" data-dropout="1">Drop out</button></p>`
     : !UI.courses ? `<p class="muted">Courses grow one craft fast; degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ((typeof DEG_LABEL !== 'undefined' && DEG_LABEL[d]) || 'a ' + d + ' degree')).join(', ')}.` : ''}</p><p><button class="btn-s ghost" data-courses="1">Browse courses</button></p>`
     : `<p class="muted"><button class="linkish" data-courses="">Hide courses</button> Courses grow one craft fast and degrees open doors that ask for one.${M.degrees.length ? ` You have: ${M.degrees.map(d => ((typeof DEG_LABEL !== 'undefined' && DEG_LABEL[d]) || 'a ' + d + ' degree')).join(', ')}.` : ''}</p>
-      <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} day${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
+      <div class="courses">${Object.entries(PROGRAMS).map(([k, P1]) => `<div class="course"><b>${esc(P1.label)}</b><p class="muted">${esc(P1.d)}</p><p class="small">${P1.weeks} weeks · ${P1.days} study session${P1.days > 1 ? 's' : ''} a week · ${P1.fee > 0 ? fmtCash(usd(P1.fee)) + '/wk' : 'paid ' + fmtCash(usd(-P1.fee)) + '/wk'}${P1.apply ? ' · ' + oddsBar(P1.apply[0], P1.apply[1]) : ''}</p>${P1.craft ? `<button class="btn-s" data-enrol="${k}:${P1.craft}"${M.schoolTry > S.week - 26 ? ' disabled title="Try again in six months"' : ''}>${P1.apply ? 'Apply' : 'Enrol'}</button>` : `<span class="enrolrow">${Object.keys(CRAFTS).map(c => `<button class="btn-s ghost" data-enrol="${k}:${c}">${esc(CRAFTS[c].label)}</button>`).join(' ')}</span>`}</div>`).join('')}</div>`;
   const agent = M.agent ? `<p>${pl(M.agent.id)} at <b>${esc(M.agent.name)}</b> ${'★'.repeat(M.agent.tier)} represents you. <b>${esc(AG_STYLE[M.agent.style || 'nurturer'].label)}</b>: ${esc(AG_STYLE[M.agent.style || 'nurturer'].d)} Last booking ${S.week - M.agent.lastBook} weeks ago${S.week - M.agent.lastBook > AG_STYLE[M.agent.style || 'nurturer'].patience - 10 ? ' <span class="bad">(they\'re getting restless)</span>' : ''}.</p><p><button class="linkish" data-fireagent="1">Leave your agent</button></p>`
     : `<p class="muted">No agent. Send a query, or get some credits and they'll call you. Each agency will look at you once every twelve weeks.</p><table class="grid small"><tbody>${ags.map(a => { const p = Math.round(queryOdds(a) * 100), wait = (M.queried || {})[a.i] > S.week - 12; return `<tr${agFits(a) ? '' : ' class="blocked"'}><td>${esc(a.name)} <span class="lvl">${'★'.repeat(a.tier)}</span><br><span class="muted small" title="${esc(AG_STYLE[a.style].d)}">${esc(AG_STYLE[a.style].label)} · for ${esc(AG_FOCUS[a.focus])}</span></td><td><span class="oddsbar"><span class="ob-t"><i style="width:${p}%" class="${p < 35 ? 'lo' : p < 65 ? 'mid' : 'hi'}"></i></span><b>${p}%</b></span></td><td>${wait ? '<span class="muted">Wait</span>' : `<button class="btn-s ghost" data-query="${a.i}">Query</button>`}</td></tr>`; }).join('')}</tbody></table>`;
   const world = typeof schoolsHTML === 'function' ? (UI.schools ? `<p><button class="linkish" data-schools="">Hide the world's schools</button></p>${schoolsHTML()}` : `<p><button class="btn-s ghost" data-schools="1">Schools around the world</button> <span class="muted small">Film, music, drama, animation, games, journalism and business schools in every city.</span></p>`) : '';
@@ -28967,7 +29179,7 @@ function render(keepScroll) {
   const cur = UI.stack[UI.stack.length - 1];
   let html;
   if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id));
-  else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts }[UI.tab];
+  else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts, tv: typeof viewTv === 'function' ? viewTv : viewWorld }[UI.tab];
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
   $('#main').innerHTML = html;
   if (typeof applyTableSorts === 'function') applyTableSorts();

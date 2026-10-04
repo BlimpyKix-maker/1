@@ -231,10 +231,10 @@ function lifeScene(pool) {
 function lifeDayEvent(act) {
   const M = S.me;
   if (act === 'work') {
-    const j = M.jobs.length ? M.jobs[(S.week + M.wk.day) % M.jobs.length] : null;
+    const j = M.jobs.length ? (workJobOn(M.wk.day) || M.jobs[(S.week + M.wk.day) % M.jobs.length]) : null;
     if (!j || prnd() > .2) return;
     const f = j.film !== null ? S.films[j.film] : null;
-    const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : []);
+    const fam = familyOf(j), pool = (ROLE_SCENES[fam] || []).concat(f && f.stage === 2 ? ROLE_SCENES.set : [], j.show && ROLE_SCENES.tv ? ROLE_SCENES.tv : []);
     const L = pool.filter(s => sceneFresh(s.id, 20));
     if (!L.length) return;
     const s = ppick(L);

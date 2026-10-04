@@ -538,6 +538,7 @@ function lateMorning() {
   const M = S.me, W = M && M.wk; if (!W) return;
   const L = careerLevel(), rich = lateRich();
   if (W.day === 1 && (rich || L >= 5)) { const ch = (L >= 7 ? .45 : L >= 6 ? .35 : L >= 5 ? .25 : .12) + (rich ? .1 : 0); if (prnd() < ch) lateOffer('late'); }
+  if (W.day === 2 && typeof tvShowrunnerWeek === 'function') tvShowrunnerWeek();
   if ((W.day === 4 || W.day === 6) && !W.beats) weekBeat();
 }
 function weekBeat() {

@@ -107,23 +107,24 @@ function occupationOf(p) {
 // ---- School ----
 const PROGRAMS = {
   short: { label: 'Short course', d: 'Eight weeks of evenings in one craft. A certificate and a few new faces.', weeks: 8, days: 1, fee: 80, grow: .03, deg: null },
-  cc: { label: 'Community college certificate', d: 'A year of practical classes, two days a week. Cheap and useful.', weeks: 40, days: 2, fee: 70, grow: .035, deg: 'cert' },
-  ba: { label: 'Degree, part-time', d: 'Three days a week for two years. Opens the doors that ask for a degree.', weeks: 100, days: 3, fee: 230, grow: .03, deg: 'ba' },
-  mfa: { label: 'Film school (MFA)', d: 'Two years, four days a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
+  cc: { label: 'Community college certificate', d: 'A year of practical classes, two sessions a week. Cheap and useful.', weeks: 40, days: 2, fee: 70, grow: .035, deg: 'cert' },
+  ba: { label: 'Degree, part-time', d: 'Three study sessions a week for two years. Opens the doors that ask for a degree.', weeks: 100, days: 3, fee: 230, grow: .03, deg: 'ba' },
+  mfa: { label: 'Film school (MFA)', d: 'Two years, four study sessions a week, a thesis film and classmates who will run the business.', weeks: 90, days: 4, fee: 520, grow: .05, deg: 'mfa', mates: 2 },
   union: { label: 'Union training programme', d: 'Paid on-set training for assistant directors. Hard to get into; the jobs that follow pay well.', weeks: 40, days: 4, fee: -260, grow: .04, deg: 'union', craft: 'dir', apply: ['eth', 13] }
 };
-function schoolDaysDone() { const M = S.me, W = M && M.wk; return W ? Object.keys(W.studyD || {}).length : (M && M.studyDone) || 0; }
+// A course asks for study sessions a week (blocks of study, any day): `days` on a programme is that number.
+function schoolDaysDone() { return studySessionsDone(); }
 // Days at school this week: a day counts if you studied in any block of it. Days already lived count what you did;
 // days still ahead count what's planned.
 function schoolDays() {
-  const W = S.me && S.me.wk, plan = planBlocks(), done = (W && W.studyD) || {}, today = W ? W.day : 0;
-  let n = 0; for (let d = 0; d < 7; d++) if (done[d] || (d >= today && !(W && W.over) && plan[d] && plan[d].includes('study') && !(d === today && W && W.block >= 3))) n++;
+  const W = S.me && S.me.wk, plan = planBlocks(), now = W ? W.day * 3 + W.block : 0;
+  let n = studySessionsDone(); for (let a = now; a < 21; a++) if (plan[Math.floor(a / 3)][a % 3] === 'study') n++;
   return n;
 }
 function enrol(a) {
   const M = S.me, P0 = PROGRAMS[a.prog];
   if (!P0 || M.school || !CRAFTS[a.craft || P0.craft]) return false;
-  if (P0.apply) { const ok = roll(P0.apply[0], P0.apply[1]); inbox('note', ok ? `In: ${P0.label}` : `Not this year: ${P0.label}`, ok ? 'You start next week. Plan your study days.' : 'Hundreds applied for a handful of places. You can try again in six months.', { roll: M.lastRoll }); if (!ok) { M.schoolTry = S.week; return true; } }
+  if (P0.apply) { const ok = roll(P0.apply[0], P0.apply[1]); inbox('note', ok ? `In: ${P0.label}` : `Not this year: ${P0.label}`, ok ? 'You start next week. Your study sessions go in your diary automatically.' : 'Hundreds applied for a handful of places. You can try again in six months.', { roll: M.lastRoll }); if (!ok) { M.schoolTry = S.week; return true; } }
   M.school = { prog: a.prog, craft: a.craft || P0.craft, done: 0, missed: 0, start: S.week };
   diary(`You enrol: ${P0.label.toLowerCase()} (${CRAFTS[M.school.craft].label.toLowerCase()}).`);
   return true;
@@ -133,8 +134,8 @@ function schoolWeek(L, gain) {
   const M = S.me, me = ME(), sc = M.school;
   if (!sc) return 0;
   const P0 = typeof schoolProg === 'function' ? schoolProg(sc) : PROGRAMS[sc.prog], days = schoolDaysDone();   // the week is over: count the days you went
-  for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * days);
-  if (days >= P0.days) { sc.done++; sc.missed = 0; } else if (S.week - 1 <= sc.start) { /* the week you enrolled doesn't count against you */ } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} days).`); }
+  for (const k in CRAFTS[sc.craft].subs) gain(k, P0.grow * Math.min(days, P0.days));
+  if (days >= P0.days) { sc.done++; sc.missed = 0; } else if (S.week - 1 <= sc.start) { /* the week you enrolled doesn't count against you */ } else { sc.missed++; L.push(`You missed classes (${days} of ${P0.days} study sessions).`); }
   if (P0.mates && days && prnd() < .08) { const q = youngNPC(M.hub, ppick(['director', 'writer', 'dp', 'editor', 'producer', 'actor'])); meet(q.id, 'Classmate', 8); L.push(`You get to know ${q.name}, a ${ROLE_LABEL[q.role].toLowerCase()} in your year.`); }
   if (sc.missed >= 4) { inbox('note', 'Dropped out', `You missed too many weeks of ${(sc.at ? P0.label : P0.label.toLowerCase())}. The school lets you go.`); M.school = null; return 0; }
   if (sc.done >= P0.weeks) {

@@ -4,7 +4,7 @@
 // choice, so the week flows; anything that matters (offers, interviews, deals, invitations) still waits for you.
 // Every auto choice goes through the action log like a click, so saves replay the same.
 function autoOn(k) { const A = (S.me && S.me.auto) || {}; return A[k] !== false; }
-function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
+function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'oblig') { M.autoOblig = M.autoOblig === false ? true : false; return true; } if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
 // the sensible choice: an option with no roll and no cost, else the first
 function sensibleChoice(it) { const L = (it.choices || []).filter(c => !c.dis); return (L.find(c => !c.check && !/quit|leave|skip|refuse|no thanks/i.test(c.label || '')) || L[0] || {}).k; }
 function autoBeforeStep() {

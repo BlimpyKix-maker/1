@@ -162,8 +162,8 @@ function tvPools() {
 }
 function tvPickPerson(r, m, role, y) {
   const L = ((tvPools()[m] || tvPools().US || {})[role]) || [];
-  for (let k = 0; k < 12 && L.length; k++) { const id = L[Math.floor(r() * L.length)], p = P(id); if (p && p.born <= y - 20 && p.born >= y - 75) return id; }
-  return L.length ? L[Math.floor(r() * L.length)] : null;
+  for (let k = 0; k < 12 && L.length; k++) { const id = L[Math.floor(r() * L.length)], p = P(id); if (p && !p.player && p.born <= y - 20 && p.born >= y - 75) return id; }
+  if (!L.length) return null; const id = L[Math.floor(r() * L.length)]; return P(id) && P(id).player ? null : id;   // you are never cast in the past
 }
 function genreFor(net, y, r) {
   if (TV_LOCAL[net.k] && r() < .7) return TV_LOCAL[net.k];
@@ -253,7 +253,7 @@ function viewTvNet(k) {
 }
 // ---- the app ----
 function tvApp() {
-  const M = S.me, tab = UI.tvt || 'now', all = tvAll();
+  const M = S.me, tab = UI.tvt || 'now', all = typeof tvAllPlus === 'function' ? tvAllPlus() : tvAll();
   const tabs = [['now', '📺 This week'], ['nets', '📡 Channels'], ['shows', '🔎 Every show'], ['year', '📅 Year by year'], ['emmets', '🏆 The Emmets'], ['mine', '🎬 Your TV']];
   let body = '';
   if (tab === 'now') {
@@ -330,6 +330,7 @@ function tvWeek() {
       milestone(`${win ? 'Won' : 'Nominated'} at The Emmets: ${cat}, for ${s.title}`, 'prize'); me.standing = clamp(me.standing + (win ? 6 : 3), 0, 100); me.fame = clamp((me.fame || 0) + (win ? 5 : 2), 0, 100);
       if (win) { me.awards.push(`The Emmets ${cat} ${S.year}`); news('Award', `${s.title} wins ${cat} at the Emmets.`, { person: me.id }); } inbox('note', win ? `${s.title} wins the Emmet` : `${s.title} is nominated`, win ? 'You carry a winged statuette back to the writers\' room and put it on the coffee machine.' : 'Nominated. The party afterwards is better than the ceremony.'); }
   }
+  if (typeof tvNewsWeek === 'function') tvNewsWeek();
 }
 function tvNewSeason(s) {
   const M = S.me, me = ME(), net = TV_NETS[s.net], G = TV_GENRES[s.g], prev = s.seas[s.seas.length - 1];

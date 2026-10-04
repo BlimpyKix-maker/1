@@ -94,6 +94,14 @@ function compWeek() {
     if (e.place === 'win') milestone(`Won ${c.name}${sc ? ' with ' + sc.title : ''}`, c.tier === 'fun' ? 'life' : 'prize');
   }
 }
+// On a contest's own page: the rules, when it runs, your odds, and every time you've entered.
+function contestRulesHTML(c) {
+  const M = S.me, T = COMP_TIER[c.tier], mine = ((M && M.comps) || []).filter(e => e.k === c.k).slice().reverse();
+  return `<section class="panel"><h3>How it works</h3><p>${chip(T[0], T[1])} ${esc(c.d)}</p>
+   <p class="small">Closes in <b>${MON[c.month]}</b>, entries open the month before · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''} · judged on <b>${esc(statLabel(c.stat).toLowerCase())}</b>${c.need === 'script' ? ' · needs a finished script' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''}${c.energy ? ' · a hard weekend' : ''}.</p>
+   ${M ? `<p class="small">Your odds today: ${oddsBar(c.stat, c.dc)}${compFits(c) ? ' ' + chip('Fits you', 'good') : ''}</p><p class="small">${compOpen(c) ? (compEntered(c) ? '<b>You\'ve entered this year.</b>' : 'Entries are open now: <button class="linkish" data-dtab="compete">enter from the Contests tab</button>.') : `Entries open in ${MON[(c.month + 11) % 12]}.`}</p>
+   <h4>Your entries</h4>${mine.length ? `<ul class="plain small">${mine.map(e => `<li>${e.y}: ${e.told ? `<b>${PLACE_LABEL[e.place]}</b>` : 'waiting on the judges'}</li>`).join('')}</ul>` : '<p class="muted small">You haven\'t entered yet.</p>'}` : ''}</section>`;
+}
 function compPanel() {
   const M = S.me, f = UI.compf || 'all', y = yearOf(S.week), scripts = (M.scripts || []).filter(x => x.grade);
   let L = COMPS.slice().sort((a, b) => ((a.month - dateOf(S.week).getUTCMonth() + 12) % 12) - ((b.month - dateOf(S.week).getUTCMonth() + 12) % 12));
@@ -103,12 +111,12 @@ function compPanel() {
   const card = c => {
     const open = compOpen(c), done = compEntered(c), e = (M.comps || []).find(x => x.k === c.k && x.y === y), fits = compFits(c), T = COMP_TIER[c.tier];
     const scSel = c.need === 'script' ? (scripts.length ? sel('comp-sc-' + c.k, scripts.map(s => [String(s.id), `${s.title} (${s.grade})`]), UI['comp-sc-' + c.k] || String(scripts[scripts.length - 1].id)) : '<span class="muted small">Needs a finished script</span>') : '';
-    return `<div class="comp${fits ? ' fits' : ''}"><div class="ch"><b>${esc(c.name)}</b> ${chip(T[0], T[1])}${fits ? ' ' + chip('Fits you', 'good') : ''}</div><p class="small">${esc(c.d)}</p>
+    return `<div class="comp${fits ? ' fits' : ''}"><div class="ch"><b>${compLink(c)}</b> ${chip(T[0], T[1])}${fits ? ' ' + chip('Fits you', 'good') : ''}</div><p class="small">${esc(c.d)}</p>
      <p class="small muted">Closes in ${MON[c.month]} · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''}${c.energy ? ' · a hard weekend' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''} · judged on ${esc(statLabel(c.stat).toLowerCase())}</p>
      ${done ? `<p class="small"><b>Entered.</b> ${e.told ? PLACE_LABEL[e.place] : 'Waiting on the judges.'}</p>` : open ? `<div class="crow">${scSel}${oddsBar(c.stat, c.dc)}<button class="btn-s" data-comp="${c.k}" ${(c.need === 'script' && !scripts.length) || M.cash < usd(c.fee) ? 'disabled' : ''}>Enter</button></div>` : `<p class="small muted">Opens ${MON[(c.month + 11) % 12]}.</p>`}</div>`;
   };
   return `<section class="panel comps"><h3>Competitions</h3><p class="muted small">Entries open the month before each deadline. Your craft sets the odds; the roll on the day decides. Major prizes open doors; the fun ones give you trophies, stories and new friends.</p>
    <div class="fchips">${Object.entries(COMP_CAT).map(([k, l]) => `<button class="fchip${f === k ? ' on' : ''}" data-compf="${k}">${esc(l)}</button>`).join('')}</div>
    <div class="compgrid">${L.map(card).join('')}</div></section>
-   <section class="panel"><h3>Your trophy shelf</h3>${shelf.length ? `<ul class="plain">${shelf.map(e => { const c = COMPS.find(x => x.k === e.k); return `<li>${e.place === 'win' ? '🏆' : e.place === 'runner' ? '🥈' : e.place === 'final' ? '🎖️' : '📜'} <b>${PLACE_LABEL[e.place]}</b>, ${esc(c.name)} <span class="muted small">${e.y}</span></li>`; }).join('')}</ul>` : '<p class="muted">Nothing on the shelf yet.</p>'}</section>`;
+   <section class="panel"><h3>Your trophy shelf</h3>${shelf.length ? `<ul class="plain">${shelf.map(e => { const c = COMPS.find(x => x.k === e.k); return `<li>${e.place === 'win' ? '🏆' : e.place === 'runner' ? '🥈' : e.place === 'final' ? '🎖️' : '📜'} <b>${PLACE_LABEL[e.place]}</b>, ${compLink(c)} <span class="muted small">${e.y}</span></li>`; }).join('')}</ul>` : '<p class="muted">Nothing on the shelf yet.</p>'}</section>`;
 }

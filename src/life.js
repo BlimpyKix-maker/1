@@ -44,13 +44,36 @@ function calOf() {
   if (!M.cal) M.cal = Array.from({ length: 7 }, (_, d) => { const a = (M.plan || [])[d] || 'rest', e = (M.eve || [])[d] || 'home'; return [a, a, OLD_EVE[e] || e]; });
   return M.cal;
 }
-// The plan as it will run: job days take the morning and afternoon of the first weekdays; burnout makes it all rest.
-function planBlocks() {
-  const M = S.me, cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
-  let need = jobDays();
-  for (let d = 0; d < 7 && need > 0; d++, need--) { cal[d][0] = 'work'; cal[d][1] = 'work'; }   // weekdays first, then weekends
-  return M.wk && M.wk.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal;
+// The plan as it will run. Your obligations are fitted in for you: each job gets its own run of days (morning and
+// afternoon, weekdays first, the job with the most days first), and a course gets the study sessions it asks for,
+// placed in the least important free blocks still ahead (rest and nights in before job hunting or writing).
+// Burnout makes it all rest. M.autoOblig === false leaves study placement to you.
+const OBLIG_RANK = { rest: 0, home: 0, read: 1, out: 2, train: 2, hustle: 3, catchup: 3, network: 3, make: 4, write: 4, hunt: 5 };
+const OBLIG_PREF = [[0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [3, 5, 7], [3, 5, 7]];
+function obligations() {
+  const M = S.me, W = M.wk, now = W ? W.day * 3 + W.block : 0;
+  const cal = calOf().map(r => r.map(k => BLOCK_ACTS[k] || (typeof venueAsEvening === 'function' && venueAsEvening(k)) ? k : 'rest'));
+  const job = Array(7).fill(null), forced = {};
+  let d = 0;
+  for (const j of M.jobs.slice().sort((a, b) => b.days - a.days || a.id - b.id)) for (let n = 0; n < j.days && d < 7; n++, d++) { job[d] = j.id; cal[d][0] = 'work'; cal[d][1] = 'work'; }
+  if (M.school && M.autoOblig !== false && typeof schoolProg === 'function') {
+    const need = (schoolProg(M.school) || {}).days || 0, done = W ? studySessionsDone() : 0;
+    let planned = 0; for (let a = now; a < 21; a++) if (cal[Math.floor(a / 3)][a % 3] === 'study') planned++;
+    let short = need - done - planned;
+    if (short > 0) {
+      const C = [];
+      for (let a = now; a < 21; a++) { const dd = Math.floor(a / 3), b = a % 3, k = cal[dd][b]; if (k === 'work' || k === 'study' || (typeof apptAt === 'function' && apptAt(dd, b))) continue; C.push({ dd, b, a, r: (OBLIG_RANK[k] ?? 2) * 10 + OBLIG_PREF[dd][b] }); }
+      C.sort((x, y) => x.r - y.r || x.a - y.a);
+      for (const c of C.slice(0, short)) { cal[c.dd][c.b] = 'study'; forced[c.dd + '-' + c.b] = 1; }
+    }
+  }
+  return { cal: W && W.burnt ? cal.map(() => ['rest', 'rest', 'home']) : cal, job, forced };
 }
+function planBlocks() { return obligations().cal; }
+// whose work day it is: with two part-time jobs, each has its own days
+function workJobOn(d) { const id = obligations().job[d]; return S.me.jobs.find(j => j.id === id) || null; }
+// study sessions this week: lived blocks of study
+function studySessionsDone() { const W = S.me && S.me.wk; return W ? (W.studyB || 0) : (S.me && S.me.studyDone) || 0; }
 function effectivePlan() { return planBlocks().map(r => r[1]); }   // the day's main activity, for older callers
 function countBlocks(k) { return planBlocks().reduce((n, r) => n + r.filter(x => x === k).length, 0); }
 function appSlots() { return countBlocks('hunt') * 3; }
@@ -147,9 +170,9 @@ function runBlock(k) {
     case 'catchup': catchupDay(W.L); break;
     case 'write': writeSession(L, .5); break;
     case 'train': for (const s in CRAFTS[M.train].subs) weekGain(s, .01 * (homeFx().train.includes(M.train) ? 1.4 : 1)); L.push(`A class in ${CRAFTS[M.train].label.toLowerCase()}. ${pickLine(CLASS_LINES, W.day + W.block)}`); break;
-    case 'study': W.studied++; if (M.school) {
+    case 'study': W.studied++; if (M.school) W.studyB = (W.studyB || 0) + 1; if (M.school) {
         for (const s in CRAFTS[M.school.craft].subs) weekGain(s, schoolProg(M.school).grow / 2);
-        const first = !(W.studyD = W.studyD || {})[W.day]; W.studyD[W.day] = 1;
+        (W.studyD = W.studyD || {})[W.day] = 1; const first = true;   // every session is a class
         // every day at school teaches something: the next class on the syllabus goes into your Craft Library
         const id = first && typeof nextClass === 'function' ? nextClass(M.school) || electiveClass(M.school) : null, X = id && lesson(id);
         if (X) { learn(id, 'class', 'B'); const k = X.L[4] && X.L[4][1] && X.L[4][1][1]; if (k && (k in ME().sk || k in ME().mind)) weekGain(k, .05); L.push(`Class: ${X.L[1]} (${X.C.label.toLowerCase()}). ${X.L[3].split('. ')[0]}.`); }
@@ -175,8 +198,8 @@ function sleepNight() {
 }
 // ---- work days ----
 function workDay() {
-  const M = S.me, me = ME(), out = [];
-  for (const j of M.jobs) {
+  const M = S.me, me = ME(), out = [], today = workJobOn(M.wk.day);
+  for (const j of today ? [today] : M.jobs) {
     const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
     out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day * 3 + M.wk.block + j.id)}`);
     if (typeof jobTaskBlock === 'function') jobTaskBlock(j, out);
@@ -236,8 +259,7 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
-  // as many study days as the programme asks for, spread through the week (a day with any study block counts)
-  if (M.school) { const n = clamp((schoolProg(M.school) || {}).days || 2, 1, 5), order = [0, 2, 4, 1, 3]; for (let i = 0; i < n; i++) cal[order[i]][0] = 'study'; }
+  // study sessions are fitted in by obligations() when the week runs
   return cal;
 }
 function setFocus(a) {

@@ -113,7 +113,7 @@ function applySchool(a) {
   if (s[2] !== M.hub && typeof relocate === 'function') relocate(s[2], 'school');
   M.school = { prog: a.prog, craft: a.craft, done: 0, missed: 0, start: S.week, at: s[0], schol: schol ? 1 : 0 };
   milestone(`Accepted to ${s[1]}${schol ? ' on a scholarship' : ''}`, 'school');
-  inbox('news', `You're in: ${s[1]}`, `${P0.label}, ${CRAFTS[a.craft].label.toLowerCase()} track. ${schol ? 'And they\'re paying most of it: a scholarship. ' : ''}Plan ${P0.days} study days a week (any day with a study block counts, and each one teaches a class); four short weeks and you're out.`, { roll: lr });
+  inbox('news', `You're in: ${s[1]}`, `${P0.label}, ${CRAFTS[a.craft].label.toLowerCase()} track. ${schol ? 'And they\'re paying most of it: a scholarship. ' : ''}${P0.days} study sessions a week go into your diary automatically (each one teaches a class); four short weeks and you're out.`, { roll: lr });
   return true;
 }
 // alumni: a famous school opens doors, and classmates become your network
@@ -136,7 +136,7 @@ function schoolsHTML() {
 function schoolPage(s) {
   const M = S.me, wait = M.schoolApp && M.schoolApp[s[0]] !== undefined && S.week - M.schoolApp[s[0]] < 26, alumni = (M.alma || []).includes(s[0]);
   return `<section class="panel jobd"><h3>${esc(s[1])} <button class="linkish" data-schopen="">Close</button></h3><p class="eyebrow">${esc(hubName(s[2]))} · founded ${s[5]} · ${'★'.repeat(4 - s[4])}${alumni ? ' · your alma mater' : ''}</p><p>${esc(s[8])}</p>
-   ${progsAt(s).map(k => { const P0 = SCHOOL_PROGS[k], fee = Math.round(P0.fee * s[7]); return `<div class="course">${typeof syllabusHTML === 'function' ? syllabusHTML(k) : ''}<b>${esc(P0.label)}</b> <span class="muted small">${Math.round(P0.weeks / 40 * 10) / 10} years · ${P0.days} days a week · ${fee ? fmtCash(usd(fee)) + '/wk' : 'no tuition'} · leads to ${esc(DEG_LABEL[P0.deg] || 'a degree')}</span><p class="small">${P0.crafts.map(c => `<button class="btn-s ghost" data-schapply="${s[0]}:${k}:${c}" ${M.school || wait ? 'disabled' : ''}>Apply: ${esc(CRAFTS[c].label)} (DC ${schoolDC(s, c)})</button>`).join(' ')}</p></div>`; }).join('')}
+   ${progsAt(s).map(k => { const P0 = SCHOOL_PROGS[k], fee = Math.round(P0.fee * s[7]); return `<div class="course">${typeof syllabusHTML === 'function' ? syllabusHTML(k) : ''}<b>${esc(P0.label)}</b> <span class="muted small">${Math.round(P0.weeks / 40 * 10) / 10} years · ${P0.days} study sessions a week · ${fee ? fmtCash(usd(fee)) + '/wk' : 'no tuition'} · leads to ${esc(DEG_LABEL[P0.deg] || 'a degree')}</span><p class="small">${P0.crafts.map(c => `<button class="btn-s ghost" data-schapply="${s[0]}:${k}:${c}" ${M.school || wait ? 'disabled' : ''}>Apply: ${esc(CRAFTS[c].label)} (DC ${schoolDC(s, c)})</button>`).join(' ')}</p></div>`; }).join('')}
    <p class="muted small">Applying costs ${fmtCash(usd(s[4] === 1 ? 120 : 60))} and rolls ${['drama', 'music'].some(k => s[3].includes(k)) ? 'Charisma for auditions or Vision for portfolios' : 'Vision for your portfolio'}. Credits, finished work and skill in the craft lower the bar. Beat it by six and you get a scholarship. ${s[2] !== M.hub ? 'Getting in means moving to ' + esc(hubName(s[2])) + '.' : ''}${wait ? ' You applied recently: wait six months.' : ''}</p></section>`;
 }
 function schoolClick(t) {

@@ -614,7 +614,7 @@ function closeWeek(a) {
   const M = S.me, me = ME(), W = M.wk, burnt = W.burnt, L = W.L, gains = W.gains, hunted = W.hunted;
   let energy = M.energy, cashIn = W.cashIn, cashOut = W.cashOut, stress = W.stress;
   const gain = (k, v) => { const g = growSub(me, k, v * learnRate(me)); if (g) gains[k] = (gains[k] || 0) + g; };
-  M.studyDone = Object.keys(W.studyD || {}).length;   // the school checks below run after the week object is cleared
+  M.studyDone = W.studyB || 0;   // the school checks below run after the week object is cleared
   M.wk = null; M.closing = true;
   if (M.spec.pages >= 110) { M.spec.pages -= 110; M.spec.drafts++; L.push(`You finish draft ${M.spec.drafts} of a spec script. It goes in the drawer for when someone asks to read something.`); }
   // jobs

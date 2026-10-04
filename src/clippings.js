@@ -25,14 +25,27 @@ function pressAboutYou(m) {
   if (kind === 'feud' && (M.press || []).some(c => c.kind === 'feud' && S.week - c.w < 26)) return;   // the gossip columns don't run the same story twice
   const r = hashRand(S.week * 31 + (M.milestones || []).length * 7 + me.id), L = PRESS_HEAD[kind];
   const h = L[Math.floor(r() * L.length)].replace('{n}', me.name), paper = PAPERS[Math.floor(r() * PAPERS.length)];
-  (M.press = M.press || []).push({ w: S.week, paper, h, sub: m.t, kind });
+  (M.press = M.press || []).push({ w: S.week, paper, h, sub: m.t, kind, ni: S.news.length });
   if (M.press.length > 60) M.press.shift();
   news(kind === 'prize' ? 'Award' : 'People', `${h}. ${m.t}.`, { person: me.id });
+}
+// the article behind a clipping (older saves didn't keep its index: find it by its headline)
+function clipNi(c) {
+  if (c.ni !== undefined && S.news[c.ni]) return c.ni;
+  for (let i = S.news.length - 1; i >= 0 && S.news[i].w >= c.w; i--) if (S.news[i].w === c.w && S.news[i].text.startsWith(c.h)) return (c.ni = i);
+  return null;
+}
+// Everything the papers have run about someone, newest first, each opening the article.
+function pressAboutHTML(id, n = 8) {
+  const out = [];
+  for (let i = S.news.length - 1; i >= 0 && out.length < n; i--) { const x = S.news[i]; if (x.ref && x.ref.person === id) out.push(i); }
+  if (!out.length) return '';
+  return `<section class="panel"><h3>In the press</h3><ul class="plain">${out.map(i => { const x = S.news[i]; return `<li><span class="muted small">${fmtDate(x.w, true)}</span> ${chip(x.type, 't-' + x.type)} <a href="#" class="lk" data-go="article:${i}">${esc(x.text.length > 140 ? x.text.slice(0, 137) + '…' : x.text)}</a></li>`; }).join('')}</ul></section>`;
 }
 function clippingsHTML() {
   const L = (S.me.press || []).slice().reverse();
   if (!L.length) return '';
-  return `<section class="panel clips"><h3>Press clippings</h3><div class="cliplist">${L.slice(0, 12).map(c => `<div class="clip"><span class="eyebrow">${esc(c.paper)} · ${fmtDate(c.w, true)}</span><b>${esc(c.h)}</b><p class="small muted">${esc(c.sub)}</p></div>`).join('')}</div></section>`;
+  return `<section class="panel clips"><h3>Press clippings</h3><div class="cliplist">${L.slice(0, 12).map(c => `<div class="clip"><span class="eyebrow">${esc(c.paper)} · ${fmtDate(c.w, true)}</span><b>${clipNi(c) !== null ? `<a href="#" class="lk" data-go="article:${clipNi(c)}">${esc(c.h)}</a>` : esc(c.h)}</b><p class="small muted">${linkPrizes(esc(c.sub))}</p></div>`).join('')}</div></section>`;
 }
 // ---- next moves: what would help most right now ----
 function nextMoves() {
@@ -92,6 +105,6 @@ function ambitionWeek() {
 function ambitionsHTML() {
   if (typeof ambFresh === 'function') ambFresh();
   const M = S.me, done = AMBITIONS.filter(A => (M.amb || {})[A.k] !== undefined), next = AMBITIONS.filter(A => (M.amb || {})[A.k] === undefined).slice(0, 3);
-  return `<section class="panel amb"><h3>Ambitions <span class="count">${done.length} of ${AMBITIONS.length}</span></h3>${next.map(A => { const [c, n] = A.p(), pct = clamp(c / n, 0, 1); return `<div class="ambrow"><span>${esc(A.t)}</span><span class="tbar"><i style="width:${Math.round(pct * 100)}%"></i></span><span class="small muted">${A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n) + ' / ' + n}</span></div>`; }).join('')}
+  return `<section class="panel amb"><h3>Ambitions <span class="count">${done.length} of ${AMBITIONS.length}</span></h3>${next.map(A => { const [c, n] = A.p(), pct = clamp(c / n, 0, 1); return `<div class="ambrow"><span>${linkPrizes(esc(A.t))}</span><span class="tbar"><i style="width:${Math.round(pct * 100)}%"></i></span><span class="small muted">${A.money ? fmtCash(Math.min(c, n)) + ' / ' + fmtCash(n) : Math.min(c, n) + ' / ' + n}</span></div>`; }).join('')}
    ${done.length ? `<p class="small muted">Done: ${done.map(A => esc(A.t.toLowerCase())).join(' · ')}</p>` : ''}</section>`;
 }

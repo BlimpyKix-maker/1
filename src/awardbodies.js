@@ -32,7 +32,7 @@ function egofWeek() {
 }
 function egofHTML() {
   const W = egofWins(), M = S.me;
-  return `<section class="panel egof"><h3>The EGOF ${M && M.egof ? '<span class="chip good">Complete</span>' : `<span class="count">${Object.keys(W).length} of 4</span>`}</h3><div class="egofrow">${EGOF.map(([k, n, show, what]) => `<div class="egofc${W[k] ? ' won' : ''}"><b>${k}</b><span>${n}</span><small>${esc(what)}</small><small>${W[k] ? 'Won ' + yearOf(W[k]) : esc(show)}</small></div>`).join('')}</div><p class="muted small">Entertainment's grand slam. Win an Emmet (series and online video), a Gramophone (music), an Oswald (cinema, at the Academy Oswalds) and a Footlight (theatre). It takes several careers' worth of crossing over.</p></section>`;
+  return `<section class="panel egof"><h3>The EGOF ${M && M.egof ? '<span class="chip good">Complete</span>' : `<span class="count">${Object.keys(W).length} of 4</span>`}</h3><div class="egofrow">${EGOF.map(([k, n, show, what]) => `<div class="egofc${W[k] ? ' won' : ''}"><b>${k}</b><span>${n}</span><small>${esc(what)}</small><small>${W[k] ? 'Won ' + yearOf(W[k]) : linkPrizes(esc(show))}</small></div>`).join('')}</div><p class="muted small">Entertainment's grand slam. Win an Emmet (series and online video), a Gramophone (music), an Oswald (cinema, at the Academy Oswalds) and a Footlight (theatre). It takes several careers' worth of crossing over.</p></section>`;
 }
 // ---- the bodies ----
 const BODY_SEEKS = {
@@ -56,6 +56,24 @@ function awardBodies() {
   L.forEach((b, i) => b.id = i);
   AB_FOR = S; AW_IDX = null; return AB_CACHE = L;
 }
+// Any prize named in a piece of (already escaped) text becomes a link to its page: awards lists, timelines,
+// ambitions, trivia, the inbox. Longest names first, and never inside an existing link or tag.
+let PRIZE_RX = null, PRIZE_MAP = null, PRIZE_FOR = null;
+function linkPrizes(html) {
+  if (!html) return html;
+  const B = awardBodies();
+  if (PRIZE_FOR !== B) {
+    const pairs = [];
+    for (const b of B) for (const n of [b.name, b.key, ...(b.alias || [])]) if (n && n.length > 7) pairs.push([esc(n), b.id]);
+    pairs.sort((a, c) => c[0].length - a[0].length);
+    PRIZE_MAP = new Map(); for (const [n, id] of pairs) if (!PRIZE_MAP.has(n)) PRIZE_MAP.set(n, id);
+    PRIZE_RX = new RegExp('(<a[\\s>][\\s\\S]*?</a>|<button[\\s>][\\s\\S]*?</button>|<[^>]+>)|(' + [...PRIZE_MAP.keys()].map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+    PRIZE_FOR = B;
+  }
+  return html.replace(PRIZE_RX, (m, tag, name) => tag ? tag : `<a href="#" class="lk" data-go="award:${PRIZE_MAP.get(name)}">${name}</a>`);
+}
+// the page for a contest in COMPS
+function compLink(c, text) { const b = awardBodies().find(x => x.comp === c.k); return b ? `<a href="#" class="lk" data-go="award:${b.id}">${esc(text || c.name)}</a>` : esc(text || c.name); }
 function bodyWinners(b) {
   const out = [];
   if (b.kind === 'festival' && b.fk && typeof festRecord === 'function') return festRecord(FESTIVALS.find(F => F.k === b.fk));
@@ -79,12 +97,13 @@ function viewAwardBody(id) {
   const b = awardBodies()[id]; if (!b) return '<p>Not found.</p>';
   const W = bodyWinners(b), MON_ = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   const kindL = { ceremony: 'National film awards', festival: 'Film festival', music: 'Music awards', stage: 'Theatre awards', media: 'Screen and audio awards', contest: 'Competition' }[b.kind];
-  const seeks = b.seeks || BODY_SEEKS[b.kind] || BODY_SEEKS.contest;
+  const cc = b.comp && typeof COMPS !== 'undefined' ? COMPS.find(c => c.k === b.comp) : null;
+  const seeks = b.seeks || (cc ? `The judges look for ${statLabel(cc.stat).toLowerCase()} above all. ${cc.tier === 'major' ? 'Hundreds enter; a handful are read past the first round.' : cc.tier === 'fun' ? 'Nobody takes it too seriously, which is the point.' : 'A working jury, a real prize and a crowd that matters.'}` : null) || BODY_SEEKS[b.kind] || BODY_SEEKS.contest;
   const egof = EGOF.find(e => e[2] === b.key);
   return `<div class="head"><p class="eyebrow">${esc(kindL)}${b.founded ? ' · since ' + b.founded : ''} · ${MON_[b.month]}</p><h2>${esc(b.name)}</h2><p class="lede">${esc(b.about || '')}</p></div>${typeof bodyLoreHTML === 'function' ? bodyLoreHTML(b) : ''}
    <div class="cols two"><section class="panel"><h3>What it stands for</h3><p>${esc(seeks)}</p>${b.bar ? `<p class="small">Selection bar: films need to be about <b>${b.bar}/100</b> in quality. Small, independent films get a nudge. Entry fee ${fmtCash(usdW(b.fee))}.</p>` : ''}${b.prize ? `<p class="small">Prize: <b>${fmtCash(usdW(b.prize))}</b> · entry ${fmtCash(usdW(b.fee))} · enter from the Contests tab.</p>` : ''}${egof ? `<p class="small">One of the four EGOF prizes: the <b>${egof[1]}</b>.</p>` : ''}
     <h4>Categories</h4><p>${(typeof bodyCats === 'function' ? bodyCats(b) : b.cats).map(c => `<button class="pill" data-abcat="${esc(c)}">${esc(c)}</button>`).join(' ')}</p><p class="muted small">Prestige ${'★'.repeat(4 - b.prestige)}</p></section>
-   ${b.fk && typeof festivalPage === 'function' ? '</div>' + festivalPage(FESTIVALS.find(F => F.k === b.fk)) + '<div>' : (typeof awardTableHTML === 'function' ? awardTableHTML(b) : '')}</div>`;
+   ${b.comp && typeof contestRulesHTML === 'function' ? contestRulesHTML(COMPS.find(c => c.k === b.comp)) : ''}${b.fk && typeof festivalPage === 'function' ? '</div>' + festivalPage(FESTIVALS.find(F => F.k === b.fk)) + '<div>' : (typeof awardTableHTML === 'function' ? awardTableHTML(b) : '')}</div>`;
 }
 function awardBodiesHTML() {
   const B = awardBodies(), F = UI.abf = UI.abf || 'all', kinds = { all: 'All', ceremony: 'Film awards', festival: 'Festivals', music: 'Music', stage: 'Theatre', media: 'Screens & audio', contest: 'Competitions' };
