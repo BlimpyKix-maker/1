@@ -102,6 +102,14 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/weather.js` | City climates (`CLIMATE`, `RAIN_BY`), `wxDay`, shoot effects (`weatherWeek`), opening-weekend crowds (`wxCrowd`, `wxBoxMul` hooked in `release()`, only once the player exists), Weather app |
 | `src/clapgram.js` | Clapgram (was Flick): feed from real events, stories, explore/follow (`cgFollow`), your posts (`cgPostAct`, action `cgpost`); 25 post kinds (`CG_KIND`: emoji, label, captions, scene emojis, style), `cgFill` placeholders ({city} {mate} {day} {n} {genre} {place} {y}), per-kind comments, suggested posts and ads |
 | `src/tv3.js` | TV pitching ways in (`tvRoutes`), staged development (`tvDevWeek`: script → notes → pilot), `emmetsHTML` (17 categories in `TV_CATS`), `primetimeHTML` |
+| `src/roger2.js` | Roger That browsable: `rtFilters`/`rtFilmTable` (genre, decade, verdict, min critics, sort; header click sorts), critic directory `rtCritics` (`RT_TEMPER`, `RT_WEIGHT`, `criticRecord`), `rtOutlets` |
+| `src/work2.js` | Work page week grid `workWeekHTML`, `fitChip` on board rows, `swapForOffer` (offer choice `swap`) |
+| `src/mine.js` | Your job/school pages: stack kinds `myjob:<id>`, `myschool:0` via `viewMine` (heads of department, cast, company staff; faculty, your year, alumni drawn from the town) |
+| `src/decide.js` | `decisionBoxHTML`: pending decisions in a sticky box at the top of #main (`UI.decI`, `UI.decMin`) |
+| `src/diary2.js` | Diary edits are actions (`calset`); pins (`calpin`, `M.calPins`, applied by `autoCal` via `applyPins`) and saved weeks (`calpreset`, `M.calPresets`) |
+| `src/make2.js` | Scriptwriter suite: tabs desk/story/chars/scenes/pages/punch/notes; action `swedit` (logline, title, char, scene, pages: 180 words = 1 page, 3/day), `punchup`; `fountain()` screenplay formatter |
+| `src/make3.js` | Studio (`st2`, `studioScore`, melody/groove/chord/mix/lyric reads, `st2Play` WebAudio), podcasts (`pod2`), CutRoom (`cut2`, `cutScore2`, thumbnail designer, preview), Notebook (`ideaAct`, sparks), Create hub `makeHubHTML`; `makesave` stores into `M.make.studio` |
+| `src/body.js` | Fitness `M.fit` {mus, mass, goal}: venues build muscle, `fitWeek` drift, role asks (`fitask` inbox, `fitPick`), drawn build via `look._fit` |
 | `src/finance2.js` | One market (`mktRows`, `allMarketHTML`), sourced tips with track records (`tipsThisWeek`, `tipJudge`), `economyHTML`, private banking (securities line `sbl`, angels `angelsOf`/`angelAct`/`takeAngels` used by `selfFund`). Tips: 7 source kinds (`TIP_KIND`), angle-based reasons (`TIP_WHY`, `TIP_ANGLES`, `SECTOR_WHY`). Angels: `ANGEL_KIND` bios, `ANGEL_MOTIVE` (moves `angelDC`), `ANGEL_ASK` terms; success sends an `angeloffer` inbox (accept / haggle cha 14 / pass, `angelPick`), two new angels a year, `angelWeek` outreach every 4 weeks; `M.angelTry` keyed by name|kind |
 | `src/creative.js` | Scriptwriter (beat board `outlineAct`, `scriptSessAct`, coverage), Studio (mix, arrangement, podcast guest/order), CutRoom (clip sets, trims, packaging, predictions) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
@@ -123,6 +131,8 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 ## Art and palette notes
 - `homeSceneSVG` (home.js) draws sky by time of day, a two-layer skyline (`homeSkyline(hub,w,h,night)`), curtains, skirting, light shafts, a vignette; empty floor spots get tier furniture (`ROOM_FILL`, `fillPieceSVG`) and empty walls get clocks/mirrors/prints (`wallFillSVG`). Purely visual: no effects.
 - Portraits: studio backdrops (bokeh, beam, sweep, halo); full-length figures draw the head at 1.12× (`headIn` group) and hands with `figHand`.
+- Full figures get an ink outline (`${uid}ink` filter) and fabric folds; the home scene avatar wanders between activities (`.me-walk`, `data-acts`, interval in home.js).
+- Tables never scroll sideways: `fitTables()` (after render) labels cells and stacks tables too wide for their box. Generic `data-ui`/`data-uiq` controls set `UI[key]` and re-render.
 - The computer's colours are tokens (`--os-*`) set per palette on `:root[data-pal=…]`; don't hard-code blues inside `.os` rules.
 
 ## Tests (run all before publishing)

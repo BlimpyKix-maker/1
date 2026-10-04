@@ -28,12 +28,12 @@ function npcFigure(p, L) {
 // The body, drawn under the head. o: the portrait's list of SVG pieces; cx: the middle; skin and cloth colours.
 function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const b = L.build, top = L.outfit, bot = L.bottoms || 0, shoe = L.shoes || 0, pose = L.pose || 0, bag = L.bag || 0, tat = L.tattoo || 0;
-  const sw = [17, 18, 20, 22, 24, 26, 15, 16, 23, 20][b], ww = [12, 13, 15, 17, 19, 23, 12, 12, 17, 15][b], hp = [14, 15, 17, 19, 21, 25, 14, 14, 18, 22][b];
+  const FT = L._fit || { mus: 0, mass: 0 }, sw = [17, 18, 20, 22, 24, 26, 15, 16, 23, 20][b] + FT.mus * .55 + FT.mass * .3, ww = [12, 13, 15, 17, 19, 23, 12, 12, 17, 15][b] + FT.mass * .85 - FT.mus * .12, hp = [14, 15, 17, 19, 21, 25, 14, 14, 18, 22][b] + FT.mass * .5;
   const sy = 87, wy = 132, hy = 146, legLen = [70, 72, 70, 70, 70, 70, 62, 80, 70, 68][b], fy = hy + legLen, lw = Math.max(5, hp / 2 - 1.5);
   const bc = FIG_COLOURS[L.bottomColour || 0], dkc = mixHex(cloth, '#000', .28), dkb = mixHex(bc, '#000', .3), skinD = mixHex(skin, '#000', .15);
   const lx = cx - hp / 2 - .5, rx = cx + hp / 2 + .5;
   // backdrop shadow
-  o.push(`<ellipse cx="${cx}" cy="${fy + 7}" rx="${hp + 14}" ry="4" fill="#000" opacity=".16"/>`);
+  { const sh = `<ellipse cx="${cx}" cy="${fy + 7}" rx="${hp + 14}" ry="4" fill="#000" opacity=".16"/>`, gi = o.findIndex(x => typeof x === 'string' && x.startsWith('<g filter=')); if (gi >= 0) o.splice(gi, 0, sh); else o.push(sh); }   // under the ink, so it isn't outlined
   // a guitar case or backpack sits behind you
   if (bag === 6) o.push(`<g transform="rotate(14 ${cx + 6} 120)"><path d="M${cx + 2} 70 Q${cx + 14} 66 ${cx + 16} 80 L${cx + 20} 150 Q${cx + 26} 172 ${cx + 10} 178 Q${cx - 6} 172 ${cx} 150 Z" fill="#2B2B2B"/><path d="M${cx + 8} 76 L${cx + 10} 170" stroke="#555" stroke-width="1"/></g>`);
   if (bag === 2) o.push(`<rect x="${cx - sw + 2}" y="${sy + 2}" width="${(sw - 2) * 2}" height="40" rx="8" fill="${mixHex(bc, '#fff', .2)}"/>`);
@@ -79,6 +79,8 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
       9: `<path d="M4 1.5 l.7 1.6 l1.7 .1 l-1.3 1.1 l.4 1.7 l-1.5 -.9 l-1.5 .9 l.4 -1.7 l-1.3 -1.1 l1.7 -.1 z" fill="${pc}"/>` }[pat];
     o.push(`<defs><pattern id="${uid}pt" width="8" height="8" patternUnits="userSpaceOnUse"${pat === 1 || pat === 7 ? ' patternTransform="rotate(90)"' : ''}>${P0}</pattern></defs><path d="${body}" fill="url(#${uid}pt)"/>`); }
   o.push(shadeTop);
+  // fabric folds: a crease at each armpit and two at the waist, so cloth reads as cloth
+  if (top !== 19) o.push(`<path d="M${cx - sw + 5} ${sy + 12} q4 3 6 9 M${cx + sw - 5} ${sy + 12} q-4 3 -6 9 M${cx - ww + 2} ${wy - 4} q5 3 9 2 M${cx + ww - 2} ${wy - 6} q-5 3 -8 3" stroke="${mixHex(top === 19 ? '#F4F2EE' : cloth, '#000', .4)}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".55"/>`);
   // the garment's own details
   if (top === 19) o.push(`<path d="M${cx - ww} 104 L${cx + ww} 104 L${cx + ww + 1} ${wy} L${cx + hp + 1} ${hy + 4} L${cx - hp - 1} ${hy + 4} L${cx - ww - 1} ${wy} Z" fill="${cloth}"/><path d="M${cx - ww + 2} 104 L${cx - sw + 6} ${sy - 3} M${cx + ww - 2} 104 L${cx + sw - 6} ${sy - 3}" stroke="${cloth}" stroke-width="3"/><circle cx="${cx - ww + 3}" cy="106" r="1.3" fill="#E3C27A"/><circle cx="${cx + ww - 3}" cy="106" r="1.3" fill="#E3C27A"/><rect x="${cx - 5}" y="112" width="10" height="8" rx="1" fill="${dkc}"/>`);
   if (top === 13) o.push(`<path d="M${cx + 1} 98 L${cx - 5} 112 L${cx} 112 L${cx - 3} 124 L${cx + 6} 106 L${cx + 1} 106 L${cx + 4} 98 Z" fill="#FFE27A"/><circle cx="${cx}" cy="111" r="11" fill="none" stroke="#FFFFFF" stroke-width="1" opacity=".6"/>`);
@@ -90,7 +92,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (top === 3) o.push(`<path d="M${cx - sw + 4} 104 Q${cx - 6} 106 ${cx - 2} 104 M${cx + 2} 104 Q${cx + 6} 106 ${cx + sw - 4} 104" stroke="${mixHex(cloth, '#fff', .35)}" stroke-width=".8" fill="none"/>`);
   if (top === 10) o.push(`<rect x="${cx - ww - 1}" y="${wy - 2}" width="${ww * 2 + 2}" height="3" fill="${dkc}"/>`);
   // arms: sleeves in the top's colour, short sleeves showing skin
-  const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : top === 11 ? cloth : cloth, aw = [5, 5.5, 6, 6.5, 7, 7.5, 4.8, 5, 7.5, 6.3][b], wide = top === 12 ? 4 : top === 17 ? 2 : 0;
+  const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : top === 11 ? cloth : cloth, aw = [5, 5.5, 6, 6.5, 7, 7.5, 4.8, 5, 7.5, 6.3][b] + FT.mus * .22 + Math.max(0, FT.mass) * .12, wide = top === 12 ? 4 : top === 17 ? 2 : 0;
   const arm = (pts, side) => {
     const [s, e, h] = pts, path = `M${s[0]} ${s[1]} Q${e[0]} ${e[1]} ${h[0]} ${h[1]}`;
     o.push(`<path d="${path}" stroke="${mixHex(short ? skin : sleeve, '#000', .35)}" stroke-width="${aw * 2 + 1.6}" stroke-linecap="round" fill="none"/><path d="${path}" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/>`);

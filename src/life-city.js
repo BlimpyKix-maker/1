@@ -82,6 +82,7 @@ function venueEvening(E) {
   const M = S.me, me = ME(), V = VENUES[E.venue], out = [];
   for (const k in V.grow || {}) { if (k === 'theme') { const v = voiceOf(), t = ppick(THEME_KEYS); v[t] = (v[t] || 0) + .5; } else weekGain(k, V.grow[k]); }
   if (V.body) M.body.stamina = clamp(M.body.stamina + V.body, 1, 20);
+  if (typeof fitVenue === 'function') fitVenue(V);
   const on = whatsOn().find(x => x.venue === E.venue);
   if (on) out.push(`${on.title}. ${on.d}`); else out.push(V.d);
   if (V.check) { const ok = roll(V.check[0], V.check[1]); out.push(ok ? (V.okT || 'Laughs. Real ones. You float home.') : (V.badT || 'Silence, then a cough. You\'ll be back.')); if (V.stake) S.me.cash += usd(ok ? V.stake : -V.stake); if (ok) me.standing = clamp(me.standing + .1, 0, 100); }

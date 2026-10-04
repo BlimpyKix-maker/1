@@ -53,7 +53,7 @@ function npcLook(p) {
   const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
   return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), head: r() < .14 ? 1 + pk(7) : 0, ears: r() < (F ? .45 : .12) ? 1 + pk(3) : 0, mark: r() < .1 ? 1 + pk(4) : 0, neck: r() < .14 ? 1 + pk(5) : 0, wrist: 0, hairline: !F && r() < .45 ? 1 : 0 };
 }
-function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : (typeof npcFigure === 'function' ? npcFigure(p, realLook(p, npcLook(p))) : realLook(p, npcLook(p))); }
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look)), typeof fitShape === 'function' ? { _fit: fitShape() } : {}) : (typeof npcFigure === 'function' ? npcFigure(p, realLook(p, npcLook(p))) : realLook(p, npcLook(p))); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
 let PORTRAIT_UID = 0;
 function portraitSVG(L, age, size = 96, bare = false, fig = false) {
@@ -61,9 +61,9 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   const uid = 'pc' + (++PORTRAIT_UID);
   const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#000000', .18), line = mixHex(skin, '#000000', .38);
   const grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
-  const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
+  const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face] + ((L._fit || {}).mass || 0) * .35, fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
   const jaw = [0, 4, -3, 0, 6, 3, 4, -4, 0, 1][L.face];
-  const bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build], neck = 9 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build];
+  const FT = L._fit || { mus: 0, mass: 0 }, bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build] + FT.mus * .9 + FT.mass * .7, neck = 9 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build] + FT.mus * .35 + Math.max(0, FT.mass) * .15;
   const recede = L.hairline === 1 ? clamp((age - 32) / 30, 0, 1) : 0;
   const cx = 60, cy = 52, top = cy - fh / 2;
   const o = [];
@@ -81,7 +81,9 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/><circle cx="60" cy="40" r="30" fill="#FFFFFF" opacity=".12"/>`);
   }
   // the sitter fills the frame: everything below is drawn a little larger than life
-  o.push(bare || fig ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
+  const ink = mixHex(skin, '#1A1020', .78);
+  if (fig) o.push(`<defs><filter id="${uid}ink" x="-10%" y="-5%" width="120%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="1.1" result="d"/><feFlood flood-color="${ink}"/><feComposite in2="d" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`);
+  o.push(fig ? `<g filter="url(#${uid}ink)">` : bare ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
   // how far the hair reaches, so headwear sits on top of it rather than inside it
   const hairTop0 = top - 3 + recede * 10;
   const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9, 14, 15].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 || L.hair === 12 ? fw / 2 : fw / 2 + 2;
@@ -115,13 +117,13 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   // head
   o.push(headIn);
   o.push(`<ellipse cx="${cx - fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/><ellipse cx="${cx + fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/>`);
-  o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="url(#${uid}f)"/><ellipse cx="${cx}" cy="${cy + fh / 2 + 1}" rx="${fw / 3}" ry="2.5" fill="${shade}" opacity=".35"/>`);
+  o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="url(#${uid}f)" stroke="${line}" stroke-width=".7" stroke-opacity=".55"/><ellipse cx="${cx}" cy="${cy + fh / 2 + 1}" rx="${fw / 3}" ry="2.5" fill="${shade}" opacity=".35"/>`);
   if (L.ears) { const ex2 = fw / 2 + 1, ear = L.ears === 1 ? (x => `<circle cx="${x}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/>`) : L.ears === 2 ? (x => `<circle cx="${x}" cy="${cy + 12}" r="3.2" fill="none" stroke="#D4AF37" stroke-width="1.3"/>`) : L.ears === 3 ? (x => `<path d="M${x} ${cy - 2} l0 6" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round"/>`) : (x => `<circle cx="${x}" cy="${cy + 9}" r="2" fill="#E8F4FF" stroke="#9FC6E8" stroke-width=".8"/>`); o.push(ear(cx - ex2) + (L.ears === 3 ? '' : ear(cx + ex2))); }
   // eyes, brows, nose, mouth
   const ey = cy - 1, ex = fw * .2, ec = LOOK.eyes.opts[L.eyes];
   o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.5" ry="2.5" fill="#FBF8F4"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.5" ry="2.5" fill="#FBF8F4"/><circle cx="${cx - ex}" cy="${ey + .1}" r="2" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey + .1}" r="2" fill="${ec}"/><circle cx="${cx - ex}" cy="${ey + .1}" r="2" fill="none" stroke="${mixHex(ec, '#000', .45)}" stroke-width=".4"/><circle cx="${cx + ex}" cy="${ey + .1}" r="2" fill="none" stroke="${mixHex(ec, '#000', .45)}" stroke-width=".4"/><circle cx="${cx - ex}" cy="${ey + .1}" r=".95" fill="#111"/><circle cx="${cx + ex}" cy="${ey + .1}" r=".95" fill="#111"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><path d="M${cx - ex - 3.4} ${ey - .6} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .6}" stroke="${line}" stroke-width=".9" fill="none"/>`);
   o.push(`<path d="M${cx - ex - 3.4} ${ey - .4} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .4}" stroke="${mixHex(line, '#000', .35)}" stroke-width="1.1" fill="none" stroke-linecap="round"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/>`);
-  o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 4} Q${cx + fw / 2 - 1} ${cy + 10} ${cx + 4} ${cy + fh / 2 - 1} Q${cx + fw / 2 - 6} ${cy + 8} ${cx + fw / 2 - 5} ${cy - 4} Z" fill="${shade}" opacity=".22"/><path d="M${cx - 1.5} ${ey + 9.5} Q${cx + 1} ${ey + 11} ${cx + 3} ${ey + 9.5}" stroke="${shade}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>`);
+  o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 4} Q${cx + fw / 2 - 1} ${cy + 10} ${cx + 4} ${cy + fh / 2 - 1} Q${cx + fw / 2 - 6} ${cy + 8} ${cx + fw / 2 - 5} ${cy - 4} Z" fill="${shade}" opacity=".34"/><path d="M${cx - 1.5} ${ey + 9.5} Q${cx + 1} ${ey + 11} ${cx + 3} ${ey + 9.5}" stroke="${shade}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>`);
   o.push(`<ellipse cx="${cx - ex - 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/><ellipse cx="${cx + ex + 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/>`);
   o.push(`<path d="M${cx - ex - 4} ${ey - 5} Q${cx - ex} ${ey - 7} ${cx - ex + 4} ${ey - 5} M${cx + ex - 4} ${ey - 5} Q${cx + ex} ${ey - 7} ${cx + ex + 4} ${ey - 5}" stroke="${mixHex(hc, '#000', .2)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
   o.push(`<path d="M${cx + .5} ${ey + 2.5} Q${cx - 2} ${ey + 8.5} ${cx + .5} ${ey + 9.6}" stroke="${line}" stroke-width=".85" fill="none" opacity=".75" stroke-linecap="round"/><circle cx="${cx - 2}" cy="${ey + 9.8}" r=".7" fill="${line}" opacity=".55"/><circle cx="${cx + 2.4}" cy="${ey + 9.8}" r=".7" fill="${line}" opacity=".55"/>`);
@@ -158,7 +160,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     16: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/><circle cx="${cx - fw / 2 + 2}" cy="${hairTop - 5}" r="6" fill="${hc}"/><circle cx="${cx + fw / 2 - 2}" cy="${hairTop - 5}" r="6" fill="${hc}"/>`,
     17: `<path d="M${cx - fw / 2} ${cy - 5} Q${cx - fw / 2 - 1} ${hairTop - 4} ${cx + 2} ${hairTop - 5} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2} ${cy - 5} Q${cx} ${hairTop + 2} ${cx - fw / 2} ${cy - 5} Z" fill="${hc}"/><path d="M${cx - 8} ${hairTop - 1} Q${cx} ${hairTop - 4} ${cx + 9} ${hairTop}" stroke="#FFFFFF" stroke-width="1" opacity=".35" fill="none"/>`
   };
-  if (hairs[L.hair]) o.push(hairOpen + hairs[L.hair] + ([2, 3, 4, 7, 8, 9, 13, 15].includes(L.hair) ? `<path d="M${cx - fw / 4} ${hairTop + 1} Q${cx} ${hairTop - 3} ${cx + fw / 4} ${hairTop + 1}" stroke="#FFFFFF" stroke-width="2" opacity=".22" fill="none" stroke-linecap="round"/>` : '') + hairClose);
+  if (hairs[L.hair]) o.push(hairOpen + `<g stroke="${mixHex(hc, '#000', .5)}" stroke-width=".6" stroke-opacity=".7">` + hairs[L.hair] + '</g>' + ([2, 3, 4, 7, 8, 9, 13, 15].includes(L.hair) ? `<path d="M${cx - fw / 4} ${hairTop + 1} Q${cx} ${hairTop - 3} ${cx + fw / 4} ${hairTop + 1}" stroke="#FFFFFF" stroke-width="2" opacity=".22" fill="none" stroke-linecap="round"/>` : '') + hairClose);
   // headwear
   // headwear, sized to the hair underneath
   const capC = cloth, dk = mixHex(cloth, '#000', .3);

@@ -979,6 +979,16 @@ td.pinned { box-shadow: inset 0 0 0 1px var(--gold); border-radius: 6px; }
 .nb-spark { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 10px 0; padding: 8px 12px; border-radius: 10px; background: color-mix(in srgb, var(--gold) 12%, transparent); }
 .nb-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 10px; margin: 8px 0; } .nb-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel); display: grid; gap: 4px; } .nb-card.used { opacity: .7; } .nb-card header { display: flex; gap: 8px; align-items: center; font-size: 12px; } .nb-card header span { flex: 1; } .nb-card p { margin: 0; } .nb-card footer { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .mh-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr)); gap: 10px; } .mh-c { all: unset; cursor: pointer; box-sizing: border-box; display: grid; gap: 3px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); } .mh-c:hover { border-color: var(--accent); } .mh-c span { font-size: 26px; } .mh-c small { color: var(--muted); font-size: 12px; } .mh-c em { font-style: normal; font-size: 12px; color: var(--accent); }
+
+/* the avatar at home */
+.home-scene .me-walk { transition: transform 2.4s ease-in-out; } .home-scene .me-bub { transition: opacity .4s ease; }
+.home-scene .me-walk.walking .me-bob { animation: mebob .45s ease-in-out infinite alternate; }
+@keyframes mebob { from { transform: translateY(0); } to { transform: translateY(-2.5px); } }
+@media (prefers-reduced-motion: reduce) { .home-scene .me-walk { transition: none; } .home-scene .me-walk.walking .me-bob { animation: none; } }
+
+.os-body a, .os-body .lk, .os-body li, .os-body p { overflow-wrap: anywhere; }
+.decbox { padding: 8px 12px; } .dec-body .mh b { font-size: 15px; } .dec-body p { margin: 2px 0 6px; font-size: 13.5px; } .decbox .choice { padding: 6px 10px; min-height: 0; } .decbox .golinks { margin: 4px 0 0; font-size: 12px; }
+@media (max-width: 760px) { .decbox { top: 0; max-height: 45vh; } }
 </style>
 
 <header class="slate"><div class="slate-in">
@@ -11441,6 +11451,7 @@ function closeWeek(a) {
   if (typeof slateWeek === 'function') slateWeek();
   if (typeof finWeek === 'function') finWeek();
   if (typeof angelWeek === 'function') angelWeek();
+  if (typeof fitWeek === 'function') fitWeek();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -11505,6 +11516,7 @@ function takeJob(post) {
   diary(`You start as ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}.`);
   if (!M.past.length && M.jobs.length === 1) milestone(`First job in the business: ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`, 'work');
   else if (post.tier >= 2 && f) milestone(`Hired as ${post.t.toLowerCase()} on ${f.title}`, 'work');
+  if (typeof fitJobHook === 'function') fitJobHook(post);
 }
 // Moving city for work: your contacts come with you (on the phone, at least); your home and the board don't.
 function relocate(hub, why) {
@@ -11742,6 +11754,7 @@ function resolvePick(it, k) {
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (typeof angelPick === 'function' && angelPick(it, k)) return true;
+  if (typeof fitPick === 'function' && fitPick(it, k)) return true;
   if (socialPick(it, k)) return true;
   if (dealPick(it, k)) return true;
   if (bidPick(it, k)) return true;
@@ -11949,7 +11962,7 @@ function npcLook(p) {
   const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
   return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), head: r() < .14 ? 1 + pk(7) : 0, ears: r() < (F ? .45 : .12) ? 1 + pk(3) : 0, mark: r() < .1 ? 1 + pk(4) : 0, neck: r() < .14 ? 1 + pk(5) : 0, wrist: 0, hairline: !F && r() < .45 ? 1 : 0 };
 }
-function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : (typeof npcFigure === 'function' ? npcFigure(p, realLook(p, npcLook(p))) : realLook(p, npcLook(p))); }
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look)), typeof fitShape === 'function' ? { _fit: fitShape() } : {}) : (typeof npcFigure === 'function' ? npcFigure(p, realLook(p, npcLook(p))) : realLook(p, npcLook(p))); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
 let PORTRAIT_UID = 0;
 function portraitSVG(L, age, size = 96, bare = false, fig = false) {
@@ -11957,9 +11970,9 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   const uid = 'pc' + (++PORTRAIT_UID);
   const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#000000', .18), line = mixHex(skin, '#000000', .38);
   const grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
-  const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
+  const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face] + ((L._fit || {}).mass || 0) * .35, fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
   const jaw = [0, 4, -3, 0, 6, 3, 4, -4, 0, 1][L.face];
-  const bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build], neck = 9 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build];
+  const FT = L._fit || { mus: 0, mass: 0 }, bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build] + FT.mus * .9 + FT.mass * .7, neck = 9 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build] + FT.mus * .35 + Math.max(0, FT.mass) * .15;
   const recede = L.hairline === 1 ? clamp((age - 32) / 30, 0, 1) : 0;
   const cx = 60, cy = 52, top = cy - fh / 2;
   const o = [];
@@ -11977,7 +11990,9 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/><circle cx="60" cy="40" r="30" fill="#FFFFFF" opacity=".12"/>`);
   }
   // the sitter fills the frame: everything below is drawn a little larger than life
-  o.push(bare || fig ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
+  const ink = mixHex(skin, '#1A1020', .78);
+  if (fig) o.push(`<defs><filter id="${uid}ink" x="-10%" y="-5%" width="120%" height="110%"><feMorphology in="SourceAlpha" operator="dilate" radius="1.1" result="d"/><feFlood flood-color="${ink}"/><feComposite in2="d" operator="in" result="o"/><feMerge><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`);
+  o.push(fig ? `<g filter="url(#${uid}ink)">` : bare ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
   // how far the hair reaches, so headwear sits on top of it rather than inside it
   const hairTop0 = top - 3 + recede * 10;
   const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9, 14, 15].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 || L.hair === 12 ? fw / 2 : fw / 2 + 2;
@@ -12011,13 +12026,13 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   // head
   o.push(headIn);
   o.push(`<ellipse cx="${cx - fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/><ellipse cx="${cx + fw / 2}" cy="${cy + 2}" rx="4" ry="6" fill="${shade}"/>`);
-  o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="url(#${uid}f)"/><ellipse cx="${cx}" cy="${cy + fh / 2 + 1}" rx="${fw / 3}" ry="2.5" fill="${shade}" opacity=".35"/>`);
+  o.push(`<path d="M${cx - fw / 2} ${cy - 6} Q${cx - fw / 2} ${top} ${cx} ${top} Q${cx + fw / 2} ${top} ${cx + fw / 2} ${cy - 6} L${cx + fw / 2 - 1} ${cy + 8} Q${cx + fw / 2 - 4 - jaw} ${cy + fh / 2} ${cx} ${cy + fh / 2} Q${cx - fw / 2 + 4 + jaw} ${cy + fh / 2} ${cx - fw / 2 + 1} ${cy + 8} Z" fill="url(#${uid}f)" stroke="${line}" stroke-width=".7" stroke-opacity=".55"/><ellipse cx="${cx}" cy="${cy + fh / 2 + 1}" rx="${fw / 3}" ry="2.5" fill="${shade}" opacity=".35"/>`);
   if (L.ears) { const ex2 = fw / 2 + 1, ear = L.ears === 1 ? (x => `<circle cx="${x}" cy="${cy + 9}" r="1.6" fill="#D4AF37"/>`) : L.ears === 2 ? (x => `<circle cx="${x}" cy="${cy + 12}" r="3.2" fill="none" stroke="#D4AF37" stroke-width="1.3"/>`) : L.ears === 3 ? (x => `<path d="M${x} ${cy - 2} l0 6" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round"/>`) : (x => `<circle cx="${x}" cy="${cy + 9}" r="2" fill="#E8F4FF" stroke="#9FC6E8" stroke-width=".8"/>`); o.push(ear(cx - ex2) + (L.ears === 3 ? '' : ear(cx + ex2))); }
   // eyes, brows, nose, mouth
   const ey = cy - 1, ex = fw * .2, ec = LOOK.eyes.opts[L.eyes];
   o.push(`<ellipse cx="${cx - ex}" cy="${ey}" rx="3.5" ry="2.5" fill="#FBF8F4"/><ellipse cx="${cx + ex}" cy="${ey}" rx="3.5" ry="2.5" fill="#FBF8F4"/><circle cx="${cx - ex}" cy="${ey + .1}" r="2" fill="${ec}"/><circle cx="${cx + ex}" cy="${ey + .1}" r="2" fill="${ec}"/><circle cx="${cx - ex}" cy="${ey + .1}" r="2" fill="none" stroke="${mixHex(ec, '#000', .45)}" stroke-width=".4"/><circle cx="${cx + ex}" cy="${ey + .1}" r="2" fill="none" stroke="${mixHex(ec, '#000', .45)}" stroke-width=".4"/><circle cx="${cx - ex}" cy="${ey + .1}" r=".95" fill="#111"/><circle cx="${cx + ex}" cy="${ey + .1}" r=".95" fill="#111"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".5" fill="#fff"/><path d="M${cx - ex - 3.4} ${ey - .6} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .6}" stroke="${line}" stroke-width=".9" fill="none"/>`);
   o.push(`<path d="M${cx - ex - 3.4} ${ey - .4} Q${cx - ex} ${ey - 3} ${cx - ex + 3.4} ${ey - .6} M${cx + ex - 3.4} ${ey - .6} Q${cx + ex} ${ey - 3} ${cx + ex + 3.4} ${ey - .4}" stroke="${mixHex(line, '#000', .35)}" stroke-width="1.1" fill="none" stroke-linecap="round"/><circle cx="${cx - ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/><circle cx="${cx + ex + .7}" cy="${ey - .7}" r=".55" fill="#fff"/>`);
-  o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 4} Q${cx + fw / 2 - 1} ${cy + 10} ${cx + 4} ${cy + fh / 2 - 1} Q${cx + fw / 2 - 6} ${cy + 8} ${cx + fw / 2 - 5} ${cy - 4} Z" fill="${shade}" opacity=".22"/><path d="M${cx - 1.5} ${ey + 9.5} Q${cx + 1} ${ey + 11} ${cx + 3} ${ey + 9.5}" stroke="${shade}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>`);
+  o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 4} Q${cx + fw / 2 - 1} ${cy + 10} ${cx + 4} ${cy + fh / 2 - 1} Q${cx + fw / 2 - 6} ${cy + 8} ${cx + fw / 2 - 5} ${cy - 4} Z" fill="${shade}" opacity=".34"/><path d="M${cx - 1.5} ${ey + 9.5} Q${cx + 1} ${ey + 11} ${cx + 3} ${ey + 9.5}" stroke="${shade}" stroke-width="1.4" fill="none" opacity=".5" stroke-linecap="round"/>`);
   o.push(`<ellipse cx="${cx - ex - 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/><ellipse cx="${cx + ex + 2}" cy="${ey + 7}" rx="4" ry="2.4" fill="#E07A6A" opacity=".1"/>`);
   o.push(`<path d="M${cx - ex - 4} ${ey - 5} Q${cx - ex} ${ey - 7} ${cx - ex + 4} ${ey - 5} M${cx + ex - 4} ${ey - 5} Q${cx + ex} ${ey - 7} ${cx + ex + 4} ${ey - 5}" stroke="${mixHex(hc, '#000', .2)}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`);
   o.push(`<path d="M${cx + .5} ${ey + 2.5} Q${cx - 2} ${ey + 8.5} ${cx + .5} ${ey + 9.6}" stroke="${line}" stroke-width=".85" fill="none" opacity=".75" stroke-linecap="round"/><circle cx="${cx - 2}" cy="${ey + 9.8}" r=".7" fill="${line}" opacity=".55"/><circle cx="${cx + 2.4}" cy="${ey + 9.8}" r=".7" fill="${line}" opacity=".55"/>`);
@@ -12054,7 +12069,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     16: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/><circle cx="${cx - fw / 2 + 2}" cy="${hairTop - 5}" r="6" fill="${hc}"/><circle cx="${cx + fw / 2 - 2}" cy="${hairTop - 5}" r="6" fill="${hc}"/>`,
     17: `<path d="M${cx - fw / 2} ${cy - 5} Q${cx - fw / 2 - 1} ${hairTop - 4} ${cx + 2} ${hairTop - 5} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2} ${cy - 5} Q${cx} ${hairTop + 2} ${cx - fw / 2} ${cy - 5} Z" fill="${hc}"/><path d="M${cx - 8} ${hairTop - 1} Q${cx} ${hairTop - 4} ${cx + 9} ${hairTop}" stroke="#FFFFFF" stroke-width="1" opacity=".35" fill="none"/>`
   };
-  if (hairs[L.hair]) o.push(hairOpen + hairs[L.hair] + ([2, 3, 4, 7, 8, 9, 13, 15].includes(L.hair) ? `<path d="M${cx - fw / 4} ${hairTop + 1} Q${cx} ${hairTop - 3} ${cx + fw / 4} ${hairTop + 1}" stroke="#FFFFFF" stroke-width="2" opacity=".22" fill="none" stroke-linecap="round"/>` : '') + hairClose);
+  if (hairs[L.hair]) o.push(hairOpen + `<g stroke="${mixHex(hc, '#000', .5)}" stroke-width=".6" stroke-opacity=".7">` + hairs[L.hair] + '</g>' + ([2, 3, 4, 7, 8, 9, 13, 15].includes(L.hair) ? `<path d="M${cx - fw / 4} ${hairTop + 1} Q${cx} ${hairTop - 3} ${cx + fw / 4} ${hairTop + 1}" stroke="#FFFFFF" stroke-width="2" opacity=".22" fill="none" stroke-linecap="round"/>` : '') + hairClose);
   // headwear
   // headwear, sized to the hair underneath
   const capC = cloth, dk = mixHex(cloth, '#000', .3);
@@ -12265,7 +12280,20 @@ function homeSceneSVG(day) {
   if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
   o.push(roomGlowSVG(RS, life, night), roomExtraSVG(RS, life));
   // you, standing in it, with a shadow
-  o.push(`<ellipse cx="203" cy="175" rx="24" ry="3.5" fill="#000" opacity=".22"/><g transform="translate(173 54)">${portraitSVG(lookOf(me), S.year - me.born, 122, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
+  // what you might be doing around the place: each spot is [shift from the middle, what's in the bubble, what it is]
+  const acts = [[0, '', 'Standing about']], at = id => { const sp = lay[id] && spots.find(x => x.id === lay[id]); return sp ? sp.x : null; };
+  if (at('desk') !== null) acts.push([at('desk') - 168, '✍️', 'Writing at the desk']);
+  if (at('records') !== null) acts.push([at('records') - 160, '🎧', 'Listening to records']);
+  if (at('coffee') !== null) acts.push([at('coffee') - 168, '☕', 'Making coffee']);
+  if (at('shelf') !== null) acts.push([at('shelf') - 160, '📚', 'Pulling a script off the shelf']);
+  if (at('camera') !== null) acts.push([at('camera') - 168, '🎥', 'Fiddling with the camera']);
+  if (at('plant') !== null || life !== 'couch') acts.push([(at('plant') ?? wx + 8) - 168, '🪴', 'Watering the plants']);
+  acts.push([wx + ww / 2 - 203, night ? '🌙' : '🌆', 'Looking out of the window']);
+  acts.push([life === 'couch' ? -110 : -150, '📖', life === 'couch' ? 'Reading on the couch' : 'Reading in bed']);
+  if (life !== 'couch') acts.push([10, '🧘', 'Stretching on the rug']);
+  acts.push([-20, '📱', 'Scrolling Clapgram']);
+  const okA = acts.filter(a => 173 + a[0] > -10 && 173 + a[0] < 330);
+  o.push(`<g class="me-walk" data-acts='${esc(JSON.stringify(okA))}'><ellipse cx="203" cy="175" rx="24" ry="3.5" fill="#000" opacity=".22"/><g class="me-bob"><g transform="translate(173 54)">${portraitSVG(lookOf(me), S.year - me.born, 122, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g></g><g class="me-bub" transform="translate(214 48)" opacity="0"><rect x="-2" y="-14" width="22" height="18" rx="9" fill="#FFFFFF" stroke="#00000022"/><path d="M2 3 l-4 6 l8 -4 z" fill="#FFFFFF"/><text x="9" y="0" font-size="12" text-anchor="middle">·</text></g></g>`);
   o.push(`<rect width="400" height="180" fill="url(#hs-side)"/>`);
   if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".34"/><circle cx="${lx}" cy="60" r="70" fill="#FFE9A8" opacity=".1"/>`);
   else if (d >= 3) o.push(`<rect width="400" height="180" fill="#FF9E5E" opacity=".07"/>`);
@@ -12317,6 +12345,24 @@ function roomStyleHTML() {
   const RS = (S.me.home && S.me.home.style) || {};
   return `<h4>Make it yours</h4><div class="looks">${Object.entries(ROOM_STYLE).map(([k, R]) => { const v = RS[k] || 0, sw = k === 'paint';
     return `<div class="lk-row"><span class="muted">${R.label}</span>${sw ? `<span class="sw">${R.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${i ? o : 'repeating-linear-gradient(45deg,#ddd 0 4px,#fff 4px 8px)'}" data-rstyle="${k}:${i}" title="${i ? '' : 'As it came'}"></button>`).join('')}</span>` : `<span class="rsb">${R.opts.map((o, i) => `<button class="pill${i === v ? ' on' : ''}" data-rstyle="${k}:${i}">${esc(o)}</button>`).join('')}</span>`}</div>`; }).join('')}</div>`;
+}
+
+// The avatar lives in the room: every few seconds they wander to something and do it for a while. Purely visual,
+// skipped for people who prefer reduced motion.
+if (typeof window !== 'undefined' && typeof document !== 'undefined' && window.setInterval && document.querySelector) {
+  let roomT = 0;
+  window.setInterval(() => {
+    const g = document.querySelector('svg.home-scene .me-walk'); if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    roomT++; if (g.dataset.busy && roomT % 3) return;   // stay a while once you get there
+    let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (A.length < 2) return;
+    const cur = +(g.dataset.i || 0); let i = Math.floor(Math.random() * A.length); if (i === cur) i = (i + 1) % A.length;
+    const [dx, em, what] = A[i], bub = g.querySelector('.me-bub'), prev = +(g.dataset.dx || 0);
+    g.dataset.i = i; g.dataset.dx = dx; g.dataset.busy = '';
+    g.classList.add('walking'); g.classList.toggle('left', dx < prev);
+    g.style.transform = `translateX(${dx}px)`;
+    if (bub) bub.setAttribute('opacity', '0');
+    setTimeout(() => { g.classList.remove('walking'); g.dataset.busy = '1'; if (bub && em) { bub.querySelector('text').textContent = em; bub.setAttribute('opacity', '1'); } const t = g.closest('svg'); if (t) t.setAttribute('aria-label', 'Your place: ' + what.toLowerCase()); }, 2400);
+  }, 2600);
 }
 // </home>
 // <career-depth>
@@ -13467,6 +13513,7 @@ function venueEvening(E) {
   const M = S.me, me = ME(), V = VENUES[E.venue], out = [];
   for (const k in V.grow || {}) { if (k === 'theme') { const v = voiceOf(), t = ppick(THEME_KEYS); v[t] = (v[t] || 0) + .5; } else weekGain(k, V.grow[k]); }
   if (V.body) M.body.stamina = clamp(M.body.stamina + V.body, 1, 20);
+  if (typeof fitVenue === 'function') fitVenue(V);
   const on = whatsOn().find(x => x.venue === E.venue);
   if (on) out.push(`${on.title}. ${on.d}`); else out.push(V.d);
   if (V.check) { const ok = roll(V.check[0], V.check[1]); out.push(ok ? (V.okT || 'Laughs. Real ones. You float home.') : (V.badT || 'Silence, then a cough. You\'ll be back.')); if (V.stake) S.me.cash += usd(ok ? V.stake : -V.stake); if (ok) me.standing = clamp(me.standing + .1, 0, 100); }
@@ -19065,12 +19112,12 @@ function hubAlerts() {
   const pend = pending().length; if (pend) add('⚖️', `${pend} decision${pend > 1 ? 's' : ''} waiting`, 'feed', 'bad');
   const offers = (M.mail || []).filter(m => m.act && !m.done && S.week - m.w < 4);
   for (const m of offers.slice(0, 2)) add('✉️', `${m.subj} (${m.from.split(',')[0]})`, `computer:mail:${m.id}`, 'good');
-  const stk = typeof pendingStakes === 'function' ? pendingStakes().length : 0; if (stk) add('⏳', `${stk} text${stk > 1 ? 's' : ''} that need an answer`, 'phone', 'bad');
+  const stk = typeof pendingStakes === 'function' ? pendingStakes().length : 0; if (stk) add('⏳', `${stk} text${stk > 1 ? 's that need' : ' that needs'} an answer`, 'phone', 'bad');
   const unread = phoneUnread(); if (unread) add('💬', `${unread} unread text${unread > 1 ? 's' : ''}`, 'phone');
   const cl = typeof ambClaimable === 'function' ? ambClaimable() : []; if (cl.length) add('✦', `${cl.length} reward${cl.length > 1 ? 's' : ''} to claim`, 'standing', 'good');
   if (M.make && M.make.ready) add('🎵', `${M.make.title || 'Your work'} is ready to release`, 'create', 'good');
   const fits = M.board.filter(p => !blockedFrom(tmplOf(p)) && hireOdds(p) >= .35 && S.week - (p.w || 0) <= 1).length; if (fits && !M.jobs.length && lookingForWork()) add('💼', `${fits} new job${fits > 1 ? 's' : ''} you could get`, 'work');
-  if (typeof COMPS !== 'undefined') { const c = COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length; if (c) add('🏆', `${c} contest${c > 1 ? 's' : ''} open that fit you`, 'compete'); }
+  if (typeof COMPS !== 'undefined') { const c = COMPS.filter(c => compOpen(c) && !compEntered(c) && compFits(c)).length; if (c) add('🏆', `${c} contest${c > 1 ? 's open that fit' : ' open that fits'} you`, 'compete'); }
   if (M.energy < 30) add('🔋', `Energy ${Math.round(M.energy)}: plan some rest`, 'diary', 'bad');
   if (M.cash < usd(ORIGIN.life[M.life].rent) * 2) add('💸', `Money's tight: ${fmtCash(M.cash)}`, 'diary', 'bad');
   return out;
@@ -28778,12 +28825,12 @@ function npcFigure(p, L) {
 // The body, drawn under the head. o: the portrait's list of SVG pieces; cx: the middle; skin and cloth colours.
 function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const b = L.build, top = L.outfit, bot = L.bottoms || 0, shoe = L.shoes || 0, pose = L.pose || 0, bag = L.bag || 0, tat = L.tattoo || 0;
-  const sw = [17, 18, 20, 22, 24, 26, 15, 16, 23, 20][b], ww = [12, 13, 15, 17, 19, 23, 12, 12, 17, 15][b], hp = [14, 15, 17, 19, 21, 25, 14, 14, 18, 22][b];
+  const FT = L._fit || { mus: 0, mass: 0 }, sw = [17, 18, 20, 22, 24, 26, 15, 16, 23, 20][b] + FT.mus * .55 + FT.mass * .3, ww = [12, 13, 15, 17, 19, 23, 12, 12, 17, 15][b] + FT.mass * .85 - FT.mus * .12, hp = [14, 15, 17, 19, 21, 25, 14, 14, 18, 22][b] + FT.mass * .5;
   const sy = 87, wy = 132, hy = 146, legLen = [70, 72, 70, 70, 70, 70, 62, 80, 70, 68][b], fy = hy + legLen, lw = Math.max(5, hp / 2 - 1.5);
   const bc = FIG_COLOURS[L.bottomColour || 0], dkc = mixHex(cloth, '#000', .28), dkb = mixHex(bc, '#000', .3), skinD = mixHex(skin, '#000', .15);
   const lx = cx - hp / 2 - .5, rx = cx + hp / 2 + .5;
   // backdrop shadow
-  o.push(`<ellipse cx="${cx}" cy="${fy + 7}" rx="${hp + 14}" ry="4" fill="#000" opacity=".16"/>`);
+  { const sh = `<ellipse cx="${cx}" cy="${fy + 7}" rx="${hp + 14}" ry="4" fill="#000" opacity=".16"/>`, gi = o.findIndex(x => typeof x === 'string' && x.startsWith('<g filter=')); if (gi >= 0) o.splice(gi, 0, sh); else o.push(sh); }   // under the ink, so it isn't outlined
   // a guitar case or backpack sits behind you
   if (bag === 6) o.push(`<g transform="rotate(14 ${cx + 6} 120)"><path d="M${cx + 2} 70 Q${cx + 14} 66 ${cx + 16} 80 L${cx + 20} 150 Q${cx + 26} 172 ${cx + 10} 178 Q${cx - 6} 172 ${cx} 150 Z" fill="#2B2B2B"/><path d="M${cx + 8} 76 L${cx + 10} 170" stroke="#555" stroke-width="1"/></g>`);
   if (bag === 2) o.push(`<rect x="${cx - sw + 2}" y="${sy + 2}" width="${(sw - 2) * 2}" height="40" rx="8" fill="${mixHex(bc, '#fff', .2)}"/>`);
@@ -28829,6 +28876,8 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
       9: `<path d="M4 1.5 l.7 1.6 l1.7 .1 l-1.3 1.1 l.4 1.7 l-1.5 -.9 l-1.5 .9 l.4 -1.7 l-1.3 -1.1 l1.7 -.1 z" fill="${pc}"/>` }[pat];
     o.push(`<defs><pattern id="${uid}pt" width="8" height="8" patternUnits="userSpaceOnUse"${pat === 1 || pat === 7 ? ' patternTransform="rotate(90)"' : ''}>${P0}</pattern></defs><path d="${body}" fill="url(#${uid}pt)"/>`); }
   o.push(shadeTop);
+  // fabric folds: a crease at each armpit and two at the waist, so cloth reads as cloth
+  if (top !== 19) o.push(`<path d="M${cx - sw + 5} ${sy + 12} q4 3 6 9 M${cx + sw - 5} ${sy + 12} q-4 3 -6 9 M${cx - ww + 2} ${wy - 4} q5 3 9 2 M${cx + ww - 2} ${wy - 6} q-5 3 -8 3" stroke="${mixHex(top === 19 ? '#F4F2EE' : cloth, '#000', .4)}" stroke-width=".8" fill="none" stroke-linecap="round" opacity=".55"/>`);
   // the garment's own details
   if (top === 19) o.push(`<path d="M${cx - ww} 104 L${cx + ww} 104 L${cx + ww + 1} ${wy} L${cx + hp + 1} ${hy + 4} L${cx - hp - 1} ${hy + 4} L${cx - ww - 1} ${wy} Z" fill="${cloth}"/><path d="M${cx - ww + 2} 104 L${cx - sw + 6} ${sy - 3} M${cx + ww - 2} 104 L${cx + sw - 6} ${sy - 3}" stroke="${cloth}" stroke-width="3"/><circle cx="${cx - ww + 3}" cy="106" r="1.3" fill="#E3C27A"/><circle cx="${cx + ww - 3}" cy="106" r="1.3" fill="#E3C27A"/><rect x="${cx - 5}" y="112" width="10" height="8" rx="1" fill="${dkc}"/>`);
   if (top === 13) o.push(`<path d="M${cx + 1} 98 L${cx - 5} 112 L${cx} 112 L${cx - 3} 124 L${cx + 6} 106 L${cx + 1} 106 L${cx + 4} 98 Z" fill="#FFE27A"/><circle cx="${cx}" cy="111" r="11" fill="none" stroke="#FFFFFF" stroke-width="1" opacity=".6"/>`);
@@ -28840,7 +28889,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (top === 3) o.push(`<path d="M${cx - sw + 4} 104 Q${cx - 6} 106 ${cx - 2} 104 M${cx + 2} 104 Q${cx + 6} 106 ${cx + sw - 4} 104" stroke="${mixHex(cloth, '#fff', .35)}" stroke-width=".8" fill="none"/>`);
   if (top === 10) o.push(`<rect x="${cx - ww - 1}" y="${wy - 2}" width="${ww * 2 + 2}" height="3" fill="${dkc}"/>`);
   // arms: sleeves in the top's colour, short sleeves showing skin
-  const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : top === 11 ? cloth : cloth, aw = [5, 5.5, 6, 6.5, 7, 7.5, 4.8, 5, 7.5, 6.3][b], wide = top === 12 ? 4 : top === 17 ? 2 : 0;
+  const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : top === 11 ? cloth : cloth, aw = [5, 5.5, 6, 6.5, 7, 7.5, 4.8, 5, 7.5, 6.3][b] + FT.mus * .22 + Math.max(0, FT.mass) * .12, wide = top === 12 ? 4 : top === 17 ? 2 : 0;
   const arm = (pts, side) => {
     const [s, e, h] = pts, path = `M${s[0]} ${s[1]} Q${e[0]} ${e[1]} ${h[0]} ${h[1]}`;
     o.push(`<path d="${path}" stroke="${mixHex(short ? skin : sleeve, '#000', .35)}" stroke-width="${aw * 2 + 1.6}" stroke-linecap="round" fill="none"/><path d="${path}" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/>`);
@@ -31386,6 +31435,58 @@ function makeSaveAct(a) {
   return true;
 }
 // </make3>
+// <body>
+// ---------------- Your body, over time ----------------
+// Muscle and weight drift with how you live: gym, boxing, swims and hikes build muscle; stress and long desk weeks
+// add weight; work on your feet takes it off. Roles can ask for more: a superhero bulks up, a famine drama slims down,
+// and you commit (or don't) when you're cast. Your figure in the room and on your pages changes to match.
+// M.fit = { mus: 0..10, mass: -6..+8, goal: null | { mus, mass, film, why, by } }
+function fitOf() { const M = S.me; return M.fit = M.fit || { mus: 0, mass: 0, goal: null }; }
+// a venue evening that works the body
+function fitVenue(V) { if (!V || !V.body) return; const F = fitOf(); F.mus = clamp(F.mus + V.body * 3, 0, 10); F.mass = clamp(F.mass - V.body * 2, -6, 8); }
+// once a week: drift toward the goal, or toward how you live
+function fitWeek() {
+  const M = S.me, F = fitOf();
+  if (F.goal) {
+    const G = F.goal; F.mus = clamp(F.mus + Math.sign(G.mus - F.mus) * Math.min(.45, Math.abs(G.mus - F.mus)), 0, 10); F.mass = clamp(F.mass + Math.sign(G.mass - F.mass) * Math.min(.6, Math.abs(G.mass - F.mass)), -6, 8);
+    M.stress = clamp(M.stress + 1.2, 0, 100); M.energy = clamp(M.energy - 2, 0, 100);
+    if (Math.abs(F.mus - G.mus) < .3 && Math.abs(F.mass - G.mass) < .3 && !G.done) { G.done = 1; diary(`You're ready for ${G.why}: the trainer says you've never looked more like the part.`); milestone(`Transformed for a role: ${G.why}`, 'work'); }
+    const f = G.film !== undefined ? S.films[G.film] : null; if (!f || f.stage >= 4 || f.rel !== null || S.week - G.by > 40) { F.goal = null; diary('The role is done. You can eat like a person again.'); }
+    return;
+  }
+  F.mus = clamp(F.mus - .05, 0, 10);   // muscle fades without the work
+  const desk = M.jobs.some(j => !j.actor) ? .04 : 0, stressed = M.stress > 60 ? .08 : 0, active = (M.body.stamina - 10) * .01;
+  F.mass = clamp(F.mass + desk + stressed - active - F.mass * .02, -6, 8);
+}
+// cast in something physical: the director asks for a transformation
+const FIT_ASK = {
+  Superhero: ['to look like you could lift a car', { mus: 9, mass: 4 }], Action: ['to do your own fight scenes', { mus: 7, mass: 1 }], 'Martial arts': ['to move like you were born to it', { mus: 7, mass: -1 }],
+  War: ['to look like you\'ve marched a thousand miles', { mus: 4, mass: -4 }], Drama: ['to look like the part has worn you down', { mus: 1, mass: -5 }], Period: ['to look like you live without fridges', { mus: 2, mass: -2 }],
+  Comedy: ['to put on some weight for the part', { mus: 0, mass: 6 }], Crime: ['to look like a heavy', { mus: 5, mass: 5 }]
+};
+function fitJobHook(post) {
+  const M = S.me, f = post.film !== null ? S.films[post.film] : null; if (!post.actor || !f || (post.tier || 1) < 2) return;
+  const A = FIT_ASK[f.genre]; if (!A || prnd() > (f.genre === 'Superhero' ? .85 : .35)) return;
+  inbox('fitask', `${f.title}: a word about your body`, `The director wants you ${A[0]}. A trainer, a diet and a few months of discipline. It shows on screen, and people notice when an actor commits.`, { film: f.id, goal: A[1], why: `${f.title}`, choices: [{ k: 'yes', label: 'Commit to the transformation' }, { k: 'half', label: 'Meet them halfway' }, { k: 'no', label: 'Politely refuse' }] });
+}
+function fitPick(it, k) {
+  if (it.kind !== 'fitask') return false;
+  const M = S.me, F = fitOf(), f = S.films[it.film]; it.done = true; it.picked = k;
+  if (k === 'no') { if (f && f.dir !== undefined && P(f.dir)) addTie(ME(), P(f.dir), -3); it.result = { t: 'They nod. They\'ll cheat it with costume and angles.' }; return true; }
+  const g = k === 'half' ? { mus: (F.mus + it.goal.mus) / 2, mass: (F.mass + it.goal.mass) / 2 } : it.goal;
+  F.goal = { mus: g.mus, mass: g.mass, film: it.film, why: it.why, by: S.week };
+  if (f && P(f.dir) && k === 'yes') addTie(ME(), P(f.dir), 3);
+  if (k === 'yes' && f) f.q = (f.q || 55) + 1.5;
+  it.result = { t: k === 'yes' ? 'A trainer calls at 5am tomorrow. And every day after.' : 'You agree to some of it. The trainer looks disappointed.' };
+  return true;
+}
+// the build you see, from the look you chose plus the life you've lived
+function fitShape() { const F = S.me && S.me.fit; return F ? { mus: F.mus, mass: F.mass } : { mus: 0, mass: 0 }; }
+function fitLabel() {
+  const F = fitOf(), m = F.mus >= 7 ? 'Built' : F.mus >= 4 ? 'Toned' : F.mus >= 2 ? 'Fit-ish' : 'Soft', w = F.mass >= 4 ? 'heavier' : F.mass >= 1.5 ? 'a little heavier' : F.mass <= -4 ? 'very lean' : F.mass <= -1.5 ? 'leaner' : 'your usual weight';
+  return `${m}, ${w}${F.goal ? ` · training for ${F.goal.why}` : ''}`;
+}
+// </body>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -32212,7 +32313,7 @@ function viewDesk() {
   }).join('');
   return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(ROLE_LABEL[me.role])} hopeful · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
-   <p class="voice">Your voice: ${topThemes(voiceOf()).map(k => `<span class="vt">${esc(THEMES[k])}</span>`).join(' ') || '<span class="muted">still finding it</span>'} <span class="muted">· loves ${esc(M.love.join(', ').toLowerCase() || 'everything')}</span></p>
+   <p class="voice">Your voice: ${topThemes(voiceOf()).map(k => `<span class="vt">${esc(THEMES[k])}</span>`).join(' ') || '<span class="muted">still finding it</span>'} <span class="muted">· loves ${esc(M.love.join(', ').toLowerCase() || 'everything')}</span>${typeof fitLabel === 'function' && S.me.fit && (S.me.fit.mus >= 1.5 || Math.abs(S.me.fit.mass) >= 1.5 || S.me.fit.goal) ? ` · <span class="muted">Body: ${esc(fitLabel())}</span>` : ''}</p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-dtab="life">Your place</button> · <button class="linkish" data-dtab="life">Your story</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
     <div><span>Energy</span>${meter('', M.energy, 'data')}</div><div><span>Stress</span>${meter('', M.stress, 'warm')}</div><div><span>Standing</span>${meter('', me.standing, 'accent')}</div></div></div></div>

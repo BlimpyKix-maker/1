@@ -694,6 +694,7 @@ function closeWeek(a) {
   if (typeof slateWeek === 'function') slateWeek();
   if (typeof finWeek === 'function') finWeek();
   if (typeof angelWeek === 'function') angelWeek();
+  if (typeof fitWeek === 'function') fitWeek();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -758,6 +759,7 @@ function takeJob(post) {
   diary(`You start as ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}.`);
   if (!M.past.length && M.jobs.length === 1) milestone(`First job in the business: ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}`, 'work');
   else if (post.tier >= 2 && f) milestone(`Hired as ${post.t.toLowerCase()} on ${f.title}`, 'work');
+  if (typeof fitJobHook === 'function') fitJobHook(post);
 }
 // Moving city for work: your contacts come with you (on the phone, at least); your home and the board don't.
 function relocate(hub, why) {
@@ -995,6 +997,7 @@ function resolvePick(it, k) {
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (typeof angelPick === 'function' && angelPick(it, k)) return true;
+  if (typeof fitPick === 'function' && fitPick(it, k)) return true;
   if (socialPick(it, k)) return true;
   if (dealPick(it, k)) return true;
   if (bidPick(it, k)) return true;

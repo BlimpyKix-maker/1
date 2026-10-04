@@ -175,7 +175,20 @@ function homeSceneSVG(day) {
   if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
   o.push(roomGlowSVG(RS, life, night), roomExtraSVG(RS, life));
   // you, standing in it, with a shadow
-  o.push(`<ellipse cx="203" cy="175" rx="24" ry="3.5" fill="#000" opacity=".22"/><g transform="translate(173 54)">${portraitSVG(lookOf(me), S.year - me.born, 122, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
+  // what you might be doing around the place: each spot is [shift from the middle, what's in the bubble, what it is]
+  const acts = [[0, '', 'Standing about']], at = id => { const sp = lay[id] && spots.find(x => x.id === lay[id]); return sp ? sp.x : null; };
+  if (at('desk') !== null) acts.push([at('desk') - 168, '✍️', 'Writing at the desk']);
+  if (at('records') !== null) acts.push([at('records') - 160, '🎧', 'Listening to records']);
+  if (at('coffee') !== null) acts.push([at('coffee') - 168, '☕', 'Making coffee']);
+  if (at('shelf') !== null) acts.push([at('shelf') - 160, '📚', 'Pulling a script off the shelf']);
+  if (at('camera') !== null) acts.push([at('camera') - 168, '🎥', 'Fiddling with the camera']);
+  if (at('plant') !== null || life !== 'couch') acts.push([(at('plant') ?? wx + 8) - 168, '🪴', 'Watering the plants']);
+  acts.push([wx + ww / 2 - 203, night ? '🌙' : '🌆', 'Looking out of the window']);
+  acts.push([life === 'couch' ? -110 : -150, '📖', life === 'couch' ? 'Reading on the couch' : 'Reading in bed']);
+  if (life !== 'couch') acts.push([10, '🧘', 'Stretching on the rug']);
+  acts.push([-20, '📱', 'Scrolling Clapgram']);
+  const okA = acts.filter(a => 173 + a[0] > -10 && 173 + a[0] < 330);
+  o.push(`<g class="me-walk" data-acts='${esc(JSON.stringify(okA))}'><ellipse cx="203" cy="175" rx="24" ry="3.5" fill="#000" opacity=".22"/><g class="me-bob"><g transform="translate(173 54)">${portraitSVG(lookOf(me), S.year - me.born, 122, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g></g><g class="me-bub" transform="translate(214 48)" opacity="0"><rect x="-2" y="-14" width="22" height="18" rx="9" fill="#FFFFFF" stroke="#00000022"/><path d="M2 3 l-4 6 l8 -4 z" fill="#FFFFFF"/><text x="9" y="0" font-size="12" text-anchor="middle">·</text></g></g>`);
   o.push(`<rect width="400" height="180" fill="url(#hs-side)"/>`);
   if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".34"/><circle cx="${lx}" cy="60" r="70" fill="#FFE9A8" opacity=".1"/>`);
   else if (d >= 3) o.push(`<rect width="400" height="180" fill="#FF9E5E" opacity=".07"/>`);
@@ -227,4 +240,22 @@ function roomStyleHTML() {
   const RS = (S.me.home && S.me.home.style) || {};
   return `<h4>Make it yours</h4><div class="looks">${Object.entries(ROOM_STYLE).map(([k, R]) => { const v = RS[k] || 0, sw = k === 'paint';
     return `<div class="lk-row"><span class="muted">${R.label}</span>${sw ? `<span class="sw">${R.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${i ? o : 'repeating-linear-gradient(45deg,#ddd 0 4px,#fff 4px 8px)'}" data-rstyle="${k}:${i}" title="${i ? '' : 'As it came'}"></button>`).join('')}</span>` : `<span class="rsb">${R.opts.map((o, i) => `<button class="pill${i === v ? ' on' : ''}" data-rstyle="${k}:${i}">${esc(o)}</button>`).join('')}</span>`}</div>`; }).join('')}</div>`;
+}
+
+// The avatar lives in the room: every few seconds they wander to something and do it for a while. Purely visual,
+// skipped for people who prefer reduced motion.
+if (typeof window !== 'undefined' && typeof document !== 'undefined' && window.setInterval && document.querySelector) {
+  let roomT = 0;
+  window.setInterval(() => {
+    const g = document.querySelector('svg.home-scene .me-walk'); if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    roomT++; if (g.dataset.busy && roomT % 3) return;   // stay a while once you get there
+    let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (A.length < 2) return;
+    const cur = +(g.dataset.i || 0); let i = Math.floor(Math.random() * A.length); if (i === cur) i = (i + 1) % A.length;
+    const [dx, em, what] = A[i], bub = g.querySelector('.me-bub'), prev = +(g.dataset.dx || 0);
+    g.dataset.i = i; g.dataset.dx = dx; g.dataset.busy = '';
+    g.classList.add('walking'); g.classList.toggle('left', dx < prev);
+    g.style.transform = `translateX(${dx}px)`;
+    if (bub) bub.setAttribute('opacity', '0');
+    setTimeout(() => { g.classList.remove('walking'); g.dataset.busy = '1'; if (bub && em) { bub.querySelector('text').textContent = em; bub.setAttribute('opacity', '1'); } const t = g.closest('svg'); if (t) t.setAttribute('aria-label', 'Your place: ' + what.toLowerCase()); }, 2400);
+  }, 2600);
 }
