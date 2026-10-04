@@ -17,7 +17,7 @@ const LADDER = [
 const TIER_PAY = [0, 1, .6, .35];
 const SEATS = [4, 3, 3, 3, 2, 2, 1, 1];
 function rungPay(c, r) { return Math.round(LADDER[r][1] * TIER_PAY[c.tier] * (r === 7 && c.tier === 1 ? 5 : 1) / 1000) * 1000; }
-for (let r = 0; r < LADDER.length; r++) { const t = { k: 'corp_' + r, t: LADDER[r][0], tier: LADDER[r][3], subs: r < 3 ? ['tas', 'eth'] : r < 6 ? ['tas', 'pack'] : ['pack', 'fin'], days: 5, rate: Math.round(LADDER[r][1] / 240), weeks: 104, biz: 'Company executive', fam: 'office', d: LADDER[r][2], corp: r }; ODD_JOBS.push(t); ODD_BY[t.k] = t; }
+for (let r = 0; r < LADDER.length; r++) { const t = { k: 'corp_' + r, t: LADDER[r][0], tier: LADDER[r][3], subs: r < 3 ? ['tas', 'eth'] : r < 6 ? ['tas', 'pack'] : ['pack', 'fin'], days: 5, rate: Math.round(LADDER[r][1] / 240), weeks: 104, biz: 'Company executive', fam: r >= 2 ? 'exec' : 'office', d: LADDER[r][2], corp: r }; ODD_JOBS.push(t); ODD_BY[t.k] = t; }
 // ---- who holds the chairs: real people from the town, the same answer all year ----
 // Worked out fresh from the town's people every time it's asked, so the simulation and the screen always agree.
 function hubStaff(hub) {
@@ -54,7 +54,12 @@ function corpPosts() {
   if (prnd() > .45) return out;
   const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null && c.owner === undefined);
   if (!cos.length) return out;
-  const c = ppick(cos), r = clamp(Math.floor(L * 1.2) + (prnd() < .3 ? 1 : 0), 0, 5), t = ODD_BY['corp_' + r];
+  // where you come in depends on company experience, not on your film career: outsiders start near the bottom
+  // (a seasoned film person might come in as a creative executive), insiders move sideways or one rung up
+  const prev = typeof corpRung === 'function' ? corpRung() : -1, base = prev >= 0 ? prev : L >= 5 ? 2 : L >= 3 ? 1 : 0;
+  // a step up only after real time served at your current rung; until then the offers are sideways moves
+  const cj = corpJob(), served = cj ? S.week - (cj.rungW ?? cj.started ?? S.week) : 0, cap = prev < 0 ? 2 : cj && served >= 26 + prev * 6 ? Math.min(5, prev + 1) : prev;
+  const c = ppick(cos), r = clamp(base + (prnd() < .3 ? 1 : 0), 0, cap), t = ODD_BY['corp_' + r];
   if (M.jobs.some(j => j.k === t.k)) return out;
   const p = makePost(t, null); p.co = c.id; p.rate = usd(Math.round(rungPay(c, r) / 240)); p.head = bossFor(c, r); p.mco = c.name;
   out.push(p);
@@ -67,11 +72,11 @@ function corpWeek() {
     const r = +j.k.slice(5), c = S.companies[j.co];
     if (j.co === undefined || !c || c.closed !== null) return;
     j.rungW = j.rungW ?? j.started;
-    const due = 30 + r * 10 - Math.max(0, (j.score || 0)) * 2, boss = j.head;
+    const due = Math.max(26 + r * 6, 30 + r * 10 - Math.max(0, (j.score || 0)) * 2), boss = j.head;
     if (r < 7 && S.week - j.rungW >= due && !pending().some(x => x.kind === 'corp') && (boss === null || boss === undefined || opinion(boss) >= 10) && (j.score || 0) >= -1 && hashRand(S.week * 7 + j.id)() < .25)
       inbox('corp', `A promotion at ${c.name}`, `${boss !== null && boss !== undefined ? P(boss).name + ' calls you in.' : 'The boss calls you in.'} "We'd like you to be our ${LADDER[r + 1][0].toLowerCase()}." ${fmtCash(usd(rungPay(c, r + 1)))} a year. ${LADDER[r + 1][2]}`, { act: 'promote', job: j.id, choices: [{ k: 'yes', label: 'Accept the promotion' }, { k: 'no', label: 'Stay where you are for now' }] });
     // headhunters: good people get calls
-    if (r >= 1 && S.week % 9 === (j.id % 9) && !pending().some(x => x.kind === 'corp') && me.standing + r * 6 >= 22 && hashRand(S.week * 11 + j.id)() < .5) {
+    if (r >= 1 && r < 6 && S.week - j.rungW >= 26 && S.week % 9 === (j.id % 9) && !pending().some(x => x.kind === 'corp') && me.standing + r * 6 >= 22 && hashRand(S.week * 11 + j.id)() < .5) {
       const rivals = S.companies.filter(x => x.closed === null && x.owner === undefined && x.id !== c.id && x.tier <= c.tier + (r >= 4 ? 0 : 1) && (x.hub === M.hub || r >= 4));
       if (rivals.length) { const x = rivals[Math.floor(hashRand(S.week + j.id)() * rivals.length)], nr = Math.min(7, r + 1), pay = Math.round(rungPay(x, nr) * 1.15);
         inbox('corp', `A headhunter calls`, `A recruiter from ${pickLine(['Vantage Search', 'Northbridge Partners', 'Halcyon Executive', 'Crowne & Lisle'], S.week)} has a client: ${x.name}${x.hub !== M.hub ? ' in ' + hubName(x.hub) : ''} wants a ${LADDER[nr][0].toLowerCase()}. ${fmtCash(usd(pay))} a year, more than you make now. They need an answer this week.`, { act: 'poach', job: j.id, to: x.id, r: nr, pay, choices: [{ k: 'take', label: `Take it: move to ${x.name}` }, { k: 'counter', label: 'Tell your boss and ask them to match', check: ['cha', 13] }, { k: 'no', label: 'Thank them and say no' }] }); }
