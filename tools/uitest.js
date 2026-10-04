@@ -1,4 +1,4 @@
-// Browser test: creates a character, plays the party and a few weeks, reloads to check the save replays.
+// Browser test: creates a character, plays the party and a few weeks, reloads to check the save (snapshot + journal) restores it.
 // Usage: NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>
 const { chromium } = require('playwright');
 const path = require('path');
@@ -65,11 +65,11 @@ const out = process.argv[2] || '.';
     await page.waitForFunction(() => !UI.busy);
   }
   await page.screenshot({ path: out + '/4-desk-later.png', fullPage: true });
-  const before = await page.evaluate(() => ({ week: S.week, cash: S.me.cash, known: Object.keys(S.me.known).length, log: S.log.length }));
+  const before = await page.evaluate(() => ({ week: S.week, cash: S.me.cash, known: Object.keys(S.me.known).length, day: S.me.wk ? S.me.wk.day : -1, inbox: S.me.inbox.length, energy: S.me.energy, rng: S.me.rng.s }));
   // reload: the saved career should replay to the same place
   await page.reload();
   await page.waitForFunction(() => S && S.me && S.me.party && S.me.party.done && !UI.replaying, null, { timeout: 180000 });
-  const after = await page.evaluate(() => ({ week: S.week, cash: S.me.cash, known: Object.keys(S.me.known).length, log: S.log.length }));
+  const after = await page.evaluate(() => ({ week: S.week, cash: S.me.cash, known: Object.keys(S.me.known).length, day: S.me.wk ? S.me.wk.day : -1, inbox: S.me.inbox.length, energy: S.me.energy, rng: S.me.rng.s }));
   console.log('before', JSON.stringify(before), '\nafter ', JSON.stringify(after), JSON.stringify(before) === JSON.stringify(after) ? 'SAVE OK' : 'SAVE MISMATCH');
   // the player's own sheet
   await page.click('a[data-go^="person:"] >> nth=0');

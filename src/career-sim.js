@@ -986,7 +986,7 @@ function sceneResolve(it, k) {
 }
 
 function resolvePick(it, k) {
-  const M = S.me, me = ME(), c = it.choices.find(x => x.k === k);
+  const M = S.me, me = ME(), c = (it.choices || []).find(x => x.k === k);
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (socialPick(it, k)) return true;

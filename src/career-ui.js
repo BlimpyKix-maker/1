@@ -1,15 +1,18 @@
 // ---------- Career: saving ----------
-// A save is the world's seed and settings plus the log of everything the player did.
+// Every action goes through here: it's applied, kept in the session's log, journalled since the last save (saves.js),
+// and an autosave comes when the schedule turns. The old one-log-per-browser save (SAVE_KEY) is only read now, to
+// bring an old career across.
 const SAVE_KEY = 'applebox-career-v1';
 function doAct(a) {
+  const w0 = S.week;
   if (!applyAct(a)) return false;
   (S.log = S.log || []).push(a);
-  saveCareer();
+  if (typeof journalAdd === 'function') { journalAdd(Object.assign({ _w: w0 }, a)); autoCheck(); }
   return true;
 }
 function saveCareer() { try { localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 9, seed: S.seed, year: S.startYear, depth: S.depth, log: S.log || [] })); } catch (e) { /* storage unavailable: the career lasts as long as the tab */ } }
 function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); return s && s.v === 9 && Array.isArray(s.log) && s.log.length ? s : null; } catch (e) { return null; } }
-function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } }
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* nothing to clear */ } if (typeof journalClear === 'function') journalClear(); }
 
 // ---------- Career: views ----------
 const MAJOR_HUBS = HUB_IDS.filter(h => !HUBS[h].minor);
@@ -656,7 +659,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -756,17 +759,18 @@ function deskNav() {
   return `<nav class="desknav" aria-label="Your desk">${tabs.map(([k, l, n, c]) => `<button class="dt${cur === k ? ' on' : ''}" data-dtab="${k}" aria-current="${cur === k ? 'page' : 'false'}">${l}${n ? ` <span class="dn ${c || ''}">${n}</span>` : ''}</button>`).join('')}</nav>`;
 }
 // Rebuild a saved career: the world is already built from the same seed; feed it the log.
+// Forgiving: a step that no longer fits (the game changed since it was taken) is settled and skipped, never a stall.
 function replayCareer(log, done) {
-  let i = 0;
-  UI.replaying = 'Starting…';
+  let i = 0, miss = 0;
+  UI.replaying = 'Starting…'; S.log = [];
   const step = () => {
     const t0 = Date.now();
-    while (i < log.length && Date.now() - t0 < 60) { applyAct(log[i]); i++; }
-    S.log = log.slice(0, i);
-    UI.replaying = `${i} of ${log.length} actions · ${fmtDate(S.week, true)}`;
-    $('#main').innerHTML = viewYou();
+    while (i < log.length && Date.now() - t0 < 120) { if (!replayOne(log[i])) miss++; i++; }
+    if (typeof JOURNAL !== 'undefined' && JOURNAL) { JOURNAL.log = S.log.slice(); journalWrite(); }
+    UI.replaying = `${i} of ${log.length} steps${S.me ? ' · ' + fmtDate(S.week, true) : ''}`;
+    try { $('#main').innerHTML = viewYou(); } catch (e) { /* the page catches up at the end */ }
     if (i < log.length) setTimeout(step, 0);
-    else { UI.replaying = null; UI.seenRoll = UI.pendingSeen = S.me ? S.me.rollN || 0 : 0; done(); }
+    else { UI.replaying = null; UI.seenRoll = UI.pendingSeen = S.me ? S.me.rollN || 0 : 0; done(miss); }
   };
   setTimeout(step, 0);
 }
