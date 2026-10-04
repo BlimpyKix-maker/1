@@ -50,7 +50,7 @@ function ladderHTML(c) {
 }
 // ---- hiring onto the ladder ----
 function corpPosts() {
-  const M = S.me, L = careerLevel(), out = [];
+  const M = S.me, L = tierLevel(), out = [];
   if (prnd() > .45) return out;
   const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null && c.owner === undefined);
   if (!cos.length) return out;

@@ -4,13 +4,13 @@
 // choice, so the week flows; anything that matters (offers, interviews, deals, invitations) still waits for you.
 // Every auto choice goes through the action log like a click, so saves replay the same.
 function autoOn(k) { const A = (S.me && S.me.auto) || {}; return A[k] !== false; }
-function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
+function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
 // the sensible choice: an option with no roll and no cost, else the first
 function sensibleChoice(it) { const L = (it.choices || []).filter(c => !c.dis); return (L.find(c => !c.check && !/quit|leave|skip|refuse|no thanks/i.test(c.label || '')) || L[0] || {}).k; }
 function autoBeforeStep() {
   const M = S.me; if (!M || !careerActive()) return;
   if (autoOn('minor')) for (const it of pending().filter(x => x.kind === 'scene')) { const k = sensibleChoice(it); if (k) doAct({ t: 'pick', id: it.id, k, auto: 1 }); }
-  if (autoOn('apply') && !M.jobs.length && typeof appSlots === 'function') {
+  if (autoOn('apply') && !M.jobs.length && lookingForWork() && typeof appSlots === 'function') {
     const slots = appSlots(); UI.apps = new Set([...UI.apps].filter(id => M.board.some(p => p.id === id)));
     if (!UI.apps.size && slots) for (const [p] of rankedFits(slots)) UI.apps.add(p.id);
   }

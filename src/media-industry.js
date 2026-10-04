@@ -43,7 +43,7 @@ const FIELD_JOBS = [
 for (const j of FIELD_JOBS) { ODD_JOBS.push(j); ODD_BY[j.k] = j; }
 // a few field jobs each week; more of your own field's, and more as you rise
 function fieldPosts() {
-  const M = S.me, L = careerLevel(), out = [];
+  const M = S.me, L = tierLevel(), out = [];
   const fit = t => t.tier <= L + 1 && (t.tier >= L - 2 || t.tier === 0) && !M.jobs.some(j => j.k === t.k) && (t.field !== 'creator' || platOpen('vidwire')) && (t.field !== 'podcast' || platOpen('podhaus'));
   const mine = FIELD_JOBS.filter(t => fit(t) && t.field === M.field), other = FIELD_JOBS.filter(t => fit(t) && t.field !== M.field);
   const n = (M.field && M.field !== 'film' ? 2 : 1) + (prnd() < .5 ? 1 : 0);   // other industries always post a few: people cross over

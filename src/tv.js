@@ -357,7 +357,7 @@ ODD_JOBS.push(
 );
 for (const t of ODD_JOBS.filter(x => x.tv)) ODD_BY[t.k] = t;
 function tvPosts() {
-  const M = S.me, L = careerLevel(), mkt = (HUBS[M.hub] || {}).m || 'US', air = tvAll().filter(s => s.m === mkt && tvOnAir(s, S.year) && !s.mine), out = [];
+  const M = S.me, L = tierLevel(), mkt = (HUBS[M.hub] || {}).m || 'US', air = tvAll().filter(s => s.m === mkt && tvOnAir(s, S.year) && !s.mine), out = [];
   if (!air.length || prnd() > .7) return out;
   const T = ODD_JOBS.filter(t => t.tv && t.k !== 'tv_showrunner' && t.tier <= L + 1 && t.tier >= L - 2 && !M.jobs.some(j => j.k === t.k));
   for (let i = 0, n = 1 + Math.floor(L / 2); i < n && T.length; i++) {

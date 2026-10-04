@@ -419,6 +419,7 @@ function endParty() {
 function inbox(kind, title, text, extra = {}) {
   const it = { id: S.me.seq++, w: S.week, kind, title, text, ...extra };
   S.me.inbox.push(it);
+  if (kind !== 'note' && S.me.wk) S.me.wk.beats = (S.me.wk.beats || 0) + 1;   // something happened this week (late-game.js)
   if (kind === 'scene' && extra.scene) { const M = S.me; (M.seenSc = M.seenSc || {})[extra.scene] = S.week; (M.seenN = M.seenN || {})[extra.scene] = (M.seenN[extra.scene] || 0) + 1; }
   if (S.me.inbox.length > 140) S.me.inbox = S.me.inbox.filter(x => x.choices && !x.done).concat(S.me.inbox.filter(x => !(x.choices && !x.done)).slice(-110));
   return it;
@@ -518,6 +519,8 @@ function refreshBoard() {
   const odd = ODD_JOBS.filter(t => !t.cat && !t.tv && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
+  // you hear about work near your level, a tier or two either way; referrals and your agent's pitches still reach you
+  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
   if (typeof nameBoard === 'function') nameBoard();
   if (typeof leadBoard === 'function') { const L = leadBoard(), ids = new Set(L.map(p => p.id)); M.board = L.concat(M.board.filter(p => !ids.has(p.id))); }
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
@@ -534,9 +537,10 @@ function tmplOf(post) { return post.odd ? ODD_BY[post.k] : POST_BY[post.k]; }
 // How likely an application is to land, and why: a list of named factors in logit units.
 function hireFactors(post) {
   const M = S.me, me = ME(), t = tmplOf(post), F = [];
-  const lvl = careerLevel();
+  const lvl = tierLevel();
   F.push(['Job level', post.odd && !t.cat && post.tier <= 1 ? 1 : post.tier === 0 ? .8 : post.tier === 1 ? .25 : -1.2 - 1.1 * (post.tier - 2) + .9 * lvl]);
   if (post.tier <= 1 && lvl >= 4) F.push(['Overqualified', -(lvl - 3) * .7]);
+  if (post.tier >= 3 && careerLevel() > 5) F.push(['Your name', .4 * (careerLevel() - 5)]);
   if (post.tier === 0 && M.school) F.push(['You\'re a student', .7]);
   if (post.agent && M.agent) F.push(['Your agent pitched you', .5 + .25 * M.agent.tier]);
   if (M.freeRef) F.push(['A word from your old teacher', .8]);
@@ -692,6 +696,7 @@ function closeWeek(a) {
   if (typeof achWeek === 'function') achWeek();
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
+  if (typeof lateWeek === 'function') lateWeek();
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
   const life = ORIGIN.life[M.life];
@@ -979,6 +984,7 @@ function resolvePick(it, k) {
   if (typeof shortPick === 'function' && shortPick(it, k)) return true;
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
   if (typeof currPick === 'function' && currPick(it, k)) return true;
+  if (typeof latePick === 'function' && latePick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;

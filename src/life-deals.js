@@ -137,7 +137,7 @@ function ownFilmOffer(sc) {
   const M = S.me, me = ME(), f = S.films[sc.made];
   if (!f || f.stage < 0 || f.stage >= 4 || sc.jobStage === f.stage || M.jobs.some(j => j.film === f.id) || pending().some(x => x.kind === 'offer' && x.post.film === f.id)) return;
   sc.jobStage = f.stage;
-  const craft = MAIN[me.role], L = careerLevel();
+  const craft = MAIN[me.role], L = tierLevel();
   const fit = t => (t.subs.some(k => SUB2C[k] === craft) ? 3 : 0) + (t.subs.some(k => SUB2C[k] === 'wri') ? 1 : 0) + Math.min(t.tier, L + 1) - (t.tier > L + 1 ? 4 : 0);
   const opts = POSTS.filter(t => !t.cat && t.st.includes(f.stage) && headOf(f, t.head) !== null && !blockedFrom(t)).sort((a, b) => fit(b) - fit(a));
   if (!opts.length || fit(opts[0]) < 1) return;

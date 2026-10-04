@@ -8,9 +8,17 @@ function careerLevel() {
   const M = S.me, me = ME();
   // time served counts a little; the quality of what you delivered counts more (job scores from the work itself)
   const work = M.past.reduce((t, p) => t + clamp(p.score || 0, -4, 6), 0) + M.jobs.reduce((t, j) => t + clamp(j.score || 0, -4, 6), 0);
-  return clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5);
+  const base = clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5);
+  if (base < 5) return base;
+  // past the top of the craft, what counts is a name: awards, fame, a body of work, or the top of a company
+  const aw = (me.awards || []).length, fame = me.fame || 0, cr = me.credits.length, rung = typeof corpRung === 'function' ? corpRung() : -1;
+  if (me.standing >= 80 && M.stats.weeks >= 400 && (aw >= 2 || fame >= 70 || cr >= 20 || rung >= 7)) return 7;
+  if (me.standing >= 60 && M.stats.weeks >= 200 && (aw >= 1 || fame >= 35 || cr >= 8 || rung >= 5)) return 6;
+  return 5;
 }
-const LEVEL_NAME = ['Nobody yet', 'Getting work', 'Credits to your name', 'Working professional', 'In demand', 'Established'];
+// Jobs only come in five tiers: the levels above that are about your name, not the jobs you can do.
+function tierLevel() { return Math.min(5, careerLevel()); }
+const LEVEL_NAME = ['Nobody yet', 'Getting work', 'Credits to your name', 'Working professional', 'In demand', 'Established', 'A name people know', 'A legend of the business'];
 
 // ---- The catalogue as postings ----
 const DEPT_HEAD = { Directed: 'prod', Writing: 'prod', Cast: 'dir', Produced: 'prod', Music: 'mus', Cinematography: 'dp', 'Film Editing': 'ed', 'Casting By': 'cst', 'Production Design': 'pd', 'Art Direction': 'pd', 'Set Decoration': 'pd', 'Costume Design': 'cos', 'Makeup Department': 'mu', 'Production Management': 'prod', 'Second Unit Director or Assistant Director': 'ad', 'Art Department': 'pd', 'Property Department': 'pd', 'Sound Department': 'snd', 'Special Effects': 'vfx', 'Visual Effects': 'vfx', Stunts: 'stn', 'Camera and Electrical Department': 'dp', 'Animation Department': 'vfx', 'Casting Department': 'cst', 'Costume and Wardrobe Department': 'cos', 'Editorial Department': 'ed', 'Location Management': 'prod', 'Music Department': 'mus', 'Script and Continuity Department': 'ad', 'Transportation Department': 'prod', 'Additional Crew': 'prod', Choreography: 'dir', 'Color Department': 'ed', 'Craft Services': 'prod', 'Health and Safety': 'ad', 'Intimacy Coordination': 'ad', Legal: 'prod', 'Production Department': 'prod', 'Production Finance and Accounting': 'prod', Publicity: 'prod', Puppetry: 'vfx', 'Voice Actors – Dubbing': 'dir', 'Studio Facilities/Equipment (Additional Crew)': 'prod' };
@@ -64,18 +72,18 @@ function blockedFrom(t) {
 }
 // The extra listings each week: catalogue crew jobs on films around you, industry jobs at companies, internships.
 function depthBoard(films) {
-  const M = S.me, L = careerLevel(), out = [];
+  const M = S.me, L = tierLevel(), out = [];
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   const fit = t => t.tier <= L + 1 && (t.tier >= L - 2 || t.tier === 0);
   for (const f of films) {
-    if (out.length >= 1 + careerLevel()) break;
+    if (out.length >= 1 + L) break;
     if (prnd() > .3) continue;
     const opts = POSTS.filter(t => t.cat && fit(t) && t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
     if (opts.length) out.push(makePost(ppick(opts), f));
   }
   const biz = ODD_JOBS.filter(t => t.cat && fit(t) && !M.jobs.some(j => j.k === t.k));
   const cos = S.companies.filter(c => c.hub === M.hub && c.closed === null);
-  for (let i = 0, n = biz.length ? 1 + (prnd() < .5 ? 1 : 0) + Math.floor(careerLevel() / 2) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
+  for (let i = 0, n = biz.length ? 1 + (prnd() < .5 ? 1 : 0) + Math.floor(L / 2) : 0; i < n; i++) { const p = makePost(ppick(biz), null); if (cos.length) p.co = ppick(cos).id; out.push(p); }
   if (typeof fieldPosts === 'function') out.push(...fieldPosts());
   if (typeof corpPosts === 'function') out.push(...corpPosts());
   if (typeof tvPosts === 'function') out.push(...tvPosts());
@@ -186,7 +194,7 @@ function signAgent(ag, why) {
 // Extra listings your agent finds, a level above where you'd look yourself, with their pitch behind them.
 function agentBoard(films) {
   const M = S.me; if (!M.agent) return [];
-  const L = careerLevel(), out = [];
+  const L = tierLevel(), out = [];
   for (const f of films) {
     const st = AG_STYLE[M.agent.style || 'nurturer'];
     if (out.length >= Math.max(1, M.agent.tier + 1 + st.pitch)) break;
@@ -270,7 +278,7 @@ const LIFE_EVENTS = [
 for (const e of LIFE_EVENTS) SCENES.push(Object.assign({ event: 1, jobs: [] }, e));
 // One event at most a week, more often as your life fills up, never the same one within ten weeks.
 function maybeEvent() {
-  const M = S.me, me = ME(), L = careerLevel();
+  const M = S.me, me = ME(), L = tierLevel();
   if (prnd() > .1 + L * .02) return;
   const ok = LIFE_EVENTS.filter(e => L >= e.lv[0] && L <= e.lv[1] && sceneFresh(e.id, 40) && (!e.fame || (me.fame || 0) >= e.fame));
   if (!ok.length) return;

@@ -44,7 +44,7 @@ function nextMoves() {
   if ((M.grind || 0) >= 8) add('Take a weekend away to reset the grind.', 'life', `${M.grind} weeks without a break`);
   const rent = usd(ORIGIN.life[M.life].rent);
   if (M.cash < rent * 2) add('Money is tight: add side-hustle blocks or cheaper housing.', 'diary', `${fmtCash(M.cash)} left`);
-  if (!M.jobs.length && M.board.length) { const best = M.board.filter(p => !blockedFrom(tmplOf(p))).map(p => [p, hireOdds(p)]).sort((a, b) => b[1] - a[1])[0]; if (best) add(`Apply: ${best[0].t} (${Math.round(best[1] * 100)}% odds)`, 'work', 'Between jobs'); }
+  if (!M.jobs.length && M.board.length && lookingForWork()) { const best = M.board.filter(p => !blockedFrom(tmplOf(p))).map(p => [p, hireOdds(p)]).sort((a, b) => b[1] - a[1])[0]; if (best) add(`Apply: ${best[0].t} (${Math.round(best[1] * 100)}% odds)`, 'work', 'Between jobs'); }
   const B = Object.keys(M.black || {}); if (B.length) add(`Try to make peace with ${P(+B[0]).name}.`, 'people', 'Bad blood is costing you');
   if (typeof campaignSeason === 'function' && campaignSeason() && campaignFilms().some(f => !(f.campLog || []).length)) add('Awards season: campaign for your film.', 'compete', 'October to December');
   if (typeof COMPS !== 'undefined') { const c = COMPS.find(c => compOpen(c) && !compEntered(c) && compFits(c) && (c.need !== 'script' || (M.scripts || []).some(s => s.grade))); if (c) add(`Enter ${c.name}.`, 'compete', 'Fits you, open now'); }

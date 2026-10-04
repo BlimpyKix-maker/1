@@ -17,6 +17,8 @@ AMBITIONS.push(
   { k: 'mentorgrad', c: 'craft', t: 'Complete a mentorship', p: () => [(S.me.mentors || []).length, 1], rw: 3 },
   { k: 'twenty', c: 'craft', t: 'Twenty screen credits', p: () => [S.me.past.filter(x => x.credited).length, 20], rw: 5 },
   { k: 'level5', c: 'craft', t: 'Reach level 5: the top of your craft', p: () => [careerLevel(), 5], rw: 6 },
+  { k: 'level6', c: 'craft', t: 'Reach level 6: a name people know', p: () => [careerLevel(), 6], rw: 8 },
+  { k: 'level7', c: 'craft', t: 'Reach level 7: a legend of the business', p: () => [careerLevel(), 7], rw: 12 },
   { k: 'tenk', c: 'money', t: 'Have $10,000 in the bank', p: () => [Math.max(0, S.me.cash), usd(10000)], rw: 1, money: 1 },
   { k: 'hundredk', c: 'money', t: 'Have $100,000 in the bank', p: () => [Math.max(0, S.me.cash), usd(100000)], rw: 3, money: 1 },
   { k: 'million', c: 'money', t: 'Become a millionaire', p: () => [Math.max(0, S.me.cash), usd(1000000)], rw: 6, money: 1 },
