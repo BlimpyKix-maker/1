@@ -72,7 +72,7 @@ const FIELD_SCENES = {
   creator: [
     { id: 'fc_comments', title: 'The comments', text: 'A video you edited is getting thousands of comments, and a lot of them are about the editing.', teach: 'Online video lives on retention: the share of viewers still watching at each second. Editors chase it with pace, jump cuts and pattern breaks, and the analytics show exactly where people leave.', opts: [
       { k: 'read', label: 'Read the retention graph, not the comments', check: ['rhythm', 11], ok: { xp: { rhythm: .1 }, tie: { head: 3 } }, bad: { stress: 2 }, t: 'Viewers left at 2:14 every time. You fix that beat in the next one and watch time jumps.', tb: 'The graph tells you nothing you can use.' },
-      { k: 'reply', label: 'Reply to the critics', ok: { stress: 3, stand: -.2 }, t: 'Never reply to the critics.' }] },
+      { k: 'reply', label: 'Reply to the critics', ok: { stress: 3, stand: -.2 }, t: 'You reply. Half the comments turn on you, half turn on them. Engagement, technically. ' }] },
     { id: 'fc_sponsor', title: 'The sponsor', text: 'The channel\'s sponsor wants their product in the first thirty seconds. The creator wants to quit.', teach: 'Sponsorships pay most creators more than ads do; platforms and advertising rules require that paid placements be clearly labelled.', opts: [
       { k: 'creative', label: 'Pitch a way to make the ad part of the joke', check: ['vstory', 12], ok: { tie: { head: 5 }, stand: .3 }, bad: { tie: { head: -2 } }, t: 'The ad becomes the most-liked part of the video. The sponsor renews for a year.', tb: 'The sponsor doesn\'t find it funny.' },
       { k: 'flat', label: 'Do it straight and move on', ok: {}, t: 'Thirty seconds of honest reading. Everyone survives.' }] }

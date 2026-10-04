@@ -98,7 +98,7 @@ const LOW_LIFE = {
       { k: "no", label: "Keep your shift", ok: { cash: 60 }, t: "Reliable money beats a free lunch." }] },
     { id: "lh_quit", title: "The manager", text: "Your manager says you can have the shift you need off for a job interview only if you work every weekend for a month.", opts: [
       { k: "deal", label: "Take the deal", ok: { energy: -10, stress: 2 }, t: "You go to the interview. You also don't see a weekend until next month." },
-      { k: "push", label: "Push back", check: ["cha", 12], ok: { stress: -1 }, bad: { stress: 3, cash: -60 }, t: "They give in: 'fine, just this once.' It's never just once.", tb: "They cut your hours to make a point." }] }
+      { k: "push", label: "Push back", check: ["cha", 12], ok: { stress: -1 }, bad: { stress: 3, cash: -60 }, t: "They give in: 'fine, just this once.' They'll remember you held your ground.", tb: "They cut your hours to make a point." }] }
   ],
   train: [
     { id: "lt_teacher", title: "The teacher's offer", text: "Your teacher says they need an assistant on a short they're shooting next month. Unpaid.", opts: [
@@ -198,7 +198,7 @@ const LOW_WORK = {
   ],
   office: [
     { id: "t_off_cc", title: "Reply all", text: "Someone has replied all to the whole company with something they shouldn't have.", opts: [
-      { k: "nothing", label: "Say nothing, delete it", ok: { trust: { head: 2 } }, t: "The office splits into people who forwarded it and people who didn't. You're in the right half." },
+      { k: "nothing", label: "Say nothing, delete it", ok: { trust: { head: 2 } }, t: "The office splits into people who forwarded it and people who didn't. You stay out of it." },
       { k: "forward", label: "Forward it to a friend", ok: { risk: .3, stress: -1 }, t: "Your friend loves it. IT keeps logs." }] },
     { id: "t_off_desk", title: "The desk", text: "Your boss's desk is chaos. They ask if you can 'just tidy it a bit'.", opts: [
       { k: "system", label: "Organise it into a system", check: ["eth", 11], ok: { tie: { head: 4 }, flag: "reliable" }, bad: { tie: { head: -2 } }, t: "They find a contract they thought was lost. You are now indispensable.", tb: "They can't find anything now. 'It was chaos, but it was my chaos.'" },

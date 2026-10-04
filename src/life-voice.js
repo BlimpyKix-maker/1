@@ -120,7 +120,7 @@ const WRITE_SCENES = [
     { k: 'rein', label: 'Rein them in', ok: { script: 2 }, t: 'Disciplined. The structure holds.' }] },
   { id: 'lw_steal', title: 'Too close', text: 'You realise your best scene in {title} is a scene from a film you love, in a different coat.', opts: [
     { k: 'cut', label: 'Cut it and find your own', check: ['orig', 13], ok: { script: 8, xp: { orig: .2 } }, bad: { stress: 3 }, t: 'Your version is stranger and better.', tb: 'The replacement is flat. You miss the old one.' },
-    { k: 'keep', label: 'Keep it: everyone steals', ok: {}, t: 'Homage, you tell yourself.' }] }
+    { k: 'keep', label: 'Keep it: everyone steals', ok: {}, t: 'Homage. Every great artist steals.' }] }
 ];
 for (const s of WRITE_SCENES) SCENES.push(Object.assign({ event: 1, jobs: [] }, s));
 function writingEvent(sc) {

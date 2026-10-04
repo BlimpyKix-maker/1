@@ -164,7 +164,7 @@ const SITUATIONS = {
     const s = { id: 'sit_' + fam + '_' + id, title, text, teach, opts: [
       { k: 'fix', label: fix, check: [stat, dc], ok: { tie: { head: 3 }, xp: { [stat]: .25 }, stand: .3 }, bad: { tie: { head: -2 }, stress: 4 }, t: ok, tb: bad },
       { k: 'ask', label: 'Ask {head} how they want it handled', ok: { tie: { head: 1 }, trust: { head: 2 }, xp: { [stat]: .1 } }, t: '{head} tells you exactly how they like it. Slower, but nothing breaks.' },
-      { k: 'bold', label: bold, check: [stat, Math.min(19, dc + 3)], ok: { tie: { head: 6 }, xp: { [stat]: .4 }, stand: .8 }, bad: { tie: { head: -5 }, stand: -.4, stress: 6 }, t: ok + ' People talk about it afterwards.', tb: bad + ' And it was your idea.' },
+      { k: 'bold', label: bold, check: [stat, Math.min(19, dc + 3)], ok: { tie: { head: 6 }, xp: { [stat]: .4 }, stand: .8 }, bad: { tie: { head: -5 }, stand: -.4, stress: 6 }, t: ok + ' People talk about it afterwards.', tb: bad + ' Big swing; this one went wide.' },
       { k: 'mate', label: 'Pull in a colleague to help', check: ['cha', 11], ok: { tie: { mates: 3 } }, bad: { tie: { mates: -1 }, stress: 2 }, t: 'Two of you, twice as fast. You owe them a drink.', tb: 'They\'re busy and say so. You do it alone, late.' }
     ] };
     (ROLE_SCENES[fam] = ROLE_SCENES[fam] || []).push(s);

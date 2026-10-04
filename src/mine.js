@@ -59,6 +59,7 @@ function mySchoolPage() {
 function viewMine(cur) {
   if (cur.kind === 'myjob') return myJobPage(cur.id);
   if (cur.kind === 'myschool') return mySchoolPage();
+  if (cur.kind === 'ticker' && typeof tickerPageHTML === 'function') return tickerPageHTML(String(cur.id));
   return '';
 }
 function mineClick(t) {

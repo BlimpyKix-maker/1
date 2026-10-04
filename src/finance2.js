@@ -21,11 +21,11 @@ function allMarketHTML() {
   L.sort((a, b) => srt === 'name' ? a.name.localeCompare(b.name) : key[srt](b) - key[srt](a));
   const movers = R.slice().sort((a, b) => b.d1 - a.d1), byInd = Object.keys(inds).map(k => { const G = R.filter(r => r.ind === k); return [k, G.reduce((t, r) => t + r.d52, 0) / G.length]; }).sort((a, b) => b[1] - a[1]);
   const trade = r => r.co !== undefined ? `<button class="btn-s" data-mkt="buy:${r.co}">Buy</button>${r.own ? ` <button class="btn-s ghost" data-mkt="sell:${r.co}">Sell</button>` : ''}` : `<button class="btn-s" data-sec="buy:${r.sk}">Buy</button>${r.own ? ` <button class="btn-s ghost" data-sec="sell:${r.sk}">Sell</button>` : ''}`;
-  const nm = r => r.co !== undefined ? `<a href="#" class="lk" data-mkt="sel:${r.co}"><b>${esc(r.tk)}</b></a>` : `<b>${esc(r.tk)}</b>`;
+  const nm = r => r.co !== undefined ? `<a href="#" class="lk" data-mkt="sel:${r.co}"><b>${esc(r.tk)}</b></a>` : `<a href="#" class="lk" data-go="ticker:${r.sk}"><b>${esc(r.tk)}</b></a>`;
   return `<div class="mk-sum"><div><span class="muted small">Best industry this year</span><b>${esc(byInd[0][0])} ${pctS(byInd[0][1])}</b></div><div><span class="muted small">Worst</span><b>${esc(byInd[byInd.length - 1][0])} ${pctS(byInd[byInd.length - 1][1])}</b></div><div><span class="muted small">Top movers this week</span><b class="small">${movers.slice(0, 3).map(r => `${esc(r.tk)} ${pctS(r.d1)}`).join(' · ')}</b></div></div>
    <div class="filt"><label class="filt-q"><span>Search</span><input id="mkq" type="search" placeholder="Ticker or company…" value="${esc(UI.mkq || '')}"></label><label><span>Industry</span>${sel('mk-ind', [['all', `Everything (${R.length})`], ...Object.entries(inds).sort((a, b) => b[1] - a[1]).map(([k, n]) => [k, `${k} (${n})`])], f)}</label><label><span>Sort</span>${sel('mk-sort', [['cap', 'Biggest'], ['d1', 'This week'], ['d52', 'This year'], ['y', 'Dividend yield'], ['px', 'Price'], ['name', 'Name']], srt)}</label><label><span>Shares a trade</span><input id="mkt-q" type="number" min="1" value="${T.q || 10}"></label></div>
-   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Industry</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n">Yield</th><th class="n">Own</th><th></th></tr></thead><tbody>${L.slice(0, 120).map(r => `<tr><td>${nm(r)}</td><td class="small">${esc(r.name)}</td><td class="small muted">${esc(r.ind)}</td><td>${r.spark}</td><td class="n">$${r.px.toFixed(2)}</td><td class="n">${pctS(r.d1)}</td><td class="n">${pctS(r.d52)}</td><td class="n small">${r.y ? r.y.toFixed(1) + '%' : '–'}</td><td class="n">${r.own || ''}</td><td>${trade(r)}</td></tr>`).join('')}</tbody></table></div>
-   <p class="small muted">${L.length} listings${L.length > 120 ? ', showing 120' : ''}. Studio tickers open their own page. Every company pays its dividend quarterly where it has one.</p>`;
+   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Industry</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n" title="Dividend yield: the cash a share pays each year, as a percentage of its price (paid quarterly)">Dividend / yr</th><th class="n">Own</th><th></th></tr></thead><tbody>${L.slice(0, 120).map(r => `<tr><td>${nm(r)}</td><td class="small">${esc(r.name)}</td><td class="small muted">${esc(r.ind)}</td><td>${r.spark}</td><td class="n" data-v="${r.px}">$${r.px.toFixed(2)}</td><td class="n" data-v="${r.d1}">${pctS(r.d1)}</td><td class="n" data-v="${r.d52}">${pctS(r.d52)}</td><td class="n small" data-v="${r.y}" title="${r.y ? `About $${(r.px * r.y / 100).toFixed(2)} a share each year` : 'Pays no dividend'}">${r.y ? r.y.toFixed(1) + '%' : 'none'}</td><td class="n">${r.own || ''}</td><td>${trade(r)}</td></tr>`).join('')}</tbody></table></div>
+   <p class="small muted">${L.length} listings${L.length > 120 ? ', showing 120' : ''}. Click any ticker for its page: chart, leadership, staff and every way to trade it, including shorts and limit orders. Dividends are paid quarterly; the yield is a year's dividends as a share of today's price.</p>`;
 }
 function mktChange(e) { const id = e.target.id, v = e.target.value; if (id === 'mk-ind') { UI.mkf = v; render(true); return true; } if (id === 'mk-sort') { UI.mks = v; render(true); return true; } if (id === 'mkq') { UI.mkq = v; render(true); return true; } return false; }
 
@@ -143,10 +143,24 @@ function angelsOf(hub) {
     const motive = kind === 'Retired studio head' && r() < .6 ? 'prestige' : kind === 'Hedge-fund manager' && r() < .6 ? 'returns' : kind === 'Sports star' && r() < .5 ? 'glamour' : pk(motives);
     const ask = motive === 'glamour' ? pk(['cameo', 'premiere', 'nephew']) : motive === 'returns' ? pk(['first', 'board', 'none']) : motive === 'prestige' ? pk(['ep', 'notes', 'none']) : pk(asks);
     return { i, name, g, kind, bio: (() => { const B = ANGEL_KIND[kind], o = Math.floor(r() * B.length); for (let j = 0; j < B.length; j++) { const b = B[(o + j) % B.length]; if (!used.has(b)) { used.add(b); return b; } } return B[o]; })(), worth, likes, motive, ask, wait: 13 + Math.floor(r() * 4) * 9, appetite: .3 + r() * .6, ticket: Math.round((.1 + r() * .9) * Math.min(worth * .01, 5e6) / 5e4) * 5e4, isNew }; };
-  for (let i = 0; i < 8; i++) out.push(make(i, r, 0));
-  // new money arrives every year
-  const rn = hashRand(HUB_IDS.indexOf(hub) * 7919 + S.year * 31 + 1); for (let i = 8; i < 10; i++) out.push(make(i, rn, 1));
+  for (let i = 0; i < 12; i++) out.push(make(i, r, 0));
+  // new money arrives every quarter, and some of it leaves again
+  const rn = hashRand(HUB_IDS.indexOf(hub) * 7919 + Math.floor(S.week / 13) * 31 + 1); for (let i = 12; i < 18; i++) { let A = make(i, rn, 1), n = 0; while (out.some(x => x.name === A.name) && n++ < 6) A = make(i, rn, 1); out.push(A); }
+  // fortunes move with where the money is: a year of their part of the market sets their worth, their cheque and their mood
+  for (const A of out) {
+    const ex = ANGEL_EXPOSURE[A.kind] || ['index', 'the stock market'], fac = angelFortune(ex[0]);
+    A.exposure = ex[1]; A.trend = fac; A.worth0 = A.worth; A.worth = Math.round(A.worth * fac / 1e6) * 1e6;
+    A.ticket = Math.round(A.ticket * clamp(fac, .3, 2) / 5e4) * 5e4; A.appetite = clamp(A.appetite * clamp(fac, .6, 1.4), .1, .95);
+    A.out = fac < .72; A.flush = fac > 1.3;
+  }
   return out;
+}
+const ANGEL_EXPOSURE = { 'Family office': ['regal', 'cinema property'], 'Tech founder': ['pipe', 'streaming shares'], 'Hedge-fund manager': ['index', 'the stock market'], 'Old money': ['gold', 'gold and land'], 'Retired studio head': ['cine', 'cinema shares'], 'Real-estate heir': ['macro', 'property'], 'Music mogul': ['label', 'music catalogues'], 'Sports star': ['toy', 'merchandise deals'], 'Restaurateur': ['pop', 'hospitality'], 'Lottery winner': ['gold', 'safe bonds and gold'] };
+function angelFortune(k) {
+  const w0 = Math.max(0, S.week - 52);
+  if (k === 'macro' || k === 'index') return clamp(macroAt(S.week) / Math.max(.2, macroAt(w0)), .4, 2.2);
+  const sec = typeof SECTOR !== 'undefined' ? SECTOR[k] : null; if (!sec || !sectorOpen(sec)) return 1;
+  return clamp(sectorPrice(sec) / Math.max(.01, sectorPrice(sec, w0)), .4, 2.2);
 }
 function angelKey(A) { return A.name + '|' + A.kind; }
 // how hard the case is to make to this one
@@ -188,7 +202,7 @@ function angelWeek() {
   const M = S.me, me = ME(), c = typeof myCo === 'function' ? myCo() : null; if (!c || c.closed !== null || S.week % 4) return;
   if ((M.inbox || []).some(x => x.act === 'angeloffer' && !x.done) || (M.angelFund || []).length >= 3) return;
   const pull = .02 + (c.hits || 0) * .02 + Math.max(0, me.standing - 40) / 600 + Math.max(0, (me.fame || 0) - 30) / 800; if (prnd() >= pull) return;
-  const L = angelsOf(M.hub).filter(A => S.week - ((M.angelTry || {})[angelKey(A)] ?? -999) >= A.wait); if (!L.length) return;
+  const L = angelsOf(M.hub).filter(A => !A.out && S.week - ((M.angelTry || {})[angelKey(A)] ?? -999) >= A.wait); if (!L.length) return;
   const A = L[Math.floor(prnd() * L.length)]; (M.angelTry = M.angelTry || {})[angelKey(A)] = S.week;
   angelOffer(A, pickLine([`A handwritten note arrives: "${A.name} would love to be part of whatever you do next."`, `${A.name}'s office calls. They saw your last film twice.`, `You're seated next to ${A.name} at a charity dinner. By dessert they've made an offer.`, `${A.name}'s assistant emails at 6am. Their boss "wants in".`], S.week));
 }
@@ -197,13 +211,13 @@ function takeAngels() { const M = S.me, L = M.angelFund || []; if (!L.length) re
 function privateBankHTML() {
   const M = S.me, B = bankOf(M), nw = osNetWorth(), lim = sblLimit(M), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub);
   const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[angelKey(a)] ?? -999) < a.wait, dc = angelDC(a), mv = ANGEL_MOTIVE[a.motive];
-    return `<div class="angel"><div class="ang-top"><div><b>${esc(a.name)}</b>${a.isNew ? ' <span class="tag-new">New money</span>' : ''}<br><span class="muted small">${esc(a.kind)} · worth ${fmtM(a.worth / 1e6)}</span></div><span class="ang-dc" title="How hard the case is to make">DC ${dc}</span></div>
+    return `<div class="angel"><div class="ang-top"><div><b>${esc(a.name)}</b>${a.isNew ? ' <span class="tag-new">New money</span>' : ''}<br><span class="muted small">${esc(a.kind)} · worth ${fmtM(a.worth / 1e6)}</span><br><span class="small ${a.trend >= 1.05 ? 'good' : a.trend < .95 ? 'bad' : 'muted'}">${a.trend >= 1 ? '▲' : '▼'} ${Math.abs(Math.round((a.trend - 1) * 100))}% this year · mostly in ${esc(a.exposure)}${a.flush ? ' · flush and keen' : a.out ? ' · licking their wounds' : ''}</span></div><span class="ang-dc" title="How hard the case is to make">DC ${dc}</span></div>
      <p class="small">${esc(a.bio)}</p><p class="small"><b>${esc(mv[0])}.</b> <span class="muted">${esc(mv[1])}</span></p>
      <p class="small"><span class="muted">Loves</span> ${a.likes.map(esc).join(', ')} · <span class="muted">Usual cheque</span> <b>${fmtCash(usd(a.ticket))}</b><br><span class="muted">Usually asks for</span> ${esc(ANGEL_ASK[a.ask])}</p>
-     ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait ? 'disabled' : ''}>${wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
+     ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait || a.out ? 'disabled' : ''}>${a.out ? 'Not investing right now' : wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
   return `<div class="os-grid">${osCard('Securities-backed credit', `<p class="small">Borrow against your shares at ${(rateAt(S.year) + 1.5).toFixed(1)}%, up to half their value: ${fmtCash(lim)} available. If the market falls far enough, the bank sells your shares to cover it.</p><div class="bank-f"><button class="os-btn" data-bank="sbl" ${lim < 1000 ? 'disabled' : ''}>Draw ${fmtCash(Math.min(lim, Math.round(+UI.bkamt || 0)))} from the line</button></div>${B.sbl ? `<p class="small">Drawn: <b>${fmtCash(Math.round(B.sbl))}</b>. Interest comes out weekly; repay with the Repay button on Borrowing.</p>` : ''}`)}
    ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
-   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Two new names arrive each year.</p>
+   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Their fortunes move with the part of the market they're in: a good year makes them keener and the cheques bigger, a bad one sends some to ground. A few new names arrive every quarter.</p>
    <div class="angels">${angels}</div>`;
 }
 function fin2Click(t) { if (t.dataset.angel !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'angel', i: +t.dataset.angel }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; } return false; }

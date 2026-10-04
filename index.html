@@ -927,9 +927,7 @@ table.stacked td.barcol, table.stacked .barcol { min-width: 0; width: auto; } ta
 .decbox .choice { margin: 0; height: 100%; }
 
 /* diary: pins and saved weeks */
-.dk { display: grid; gap: 8px; margin: 8px 0 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; }
-.dk-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; } .dk-t { display: flex; gap: 6px; align-items: center; cursor: pointer; } .dk-p { display: inline-flex; gap: 4px; align-items: center; } .dk-x { color: var(--bad) !important; }
-.dk input#cal-pname { min-width: 0; flex: 0 1 180px; }
+.dk { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; margin: 4px 0 6px; font-size: 12px; } .dk-t { display: inline-flex; gap: 4px; align-items: center; cursor: pointer; font-weight: 600; } .dk-t input { margin: 0; } .dk-sep { color: var(--muted); } .dk .dk-in { font-size: 12px; padding: 2px 6px; width: 120px; } .dk select { font-size: 12px; padding: 2px 6px; max-width: 160px; } .dk-x { color: var(--bad) !important; }
 .calc { display: flex; gap: 2px; align-items: center; } .calc select { flex: 1; min-width: 0; } .calpin { all: unset; cursor: pointer; font-size: 11px; opacity: .25; filter: grayscale(1); padding: 2px; } .calpin:hover { opacity: .7; } .calpin.on { opacity: 1; filter: none; }
 td.pinned { box-shadow: inset 0 0 0 1px var(--gold); border-radius: 6px; }
 
@@ -989,6 +987,14 @@ td.pinned { box-shadow: inset 0 0 0 1px var(--gold); border-radius: 6px; }
 .os-body a, .os-body .lk, .os-body li, .os-body p { overflow-wrap: anywhere; }
 .decbox { padding: 8px 12px; } .dec-body .mh b { font-size: 15px; } .dec-body p { margin: 2px 0 6px; font-size: 13.5px; } .decbox .choice { padding: 6px 10px; min-height: 0; } .decbox .golinks { margin: 4px 0 0; font-size: 12px; }
 @media (max-width: 760px) { .decbox { top: 0; max-height: 45vh; } }
+
+.res .quip { font: italic 600 13px var(--f-body); margin: 4px 0 2px; }
+
+.decbox { position: relative; top: auto; max-height: none; overflow: visible; margin: 0 0 12px; }
+
+.mmain { display: grid; gap: 10px; align-content: start; min-width: 0; } .mmain .mread { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; } .mmain .mlist { max-height: 460px; overflow-y: auto; }
+
+.trade2 .tr-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; } .trade2 input { width: 90px; } .bigchart { display: block; margin: 6px 0; }
 </style>
 
 <header class="slate"><div class="slate-in">
@@ -11452,6 +11458,7 @@ function closeWeek(a) {
   if (typeof finWeek === 'function') finWeek();
   if (typeof angelWeek === 'function') angelWeek();
   if (typeof fitWeek === 'function') fitWeek();
+  if (typeof market3Week === 'function') market3Week();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -11746,7 +11753,7 @@ function sceneResolve(it, k) {
   if (lr && lr.crit < 0) { M.stress = clamp(M.stress + 5, 0, 100); t += ' It could hardly have gone worse.'; }
   // how a moment on the job goes is part of the work: it counts toward the film and your boss's opinion
   if (o.check && ctx.film !== null && ctx.film !== undefined) { const jj = M.jobs.find(x => x.film === ctx.film); if (jj && typeof jobScore === 'function') jobScore(jj, ok ? (lr.crit > 0 ? 2 : 1) : (lr.crit < 0 ? -1.5 : -.5), it.title); }
-  it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null };
+  it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null, quip: typeof stanceQuip === 'function' ? stanceQuip(o, ok, it) : null };
 }
 
 function resolvePick(it, k) {
@@ -11874,6 +11881,8 @@ function applyAct(a) {
     case 'outline': return outlineAct(a);
     case 'scriptsess': return scriptSessAct(a);
     case 'calset': return calSetAct(a);
+    case 'short': return shortAct(a);
+    case 'order': return orderAct(a);
     case 'swedit': return swEditAct(a);
     case 'punchup': return punchAct(a);
     case 'makesave': return makeSaveAct(a);
@@ -12353,7 +12362,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined' && window.s
   let roomT = 0;
   window.setInterval(() => {
     const g = document.querySelector('svg.home-scene .me-walk'); if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-    roomT++; if (g.dataset.busy && roomT % 3) return;   // stay a while once you get there
+    roomT++; if (roomT % 10 || Math.random() < .35) return;   // now and then, not all the time: a move every half minute or so
     let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (A.length < 2) return;
     const cur = +(g.dataset.i || 0); let i = Math.floor(Math.random() * A.length); if (i === cur) i = (i + 1) % A.length;
     const [dx, em, what] = A[i], bub = g.querySelector('.me-bub'), prev = +(g.dataset.dx || 0);
@@ -12927,7 +12936,7 @@ const DAY_FOCUS = {
   social: { label: 'Networking', icon: '🥂', d: 'Mixers and coffees. More people, warmer ties; costs money.', days: [['hunt', 'network'], ['catchup', 'network'], ['hunt', 'network'], ['catchup', 'network'], ['hunt', 'hunt']] },
   money: { label: 'Pay the rent', icon: '🛵', d: 'Side hustles most days. Money now, no progress.', days: [['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle']] },
   make: { label: 'Making things', icon: '🎛️', d: 'Your own work comes first: songs, videos, episodes, pages. Some hunting on the side.', days: [['make', 'make'], ['make', 'hunt'], ['make', 'make'], ['make', 'network'], ['make', 'hustle']] },
-  recover: { label: 'Recover', icon: '🛋️', d: 'Rest and easy days. Energy and stress come back.', days: [['rest', 'read'], ['rest', 'hunt'], ['rest', 'read'], ['rest', 'hunt'], ['rest', 'read']] }
+  recover: { label: 'Recover', icon: '🛋️', d: 'Every free block is rest: maximum energy back, stress down. Work and classes still happen.', days: [['rest', 'rest'], ['rest', 'rest'], ['rest', 'rest'], ['rest', 'rest'], ['rest', 'rest']] }
 };
 const EVE_STYLE = {
   quiet: { label: 'Quiet nights', icon: '🏠', eves: ['home', 'read', 'home', 'read', 'home', 'out', 'home'] },
@@ -12938,6 +12947,8 @@ const EVE_STYLE = {
 function autoCal() {
   const M = S.me, F = M.focus || {}, D = DAY_FOCUS[F.day] || DAY_FOCUS.balanced, E = EVE_STYLE[F.eve] || EVE_STYLE.quiet;
   const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : F.day === 'make' ? 'make' : 'read', E.eves[d]]);
+  // recovering means exactly that: every free block is rest (work and classes still take theirs, and pins are kept)
+  if (F.day === 'recover') { const rc = Array.from({ length: 7 }, () => ['rest', 'rest', 'rest']); M.calRested = {}; return typeof applyPins === 'function' ? applyPins(rc) : rc; }
   const life = ORIGIN.life[M.life];
   if (M.energy < 45) { cal[1][1] = 'rest'; cal[3][1] = 'rest'; }
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
@@ -12959,6 +12970,7 @@ function setFocus(a) {
   if (a.day && !DAY_FOCUS[a.day] || a.eve && !EVE_STYLE[a.eve]) return false;
   M.focus = Object.assign({ day: 'balanced', eve: 'quiet', auto: true }, M.focus || {}, a.day ? { day: a.day } : {}, a.eve ? { eve: a.eve } : {}, a.auto !== undefined ? { auto: !!a.auto } : {}, a.noHunt !== undefined ? { noHunt: !!a.noHunt } : {});
   if (M.focus.noHunt && M.focus.day === 'hunt') M.focus.day = 'balanced';
+  if (a.day === 'recover') M.focus.auto = true;   // picking Recover always replans the week as rest
   if (M.focus.auto) M.cal = autoCal();
   return true;
 }
@@ -13375,7 +13387,7 @@ const WRITE_SCENES = [
     { k: 'rein', label: 'Rein them in', ok: { script: 2 }, t: 'Disciplined. The structure holds.' }] },
   { id: 'lw_steal', title: 'Too close', text: 'You realise your best scene in {title} is a scene from a film you love, in a different coat.', opts: [
     { k: 'cut', label: 'Cut it and find your own', check: ['orig', 13], ok: { script: 8, xp: { orig: .2 } }, bad: { stress: 3 }, t: 'Your version is stranger and better.', tb: 'The replacement is flat. You miss the old one.' },
-    { k: 'keep', label: 'Keep it: everyone steals', ok: {}, t: 'Homage, you tell yourself.' }] }
+    { k: 'keep', label: 'Keep it: everyone steals', ok: {}, t: 'Homage. Every great artist steals.' }] }
 ];
 for (const s of WRITE_SCENES) SCENES.push(Object.assign({ event: 1, jobs: [] }, s));
 function writingEvent(sc) {
@@ -15229,7 +15241,7 @@ function structureOf(c) {
   const N = NAMES[HUBS[c.hub].lang] || NAMES.en, r = hashRand(c.id * 17 + 3), nm = () => { const a = N[r() < .5 ? 'M' : 'F'][Math.floor(r() * 10)], b = N.L[Math.floor(r() * N.L.length)]; return EAST[HUBS[c.hub].lang] ? `${b} ${a}` : `${a} ${b}`; };
   const owner = c.owner !== undefined ? c.owner : null;
   return {
-    ceo: owner !== null ? owner : prods[0] ?? null, ceoName: nm(), hop: prods[owner !== null ? 0 : 1] ?? null, dist: nm(), cfo: nm(), board: [nm(), nm(), nm()].slice(0, c.tier === 1 ? 3 : c.tier === 2 ? 2 : 1), partners: dirs.slice(0, 4),
+    ceo: owner !== null ? owner : prods[0] ?? null, ceoName: nm(), hop: prods[owner !== null ? 0 : 1] ?? (typeof staffOf === 'function' && c.closed === null && c.owner === undefined ? ((staffOf(c).find(x => x.r === 6 && x.id !== null) || staffOf(c).find(x => x.r >= 4 && x.id !== null) || {}).id ?? null) : null), dist: nm(), cfo: nm(), board: [nm(), nm(), nm()].slice(0, c.tier === 1 ? 3 : c.tier === 2 ? 2 : 1), partners: dirs.slice(0, 4),
     divisions: { 1: ['Studio', 'Worldwide distribution', 'Classics label', 'Television', 'International'], 2: ['Production', 'Distribution', 'Library sales'], 3: ['Production'] }[c.tier]
   };
 }
@@ -15672,7 +15684,7 @@ const THIRD_SCENES = {
       { k: "spin", label: "Write it up as \"weather and schedule pressure\"", check: ["cha", 12], ok: { tie: { head: 2 } }, bad: { tie: { head: -4 }, flag: "fudger" }, t: "The studio accepts it. This time.", tb: "The studio asks for receipts." }] },
     { id: "t_pro_permit", title: "The permit", text: "The location permit for tomorrow hasn't come through, and a hundred people are booked to be there at 6 a.m.", teach: "Filming in public needs a permit from the city film office, often with police or fire officers on site; shooting without one can shut a production down and cost the location for every future film.", opts: [
       { k: "call", label: "Ring the film office until someone answers", check: ["eth", 12], ok: { tie: { head: 4 }, stand: .2 }, bad: { stress: 4 }, t: "A tired clerk finds it in a pile at 6:40 p.m. You could kiss them.", tb: "Voicemail, voicemail, voicemail. The day moves to a stage set nobody likes." },
-      { k: "steal", label: "Suggest shooting it anyway, quickly", ok: { tie: { head: -1 }, risk: .35, stand: .2 }, t: "A small crew, one camera, in and out in two hours. It works. It shouldn't have." }] },
+      { k: "steal", label: "Suggest shooting it anyway, quickly", ok: { tie: { head: -1 }, risk: .35, stand: .2 }, t: "A small crew, one camera, in and out in two hours. It works. Nobody asks how." }] },
     { id: "t_pro_notes", title: "Studio notes", text: "Twelve pages of studio notes arrive on the cut. Half contradict the other half; one asks for a happier ending.", teach: "Studio executives give notes at every stage; producers translate them, fight the bad ones and protect the director from the rest. 'Note' is also a polite word for an order.", opts: [
       { k: "triage", label: "Sort them: must-do, can-argue, ignore", check: ["pack", 12], ok: { tie: { head: 5, dir: 3 }, xp: { pack: .1 } }, bad: { tie: { dir: -3 } }, t: "Three real problems, two fights worth having, and seven that will be forgotten. Everyone feels heard.", tb: "The director reads your summary as siding with the studio." },
       { k: "forward", label: "Forward them to the director unfiltered", ok: { tie: { dir: -4 }, stress: 1 }, t: "The director goes very quiet for a day." }] },
@@ -15777,7 +15789,7 @@ const THIRD_SCENES = {
       { k: "defend", label: "Argue the audience is wrong", check: ["cha", 13], ok: { tie: { dir: 3 } }, bad: { tie: { head: -4 } }, t: "The director backs you. The studio lets it stand.", tb: "The studio does not like editors who argue with numbers." }] },
     { id: "t_edt_lost", title: "Missing media", text: "The project opens with a third of the clips offline. The assistant swears they were backed up.", teach: "Assistant editors manage media: ingesting, syncing, organising and backing up every frame, usually on two or three separate drives. 'Media offline' is the most dreaded phrase in post.", opts: [
       { k: "relink", label: "Track the drives down and relink everything", check: ["cont", 12], ok: { tie: { head: 4 }, xp: { cont: .1 } }, bad: { energy: -10 }, t: "A drive in a drawer, a folder renamed by accident. Relinked by midnight.", tb: "Two days of detective work. Three clips are gone for good." },
-      { k: "blame", label: "Let the assistant take the heat", ok: { tie: { mates: -3 } }, t: "It wasn't really their fault. Everyone knows that, including them." }] }
+      { k: "blame", label: "Let the assistant take the heat", ok: { tie: { mates: -3 } }, t: "The assistant takes it on the chin. Your record stays clean." }] }
   ],
   dir: [
     { id: "t_dir_rain", title: "The rain machine", text: "The rain machine floods the street, the lead is shivering, and you still don't have the shot.", teach: "Film rain comes from towers and hoses because real rain barely shows on camera; it's backlit to be seen and is miserable to act in.", opts: [
@@ -16279,7 +16291,7 @@ const LOW_LIFE = {
       { k: "no", label: "Keep your shift", ok: { cash: 60 }, t: "Reliable money beats a free lunch." }] },
     { id: "lh_quit", title: "The manager", text: "Your manager says you can have the shift you need off for a job interview only if you work every weekend for a month.", opts: [
       { k: "deal", label: "Take the deal", ok: { energy: -10, stress: 2 }, t: "You go to the interview. You also don't see a weekend until next month." },
-      { k: "push", label: "Push back", check: ["cha", 12], ok: { stress: -1 }, bad: { stress: 3, cash: -60 }, t: "They give in: 'fine, just this once.' It's never just once.", tb: "They cut your hours to make a point." }] }
+      { k: "push", label: "Push back", check: ["cha", 12], ok: { stress: -1 }, bad: { stress: 3, cash: -60 }, t: "They give in: 'fine, just this once.' They'll remember you held your ground.", tb: "They cut your hours to make a point." }] }
   ],
   train: [
     { id: "lt_teacher", title: "The teacher's offer", text: "Your teacher says they need an assistant on a short they're shooting next month. Unpaid.", opts: [
@@ -16379,7 +16391,7 @@ const LOW_WORK = {
   ],
   office: [
     { id: "t_off_cc", title: "Reply all", text: "Someone has replied all to the whole company with something they shouldn't have.", opts: [
-      { k: "nothing", label: "Say nothing, delete it", ok: { trust: { head: 2 } }, t: "The office splits into people who forwarded it and people who didn't. You're in the right half." },
+      { k: "nothing", label: "Say nothing, delete it", ok: { trust: { head: 2 } }, t: "The office splits into people who forwarded it and people who didn't. You stay out of it." },
       { k: "forward", label: "Forward it to a friend", ok: { risk: .3, stress: -1 }, t: "Your friend loves it. IT keeps logs." }] },
     { id: "t_off_desk", title: "The desk", text: "Your boss's desk is chaos. They ask if you can 'just tidy it a bit'.", opts: [
       { k: "system", label: "Organise it into a system", check: ["eth", 11], ok: { tie: { head: 4 }, flag: "reliable" }, bad: { tie: { head: -2 } }, t: "They find a contract they thought was lost. You are now indispensable.", tb: "They can't find anything now. 'It was chaos, but it was my chaos.'" },
@@ -16824,7 +16836,7 @@ const FIELD_SCENES = {
   creator: [
     { id: 'fc_comments', title: 'The comments', text: 'A video you edited is getting thousands of comments, and a lot of them are about the editing.', teach: 'Online video lives on retention: the share of viewers still watching at each second. Editors chase it with pace, jump cuts and pattern breaks, and the analytics show exactly where people leave.', opts: [
       { k: 'read', label: 'Read the retention graph, not the comments', check: ['rhythm', 11], ok: { xp: { rhythm: .1 }, tie: { head: 3 } }, bad: { stress: 2 }, t: 'Viewers left at 2:14 every time. You fix that beat in the next one and watch time jumps.', tb: 'The graph tells you nothing you can use.' },
-      { k: 'reply', label: 'Reply to the critics', ok: { stress: 3, stand: -.2 }, t: 'Never reply to the critics.' }] },
+      { k: 'reply', label: 'Reply to the critics', ok: { stress: 3, stand: -.2 }, t: 'You reply. Half the comments turn on you, half turn on them. Engagement, technically. ' }] },
     { id: 'fc_sponsor', title: 'The sponsor', text: 'The channel\'s sponsor wants their product in the first thirty seconds. The creator wants to quit.', teach: 'Sponsorships pay most creators more than ads do; platforms and advertising rules require that paid placements be clearly labelled.', opts: [
       { k: 'creative', label: 'Pitch a way to make the ad part of the joke', check: ['vstory', 12], ok: { tie: { head: 5 }, stand: .3 }, bad: { tie: { head: -2 } }, t: 'The ad becomes the most-liked part of the video. The sponsor renews for a year.', tb: 'The sponsor doesn\'t find it funny.' },
       { k: 'flat', label: 'Do it straight and move on', ok: {}, t: 'Thirty seconds of honest reading. Everyone survives.' }] }
@@ -17209,10 +17221,13 @@ function mailApp() {
   const F = { inbox: 'Inbox', offers: 'Offers', fans: 'Fan mail', news: 'Newsletters', sent: 'Sent', spam: 'Spam' };
   const inInbox = m => !['spam', 'sent', 'news'].includes(m.folder);
   const list = f === 'compose' ? L.filter(m => m.folder === 'sent') : f === 'inbox' ? L.filter(inInbox) : L.filter(m => m.folder === f), open = L.find(m => m.id === UI.mailo);
-  const cnt = k => L.filter(m => (k === 'inbox' ? inInbox(m) : m.folder === k) && k !== 'sent' && k !== 'spam' && !m.rd && S.week - m.w < 8).length;
-  return `<div class="mailapp"><div class="mfold"><button class="btn-s${f === 'compose' ? '' : ' ghost'}" data-mailf="compose">✏️ New email</button>${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button></div>
+  const cnt = k => L.filter(m => (k === 'inbox' ? inInbox(m) : m.folder === k) && k !== 'sent' && k !== 'spam' && !m.rd).length;
+  // nothing chosen yet: open the newest unread email in this folder
+  if (!open && f !== 'compose' && f !== 'old' && !UI.mailo) { const nu = list.find(m => !m.rd); if (nu) { UI.mailo = nu.id; nu.rd = 1; return mailApp(); } }
+  return `<div class="mailapp"><div class="mfold"><button class="btn-s${f === 'compose' ? '' : ' ghost'}" data-mailf="compose">✏️ New email</button>${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button>${L.some(m => !m.rd && m.folder !== 'sent' && m.folder !== 'spam') ? '<button class="linkish small" data-markread="1">Mark all read</button>' : ''}</div>
+   <div class="mmain">${open && f !== 'old' && f !== 'compose' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.folder === 'fans' ? (open.replied ? '<p class="muted">You wrote back. It made their week.</p>' : `<p><button class="btn-s ghost" data-mailact="${open.id}:fan">Write back</button></p>`) : ''}${open.act ? (open.done ? `<p class="muted">${open.doneT ? esc(open.doneT) : { yes: 'You said yes.', more: 'You asked for more. See their reply.', asked: 'You asked a question. See their reply.' }[open.done] || 'You declined.'}</p>` : open.act.opts ? `<p>${open.act.opts.map(([k, l], i) => `<button class="btn-s${i ? ' ghost' : ''}" data-mailact="${open.id}:${k}">${esc(l)}</button>`).join(' ')}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">${open.act.k === 'favour' ? 'Help them' : 'Accept'}</button> ${(open.act.fee !== undefined || open.act.adv !== undefined) && !open.act.pushed ? `<button class="btn-s ghost" data-mailact="${open.id}:more" title="Ask for more money. They might say yes, hold firm, or walk away.">Negotiate</button> ` : ''}${!open.act.asked ? `<button class="btn-s ghost" data-mailact="${open.id}:ask">Ask a question</button> ` : ''}<button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}
    <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}${m.rd ? '' : ' unread'}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || `<div class="os-empty"><span>${{ inbox: '📭', offers: '🤝', fans: '💌', news: '🗞️', sent: '📤', spam: '🧹' }[f] || '📭'}</span><b>${{ inbox: 'Inbox zero', offers: 'No offers yet', fans: 'No fan mail yet', news: 'No newsletters', sent: 'Nothing sent', spam: 'No spam. Lucky you.' }[f] || 'Nothing here'}</b><p>${{ inbox: 'Replies, invitations and offers land here. Write to someone to get things moving.', offers: 'Offers arrive as your name gets around: apply, network and finish what you start.', fans: 'Make things people see, and they write back.', sent: 'Use New email to write to anyone you know.' }[f] || ''}</p></div>`}</div>
-   ${f === 'compose' && typeof composeMailHTML === 'function' ? composeMailHTML() : ''}${open && f !== 'old' && f !== 'compose' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.folder === 'fans' ? (open.replied ? '<p class="muted">You wrote back. It made their week.</p>' : `<p><button class="btn-s ghost" data-mailact="${open.id}:fan">Write back</button></p>`) : ''}${open.act ? (open.done ? `<p class="muted">${open.doneT ? esc(open.doneT) : { yes: 'You said yes.', more: 'You asked for more. See their reply.', asked: 'You asked a question. See their reply.' }[open.done] || 'You declined.'}</p>` : open.act.opts ? `<p>${open.act.opts.map(([k, l], i) => `<button class="btn-s${i ? ' ghost' : ''}" data-mailact="${open.id}:${k}">${esc(l)}</button>`).join(' ')}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">${open.act.k === 'favour' ? 'Help them' : 'Accept'}</button> ${(open.act.fee !== undefined || open.act.adv !== undefined) && !open.act.pushed ? `<button class="btn-s ghost" data-mailact="${open.id}:more" title="Ask for more money. They might say yes, hold firm, or walk away.">Negotiate</button> ` : ''}${!open.act.asked ? `<button class="btn-s ghost" data-mailact="${open.id}:ask">Ask a question</button> ` : ''}<button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
+   ${f === 'compose' && typeof composeMailHTML === 'function' ? composeMailHTML() : ''}</div></div>`;
 }
 // ---- Ticker: the industry's market and its trends ----
 function fieldIndex(field, w) {
@@ -18254,7 +18269,7 @@ const SITUATIONS = {
     const s = { id: 'sit_' + fam + '_' + id, title, text, teach, opts: [
       { k: 'fix', label: fix, check: [stat, dc], ok: { tie: { head: 3 }, xp: { [stat]: .25 }, stand: .3 }, bad: { tie: { head: -2 }, stress: 4 }, t: ok, tb: bad },
       { k: 'ask', label: 'Ask {head} how they want it handled', ok: { tie: { head: 1 }, trust: { head: 2 }, xp: { [stat]: .1 } }, t: '{head} tells you exactly how they like it. Slower, but nothing breaks.' },
-      { k: 'bold', label: bold, check: [stat, Math.min(19, dc + 3)], ok: { tie: { head: 6 }, xp: { [stat]: .4 }, stand: .8 }, bad: { tie: { head: -5 }, stand: -.4, stress: 6 }, t: ok + ' People talk about it afterwards.', tb: bad + ' And it was your idea.' },
+      { k: 'bold', label: bold, check: [stat, Math.min(19, dc + 3)], ok: { tie: { head: 6 }, xp: { [stat]: .4 }, stand: .8 }, bad: { tie: { head: -5 }, stand: -.4, stress: 6 }, t: ok + ' People talk about it afterwards.', tb: bad + ' Big swing; this one went wide.' },
       { k: 'mate', label: 'Pull in a colleague to help', check: ['cha', 11], ok: { tie: { mates: 3 } }, bad: { tie: { mates: -1 }, stress: 2 }, t: 'Two of you, twice as fast. You owe them a drink.', tb: 'They\'re busy and say so. You do it alone, late.' }
     ] };
     (ROLE_SCENES[fam] = ROLE_SCENES[fam] || []).push(s);
@@ -18411,7 +18426,7 @@ function tableKey(tb) { return [...tb.querySelectorAll('thead th')].map(th => th
 function cellVal(td) {
   if (!td) return '';
   if (td.dataset.v !== undefined) return +td.dataset.v;
-  const t = td.textContent.trim(), m = t.replace(/[,\s]/g, '').match(/^[−-]?[$£€¥₹]?([−-]?\d+(\.\d+)?)([kKMB%])?/);
+  const t0 = td.textContent.trim(), t = t0.replace(/^▲\s*/, '').replace(/^▼\s*/, '-'), m = t.replace(/[,\s]/g, '').match(/^[−-]?[$£€¥₹]?([−-]?\d+(\.\d+)?)([kKMB%])?/);
   if (m) { let v = parseFloat(m[1].replace('−', '-')); if (/^[−-]/.test(t)) v = -Math.abs(v); const s = m[3]; if (s === 'k' || s === 'K') v *= 1e3; else if (s === 'M') v *= 1e6; else if (s === 'B') v *= 1e9; return v; }
   return t.toLowerCase();
 }
@@ -18759,7 +18774,7 @@ for (let r = 0; r < LADDER.length; r++) { const t = { k: 'corp_' + r, t: LADDER[
 // Worked out fresh from the town's people every time it's asked, so the simulation and the screen always agree.
 function hubStaff(hub) {
   const cos = S.companies.filter(c => c.hub === hub && c.closed === null && c.owner === undefined).sort((a, b) => a.tier - b.tier || a.id - b.id);
-  const pool = (S.pool[hub] ? [].concat(S.pool[hub].producer || [], (S.pool[hub].writer || []).filter(id => !P(id).catId && P(id).standing < 30)) : []).filter(id => P(id) && !P(id).dead && !P(id).player && (P(id).role === 'producer' || !P(id).catId));
+  const pool = (S.pool[hub] ? [].concat(S.pool[hub].producer || [], (S.pool[hub].writer || []).filter(id => !P(id).catId && P(id).standing < 30), ['director', 'editor', 'writer', 'casting'].flatMap(r => (S.pool[hub][r] || []).filter(id => P(id) && !P(id).catId && P(id).standing >= 30))) : []).filter((id, i, a) => a.indexOf(id) === i && P(id) && !P(id).dead && !P(id).player && !P(id).retired && (P(id).role === 'producer' || !P(id).catId));
   const order = pool.map(id => [id, P(id).standing + hashRand(id * 31 + S.year)() * 25]).sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(x => x[0]);
   const used = new Set(), M2 = {};
   for (const c of cos) {
@@ -18772,6 +18787,17 @@ function hubStaff(hub) {
     M2[c.id] = L;
   }
   for (const x of S.poach || []) { for (const c in M2) M2[c] = M2[c].map(s => s.id === x.person && +c !== x.to ? { r: s.r, id: null } : s); if (M2[x.to]) { const seat = M2[x.to].find(s => s.r === x.r); if (seat) seat.id = x.person; } }
+  // chairs don't stay empty for long: the best person left steps up (or is hired in), top chairs first
+  for (const x of S.poach || []) used.add(x.person);
+  let wide = null;
+  for (const c of cos) for (const seat of M2[c.id].slice().sort((a, b) => b.r - a.r)) if (seat.id === null) {
+    let id = order.find(z => !used.has(z));
+    if (id === undefined) {   // the producer pool is spent: experienced people from every department move into the office
+      wide = wide || S.people.filter(p => p && p.hub === hub && !p.dead && !p.player && !p.retired && !p.catId && S.year - p.born >= 24 && S.year - p.born <= 72).map(p => [p.id, p.standing + hashRand(p.id * 17 + S.year)() * 20]).sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(x => x[0]);
+      id = wide.find(z => !used.has(z));
+    }
+    if (id === undefined) break; seat.id = id; used.add(id);
+  }
   return M2;
 }
 function staffOf(c) { return hubStaff(c.hub)[c.id] || []; }
@@ -19133,7 +19159,7 @@ function todayHub() {
 }
 function hubClick(t) {
   const d = t.dataset;
-  if (d.jump) { const [tab, app, x] = d.jump.split(':'); UI.tab = 'you'; UI.stack = []; UI.dtab = tab; if (d.libf) UI.libf = d.libf; if (app) { UI.app = app; if (x) UI.mailo = +x; } render(); return true; }
+  if (d.jump) { const [tab, app, x] = d.jump.split(':'); UI.tab = 'you'; UI.stack = []; UI.dtab = tab; if (d.libf) UI.libf = d.libf; if (tab === 'phone' && typeof phoneFocus === 'function') phoneFocus(); if (app) { UI.app = app; if (x) { UI.mailo = +x; UI.mailf = 'inbox'; UI.mailJump = 1; const m = (S.me.mail || []).find(y => y.id === +x); if (m) m.rd = 1; } } render(); return true; }
   if (d.applybest) { const slots = appSlots(); UI.apps = new Set([...UI.apps].filter(id => S.me.board.some(p => p.id === id))); for (const [p] of bestFits(12)) { if (UI.apps.size >= slots) break; UI.apps.add(p.id); } render(true); return true; }
   return false;
 }
@@ -19357,7 +19383,7 @@ function stockPage(c) {
    <div class="trade"><label class="small">Shares <input id="mkt-q" type="number" min="1" value="${q}"></label> <button class="btn-s" data-mkt="buy:${c.id}" ${maxBuy < 1 ? 'disabled' : ''}>Buy</button> <button class="btn-s ghost" data-mkt="buymax:${c.id}" ${maxBuy < 1 ? 'disabled' : ''}>Max (${Math.max(0, maxBuy)})</button>${n ? ` <button class="btn-s ghost" data-mkt="sell:${c.id}">Sell</button> <button class="btn-s ghost" data-mkt="sellall:${c.id}">Sell all ${n}</button>` : ''}<p class="muted small">$5 a trade. You own ${n}.${n ? ` Worth ${fmtCash(Math.round(n * px))}.` : ''}</p></div></div>
    ${candles(c)}
    <div class="cols two"><section><h4>What's driving it</h4><ul class="plain small">${recent.map(f => `<li>${fl(f.id)} ${f.hitRatio > 2 ? '<span class="good">hit</span>' : f.hitRatio < .7 ? '<span class="bad">flop</span>' : ''} · ${fmtM(f.total)} worldwide</li>`).join('') || '<li class="muted">No recent releases.</li>'}<li>${slate} film${slate === 1 ? '' : 's'} on the slate · ${c.hits} hits all time · cash ${fmtM(c.cash)}</li><li>Next earnings: ${fmtDate(S.week + ((7 - S.week % 13) + 13) % 13, true)}</li></ul></section>
-   <section><h4>Analysts</h4><p class="small">${c.cash < 0 ? 'Debt is the story. A flop could break it.' : chg(c, 52) > 20 ? 'Momentum. Priced for more hits.' : chg(c, 52) < -20 ? 'Beaten down. Value hunters circling.' : 'Steady. Watch the next opening.'} ${c.tier === 1 ? 'Pays a quarterly dividend.' : 'No dividend.'}</p><p><a href="#" class="lk" data-go="co:${c.id}">Company page ›</a></p></section></div>`;
+   <section><h4>Analysts</h4><p class="small">${c.cash < 0 ? 'Debt is the story. A flop could break it.' : chg(c, 52) > 20 ? 'Momentum. Priced for more hits.' : chg(c, 52) < -20 ? 'Beaten down. Value hunters circling.' : 'Steady. Watch the next opening.'} ${c.tier === 1 ? 'Pays a quarterly dividend.' : 'No dividend.'}</p><p><a href="#" class="lk" data-go="co:${c.id}">Company page ›</a></p></section></div>${typeof tradePanelHTML === 'function' ? tradePanelHTML('c' + c.id) : ''}`;
 }
 function marketClick(t) {
   const d = t.dataset; if (!d.mkt) return false;
@@ -20878,7 +20904,15 @@ const DEPTS = {
   podcast: [['Executive Office', .01], ['Production', .26], ['Editorial', .14], ['Audio Engineering', .12], ['Research', .08], ['Ad Sales', .14], ['Marketing', .09], ['Talent', .06], ['Legal', .04], ['Finance', .06]],
   creator: [['Executive Office', .02], ['Production', .26], ['Editing', .2], ['Brand Partnerships', .14], ['Talent Management', .12], ['Analytics', .08], ['Design', .1], ['Finance', .08]],
   theatre: [['Executive Office', .01], ['Artistic', .06], ['Producing', .05], ['Stage Management', .07], ['Carpentry & Scenery', .1], ['Lighting & Sound', .1], ['Wardrobe', .1], ['Front of House', .16], ['Box Office', .08], ['Marketing', .07], ['Development (Fundraising)', .06], ['Education & Outreach', .05], ['Finance & Admin', .09]],
-  biz: [['Management', .18], ['Staff', .82]]
+  biz: [['Management', .18], ['Staff', .82]],
+  cinema: [['Executive Office', .002], ['Film Buying & Booking', .01], ['Theatre Operations', .55], ['Concessions', .2], ['Marketing', .03], ['Real Estate', .02], ['Technology & Projection', .05], ['Finance', .03], ['Human Resources', .03]],
+  gear: [['Executive Office', .01], ['Rental Desk', .15], ['Camera & Lens Engineering', .2], ['Lighting & Grip', .2], ['Logistics', .15], ['Sales', .1], ['R&D', .1], ['Finance', .05]],
+  toys: [['Executive Office', .005], ['Licensing', .08], ['Design', .12], ['Manufacturing', .35], ['Marketing', .12], ['Sales', .15], ['Supply Chain', .1], ['Finance', .05]],
+  stream: [['Executive Office', .003], ['Content & Originals', .1], ['Acquisitions', .04], ['Engineering', .3], ['Product', .1], ['Marketing', .12], ['Data & Research', .08], ['Partnerships', .05], ['Trust & Safety', .05], ['Finance', .05]],
+  ads: [['Executive Office', .01], ['Creative', .3], ['Strategy', .1], ['Media Buying', .15], ['Account Management', .2], ['Production', .12], ['Finance', .05]],
+  vfx: [['Executive Office', .005], ['Compositing', .25], ['Animation', .15], ['FX & Simulation', .12], ['Lighting', .1], ['Pipeline & R&D', .1], ['Production', .12], ['Recruitment', .03]],
+  fund: [['Management', .3], ['Trading', .3], ['Custody & Vaults', .2], ['Compliance', .2]],
+  corp: [['Executive Office', .005], ['Operations', .35], ['Creative', .12], ['Marketing', .12], ['Sales', .12], ['Technology', .12], ['Finance', .06], ['Legal', .03], ['Human Resources', .03]]
 };
 const LADDER_T = ['Assistant', 'Coordinator', 'Senior Coordinator', 'Manager', 'Senior Manager', 'Director', 'Senior Director', 'Vice President', 'Senior Vice President', 'Executive Vice President'];
 const EXEC_T = ['Chief Executive Officer', 'President', 'Chief Operating Officer', 'Chief Financial Officer', 'Chief Creative Officer', 'General Counsel', 'Chief of Staff', 'Executive Assistant to the CEO', 'Executive Assistant to the President', 'Head of Strategy', 'Chief Marketing Officer', 'Chief Technology Officer'];
@@ -20893,6 +20927,7 @@ function coRef(key) {
   if (t === 'f') { const c = S.companies[+rest]; if (!c) return null; return { key, name: c.name, kind: 'film', tier: c.tier, hub: c.hub, founded: c.founded, closed: c.closed, c }; }
   if (t === 'm') { const c = MEDIA_COS[+rest]; if (!c) return null; return { key, name: c.n, kind: ['label', 'publisher', 'podcast', 'creator', 'theatre'].includes(c.type) ? c.type : 'label', tier: c.tier || 2, hub: c.hub, founded: c.f, m: c, mi: +rest }; }
   if (t === 'x' && typeof freeCoRef === 'function') return freeCoRef(key);
+  if (t === 'k' && typeof sectorRef === 'function') return sectorRef(rest);
   if (t === 'b') { const [name, hub] = rest.split('|'); const kind = typeof bizKind === 'function' ? bizKind(name)[1] : 'office'; const r = hashRand([...name].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) >>> 0); return { key, name, kind: 'biz', bk: BIZ_T[kind] ? kind : 'office', tier: 3, hub: HUBS[hub] ? hub : 'hollywood', founded: S.year - 2 - Math.floor(r() * 40) }; }
   return null;
 }
@@ -30249,11 +30284,11 @@ function allMarketHTML() {
   L.sort((a, b) => srt === 'name' ? a.name.localeCompare(b.name) : key[srt](b) - key[srt](a));
   const movers = R.slice().sort((a, b) => b.d1 - a.d1), byInd = Object.keys(inds).map(k => { const G = R.filter(r => r.ind === k); return [k, G.reduce((t, r) => t + r.d52, 0) / G.length]; }).sort((a, b) => b[1] - a[1]);
   const trade = r => r.co !== undefined ? `<button class="btn-s" data-mkt="buy:${r.co}">Buy</button>${r.own ? ` <button class="btn-s ghost" data-mkt="sell:${r.co}">Sell</button>` : ''}` : `<button class="btn-s" data-sec="buy:${r.sk}">Buy</button>${r.own ? ` <button class="btn-s ghost" data-sec="sell:${r.sk}">Sell</button>` : ''}`;
-  const nm = r => r.co !== undefined ? `<a href="#" class="lk" data-mkt="sel:${r.co}"><b>${esc(r.tk)}</b></a>` : `<b>${esc(r.tk)}</b>`;
+  const nm = r => r.co !== undefined ? `<a href="#" class="lk" data-mkt="sel:${r.co}"><b>${esc(r.tk)}</b></a>` : `<a href="#" class="lk" data-go="ticker:${r.sk}"><b>${esc(r.tk)}</b></a>`;
   return `<div class="mk-sum"><div><span class="muted small">Best industry this year</span><b>${esc(byInd[0][0])} ${pctS(byInd[0][1])}</b></div><div><span class="muted small">Worst</span><b>${esc(byInd[byInd.length - 1][0])} ${pctS(byInd[byInd.length - 1][1])}</b></div><div><span class="muted small">Top movers this week</span><b class="small">${movers.slice(0, 3).map(r => `${esc(r.tk)} ${pctS(r.d1)}`).join(' · ')}</b></div></div>
    <div class="filt"><label class="filt-q"><span>Search</span><input id="mkq" type="search" placeholder="Ticker or company…" value="${esc(UI.mkq || '')}"></label><label><span>Industry</span>${sel('mk-ind', [['all', `Everything (${R.length})`], ...Object.entries(inds).sort((a, b) => b[1] - a[1]).map(([k, n]) => [k, `${k} (${n})`])], f)}</label><label><span>Sort</span>${sel('mk-sort', [['cap', 'Biggest'], ['d1', 'This week'], ['d52', 'This year'], ['y', 'Dividend yield'], ['px', 'Price'], ['name', 'Name']], srt)}</label><label><span>Shares a trade</span><input id="mkt-q" type="number" min="1" value="${T.q || 10}"></label></div>
-   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Industry</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n">Yield</th><th class="n">Own</th><th></th></tr></thead><tbody>${L.slice(0, 120).map(r => `<tr><td>${nm(r)}</td><td class="small">${esc(r.name)}</td><td class="small muted">${esc(r.ind)}</td><td>${r.spark}</td><td class="n">$${r.px.toFixed(2)}</td><td class="n">${pctS(r.d1)}</td><td class="n">${pctS(r.d52)}</td><td class="n small">${r.y ? r.y.toFixed(1) + '%' : '–'}</td><td class="n">${r.own || ''}</td><td>${trade(r)}</td></tr>`).join('')}</tbody></table></div>
-   <p class="small muted">${L.length} listings${L.length > 120 ? ', showing 120' : ''}. Studio tickers open their own page. Every company pays its dividend quarterly where it has one.</p>`;
+   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Industry</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n" title="Dividend yield: the cash a share pays each year, as a percentage of its price (paid quarterly)">Dividend / yr</th><th class="n">Own</th><th></th></tr></thead><tbody>${L.slice(0, 120).map(r => `<tr><td>${nm(r)}</td><td class="small">${esc(r.name)}</td><td class="small muted">${esc(r.ind)}</td><td>${r.spark}</td><td class="n" data-v="${r.px}">$${r.px.toFixed(2)}</td><td class="n" data-v="${r.d1}">${pctS(r.d1)}</td><td class="n" data-v="${r.d52}">${pctS(r.d52)}</td><td class="n small" data-v="${r.y}" title="${r.y ? `About $${(r.px * r.y / 100).toFixed(2)} a share each year` : 'Pays no dividend'}">${r.y ? r.y.toFixed(1) + '%' : 'none'}</td><td class="n">${r.own || ''}</td><td>${trade(r)}</td></tr>`).join('')}</tbody></table></div>
+   <p class="small muted">${L.length} listings${L.length > 120 ? ', showing 120' : ''}. Click any ticker for its page: chart, leadership, staff and every way to trade it, including shorts and limit orders. Dividends are paid quarterly; the yield is a year's dividends as a share of today's price.</p>`;
 }
 function mktChange(e) { const id = e.target.id, v = e.target.value; if (id === 'mk-ind') { UI.mkf = v; render(true); return true; } if (id === 'mk-sort') { UI.mks = v; render(true); return true; } if (id === 'mkq') { UI.mkq = v; render(true); return true; } return false; }
 
@@ -30371,10 +30406,24 @@ function angelsOf(hub) {
     const motive = kind === 'Retired studio head' && r() < .6 ? 'prestige' : kind === 'Hedge-fund manager' && r() < .6 ? 'returns' : kind === 'Sports star' && r() < .5 ? 'glamour' : pk(motives);
     const ask = motive === 'glamour' ? pk(['cameo', 'premiere', 'nephew']) : motive === 'returns' ? pk(['first', 'board', 'none']) : motive === 'prestige' ? pk(['ep', 'notes', 'none']) : pk(asks);
     return { i, name, g, kind, bio: (() => { const B = ANGEL_KIND[kind], o = Math.floor(r() * B.length); for (let j = 0; j < B.length; j++) { const b = B[(o + j) % B.length]; if (!used.has(b)) { used.add(b); return b; } } return B[o]; })(), worth, likes, motive, ask, wait: 13 + Math.floor(r() * 4) * 9, appetite: .3 + r() * .6, ticket: Math.round((.1 + r() * .9) * Math.min(worth * .01, 5e6) / 5e4) * 5e4, isNew }; };
-  for (let i = 0; i < 8; i++) out.push(make(i, r, 0));
-  // new money arrives every year
-  const rn = hashRand(HUB_IDS.indexOf(hub) * 7919 + S.year * 31 + 1); for (let i = 8; i < 10; i++) out.push(make(i, rn, 1));
+  for (let i = 0; i < 12; i++) out.push(make(i, r, 0));
+  // new money arrives every quarter, and some of it leaves again
+  const rn = hashRand(HUB_IDS.indexOf(hub) * 7919 + Math.floor(S.week / 13) * 31 + 1); for (let i = 12; i < 18; i++) { let A = make(i, rn, 1), n = 0; while (out.some(x => x.name === A.name) && n++ < 6) A = make(i, rn, 1); out.push(A); }
+  // fortunes move with where the money is: a year of their part of the market sets their worth, their cheque and their mood
+  for (const A of out) {
+    const ex = ANGEL_EXPOSURE[A.kind] || ['index', 'the stock market'], fac = angelFortune(ex[0]);
+    A.exposure = ex[1]; A.trend = fac; A.worth0 = A.worth; A.worth = Math.round(A.worth * fac / 1e6) * 1e6;
+    A.ticket = Math.round(A.ticket * clamp(fac, .3, 2) / 5e4) * 5e4; A.appetite = clamp(A.appetite * clamp(fac, .6, 1.4), .1, .95);
+    A.out = fac < .72; A.flush = fac > 1.3;
+  }
   return out;
+}
+const ANGEL_EXPOSURE = { 'Family office': ['regal', 'cinema property'], 'Tech founder': ['pipe', 'streaming shares'], 'Hedge-fund manager': ['index', 'the stock market'], 'Old money': ['gold', 'gold and land'], 'Retired studio head': ['cine', 'cinema shares'], 'Real-estate heir': ['macro', 'property'], 'Music mogul': ['label', 'music catalogues'], 'Sports star': ['toy', 'merchandise deals'], 'Restaurateur': ['pop', 'hospitality'], 'Lottery winner': ['gold', 'safe bonds and gold'] };
+function angelFortune(k) {
+  const w0 = Math.max(0, S.week - 52);
+  if (k === 'macro' || k === 'index') return clamp(macroAt(S.week) / Math.max(.2, macroAt(w0)), .4, 2.2);
+  const sec = typeof SECTOR !== 'undefined' ? SECTOR[k] : null; if (!sec || !sectorOpen(sec)) return 1;
+  return clamp(sectorPrice(sec) / Math.max(.01, sectorPrice(sec, w0)), .4, 2.2);
 }
 function angelKey(A) { return A.name + '|' + A.kind; }
 // how hard the case is to make to this one
@@ -30416,7 +30465,7 @@ function angelWeek() {
   const M = S.me, me = ME(), c = typeof myCo === 'function' ? myCo() : null; if (!c || c.closed !== null || S.week % 4) return;
   if ((M.inbox || []).some(x => x.act === 'angeloffer' && !x.done) || (M.angelFund || []).length >= 3) return;
   const pull = .02 + (c.hits || 0) * .02 + Math.max(0, me.standing - 40) / 600 + Math.max(0, (me.fame || 0) - 30) / 800; if (prnd() >= pull) return;
-  const L = angelsOf(M.hub).filter(A => S.week - ((M.angelTry || {})[angelKey(A)] ?? -999) >= A.wait); if (!L.length) return;
+  const L = angelsOf(M.hub).filter(A => !A.out && S.week - ((M.angelTry || {})[angelKey(A)] ?? -999) >= A.wait); if (!L.length) return;
   const A = L[Math.floor(prnd() * L.length)]; (M.angelTry = M.angelTry || {})[angelKey(A)] = S.week;
   angelOffer(A, pickLine([`A handwritten note arrives: "${A.name} would love to be part of whatever you do next."`, `${A.name}'s office calls. They saw your last film twice.`, `You're seated next to ${A.name} at a charity dinner. By dessert they've made an offer.`, `${A.name}'s assistant emails at 6am. Their boss "wants in".`], S.week));
 }
@@ -30425,13 +30474,13 @@ function takeAngels() { const M = S.me, L = M.angelFund || []; if (!L.length) re
 function privateBankHTML() {
   const M = S.me, B = bankOf(M), nw = osNetWorth(), lim = sblLimit(M), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub);
   const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[angelKey(a)] ?? -999) < a.wait, dc = angelDC(a), mv = ANGEL_MOTIVE[a.motive];
-    return `<div class="angel"><div class="ang-top"><div><b>${esc(a.name)}</b>${a.isNew ? ' <span class="tag-new">New money</span>' : ''}<br><span class="muted small">${esc(a.kind)} · worth ${fmtM(a.worth / 1e6)}</span></div><span class="ang-dc" title="How hard the case is to make">DC ${dc}</span></div>
+    return `<div class="angel"><div class="ang-top"><div><b>${esc(a.name)}</b>${a.isNew ? ' <span class="tag-new">New money</span>' : ''}<br><span class="muted small">${esc(a.kind)} · worth ${fmtM(a.worth / 1e6)}</span><br><span class="small ${a.trend >= 1.05 ? 'good' : a.trend < .95 ? 'bad' : 'muted'}">${a.trend >= 1 ? '▲' : '▼'} ${Math.abs(Math.round((a.trend - 1) * 100))}% this year · mostly in ${esc(a.exposure)}${a.flush ? ' · flush and keen' : a.out ? ' · licking their wounds' : ''}</span></div><span class="ang-dc" title="How hard the case is to make">DC ${dc}</span></div>
      <p class="small">${esc(a.bio)}</p><p class="small"><b>${esc(mv[0])}.</b> <span class="muted">${esc(mv[1])}</span></p>
      <p class="small"><span class="muted">Loves</span> ${a.likes.map(esc).join(', ')} · <span class="muted">Usual cheque</span> <b>${fmtCash(usd(a.ticket))}</b><br><span class="muted">Usually asks for</span> ${esc(ANGEL_ASK[a.ask])}</p>
-     ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait ? 'disabled' : ''}>${wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
+     ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait || a.out ? 'disabled' : ''}>${a.out ? 'Not investing right now' : wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
   return `<div class="os-grid">${osCard('Securities-backed credit', `<p class="small">Borrow against your shares at ${(rateAt(S.year) + 1.5).toFixed(1)}%, up to half their value: ${fmtCash(lim)} available. If the market falls far enough, the bank sells your shares to cover it.</p><div class="bank-f"><button class="os-btn" data-bank="sbl" ${lim < 1000 ? 'disabled' : ''}>Draw ${fmtCash(Math.min(lim, Math.round(+UI.bkamt || 0)))} from the line</button></div>${B.sbl ? `<p class="small">Drawn: <b>${fmtCash(Math.round(B.sbl))}</b>. Interest comes out weekly; repay with the Repay button on Borrowing.</p>` : ''}`)}
    ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
-   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Two new names arrive each year.</p>
+   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Their fortunes move with the part of the market they're in: a good year makes them keener and the cheques bigger, a bad one sends some to ground. A few new names arrive every quarter.</p>
    <div class="angels">${angels}</div>`;
 }
 function fin2Click(t) { if (t.dataset.angel !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'angel', i: +t.dataset.angel }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; } return false; }
@@ -30816,6 +30865,7 @@ function mySchoolPage() {
 function viewMine(cur) {
   if (cur.kind === 'myjob') return myJobPage(cur.id);
   if (cur.kind === 'myschool') return mySchoolPage();
+  if (cur.kind === 'ticker' && typeof tickerPageHTML === 'function') return tickerPageHTML(String(cur.id));
   return '';
 }
 function mineClick(t) {
@@ -30878,10 +30928,7 @@ function calPresetAct(a) {
 function applyPins(cal) { const P0 = S.me.calPins || {}; for (const key in P0) { const [d, b] = key.split('-').map(Number); if (cal[d] && calOk(d, b, P0[key])) cal[d][b] = P0[key]; } return cal; }
 function diaryKeepHTML() {
   const M = S.me, pins = Object.keys(M.calPins || {}).length, L = M.calPresets || [];
-  return `<div class="dk"><div class="dk-row"><label class="dk-t"><input type="checkbox" data-calpinall="1" ${M.calPinAll ? 'checked' : ''}> <b>📌 Keep my changes every week</b></label><span class="muted small">${M.calPinAll ? 'Every block you change from now on is pinned: autopilot plans around it each week.' : 'Tick it, or click 📌 on any block, and autopilot keeps your choices instead of replanning them.'}</span>
-    ${pins ? `<span class="chip">${pins} pinned</span> <button class="linkish" data-calpinclear="1">Unpin all</button>` : ''}<button class="os-btn" data-calpinsnap="1" title="Pin every block of this week as it stands">Pin this whole week</button></div>
-   <div class="dk-row"><b class="small">Saved weeks</b>${L.map((p, i) => `<span class="dk-p"><button class="os-btn" data-caluse="${i}" title="Load this plan into the diary">${esc(p.name)}</button><button class="linkish" data-caluse="${i}" data-calpinuse="1" title="Load it and pin every block">load + pin</button><button class="linkish dk-x" data-caldel="${i}" title="Delete">✕</button></span>`).join('') || '<span class="muted small">None yet.</span>'}
-    ${L.length < 6 ? `<input id="cal-pname" maxlength="28" placeholder="Name this week…" value="${esc(UI.calpname || '')}"><button class="os-btn" data-calsave="1">Save this week</button>` : '<span class="muted small">Six saved: delete one to save another.</span>'}</div></div>`;
+  return `<div class="dk"><label class="dk-t" title="Every block you change is pinned, and autopilot plans around it each week"><input type="checkbox" data-calpinall="1" ${M.calPinAll ? 'checked' : ''}>📌 Keep my changes</label>${pins ? `<span class="muted">${pins} pinned · <button class="linkish" data-calpinclear="1">unpin</button></span>` : ''}<span class="dk-sep">·</span>${L.length ? `<select id="cal-use" aria-label="Saved weeks"><option value="">Saved weeks…</option>${L.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('')}</select><button class="linkish" data-caluse2="1">load</button><button class="linkish dk-x" data-caldel2="1">delete</button>` : ''}${L.length < 6 ? (UI.calnaming ? `<input id="cal-pname" maxlength="28" placeholder="Name it" class="dk-in"><button class="linkish" data-calsave="1">save</button><button class="linkish" data-calname="0">cancel</button>` : `<button class="linkish" data-calname="1" title="Save this week's plan to load again later">save this week</button>`) : ''}</div>`;
 }
 function diary2Click(t) {
   if (!S.me) return false;
@@ -30890,7 +30937,9 @@ function diary2Click(t) {
   if (d.calpinall) { doAct({ t: 'calpin', all: t.checked }); UI.fineOpen = true; render(true); return true; }
   if (d.calpinsnap) { doAct({ t: 'calpin', all: true, snap: 1 }); UI.fineOpen = true; render(true); return true; }
   if (d.calpinclear) { doAct({ t: 'calpin', clear: 1 }); render(true); return true; }
-  if (d.calsave) { const el = document.getElementById('cal-pname'); doAct({ t: 'calpreset', op: 'save', name: el ? el.value : '' }); UI.calpname = ''; UI.fineOpen = true; render(true); return true; }
+  if (d.calname !== undefined) { UI.calnaming = d.calname === '1'; UI.fineOpen = true; render(true); const el = document.getElementById('cal-pname'); if (el) el.focus(); return true; }
+  if (d.calsave) { const el = document.getElementById('cal-pname'); doAct({ t: 'calpreset', op: 'save', name: el ? el.value : '' }); UI.calnaming = false; UI.fineOpen = true; render(true); return true; }
+  if (d.caluse2 || d.caldel2) { const el = document.getElementById('cal-use'), i = el && el.value !== '' ? +el.value : -1; if (i >= 0) doAct({ t: 'calpreset', op: d.caluse2 ? 'use' : 'del', i }); UI.fineOpen = true; render(true); return true; }
   if (d.caluse !== undefined) { doAct({ t: 'calpreset', op: 'use', i: +d.caluse, pin: d.calpinuse ? 1 : 0 }); UI.fineOpen = true; render(true); return true; }
   if (d.caldel !== undefined) { doAct({ t: 'calpreset', op: 'del', i: +d.caldel }); render(true); return true; }
   return false;
@@ -31487,6 +31536,189 @@ function fitLabel() {
   return `${m}, ${w}${F.goal ? ` · training for ${F.goal.why}` : ''}`;
 }
 // </body>
+// <tone>
+// ---------------- No lectures ----------------
+// Choices aren't moral tests. A bold, confrontational or go-it-alone choice can be exactly right; what decides it is
+// the roll and the circumstances. Bold choices that used to cost you automatically are gambles now (a roll that can
+// pay off), and every rolled outcome gets a short line judged only on whether it worked, in the voice of the job.
+const STANCE_RE = {
+  bold: /push back|fight|argue|refuse|demand|insist|call it out|speak up|confront|challenge|negotiat|reply|vent|side with|go over|unfiltered|anyway|own way|your way|what you really think|tell them|bold|stand firm|hold firm|hard bargain|walk out|threaten|bluff|break|opposite/i,
+  careful: /say nothing|keep it|quiet|let it|wait|ignore|stay out|leave it|play it safe|follow|delete it|do as/i,
+  generous: /help|cover|offer|lend|share|take them out|organise|organize|step in|volunteer|teach|buy/i
+};
+function stanceOf(label) { for (const k of ['bold', 'careful', 'generous']) if (STANCE_RE[k].test(label || '')) return k; return 'plain'; }
+const QUIPS = {
+  bold: [['Bold call. It paid off.', 'You backed yourself, and it landed.', 'Nerve like that gets a {role} noticed.', 'The loudest idea in the room was the right one.', 'That\'s how reputations get made.', 'You said it out loud. It worked.'],
+         ['Big swing. Not this time.', 'Didn\'t land today. The instinct was still yours.', 'Some fights you lose. You\'ll pick the next one.', 'Bold doesn\'t always win. It does get remembered.', 'Wrong day for it, not wrong to try.']],
+  careful: [['Steady hands. It held.', 'Quiet, and it worked.', 'Picking your moment paid off.', 'A cool head for a {role}.'],
+            ['Playing it safe didn\'t save it.', 'The quiet option had its own risks.', 'Careful wasn\'t enough this time.']],
+  generous: [['People remember who showed up.', 'Generous, and it came back around.', 'That\'s the kind of {role} crews ask for.'],
+             ['You tried to help. It didn\'t take.', 'Good intentions, rough result.', 'Not every favour lands.']],
+  plain: [['That went your way.', 'Nicely done.', 'Clean.', 'Exactly what a {role} is for.'], ['Didn\'t go your way.', 'Rough break.', 'Not your day.', 'The dice had other plans.']]
+};
+function stanceQuip(o, ok, it) {
+  if (!o || !o.check) return null;
+  const st = stanceOf(o.label), L = QUIPS[st][ok ? 0 : 1], r = hashRand((it.id || 1) * 7 + (ok ? 3 : 5))(), job = S.me && S.me.jobs.find(j => j.id === it.job);
+  return L[Math.floor(r * L.length)].replace('{role}', job ? job.t.toLowerCase() : 'newcomer');
+}
+// bold choices that were automatic punishments become gambles
+(function boldGambles() {
+  if (typeof SCENES === 'undefined') return;
+  for (const s of SCENES) for (const op of s.opts) {
+    if (op.check || stanceOf(op.label) !== 'bold') continue;
+    const f = op.ok || {}, tie = Object.values(f.tie || {}).reduce((a, b) => a + b, 0); if (tie >= 0 && (f.stand || 0) >= 0) continue;
+    const good = { stand: .3 }; if (f.tie) { good.tie = {}; for (const k in f.tie) good.tie[k] = Math.max(1, Math.round(Math.abs(f.tie[k]) * .6)); }
+    op.bad = f; op.tb = op.t; op.ok = good; op.check = [/negotiat|argue|tell|reply|vent|push|side/i.test(op.label) ? 'cha' : 'com', 13];
+    op.t = ['It lands better than anyone expected.', 'You read the room right: it works.', 'They push back, you hold, and it goes your way.'][(s.id.length + op.k.length) % 3];
+  }
+})();
+// </tone>
+// <msgfix>
+// ---------------- Phone and mail you can find your way around ----------------
+// What you've read is remembered with the game (not just this browser tab), unread counts mean the same thing
+// everywhere, an alert opens the exact thread or email, and a conversation always opens at its newest message.
+function phoneSeen() {
+  const M = S.me; if (!M) return {};
+  if (!M.phoneSeen) { M.phoneSeen = {}; for (const m of M.phone || []) { const k = threadOf(m); M.phoneSeen[k] = (M.phoneSeen[k] || 0) + 1; } }   // start clean
+  return M.phoneSeen;
+}
+// unread in one thread: incoming messages after the ones you've looked at
+function threadUnread(k) {
+  const M = S.me, seen = phoneSeen()[k] || 0; let i = 0, u = 0;
+  for (const m of M.phone || []) if (threadOf(m) === k) { i++; if (i > seen && m.from !== -1) u++; }
+  return u;
+}
+function phoneUnread() {
+  const M = S.me; if (!M || !M.phone) return 0;
+  const seen = phoneSeen(), n = {}; let u = 0;
+  for (const m of M.phone) { const k = threadOf(m); n[k] = (n[k] || 0) + 1; if (m.from !== -1 && n[k] > (seen[k] || 0)) u++; }
+  return u;
+}
+// where a phone alert should land: a text that needs an answer first, then the newest unread conversation
+function phoneFocus() {
+  const M = S.me, st = typeof pendingStakes === 'function' ? pendingStakes() : [];
+  if (st.length) { UI.thread = threadOf(st[st.length - 1]); return; }
+  for (let i = (M.phone || []).length - 1; i >= 0; i--) { const m = M.phone[i], k = threadOf(m); if (m.from !== -1 && threadUnread(k)) { UI.thread = k; return; } }
+}
+function markAllRead() {
+  const M = S.me; phoneSeen(); M.phoneSeen = {}; for (const m of M.phone || []) { const k = threadOf(m); M.phoneSeen[k] = (M.phoneSeen[k] || 0) + 1; }
+  for (const m of M.mail || []) m.rd = 1;
+}
+// after drawing: open conversations sit at their newest message; an open email sits at the top of the view
+function msgScroll() {
+  if (typeof document === 'undefined') return;
+  document.querySelectorAll('.sms.thread').forEach(el => { el.scrollTop = el.scrollHeight; const sc = el.closest('.screen'); if (sc) sc.scrollTop = sc.scrollHeight; });
+  if (UI.mailJump) { UI.mailJump = 0; const r = document.querySelector('.mread'); if (r && r.scrollIntoView) r.scrollIntoView({ block: 'nearest' }); }
+}
+function msgClick(t) {
+  if (!S.me) return false;
+  if (t.dataset.markread !== undefined) { markAllRead(); render(true); return true; }
+  return false;
+}
+// </msgfix>
+// <market3>
+// ---------------- The whole market ----------------
+// Every ticker gets a page: what the company does, its chart, the numbers that matter, who runs it (clickable, with a
+// full staff directory) and every way to trade it: buy, sell, sell everything, short and cover, limit orders that
+// fill when the price gets there, and stop-losses that sell when it falls. Shorts pay a weekly borrow fee and are
+// closed by the broker if the loss outgrows your cash (a margin call). Orders are checked as each week closes.
+// Keys: 'c<id>' a listed studio, 's<k>' a sector company.
+function pxOf(key) { if (key[0] === 'c') { const c = S.companies[+key.slice(1)]; return c && c.closed === null ? mktPrice(c) : 0; } const s = SECTOR[key.slice(1)]; return s && sectorOpen(s) ? sectorPrice(s) : 0; }
+function holdOf(key) { const M = S.me; return key[0] === 'c' ? (M.port || {})[+key.slice(1)] || 0 : (M.sport || {})[key.slice(1)] || 0; }
+function tkName(key) { if (key[0] === 'c') { const c = S.companies[+key.slice(1)]; return c ? `${tickerOf(c)} · ${c.name}` : key; } const s = SECTOR[key.slice(1)]; return s ? `${s.tk} · ${s.name}` : key; }
+function tradeKey(key, n) { return key[0] === 'c' ? tradeAct({ co: +key.slice(1), n }) : sTrade({ s: key.slice(1), n }); }
+const SHORT_FEE = .0008;   // a week, on the value borrowed
+function shortAct(a) {
+  const M = S.me, key = String(a.key || ''), n = Math.round(+a.n), px = pxOf(key); if (!/^[cs]/.test(key) || !(n > 0) || n > 1e7 || px <= 0) return false;
+  M.shorts = M.shorts || {}; const sh = M.shorts[key] || { n: 0, cost: 0 };
+  if (a.op === 'open') {   // borrow and sell: half the value must sit in cash as margin
+    const val = px * n; if (M.cash < val * .5 + 5) return false;
+    M.cash += Math.round(val) - 5; sh.n += n; sh.cost += Math.round(val); M.shorts[key] = sh;
+  } else if (a.op === 'cover') {
+    const k = Math.min(n, sh.n); if (!k) return false; const cost = Math.round(px * k) + 5; M.cash -= cost; sh.cost = Math.round(sh.cost * (sh.n - k) / sh.n); sh.n -= k; if (sh.n) M.shorts[key] = sh; else delete M.shorts[key];
+  } else return false;
+  (M.trades = M.trades || []).push({ w: S.week, key, n: a.op === 'open' ? -n : n, px: +px.toFixed(2), short: 1 }); if (M.trades.length > 80) M.trades.shift();
+  return true;
+}
+function orderAct(a) {
+  const M = S.me, L = M.orders = M.orders || [];
+  if (a.op === 'cancel') { const i = L.findIndex(o => o.id === +a.id); if (i < 0) return false; L.splice(i, 1); return true; }
+  const key = String(a.key || ''), n = Math.round(+a.n), lim = +a.lim, kind = ['buy', 'sell', 'stop'].includes(a.kind) ? a.kind : null;
+  if (!/^[cs]/.test(key) || !kind || !(n > 0) || !(lim > 0) || n > 1e7 || L.length >= 20 || pxOf(key) <= 0) return false;
+  L.push({ id: M.seq++, key, kind, n, lim: Math.round(lim * 100) / 100, w: S.week, exp: S.week + 12 }); return true;
+}
+// as the week closes: fill orders, charge borrow fees, call margin
+function market3Week() {
+  const M = S.me; if (!M) return;
+  for (const o of (M.orders || []).slice()) {
+    const px = pxOf(o.key), L = M.orders;
+    if (px <= 0 || S.week > o.exp) { L.splice(L.indexOf(o), 1); mail('news', 'Your broker', 'Order expired', `Your ${o.kind} order for ${o.n} ${tkName(o.key)} at $${o.lim.toFixed(2)} lapsed unfilled.`); continue; }
+    const hit = o.kind === 'buy' ? px <= o.lim : o.kind === 'sell' ? px >= o.lim : px <= o.lim;
+    if (!hit) continue;
+    const n = o.kind === 'buy' ? o.n : -Math.min(o.n, holdOf(o.key)), ok = n !== 0 && tradeKey(o.key, n);
+    L.splice(L.indexOf(o), 1);
+    mail('news', 'Your broker', ok ? `${o.kind === 'stop' ? 'Stop-loss' : o.kind === 'buy' ? 'Buy order' : 'Sell order'} filled` : 'Order couldn\'t fill', ok ? `${o.kind === 'buy' ? 'Bought' : 'Sold'} ${Math.abs(n)} ${tkName(o.key)} at $${px.toFixed(2)} (your trigger was $${o.lim.toFixed(2)}).` : `The price reached $${px.toFixed(2)} but ${o.kind === 'buy' ? 'there wasn\'t enough cash' : 'you no longer hold the shares'}.`);
+  }
+  let fee = 0; for (const key in M.shorts || {}) { const sh = M.shorts[key], px = pxOf(key); if (px <= 0) { M.cash += sh.cost; delete M.shorts[key]; continue; } fee += px * sh.n * SHORT_FEE; }
+  if (fee) M.cash -= Math.round(fee);
+  for (const key in M.shorts || {}) { const sh = M.shorts[key], px = pxOf(key), loss = px * sh.n - sh.cost; if (loss > 0 && loss > M.cash * .9 + sh.cost * .5) { const cost = Math.round(px * sh.n) + 5; M.cash -= cost; delete M.shorts[key]; mail('news', 'Your broker', 'Margin call', `${tkName(key)} kept rising. We closed your short of ${sh.n} at $${px.toFixed(2)} (${fmtCash(cost)}).`); } }
+}
+// ---- the trade panel, on every ticker page ----
+function tradePanelHTML(key) {
+  const M = S.me, px = pxOf(key), have = holdOf(key), sh = (M.shorts || {})[key], q = Math.max(1, Math.round(+UI.tq || 10)), orders = (M.orders || []).filter(o => o.key === key);
+  const val = px * q;
+  return `<section class="os-card trade2"><h5>Trade ${esc(tkName(key).split(' · ')[0])} <small>$${px.toFixed(2)} a share</small></h5>
+   <div class="tr-row"><label>Shares <input id="tq" type="number" min="1" step="1" value="${q}"></label><span class="muted small">≈ ${fmtCash(Math.round(val))} · fee $5</span></div>
+   <div class="tr-row"><button class="btn-s" data-tr="buy:${key}" ${M.cash < val + 5 ? 'disabled title="Not enough cash"' : ''}>Buy ${q}</button><button class="btn-s ghost" data-tr="sell:${key}" ${have ? '' : 'disabled'}>Sell ${Math.min(q, have) || q}</button><button class="btn-s ghost" data-tr="sellall:${key}" ${have ? '' : 'disabled'}>Sell all ${have || ''}</button>
+    <button class="btn-s ghost" data-tr="short:${key}" title="Borrow shares and sell them now; buy back later. You profit if the price falls. Half the value must sit in cash as margin.">Short ${q}</button>${sh ? `<button class="btn-s ghost" data-tr="cover:${key}">Cover ${sh.n}</button>` : ''}</div>
+   <div class="tr-row"><label>Trigger price $<input id="tlim" type="number" min="0.01" step="0.01" value="${(+UI.tlim || +(px * .95).toFixed(2)).toFixed(2)}"></label><button class="btn-s ghost" data-tr="limbuy:${key}" title="Buy automatically if the price falls to this">Limit buy</button><button class="btn-s ghost" data-tr="limsell:${key}" ${have ? '' : 'disabled'} title="Sell automatically if the price rises to this">Limit sell</button><button class="btn-s ghost" data-tr="stop:${key}" ${have ? '' : 'disabled'} title="Sell automatically if the price falls to this">Stop-loss</button></div>
+   <p class="small">You hold <b>${have}</b>${have ? ` worth ${fmtCash(Math.round(have * px))}` : ''}${sh ? ` · short <b>${sh.n}</b> (${px * sh.n < sh.cost ? 'up' : 'down'} ${fmtCash(Math.abs(Math.round(sh.cost - px * sh.n)))})` : ''}.</p>
+   ${orders.length ? `<ul class="os-list">${orders.map(o => `<li><span>${o.kind === 'stop' ? 'Stop-loss' : o.kind === 'buy' ? 'Limit buy' : 'Limit sell'} ${o.n} at $${o.lim.toFixed(2)}</span><span class="muted small">until ${fmtDate(o.exp, true)}</span><button class="linkish" data-tr="cancel:${o.id}">cancel</button></li>`).join('')}</ul>` : ''}
+   <p class="small muted">Orders are checked as each week closes and last twelve weeks. Shorts cost ${(SHORT_FEE * 100).toFixed(2)}% a week to borrow, and the broker closes them if the loss gets bigger than your cash can cover.</p></section>`;
+}
+function tradeClick(t) {
+  if (!S.me || !t.dataset.tr) return false;
+  const [op, key] = t.dataset.tr.split(':'), q = Math.max(1, Math.round(+((document.getElementById('tq') || {}).value || UI.tq || 10))), lim = +((document.getElementById('tlim') || {}).value || 0);
+  UI.tq = q; if (lim) UI.tlim = lim;
+  if (op === 'buy') doAct({ t: key[0] === 'c' ? 'trade' : 'strade', co: +key.slice(1), s: key.slice(1), n: q });
+  else if (op === 'sell' || op === 'sellall') { const n = op === 'sellall' ? holdOf(key) : Math.min(q, holdOf(key)); doAct({ t: key[0] === 'c' ? 'trade' : 'strade', co: +key.slice(1), s: key.slice(1), n: -n }); }
+  else if (op === 'short') doAct({ t: 'short', op: 'open', key, n: q });
+  else if (op === 'cover') doAct({ t: 'short', op: 'cover', key, n: ((S.me.shorts || {})[key] || {}).n || 0 });
+  else if (op === 'limbuy' || op === 'limsell' || op === 'stop') doAct({ t: 'order', key, kind: op === 'limbuy' ? 'buy' : op === 'limsell' ? 'sell' : 'stop', n: op === 'limbuy' ? q : Math.min(q, holdOf(key)), lim });
+  else if (op === 'cancel') doAct({ t: 'order', op: 'cancel', id: +key });
+  render(true); return true;
+}
+// ---- a page for every sector company ----
+const SECTOR_KIND = { cine: 'cinema', regal: 'cinema', pop: 'cinema', cam: 'gear', kod: 'gear', toy: 'toys', label: 'label', pipe: 'stream', ad: 'ads', vfxco: 'vfx', pod: 'podcast', gold: 'fund' };
+function sectorRef(k) {
+  const s = SECTOR[k]; if (!s) return null;
+  if (/^mco\d+$/.test(k) && typeof coRef === 'function') { const R = coRef('m' + k.slice(3)); if (R) return R; }
+  const kind = SECTOR_KIND[k] || (/^net_/.test(k) ? 'stream' : 'corp');
+  return { key: 'k' + k, name: s.name, kind, tier: k === 'gold' ? 3 : 1, hub: s.hub || 'hollywood', founded: s.from };
+}
+function bigChart(pts, W = 560, H = 160) {
+  const hi = Math.max(...pts), lo = Math.min(...pts), up = pts[pts.length - 1] >= pts[0];
+  const xy = pts.map((v, i) => `${(i / (pts.length - 1) * W).toFixed(1)},${(6 + (hi - v) / Math.max(1e-6, hi - lo) * (H - 12)).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" class="bigchart"><polyline fill="none" stroke="${up ? 'var(--good)' : 'var(--bad)'}" stroke-width="2" points="${xy}"/><polygon fill="${up ? 'var(--good)' : 'var(--bad)'}" opacity=".08" points="0,${H} ${xy} ${W},${H}"/></svg>`;
+}
+function tickerPageHTML(k) {
+  const s = SECTOR[k]; if (!s || !sectorOpen(s)) return '<div class="os-empty"><span>📉</span><b>Not listed yet</b></div>';
+  const span = +UI.tspan || 52, pts = Array.from({ length: span + 1 }, (_, i) => sectorPrice(s, S.week - span + i)), R = sectorRef(k), O = typeof orgChart === 'function' ? orgChart(R) : null;
+  const leaders = O ? Array.from({ length: Math.min(8, O.H) }, (_, n) => staffAt(R, n)).filter(Boolean) : [];
+  const y = sYield(s) * 100, px = sectorPrice(s), M = S.me;
+  return `<div class="head"><p class="eyebrow">${esc(s.sec)} · listed since ${s.from} · ${esc(s.tk)}</p><h2>${esc(s.name)}</h2><p class="lede">${esc(s.d)}</p></div>
+   <div class="kpis mini"><div><span>Price</span><b>$${px.toFixed(2)}</b></div><div><span>This week</span><b>${pctS(sChg(s, 1))}</b></div><div><span>This year</span><b>${pctS(sChg(s, 52))}</b></div><div><span>5 years</span><b>${pctS(sChg(s, 260))}</b></div><div title="Cash paid to shareholders each year, as a share of the price"><span>Dividend yield</span><b>${y ? y.toFixed(1) + '% a year' : 'None'}</b></div><div title="How hard it swings with the market: above 1 swings harder, below 1 calmer, below 0 moves against it"><span>Beta</span><b>${s.beta.toFixed(1)}</b></div></div>
+   <div class="np-tabs">${[[13, '3M'], [52, '1Y'], [260, '5Y'], [520, '10Y']].map(([n, l]) => `<button class="${span === n ? 'on' : ''}" data-tspan="${n}">${l}</button>`).join('')}</div>${bigChart(pts)}
+   <p class="small muted">${y ? `Pays ${y.toFixed(1)}% a year in quarterly dividends: at today's price, 100 shares pay about ${fmtCash(Math.round(px * 100 * y / 100))} a year.` : 'Pays no dividend: all the return is in the price.'}</p>
+   <div class="cols two"><section class="panel"><h3>Who runs it</h3><ul class="plain mn-list">${leaders.map(e => `<li class="mn-p"><div><a href="#" class="lk" data-go="emp:${e.key}~${e.n}">${esc(e.name)}</a><br><span class="muted small">${esc(e.title)} · since ${e.since}</span></div></li>`).join('')}</ul>${O ? `<p><a href="#" class="lk" data-go="staff:${R.key}">All ${O.H.toLocaleString()} staff ›</a></p>` : ''}</section>
+    <div>${tradePanelHTML('s' + k)}</div></div>`;
+}
+function market3Click(t) {
+  if (!S.me) return false;
+  if (t.dataset.tspan) { UI.tspan = +t.dataset.tspan; render(true); return true; }
+  return tradeClick(t);
+}
+// </market3>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -32069,7 +32301,7 @@ function inboxLinks(it) {
 function inboxCard(it) {
   return `<div class="mh"><time>${fmtDate(it.w, true)}</time><b>${esc(it.title)}</b></div><p>${linkPrizes(esc(it.text))}${it.film !== undefined ? ' ' + fl(it.film) : ''}</p>
     ${it.choices && !it.done ? `<div class="choices">${it.choices.map(c => `<button class="choice${c.check && c.check[1] >= 13 ? ' hard' : ''}" data-pick="${it.id}:${c.k}" ${c.dis ? 'disabled' : ''}><b>${esc(c.label)}</b>${c.dis ? `<span class="odds">${esc(c.dis)}</span>` : c.check ? oddsBar(c.check[0], c.check[1]) : '<span class="odds">No roll</span>'}</button>`).join('')}</div>` : ''}
-    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}${inboxLinks(it)}`;
+    ${it.result ? `<div class="res">${rollCard(it.result.roll, true)}${it.result.quip ? `<p class="quip ${it.result.ok ? 'good' : 'bad'}">${esc(it.result.quip)}</p>` : ''}<p>${esc(it.result.t)}</p>${it.result.teach ? `<p class="teach"><b>How the job works:</b> ${esc(it.result.teach)}</p>` : ''}</div>` : ''}${inboxLinks(it)}`;
 }
 // Today, as it happens: a card for each block lived so far, any decision waiting, and what's next.
 function blockLabel(d, b) {
@@ -32127,10 +32359,10 @@ const CAL_PRESETS = {
 function threadOf(m) { return m.from === -1 ? (m.to ?? 'home') : m.from === null || m.from === undefined ? 'home' : m.from; }
 function phonePanel() {
   const M = S.me, all = M.phone || [], known = aliveKnown();
-  UI.seen = UI.seen || {};   // per thread: how many of its messages you've looked at
+  UI.seen = typeof phoneSeen === 'function' ? phoneSeen() : (UI.seen || {});   // per thread: how many of its messages you've looked at (kept with the game)
   const threads = new Map();
   all.forEach((m, i) => { const k = threadOf(m); threads.set(k, { k, last: m, i, n: ((threads.get(k) || {}).n || 0) + 1 }); });
-  const list = [...threads.values()].sort((a, b) => b.i - a.i);
+  const list = [...threads.values()].sort((a, b) => (typeof threadUnread === 'function' ? (threadUnread(b.k) > 0) - (threadUnread(a.k) > 0) : 0) || b.i - a.i);
   const when = m => m.w === S.week ? `${DAYS7[m.d].slice(0, 3)} ${BLOCKS[m.b].toLowerCase()}` : `${S.week - m.w}w ago`;
   const nameOf = k => k === 'home' ? 'Home & gossip' : P(k).name;
   const byRel = {};
@@ -32157,7 +32389,7 @@ function phonePanel() {
      <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}${m.topic === 'stake' && !m.replied && !m.missed ? ' stake' : ''}"><p>${esc(m.t)}</p>${m.topic === 'stake' && !m.replied && !m.missed ? '<span class="stakechip">⏳ needs an answer this week</span>' : ''}<time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
      ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div><details class="newtopic"><summary class="small">Or change the subject…</summary>${compose(true)}</details>` : q ? compose(true) : ''}`;
   } else {
-    left = `<div class="ph-bar"><b>Messages</b></div><ul class="threads">${list.slice(0, 14).map(t => { const unread = t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
+    left = `<div class="ph-bar"><b>Messages</b>${phoneUnread() ? ` <span class="muted small">${phoneUnread()} unread</span> <button class="linkish small" data-markread="1">Mark all read</button>` : ''}</div><ul class="threads">${list.slice(0, 14).map(t => { const unread = typeof threadUnread === 'function' ? threadUnread(t.k) : t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
   }
   const W = M.wk, clock = W ? ['08:14', '14:37', '21:52'][W.block] : '09:00';
   return `<section class="panel phone"><h3>📱 Your phone</h3>
@@ -32488,7 +32720,7 @@ function careerClick(t) {
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
   if (t.dataset.pitch) { const [id, co] = t.dataset.pitch.split(':').map(Number), n0 = S.me.rollN || 0; doAct({ t: 'pitch', id, co }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
-  if (t.dataset.phonejump !== undefined) { UI.tab = 'you'; UI.dtab = 'phone'; UI.stack = []; render(); const el = document.querySelector('.desknav'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return true; }
+  if (t.dataset.phonejump !== undefined) { UI.tab = 'you'; UI.dtab = 'phone'; UI.stack = []; if (typeof phoneFocus === 'function') phoneFocus(); render(); const el = document.querySelector('.desknav'); if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); return true; }
   if (t.dataset.rewrite) { doAct({ t: 'rewrite', id: +t.dataset.rewrite }); render(true); return true; }
   if (t.dataset.contest) { const [id, c] = t.dataset.contest.split(':'); doAct({ t: 'contest', id: +id, c }); render(true); return true; }
   if (t.dataset.activescript) { doAct({ t: 'activescript', id: +t.dataset.activescript }); render(true); return true; }
@@ -32502,7 +32734,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -32631,7 +32863,7 @@ if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
   if (ov) { e.preventDefault(); const b = ov.querySelector('.ro-ok'); if (b) b.click(); return; }
   if (typeof careerActive !== 'function' || !careerActive() || UI.busy) return;
   e.preventDefault();
-  if (pending().length && UI.tab === 'you' && !UI.stack.length && UI.app === 'today') { const d = document.querySelector('.decbox'); if (d) window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  if (pending().length && UI.tab === 'you' && !UI.stack.length && UI.app === 'today') { const d = document.querySelector('.decbox'); if (d) window.scrollTo({ top: Math.max(0, d.getBoundingClientRect().top + window.scrollY - ((document.querySelector('header.slate') || {}).offsetHeight || 0) - 10), behavior: 'smooth' }); return; }
   playStep('next');
 });
 
@@ -32727,11 +32959,13 @@ function render(keepScroll) {
   if (cur) html = `<button class="back" data-back="1">← Back</button>` + ((typeof viewMine === 'function' && viewMine(cur)) || (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id)));
   else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts, tv: typeof viewTv === 'function' ? viewTv : viewWorld, saves: typeof savesHTML === 'function' ? () => `<div class="head"><h2>Saves</h2></div>` + savesHTML() : viewWorld }[UI.tab] || (typeof reelView === 'function' ? reelView(UI.tab) : null) || viewWorld;
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
-  if (typeof decisionBoxHTML === 'function') html = decisionBoxHTML() + html;
+  const decH = typeof decisionBoxHTML === 'function' ? decisionBoxHTML() : '';
   $('#main').innerHTML = html;
+  if (decH) { const ow = $('#main').querySelector('.os-wrap'); if (ow) ow.insertAdjacentHTML('beforebegin', decH); else $('#main').insertAdjacentHTML('afterbegin', decH); }
   { const hd = document.querySelector('header.slate'); if (hd) document.documentElement.style.setProperty('--hdr', hd.offsetHeight + 'px'); }
   if (typeof applyTableSorts === 'function') applyTableSorts();
   fitTables();
+  if (typeof msgScroll === 'function') msgScroll();
   if (UI.pendingSeen) UI.seenRoll = UI.pendingSeen;   // a roll tumbles in once
   const adv = $('#adv'), mode = UI.building ? 'setup' : careerActive() ? 'career' : S.me && !S.me.over ? 'setup' : 'watch';
   if (adv.dataset.mode !== mode) {
@@ -32823,6 +33057,8 @@ document.addEventListener('click', e => {
   if (typeof work2Click === 'function' && work2Click(t)) return;
   if (typeof mineClick === 'function' && mineClick(t)) return;
   if (typeof decideClick === 'function' && decideClick(t)) return;
+  if (typeof msgClick === 'function' && msgClick(t)) return;
+  if (typeof market3Click === 'function' && market3Click(t)) return;
   if (typeof diary2Click === 'function' && diary2Click(t)) return;
   if (typeof make2Click === 'function' && make2Click(t)) return;
   if (typeof make3Click === 'function' && make3Click(t)) return;

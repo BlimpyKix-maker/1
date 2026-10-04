@@ -248,7 +248,7 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined' && window.s
   let roomT = 0;
   window.setInterval(() => {
     const g = document.querySelector('svg.home-scene .me-walk'); if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-    roomT++; if (g.dataset.busy && roomT % 3) return;   // stay a while once you get there
+    roomT++; if (roomT % 10 || Math.random() < .35) return;   // now and then, not all the time: a move every half minute or so
     let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (A.length < 2) return;
     const cur = +(g.dataset.i || 0); let i = Math.floor(Math.random() * A.length); if (i === cur) i = (i + 1) % A.length;
     const [dx, em, what] = A[i], bub = g.querySelector('.me-bub'), prev = +(g.dataset.dx || 0);

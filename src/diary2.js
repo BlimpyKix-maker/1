@@ -30,10 +30,7 @@ function calPresetAct(a) {
 function applyPins(cal) { const P0 = S.me.calPins || {}; for (const key in P0) { const [d, b] = key.split('-').map(Number); if (cal[d] && calOk(d, b, P0[key])) cal[d][b] = P0[key]; } return cal; }
 function diaryKeepHTML() {
   const M = S.me, pins = Object.keys(M.calPins || {}).length, L = M.calPresets || [];
-  return `<div class="dk"><div class="dk-row"><label class="dk-t"><input type="checkbox" data-calpinall="1" ${M.calPinAll ? 'checked' : ''}> <b>📌 Keep my changes every week</b></label><span class="muted small">${M.calPinAll ? 'Every block you change from now on is pinned: autopilot plans around it each week.' : 'Tick it, or click 📌 on any block, and autopilot keeps your choices instead of replanning them.'}</span>
-    ${pins ? `<span class="chip">${pins} pinned</span> <button class="linkish" data-calpinclear="1">Unpin all</button>` : ''}<button class="os-btn" data-calpinsnap="1" title="Pin every block of this week as it stands">Pin this whole week</button></div>
-   <div class="dk-row"><b class="small">Saved weeks</b>${L.map((p, i) => `<span class="dk-p"><button class="os-btn" data-caluse="${i}" title="Load this plan into the diary">${esc(p.name)}</button><button class="linkish" data-caluse="${i}" data-calpinuse="1" title="Load it and pin every block">load + pin</button><button class="linkish dk-x" data-caldel="${i}" title="Delete">✕</button></span>`).join('') || '<span class="muted small">None yet.</span>'}
-    ${L.length < 6 ? `<input id="cal-pname" maxlength="28" placeholder="Name this week…" value="${esc(UI.calpname || '')}"><button class="os-btn" data-calsave="1">Save this week</button>` : '<span class="muted small">Six saved: delete one to save another.</span>'}</div></div>`;
+  return `<div class="dk"><label class="dk-t" title="Every block you change is pinned, and autopilot plans around it each week"><input type="checkbox" data-calpinall="1" ${M.calPinAll ? 'checked' : ''}>📌 Keep my changes</label>${pins ? `<span class="muted">${pins} pinned · <button class="linkish" data-calpinclear="1">unpin</button></span>` : ''}<span class="dk-sep">·</span>${L.length ? `<select id="cal-use" aria-label="Saved weeks"><option value="">Saved weeks…</option>${L.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('')}</select><button class="linkish" data-caluse2="1">load</button><button class="linkish dk-x" data-caldel2="1">delete</button>` : ''}${L.length < 6 ? (UI.calnaming ? `<input id="cal-pname" maxlength="28" placeholder="Name it" class="dk-in"><button class="linkish" data-calsave="1">save</button><button class="linkish" data-calname="0">cancel</button>` : `<button class="linkish" data-calname="1" title="Save this week's plan to load again later">save this week</button>`) : ''}</div>`;
 }
 function diary2Click(t) {
   if (!S.me) return false;
@@ -42,7 +39,9 @@ function diary2Click(t) {
   if (d.calpinall) { doAct({ t: 'calpin', all: t.checked }); UI.fineOpen = true; render(true); return true; }
   if (d.calpinsnap) { doAct({ t: 'calpin', all: true, snap: 1 }); UI.fineOpen = true; render(true); return true; }
   if (d.calpinclear) { doAct({ t: 'calpin', clear: 1 }); render(true); return true; }
-  if (d.calsave) { const el = document.getElementById('cal-pname'); doAct({ t: 'calpreset', op: 'save', name: el ? el.value : '' }); UI.calpname = ''; UI.fineOpen = true; render(true); return true; }
+  if (d.calname !== undefined) { UI.calnaming = d.calname === '1'; UI.fineOpen = true; render(true); const el = document.getElementById('cal-pname'); if (el) el.focus(); return true; }
+  if (d.calsave) { const el = document.getElementById('cal-pname'); doAct({ t: 'calpreset', op: 'save', name: el ? el.value : '' }); UI.calnaming = false; UI.fineOpen = true; render(true); return true; }
+  if (d.caluse2 || d.caldel2) { const el = document.getElementById('cal-use'), i = el && el.value !== '' ? +el.value : -1; if (i >= 0) doAct({ t: 'calpreset', op: d.caluse2 ? 'use' : 'del', i }); UI.fineOpen = true; render(true); return true; }
   if (d.caluse !== undefined) { doAct({ t: 'calpreset', op: 'use', i: +d.caluse, pin: d.calpinuse ? 1 : 0 }); UI.fineOpen = true; render(true); return true; }
   if (d.caldel !== undefined) { doAct({ t: 'calpreset', op: 'del', i: +d.caldel }); render(true); return true; }
   return false;

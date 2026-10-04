@@ -146,7 +146,7 @@ function tableKey(tb) { return [...tb.querySelectorAll('thead th')].map(th => th
 function cellVal(td) {
   if (!td) return '';
   if (td.dataset.v !== undefined) return +td.dataset.v;
-  const t = td.textContent.trim(), m = t.replace(/[,\s]/g, '').match(/^[−-]?[$£€¥₹]?([−-]?\d+(\.\d+)?)([kKMB%])?/);
+  const t0 = td.textContent.trim(), t = t0.replace(/^▲\s*/, '').replace(/^▼\s*/, '-'), m = t.replace(/[,\s]/g, '').match(/^[−-]?[$£€¥₹]?([−-]?\d+(\.\d+)?)([kKMB%])?/);
   if (m) { let v = parseFloat(m[1].replace('−', '-')); if (/^[−-]/.test(t)) v = -Math.abs(v); const s = m[3]; if (s === 'k' || s === 'K') v *= 1e3; else if (s === 'M') v *= 1e6; else if (s === 'B') v *= 1e9; return v; }
   return t.toLowerCase();
 }

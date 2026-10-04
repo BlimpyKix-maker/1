@@ -28,7 +28,7 @@ function todayHub() {
 }
 function hubClick(t) {
   const d = t.dataset;
-  if (d.jump) { const [tab, app, x] = d.jump.split(':'); UI.tab = 'you'; UI.stack = []; UI.dtab = tab; if (d.libf) UI.libf = d.libf; if (app) { UI.app = app; if (x) UI.mailo = +x; } render(); return true; }
+  if (d.jump) { const [tab, app, x] = d.jump.split(':'); UI.tab = 'you'; UI.stack = []; UI.dtab = tab; if (d.libf) UI.libf = d.libf; if (tab === 'phone' && typeof phoneFocus === 'function') phoneFocus(); if (app) { UI.app = app; if (x) { UI.mailo = +x; UI.mailf = 'inbox'; UI.mailJump = 1; const m = (S.me.mail || []).find(y => y.id === +x); if (m) m.rd = 1; } } render(); return true; }
   if (d.applybest) { const slots = appSlots(); UI.apps = new Set([...UI.apps].filter(id => S.me.board.some(p => p.id === id))); for (const [p] of bestFits(12)) { if (UI.apps.size >= slots) break; UI.apps.add(p.id); } render(true); return true; }
   return false;
 }

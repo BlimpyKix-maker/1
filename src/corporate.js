@@ -23,7 +23,7 @@ for (let r = 0; r < LADDER.length; r++) { const t = { k: 'corp_' + r, t: LADDER[
 // Worked out fresh from the town's people every time it's asked, so the simulation and the screen always agree.
 function hubStaff(hub) {
   const cos = S.companies.filter(c => c.hub === hub && c.closed === null && c.owner === undefined).sort((a, b) => a.tier - b.tier || a.id - b.id);
-  const pool = (S.pool[hub] ? [].concat(S.pool[hub].producer || [], (S.pool[hub].writer || []).filter(id => !P(id).catId && P(id).standing < 30)) : []).filter(id => P(id) && !P(id).dead && !P(id).player && (P(id).role === 'producer' || !P(id).catId));
+  const pool = (S.pool[hub] ? [].concat(S.pool[hub].producer || [], (S.pool[hub].writer || []).filter(id => !P(id).catId && P(id).standing < 30), ['director', 'editor', 'writer', 'casting'].flatMap(r => (S.pool[hub][r] || []).filter(id => P(id) && !P(id).catId && P(id).standing >= 30))) : []).filter((id, i, a) => a.indexOf(id) === i && P(id) && !P(id).dead && !P(id).player && !P(id).retired && (P(id).role === 'producer' || !P(id).catId));
   const order = pool.map(id => [id, P(id).standing + hashRand(id * 31 + S.year)() * 25]).sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(x => x[0]);
   const used = new Set(), M2 = {};
   for (const c of cos) {
@@ -36,6 +36,17 @@ function hubStaff(hub) {
     M2[c.id] = L;
   }
   for (const x of S.poach || []) { for (const c in M2) M2[c] = M2[c].map(s => s.id === x.person && +c !== x.to ? { r: s.r, id: null } : s); if (M2[x.to]) { const seat = M2[x.to].find(s => s.r === x.r); if (seat) seat.id = x.person; } }
+  // chairs don't stay empty for long: the best person left steps up (or is hired in), top chairs first
+  for (const x of S.poach || []) used.add(x.person);
+  let wide = null;
+  for (const c of cos) for (const seat of M2[c.id].slice().sort((a, b) => b.r - a.r)) if (seat.id === null) {
+    let id = order.find(z => !used.has(z));
+    if (id === undefined) {   // the producer pool is spent: experienced people from every department move into the office
+      wide = wide || S.people.filter(p => p && p.hub === hub && !p.dead && !p.player && !p.retired && !p.catId && S.year - p.born >= 24 && S.year - p.born <= 72).map(p => [p.id, p.standing + hashRand(p.id * 17 + S.year)() * 20]).sort((a, b) => b[1] - a[1] || a[0] - b[0]).map(x => x[0]);
+      id = wide.find(z => !used.has(z));
+    }
+    if (id === undefined) break; seat.id = id; used.add(id);
+  }
   return M2;
 }
 function staffOf(c) { return hubStaff(c.hub)[c.id] || []; }

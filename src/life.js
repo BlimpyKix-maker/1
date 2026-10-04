@@ -262,7 +262,7 @@ const DAY_FOCUS = {
   social: { label: 'Networking', icon: '🥂', d: 'Mixers and coffees. More people, warmer ties; costs money.', days: [['hunt', 'network'], ['catchup', 'network'], ['hunt', 'network'], ['catchup', 'network'], ['hunt', 'hunt']] },
   money: { label: 'Pay the rent', icon: '🛵', d: 'Side hustles most days. Money now, no progress.', days: [['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle'], ['hustle', 'hunt'], ['hustle', 'hustle']] },
   make: { label: 'Making things', icon: '🎛️', d: 'Your own work comes first: songs, videos, episodes, pages. Some hunting on the side.', days: [['make', 'make'], ['make', 'hunt'], ['make', 'make'], ['make', 'network'], ['make', 'hustle']] },
-  recover: { label: 'Recover', icon: '🛋️', d: 'Rest and easy days. Energy and stress come back.', days: [['rest', 'read'], ['rest', 'hunt'], ['rest', 'read'], ['rest', 'hunt'], ['rest', 'read']] }
+  recover: { label: 'Recover', icon: '🛋️', d: 'Every free block is rest: maximum energy back, stress down. Work and classes still happen.', days: [['rest', 'rest'], ['rest', 'rest'], ['rest', 'rest'], ['rest', 'rest'], ['rest', 'rest']] }
 };
 const EVE_STYLE = {
   quiet: { label: 'Quiet nights', icon: '🏠', eves: ['home', 'read', 'home', 'read', 'home', 'out', 'home'] },
@@ -273,6 +273,8 @@ const EVE_STYLE = {
 function autoCal() {
   const M = S.me, F = M.focus || {}, D = DAY_FOCUS[F.day] || DAY_FOCUS.balanced, E = EVE_STYLE[F.eve] || EVE_STYLE.quiet;
   const cal = Array.from({ length: 7 }, (_, d) => d < 5 ? [D.days[d][0], D.days[d][1], E.eves[d]] : [F.day === 'money' ? 'hustle' : 'rest', F.day === 'write' ? 'write' : F.day === 'make' ? 'make' : 'read', E.eves[d]]);
+  // recovering means exactly that: every free block is rest (work and classes still take theirs, and pins are kept)
+  if (F.day === 'recover') { const rc = Array.from({ length: 7 }, () => ['rest', 'rest', 'rest']); M.calRested = {}; return typeof applyPins === 'function' ? applyPins(rc) : rc; }
   const life = ORIGIN.life[M.life];
   if (M.energy < 45) { cal[1][1] = 'rest'; cal[3][1] = 'rest'; }
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
@@ -294,6 +296,7 @@ function setFocus(a) {
   if (a.day && !DAY_FOCUS[a.day] || a.eve && !EVE_STYLE[a.eve]) return false;
   M.focus = Object.assign({ day: 'balanced', eve: 'quiet', auto: true }, M.focus || {}, a.day ? { day: a.day } : {}, a.eve ? { eve: a.eve } : {}, a.auto !== undefined ? { auto: !!a.auto } : {}, a.noHunt !== undefined ? { noHunt: !!a.noHunt } : {});
   if (M.focus.noHunt && M.focus.day === 'hunt') M.focus.day = 'balanced';
+  if (a.day === 'recover') M.focus.auto = true;   // picking Recover always replans the week as rest
   if (M.focus.auto) M.cal = autoCal();
   return true;
 }

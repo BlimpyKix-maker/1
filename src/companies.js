@@ -43,7 +43,7 @@ function structureOf(c) {
   const N = NAMES[HUBS[c.hub].lang] || NAMES.en, r = hashRand(c.id * 17 + 3), nm = () => { const a = N[r() < .5 ? 'M' : 'F'][Math.floor(r() * 10)], b = N.L[Math.floor(r() * N.L.length)]; return EAST[HUBS[c.hub].lang] ? `${b} ${a}` : `${a} ${b}`; };
   const owner = c.owner !== undefined ? c.owner : null;
   return {
-    ceo: owner !== null ? owner : prods[0] ?? null, ceoName: nm(), hop: prods[owner !== null ? 0 : 1] ?? null, dist: nm(), cfo: nm(), board: [nm(), nm(), nm()].slice(0, c.tier === 1 ? 3 : c.tier === 2 ? 2 : 1), partners: dirs.slice(0, 4),
+    ceo: owner !== null ? owner : prods[0] ?? null, ceoName: nm(), hop: prods[owner !== null ? 0 : 1] ?? (typeof staffOf === 'function' && c.closed === null && c.owner === undefined ? ((staffOf(c).find(x => x.r === 6 && x.id !== null) || staffOf(c).find(x => x.r >= 4 && x.id !== null) || {}).id ?? null) : null), dist: nm(), cfo: nm(), board: [nm(), nm(), nm()].slice(0, c.tier === 1 ? 3 : c.tier === 2 ? 2 : 1), partners: dirs.slice(0, 4),
     divisions: { 1: ['Studio', 'Worldwide distribution', 'Classics label', 'Television', 'International'], 2: ['Production', 'Distribution', 'Library sales'], 3: ['Production'] }[c.tier]
   };
 }

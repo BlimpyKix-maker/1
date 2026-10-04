@@ -695,6 +695,7 @@ function closeWeek(a) {
   if (typeof finWeek === 'function') finWeek();
   if (typeof angelWeek === 'function') angelWeek();
   if (typeof fitWeek === 'function') fitWeek();
+  if (typeof market3Week === 'function') market3Week();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -989,7 +990,7 @@ function sceneResolve(it, k) {
   if (lr && lr.crit < 0) { M.stress = clamp(M.stress + 5, 0, 100); t += ' It could hardly have gone worse.'; }
   // how a moment on the job goes is part of the work: it counts toward the film and your boss's opinion
   if (o.check && ctx.film !== null && ctx.film !== undefined) { const jj = M.jobs.find(x => x.film === ctx.film); if (jj && typeof jobScore === 'function') jobScore(jj, ok ? (lr.crit > 0 ? 2 : 1) : (lr.crit < 0 ? -1.5 : -.5), it.title); }
-  it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null };
+  it.result = { ok: o.check ? ok : null, roll: lr, t, teach: s.teach || null, quip: typeof stanceQuip === 'function' ? stanceQuip(o, ok, it) : null };
 }
 
 function resolvePick(it, k) {
@@ -1117,6 +1118,8 @@ function applyAct(a) {
     case 'outline': return outlineAct(a);
     case 'scriptsess': return scriptSessAct(a);
     case 'calset': return calSetAct(a);
+    case 'short': return shortAct(a);
+    case 'order': return orderAct(a);
     case 'swedit': return swEditAct(a);
     case 'punchup': return punchAct(a);
     case 'makesave': return makeSaveAct(a);

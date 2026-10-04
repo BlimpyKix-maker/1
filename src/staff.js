@@ -13,7 +13,15 @@ const DEPTS = {
   podcast: [['Executive Office', .01], ['Production', .26], ['Editorial', .14], ['Audio Engineering', .12], ['Research', .08], ['Ad Sales', .14], ['Marketing', .09], ['Talent', .06], ['Legal', .04], ['Finance', .06]],
   creator: [['Executive Office', .02], ['Production', .26], ['Editing', .2], ['Brand Partnerships', .14], ['Talent Management', .12], ['Analytics', .08], ['Design', .1], ['Finance', .08]],
   theatre: [['Executive Office', .01], ['Artistic', .06], ['Producing', .05], ['Stage Management', .07], ['Carpentry & Scenery', .1], ['Lighting & Sound', .1], ['Wardrobe', .1], ['Front of House', .16], ['Box Office', .08], ['Marketing', .07], ['Development (Fundraising)', .06], ['Education & Outreach', .05], ['Finance & Admin', .09]],
-  biz: [['Management', .18], ['Staff', .82]]
+  biz: [['Management', .18], ['Staff', .82]],
+  cinema: [['Executive Office', .002], ['Film Buying & Booking', .01], ['Theatre Operations', .55], ['Concessions', .2], ['Marketing', .03], ['Real Estate', .02], ['Technology & Projection', .05], ['Finance', .03], ['Human Resources', .03]],
+  gear: [['Executive Office', .01], ['Rental Desk', .15], ['Camera & Lens Engineering', .2], ['Lighting & Grip', .2], ['Logistics', .15], ['Sales', .1], ['R&D', .1], ['Finance', .05]],
+  toys: [['Executive Office', .005], ['Licensing', .08], ['Design', .12], ['Manufacturing', .35], ['Marketing', .12], ['Sales', .15], ['Supply Chain', .1], ['Finance', .05]],
+  stream: [['Executive Office', .003], ['Content & Originals', .1], ['Acquisitions', .04], ['Engineering', .3], ['Product', .1], ['Marketing', .12], ['Data & Research', .08], ['Partnerships', .05], ['Trust & Safety', .05], ['Finance', .05]],
+  ads: [['Executive Office', .01], ['Creative', .3], ['Strategy', .1], ['Media Buying', .15], ['Account Management', .2], ['Production', .12], ['Finance', .05]],
+  vfx: [['Executive Office', .005], ['Compositing', .25], ['Animation', .15], ['FX & Simulation', .12], ['Lighting', .1], ['Pipeline & R&D', .1], ['Production', .12], ['Recruitment', .03]],
+  fund: [['Management', .3], ['Trading', .3], ['Custody & Vaults', .2], ['Compliance', .2]],
+  corp: [['Executive Office', .005], ['Operations', .35], ['Creative', .12], ['Marketing', .12], ['Sales', .12], ['Technology', .12], ['Finance', .06], ['Legal', .03], ['Human Resources', .03]]
 };
 const LADDER_T = ['Assistant', 'Coordinator', 'Senior Coordinator', 'Manager', 'Senior Manager', 'Director', 'Senior Director', 'Vice President', 'Senior Vice President', 'Executive Vice President'];
 const EXEC_T = ['Chief Executive Officer', 'President', 'Chief Operating Officer', 'Chief Financial Officer', 'Chief Creative Officer', 'General Counsel', 'Chief of Staff', 'Executive Assistant to the CEO', 'Executive Assistant to the President', 'Head of Strategy', 'Chief Marketing Officer', 'Chief Technology Officer'];
@@ -28,6 +36,7 @@ function coRef(key) {
   if (t === 'f') { const c = S.companies[+rest]; if (!c) return null; return { key, name: c.name, kind: 'film', tier: c.tier, hub: c.hub, founded: c.founded, closed: c.closed, c }; }
   if (t === 'm') { const c = MEDIA_COS[+rest]; if (!c) return null; return { key, name: c.n, kind: ['label', 'publisher', 'podcast', 'creator', 'theatre'].includes(c.type) ? c.type : 'label', tier: c.tier || 2, hub: c.hub, founded: c.f, m: c, mi: +rest }; }
   if (t === 'x' && typeof freeCoRef === 'function') return freeCoRef(key);
+  if (t === 'k' && typeof sectorRef === 'function') return sectorRef(rest);
   if (t === 'b') { const [name, hub] = rest.split('|'); const kind = typeof bizKind === 'function' ? bizKind(name)[1] : 'office'; const r = hashRand([...name].reduce((a, ch) => a * 31 + ch.charCodeAt(0), 7) >>> 0); return { key, name, kind: 'biz', bk: BIZ_T[kind] ? kind : 'office', tier: 3, hub: HUBS[hub] ? hub : 'hollywood', founded: S.year - 2 - Math.floor(r() * 40) }; }
   return null;
 }
