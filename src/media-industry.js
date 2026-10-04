@@ -187,13 +187,37 @@ function chartFor(field, hub) {
 }
 // Titles are seeded by the whole name (not its length), so two acts never share a discography.
 const WT_SOLO = ['Tell Me Twice', 'All Night Long Again', 'Don\'t Look Back Now', 'Slow Burn', 'Wildfire', 'Heartbeat Avenue', 'Overgrown', 'Satellite', 'Undertow', 'Afterglow', 'Holding Pattern', 'Paper Planes and Promises', 'Say It Like You Mean It', 'Rearview', 'Daylight Robbery', 'Fever Dream', 'Bad Habits, Good Intentions', 'Lighthouse', 'The Long Way Home', 'Sugar on the Radio', 'Cold Water', 'Wrong Number', 'Dance Like Nobody\'s Filming', 'Gravity', 'Old Flames', 'Cheap Champagne', 'Ten Feet Tall', 'Heavy Weather', 'Last Bus Home', 'Glow', 'Hurricane Season', 'Velvet Underground Car Park', 'Kiss the Sky Goodbye', 'Postcards', 'Fool\'s Gold', 'Static Love', 'Moonlighting', 'Nobody\'s Business', 'Sweet Disaster', 'Copper Sun'];
+// Plays: whole templates with words that fit them, so the parodies scan ("Death of a Wedding Planner").
+const PLAY_T = ['Death of a {job}', 'Waiting for {name}', 'A Streetcar Named {virtue}', 'Cat on a Hot {material} Roof', 'The Importance of Being {adj}', 'Who\'s Afraid of {name}?', 'Long Day\'s Journey into {time}', 'The {job}\'s Wife', 'Look Back in {mood}', 'The Glass {animal}', 'A Doll\'s {place}', 'The {job} of {city}', 'Three {plural}', 'The Night of the {animal}', 'Arcadia {road}', '{name}\'s Last Tape', 'The {adj} Heart', 'Twelve Angry {plural}', 'A Raisin in the {weather}', 'The {animal} Gull', 'Much Ado About {thing}', 'The {colour} Room', 'An Inspector {verb}s', '{name} in the {place}'];
+const PLAY_W = {
+  job: ['Salesman', 'Wedding Planner', 'Dentist', 'Lighthouse Keeper', 'Ferryman', 'Plumber', 'Magician', 'Accountant', 'Tailor', 'Cartographer', 'Night Porter', 'Weather Girl'],
+  name: ['Gordon', 'Norman', 'Dorothy', 'Godfrey', 'Margot', 'Gus', 'Agnes', 'Lenny', 'Mabel', 'Felix'],
+  virtue: ['Patience', 'Desire', 'Regret', 'Prudence', 'Mercy', 'Ambition', 'Envy', 'Hope'],
+  material: ['Tin', 'Glass', 'Slate', 'Copper', 'Velvet', 'Paper', 'Thatched'],
+  adj: ['Earnest', 'Honest', 'Ordinary', 'Elsewhere', 'Fabulous', 'Sensible', 'Late', 'Brave'],
+  time: ['Night', 'Morning', 'Tuesday', 'Winter', 'Teatime', 'Brunch'],
+  mood: ['Anger', 'Laughter', 'Confusion', 'Envy', 'Wonder', 'Fury'],
+  animal: ['Ferret', 'Llama', 'Seagull', 'Fox', 'Heron', 'Pigeon', 'Goat', 'Badger'],
+  place: ['Shed', 'Garden', 'Kitchen', 'Attic', 'Lighthouse', 'Laundrette'],
+  city: ['Venice', 'Brighton', 'Seville', 'Naples', 'Dublin', 'Lyon'],
+  plural: ['Sisters', 'Brothers', 'Widows', 'Cousins', 'Uncles', 'Neighbours', 'Men', 'Women'],
+  road: ['Road', 'Avenue', 'Lane', 'Revisited'],
+  weather: ['Sun', 'Rain', 'Fog', 'Snow', 'Drizzle'],
+  thing: ['Nothing', 'Everything', 'Something', 'Very Little', 'The Neighbours'],
+  colour: ['Blue', 'Yellow', 'Green', 'Velvet', 'Crimson'],
+  verb: ['Whistle', 'Sing', 'Dance', 'Panic', 'Knit']
+};
+// Online video: the titles creators actually use.
+const VID_T = ['I Tried {thing} for 30 Days', 'We Built a {thing} in 24 Hours', 'Rating Every {thing} in {city}', 'The Truth About {thing}', '{n} Things Nobody Tells You About {topic}', 'I Spent $1 vs $1,000 on {thing}', 'Why Is Everyone Talking About {topic}?', 'Reacting to My First {thing}', 'Surviving a Week as a {job}', 'Day in the Life of a {job}', 'Ranking {topic}, Badly', 'Can a {job} Make a Film in a Weekend?'];
+const VID_W = { thing: ['Haunted Hotel', 'Film Camera', 'Street Food Tour', 'Tiny House', 'Silent Film', 'Vintage Lens', 'Bad Script', 'Escape Room', 'Thrift Haul', 'Movie Set'], city: ['Tokyo', 'Paris', 'Lagos', 'Mumbai', 'Mexico City', 'Seoul', 'London', 'Rome'], topic: ['Film Sets', 'Movie Trailers', 'Stunt Doubles', 'Award Shows', 'Plot Holes', 'Sequels', 'Horror Films', 'Film School'], job: ['Stuntperson', 'Film Extra', 'Foley Artist', 'Boom Operator', 'Script Supervisor', 'Projectionist', 'Location Scout'], n: ['5', '7', '10', '12', '23'] };
 const PLAY_A = ['The Glass', 'The Last', 'A Winter', 'The Lonely', 'The House of', 'The Ballad of', 'Death of a', 'The Importance of', 'Waiting for', 'A Streetcar Called', 'Cat on a Hot', 'The Night of the'];
 const PLAY_B = ['Mechanic', 'Salesgirl', 'Tin Shed', 'Gordon', 'Desire', 'Ironing', 'Lear', 'Bernarda', 'Being Elsewhere', 'Rain', 'Harbour', 'Orchard', 'Sisters', 'Garden', 'Ferryman', 'Inheritance'];
 function nameHash(s) { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
 function workTitleFor(x, w) {
   if (x.field === 'podcast') return x.name;
   const r = hashRand(nameHash(x.name) % 1e7 * 13 + Math.floor(w / 6) * 977), f = r(), pk = L => L[Math.floor(r() * L.length)];
-  if (x.field === 'stage') return f < .7 ? `${pk(PLAY_A)} ${pk(PLAY_B)}` : pk(WT_SOLO);
+  if (x.field === 'stage') { const T = pk(PLAY_T); return T.replace(/\{(\w+)\}/g, (_, k) => pk(PLAY_W[k])).replace(/(^| )([Aa]) ([AEIOU])/g, '$1$2n $3'); }
+  if (x.field === 'creator') { const T = pk(VID_T); return T.replace(/\{(\w+)\}/g, (_, k) => pk(VID_W[k])); }
   return f < .5 ? `${pk(WT_A)} ${pk(WT_B)}` : f < .85 ? pk(WT_SOLO) : `${pk(WT_A)} ${pk(WT_B)} (${pk(['Live', 'Remix', 'Acoustic', 'Radio Edit', 'Reprise', 'Night Version'])})`;
 }
 function viewCharts() {

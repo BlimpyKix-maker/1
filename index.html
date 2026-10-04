@@ -8300,24 +8300,87 @@ const TW = {
   num: ['Three', 'Five', 'Seven', 'Twelve', 'Two', 'Nine'],
   season: ['Summer', 'Winter', 'Autumn', 'Spring', 'Monsoon']
 };
+// Each template draws exactly as many words as it always did (saved worlds rebuild identically); the words now
+// come from lists that suit the template, so titles read like films and not like a word salad.
+const TWX = {
+  dthing: ['House', 'Garden', 'Wedding', 'Funeral', 'Letter', 'Season', 'Promise', 'Secret', 'Summer', 'Silence', 'Daughter', 'Stranger', 'Window', 'Piano', 'Boat', 'Bridge', 'Harvest', 'Visitor'],
+  dperson: ['Widow', 'Daughter', 'Teacher', 'Stranger', 'Priest', 'Painter', 'Ferryman', 'Doctor', 'Mother', 'Son', 'Gardener', 'Watchmaker', 'Pianist', 'Bride', 'Lighthouse Keeper'],
+  dthing2: ['Garden', 'Secret', 'Silence', 'Daughter', 'Letters', 'Promise', 'Last Summer', 'Window', 'Confession', 'Debt', 'Lament', 'Return', 'Choice', 'Wedding'],
+  dabstract: ['Second Chances', 'Wine and Roses', 'Grace', 'Rain', 'Glory', 'Thunder', 'Our Youth', 'Plenty', 'Hope', 'Silence', 'Small Mercies', 'Summer', 'Fire', 'Innocence'],
+  cadj: ['Crazy', 'Rich', 'Famous', 'Fake', 'Secret', 'Accidental', 'Imaginary', 'Billionaire', 'Embarrassing', 'Long-Lost', 'Ridiculous', 'Brilliant'],
+  cplural: ['Brides', 'Grooms', 'Dads', 'Cousins', 'Nuns', 'Plumbers', 'Strangers', 'Grandmas', 'Wedding Planners', 'Best Men', 'Neighbours', 'Exes'],
+  cnoun: ['Goat', 'Baby', 'Llama', 'Funeral', 'Lottery Ticket', 'Camper Van', 'Parrot', 'Wedding', 'Karaoke Machine', 'Stolen Cake', 'Tortoise', 'Christmas Tree'],
+  cwed: ['Big Fat', 'Accidental', 'Disastrous', 'Destination', 'Secret', 'Second', 'Wrong', 'Runaway', 'Royal', 'Last-Minute'],
+  cradj: ['Dirty', 'Easy', 'Blood', 'Cold', 'Hot', 'Fast', 'Old', 'Bad', 'Clean', 'Funny', 'Hush', 'Dead'],
+  crjob: ['Diamond', 'Bank', 'Casino', 'Museum', 'Midnight', 'Inside', 'Payroll', 'Harbour', 'Gold', 'Last', 'Christmas', 'Vegas'],
+  crhand: ['Hand', 'Money', 'Debt', 'Wallet', 'Road', 'Bluff', 'Chest', 'Island', 'Shoes', 'Gold', 'Letter', 'Revenge'],
+  crplural: ['Thieves', 'Brothers', 'Witnesses', 'Bullets', 'Days', 'Graves', 'Kings', 'Suspects', 'Hitmen', 'Rounds'],
+  crcity: ['Thieves', 'Liars', 'Ghosts', 'Wolves', 'Saints', 'Strangers', 'Sinners', 'Angels', 'Gangsters', 'Fools'],
+  tadj: ['Silent', 'Last', 'Hidden', 'Second', 'Perfect', 'Unknown', 'Unreliable', 'Only', 'Missing', 'Final'],
+  taff: ['Glass', 'Crimson', 'Velvet', 'Harbour', 'Midnight', 'Embassy', 'Orchid', 'Cipher', 'Lomond', 'Copenhagen', 'Kessler', 'Blackwood'],
+  thour: ['Final', 'Zero', 'Golden', 'Midnight', 'Eleventh', 'Darkest', 'Witching', 'Rush', 'Blue', 'Last'],
+  hadj: ['Hollow', 'Crooked', 'Silent', 'Hungry', 'Drowned', 'Burning', 'Other', 'Empty', 'Last', 'Haunted'],
+  hdead: ['Night', 'Lake', 'Island', 'Harvest', 'Bride', 'Choir', 'Carnival', 'Feast', 'Valley', 'Hotel', 'House', 'Diary'],
+  hplural: ['Wolves', 'Crows', 'Hollow Men', 'Scarecrows', 'Mannequins', 'Children', 'Lambs', 'Living Dead', 'Moths', 'Strangers'],
+  hbelow: ['Thing', 'Cellar', 'Hunger', 'Voice', 'Dark', 'Hive', 'Choir', 'Door', 'Tide', 'Sleepers'],
+  aforce: ['Echo', 'Strike', 'Iron', 'Lethal', 'Rogue', 'Red', 'Fast', 'Black', 'Shadow', 'Air'],
+  acode: ['Red', 'Black', 'Zero', 'Viper', 'Thunder', 'Omega', 'Breaker', 'Nine', 'Blue', 'Kill'],
+  aline: ['Red', 'Thin', 'Final', 'Blue', 'Dead', 'Hard', 'Front', 'Last', 'Fine', 'Bottom'],
+  astrike: ['Thunder', 'First', 'Lightning', 'Viper', 'Midnight', 'Night', 'Air', 'Iron', 'Counter', 'Lucky'],
+  amax: ['Overdrive', 'Impact', 'Velocity', 'Pressure', 'Force', 'Risk', 'Speed', 'Voltage', 'Damage', 'Security'],
+  mfist: ['Iron', 'Jade', 'Drunken', 'Golden', 'Silent', 'Flying', 'Iron Palm', 'Thunder', 'Invisible', 'Five-Point'],
+  msword: ['Dragon', 'Jade', 'Phoenix', 'Thunder', 'Crane', 'Tiger', 'Moonlight', 'Seven Stars', 'Lotus', 'Heaven'],
+  mtiger: ['Golden', 'Iron', 'Drunken', 'White', 'Sleeping', 'Last', 'Shaolin', 'Mountain', 'Laughing', 'Blind'],
+  wnoun: ['Bullet', 'Coffin', 'Rope', 'Horse', 'Grave', 'Badge', 'Pistol', 'Noose', 'Ticket', 'Saddle'],
+  wrider: ['Pale', 'Lone', 'Last', 'Midnight', 'Long', 'High', 'Silent', 'Dark', 'Brave', 'Proud'],
+  wtrail: ['Lonesome', 'Long', 'Outlaw', 'Hangman\'s', 'Dusty', 'Bitter', 'Wild', 'Old', 'Desperate', 'Silver'],
+  rheart: ['Matters', 'Map', 'Secrets', 'Weather', 'Geography', 'Language', 'Music', 'Business', 'Courage', 'Compass'],
+  rkiss: ['Last', 'First', 'Stolen', 'Summer', 'Accidental', 'Borrowed', 'Second', 'Midnight', 'Goodbye', 'Perfect'],
+  musong: ['Last', 'Happiest', 'Sweetest', 'Midnight', 'Summer', 'Wedding', 'Lonely', 'Lucky', 'Forbidden', 'Golden'],
+  muplural: ['Lovers', 'Sailors', 'Dreamers', 'Fireflies', 'Stars', 'Fools', 'Angels', 'Sisters', 'Hours', 'Seasons'],
+  sproto: ['Lazarus', 'Orion', 'Zero', 'Ghost', 'Helix', 'Icarus', 'Omega', 'Prometheus', 'Echo', 'Janus'],
+  sbeyond: ['Stars', 'Horizon', 'Void', 'Rift', 'Silence', 'Edge', 'Dark', 'Moon', 'Veil', 'Signal'],
+  ssignal: ['Last', 'Silent', 'Alien', 'Distant', 'Final', 'Lost', 'Ninth', 'Second', 'Deep', 'Dying'],
+  sstation: ['Zero', 'Eleven', 'Tycho', 'Omega', 'Polaris', 'Kepler', 'Nine', 'Horizon', 'Erebus', 'Vega'],
+  fking: ['Lost', 'Hidden', 'Sunken', 'Frozen', 'Forgotten', 'Twelfth', 'Glass', 'Hollow', 'Sleeping', 'Last'],
+  fthing: ['Crown', 'Sword', 'Song', 'Throne', 'Queen', 'Keeper', 'Daughter', 'Heir', 'Curse', 'Last'],
+  fplural: ['Dragons', 'Wolves', 'Kings', 'Fae', 'Ravens', 'Lost', 'Giants', 'Stars', 'Moon', 'Tides'],
+  fkeep: ['Dragon', 'Lighthouse', 'Dream', 'Star', 'Clock', 'Key', 'Storm', 'Map', 'Moon', 'Book'],
+  frealm: ['Shadows', 'Kings', 'Dragons', 'Giants', 'Storms', 'Ash', 'Thorns', 'Mist', 'Glass', 'Embers'],
+  wrfront: ['Eastern', 'Western', 'Silent', 'Last', 'Home', 'Winter', 'Northern', 'Southern', 'Forgotten', 'Burning'],
+  wrplural: ['Heroes', 'Ghosts', 'Angels', 'Lions', 'Sons', 'Soldiers', 'Widows', 'Saints', 'Eagles', 'Brothers'],
+  wrcompany: ['Heroes', 'Strangers', 'Brothers', 'Wolves', 'Ghosts', 'Volunteers', 'Fools', 'Saints', 'Orphans', 'Lions'],
+  pemp: ['Last', 'Young', 'Exiled', 'Secret', 'Iron', 'Forgotten', 'Child', 'Mad', 'Silent', 'Rebel'],
+  pcrown: ['Duchess', 'Painter', 'Rebel', 'Physician', 'Spy', 'Cardinal', 'Poet', 'Courtesan', 'Mapmaker', 'Gardener'],
+  dcmake: ['Map', 'Clock', 'Cheese', 'Bell', 'Dream', 'Kite', 'Noise', 'Rain', 'Violin', 'Firework'],
+  dcplural: ['Liars', 'Champions', 'Twins', 'Divers', 'Dancers', 'Smugglers', 'Chess Players', 'Beekeepers', 'Forgers', 'Gamblers'],
+  anlittle: ['Robot', 'Dragon', 'Lighthouse', 'Fox', 'Penguin', 'Mermaid', 'Rocket', 'Cactus', 'Snowman', 'Witch'],
+  anadj: ['Flying', 'Magic', 'Giant', 'Clockwork', 'Upside-Down', 'Invisible', 'Singing', 'Paper', 'Moonlit', 'Enchanted'],
+  announ: ['Whale', 'Teapot', 'Umbrella', 'Dragon', 'Kite', 'Bicycle', 'Castle', 'Lighthouse', 'Forest', 'Balloon'],
+  shcap: ['Thunder', 'Comet', 'Valor', 'Spectrum', 'Nova', 'Atlas', 'Meteor', 'Glory', 'Tomorrow', 'Courage'],
+  shguard: ['Galactic', 'Midnight', 'Eternal', 'Iron', 'Cosmic', 'Last', 'Hidden', 'Infinite', 'Northern', 'Young'],
+  shman: ['Thunder', 'Gravity', 'Comet', 'Volt', 'Spark', 'Tide', 'Quantum', 'Magnet', 'Rocket', 'Echo'],
+  shnight: ['Hawk', 'Owl', 'Shade', 'Crusader', 'Watch', 'Fury', 'Wing', 'Ranger', 'Stalker', 'Falcon'],
+  shlegion: ['Star', 'Shadow', 'Iron', 'Cosmic', 'Final', 'Thunder', 'Silver', 'Phantom', 'Dawn', 'Omega']
+};
 const TPL = {
-  Drama: ['The {adj} {noun}', '{noun} of {place}', 'A {noun} in {place}', "The {noun}'s {noun2}", '{adj} {season}', 'Days of {noun}'],
-  Comedy: ['{first} Takes {place}', 'My {adj} Uncle', 'Two {plural} and a {noun}', 'The {adj} Wedding', 'Everybody Loves {first}', '{first} and {first2}'],
-  Crime: ['{adj} Money', 'The {noun} Job', "Dead Man's {noun}", 'The {place} Connection', '{num} {plural}', 'City of {plural}'],
-  Thriller: ['The {adj} Witness', 'The {noun} Affair', 'Dead of {season}', '{adj} Hour', 'The Man from {place}'],
-  Horror: ['The {adj} House', '{noun} of the Dead', 'Night of the {plural}', 'They Came from {place}', 'The {noun} Below'],
-  Action: ['{adj} Force', 'Code {noun}', 'The {adj} Line', '{noun} Strike', 'Maximum {noun}'],
-  'Martial arts': ['The {adj} Fist', '{num} Masters of {place}', '{noun} Sword', 'Return of the {adj} Tiger', 'Fists of {place}'],
-  Western: ['Guns of {place}', 'A {noun} for {first}', 'The {adj} Rider', '{num} Graves to {place}', 'Ride the {adj} Trail'],
-  Romance: ['A {season} in {place}', '{noun} of the Heart', 'Letters to {first}', 'The {adj} Kiss', 'Only in {place}'],
-  Musical: ['{place} Serenade', 'Dance of the {plural}', 'The {adj} Song', 'Sing, {first}!', 'Rhythm of {place}'],
-  'Sci-fi': ['{noun} Protocol', 'Beyond the {noun}', 'The {adj} Signal', 'Colony {num}', 'Station {noun}'],
-  Fantasy: ['The {adj} Kingdom', '{noun} of the {plural}', 'The {noun} Keeper', 'Realm of {plural}'],
-  War: ['The {adj} Front', 'Hill {n}', '{plural} of {place}', 'The Longest {season}', 'Company of {plural}'],
-  Period: ['The {adj} Empress', '{first} of {place}', 'The {noun} and the Crown', 'A House in {place}'],
-  Documentary: ['Inside {place}', 'The {noun} Makers', 'Portrait of {place}', '{plural}: A True Story'],
-  Animation: ['The Little {noun}', '{first} and the {adj} {noun}', 'Tales of the {adj} {noun}'],
-  Superhero: ['Captain {noun}', 'The {adj} Guardians', '{noun}man', 'Night {noun}', '{adj} Legion']
+  Drama: ['The {adj} {dthing}', 'The {dperson} of {place}', 'A {dthing} in {place}', "The {dperson}'s {dthing2}", '{adj} {season}', 'Days of {dabstract}'],
+  Comedy: ['{first} Takes {place}', 'My {cadj} Uncle', 'Two {cplural} and a {cnoun}', 'The {cwed} Wedding', 'Everybody Loves {first}', '{first} and {first2}'],
+  Crime: ['{cradj} Money', 'The {crjob} Job', "Dead Man's {crhand}", 'The {place} Connection', '{num} {crplural}', 'City of {crcity}'],
+  Thriller: ['The {tadj} Witness', 'The {taff} Affair', 'Dead of {season}', 'The {thour} Hour', 'The Man from {place}'],
+  Horror: ['The {hadj} House', '{hdead} of the Dead', 'Night of the {hplural}', 'They Came from {place}', 'The {hbelow} Below'],
+  Action: ['{aforce} Force', 'Code {acode}', 'The {aline} Line', '{astrike} Strike', 'Maximum {amax}'],
+  'Martial arts': ['The {mfist} Fist', '{num} Masters of {place}', 'The {msword} Sword', 'Return of the {mtiger} Tiger', 'Fists of {place}'],
+  Western: ['Guns of {place}', 'A {wnoun} for {first}', 'The {wrider} Rider', '{num} Graves to {place}', 'Ride the {wtrail} Trail'],
+  Romance: ['A {season} in {place}', '{rheart} of the Heart', 'Letters to {first}', 'The {rkiss} Kiss', 'Only in {place}'],
+  Musical: ['{place} Serenade', 'Dance of the {muplural}', 'The {musong} Song', 'Sing, {first}!', 'Rhythm of {place}'],
+  'Sci-fi': ['The {sproto} Protocol', 'Beyond the {sbeyond}', 'The {ssignal} Signal', 'Colony {num}', 'Station {sstation}'],
+  Fantasy: ['The {fking} Kingdom', 'The {fthing} of the {fplural}', 'The {fkeep} Keeper', 'Realm of {frealm}'],
+  War: ['The {wrfront} Front', 'Hill {n}', '{wrplural} of {place}', 'The Longest {season}', 'Company of {wrcompany}'],
+  Period: ['The {pemp} Empress', '{first} of {place}', 'The {pcrown} and the Crown', 'A House in {place}'],
+  Documentary: ['Inside {place}', 'The {dcmake} Makers', 'Portrait of {place}', '{dcplural}: A True Story'],
+  Animation: ['The Little {anlittle}', '{first} and the {anadj} {announ}', 'Tales of the {anadj} {announ}'],
+  Superhero: ['Captain {shcap}', 'The {shguard} Guardians', '{shman}man', 'The Night {shnight}', '{shlegion} Legion']
 };
 
 const CO_WORDS = ['Meridian', 'Lodestar', 'Palisade', 'Cobalt', 'Harbor Light', 'Silver Arrow', 'Northgate', 'Red Lantern', 'Crescent', 'Summit', 'Blue Heron', 'Eastwind', 'Keystone', 'Ironwood', 'Starboard', 'Orchid', 'Pagoda', 'Monarch', 'Horizon', 'Beacon', 'Driftwood', 'Solstice', 'Granite', 'Vermilion', 'Quarry', 'Juniper', 'Falcon', 'Tidewater', 'Coral', 'Lighthouse', 'Jade Gate', 'Aurora', 'Stella', 'Cypress', 'Obelisk', 'Marigold', 'Kestrel', 'Sable', 'Albatross', 'Zenith'];
@@ -10016,9 +10079,9 @@ function marketIn(m) { const n = MARKETS[m].name, two = n.split(' / '), nm = two
 function titleFor(genre, hub) {
   const H = HUBS[hub], N = NAMES[H.lang] || NAMES.en;
   const t = pick(TPL[genre]);
-  const rep = { adj: () => pick(TW.adj), noun: () => pick(TW.noun), noun2: () => pick(TW.noun), plural: () => pick(TW.plural), num: () => pick(TW.num), season: () => pick(TW.season), place: () => pick(H.places), first: () => pick(N.M.concat(N.F)), first2: () => pick(N.M.concat(N.F)), n: () => ri(12, 900) };
+  const rep = { ...Object.fromEntries(Object.keys(TWX).map(k => [k, () => pick(TWX[k])])), adj: () => pick(TW.adj), noun: () => pick(TW.noun), noun2: () => pick(TW.noun), plural: () => pick(TW.plural), num: () => pick(TW.num), season: () => pick(TW.season), place: () => pick(H.places), first: () => pick(N.M.concat(N.F)), first2: () => pick(N.M.concat(N.F)), n: () => ri(12, 900) };
   return t.replace(/\{(\w+)\}/g, (_, k) => rep[k] ? rep[k]() : k).replace(/\b([Tt]he) the /g, '$1 ')   // 'The {place}' with a place like 'the Canyon'
-    .replace(/^Days of (?!Silence|Fever|Ashes|Winter|Harvest|Ruin)([A-Z]\w+)$/, 'Days of the $1').replace(/ a Ashes\b/, ' the Ashes').replace(/ a ([AEIOU])/g, ' an $1').replace(/^Only in the /, 'Only on the ');
+    .replace(/(^| )([Aa]) ([AEIOU]|Hour\b)/g, '$1$2n $3').replace(/^Only in the /, 'Only on the ').replace(/ in the (Coast|Canyon|Beach|Strip|Island|Hill|Mountain)s?\b/, ' on the $1');
 }
 
 // o (optional): a film built around a script someone optioned: { genre, wri, title, prod, co, score, dir, budget, lead, dp, ed }.
@@ -16509,13 +16572,37 @@ function chartFor(field, hub) {
 }
 // Titles are seeded by the whole name (not its length), so two acts never share a discography.
 const WT_SOLO = ['Tell Me Twice', 'All Night Long Again', 'Don\'t Look Back Now', 'Slow Burn', 'Wildfire', 'Heartbeat Avenue', 'Overgrown', 'Satellite', 'Undertow', 'Afterglow', 'Holding Pattern', 'Paper Planes and Promises', 'Say It Like You Mean It', 'Rearview', 'Daylight Robbery', 'Fever Dream', 'Bad Habits, Good Intentions', 'Lighthouse', 'The Long Way Home', 'Sugar on the Radio', 'Cold Water', 'Wrong Number', 'Dance Like Nobody\'s Filming', 'Gravity', 'Old Flames', 'Cheap Champagne', 'Ten Feet Tall', 'Heavy Weather', 'Last Bus Home', 'Glow', 'Hurricane Season', 'Velvet Underground Car Park', 'Kiss the Sky Goodbye', 'Postcards', 'Fool\'s Gold', 'Static Love', 'Moonlighting', 'Nobody\'s Business', 'Sweet Disaster', 'Copper Sun'];
+// Plays: whole templates with words that fit them, so the parodies scan ("Death of a Wedding Planner").
+const PLAY_T = ['Death of a {job}', 'Waiting for {name}', 'A Streetcar Named {virtue}', 'Cat on a Hot {material} Roof', 'The Importance of Being {adj}', 'Who\'s Afraid of {name}?', 'Long Day\'s Journey into {time}', 'The {job}\'s Wife', 'Look Back in {mood}', 'The Glass {animal}', 'A Doll\'s {place}', 'The {job} of {city}', 'Three {plural}', 'The Night of the {animal}', 'Arcadia {road}', '{name}\'s Last Tape', 'The {adj} Heart', 'Twelve Angry {plural}', 'A Raisin in the {weather}', 'The {animal} Gull', 'Much Ado About {thing}', 'The {colour} Room', 'An Inspector {verb}s', '{name} in the {place}'];
+const PLAY_W = {
+  job: ['Salesman', 'Wedding Planner', 'Dentist', 'Lighthouse Keeper', 'Ferryman', 'Plumber', 'Magician', 'Accountant', 'Tailor', 'Cartographer', 'Night Porter', 'Weather Girl'],
+  name: ['Gordon', 'Norman', 'Dorothy', 'Godfrey', 'Margot', 'Gus', 'Agnes', 'Lenny', 'Mabel', 'Felix'],
+  virtue: ['Patience', 'Desire', 'Regret', 'Prudence', 'Mercy', 'Ambition', 'Envy', 'Hope'],
+  material: ['Tin', 'Glass', 'Slate', 'Copper', 'Velvet', 'Paper', 'Thatched'],
+  adj: ['Earnest', 'Honest', 'Ordinary', 'Elsewhere', 'Fabulous', 'Sensible', 'Late', 'Brave'],
+  time: ['Night', 'Morning', 'Tuesday', 'Winter', 'Teatime', 'Brunch'],
+  mood: ['Anger', 'Laughter', 'Confusion', 'Envy', 'Wonder', 'Fury'],
+  animal: ['Ferret', 'Llama', 'Seagull', 'Fox', 'Heron', 'Pigeon', 'Goat', 'Badger'],
+  place: ['Shed', 'Garden', 'Kitchen', 'Attic', 'Lighthouse', 'Laundrette'],
+  city: ['Venice', 'Brighton', 'Seville', 'Naples', 'Dublin', 'Lyon'],
+  plural: ['Sisters', 'Brothers', 'Widows', 'Cousins', 'Uncles', 'Neighbours', 'Men', 'Women'],
+  road: ['Road', 'Avenue', 'Lane', 'Revisited'],
+  weather: ['Sun', 'Rain', 'Fog', 'Snow', 'Drizzle'],
+  thing: ['Nothing', 'Everything', 'Something', 'Very Little', 'The Neighbours'],
+  colour: ['Blue', 'Yellow', 'Green', 'Velvet', 'Crimson'],
+  verb: ['Whistle', 'Sing', 'Dance', 'Panic', 'Knit']
+};
+// Online video: the titles creators actually use.
+const VID_T = ['I Tried {thing} for 30 Days', 'We Built a {thing} in 24 Hours', 'Rating Every {thing} in {city}', 'The Truth About {thing}', '{n} Things Nobody Tells You About {topic}', 'I Spent $1 vs $1,000 on {thing}', 'Why Is Everyone Talking About {topic}?', 'Reacting to My First {thing}', 'Surviving a Week as a {job}', 'Day in the Life of a {job}', 'Ranking {topic}, Badly', 'Can a {job} Make a Film in a Weekend?'];
+const VID_W = { thing: ['Haunted Hotel', 'Film Camera', 'Street Food Tour', 'Tiny House', 'Silent Film', 'Vintage Lens', 'Bad Script', 'Escape Room', 'Thrift Haul', 'Movie Set'], city: ['Tokyo', 'Paris', 'Lagos', 'Mumbai', 'Mexico City', 'Seoul', 'London', 'Rome'], topic: ['Film Sets', 'Movie Trailers', 'Stunt Doubles', 'Award Shows', 'Plot Holes', 'Sequels', 'Horror Films', 'Film School'], job: ['Stuntperson', 'Film Extra', 'Foley Artist', 'Boom Operator', 'Script Supervisor', 'Projectionist', 'Location Scout'], n: ['5', '7', '10', '12', '23'] };
 const PLAY_A = ['The Glass', 'The Last', 'A Winter', 'The Lonely', 'The House of', 'The Ballad of', 'Death of a', 'The Importance of', 'Waiting for', 'A Streetcar Called', 'Cat on a Hot', 'The Night of the'];
 const PLAY_B = ['Mechanic', 'Salesgirl', 'Tin Shed', 'Gordon', 'Desire', 'Ironing', 'Lear', 'Bernarda', 'Being Elsewhere', 'Rain', 'Harbour', 'Orchard', 'Sisters', 'Garden', 'Ferryman', 'Inheritance'];
 function nameHash(s) { let h = 7; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h; }
 function workTitleFor(x, w) {
   if (x.field === 'podcast') return x.name;
   const r = hashRand(nameHash(x.name) % 1e7 * 13 + Math.floor(w / 6) * 977), f = r(), pk = L => L[Math.floor(r() * L.length)];
-  if (x.field === 'stage') return f < .7 ? `${pk(PLAY_A)} ${pk(PLAY_B)}` : pk(WT_SOLO);
+  if (x.field === 'stage') { const T = pk(PLAY_T); return T.replace(/\{(\w+)\}/g, (_, k) => pk(PLAY_W[k])).replace(/(^| )([Aa]) ([AEIOU])/g, '$1$2n $3'); }
+  if (x.field === 'creator') { const T = pk(VID_T); return T.replace(/\{(\w+)\}/g, (_, k) => pk(VID_W[k])); }
   return f < .5 ? `${pk(WT_A)} ${pk(WT_B)}` : f < .85 ? pk(WT_SOLO) : `${pk(WT_A)} ${pk(WT_B)} (${pk(['Live', 'Remix', 'Acoustic', 'Radio Edit', 'Reprise', 'Night Version'])})`;
 }
 function viewCharts() {
