@@ -411,6 +411,7 @@ function endParty() {
     if (lost.length) { const id = ppick(lost); delete M.known[id]; pt.forgot = +id; }
   }
   pt.done = true;
+  if (M.focus && M.focus.auto && typeof autoCal === 'function') M.cal = autoCal();   // the first week is planned like every other, rest included
   inbox('note', 'New Year’s Day', `You wake up ${pt.drinks >= 4 ? 'at noon with a pounding head' : pt.drinks >= 2 ? 'a little slow' : 'clear-headed'}. ${Object.keys(M.known).length} names in your phone${pt.forgot != null ? ', and one you can’t place at all' : ''}. ${pt.leads.length ? `${pt.leads.length === 1 ? 'One person' : pt.leads.length + ' people'} said to get in touch: worth following up while they remember you.` : 'Nobody promised you anything. That is normal.'} Plan your first week below.`);
   refreshBoard();
 }
@@ -694,6 +695,7 @@ function closeWeek(a) {
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
+  if (typeof correspondWeek === 'function') correspondWeek();
   if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof shopWeek === 'function') shopWeek();

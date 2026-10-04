@@ -195,7 +195,7 @@ function msgWeek() {
     else if (x.k === 'leak') { if (!M.known[x.id]) continue; addTie(me, q, -6); trust(x.id, -8); sms(x.id, pickLine(['heard what you said about me. nice', 'funny, someone told me what you\'ve been saying. we should talk', 'I thought we were friends'], x.id + S.week), 'text', { replyable: 1, topic: 'bad', mood: 'none' }); }
     else if (x.k === 'pitch' && M.known[x.id]) { const good = prnd() < clamp(.3 + me.mind.tas / 30 + me.mind.tas / 60, .15, .85); addTie(me, q, good ? 3 : 0); if (good) M.refs[x.id] = (M.refs[x.id] || 0) + 1; sms(x.id, good ? pickLine([`still thinking about ${x.idea}. if you write it, I want to see it first`, `told a producer friend about ${x.idea}. they want to meet you`, `that idea of yours keeps coming back to me. write it`], x.id) : pickLine(['thought about your idea. not sure it\'s a film yet. but keep going', 'it\'s not there yet. but you are, if that makes sense'], x.id), 'text', { replyable: 1, topic: good ? 'good' : 'chat' }); }
     else if (x.k === 'payback' && M.known[x.id]) { if (x.stiff) { addTie(me, q, -2); sms(x.id, pickLine(['I know I owe you. I haven\'t forgotten. soon', 'about the money. can it be a bit longer?'], x.id), 'text', { replyable: 1, topic: 'chat' }); } else { M.cash += x.amt; sms(x.id, `sent back the ${fmtCash(x.amt)}. thank you for trusting me`, 'text', { replyable: 1, topic: 'good' }); } }
-    else if (x.k === 'mail') mailReply(x);
+    else if (x.k === 'mail') { const n0 = (M.mail || []).length; mailReply(x); if (typeof mailEchoAfter === 'function') mailEchoAfter(x, n0); }
   }
   M.msgq = (M.msgq || []).filter(x => !x.done || S.week - x.due < 4);
   // an unpaid loan sours things
@@ -229,7 +229,7 @@ function emailAct(a) {
   M.emailW = M.emailW || {}; const key = a.kind + a.to; if (M.emailW[key] !== undefined && S.week - M.emailW[key] < 8) return false; M.emailW[key] = S.week;
   const text = String(a.text || '').trim().slice(0, 1200), rude = readIntent(text).rude;
   mail('sent', 'You → ' + who.name, K.subj, text || `Dear ${isCo ? 'team' : who.name.split(' ')[0]},\n\n${{ enquire: 'I\'m writing to ask whether you have any openings. My work is attached.', pitchco: 'I have a project I think suits your slate. Could I send you a one-page outline?', cold: 'I\'ve admired your work for years and wanted to say so. If you ever have ten minutes for someone starting out, I\'d be grateful.', meet: 'Would you have time for a short meeting in the next few weeks? I\'d value your thoughts.', thanks: 'Just a note to say thank you. It made a real difference.', agent: 'I\'m looking for representation and I\'d love to talk. My credits and reel are attached.' }[a.kind]}\n\nBest,\n${ME().name}`);
-  later({ k: 'mail', kind: a.kind, to: a.to, id: isCo ? -1 : ref, effort: Math.min(1, text.length / 400), rude, due: S.week + 1 + Math.floor(prnd() * 2) });
+  later({ k: 'mail', kind: a.kind, to: a.to, id: isCo ? -1 : ref, effort: Math.min(1, text.length / 400), rude, text: text.slice(0, 600), due: S.week + 1 + Math.floor(prnd() * 2) });
   return true;
 }
 function mailReply(x) {

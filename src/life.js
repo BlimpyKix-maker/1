@@ -278,6 +278,9 @@ function autoCal() {
   if ((M.grind || 0) >= 8) for (const d of [0, 2, 4, 6]) cal[d][2] = 'home';   // worn down: protect the evenings
   if (M.stress > 55) { cal[2][2] = 'out'; cal[5][0] = 'rest'; cal[6][2] = 'home'; }
   if (M.cash < usd(life.rent) * 3 && F.day !== 'money') { cal[1][1] = 'hustle'; cal[3][1] = 'hustle'; cal[5][1] = 'hustle'; }
+  // job hunt paused (happy where you are, or school comes first): those blocks go to something that builds you
+  if (F.noHunt) { const alt = M.school ? ['study', 'read', 'study', 'write'] : { write: ['write'], make: ['make'], craft: ['train', 'read'], social: ['network', 'catchup'], money: ['hustle'] }[F.day] || ['write', 'train', 'read', 'make'];
+    let n = 0; for (const r of cal) for (let b = 0; b < 3; b++) if (r[b] === 'hunt') r[b] = alt[n++ % alt.length]; }
   // study sessions are fitted in by obligations() when the week runs; then rest comes before everything else
   const keep = M.cal; M.cal = cal;
   const OB = obligations(), run = OB.cal.map(r => r.slice()), rested = restGuard(run, OB.forced, 0);
@@ -289,7 +292,8 @@ function autoCal() {
 function setFocus(a) {
   const M = S.me;
   if (a.day && !DAY_FOCUS[a.day] || a.eve && !EVE_STYLE[a.eve]) return false;
-  M.focus = Object.assign({ day: 'balanced', eve: 'quiet', auto: true }, M.focus || {}, a.day ? { day: a.day } : {}, a.eve ? { eve: a.eve } : {}, a.auto !== undefined ? { auto: !!a.auto } : {});
+  M.focus = Object.assign({ day: 'balanced', eve: 'quiet', auto: true }, M.focus || {}, a.day ? { day: a.day } : {}, a.eve ? { eve: a.eve } : {}, a.auto !== undefined ? { auto: !!a.auto } : {}, a.noHunt !== undefined ? { noHunt: !!a.noHunt } : {});
+  if (M.focus.noHunt && M.focus.day === 'hunt') M.focus.day = 'balanced';
   if (M.focus.auto) M.cal = autoCal();
   return true;
 }

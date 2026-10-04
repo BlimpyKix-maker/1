@@ -211,7 +211,7 @@ function agentWeek() {
   const M = S.me; if (!M.agent) return;
   if (M.jobs.length) M.agent.lastBook = S.week;
   const st = AG_STYLE[M.agent.style || 'nurturer'];
-  if (st.refs && (S.week - M.agent.since) % 8 === 7) { M.freeRef = (M.freeRef || 0) + 1; sms(M.agent.id, 'put your name in for a couple of things this week. apply and I\'ll follow up', 'tip'); }
+  if (st.refs && (S.week - M.agent.since) % 8 === 7) { M.freeRef = (M.freeRef || 0) + 1; sms(M.agent.id, typeof fresh === 'function' ? fresh(['put your name in for a couple of things this week. apply and I\'ll follow up', 'two things on the board have your name on them. apply, I\'ll make calls', 'I\'ve been talking you up. check the board this week', 'a casting director owes me lunch. apply to anything good and I\'ll chase it', 'quiet week, but I got you a referral. use it'], 'agent', S.week) : 'put your name in for a couple of things this week. apply and I\'ll follow up', 'tip'); }
   if (S.week - M.agent.lastBook > st.patience) { inbox('note', 'Your agent lets you go', `${M.agent.name} drops you: too long without a booking. It isn't personal. It feels personal.`); M.agent = null; M.board = M.board.filter(p => !p.agent); }
 }
 function agentApproach() {

@@ -72,7 +72,7 @@ function tryInvite(q, kind, C, L) {
   return { t: pickLine(['yes! ' + slotLabel(s) + '?', 'done. ' + slotLabel(s) + ', you\'re buying', 'I\'m in. ' + slotLabel(s) + ' works', 'finally. ' + slotLabel(s) + ', don\'t be late'], q.id + C.n), d: 1.5, booked: s };
 }
 // How they answer: built from what you said, who they are, and what they remember.
-function answerOwn(q, text, m, C) {
+function answerOwnBasic(q, text, m, C) {
   const I = readIntent(text), o = opinion(q.id), rel = relOf(q.id), t = q.traits || [], top = msgTopic(m), parts = [];
   let d = 1 + (I.long ? .5 : 0), mood = 'happy';
   if (I.rude) { d = t.includes('Volatile') ? -6 : -4; mood = 'none'; parts.push(t.includes('Volatile') ? pickLine(['wow. ok. noted', 'say that to my face', 'right. done talking to you for a bit'], q.id) : pickLine(['ouch', 'that was unnecessary', 'ok… I\'ll pretend I didn\'t read that'], q.id)); return { t: parts.join(' '), d, mood }; }

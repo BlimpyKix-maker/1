@@ -112,11 +112,13 @@ async function pack(str) {
 async function unpack(rec) { return rec.z ? await new Response(rec.data.stream().pipeThrough(new DecompressionStream('gzip'))).text() : rec.data; }
 function saveList() { return idbDo('meta', 'readonly', st => st.getAll()).then(L => (L || []).sort((a, b) => b.when - a.when)).catch(() => []); }
 async function writeSlot(kind, name, id) {
-  const str = snapData(), p = await pack(str), size = p.z ? p.data.size : str.length;
+  const str = snapData(), j0 = JOURNAL ? JOURNAL.log.length : 0;   // what's done from here on belongs after this save
+  const p = await pack(str), size = p.z ? p.data.size : str.length;
   const meta = { id: id || kind + '-' + Date.now().toString(36), kind, name: name || '', when: Date.now(), seed: S.seed, year: S.startYear, depth: S.depth, week: S.week, label: snapLabel(), build: BUILD_ID, size };
   await idbDo('data', 'readwrite', st => st.put(p, meta.id));
   await idbDo('meta', 'readwrite', st => st.put(meta));
-  journalReset(meta.id);
+  const after = JOURNAL ? JOURNAL.log.slice(j0) : [];
+  journalReset(meta.id); if (after.length) { JOURNAL.log = after; journalWrite(); }
   if (kind === 'auto') { const L = (await saveList()).filter(x => x.kind === 'auto'); for (const x of L.slice(MAX_AUTO)) await deleteSlot(x.id); }
   return meta;
 }

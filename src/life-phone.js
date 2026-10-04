@@ -22,8 +22,8 @@ function styleText(p, t, mood = 'happy') {
   let s = String(t);
   if (/^\[/.test(s)) return s;   // a photo or a voice note speaks for itself
   switch (st) {
-    case 'formal': s = sentenceCase(s.replace(/\s*$/, '')); if (!/[.!?…]$/.test(s)) s += '.'; if (s.length > 70 && o < 20) s = `Hi ${first}. ${s}`; if (s.length > 70) s += ` Best, ${p.name.split(' ')[0]}`; break;
-    case 'terse': { const t0 = s.split(/(?<=\w)[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); s = t0.replace(/[.…\s]/g, '').length < 3 ? s.toLowerCase() : t0; if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break; }
+    case 'formal': s = sentenceCase(s.replace(/\s*$/, '')); if (!/[.!?…]$/.test(s)) s += '.'; if (s.length > 70 && o < 20 && r < .5) s = `Hi ${first}. ${s}`; break;
+    case 'terse': { const parts = s.split(/(?<=[\w)])[.!?]+\s+/).map(x => x.trim()).filter(Boolean), t0 = (parts.length > 1 && s.length > 90 ? parts.slice().sort((a, b) => b.length - a.length)[0] : s).toLowerCase().replace(/[.!]+$/, ''); s = t0.replace(/[.…\s]/g, '').length < 3 ? s.toLowerCase() : t0; if (s.length > 90) s = s.slice(0, 88).replace(/\s\S*$/, '') + '…'; break; }   // the sentence that says something, not the first one
     case 'lower': s = s.toLowerCase().replace(/[.]$/, ''); break;
     case 'caps': s = s.replace(/\b([a-z]{4,})\b/g, (w, _, i) => (hashRand(i + p.id)() < .35 ? w.toUpperCase() : w)) + (r < .5 ? '!!' : '!!!'); break;
     case 'long': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, '') + (/[.!?…)\]]$/.test(s.trim()) ? '' : '.') + (r < .5 ? ' Anyway sorry, long message, I just think about this stuff a lot. How are YOU? Properly, I mean.' : ' Also, random, but I hope you\'re looking after yourself. This business eats people.'); break;

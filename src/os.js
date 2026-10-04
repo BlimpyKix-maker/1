@@ -42,7 +42,6 @@ function osCard(title, inner, cls = '') { return `<div class="os-card ${cls}"><h
 function osHome() {
   const M = S.me, me = ME(), A = typeof hubAlerts === 'function' ? hubAlerts() : [], slots = appSlots(), B = typeof bestFits === 'function' ? bestFits(5) : [];
   const picked = [...UI.apps].filter(id => M.board.some(p => p.id === id)).length;
-  const mails = (M.mail || []).filter(m => !['spam', 'sent', 'news'].includes(m.folder)).slice(-4).reverse();
   const ap = typeof apptsAhead === 'function' ? apptsAhead().slice(0, 4) : [];
   const nw = osNetWorth(), news = S.news.map((n, i) => [n, i]).slice(-4).reverse();
   const kpi = (l, v, c = '') => `<div class="os-kpi"><span>${l}</span><b class="${c}">${v}</b></div>`;
@@ -50,11 +49,20 @@ function osHome() {
    <div class="os-grid">
     ${osCard('Needs you', A.length ? `<div class="os-alerts">${A.map(a => `<button class="os-alert ${a.cls}" data-jump="${esc(a.go)}"><span>${a.icon}</span>${esc(a.t)}<i>›</i></button>`).join('')}</div>` : '<p class="muted">All quiet. A good week to make something.</p>', 'wide')}
     ${!M.jobs.length && B.length ? osCard(`Best jobs for you <small>${picked} of ${slots} applications planned</small>`, `<ul class="os-list">${B.map(([p, o]) => `<li><label><input type="checkbox" data-apply="${p.id}" ${UI.apps.has(p.id) ? 'checked' : ''} ${!UI.apps.has(p.id) && picked >= slots ? 'disabled' : ''}></label><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a><span class="muted">${p.film !== null ? esc(S.films[p.film].title) : esc((tmplOf(p) || {}).biz || '')}</span><span class="os-pill ${o >= .6 ? 'good' : o >= .35 ? '' : 'bad'}">${Math.round(o * 100)}%</span></li>`).join('')}</ul>${!slots ? '<p class="muted small">Plan job-hunting blocks in your week to send applications.</p>' : ''}<button class="os-link" data-app="jobs">All listings ›</button>`, 'wide') : M.jobs.length ? osCard('On the job', `<ul class="os-list">${M.jobs.map(j => `<li><b>${esc(j.t)}</b><span class="muted">${j.film !== null && j.film !== undefined ? fl(j.film) : esc(j.mco || '')}</span><span class="os-pill">${Math.max(0, j.started + j.weeks - S.week)} wk left</span></li>`).join('')}</ul>`, 'wide') : ''}
-    ${osCard('Mail', mails.length ? `<ul class="os-list">${mails.map(m => `<li><button class="os-row" data-app="mail" data-mailo="${m.id}">${m.act && !m.done ? '<span class="os-dot"></span>' : ''}<b>${esc(m.subj)}</b><span class="muted">${esc(m.from)}</span></button></li>`).join('')}</ul>` : '<p class="muted">Inbox zero.</p>')}
+    ${osMessages()}
     ${osCard('Coming up', ap.length ? `<ul class="os-list">${ap.map(a => `<li><span>${(APPT_KINDS[a.kind] || {}).icon || '•'}</span><b>${esc(slotLabel(a))}</b><span class="muted">${esc((APPT_KINDS[a.kind] || {}).label || a.kind)}${a.who != null ? ' · ' + esc(P(a.who).name) : ''}</span></li>`).join('')}</ul>` : '<p class="muted">Nothing booked. Text someone.</p>', '')}
     ${osCard('Money', `<p class="os-big">${fmtCash(nw.total)}</p><p class="muted small">Cash ${fmtCash(M.cash)} · shares ${fmtCash(nw.shares)} · collectibles ${fmtCash(nw.things)}${nw.debt ? ` · owed ${fmtCash(nw.debt)}` : ''}</p><button class="os-link" data-app="bank">Open the bank ›</button>`)}
     ${osCard('Headlines', `<ul class="os-list">${news.map(([n, i]) => `<li><a href="#" class="lk" data-go="article:${i}">${esc(n.text.slice(0, 110))}</a></li>`).join('')}</ul><button class="os-link" data-app="trades">The Daily Slate ›</button>`, 'wide')}
    </div>`;
+}
+// Mail and texts together, on the front page: the newest from people first, with a reply right there.
+function osMessages() {
+  const M = S.me, texts = (M.phone || []).filter(m => m.from >= 0 && m.replyable && !m.replied && S.week - m.w < 6).slice(-4).reverse();
+  const mails = (M.mail || []).filter(m => !['spam', 'sent', 'news'].includes(m.folder) && (!m.rd || (m.act && !m.done))).slice(-5).reverse();
+  const tx = m => `<div class="os-txt">${phoneAvatar(m.from, 26)}<div><b>${esc(P(m.from).name)}</b> <span class="muted small">${fmtDate(m.w, true)}</span><p>${esc(m.t)}</p><div class="quick">${replyOptions(m).slice(0, 4).map(k => `<button class="qr" data-reply="${m.id}:${k}">${replyLabel(m, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text-${m.id}" maxlength="280" placeholder="Write back…"><button class="btn-s" data-reply="${m.id}:own">Send</button></div></div></div>`;
+  const ml = m => `<li><button class="os-row${m.rd ? '' : ' unread'}" data-app="mail" data-mailo="${m.id}">${m.act && !m.done ? '<span class="os-dot"></span>' : ''}<b>${esc(m.subj)}</b><span class="muted">${esc(m.from)}</span></button></li>`;
+  return osCard(`Messages <small>${texts.length ? texts.length + ' text' + (texts.length > 1 ? 's' : '') : ''}${texts.length && mails.length ? ' · ' : ''}${mails.length ? mails.length + ' email' + (mails.length > 1 ? 's' : '') : ''}</small>`,
+    `${texts.map(tx).join('')}${mails.length ? `<ul class="os-list">${mails.map(ml).join('')}</ul>` : ''}${!texts.length && !mails.length ? '<p class="muted">Nothing new. Text someone, or write an email: <button class="os-link" data-app="phoneapp">Phone ›</button> <button class="os-link" data-app="mail">Mail ›</button></p>' : `<p><button class="os-link" data-app="mail">All mail ›</button> <button class="os-link" data-app="phoneapp">All texts ›</button></p>`}`, 'wide');
 }
 function osNetWorth() {
   const M = S.me, shares = Object.entries(M.port || {}).reduce((t, [id, n]) => t + (n > 0 && S.companies[+id] && S.companies[+id].closed === null && typeof mktPrice === 'function' ? mktPrice(S.companies[+id]) * n : 0), 0);

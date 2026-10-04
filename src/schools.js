@@ -117,25 +117,40 @@ function applySchool(a) {
   return true;
 }
 // alumni: a famous school opens doors, and classmates become your network
-function almaFactors(post) { const M = S.me, A = (M.alma || []).map(id => SCHOOL_BY[id]).filter(Boolean); if (!A.length) return []; const best = A.sort((a, b) => a[4] - b[4])[0]; return best[4] <= 2 ? [[`Alumni of ${best[1]}`, best[4] === 1 ? .35 : .15]] : []; }
+function almaFactors(post) { const M = S.me, A = (M.alma || []).map(id => SCHOOL_BY[id]).filter(Boolean); if (!A.length) return []; const best = A.sort((a, b) => schoolRating(b) - schoolRating(a))[0], r = schoolRating(best); return r >= 6 ? [[`Alumni of ${best[1]}`, r >= 8.5 ? .35 : r >= 7.5 ? .2 : .1]] : []; }
 function schoolGraduate(sc) { const M = S.me; if (sc.at) { (M.alma = M.alma || []).push(sc.at); const P0 = SCHOOL_PROGS[sc.prog]; if (P0 && P0.deg && !M.degrees.includes(P0.deg)) M.degrees.push(P0.deg); } }
+// ---- ratings out of ten ----
+// Prestige tiers are coarse (a third of the list sits in the top one), so each school gets a rating out of ten,
+// spread by where it ranks: tier, how hard it is to get into, how long it has been teaching, and a little of its own
+// reputation. Only a handful reach nine; the middle of the list sits around five.
+let SCH_RATE = null;
+function schoolRating(s) {
+  if (!SCH_RATE) {
+    const raw = SCHOOLS.map(x => [x[0], [0, 7, 5.2, 3.6][x[4]] + (x[6] - 12) * .22 + Math.min(1, Math.max(0, 2027 - x[5]) / 100) * .8 + (hashRand(x[0].length * 977 + x[1].length * 31 + x[5])() - .5) * 1.2]);
+    raw.sort((a, b) => a[1] - b[1]);
+    SCH_RATE = {}; raw.forEach(([id], i) => { const p = raw.length > 1 ? i / (raw.length - 1) : 1; SCH_RATE[id] = Math.round((3 + 6.8 * Math.pow(p, 1.6)) * 10) / 10; });
+  }
+  return SCH_RATE[s[0]] || 5;
+}
+function rateChip(s) { const r = schoolRating(s); return `<span class="chip ${r >= 8.5 ? 'good' : r < 4.5 ? 'hist' : ''}" title="Rating out of ten">${r.toFixed(1)}</span>`; }
+function eliteSchool(id) { const s = SCHOOL_BY[id]; return !!s && schoolRating(s) >= 8.5; }
 // ---- browsing ----
 function schoolsHTML() {
   const M = S.me, F = UI.sch = UI.sch || { kind: 'all', where: 'all', sort: 'prestige' };
   const kinds = { all: 'All', film: 'Film', music: 'Music', drama: 'Drama', animation: 'Animation', games: 'Games', journalism: 'Journalism & audio', business: 'Business & producing' };
   let L = SCHOOLS.filter(s => s[5] <= S.year && (F.kind === 'all' || s[3].includes(F.kind)) && (F.where === 'all' || (F.where === 'here' ? s[2] === M.hub : HUBS[s[2]].m === F.where)));
-  L = L.sort((a, b) => F.sort === 'prestige' ? a[4] - b[4] || a[6] - b[6] : F.sort === 'cheap' ? a[7] - b[7] : F.sort === 'easy' ? a[6] - b[6] : a[1].localeCompare(b[1]));
+  L = L.sort((a, b) => F.sort === 'prestige' ? schoolRating(b) - schoolRating(a) : F.sort === 'cheap' ? a[7] - b[7] : F.sort === 'easy' ? a[6] - b[6] : a[1].localeCompare(b[1]));
   const markets = [...new Set(SCHOOLS.map(s => HUBS[s[2]].m))];
   const open = SCHOOL_BY[UI.schOpen];
   return `<div class="bfilter"><div class="bf-row">${Object.entries(kinds).map(([k, l]) => `<button class="pill${F.kind === k ? ' on' : ''}" data-schk="${k}">${l}</button>`).join('')}</div>
    <div class="bf-row"><label class="small">Where <select id="sch-where"><option value="all">Anywhere</option><option value="here"${F.where === 'here' ? ' selected' : ''}>In ${esc(hubName(M.hub))}</option>${markets.map(m => `<option value="${m}"${F.where === m ? ' selected' : ''}>${esc(MARKETS[m] ? MARKETS[m].name : m)}</option>`).join('')}</select></label>
-   <label class="small">Sort <select id="sch-sort">${[['prestige', 'Most prestigious'], ['easy', 'Easiest to get into'], ['cheap', 'Cheapest'], ['name', 'Name']].map(([k, l]) => `<option value="${k}"${F.sort === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label> <span class="muted small">${L.length} schools</span></div></div>
-   <div class="tw"><table class="grid small"><thead><tr><th>School</th><th>City</th><th>Teaches</th><th>Prestige</th><th class="n">Entry DC</th><th class="n">A year</th></tr></thead><tbody>${L.slice(0, 60).map(s => `<tr><td><a href="#" class="lk" data-schopen="${s[0]}">${esc(s[1])}</a></td><td>${esc(hubName(s[2]))}</td><td>${s[3].map(k => kinds[k].split(' ')[0]).join(', ')}</td><td data-v="${4 - s[4]}">${'★'.repeat(4 - s[4])}</td><td class="n" data-v="${s[6]}">${schoolDC(s)}</td><td class="n" data-v="${s[7]}">${s[7] === 0 ? 'free' : fmtCash(usd(Math.round(SCHOOL_PROGS[s[3][0]].fee * s[7] * 40)))}</td></tr>`).join('')}</tbody></table></div>
+   <label class="small">Sort <select id="sch-sort">${[['prestige', 'Highest rated'], ['easy', 'Easiest to get into'], ['cheap', 'Cheapest'], ['name', 'Name']].map(([k, l]) => `<option value="${k}"${F.sort === k ? ' selected' : ''}>${l}</option>`).join('')}</select></label> <span class="muted small">${L.length} schools</span></div></div>
+   <div class="tw"><table class="grid small"><thead><tr><th>School</th><th>City</th><th>Teaches</th><th>Rating /10</th><th class="n">Entry DC</th><th class="n">A year</th></tr></thead><tbody>${L.slice(0, 60).map(s => `<tr><td><a href="#" class="lk" data-schopen="${s[0]}">${esc(s[1])}</a></td><td>${esc(hubName(s[2]))}</td><td>${s[3].map(k => kinds[k].split(' ')[0]).join(', ')}</td><td data-v="${schoolRating(s)}">${rateChip(s)}</td><td class="n" data-v="${s[6]}">${schoolDC(s)}</td><td class="n" data-v="${s[7]}">${s[7] === 0 ? 'free' : fmtCash(usd(Math.round(SCHOOL_PROGS[s[3][0]].fee * s[7] * 40)))}</td></tr>`).join('')}</tbody></table></div>
    ${open ? schoolPage(open) : ''}`;
 }
 function schoolPage(s) {
   const M = S.me, wait = M.schoolApp && M.schoolApp[s[0]] !== undefined && S.week - M.schoolApp[s[0]] < 26, alumni = (M.alma || []).includes(s[0]);
-  return `<section class="panel jobd"><h3>${esc(s[1])} <button class="linkish" data-schopen="">Close</button></h3><p class="eyebrow">${esc(hubName(s[2]))} · founded ${s[5]} · ${'★'.repeat(4 - s[4])}${alumni ? ' · your alma mater' : ''}</p><p>${esc(s[8])}</p>
+  return `<section class="panel jobd"><h3>${esc(s[1])} <button class="linkish" data-schopen="">Close</button></h3><p class="eyebrow">${esc(hubName(s[2]))} · founded ${s[5]} · rated ${schoolRating(s).toFixed(1)} out of 10${alumni ? ' · your alma mater' : ''}</p><p>${esc(s[8])}</p>
    ${progsAt(s).map(k => { const P0 = SCHOOL_PROGS[k], fee = Math.round(P0.fee * s[7]); return `<div class="course">${typeof syllabusHTML === 'function' ? syllabusHTML(k) : ''}<b>${esc(P0.label)}</b> <span class="muted small">${Math.round(P0.weeks / 40 * 10) / 10} years · ${P0.days} study sessions a week · ${fee ? fmtCash(usd(fee)) + '/wk' : 'no tuition'} · leads to ${esc(DEG_LABEL[P0.deg] || 'a degree')}</span><p class="small">${P0.crafts.map(c => `<button class="btn-s ghost" data-schapply="${s[0]}:${k}:${c}" ${M.school || wait ? 'disabled' : ''}>Apply: ${esc(CRAFTS[c].label)} (DC ${schoolDC(s, c)})</button>`).join(' ')}</p></div>`; }).join('')}
    <p class="muted small">Applying costs ${fmtCash(usd(s[4] === 1 ? 120 : 60))} and rolls ${['drama', 'music'].some(k => s[3].includes(k)) ? 'Charisma for auditions or Vision for portfolios' : 'Vision for your portfolio'}. Credits, finished work and skill in the craft lower the bar. Beat it by six and you get a scholarship. ${s[2] !== M.hub ? 'Getting in means moving to ' + esc(hubName(s[2])) + '.' : ''}${wait ? ' You applied recently: wait six months.' : ''}</p></section>`;
 }

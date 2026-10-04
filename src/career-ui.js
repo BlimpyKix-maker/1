@@ -446,7 +446,10 @@ function homePanel() {
    <h4>Furniture and things</h4><div class="shop">${Object.entries(FURNITURE).map(([id, F]) => { const own = H.items.includes(id);
      return `<div class="shop-item${own ? ' owned' : ''}"><svg viewBox="-30 -84 120 92" width="64" height="50">${furnitureSVG(id, 0, 0)}</svg><div><b>${esc(F.name)}</b><p class="muted">${esc(F.d)}</p><p>${fxBadges(F)}</p>${own ? `<span class="chip t-Award">${lay[id] ? 'In the room' : 'In a box'}</span>` : `<button class="btn-s" data-furnish="${id}"${M.cash < F.price ? ' disabled' : ''}>Buy ${usd(F.price)}</button>`}</div></div>`; }).join('')}</div></section>`;
 }
+// The computer is the one main screen: a desk section asked for by any link opens as its app inside it.
+const DT2APP = { today: 'today', feed: 'feed', diary: 'week', phone: 'phoneapp', work: 'work', create: 'create', compete: 'contests', standing: 'standing', life: 'life', people: 'people', computer: 'home' };
 function viewDesk() {
+  if (!UI.inPart && UI.dtab !== 'computer') { const was = UI.dtab; UI.dtab = 'computer'; if (was) { UI.app = DT2APP[was] || 'home'; UI.osStack = []; } }
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
   const pend = pending();
   const plan = [].concat(...planBlocks()), jd = jobDays();
@@ -478,7 +481,6 @@ function viewDesk() {
   ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own. Pieces marked ★ were bought.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${M.over ? (typeof epilogueHTML === 'function' ? epilogueHTML() : `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>`) : ''}
-  ${deskNav()}
   <div class="dstack">${(() => { switch (UI.dtab || 'computer') {
     case 'feed': return feedPanel();
     case 'compete': return campaignHTML() + compPanel();
@@ -532,13 +534,13 @@ function endWeekAct(t = 'end') { return { t, cal: calOf().map(r => r.slice()), a
 function playStep(t) {
   if (UI.busy || !careerActive()) return;
   if (typeof autoBeforeStep === 'function') autoBeforeStep();
-  if (pending().length) { UI.tab = 'you'; if (UI.dtab === 'computer') { UI.app = 'today'; UI.osStack = []; } else UI.dtab = 'today'; UI.stack = []; render(); return; }
+  // wherever you were, time moves on from the main screen: the computer, on Home (or Today, with a decision waiting)
+  const home = () => { UI.tab = 'you'; UI.stack = []; UI.dtab = 'computer'; UI.app = pending().length ? 'today' : 'home'; UI.osStack = []; UI.mailo = null; };
+  if (pending().length) { home(); render(); return; }
   const w0 = S.week;
   doAct(endWeekAct(t));
   if (S.week !== w0) UI.apps = new Set();
-  if (UI.dtab === undefined) UI.dtab = 'computer';   // the computer is home base
-  if (pending().length || S.week !== w0) { if (UI.dtab === 'computer') { UI.app = pending().length ? 'today' : 'home'; UI.osStack = []; } else UI.dtab = 'today'; }   // a new week starts on the hub
-  UI.tab = 'you'; UI.stack = []; render(true);
+  home(); render(true); if (typeof window !== 'undefined' && window.scrollY > 400) { const c = document.querySelector('.os'); if (c) c.scrollIntoView({ block: 'start' }); }
 }
 function playWeeks(n) {
   if (UI.busy || !careerActive()) return;
@@ -622,7 +624,7 @@ function careerClick(t) {
   if (t.dataset.vcat) { UI.vcat = t.dataset.vcat; render(true); return true; }
   if (t.dataset.trip) { doAct({ t: 'trip', k: t.dataset.trip }); render(true); return true; }
   if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
-  if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
+  if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text-' + mid) || $('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' || (typeof TOPICS !== 'undefined' && TOPICS[T.kind]) ? T.msg : undefined }; if (T.kind !== 'hi' && !(typeof TOPICS !== 'undefined' && TOPICS[T.kind])) { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
@@ -689,6 +691,7 @@ function careerChange(e) {
     render(true); return true;
   }
   if (/^cal-\d-\d$/.test(id)) { UI.fineOpen = true; calOf()[+id[4]][+id[6]] = v; render(true); return true; }
+  if (e.target.dataset.huntpause) { doAct({ t: 'focus', noHunt: e.target.checked }); render(true); return true; }
   if (e.target.dataset.autopilot) { doAct({ t: 'focus', auto: e.target.checked }); render(true); return true; }
   if (id === 'tx-msg') { UI.txt.msg = v; return true; }
   if (/^comp-sc-/.test(id)) { UI[id] = v; return true; }
@@ -746,9 +749,10 @@ function troupePanel() {
 function focusPanel() {
   const M = S.me, F = M.focus || { day: 'balanced', eve: 'quiet', auto: false }, fc = forecastWeek();
   const card = (k, D, on, g) => `<button class="fcard${on ? ' on' : ''}" data-focus="${g}:${k}" title="${esc(D.d || '')}"><span>${D.icon}</span><b>${esc(D.label)}</b>${D.d ? `<small>${esc(D.d)}</small>` : ''}</button>`;
-  return `<div class="focus"><h4>What are your days for?</h4><div class="fcards">${Object.entries(DAY_FOCUS).map(([k, D]) => card(k, D, F.day === k, 'day')).join('')}</div>
+  return `<div class="focus"><h4>What are your days for?</h4><div class="fcards">${Object.entries(DAY_FOCUS).filter(([k]) => !(F.noHunt && k === 'hunt')).map(([k, D]) => card(k, D, F.day === k, 'day')).join('')}</div>
    <h4>And your evenings?</h4><div class="fcards eve">${Object.entries(EVE_STYLE).map(([k, D]) => card(k, D, F.eve === k, 'eve')).join('')}</div>
    <p><label><input type="checkbox" data-autopilot="1" ${F.auto ? 'checked' : ''}> Autopilot: write next week's diary from these, adjusting when I'm tired, stressed, broke or in school</label></p>
+   <p><label><input type="checkbox" data-huntpause="1" ${F.noHunt ? 'checked' : ''}> Pause the job hunt: autopilot stops booking "Look for work" and uses those blocks ${S.me.school ? 'for study and reading' : 'for your focus (writing, classes, making things)'}. Offers and headhunters can still find you.</label></p>
    <div class="forecast"><div class="fdays">${fc.days.map(x => `<div class="fd"><span class="fbar"><i style="height:${x.low}%" class="${x.low < 20 ? 'lo' : x.low < 40 ? 'mid' : 'hi'}"></i></span><small>${DAYS7[x.d].slice(0, 2)}</small></div>`).join('')}</div>
     <p class="small">Forecast: energy dips as low as <b>${Math.min(...fc.days.map(x => x.low))}</b> and ends the week near <b>${fc.endE}</b> · stress ${fc.stress >= 0 ? '+' : ''}${fc.stress} · ${fmtCash(fc.spend)} out${fc.earn ? `, ${fmtCash(fc.earn)} in` : ''} · ${fc.apps} applications · ${fc.writes} writing, ${fc.classes} class and ${fc.social} social blocks.${Math.min(...fc.days.map(x => x.low)) < 20 ? ' <span class="bad">You\'ll be exhausted: rolls get harder and mistakes happen.</span>' : ''}</p></div></div>`;
 }
@@ -778,13 +782,15 @@ function replayCareer(log, done) {
 // The space bar lives on to the next thing worth seeing, as long as you aren't typing.
 if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
   if (e.key !== ' ' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-  const tg = e.target, tn = tg && tg.tagName;
-  if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT' || tn === 'BUTTON' || (tg && tg.isContentEditable)) return;
+  const tg = e.target, tn = tg && tg.tagName, typ = tn === 'INPUT' ? (tg.type || 'text') : '';
+  // only typing keeps the space bar: a focused button, checkbox or menu doesn't, so it works from any page
+  if (tn === 'TEXTAREA' || (tn === 'INPUT' && !['checkbox', 'radio', 'button', 'submit', 'range'].includes(typ)) || (tg && tg.isContentEditable)) return;
+  if (tg && tg.blur && (tn === 'BUTTON' || tn === 'SELECT' || tn === 'INPUT' || tn === 'A')) tg.blur();
   const ov = document.getElementById('rollov');
   if (ov) { e.preventDefault(); const b = ov.querySelector('.ro-ok'); if (b) b.click(); return; }
   if (typeof careerActive !== 'function' || !careerActive() || UI.busy) return;
   e.preventDefault();
-  if (pending().length) { const d = document.querySelector('.beat.decide'); if (d) d.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
+  if (pending().length && UI.tab === 'you' && !UI.stack.length && UI.app === 'today') { const d = document.querySelector('.beat.decide, .msg.open'); if (d) d.scrollIntoView({ block: 'center', behavior: 'smooth' }); return; }
   playStep('next');
 });
 

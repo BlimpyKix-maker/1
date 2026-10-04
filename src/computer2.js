@@ -27,7 +27,8 @@ function buyApp(a) {
 // ---- mail: generated each week from what's happening to you, no dice ----
 const SPAM = ['You have WON a cruise (please send bank details)', 'Hot singles in your postcode want to read your screenplay', 'URGENT: your account will be suspended', 'A prince needs a cinematographer', 'Lose ten pounds by thinking about lighting', 'Your free trial of Premium Clapperboard is ending', 'Re: Re: Re: FW: you won\'t believe this headshot'];
 const FANS = ['I don\'t usually write to people but your last thing got me through a bad week.', 'my whole family argues about your stuff at dinner now', 'Please make more. Also, what microphone do you use?', 'I showed your work to my class and now they all want to do what you do', 'You probably won\'t read this but thank you.'];
-function mail(folder, from, subj, body, act) { const M = S.me; M.mail = M.mail || []; M.mail.push({ id: (M.mailN = (M.mailN || 0) + 1), w: S.week, folder, from, subj, body, act: act || null }); if (M.mail.length > 90) M.mail.splice(0, M.mail.length - 90); }
+// newsletters and spam replace their own last issue instead of piling up; the inbox stays for people
+function mail(folder, from, subj, body, act) { const M = S.me; M.mail = M.mail || []; if ((folder === 'news' || folder === 'spam') && !act) { const i = M.mail.findIndex(m => m.folder === folder && m.from === from && (m.subj === subj || folder === 'news')); if (i >= 0) M.mail.splice(i, 1); } M.mail.push({ id: (M.mailN = (M.mailN || 0) + 1), w: S.week, folder, from, subj, body, act: act || null }); if (M.mail.length > 90) M.mail.splice(0, M.mail.length - 90); }
 function mailWeek() {
   const M = S.me, r = hashRand(S.week * 53 + M.id), fol = k => followers(k);
   const top = []; for (let i = S.news.length - 1; i >= 0 && top.length < 3; i--) if (S.week - S.news[i].w < 2) top.push(S.news[i].text);
@@ -96,11 +97,12 @@ function mailAct(a) {
 }
 function mailApp() {
   const M = S.me, L = (M.mail || []).slice().reverse(), f = UI.mailf || 'inbox';
-  const F = { inbox: 'Everything', offers: 'Offers', fans: 'Fan mail', news: 'Newsletters', sent: 'Sent', spam: 'Spam' };
-  const list = f === 'compose' ? L.filter(m => m.folder === 'sent') : f === 'inbox' ? L.filter(m => m.folder !== 'spam' && m.folder !== 'sent') : L.filter(m => m.folder === f), open = L.find(m => m.id === UI.mailo);
-  const cnt = k => L.filter(m => (k === 'inbox' ? m.folder !== 'spam' && m.folder !== 'sent' : m.folder === k) && k !== 'sent' && S.week - m.w < 2).length;
+  const F = { inbox: 'Inbox', offers: 'Offers', fans: 'Fan mail', news: 'Newsletters', sent: 'Sent', spam: 'Spam' };
+  const inInbox = m => !['spam', 'sent', 'news'].includes(m.folder);
+  const list = f === 'compose' ? L.filter(m => m.folder === 'sent') : f === 'inbox' ? L.filter(inInbox) : L.filter(m => m.folder === f), open = L.find(m => m.id === UI.mailo);
+  const cnt = k => L.filter(m => (k === 'inbox' ? inInbox(m) : m.folder === k) && k !== 'sent' && k !== 'spam' && !m.rd && S.week - m.w < 8).length;
   return `<div class="mailapp"><div class="mfold"><button class="btn-s${f === 'compose' ? '' : ' ghost'}" data-mailf="compose">✏️ New email</button>${Object.entries(F).map(([k, l]) => `<button class="linkish${f === k ? ' on' : ''}" data-mailf="${k}">${l}${cnt(k) ? ` <span class="dn">${cnt(k)}</span>` : ''}</button>`).join('')}<button class="linkish" data-mailf="old">Old inbox</button></div>
-   <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || '<p class="muted">Nothing here.</p>'}</div>
+   <div class="mlist">${f === 'old' ? `<ul class="inbox">${M.inbox.slice(-10).reverse().map(it => `<li class="msg ${it.kind}">${inboxCard(it)}</li>`).join('')}</ul>` : list.slice(0, 30).map(m => `<button class="mrow${open === m ? ' on' : ''}${m.act && !m.done ? ' act' : ''}${m.rd ? '' : ' unread'}" data-mailo="${m.id}"><b>${esc(m.from)}</b><span>${esc(m.subj)}</span><small class="muted">${fmtDate(m.w, true)}</small></button>`).join('') || '<p class="muted">Nothing here.</p>'}</div>
    ${f === 'compose' && typeof composeMailHTML === 'function' ? composeMailHTML() : ''}${open && f !== 'old' && f !== 'compose' ? `<div class="mread"><p class="muted small">From ${esc(open.from)} · ${fmtDate(open.w, true)}</p><h4>${esc(open.subj)}</h4><p style="white-space:pre-line">${esc(open.body)}</p>${open.folder === 'fans' ? (open.replied ? '<p class="muted">You wrote back. It made their week.</p>' : `<p><button class="btn-s ghost" data-mailact="${open.id}:fan">Write back</button></p>`) : ''}${open.act ? (open.done ? `<p class="muted">${open.doneT ? esc(open.doneT) : { yes: 'You said yes.', more: 'You asked for more. See their reply.', asked: 'You asked a question. See their reply.' }[open.done] || 'You declined.'}</p>` : open.act.opts ? `<p>${open.act.opts.map(([k, l], i) => `<button class="btn-s${i ? ' ghost' : ''}" data-mailact="${open.id}:${k}">${esc(l)}</button>`).join(' ')}</p>` : `<p><button class="btn-s" data-mailact="${open.id}:yes">${open.act.k === 'favour' ? 'Help them' : 'Accept'}</button> ${(open.act.fee !== undefined || open.act.adv !== undefined) && !open.act.pushed ? `<button class="btn-s ghost" data-mailact="${open.id}:more" title="Ask for more money. They might say yes, hold firm, or walk away.">Negotiate</button> ` : ''}${!open.act.asked ? `<button class="btn-s ghost" data-mailact="${open.id}:ask">Ask a question</button> ` : ''}<button class="btn-s ghost" data-mailact="${open.id}:no">Decline</button></p>`) : ''}</div>` : ''}</div>`;
 }
 // ---- Ticker: the industry's market and its trends ----
@@ -227,7 +229,7 @@ function computerClick(t) {
   if (typeof bankClick === 'function' && bankClick(t)) return true;
   if (typeof paperClick === 'function' && paperClick(t)) return true;
   if (d.mailf) { UI.mailf = d.mailf; UI.mailo = null; render(true); return true; }
-  if (d.mailo) { UI.mailo = +d.mailo; render(true); return true; }
+  if (d.mailo) { UI.mailo = +d.mailo; const m = (S.me.mail || []).find(x => x.id === UI.mailo); if (m) m.rd = 1; render(true); return true; }
   if (d.app && (d.mailo || d.geatab)) UI.app = d.app;
   if (d.wmax) { UI.wmax = !UI.wmax; render(true); return true; }
   if (d.wall) { UI.wall = d.wall; try { localStorage.setItem('ab-wall', d.wall); } catch (e) { } render(true); return true; }

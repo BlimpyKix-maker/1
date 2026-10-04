@@ -72,7 +72,7 @@ function npcLivesWeek() {
       else if (e.ask && rel !== 'mentor') { const slot = freeSlot({ days: [2, 3, 4, 5, 6], blocks: [2], from: 1 }); if (slot) inbox('ask', `${p.name} needs you`, `${p.name} ${t}. They could use ${e.ask}, ${slotLabel(slot)}.`, { person: id, slot, what: e.ask, choices: [{ k: 'yes', label: 'Be there' }, { k: 'no', label: 'Send your love' }] }); }
     } else {
       const from = aliveKnown().filter(x => x !== id && ['friend', 'close'].includes(relOf(x)));
-      (M.gossipQ = M.gossipQ || []).push({ from: from.length ? ppick(from) : null, t: `did you hear? ${p.name} ${t}`, person: id });
+      if (from.length && M.known[id] && Math.abs(opinion(id)) >= 8) (M.gossipQ = M.gossipQ || []).push({ from: ppick(from), ev: t, person: id });
     }
   }
   if ((M.gossipQ || []).length > 6) M.gossipQ.splice(0, M.gossipQ.length - 6);

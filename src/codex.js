@@ -61,7 +61,7 @@ function codexTime(topic, units, L, gain) {
   if (!CODEX[topic]) return;
   T[topic] = (T[topic] || 0) + units;
   const n = C[topic] || 0; if (n >= 9) return;
-  const need = 2 + n * 2, maxN = careerLevel() >= 4 || (M.alma || []).some(id => SCHOOL_BY[id] && SCHOOL_BY[id][4] === 1) ? 9 : careerLevel() >= 2 || (M.mentors || []).length ? 6 : 3;
+  const need = 2 + n * 2, maxN = careerLevel() >= 4 || (M.alma || []).some(id => eliteSchool(id)) ? 9 : careerLevel() >= 2 || (M.mentors || []).length ? 6 : 3;
   if (T[topic] < need || n >= maxN) return;
   T[topic] = 0; C[topic] = n + 1;
   const X = CODEX[topic], lesson = X[2 + Math.floor(n / 3)][n % 3];

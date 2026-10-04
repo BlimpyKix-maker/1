@@ -12,7 +12,7 @@ AMBITIONS.push(
   { k: 'firstwork', c: 'start', t: 'Release something of your own', p: () => [(S.me.works || []).length + (S.me.scripts || []).filter(s => s.grade).length, 1], rw: 1 },
   { k: 'mentor', c: 'start', t: 'Find a mentor', p: () => [S.me.mentor || (S.me.mentors || []).length ? 1 : 0, 1], rw: 2 },
   { k: 'school', c: 'craft', t: 'Graduate from a school', p: () => [(S.me.alma || []).length + S.me.degrees.filter(d => d !== 'film').length > 0 ? 1 : 0, 1], rw: 2 },
-  { k: 'elite', c: 'craft', t: 'Get into one of the great schools', p: () => [[S.me.school && S.me.school.at, ...(S.me.alma || [])].some(id => id && SCHOOL_BY[id] && SCHOOL_BY[id][4] === 1) ? 1 : 0, 1], rw: 3 },
+  { k: 'elite', c: 'craft', t: 'Get into one of the great schools', p: () => [[S.me.school && S.me.school.at, ...(S.me.alma || [])].some(id => id && eliteSchool(id)) ? 1 : 0, 1], rw: 3 },
   { k: 'crossover', c: 'craft', t: 'Work in three different industries', p: () => [Object.values(fieldExp()).filter(v => v >= 1).length, 3], rw: 3 },
   { k: 'mentorgrad', c: 'craft', t: 'Complete a mentorship', p: () => [(S.me.mentors || []).length, 1], rw: 3 },
   { k: 'twenty', c: 'craft', t: 'Twenty screen credits', p: () => [S.me.past.filter(x => x.credited).length, 20], rw: 5 },
