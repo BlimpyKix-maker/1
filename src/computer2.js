@@ -48,6 +48,7 @@ function mailWeek() {
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
   { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
   if (typeof endorseWeek === 'function') endorseWeek();
+  if (typeof chatterMailWeek === 'function') chatterMailWeek(r);
   if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
 }
 const FAVOURS = [

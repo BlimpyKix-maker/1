@@ -36,7 +36,7 @@ function filmTrivia(f) {
   const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
   if (d && d.credits.length && d.credits[0] === f.id) out.push(['f', `${d.name}'s first film as director.`, 4]);
   if (f.cost > f.budget * 1.25) out.push(['f', `It went ${Math.round((f.cost / f.budget - 1) * 100)}% over budget.`, 7]);
-  for (const e of (f.events || []).slice(0, 2)) if (e.t) out.push(['f', `From the set: ${e.t}`, 9]);
+  for (const e of (f.events || []).slice(0, 2)) if (e.t) out.push(['f', `From the set: ${setPast(e.t, f.title)}`, 9]);
   if (f.rel !== null) {
     if (f.reviews >= 75 && f.hitRatio < .8) out.push(['f', `Critics loved it (${f.reviews}/100); audiences stayed away.`, 5]);
     if (f.hitRatio > 3) out.push(['f', `It earned back its cost ${Math.round(f.hitRatio)} times over at home.`, 3]);
@@ -84,11 +84,18 @@ function productionFacts(f) {
   if (f.crew && f.crew.pd !== undefined) out.push(['f', `${P(f.crew.pd).name}'s team built ${2 + Math.floor(r() * 30)} sets.`, 8]);
   if (lead) { const tk = 1 + Math.floor(r() * 25); out.push(['f', tk === 1 ? `${lead.name} got the final scene in a single take.` : `${lead.name} needed ${tk} takes to get the final scene.`, 9]); }
   if (f.awards && f.awards.length) out.push(['f', `It won ${f.awards.length} award${f.awards.length > 1 ? 's' : ''}, among them ${f.awards[0].replace(/ \d{4}$/, '')}.`, 2]);
-  if (f.rel !== null) { const rivals = S.films.filter(g => g.rel !== null && g.genre === f.genre && g.m === f.m && yearOf(g.rel) === y); if (rivals.length > 2 && rivals.every(g => g.total <= f.total)) out.push(['f', `The biggest ${f.genre.toLowerCase()} of ${y} in ${MARKETS[f.m].name}.`, 4]); }
+  if (f.rel !== null) { const rivals = S.films.filter(g => g.rel !== null && g.genre === f.genre && g.m === f.m && yearOf(g.rel) === y); if (rivals.length > 2 && rivals.every(g => g.total <= f.total)) out.push(['f', `The biggest ${({ Comedy: 'comedy', Drama: 'drama', Romance: 'romance', Western: 'western', Musical: 'musical', Documentary: 'documentary', Animation: 'animated film', 'Sci-fi': 'science-fiction film', Superhero: 'superhero film', 'Martial arts': 'martial-arts film', Period: 'period film' })[f.genre] || f.genre.toLowerCase() + ' film'} of ${y} in ${typeof marketIn === 'function' ? marketIn(f.m) : MARKETS[f.m].name}.`, 4]); }
   const sr = hashRand(f.id * 389 + 17), fill = t => t.replace('{lead}', lead ? lead.name : 'The lead').replace('{dir}', d ? d.name : 'The director').replace('{title}', f.title);
   const used = new Set();
   for (let k = 0; k < 3; k++) { const i = Math.floor(sr() * SILLY_FILM.length); if (!used.has(i)) { used.add(i); out.push(['s', fill(SILLY_FILM[i]), 0]); } }
   return out;
+}
+// A headline from the shoot, told afterwards: past tense, and the film's own title left out.
+function setPast(t, title) {
+  const T = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let s = t.replace(new RegExp(` (on|of) the set of ${T}`), '').replace(new RegExp(` (on|of) ${T}(?=[.;]|$)`), '').replace(new RegExp(`^The cast and crew of ${T} `), 'The cast and crew ');
+  for (const [a, b] of [[' stop speaking', ' stopped speaking'], [' becomes the heart', ' became the heart'], [' runs over budget', ' ran over budget'], [' refuses ', ' refused '], [' are the talk of', ' were the talk of'], [' bond over', ' bonded over'], ['Weather wrecks', 'Weather wrecked'], [' demand cuts', ' demanded cuts'], [' forces a new ending', ' forced a new ending'], [' walks off', ' walked off'], [' is fired', ' was fired'], [' is replaced', ' was replaced'], [' quits', ' quit']]) s = s.replace(a, b);
+  return s.replace(/ to( \.|$)/, '$1').replace(/^Censors demanded cuts\.?$/, 'Censors demanded cuts.');
 }
 function filmTriviaHTML(f) { return triviaList(filmTrivia(f)); }
 function personTriviaHTML(p) { return triviaList(personTrivia(p)); }

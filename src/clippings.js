@@ -99,7 +99,7 @@ function ambitionWeek() {
     let c = 0, n = 1; try { [c, n] = A.p(); } catch (e) { continue; } if (!(c >= n)) continue;
     M.amb[A.k] = S.week; got.push(A);
   }
-  if (got.length === 1) inbox('note', `Ambition reached: ${got[0].t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. Your reward is waiting on the Standing page.`);
+  if (got.length === 1) inbox('note', `Ambition reached: ${got[0].t.toLowerCase()}`, `${pickLine(['One more rung. You feel it: a little steadier, a little more sure you belong.', 'You tick it off in your head on the walk home, and allow yourself a small, private grin.', 'Nobody else knows it happened. You do.', 'Proof, if you needed it, that this is going somewhere.', 'A small win. They add up.'], S.week)} Your reward is waiting on the Standing page.`);
   else if (got.length > 1) inbox('note', `${got.length} ambitions reached`, `${got.slice(0, 8).map(A => A.t).join(' · ')}${got.length > 8 ? ` and ${got.length - 8} more` : ''}. The rewards are waiting on the Standing page.`);
 }
 function ambitionsHTML() {

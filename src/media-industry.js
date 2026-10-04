@@ -203,6 +203,19 @@ function viewCharts() {
    <section class="panel"><h3>Companies in these fields</h3><div class="tw"><table class="grid"><thead><tr><th>Company</th><th>Type</th><th>Based in</th><th>Since</th><th></th></tr></thead><tbody>${MEDIA_COS.filter(c => c.f <= S.year).map(c => `<tr><td><b><a href="#" class="lk" data-go="mco:${MEDIA_COS.indexOf(c)}">${esc(c.n)}</a></b></td><td>${esc(MCO_TYPE[c.type])}</td><td>${esc(hubName(c.hub))}</td><td>${c.f}</td><td class="small muted">${esc(c.d)}</td></tr>`).join('')}</tbody></table></div></section>`;
 }
 // ---- awards for the other fields, every January ----
+// A prize for a work names the work and its maker; a prize for a person names the person. Titles come from a
+// hash, so the record is the same every time it's read.
+const WORK_CATS = { 'Song of the Year': 'song', 'Album of the Year': 'album', 'Best New Play': 'play', 'Best Musical': 'musical', 'Outstanding Online Series': 'series', 'Outstanding Short-Form Series': 'series' };
+function awardWorkLine(cat, name, seed) {
+  const k = WORK_CATS[cat]; if (!k) return name;
+  const r = hashRand(seed), pk = L => L[Math.floor(r() * L.length)];
+  const t = k === 'song' ? pk([`${pk(TW.adj)} ${pk(TW.noun)}`, `${pk(TW.noun)} (${pk(['Slow', 'Midnight', 'Acoustic', 'Live'])} Version)`, `Call Me ${pk(TW.adj)}`, `${pk(TW.season)} ${pk(TW.noun)}`])
+    : k === 'album' ? pk([`${pk(TW.adj)} ${pk(TW.plural)}`, `The ${pk(TW.noun)} Sessions`, `${pk(TW.num)} ${pk(TW.plural)}`, `${pk(TW.season)} Songs`])
+    : k === 'play' ? pk([`The ${pk(TW.adj)} ${pk(TW.noun)}`, `${pk(TW.num)} ${pk(TW.plural)} in a Room`, `A ${pk(TW.noun)} for ${pk(TW.season)}`])
+    : k === 'musical' ? pk([`${pk(TW.noun)}!`, `${pk(TW.adj)} ${pk(TW.noun)}: The Musical`, `Dancing ${pk(TW.adj)}`])
+    : pk([`${pk(TW.adj)} ${pk(TW.noun)}`, `The ${pk(TW.noun)} Diaries`, `${pk(TW.noun)} Club`]);
+  return k === 'song' || k === 'album' ? `"${t}", ${name}` : `${t} (${name})`;
+}
 const MEDIA_AWARDS = { music: ['The Gramophones', ['Song of the Year', 'Best New Artist', 'Album of the Year']], stage: ['The Footlights', ['Best New Play', 'Best Musical', 'Best Performance']], podcast: ['The Golden Mics', ['Podcast of the Year', 'Best New Show']], creator: ['The Vidwire Creator Awards', ['Creator of the Year', 'Breakout Creator']] };
 function mediaAwardsWeek() {
   const M = S.me, me = ME(); if (!M || dateOf(S.week).getUTCMonth() !== 0 || M.mAwY === S.year) return;
@@ -211,7 +224,7 @@ function mediaAwardsWeek() {
     const [show, cats] = MEDIA_AWARDS[f];
     if (f === 'creator' && !platOpen('vidwire')) continue;
     const mine = (M.works || []).filter(w => WORK_TYPES[w.type].field === f && yearOf(w.rel) === y).sort((a, b) => b.q * Math.log10(10 + b.units) - a.q * Math.log10(10 + a.units))[0];
-    const winners = cats.map((c, i) => { const L = activeFigures(M.hub, f).concat(...HUB_IDS.filter(h => h !== M.hub && HUBS[h].m === 'US').slice(0, 2).map(h => activeFigures(h, f))); const x = L[Math.floor(hashRand(y * 31 + i * 7 + f.length)() * Math.max(1, L.length))]; return [c, x ? x.name : '—']; });
+    const winners = cats.map((c, i) => { const L = activeFigures(M.hub, f).concat(...HUB_IDS.filter(h => h !== M.hub && HUBS[h].m === 'US').slice(0, 2).map(h => activeFigures(h, f))); const x = L[Math.floor(hashRand(y * 31 + i * 7 + f.length)() * Math.max(1, L.length))]; return [c, x ? awardWorkLine(c, x.name, y * 131 + i * 17 + f.length) : '—']; });
     let line = winners.map(([c, n]) => `${c}: ${n}`).join(' · ');
     if (mine && mine.q >= 72 && mine.units >= (f === 'stage' ? 400 : 20000)) {
       const won = prnd() < (mine.q - 65) / 60;

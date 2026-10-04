@@ -15,13 +15,15 @@ function textStyle(p) {
   return age < 32 ? (r < .6 ? 'lower' : 'emoji') : r < .5 ? 'lower' : 'terse';
 }
 const EMO = { happy: ['😂', '🙌', '✨', '🥹', '😄', '🎬'], sad: ['😩', '🫠', '😭'], love: ['❤️', '😘', '🥰'], none: ['👀', '🙃', '😅'] };
+// capital letters where sentences start, for the people who text properly
+function sentenceCase(s) { return s.replace(/(^|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\bi\b/g, 'I'); }
 function styleText(p, t, mood = 'happy') {
   const M = S.me, st = textStyle(p), o = M && M.known[p.id] ? opinion(p.id) : 0, r = hashRand(p.id * 7 + (M ? M.phoneN || 0 : 0))(), first = M ? ME().name.split(' ')[0] : '';
   let s = String(t);
   if (/^\[/.test(s)) return s;   // a photo or a voice note speaks for itself
   switch (st) {
-    case 'formal': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, ''); if (!/[.!?]$/.test(s)) s += '.'; if (o < 20) s = `Hello ${first}, ${s[0].toLowerCase()}${s.slice(1)}`; s += ` Best, ${p.name.split(' ')[0]}`; break;
-    case 'terse': s = s.split(/[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break;
+    case 'formal': s = sentenceCase(s.replace(/\s*$/, '')); if (!/[.!?…]$/.test(s)) s += '.'; if (s.length > 70 && o < 20) s = `Hi ${first}. ${s}`; if (s.length > 70) s += ` Best, ${p.name.split(' ')[0]}`; break;
+    case 'terse': { const t0 = s.split(/(?<=\w)[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); s = t0.replace(/[.…\s]/g, '').length < 3 ? s.toLowerCase() : t0; if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break; }
     case 'lower': s = s.toLowerCase().replace(/[.]$/, ''); break;
     case 'caps': s = s.replace(/\b([a-z]{4,})\b/g, (w, _, i) => (hashRand(i + p.id)() < .35 ? w.toUpperCase() : w)) + (r < .5 ? '!!' : '!!!'); break;
     case 'long': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, '') + (/[.!?…)\]]$/.test(s.trim()) ? '' : '.') + (r < .5 ? ' Anyway sorry, long message, I just think about this stuff a lot. How are YOU? Properly, I mean.' : ' Also, random, but I hope you\'re looking after yourself. This business eats people.'); break;
@@ -38,6 +40,7 @@ function worldGripe() { const on = typeof worldOn === 'function' ? worldOn().fil
 // Extra phone traffic: called from phoneTick's quieter moments.
 function phoneExtra(id) {
   const g = worldGripe(), r = prnd();
+  if (typeof chatterText === 'function' && chatSeed(id)() < .55) return sms(id, chatterText(id), 'text', { replyable: 1 });
   if (g && r < .25) return sms(id, g, 'text', { replyable: 1 });
   if (r < .45) return sms(id, ppick(MEMES), 'text', { replyable: 1 });
   if (r < .6) { const i = Math.floor(prnd() * ASK_ADVICE.length); return sms(id, ASK_ADVICE[i], 'advice', { replyable: 1, topic: 'adv' + i }); }

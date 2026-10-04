@@ -10011,11 +10011,14 @@ function tierAdj(p, tier) {
   return -Math.max(0, p.fame - 75) * .5;
 }
 
+// a market's name as it would read in a sentence, in the year it's read
+function marketIn(m) { const n = MARKETS[m].name, two = n.split(' / '), nm = two.length > 1 ? (S.year >= 1992 ? two[1] : two[0]) : n; return /^(United|Netherlands|Philippines|Czech Republic)/.test(nm) ? 'the ' + nm : nm; }
 function titleFor(genre, hub) {
   const H = HUBS[hub], N = NAMES[H.lang] || NAMES.en;
   const t = pick(TPL[genre]);
   const rep = { adj: () => pick(TW.adj), noun: () => pick(TW.noun), noun2: () => pick(TW.noun), plural: () => pick(TW.plural), num: () => pick(TW.num), season: () => pick(TW.season), place: () => pick(H.places), first: () => pick(N.M.concat(N.F)), first2: () => pick(N.M.concat(N.F)), n: () => ri(12, 900) };
-  return t.replace(/\{(\w+)\}/g, (_, k) => rep[k] ? rep[k]() : k).replace(/\b([Tt]he) the /g, '$1 ');   // 'The {place}' with a place like 'the Canyon'
+  return t.replace(/\{(\w+)\}/g, (_, k) => rep[k] ? rep[k]() : k).replace(/\b([Tt]he) the /g, '$1 ')   // 'The {place}' with a place like 'the Canyon'
+    .replace(/^Days of (?!Silence|Fever|Ashes|Winter|Harvest|Ruin)([A-Z]\w+)$/, 'Days of the $1').replace(/ a Ashes\b/, ' the Ashes').replace(/ a ([AEIOU])/g, ' an $1').replace(/^Only in the /, 'Only on the ');
 }
 
 // o (optional): a film built around a script someone optioned: { genre, wri, title, prod, co, score, dir, budget, lead, dp, ed }.
@@ -10277,7 +10280,7 @@ function release(f) {
   if (ratio > 3 && f.total > avgHome * 6) news('Hit', `${f.title} is a smash: ${fmtM(f.total)} worldwide on a ${fmtM(f.cost)} budget.`, { film: f.id });
   else if (ratio < .5 && f.tier < 3 && f.cost > avgHome * .6) news('Flop', `${f.title} bombs, recouping only ${fmtM(f.total)} of its ${fmtM(f.cost)} cost.`, { film: f.id });
   else if (f.reviews >= 85) news('Release', `Critics hail ${P(f.dir).name}'s ${f.title} (${f.reviews}/100).`, { film: f.id });
-  else if (f.tier === 1 && rnd() < .35) news('Release', `${f.title} opens in ${MARKETS[f.m].name} (${f.genre.toLowerCase()}, ${fmtM(f.cost)}).`, { film: f.id });
+  else if (f.tier === 1 && rnd() < .35) news('Release', `${f.title} opens in ${marketIn(f.m)} (${f.genre.toLowerCase()}, ${fmtM(f.cost)}).`, { film: f.id });
 }
 
 // ---------------- Life after release ----------------
@@ -10919,6 +10922,11 @@ function endParty() {
 
 // ---------------- Inbox ----------------
 function inbox(kind, title, text, extra = {}) {
+  // plural names take a bare apostrophe ("Tester Pictures' next film"); a situation's "ask your boss" and "pull in a
+  // colleague" options only appear when there is a boss or a colleague to ask
+  const fixPoss = t => typeof t === 'string' ? t.replace(/([^s'])s's\b/g, "$1s'") : t;
+  title = fixPoss(title); text = fixPoss(text);
+  if (kind === 'scene' && extra.choices && extra.ctx && /^sit_/.test(extra.scene || '')) extra = Object.assign({}, extra, { choices: extra.choices.filter(c => !(c.k === 'ask' && (extra.ctx.head === null || extra.ctx.head === undefined)) && !(c.k === 'mate' && !(extra.ctx.mates || []).length)) });
   const it = { id: S.me.seq++, w: S.week, kind, title, text, ...extra };
   S.me.inbox.push(it);
   if (kind !== 'note' && S.me.wk) S.me.wk.beats = (S.me.wk.beats || 0) + 1;   // something happened this week (late-game.js)
@@ -11273,7 +11281,7 @@ function finishJob(j, L, quit) {
     if (k && !k.tags.includes('Worked for them')) k.tags.push('Worked for them');
     if (o > 20) M.refs[j.head] = (M.refs[j.head] || 0) + 1;
   }
-  const txt = quit ? `You leave ${j.t.toLowerCase()}${f ? ' on ' + f.title : ''}.` : `${f ? f.title + ' wraps your part' : 'Your stint as ' + j.t.toLowerCase() + ' ends'}.${credited ? ' Your name will be in the credits.' : ''}${j.head !== null && opinion(j.head) > 20 ? ` ${P(j.head).name} says to call them for the next one.` : ''}`;
+  const txt = quit ? `You leave your job as ${j.t.toLowerCase()}${f ? ' on ' + f.title : ''}.` : `${f ? f.title + ' wraps your part' : 'Your stint as ' + j.t.toLowerCase() + ' ends'}.${credited ? ' Your name will be in the credits.' : ''}${j.head !== null && opinion(j.head) > 20 ? ` ${P(j.head).name} says to call them for the next one.` : ''}`;
   (L ? L.push(txt) : diary(txt));
   if (!quit && f) inbox('note', f ? 'Wrapped' : 'Job done', txt);
 }
@@ -11328,7 +11336,7 @@ function afterTick(fresh) {
     const who = ids.find(id => M.known[id] && !seen.has(id));
     if (who === undefined) continue;
     seen.add(who);
-    inbox('news', `News: ${P(who).name}`, n.text, n.ref && n.ref.film !== undefined ? { film: n.ref.film } : { person: who });
+    inbox('news', n.ref && n.ref.film !== undefined ? `From the set of ${S.films[n.ref.film].title}` : `News about ${P(who).name}`, n.ref && n.ref.film !== undefined ? `${n.text} (${P(who).name}, whom you know, is on it.)` : n.text, n.ref && n.ref.film !== undefined ? { film: n.ref.film } : { person: who });
   }
   // a contact who likes you and is starting a film remembers you
   for (const id of S.active) {
@@ -11430,7 +11438,13 @@ function pickScene(j) {
   return { id: s.id, title: s.title, text: fillScene(s.text, ctx), ctx, opts: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check, hint: o.check ? statLabel(o.check[0]) : null })) };
 }
 function statLabel(k) { return MINDS[k] || (SUB2C[k] ? CRAFTS[SUB2C[k]].subs[k] : k); }
-function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : 'someone').replace(/\b([Tt]he) The /g, '$1 '); }
+// who a scene means when nobody specific is there
+const FILL_FALLBACK = { head: 'your boss', dir: 'the director', lead: 'the lead actor', dp: 'the cinematographer', prod: 'the producer', contact: 'a friend', star: 'the star', mates: 'a colleague' };
+const A_ROLE = { actor: 'an actor', director: 'a director', writer: 'a writer', dp: 'a cinematographer', editor: 'an editor', producer: 'a producer', composer: 'a composer', designer: 'a production designer', costume: 'a costume designer', sound: 'a sound recordist', vfx: 'a visual effects artist', makeup: 'a make-up artist', casting: 'a casting director', ad: 'an assistant director', stunts: 'a stunt performer' };
+function fillScene(t, ctx) {
+  const s = t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null && ctx.film !== undefined ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : FILL_FALLBACK[k] || 'someone').replace(/\b([Tt]he) The /g, '$1 ');
+  return s.replace(/(^|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase());
+}
 
 function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
@@ -11456,7 +11470,7 @@ function sceneResolve(it, k) {
   if (fx.rel && ctx.contact != null) setRel(ctx.contact, fx.rel === 'none' ? null : fx.rel);
   if (fx.cohab && ctx.contact != null) { M.cohab = ctx.contact; milestone(`Moved in with ${P(ctx.contact).name}`, 'love'); }
   if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
-  if (fx.meet) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = ` You meet ${q.name}, ${ROLE_LABEL[q.role].toLowerCase()}.`; } }
+  if (fx.meet) { const q = bestIn(M.hub, s.meetRole ? [s.meetRole] : ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = s.meetRole ? ` (That's ${q.name}.)` : ` You get talking to ${q.name}, ${A_ROLE[q.role] || ROLE_LABEL[q.role].toLowerCase()}.`; } }
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
   const job = M.jobs.find(j => j.id === it.job);
   if (fx.shadow && job) job.shadow = 1;
@@ -11531,6 +11545,7 @@ function applyAct(a) {
   switch (a.t) {
     case 'create': startCareer(a.c); if (typeof legacyGreet === 'function') legacyGreet(); return true;
     case 'retire': return retireAct();
+    case 'roomstyle': return roomStyleAct(a);
     case 'nextgen': return nextGenAct();
     case 'startwork': return startWork(a);
     case 'mail': return mailAct(a);
@@ -11634,7 +11649,7 @@ const LOOK = {
   hairline: { label: 'Hairline with age', opts: ['Keeps it', 'Recedes'] }
 };
 const LOOK_KEYS = Object.keys(LOOK);
-function defaultLook() { return { skin: 3, face: 0, build: 2, hair: 2, hairColor: 2, eyes: 1, facial: 0, glasses: 0, outfit: 0, colour: 0, head: 0, ears: 0, mark: 0, neck: 0, wrist: 0, hairline: 0 }; }
+function defaultLook() { return { skin: 3, face: 0, build: 2, hair: 2, hairColor: 2, eyes: 1, facial: 0, glasses: 0, outfit: 0, colour: 0, head: 0, ears: 0, mark: 0, neck: 0, wrist: 0, hairline: 0, pattern: 0, bottoms: 0, bottomColour: 0, shoes: 0, bag: 0, tattoo: 0, pose: 0 }; }
 // Wardrobe pieces you have to buy. Each sits in one slot; some change your rolls when worn. Everything else in LOOK is free.
 const WARDROBE = {
   fedora: { slot: 'head', opt: 8, price: 180, adv: ['cha'], dis: ['col'], d: 'Old-Hollywood swagger. Advantage on Charisma; crews read it as attitude (disadvantage on Collaboration).' },
@@ -11667,10 +11682,10 @@ function npcLook(p) {
   const outfit = y < 1950 ? [7, 8, 9, 9][pk(4)] : y < 1975 ? [5, 6, 7, 8, 9][pk(5)] : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9][pk(10)];
   return { skin, face: pk(10), build: pk(10), hair, hairColor, eyes: pk(10), facial: F ? 0 : r() < .45 ? 1 + pk(9) : 0, glasses: r() < .22 ? 1 + pk(9) : 0, outfit, colour: pk(10), head: r() < .14 ? 1 + pk(7) : 0, ears: r() < (F ? .45 : .12) ? 1 + pk(3) : 0, mark: r() < .1 ? 1 + pk(4) : 0, neck: r() < .14 ? 1 + pk(5) : 0, wrist: 0, hairline: !F && r() < .45 ? 1 : 0 };
 }
-function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : realLook(p, npcLook(p)); }
+function lookOf(p) { return p.player && S.me && S.me.look ? Object.assign(defaultLook(), migrateLook(Object.assign({}, S.me.look))) : (typeof npcFigure === 'function' ? npcFigure(p, realLook(p, npcLook(p))) : realLook(p, npcLook(p))); }
 function mixHex(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = k => Math.round(((pa >> k) & 255) * (1 - t) + ((pb >> k) & 255) * t); return '#' + ((1 << 24) + (c(16) << 16) + (c(8) << 8) + c(0)).toString(16).slice(1); }
 let PORTRAIT_UID = 0;
-function portraitSVG(L, age, size = 96, bare = false) {
+function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   L = Object.assign(defaultLook(), migrateLook(Object.assign({}, L)));
   const uid = 'pc' + (++PORTRAIT_UID);
   const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#000000', .18), line = mixHex(skin, '#000000', .38);
@@ -11685,33 +11700,38 @@ function portraitSVG(L, age, size = 96, bare = false) {
   const pr = hashRand(L.skin * 131 + L.hair * 17 + L.colour * 7 + L.face * 3 + L.outfit + L.eyes * 29), pat = Math.floor(pr() * 4), bgc = mixHex(cloth, '#FFFFFF', .72), bgd = mixHex(cloth, '#FFFFFF', .5);
   o.push(`<defs><linearGradient id="${uid}f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${mixHex(skin, '#FFFFFF', .14)}"/><stop offset=".6" stop-color="${skin}"/><stop offset="1" stop-color="${mixHex(skin, '#000000', .12)}"/></linearGradient><linearGradient id="${uid}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(cloth, '#FFFFFF', .12)}"/><stop offset="1" stop-color="${mixHex(cloth, '#000000', .28)}"/></linearGradient><radialGradient id="${uid}b" cx=".5" cy=".38" r=".75"><stop offset="0" stop-color="${bgc}"/><stop offset="1" stop-color="${bgd}"/></radialGradient><radialGradient id="${uid}v" cx=".5" cy=".45" r=".72"><stop offset=".7" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></radialGradient></defs>`);
   if (!bare) {
-    o.push(`<rect width="120" height="120" rx="10" fill="url(#${uid}b)"/>`);
+    const BH = fig ? 240 : 120;
+    o.push(`<rect width="120" height="${BH}" rx="10" fill="url(#${uid}b)"/>`);
+    if (fig) o.push(`<rect y="${BH - 30}" width="120" height="30" fill="${mixHex(cloth, '#000', .25)}" opacity=".18"/>`);
     if (pat === 0) o.push(Array.from({ length: 12 }, (_, i) => { const a = i / 12 * Math.PI * 2; return `<path d="M60 44 L${60 + Math.cos(a) * 110} ${44 + Math.sin(a) * 110} L${60 + Math.cos(a + .2) * 110} ${44 + Math.sin(a + .2) * 110} Z" fill="#FFFFFF" opacity=".16"/>`; }).join(''));
-    else if (pat === 1) o.push(Array.from({ length: 36 }, (_, i) => `<circle cx="${8 + (i % 6) * 21}" cy="${8 + Math.floor(i / 6) * 21}" r="2.2" fill="#FFFFFF" opacity=".28"/>`).join(''));
-    else if (pat === 2) o.push(Array.from({ length: 8 }, (_, i) => `<rect x="${i * 16}" y="0" width="7" height="120" fill="#FFFFFF" opacity=".14"/>`).join(''));
+    else if (pat === 1) o.push(Array.from({ length: fig ? 66 : 36 }, (_, i) => `<circle cx="${8 + (i % 6) * 21}" cy="${8 + Math.floor(i / 6) * 21}" r="2.2" fill="#FFFFFF" opacity=".28"/>`).join(''));
+    else if (pat === 2) o.push(Array.from({ length: 8 }, (_, i) => `<rect x="${i * 16}" y="0" width="7" height="${fig ? 240 : 120}" fill="#FFFFFF" opacity=".14"/>`).join(''));
     else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/>`);
   }
   // the sitter fills the frame: everything below is drawn a little larger than life
-  o.push(bare ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
+  o.push(bare || fig ? '<g>' : '<g transform="translate(60 62) scale(1.26) translate(-60 -57)">');
   // how far the hair reaches, so headwear sits on top of it rather than inside it
   const hairTop0 = top - 3 + recede * 10;
-  const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 ? fw / 2 : fw / 2 + 2;
+  const hairHalf = L.hair === 6 ? fw / 2 + 12 : L.hair === 5 ? fw / 2 + 7 : [7, 8, 9, 14, 15].includes(L.hair) ? fw / 2 + 4 : L.hair === 0 || L.hair === 12 ? fw / 2 : fw / 2 + 2;
   const hairPeak = L.hair === 6 ? top + 10 - (fw / 2 + 12) : L.hair === 4 ? hairTop0 - 12 : L.hair === 5 ? hairTop0 - 6 : L.hair === 0 ? top : hairTop0 - 4;
-  const covers = [1, 2, 4, 6, 8, 9].includes(L.head);   // hats that hide the hair above the brim
-  const brim = top + ([0, 8, 10, 0, 6, 0, 7, 0, 6, 8][L.head] || 0);
+  const covers = [1, 2, 4, 6, 8, 9, 11, 12].includes(L.head);   // hats that hide the hair above the brim
+  const brim = top + ([0, 8, 10, 0, 6, 0, 7, 0, 6, 8, 0, 8, 7, 0][L.head] || 0);
   const hw = Math.max(fw / 2 + 2, Math.min(hairHalf, fw / 2 + 9));   // headwear half-width: wide enough for the hair under it
   if (covers) o.push(`<defs><clipPath id="${uid}"><rect x="0" y="${brim - 1}" width="120" height="${121 - brim}"/></clipPath></defs>`);
   const hairOpen = covers ? `<g clip-path="url(#${uid})">` : '', hairClose = covers ? '</g>' : '';
   // hair behind the head
   o.push(hairOpen);
+  if (L.hair === 10) o.push(`<path d="M${cx + fw / 2 - 2} ${cy - 10} Q${cx + fw / 2 + 12} ${cy - 4} ${cx + fw / 2 + 6} ${cy + 26} Q${cx + fw / 2 + 2} ${cy + 6} ${cx + fw / 2 - 4} ${cy - 2} Z" fill="${hc}"/>`);
+  if (L.hair === 15) o.push(`<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${cy + 26} ${cx - fw / 2 + 4} ${cy + 30} L${cx + fw / 2 - 4} ${cy + 30} Q${cx + fw / 2 + 4} ${cy + 26} ${cx + fw / 2 + 3} ${cy} Z" fill="${hc}"/>`);
+  if (L.hair === 14) o.push(`<path d="M${cx - fw / 2 - 4} ${cy - 8} Q${cx - fw / 2 - 8} ${cy + 30} ${cx - fw / 2} ${cy + 40} L${cx + fw / 2} ${cy + 40} Q${cx + fw / 2 + 8} ${cy + 30} ${cx + fw / 2 + 4} ${cy - 8} Z" fill="${hc}"/>`);
   if ([7, 8, 9].includes(L.hair)) o.push(`<path d="M${cx - fw / 2 - 4} ${cy - 8} Q${cx - fw / 2 - 8} ${cy + 30} ${cx - fw / 2 + (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} L${cx + fw / 2 - (L.hair === 7 ? 6 : 0)} ${cy + (L.hair === 7 ? 18 : 40)} Q${cx + fw / 2 + 8} ${cy + 30} ${cx + fw / 2 + 4} ${cy - 8} Z" fill="${hc}"/>`);
   if (L.hair === 6) o.push(`<circle cx="${cx}" cy="${top + 10}" r="${fw / 2 + 12}" fill="${hc}"/>`);
   o.push(hairClose);
   // body and clothes
-  o.push(`<path d="M${cx - bw} 122 Q${cx - bw - 1} 94 ${cx - bw + 12} 89 Q${cx - neck - 12} 84.5 ${cx - neck - 2} 84 L${cx + neck + 2} 84 Q${cx + neck + 12} 84.5 ${cx + bw - 12} 89 Q${cx + bw + 1} 94 ${cx + bw} 122 Z" fill="url(#${uid}c)"/><path d="M${cx - bw + 3} 118 Q${cx - bw + 4} 92 ${cx - neck - 6} 87" stroke="#FFFFFF" stroke-width="1.5" opacity=".18" fill="none"/>`);
+  if (fig) figureBody(L, o, uid, cx, skin, cloth, pr); else o.push(`<path d="M${cx - bw} 122 Q${cx - bw - 1} 94 ${cx - bw + 12} 89 Q${cx - neck - 12} 84.5 ${cx - neck - 2} 84 L${cx + neck + 2} 84 Q${cx + neck + 12} 84.5 ${cx + bw - 12} 89 Q${cx + bw + 1} 94 ${cx + bw} 122 Z" fill="url(#${uid}c)"/><path d="M${cx - bw + 3} 118 Q${cx - bw + 4} 92 ${cx - neck - 6} 87" stroke="#FFFFFF" stroke-width="1.5" opacity=".18" fill="none"/>`);
   { const ny = cy + fh / 2 - 6; o.push(`<defs><linearGradient id="${uid}n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(skin, '#000', .3)}"/><stop offset=".45" stop-color="${shade}"/><stop offset="1" stop-color="${mixHex(skin, '#000', .1)}"/></linearGradient></defs><path d="M${cx - neck} ${ny} L${cx - neck} ${ny + 10} Q${cx - neck - 1} ${85} ${cx - neck - 5} 86.5 Q${cx} 92 ${cx + neck + 5} 86.5 Q${cx + neck + 1} 85 ${cx + neck} ${ny + 10} L${cx + neck} ${ny} Z" fill="url(#${uid}n)"/>`); }
   const collar = { 1: `<path d="M${cx - 16} 86 Q${cx} 100 ${cx + 16} 86" fill="none" stroke="${mixHex(cloth, '#000', .3)}" stroke-width="3"/>`, 2: `<path d="M${cx - 30} 100 L${cx + 30} 100 M${cx - 34} 110 L${cx + 34} 110" stroke="${mixHex(cloth, '#fff', .25)}" stroke-width="2"/>`, 3: `<path d="M${cx - 12} 85 L${cx} 98 L${cx + 12} 85" fill="none" stroke="${mixHex(cloth, '#fff', .3)}" stroke-width="2"/>`, 4: `<path d="M${cx - 14} 85 L${cx - 2} 110 M${cx + 14} 85 L${cx + 2} 110" stroke="${mixHex(cloth, '#000', .4)}" stroke-width="3"/>`, 5: `<rect x="${cx - neck - 3}" y="80" width="${neck * 2 + 6}" height="9" rx="3" fill="${cloth}"/>`, 7: `<path d="M${cx - 10} 85 L${cx} 95 L${cx + 10} 85" fill="#F1EEE8"/>`, 8: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 14} 86 L${cx - 4} 112 M${cx + 14} 86 L${cx + 4} 112" stroke="${mixHex(cloth, '#000', .35)}" stroke-width="3"/>`, 9: `<path d="M${cx - 10} 85 L${cx} 100 L${cx + 10} 85" fill="#F1EEE8"/><path d="M${cx - 3} 92 L${cx + 3} 92 L${cx + 4} 112 L${cx} 116 L${cx - 4} 112 Z" fill="#8C2E2E"/>` }[L.outfit];
-  if (collar) o.push(collar);
+  if (collar && !(fig && L.outfit === 2)) o.push(collar);
   // round the neck
   if (L.neck === 1 || L.neck === 6) { const sc = L.neck === 6 ? '#B9375A' : '#B8533A'; o.push(`<path d="M${cx - 20} 84 Q${cx} 96 ${cx + 20} 84 L${cx + 18} 92 Q${cx} 104 ${cx - 18} 92 Z" fill="${sc}"/>` + (L.neck === 6 ? `<path d="M${cx + 8} 94 L${cx + 14} 114 L${cx + 6} 112 Z" fill="${sc}"/>` : '')); }
   if (L.neck === 2) o.push(`<path d="M${cx - 10} 87 Q${cx} 97 ${cx + 10} 87" fill="none" stroke="#C9A646" stroke-width="1.5"/>`);
@@ -11754,9 +11774,17 @@ function portraitSVG(L, age, size = 96, bare = false) {
     6: '',
     7: `<path d="M${cx - fw / 2 - 3} ${cy + 6} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy + 6} Q${cx + fw / 2 - 2} ${hairTop + 6} ${cx} ${hairTop + 8} Q${cx - fw / 2 + 2} ${hairTop + 6} ${cx - fw / 2 - 3} ${cy + 6} Z" fill="${hc}"/>`,
     8: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>`,
-    9: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-12, -4, 4, 12].map(d => `<path d="M${cx + d} ${hairTop} L${cx + d * 1.6} ${cy + 34}" stroke="${hc}" stroke-width="5" stroke-linecap="round"/>`).join('')
+    9: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-12, -4, 4, 12].map(d => `<path d="M${cx + d} ${hairTop} L${cx + d * 1.6} ${cy + 34}" stroke="${hc}" stroke-width="5" stroke-linecap="round"/>`).join(''),
+    10: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx} ${hairTop + 3} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/><circle cx="${cx + fw / 2 - 1}" cy="${cy - 8}" r="2" fill="${mixHex(hc, '#E0457B', .5)}"/>`,
+    11: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx} ${hairTop + 3} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/><circle cx="${cx}" cy="${hairTop - 8}" r="7" fill="${hc}"/>`,
+    12: `<path d="M${cx - fw / 2 + 1} ${cy - 6} Q${cx - fw / 2} ${hairTop} ${cx} ${hairTop} Q${cx + fw / 2} ${hairTop} ${cx + fw / 2 - 1} ${cy - 6} Q${cx} ${hairTop + 5} ${cx - fw / 2 + 1} ${cy - 6} Z" fill="${hc}" opacity=".35"/><path d="M${cx - 4} ${hairTop + 6} Q${cx - 5} ${hairTop - 14} ${cx} ${hairTop - 16} Q${cx + 5} ${hairTop - 14} ${cx + 4} ${hairTop + 6} Z" fill="${hc}"/>`,
+    13: `<path d="M${cx - fw / 2 - 1} ${cy - 6} Q${cx - fw / 2 - 2} ${hairTop - 2} ${cx + 2} ${hairTop - 3} Q${cx + fw / 2 + 2} ${hairTop - 1} ${cx + fw / 2 + 1} ${cy - 6} Q${cx + fw / 2 - 6} ${hairTop + 7} ${cx - 2} ${hairTop + 9} Q${cx - fw / 2 + 2} ${hairTop + 7} ${cx - fw / 2 - 1} ${cy - 6} Z" fill="${hc}"/>`,
+    14: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx} ${hairTop + 5} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/>` + [-11, -4, 4, 11].map(d => Array.from({ length: 5 }, (_, i) => `<ellipse cx="${cx + d * (1 + i * .12)}" cy="${hairTop + 8 + i * 7}" rx="2.6" ry="3.6" fill="${mixHex(hc, '#000', i % 2 ? .15 : 0)}"/>`).join('')).join(''),
+    15: `<path d="M${cx - fw / 2 - 1} ${cy - 4} Q${cx - fw / 2 - 2} ${hairTop - 3} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2 + 1} ${cy - 4} Q${cx + 8} ${hairTop + 6} ${cx - fw / 2 - 1} ${cy - 4} Z" fill="${hc}"/>`,
+    16: `<path d="M${cx - fw / 2 - 3} ${cy} Q${cx - fw / 2 - 4} ${hairTop - 4} ${cx} ${hairTop - 4} Q${cx + fw / 2 + 4} ${hairTop - 4} ${cx + fw / 2 + 3} ${cy} Q${cx + 4} ${hairTop + 4} ${cx - fw / 2 - 3} ${cy} Z" fill="${hc}"/><circle cx="${cx - fw / 2 + 2}" cy="${hairTop - 5}" r="6" fill="${hc}"/><circle cx="${cx + fw / 2 - 2}" cy="${hairTop - 5}" r="6" fill="${hc}"/>`,
+    17: `<path d="M${cx - fw / 2} ${cy - 5} Q${cx - fw / 2 - 1} ${hairTop - 4} ${cx + 2} ${hairTop - 5} Q${cx + fw / 2 + 2} ${hairTop - 3} ${cx + fw / 2} ${cy - 5} Q${cx} ${hairTop + 2} ${cx - fw / 2} ${cy - 5} Z" fill="${hc}"/><path d="M${cx - 8} ${hairTop - 1} Q${cx} ${hairTop - 4} ${cx + 9} ${hairTop}" stroke="#FFFFFF" stroke-width="1" opacity=".35" fill="none"/>`
   };
-  if (hairs[L.hair]) o.push(hairOpen + hairs[L.hair] + ([2, 3, 4, 7, 8, 9].includes(L.hair) ? `<path d="M${cx - fw / 4} ${hairTop + 1} Q${cx} ${hairTop - 3} ${cx + fw / 4} ${hairTop + 1}" stroke="#FFFFFF" stroke-width="2" opacity=".22" fill="none" stroke-linecap="round"/>` : '') + hairClose);
+  if (hairs[L.hair]) o.push(hairOpen + hairs[L.hair] + ([2, 3, 4, 7, 8, 9, 13, 15].includes(L.hair) ? `<path d="M${cx - fw / 4} ${hairTop + 1} Q${cx} ${hairTop - 3} ${cx + fw / 4} ${hairTop + 1}" stroke="#FFFFFF" stroke-width="2" opacity=".22" fill="none" stroke-linecap="round"/>` : '') + hairClose);
   // headwear
   // headwear, sized to the hair underneath
   const capC = cloth, dk = mixHex(cloth, '#000', .3);
@@ -11769,8 +11797,12 @@ function portraitSVG(L, age, size = 96, bare = false) {
   if (L.head === 7) o.push(`<path d="M${cx - hairHalf} ${top + 7} Q${cx} ${top - 2} ${cx + hairHalf} ${top + 7}" stroke="#C8102E" stroke-width="4" fill="none"/>`);
   if (L.head === 8) o.push(`<ellipse cx="${cx}" cy="${brim}" rx="${hw + 12}" ry="4.5" fill="#3B3226"/><path d="M${cx - hw + 1} ${brim} L${cx - hw + 3} ${top - 12} Q${cx} ${top - 6} ${cx + hw - 3} ${top - 12} L${cx + hw - 1} ${brim} Z" fill="#3B3226"/><rect x="${cx - hw + 1}" y="${brim - 5}" width="${hw * 2 - 2}" height="4" fill="#1E1A14"/>`);
   if (L.head === 9) o.push(`<path d="M${cx - hw} ${brim} Q${cx - hw} ${top - 10} ${cx} ${top - 11} Q${cx + hw} ${top - 10} ${cx + hw} ${brim} Z" fill="#1F1430"/><path d="M${cx - 2} ${brim - 1} L${cx + hw + 13} ${brim + 1} Q${cx + hw + 14} ${brim + 5} ${cx + hw + 6} ${brim + 5} L${cx - 2} ${brim + 3} Z" fill="#000"/><text x="${cx}" y="${top + 2}" font-size="6" text-anchor="middle" fill="#fff" font-family="sans-serif" font-weight="700">CREW</text>`);
+  if (L.head === 10) o.push([-12, -6, 0, 6, 12].map((d, i) => `<circle cx="${cx + d}" cy="${top - 1 + Math.abs(d) * .25}" r="3.2" fill="${['#E85D9A', '#FFE27A', '#FFFFFF', '#B39DDB', '#FF7F6B'][i]}"/><circle cx="${cx + d}" cy="${top - 1 + Math.abs(d) * .25}" r="1.1" fill="#E3A72F"/>`).join(''));
+  if (L.head === 11) o.push(`<path d="M${cx - hw - 6} ${brim + 2} L${cx - hw + 2} ${top - 10} Q${cx} ${top - 13} ${cx + hw - 2} ${top - 10} L${cx + hw + 6} ${brim + 2} Z" fill="${mixHex(cloth, '#fff', .3)}"/>`);
+  if (L.head === 12) o.push(`<ellipse cx="${cx}" cy="${brim}" rx="${hw + 16}" ry="4" fill="#8C5A2E"/><path d="M${cx - hw - 12} ${brim - 3} Q${cx - hw - 14} ${brim - 9} ${cx - hw - 8} ${brim - 6} M${cx + hw + 12} ${brim - 3} Q${cx + hw + 14} ${brim - 9} ${cx + hw + 8} ${brim - 6}" stroke="#8C5A2E" stroke-width="3" fill="none"/><path d="M${cx - hw + 1} ${brim} Q${cx - hw} ${top - 16} ${cx - 4} ${top - 12} Q${cx} ${top - 8} ${cx + 4} ${top - 12} Q${cx + hw} ${top - 16} ${cx + hw - 1} ${brim} Z" fill="#A86E3A"/><rect x="${cx - hw + 1}" y="${brim - 5}" width="${hw * 2 - 2}" height="3" fill="#5A3A22"/>`);
+  if (L.head === 13) o.push(`<path d="M${cx - hw} ${top + 6} Q${cx} ${top - 2} ${cx + hw} ${top + 6}" stroke="${cloth}" stroke-width="4" fill="none"/><path d="M${cx - 2} ${top + 4} L${cx + hw + 12} ${top + 7} Q${cx + hw + 13} ${top + 11} ${cx + hw + 5} ${top + 11} L${cx - 2} ${top + 8} Z" fill="${mixHex(cloth, '#000', .3)}"/>`);
   // a raised forearm shows what's on the wrist
-  if (L.wrist) { const band = ['', '#3B3226', '#C9A646', '#8C6A2E', '#1E1E1E'][L.wrist], face = L.wrist === 2 ? null : L.wrist === 4 ? '#2C4F7C' : '#F3EFF8';
+  if (L.wrist && !fig) { const band = ['', '#3B3226', '#C9A646', '#8C6A2E', '#1E1E1E'][L.wrist], face = L.wrist === 2 ? null : L.wrist === 4 ? '#2C4F7C' : '#F3EFF8';
     o.push(`<g transform="rotate(-18 100 112)"><rect x="93" y="92" width="14" height="30" rx="6" fill="${cloth}"/><rect x="94" y="80" width="12" height="16" rx="5" fill="${skin}"/><ellipse cx="100" cy="78" rx="7" ry="6" fill="${skin}"/><rect x="93" y="88" width="14" height="${L.wrist === 2 ? 2.5 : 4}" fill="${band}"/>${face ? `<rect x="96.5" y="86.5" width="7" height="7" rx="${L.wrist === 4 ? 1.5 : 3.5}" fill="${face}" stroke="${band}" stroke-width="1"/>` : ''}</g>`); }
   // glasses
   if (L.glasses) {
@@ -11779,8 +11811,8 @@ function portraitSVG(L, age, size = 96, bare = false) {
     o.push(lens(cx - ex) + lens(cx + ex) + `<path d="M${cx - ex + 5} ${ey - 1} L${cx + ex - 5} ${ey - 1}" stroke="${gc}" stroke-width="1.3"/>`);
   }
   o.push('</g>');
-  if (!bare) o.push(`<rect width="120" height="120" rx="10" fill="url(#${uid}v)"/>`);
-  return `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
+  if (!bare) o.push(`<rect width="120" height="${fig ? 240 : 120}" rx="10" fill="url(#${uid}v)"/>`);
+  return fig ? `<svg class="portrait figure" viewBox="0 0 120 240" width="${Math.round(size / 2)}" height="${size}" role="img" aria-label="Full-length portrait">${o.join('')}</svg>` : `<svg class="portrait" viewBox="0 0 120 120" width="${size}" height="${size}" role="img" aria-label="Portrait">${o.join('')}</svg>`;
 }
 // The dead are remembered in their prime.
 function portraitOf(p, size) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, size); }
@@ -11858,7 +11890,10 @@ function furnitureSVG(id, x, y) {
 function homeSceneSVG(day) {
   const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [];
   const sky = ['#BFD8F2', '#CFE3F5', '#F7D9B5', '#F5C49A', '#E8A36B', '#1E2A44'][clamp(day ?? 0, 0, 5)];
-  const wall = { couch: '#E6DCCB', shared: '#EDE4D3', studio: '#EFE8DA', own: '#F6F0E4', loft: '#D9D2C6', house: '#F3EBDD' }[life] || '#EDE4D3', floor = { couch: '#B59A7A', shared: '#A8865F', studio: '#9C7A55', own: '#8E6B4A', loft: '#6F6A63', house: '#8A6440' }[life] || '#A8865F';
+  let wall = { couch: '#E6DCCB', shared: '#EDE4D3', studio: '#EFE8DA', own: '#F6F0E4', loft: '#D9D2C6', house: '#F3EBDD' }[life] || '#EDE4D3', floor = { couch: '#B59A7A', shared: '#A8865F', studio: '#9C7A55', own: '#8E6B4A', loft: '#6F6A63', house: '#8A6440' }[life] || '#A8865F';
+  const RS = (M.home && M.home.style) || {};
+  if (RS.paint) wall = ROOM_STYLE.paint.opts[RS.paint];
+  if (RS.floor) floor = ['', '#C9A36A', '#5A3A22', '#EDEDED', '#D8CFC2', '#3E6B4A', '#D98FA8'][RS.floor] || floor;
   const night = (day ?? 0) >= 5, wd = mixHex(wall, '#000000', .08);
   const o = [`<defs><linearGradient id="hs-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(wall, '#FFFFFF', .2)}"/><stop offset="1" stop-color="${wall}"/></linearGradient><linearGradient id="hs-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mixHex(floor, '#000000', .12)}"/><stop offset="1" stop-color="${mixHex(floor, '#FFFFFF', .08)}"/></linearGradient></defs><rect width="400" height="180" fill="url(#hs-w)"/>`];
   // the walls say where you live: peeling paint, stripes, brick, wallpaper
@@ -11868,7 +11903,10 @@ function homeSceneSVG(day) {
   else if (life === 'house') o.push(Array.from({ length: 60 }, (_, i) => `<path d="M${(i % 12) * 34 + 17} ${Math.floor(i / 12) * 26 + 10} l4 6 l-4 6 l-4 -6 z" fill="${wd}" opacity=".45"/>`).join(''));
   else o.push(`<rect y="84" width="400" height="44" fill="${wd}" opacity=".45"/><rect y="84" width="400" height="2" fill="#FFFFFF" opacity=".5"/>`);
   o.push(`<rect y="130" width="400" height="50" fill="url(#hs-f)"/>${Array.from({ length: 9 }, (_, i) => `<line x1="${i * 50 + (i % 2) * 20}" y1="130" x2="${i * 50 + (i % 2) * 20 - 30}" y2="180" stroke="#000" stroke-width=".6" opacity=".12"/>`).join('')}<rect y="126" width="400" height="5" fill="${mixHex(wall, '#FFFFFF', .5)}"/><rect y="130" width="400" height="2" fill="#000" opacity=".08"/>`);
-  if (life !== 'couch') o.push(`<ellipse cx="200" cy="160" rx="110" ry="14" fill="${['house', 'own'].includes(life) ? '#8C3B3B' : '#3E5A7A'}" opacity=".55"/><ellipse cx="200" cy="160" rx="96" ry="10" fill="none" stroke="#E3C27A" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`);
+  o.push(roomPaperSVG(RS, wd));
+  if (RS.floor === 3) o.push(Array.from({ length: 20 }, (_, i) => Array.from({ length: 4 }, (_, j) => (i + j) % 2 ? `<rect x="${i * 20}" y="${130 + j * 12.5}" width="20" height="12.5" fill="#1E1E1E" opacity=".85"/>` : '').join('')).join(''));
+  if (RS.floor === 4) o.push(Array.from({ length: 70 }, (_, i) => `<circle cx="${(i * 53) % 400}" cy="${132 + (i * 29) % 46}" r="${1 + i % 3}" fill="${['#C8553D', '#2E5A3A', '#E3C27A', '#5B3A6E'][i % 4]}" opacity=".5"/>`).join(''));
+  if (life !== 'couch' && RS.rug !== 5) o.push(RS.rug ? roomRugSVG(RS.rug) : `<ellipse cx="200" cy="160" rx="110" ry="14" fill="${['house', 'own'].includes(life) ? '#8C3B3B' : '#3E5A7A'}" opacity=".55"/><ellipse cx="200" cy="160" rx="96" ry="10" fill="none" stroke="#E3C27A" stroke-width="1.5" stroke-dasharray="4 3" opacity=".7"/>`);
   o.push(`<line x1="${life === 'couch' ? 120 : 330}" y1="0" x2="${life === 'couch' ? 120 : 330}" y2="22" stroke="#3B3B3B" stroke-width="1.2"/><path d="M${life === 'couch' ? 112 : 322} 22 h16 l-3 -6 h-10 z" fill="#3B3B3B"/><circle cx="${life === 'couch' ? 120 : 330}" cy="24" r="3" fill="#FFE9A8" opacity="${night ? 1 : .5}"/>`);
   const wx = life === 'couch' ? 268 : 160, ww = ['own', 'loft', 'house'].includes(life) ? 110 : 80;
   o.push(`<rect x="${wx}" y="18" width="${ww}" height="76" fill="${sky}"/><g transform="translate(${wx} 18)">${homeSkyline(M.hub, ww, 76)}</g><rect x="${wx - 4}" y="14" width="${ww + 8}" height="84" fill="none" stroke="#FFFFFF" stroke-width="6"/><path d="M${wx + ww / 2} 18 L${wx + ww / 2} 94" stroke="#FFFFFF" stroke-width="3"/><rect x="${wx - 8}" y="94" width="${ww + 16}" height="5" fill="#FFFFFF"/>`);
@@ -11888,9 +11926,56 @@ function homeSceneSVG(day) {
   wall2.forEach((g, i) => o.push(`<g transform="translate(${life === 'couch' ? 210 + i * 26 : 290 + (i % 4) * 26} ${life === 'couch' ? 30 : 30 + Math.floor(i / 4) * 30})">${g}</g>`));
   if (wins) o.push(`<g transform="translate(${life === 'couch' ? 12 : 60} 118)">${Array.from({ length: Math.min(5, wins) }, (_, i) => `<path d="M${i * 10} 0 l6 0 l-1 5 l-2 0 l0 2 l2 0 l0 1 l-6 0 l0 -1 l2 0 l0 -2 l-2 0 z" fill="#D4AF37"/>`).join('')}<rect x="-2" y="8" width="${Math.min(5, wins) * 10 + 2}" height="2" fill="#6B4E3A"/></g>`);
   if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
+  o.push(roomGlowSVG(RS, life, night), roomExtraSVG(RS, life));
   if (night) o.push(`<rect width="400" height="180" fill="#0B1020" opacity=".38"/><circle cx="${life === 'couch' ? 120 : 330}" cy="40" r="60" fill="#FFE9A8" opacity=".12"/>`);
-  o.push(`<g transform="translate(176 106)">${portraitSVG(lookOf(me), S.year - me.born, 64, true).replace('<svg class="portrait"', '<svg class="portrait" x="0" y="0"')}</g>`);
+  o.push(`<g transform="translate(178 76)">${portraitSVG(lookOf(me), S.year - me.born, 100, true, true).replace('<svg class="portrait figure"', '<svg class="portrait figure" x="0" y="0"')}</g>`);
   return `<svg class="home-scene" viewBox="0 0 400 180" role="img" aria-label="Your place">${o.join('')}</svg>`;
+}
+
+// ---- making it yours: paint, paper, floors, rugs, lights and the odd pet. Free, and only for the look of it. ----
+const ROOM_STYLE = {
+  paint: { label: 'Walls', opts: ['As it came', '#F6D6D6', '#CDE7E0', '#D9D2F0', '#FBE7B5', '#2E3A59', '#E8C1A0', '#BFD8F2', '#3E5A3A', '#FFF8EE'] },
+  paper: { label: 'Wallpaper', opts: ['None', 'Stripes', 'Polka dots', 'Palm leaves', 'Stars', 'Zigzag', 'Film strip'] },
+  floor: { label: 'Floor', opts: ['As it came', 'Light oak', 'Dark walnut', 'Black and white tiles', 'Terrazzo', 'Green carpet', 'Pink carpet'] },
+  rug: { label: 'Rug', opts: ['As it came', 'Persian red', 'Sunset stripes', 'Round sheepskin', 'Retro geometric', 'No rug'] },
+  glow: { label: 'Lights', opts: ['Just the lamp', 'String lights', 'Neon sign', 'Lava lamp', 'Disco ball', 'Candles everywhere'] },
+  extra: { label: 'Personal touch', opts: ['Nothing', 'A sleeping cat', 'Stacks of DVDs', 'A mini fridge', 'A drum kit', 'A film projector', 'A cactus collection'] }
+};
+function roomStyleAct(a) { const M = S.me, R = ROOM_STYLE[a.k], v = +a.v; if (!R || !(v >= 0 && v < R.opts.length)) return false; (M.home.style = M.home.style || {})[a.k] = v; return true; }
+function roomPaperSVG(RS, wd) {
+  const p = RS.paper || 0, c = RS.paint === 5 || RS.paint === 8 ? '#FFFFFF' : wd; if (!p) return '';
+  const tile = { 1: '<rect width="10" height="20" fill="C"/>', 2: '<circle cx="10" cy="10" r="3" fill="C"/>', 3: '<path d="M10 2 Q4 8 10 18 Q16 8 10 2 Z M10 4 L10 17" fill="C" stroke="C" stroke-width=".6"/>', 4: '<path d="M10 4 l1.5 3.5 l3.8 .3 l-2.9 2.4 l.9 3.7 l-3.3 -2 l-3.3 2 l.9 -3.7 l-2.9 -2.4 l3.8 -.3 z" fill="C"/>', 5: '<path d="M0 14 L5 6 L10 14 L15 6 L20 14" stroke="C" stroke-width="2" fill="none"/>', 6: '<rect x="2" y="2" width="16" height="16" fill="none" stroke="C" stroke-width="1.6"/><rect x="0" y="0" width="2" height="4" fill="C"/><rect x="18" y="0" width="2" height="4" fill="C"/>' }[p].replace(/C/g, c);
+  return `<defs><pattern id="hs-pp" width="20" height="20" patternUnits="userSpaceOnUse">${tile}</pattern></defs><rect width="400" height="128" fill="url(#hs-pp)" opacity=".5"/>`;
+}
+function roomRugSVG(r) {
+  if (r === 1) return `<ellipse cx="200" cy="160" rx="112" ry="15" fill="#8C2E2E"/><ellipse cx="200" cy="160" rx="96" ry="11" fill="none" stroke="#E3C27A" stroke-width="2"/><ellipse cx="200" cy="160" rx="60" ry="6" fill="#2C4F7C" opacity=".7"/>`;
+  if (r === 2) return ['#F28C28', '#E0457B', '#7B4FC9', '#E3A72F'].map((c, i) => `<ellipse cx="200" cy="160" rx="${112 - i * 22}" ry="${15 - i * 3}" fill="${c}"/>`).join('');
+  if (r === 3) return `<ellipse cx="200" cy="162" rx="60" ry="12" fill="#F4F0E6"/>${Array.from({ length: 30 }, (_, i) => `<circle cx="${148 + (i * 37) % 104}" cy="${155 + (i * 13) % 14}" r="2.2" fill="#FFFFFF" opacity=".8"/>`).join('')}`;
+  return `<ellipse cx="200" cy="160" rx="112" ry="15" fill="#1FA3A0"/>${[-60, -20, 20, 60].map((d, i) => `<path d="M${200 + d - 12} 160 L${200 + d} 150 L${200 + d + 12} 160 L${200 + d} 170 Z" fill="${['#FFE27A', '#E0457B', '#FFFFFF', '#F28C28'][i]}"/>`).join('')}`;
+}
+function roomGlowSVG(RS, life, night) {
+  const g = RS.glow || 0, op = night ? 1 : .75;
+  if (g === 1) return `<path d="M0 10 Q50 26 100 10 Q150 26 200 10 Q250 26 300 10 Q350 26 400 10" stroke="#333" stroke-width=".8" fill="none"/>${Array.from({ length: 20 }, (_, i) => { const x = 10 + i * 20, y = 10 + 10 * Math.sin((x % 100) / 100 * Math.PI) + 4; return `<circle cx="${x}" cy="${y}" r="3" fill="${['#FFE27A', '#E85D9A', '#7FD1B9', '#F28C28', '#B39DDB'][i % 5]}" opacity="${op}"/>${night ? `<circle cx="${x}" cy="${y}" r="8" fill="#FFE9A8" opacity=".18"/>` : ''}`; }).join('')}`;
+  if (g === 2) { const n = (ME().name || 'X')[0].toUpperCase(); return `<text x="70" y="70" font-size="34" font-family="'Brush Script MT', cursive" fill="#FF4FA3" opacity="${op}" stroke="#FFB3DA" stroke-width=".8">${esc(n)}♥</text>${night ? '<ellipse cx="88" cy="58" rx="40" ry="24" fill="#FF4FA3" opacity=".15"/>' : ''}`; }
+  if (g === 3) return `<g transform="translate(${life === 'couch' ? 300 : 250} 160)"><rect x="-4" y="-6" width="8" height="6" fill="#555"/><path d="M-6 -6 L-3 -36 L3 -36 L6 -6 Z" fill="#E0457B" opacity=".85"/><circle cx="0" cy="-16" r="3" fill="#FFB347"/><circle cx="-1" cy="-27" r="2.2" fill="#FFB347"/><rect x="-4" y="-40" width="8" height="4" fill="#555"/>${night ? '<circle cx="0" cy="-20" r="22" fill="#E0457B" opacity=".18"/>' : ''}</g>`;
+  if (g === 4) return `<line x1="200" y1="0" x2="200" y2="20" stroke="#888" stroke-width="1"/><circle cx="200" cy="30" r="10" fill="#C9CCD6"/>${Array.from({ length: 12 }, (_, i) => `<rect x="${193 + (i % 4) * 4}" y="${23 + Math.floor(i / 4) * 5}" width="3" height="3" fill="#FFFFFF" opacity=".7"/>`).join('')}${night ? Array.from({ length: 18 }, (_, i) => `<circle cx="${(i * 71) % 400}" cy="${(i * 37) % 170}" r="2" fill="${['#FFE27A', '#7FD1B9', '#E85D9A'][i % 3]}" opacity=".7"/>`).join('') : ''}`;
+  if (g === 5) return [60, 140, 300, 350].map(x => `<rect x="${x}" y="152" width="4" height="10" fill="#FFF6D8"/><ellipse cx="${x + 2}" cy="150" rx="1.5" ry="3" fill="#FFB347"/>${night ? `<circle cx="${x + 2}" cy="150" r="10" fill="#FFE9A8" opacity=".25"/>` : ''}`).join('');
+  return '';
+}
+function roomExtraSVG(RS, life) {
+  const e = RS.extra || 0, x = life === 'couch' ? 330 : 236;
+  if (e === 1) return `<g transform="translate(${x} 166)"><ellipse cx="0" cy="0" rx="14" ry="7" fill="#E3A72F"/><circle cx="11" cy="-4" r="5.5" fill="#E3A72F"/><path d="M8 -9 l1.5 -4 l2.5 4 M13 -9 l1.5 -4 l2 4" fill="#E3A72F"/><path d="M-12 1 Q-20 -2 -16 -8" stroke="#E3A72F" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M-6 -3 l4 0 M-4 1 l4 0" stroke="#B5762A" stroke-width="1"/></g>`;
+  if (e === 2) return `<g transform="translate(${x} 170)">${[0, 1, 2].map(s => Array.from({ length: 6 }, (_, i) => `<rect x="${s * 14}" y="${-5 - i * 4}" width="12" height="3.5" fill="${['#2C4F7C', '#C8553D', '#1E1E1E', '#E3A72F', '#2E5A3A', '#5B3A6E'][(i + s) % 6]}"/>`).join('')).join('')}</g>`;
+  if (e === 3) return `<g transform="translate(${x} 170)"><rect x="0" y="-30" width="22" height="30" rx="2" fill="#E8E4DA" stroke="#B9B5AE"/><rect x="18" y="-24" width="2" height="8" fill="#888"/><rect x="2" y="-36" width="6" height="6" fill="#C8553D"/><rect x="10" y="-34" width="5" height="4" fill="#2E5A3A"/></g>`;
+  if (e === 4) return `<g transform="translate(${x} 170)"><ellipse cx="14" cy="-8" rx="14" ry="10" fill="#C8102E"/><ellipse cx="14" cy="-8" rx="10" ry="7" fill="#F4F2EE"/><ellipse cx="-4" cy="-22" rx="8" ry="3" fill="#E3C27A"/><line x1="-4" y1="-22" x2="-4" y2="0" stroke="#888"/><ellipse cx="32" cy="-26" rx="8" ry="3" fill="#E3C27A"/><line x1="32" y1="-26" x2="32" y2="0" stroke="#888"/></g>`;
+  if (e === 5) return `<g transform="translate(${x} 170)"><path d="M8 -18 L2 0 M8 -18 L14 0" stroke="#333" stroke-width="1.5"/><rect x="0" y="-30" width="22" height="12" rx="2" fill="#2B2B2B"/><circle cx="4" cy="-34" r="5" fill="#2B2B2B"/><circle cx="16" cy="-34" r="5" fill="#2B2B2B"/><path d="M22 -26 L120 -60 L120 -10 Z" fill="#FFF6D8" opacity=".2"/></g>`;
+  if (e === 6) return `<g transform="translate(${x} 170)">${[0, 12, 24].map((d, i) => `<rect x="${d}" y="-6" width="9" height="6" fill="#C8553D"/><path d="M${d + 4.5} -6 L${d + 4.5} ${-16 - i * 3}" stroke="#2E7A4C" stroke-width="5" stroke-linecap="round"/>${i === 1 ? `<circle cx="${d + 4.5}" cy="-21" r="2" fill="#E85D9A"/>` : ''}`).join('')}</g>`;
+  return '';
+}
+function roomStyleHTML() {
+  const RS = (S.me.home && S.me.home.style) || {};
+  return `<h4>Make it yours</h4><div class="looks">${Object.entries(ROOM_STYLE).map(([k, R]) => { const v = RS[k] || 0, sw = k === 'paint';
+    return `<div class="lk-row"><span class="muted">${R.label}</span>${sw ? `<span class="sw">${R.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${i ? o : 'repeating-linear-gradient(45deg,#ddd 0 4px,#fff 4px 8px)'}" data-rstyle="${k}:${i}" title="${i ? '' : 'As it came'}"></button>`).join('')}</span>` : `<span class="rsb">${R.opts.map((o, i) => `<button class="pill${i === v ? ' on' : ''}" data-rstyle="${k}:${i}">${esc(o)}</button>`).join('')}</span>`}</div>`; }).join('')}</div>`;
 }
 // </home>
 // <career-depth>
@@ -12705,7 +12790,7 @@ function lifeScene(pool) {
   const s = ppick(L), known = Object.keys(M.known).map(Number).filter(id => !P(id).dead);
   const ctx = { head: null, film: null, mates: [], contact: known.length ? ppick(known) : null, star: null };
   if (/\{contact\}/.test(s.text) && ctx.contact === null) return;
-  const text = fillScene(s.text, ctx).replace('{fieldword}', ppick(['casting', 'post-production', 'a studio\'s development office', 'an agency', 'documentaries']));
+  const text = fillScene(s.text.replace('{fieldword}', ppick(['casting', 'post-production', 'a studio\'s development office', 'an agency', 'documentaries'])), ctx);
   inbox('scene', s.title, text, { scene: s.id, ctx, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
 }
 // A working day: a decent chance of a scene from your job's family, or from the shared life of a shoot.
@@ -12737,7 +12822,7 @@ function holdInterview(post) {
   const M = S.me, t = tmplOf(post), target = clamp(hireOdds(post) / shortlistOdds(post), .1, .95);
   const sub = t.subs[0], dc = st => { const m = checkMods(st).mod; return clamp(Math.round(20 - 20 * target + m), 4, 19); };
   const f = post.film !== null ? S.films[post.film] : null;
-  const who = post.head !== null ? P(post.head).name : 'the hiring manager';
+  const who = post.head !== null ? P(post.head).name : 'The hiring manager';
   inbox('interview', `Interview: ${post.t}`, `${who} sees you about ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}. Twenty minutes, a cold coffee and a long list of other candidates. How do you play it?`, { post, choices: [
     { k: 'craft', label: `Talk about the work: ${statLabel(sub).toLowerCase()}`, check: [sub, dc(sub)] },
     { k: 'charm', label: 'Charm them', check: ['cha', dc('cha')] },
@@ -13252,6 +13337,20 @@ const INVITES = [
   { k: 'festival', t: 'a festival premiere', never: 1, senior: 1, meet: 3, tie: 4, stand: .8, cost: 200, e: 6 },
   { k: 'awards', t: 'the awards', never: 1, senior: 1, meet: 2, tie: 4, stand: .6, cost: 120, stress: -2 }
 ];
+// How people actually invite you: in their own words, with the day in the sentence.
+const INVITE_TXT = {
+  birthday: ['it\'s my birthday drinks {when}. you coming?', 'birthday drinks {when}! please come, I need at least one person who isn\'t my cousin', 'I\'m turning another year older {when}. drinks. you in?'],
+  dinner: ['I\'m doing a dinner party at mine {when}. you in?', 'come for dinner at mine {when}? I\'m attempting a risotto, lower your expectations', 'small dinner at my place {when}, six of us, good wine. come'],
+  screening: ['cast and crew screening of {film} {when}. want to come?', 'they\'re screening {film} for the crew {when}. come with me?'],
+  premiere: ['I\'ve got a spare ticket to the {film} premiere {when}. come with me?', '{film} premiere {when}. I need a plus-one who won\'t embarrass me'],
+  tableread: ['I\'m doing a table read of my new script {when}. would you come and read a part?', 'table read of my new thing {when}. I need actors and honesty. bring both'],
+  football: ['five-a-side {when}, we\'re a player short. you in?', 'football {when}? we lost 9-1 last week, you can\'t make it worse'],
+  gallery: ['gallery opening {when}. free wine, strange art. come?', 'a friend\'s show opens {when}. come and pretend to understand it with me'],
+  karaoke: ['karaoke with my crew {when}. no excuses', 'we\'re doing karaoke {when}. I\'ve already picked your song'],
+  wrap: ['wrap party for {film} {when}! come', 'we wrapped {film}!! party {when}, you\'re coming']
+};
+function whenTxt(w) { return /^(next|this|tomorrow|tonight|on )/i.test(w) ? w : 'on ' + w; }
+function inviteText(k, when, film, mine, seed) { const L = INVITE_TXT[k]; return L ? pickLine(L, seed).replace('{when}', whenTxt(when)).replace('{film}', film) : `are you free for ${mine} ${whenTxt(when)}?`; }
 function inviteFrom(id) {
   const M = S.me, q = P(id);
   const film = S.films.find && S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
@@ -13260,8 +13359,9 @@ function inviteFrom(id) {
   if (!slot) return;
   const what = v.t.replace('{who}', q.name).replace('{film}', film ? film.title : 'the film');
   const mine = v.t.replace("{who}'s", 'my').replace(' with {who}', '').replace('{film}', film ? film.title : 'the film');
-  sms(id, `${pickLine(['are you free for', 'come to', 'you HAVE to come to', 'any chance you can make'], id + S.week)} ${mine}? ${slotLabel(slot)}`, 'invite');
-  inbox('invite', `${q.name} invites you`, `${q.name} asks you to ${what}, ${slotLabel(slot)}.`, { person: id, ev: v.k, film: film ? film.id : undefined, slot, what, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Make an excuse' }] });
+  sms(id, inviteText(v.k, slotLabel(slot), film ? film.title : 'the film', mine, id + S.week), 'invite');
+  const theirs = v.t.replace("{who}'s", 'their').replace(' with {who}', ' with them').replace('{film}', film ? film.title : 'the film');
+  inbox('invite', `${q.name} invites you`, `${q.name} invites you to ${theirs}, ${slotLabel(slot)}.`, { person: id, ev: v.k, film: film ? film.id : undefined, slot, what, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Make an excuse' }] });
 }
 function askFrom(id) {
   const q = P(id), slot = freeSlot({ days: [5, 6], blocks: [0, 1], from: 1 });
@@ -13578,7 +13678,7 @@ const NPC_EVENTS = [
   { k: 'lawsuit', w: 1, ok: p => p.credits.length > 4, go: () => {}, t: () => 'is suing a studio over profits from an old hit that somehow never made any' },
   { k: 'comeback', w: 1, ok: p => p.standing < 30 && ageOf(p) > 45, go: p => { p.standing = clamp(p.standing + 6, 0, 100); }, t: () => 'is having a late-career comeback after a film festival rediscovered their old work' },
   { k: 'tattoo', w: 1, personal: 1, ok: p => ageOf(p) < 45, go: () => {}, t: () => 'got a tattoo of a line from a film, and spelt it slightly wrong' },
-  { k: 'move', w: 1, ok: () => true, go: p => { p.hood = ppick(['by the beach', 'in the hills', 'across town', 'downtown', 'near the studios']); }, t: p => `moved ${p.hood}` }
+  { k: 'move', w: 1, ok: () => true, go: p => { p.hood = ppick(['by the beach', 'in the hills', 'across town', 'downtown', 'near the studios']); }, t: p => `moved ${{ 'by the beach': 'to a flat by the beach', 'in the hills': 'up into the hills', 'across town': 'across town', downtown: 'downtown', 'near the studios': 'to be near the studios' }[p.hood] || p.hood}` }
 ];
 function spouseName(p) { const N = NAMES[HUBS[p.hub].lang] || NAMES.en; return ppick(N.M.concat(N.F)) + ' ' + ppick(N.L); }
 function npcLivesWeek() {
@@ -13990,7 +14090,7 @@ function filmTrivia(f) {
   const d = P(f.dir), lead = f.cast[0] !== undefined ? P(f.cast[0]) : null;
   if (d && d.credits.length && d.credits[0] === f.id) out.push(['f', `${d.name}'s first film as director.`, 4]);
   if (f.cost > f.budget * 1.25) out.push(['f', `It went ${Math.round((f.cost / f.budget - 1) * 100)}% over budget.`, 7]);
-  for (const e of (f.events || []).slice(0, 2)) if (e.t) out.push(['f', `From the set: ${e.t}`, 9]);
+  for (const e of (f.events || []).slice(0, 2)) if (e.t) out.push(['f', `From the set: ${setPast(e.t, f.title)}`, 9]);
   if (f.rel !== null) {
     if (f.reviews >= 75 && f.hitRatio < .8) out.push(['f', `Critics loved it (${f.reviews}/100); audiences stayed away.`, 5]);
     if (f.hitRatio > 3) out.push(['f', `It earned back its cost ${Math.round(f.hitRatio)} times over at home.`, 3]);
@@ -14038,11 +14138,18 @@ function productionFacts(f) {
   if (f.crew && f.crew.pd !== undefined) out.push(['f', `${P(f.crew.pd).name}'s team built ${2 + Math.floor(r() * 30)} sets.`, 8]);
   if (lead) { const tk = 1 + Math.floor(r() * 25); out.push(['f', tk === 1 ? `${lead.name} got the final scene in a single take.` : `${lead.name} needed ${tk} takes to get the final scene.`, 9]); }
   if (f.awards && f.awards.length) out.push(['f', `It won ${f.awards.length} award${f.awards.length > 1 ? 's' : ''}, among them ${f.awards[0].replace(/ \d{4}$/, '')}.`, 2]);
-  if (f.rel !== null) { const rivals = S.films.filter(g => g.rel !== null && g.genre === f.genre && g.m === f.m && yearOf(g.rel) === y); if (rivals.length > 2 && rivals.every(g => g.total <= f.total)) out.push(['f', `The biggest ${f.genre.toLowerCase()} of ${y} in ${MARKETS[f.m].name}.`, 4]); }
+  if (f.rel !== null) { const rivals = S.films.filter(g => g.rel !== null && g.genre === f.genre && g.m === f.m && yearOf(g.rel) === y); if (rivals.length > 2 && rivals.every(g => g.total <= f.total)) out.push(['f', `The biggest ${({ Comedy: 'comedy', Drama: 'drama', Romance: 'romance', Western: 'western', Musical: 'musical', Documentary: 'documentary', Animation: 'animated film', 'Sci-fi': 'science-fiction film', Superhero: 'superhero film', 'Martial arts': 'martial-arts film', Period: 'period film' })[f.genre] || f.genre.toLowerCase() + ' film'} of ${y} in ${typeof marketIn === 'function' ? marketIn(f.m) : MARKETS[f.m].name}.`, 4]); }
   const sr = hashRand(f.id * 389 + 17), fill = t => t.replace('{lead}', lead ? lead.name : 'The lead').replace('{dir}', d ? d.name : 'The director').replace('{title}', f.title);
   const used = new Set();
   for (let k = 0; k < 3; k++) { const i = Math.floor(sr() * SILLY_FILM.length); if (!used.has(i)) { used.add(i); out.push(['s', fill(SILLY_FILM[i]), 0]); } }
   return out;
+}
+// A headline from the shoot, told afterwards: past tense, and the film's own title left out.
+function setPast(t, title) {
+  const T = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  let s = t.replace(new RegExp(` (on|of) the set of ${T}`), '').replace(new RegExp(` (on|of) ${T}(?=[.;]|$)`), '').replace(new RegExp(`^The cast and crew of ${T} `), 'The cast and crew ');
+  for (const [a, b] of [[' stop speaking', ' stopped speaking'], [' becomes the heart', ' became the heart'], [' runs over budget', ' ran over budget'], [' refuses ', ' refused '], [' are the talk of', ' were the talk of'], [' bond over', ' bonded over'], ['Weather wrecks', 'Weather wrecked'], [' demand cuts', ' demanded cuts'], [' forces a new ending', ' forced a new ending'], [' walks off', ' walked off'], [' is fired', ' was fired'], [' is replaced', ' was replaced'], [' quits', ' quit']]) s = s.replace(a, b);
+  return s.replace(/ to( \.|$)/, '$1').replace(/^Censors demanded cuts\.?$/, 'Censors demanded cuts.');
 }
 function filmTriviaHTML(f) { return triviaList(filmTrivia(f)); }
 function personTriviaHTML(p) { return triviaList(personTrivia(p)); }
@@ -14157,7 +14264,7 @@ function awardsWeek() {
     inbox('invite', `The ${mk}`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
   } else {
     const best = wins.find(a => /Best Film/.test(a.name));
-    inbox('note', `The ${mk}`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
+    inbox('note', `The ${mk}`, `You watch on television with a takeaway.${best ? ` The Best Film prize goes to ${S.films[best.film].title}.` : ''} One day, you tell yourself.`);
   }
 }
 function awardsNight(x, L) {
@@ -14544,17 +14651,26 @@ function fullCredits(f) {
    <details class="more"><summary>Full cast and crew</summary>${credit('Also starring', x.bits)}<div class="crewlist">${crewNames(f).map(([r, n]) => `<div class="cr"><span>${esc(r)}</span><span>${esc(n)}</span></div>`).join('')}</div></details></section>`;
 }
 // ---- people ----
+// A job title as it reads in a sentence: the first of any slashed alternatives, no bracketed abbreviations.
+function occPhrase(occ) {
+  let o = occ.split(' / ')[0].replace(/\s*\([^)]*\)/g, '').trim().toLowerCase().replace(/\b(ad|dp|vfx|cg|tv|ceo|vp)\b/g, m => m.toUpperCase()).replace(/\bsecond second\b/, 'second second');
+  const an = /^(a|e|i|o|u(?!ni|ti|s[aeiou]|r)|honou?r)/i.test(o) && !/^(one|eu)/i.test(o);
+  return (an ? 'an ' : 'a ') + o;
+}
+// Traits that are things people are, not adjectives: "an auteur", "a team player".
+const TRAIT_NOUN = new Set(['auteur', 'gossip', 'health nut', 'team player', 'method', 'cinephile', 'early riser', 'lone wolf', 'workhorse', 'hustler', 'late bloomer', 'perfectionist', 'party animal', 'optimist', 'night owl']);
+function traitList(ts) { const L = ts.map(x => { const t = x.toLowerCase(); return t === 'method' ? 'a method actor' : TRAIT_NOUN.has(t) ? (/^[aeiou]/.test(t) ? 'an ' : 'a ') + t : t; }); return L.length > 1 ? L.slice(0, -1).join(', ') + ' and ' + L[L.length - 1] : L[0]; }
 function personBio(p) {
   if (p.player) return '';
   const cr = p.credits.map(i => S.films[i]).filter(f => f && f.rel !== null).sort((a, b) => a.rel - b.rel);
   const best = cr.slice().sort((a, b) => b.reviews - a.reviews)[0], big = cr.slice().sort((a, b) => b.total - a.total)[0];
-  const b = backstoryOf(p), occ = (p.occ || occupationOf(p)).toLowerCase(), P0 = pron(p);
-  let t = `${p.name} is ${/^[aeiou]/.test(occ) ? 'an' : 'a'} ${occ} based in ${hubName(p.hub)}`;
+  const b = backstoryOf(p), occ = p.occ || occupationOf(p), P0 = pron(p);
+  let t = `${p.name} is ${occPhrase(occ)} based in ${hubName(p.hub)}`;
   t += cr.length ? `, with ${cr.length} credit${cr.length > 1 ? 's' : ''} since ${yearOf(cr[0].rel)}.` : ', still waiting on a first credit.';
-  if (best) t += ` Best known for ${best.title} (${yearOf(best.rel)})${big && big !== best ? ` and the hit ${big.title}` : ''}.`;
+  if (best) t += ` Best known for ${best.title} (${yearOf(best.rel)})${big && big !== best ? `, and for the hit ${big.title}` : ''}.`;
   if (p.awards.length) t += ` ${P0[0]} ${P0[0] === 'They' ? 'have' : 'has'} won ${p.awards.length} award${p.awards.length > 1 ? 's' : ''}.`;
-  if (b && b.from) t += ` Grew up in ${b.from}.`;
-  if (p.traits.length) t += ` Known for being ${p.traits.slice(0, 2).map(x => x.toLowerCase()).join(' and ')}.`;
+  if (b && b.from) t += ` Grew up ${/island/.test(b.from) ? 'on' : 'in'} ${b.from}.`;
+  if (p.traits.length) t += ` Colleagues describe ${P0[0] === 'They' ? 'them' : P0[0] === 'She' ? 'her' : 'him'} as ${traitList(p.traits.slice(0, 2))}.`;
   return t;
 }
 // The archive's masthead: switch between films and people.
@@ -14738,13 +14854,15 @@ function textStyle(p) {
   return age < 32 ? (r < .6 ? 'lower' : 'emoji') : r < .5 ? 'lower' : 'terse';
 }
 const EMO = { happy: ['😂', '🙌', '✨', '🥹', '😄', '🎬'], sad: ['😩', '🫠', '😭'], love: ['❤️', '😘', '🥰'], none: ['👀', '🙃', '😅'] };
+// capital letters where sentences start, for the people who text properly
+function sentenceCase(s) { return s.replace(/(^|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase()).replace(/\bi\b/g, 'I'); }
 function styleText(p, t, mood = 'happy') {
   const M = S.me, st = textStyle(p), o = M && M.known[p.id] ? opinion(p.id) : 0, r = hashRand(p.id * 7 + (M ? M.phoneN || 0 : 0))(), first = M ? ME().name.split(' ')[0] : '';
   let s = String(t);
   if (/^\[/.test(s)) return s;   // a photo or a voice note speaks for itself
   switch (st) {
-    case 'formal': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, ''); if (!/[.!?]$/.test(s)) s += '.'; if (o < 20) s = `Hello ${first}, ${s[0].toLowerCase()}${s.slice(1)}`; s += ` Best, ${p.name.split(' ')[0]}`; break;
-    case 'terse': s = s.split(/[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break;
+    case 'formal': s = sentenceCase(s.replace(/\s*$/, '')); if (!/[.!?…]$/.test(s)) s += '.'; if (s.length > 70 && o < 20) s = `Hi ${first}. ${s}`; if (s.length > 70) s += ` Best, ${p.name.split(' ')[0]}`; break;
+    case 'terse': { const t0 = s.split(/(?<=\w)[.!?] /)[0].toLowerCase().replace(/[.!]+$/, ''); s = t0.replace(/[.…\s]/g, '').length < 3 ? s.toLowerCase() : t0; if (s.length > 60) s = s.slice(0, 58).replace(/\s\S*$/, '') + '…'; break; }
     case 'lower': s = s.toLowerCase().replace(/[.]$/, ''); break;
     case 'caps': s = s.replace(/\b([a-z]{4,})\b/g, (w, _, i) => (hashRand(i + p.id)() < .35 ? w.toUpperCase() : w)) + (r < .5 ? '!!' : '!!!'); break;
     case 'long': s = s[0].toUpperCase() + s.slice(1).replace(/\s*$/, '') + (/[.!?…)\]]$/.test(s.trim()) ? '' : '.') + (r < .5 ? ' Anyway sorry, long message, I just think about this stuff a lot. How are YOU? Properly, I mean.' : ' Also, random, but I hope you\'re looking after yourself. This business eats people.'); break;
@@ -14761,6 +14879,7 @@ function worldGripe() { const on = typeof worldOn === 'function' ? worldOn().fil
 // Extra phone traffic: called from phoneTick's quieter moments.
 function phoneExtra(id) {
   const g = worldGripe(), r = prnd();
+  if (typeof chatterText === 'function' && chatSeed(id)() < .55) return sms(id, chatterText(id), 'text', { replyable: 1 });
   if (g && r < .25) return sms(id, g, 'text', { replyable: 1 });
   if (r < .45) return sms(id, ppick(MEMES), 'text', { replyable: 1 });
   if (r < .6) { const i = Math.floor(prnd() * ASK_ADVICE.length); return sms(id, ASK_ADVICE[i], 'advice', { replyable: 1, topic: 'adv' + i }); }
@@ -15635,13 +15754,13 @@ function compPanel() {
 // the side hustle, the classes, the nights in and out, and the small jobs. Many of them open a door or close one:
 // a new name in your phone, a reputation, a favour owed, someone who now thinks less of you.
 const LOW_ROAD = [
-  { id: "lr_bus2", v: ["transit"], title: "The night bus", text: "The last bus home. A man at the back is quietly crying over a stack of headshots.", teach: "Most actors work other jobs for years; casting directors see thousands of headshots a week, and the photo is often the only thing that gets read.", opts: [
+  { id: "lr_bus2", meetRole: "actor", v: ["transit"], title: "The night bus", text: "The last bus home. A man at the back is quietly crying over a stack of headshots.", teach: "Most actors work other jobs for years; casting directors see thousands of headshots a week, and the photo is often the only thing that gets read.", opts: [
     { k: "talk", label: "Sit with him", check: ["cha", 10], ok: { meet: 1, stress: -1 }, bad: {}, t: "He's an actor who just lost a part he'd been promised. By the end of the route you're both laughing. He takes your number.", tb: "He'd rather be alone. You respect that." },
     { k: "leave", label: "Give him some space", ok: {}, t: "You look out of the window. Everyone's carrying something." }] },
   { id: "lr_train", v: ["transit"], title: "The delayed train", text: "Signal failure. Forty minutes stuck between stations, and you're due on set.", teach: "Being late on set costs money by the minute; crews call ahead the moment they know, and good ADs remember who did.", opts: [
     { k: "call", label: "Call ahead straight away", check: ["com", 9], ok: { flag: "reliable" }, bad: { stress: 2 }, t: "The AD says 'thanks for the heads-up' and means it.", tb: "No signal in the tunnel. You arrive late and flustered." },
     { k: "script", label: "Use the time to read", ok: { xp: { tas: .05 } }, t: "You finish a script someone lent you. Annoyingly, it's good." }] },
-  { id: "lr_busker", v: ["transit"], title: "The busker", text: "A busker in the station is playing a film theme beautifully, to nobody.", opts: [
+  { id: "lr_busker", meetRole: "composer", v: ["transit"], title: "The busker", text: "A busker in the station is playing a film theme beautifully, to nobody.", opts: [
     { k: "listen", label: "Stop and listen, drop a coin", ok: { stress: -2, cash: -2 }, t: "Three minutes of something lovely before the day starts." },
     { k: "ask", label: "Ask if they've ever thought of scoring films", check: ["cha", 11], ok: { meet: 1 }, bad: {}, t: "They've scored three student shorts. You swap numbers; you'll need music one day.", tb: "They have, and they're very tired of being asked." }] },
   { id: "lr_lost", v: ["transit"], title: "The lost tourist", text: "A tourist with a paper map is asking for the studios. You're going that way.", opts: [
@@ -15719,10 +15838,10 @@ const LOW_LIFE = {
     { id: "lh_wedding", title: "The wedding video", text: "A couple you served at the bar want you to film their wedding. Cash, this Saturday.", opts: [
       { k: "shoot", label: "Shoot it properly", check: ["comp", 10], ok: { cash: 300, xp: { comp: .08 }, energy: -10 }, bad: { cash: 150, energy: -10 }, t: "The first dance at golden hour. They cry when they see it. So do you, a bit.", tb: "The battery dies during the vows. They're very nice about it." },
       { k: "no", label: "Say you're not a wedding person", ok: {}, t: "They hire someone else. The bar tips stay the same." }] },
-    { id: "lh_delivery", title: "The delivery", text: "Your delivery drop is a film production office. They look desperate.", opts: [
+    { id: "lh_delivery", meetRole: "producer", title: "The delivery", text: "Your delivery drop is a film production office. They look desperate.", opts: [
       { k: "offer", label: "Mention you're looking for production work", check: ["cha", 11], ok: { meet: 1, refs: 1 }, bad: {}, t: "The coordinator takes your number. 'We lose a runner a week.'", tb: "They take the pizza and close the door." },
       { k: "drop", label: "Just drop it off", ok: { cash: 8 }, t: "A good tip. Back on the bike." }] },
-    { id: "lh_rude", title: "The rude customer", text: "A customer is rude to you all evening, then leaves a business card: they're a casting director.", opts: [
+    { id: "lh_rude", meetRole: "casting", title: "The rude customer", text: "A customer is rude to you all evening, then leaves a business card: they're a casting director.", opts: [
       { k: "call", label: "Call them anyway", check: ["com", 12], ok: { meet: 1 }, bad: { stress: 3 }, t: "On the phone they're charming. 'Oh God, was I awful? Bad day.' They call you in for a reader job.", tb: "They don't remember you, or pretend not to." },
       { k: "bin", label: "Bin the card", ok: { stress: -1 }, t: "Life's too short. Probably." }] },
     { id: "lh_extra", title: "Background work", text: "A friend says a TV shoot needs fifty extras tomorrow. It pays, and there's lunch.", teach: "Background actors are hired through specialist agencies; a day on set as an extra is how many crew first see how a set actually works.", opts: [
@@ -16051,7 +16170,7 @@ function ambitionWeek() {
     let c = 0, n = 1; try { [c, n] = A.p(); } catch (e) { continue; } if (!(c >= n)) continue;
     M.amb[A.k] = S.week; got.push(A);
   }
-  if (got.length === 1) inbox('note', `Ambition reached: ${got[0].t.toLowerCase()}`, `One more rung. You feel it: a little steadier, a little more sure you belong. Your reward is waiting on the Standing page.`);
+  if (got.length === 1) inbox('note', `Ambition reached: ${got[0].t.toLowerCase()}`, `${pickLine(['One more rung. You feel it: a little steadier, a little more sure you belong.', 'You tick it off in your head on the walk home, and allow yourself a small, private grin.', 'Nobody else knows it happened. You do.', 'Proof, if you needed it, that this is going somewhere.', 'A small win. They add up.'], S.week)} Your reward is waiting on the Standing page.`);
   else if (got.length > 1) inbox('note', `${got.length} ambitions reached`, `${got.slice(0, 8).map(A => A.t).join(' · ')}${got.length > 8 ? ` and ${got.length - 8} more` : ''}. The rewards are waiting on the Standing page.`);
 }
 function ambitionsHTML() {
@@ -16406,6 +16525,19 @@ function viewCharts() {
    <section class="panel"><h3>Companies in these fields</h3><div class="tw"><table class="grid"><thead><tr><th>Company</th><th>Type</th><th>Based in</th><th>Since</th><th></th></tr></thead><tbody>${MEDIA_COS.filter(c => c.f <= S.year).map(c => `<tr><td><b><a href="#" class="lk" data-go="mco:${MEDIA_COS.indexOf(c)}">${esc(c.n)}</a></b></td><td>${esc(MCO_TYPE[c.type])}</td><td>${esc(hubName(c.hub))}</td><td>${c.f}</td><td class="small muted">${esc(c.d)}</td></tr>`).join('')}</tbody></table></div></section>`;
 }
 // ---- awards for the other fields, every January ----
+// A prize for a work names the work and its maker; a prize for a person names the person. Titles come from a
+// hash, so the record is the same every time it's read.
+const WORK_CATS = { 'Song of the Year': 'song', 'Album of the Year': 'album', 'Best New Play': 'play', 'Best Musical': 'musical', 'Outstanding Online Series': 'series', 'Outstanding Short-Form Series': 'series' };
+function awardWorkLine(cat, name, seed) {
+  const k = WORK_CATS[cat]; if (!k) return name;
+  const r = hashRand(seed), pk = L => L[Math.floor(r() * L.length)];
+  const t = k === 'song' ? pk([`${pk(TW.adj)} ${pk(TW.noun)}`, `${pk(TW.noun)} (${pk(['Slow', 'Midnight', 'Acoustic', 'Live'])} Version)`, `Call Me ${pk(TW.adj)}`, `${pk(TW.season)} ${pk(TW.noun)}`])
+    : k === 'album' ? pk([`${pk(TW.adj)} ${pk(TW.plural)}`, `The ${pk(TW.noun)} Sessions`, `${pk(TW.num)} ${pk(TW.plural)}`, `${pk(TW.season)} Songs`])
+    : k === 'play' ? pk([`The ${pk(TW.adj)} ${pk(TW.noun)}`, `${pk(TW.num)} ${pk(TW.plural)} in a Room`, `A ${pk(TW.noun)} for ${pk(TW.season)}`])
+    : k === 'musical' ? pk([`${pk(TW.noun)}!`, `${pk(TW.adj)} ${pk(TW.noun)}: The Musical`, `Dancing ${pk(TW.adj)}`])
+    : pk([`${pk(TW.adj)} ${pk(TW.noun)}`, `The ${pk(TW.noun)} Diaries`, `${pk(TW.noun)} Club`]);
+  return k === 'song' || k === 'album' ? `"${t}", ${name}` : `${t} (${name})`;
+}
 const MEDIA_AWARDS = { music: ['The Gramophones', ['Song of the Year', 'Best New Artist', 'Album of the Year']], stage: ['The Footlights', ['Best New Play', 'Best Musical', 'Best Performance']], podcast: ['The Golden Mics', ['Podcast of the Year', 'Best New Show']], creator: ['The Vidwire Creator Awards', ['Creator of the Year', 'Breakout Creator']] };
 function mediaAwardsWeek() {
   const M = S.me, me = ME(); if (!M || dateOf(S.week).getUTCMonth() !== 0 || M.mAwY === S.year) return;
@@ -16414,7 +16546,7 @@ function mediaAwardsWeek() {
     const [show, cats] = MEDIA_AWARDS[f];
     if (f === 'creator' && !platOpen('vidwire')) continue;
     const mine = (M.works || []).filter(w => WORK_TYPES[w.type].field === f && yearOf(w.rel) === y).sort((a, b) => b.q * Math.log10(10 + b.units) - a.q * Math.log10(10 + a.units))[0];
-    const winners = cats.map((c, i) => { const L = activeFigures(M.hub, f).concat(...HUB_IDS.filter(h => h !== M.hub && HUBS[h].m === 'US').slice(0, 2).map(h => activeFigures(h, f))); const x = L[Math.floor(hashRand(y * 31 + i * 7 + f.length)() * Math.max(1, L.length))]; return [c, x ? x.name : '—']; });
+    const winners = cats.map((c, i) => { const L = activeFigures(M.hub, f).concat(...HUB_IDS.filter(h => h !== M.hub && HUBS[h].m === 'US').slice(0, 2).map(h => activeFigures(h, f))); const x = L[Math.floor(hashRand(y * 31 + i * 7 + f.length)() * Math.max(1, L.length))]; return [c, x ? awardWorkLine(c, x.name, y * 131 + i * 17 + f.length) : '—']; });
     let line = winners.map(([c, n]) => `${c}: ${n}`).join(' · ');
     if (mine && mine.q >= 72 && mine.units >= (f === 'stage' ? 400 : 20000)) {
       const won = prnd() < (mine.q - 65) / 60;
@@ -16571,6 +16703,7 @@ function mailWeek() {
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
   { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
   if (typeof endorseWeek === 'function') endorseWeek();
+  if (typeof chatterMailWeek === 'function') chatterMailWeek(r);
   if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
 }
 const FAVOURS = [
@@ -18462,7 +18595,7 @@ function endorseWeek() {
   const field = M.field && M.field !== 'film' ? M.field : null, L = BRANDS.filter(b => b[2].includes(me.role) || (field && b[2].includes(field)));
   if (!L.length) return;
   const b = L[Math.floor(r() * L.length)], fee = Math.round(usd(clamp(600 * Math.pow(s / 18, 2.2), 600, 400000)) / 50) * 50;
-  mail('offers', `Partnerships, ${b[0]}`, `Be the face of ${b[1]}?`, `We think our customers would love to see you with ${b[1]}. A photo shoot, two posts and a short film for our channels. Fee: ${fmtCash(fee)}.${b[3] === 2 ? ' (Your agent mutters that this one could age badly.)' : b[3] === 1 ? ' It\'s not glamorous, but the money is real.' : ''}`, { k: 'endorse', fee, brand: b[0], shady: b[3] });
+  mail('offers', `Partnerships, ${b[0]}`, `Front our campaign for ${b[1]}?`, `${pickLine([`We're launching ${b[1]} and we think you're exactly the right face for it.`, `Our customers know your work, and we'd love you to front our new campaign for ${b[1]}.`, `We're looking for someone with real credibility to front ${b[1]}, and your name keeps coming up.`], S.week)} A photo shoot, two social posts and a short film for our channels. Fee: ${fmtCash(fee)}.${b[3] === 2 ? ' (Your agent mutters that this one could age badly.)' : b[3] === 1 ? ' It\'s not glamorous, but the money is real.' : ''}`, { k: 'endorse', fee, brand: b[0], shady: b[3] });
 }
 function endorseAccept(A) {
   const M = S.me, me = ME();
@@ -19336,8 +19469,8 @@ function mailOptAct(m, k) {
 function workMailWeek() {
   const M = S.me, me = ME();
   for (const p of M.past.filter(p => p.to === S.week)) {
-    const f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, where = f ? f.title : (p.mco || 'the company');
-    mail('inbox', `Accounts, ${where}`, `Remittance: ${p.t}`, `Payment for your work as ${p.t.toLowerCase()} on ${where} has been sent. Please allow three to five working days. Do not reply to this email; nobody reads it.`, null);
+    const f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, emp = p.mco || (p.co !== null && p.co !== undefined && S.companies[p.co] ? S.companies[p.co].name : null), where = f ? f.title : emp || 'the job';
+    mail('inbox', f || emp ? `Accounts, ${where}` : 'Payroll', `Remittance: ${p.t.split(',')[0]}`, `Your final payment for ${f ? `your work on ${where}` : emp ? `your time at ${emp}` : `your work as ${p.t.toLowerCase()}`} has been sent. Please allow three to five working days. Do not reply to this email; nobody reads it.`, null);
     if (p.head !== null && p.head !== undefined && M.known[p.head] && !P(p.head).dead && !p.quit) { const q = P(p.head), good = (p.score || 0) >= 0; mail('inbox', sigOf(q), good ? `Thank you` : 'Wrapping up', good ? `Hi ${me.name.split(' ')[0]},\n\nJust wanted to say thank you for ${where}. You made my life easier, which is the highest compliment I give.\n\n${q.name.split(' ')[0]}` : `Hi ${me.name.split(' ')[0]},\n\nThat was a hard one. Thanks for sticking it out on ${where}. Let's both do better next time.\n\n${q.name.split(' ')[0]}`, { k: 'opt', kind: 'wrap', id: q.id, opts: WRAP_OPTS }); }
   }
   for (const id of me.credits) { const f = S.films[id]; if (f && f.rel === S.week) mail('offers', `${f.co !== null ? S.companies[f.co].name : 'The producers'} · Publicity`, `Invitation: the premiere of ${f.title}`, `You are warmly invited to the premiere of ${f.title}, followed by a reception. Black tie optional; enthusiasm mandatory. Please RSVP.`, { k: 'opt', kind: 'premiere', film: f.id, opts: [['p_go', 'Accept with pleasure'], ['p_no', 'Send regrets']] }); }
@@ -22701,8 +22834,8 @@ const BIDS = { low: ['Bid the low estimate', .9, .2], fair: ['Bid the high estim
 function relicGive(k, paid, how) {
   const M = S.me, R = RELIC[k];
   M.bz.push({ id: M.seq++, k, name: R.name, w: S.week, paid, seed: M.seq * 7 + 3 });
-  diary(`Money: ${how}: ${R.name} (${fmtCash(paid)}).`);
-  milestone(`Acquired ${R.name.toLowerCase()} (${R.y})`, 'home');
+  diary(paid ? `Money: ${how}: ${R.name} (${fmtCash(paid)}).` : `${how.charAt(0).toUpperCase() + how.slice(1)}: ${R.name}.`);
+  milestone(`Acquired ${/^[A-Z][a-z]/.test(R.name) && !/^[A-Z][a-z]+ [A-Z]/.test(R.name) ? R.name[0].toLowerCase() + R.name.slice(1) : R.name} (${R.y})`, 'home');
 }
 function relicRival() {
   const r = hashRand(S.week * 17 + 3);
@@ -22858,7 +22991,7 @@ function shopWeek() {
   const M = S.me;
   for (const k of Object.keys(M.subs || {})) { const it = SHOP[k]; if (!it) continue; const c = usd(it.sub); if (M.cash < c) { delete M.subs[k]; M.owned2 = (M.owned2 || []).filter(x => x !== k); diary(`${it.label} cancelled your subscription: the card bounced.`); } else M.cash -= c; }
   if (M.jobs.length && prnd() < .004) { const L = relicPool().filter(R => R.tier === 'rare' && !relicOwned(R.k)); if (L.length) { const R = L[Math.floor(prnd() * L.length)]; M.bz = M.bz || []; relicGive(R.k, 0, 'a wrap-party present from the props department'); inbox('note', 'From the props department, with love', `The prop master hands you a box at the wrap party: ${R.name.toLowerCase()}. "It was going in a skip. You looked like you'd appreciate it."`); } }
-  if (S.week % 4 === 0 && typeof mail === 'function') { const now = bzDrops(S.week / 4).map(k => BZ_BY[k].name); mail('news', 'The Bazaar', `This month's drops: ${now.join(', ')}`, `Limited runs, gone in four weeks: ${now.join('; ')}. Also at auction this quarter: ${RELIC[relicAuction().id].name.toLowerCase()}.`); }
+  if (S.week % 4 === 0 && typeof mail === 'function') { const now = bzDrops(S.week / 4).map(k => BZ_BY[k].name), lc = t => /^[A-Z][a-z]/.test(t) && !/^[A-Z][a-z]+ [A-Z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t, list = L => L.length > 1 ? L.slice(0, -1).map(lc).join(', ') + ' and ' + lc(L[L.length - 1]) : lc(L[0]); mail('news', 'The Bazaar', `New this month: ${list(now)}`, `Limited runs, gone in four weeks: ${list(now)}. Also up for auction this quarter: ${lc(RELIC[relicAuction().id].name)}.`); }
 }
 
 // ---- grander places to live ----
@@ -28091,6 +28224,212 @@ function legacyGreet() {
   sms(p.id, pickLine(['heard you\'re new in town. come for coffee, I\'ll tell you everything I got wrong', 'someone told me you remind them of me. I\'m sorry. let\'s have lunch'], S.week), 'tip');
 }
 // </legacy>
+// <figure>
+// ---------------- The whole person ----------------
+// Portraits are head and shoulders, for lists and the phone. Where there's room (the creator, profiles, your
+// room) people are drawn head to toe: what they wear on top and below, their shoes, a bag, a pattern, a pose.
+// More style to choose from, too: louder colours, more hair, more hats. New options are appended to the old lists
+// so every saved look keeps meaning what it meant.
+LOOK.outfit.opts.push('Dress', 'Tracksuit top', 'Kimono jacket', 'Band tee', 'Sequin jacket', 'Cardigan', 'Hawaiian shirt', 'Puffer jacket', 'Trench coat', 'Overalls');
+LOOK.colour.opts.push('#E0457B', '#1FA3A0', '#E3A72F', '#B39DDB', '#F28C28', '#2EAD6B', '#2F5BD3', '#FF7F6B', '#151515', '#F2C6D6');
+LOOK.hair.opts.push('Ponytail', 'Top bun', 'Mohawk', 'Pixie', 'Braids', 'Mullet', 'Space buns', 'Slicked back');
+LOOK.hairColor.opts.push('#ECE4CF', '#B5562C', '#7FD1B9', '#7B4FC9', '#E85D9A');
+LOOK.head.opts.push('Flower crown', 'Bucket hat', 'Cowboy hat', 'Visor');
+const FIG_COLOURS = ['#2C4F7C', '#1E1E1E', '#C2A878', '#3B3B3B', '#7A2E2E', '#2E5A3A', '#E8E4DA', '#5B3A6E', '#E0457B', '#1FA3A0', '#E3A72F', '#B39DDB', '#F28C28', '#8C6A2E', '#2F5BD3', '#FF7F6B'];
+Object.assign(LOOK, {
+  pattern: { label: 'Pattern on top', opts: ['Plain', 'Stripes', 'Checks', 'Polka dots', 'Florals', 'Tie-dye', 'Leopard', 'Pinstripe', 'Camouflage', 'Stars'] },
+  bottoms: { label: 'Below the waist', opts: ['Jeans', 'Skinny jeans', 'Chinos', 'Shorts', 'Mini skirt', 'Long skirt', 'Suit trousers', 'Cargo trousers', 'Wide-leg trousers', 'Leggings'] },
+  bottomColour: { label: 'Bottoms colour', opts: FIG_COLOURS },
+  shoes: { label: 'Shoes', opts: ['Trainers', 'High-tops', 'Boots', 'Loafers', 'Heels', 'Sandals', 'Brogues', 'Platform boots', 'Cowboy boots', 'Fluffy slippers'] },
+  bag: { label: 'Carrying', opts: ['Nothing', 'Tote bag', 'Backpack', 'Camera bag', 'Messenger bag', 'Clutch', 'Guitar case', 'A script', 'Coffee', 'Film canister'] },
+  tattoo: { label: 'Tattoos', opts: ['None', 'Sleeve', 'Wrist', 'Hand', 'Ankle'] },
+  pose: { label: 'Pose', opts: ['Standing', 'Hand on hip', 'Waving', 'Arms crossed', 'Hands in pockets'] }
+});
+for (const k of ['pattern', 'bottoms', 'bottomColour', 'shoes', 'bag', 'tattoo', 'pose']) if (!LOOK_KEYS.includes(k)) LOOK_KEYS.push(k);
+// what everyone else wears below the waist, from a seed of their own (their face and top are untouched)
+function npcFigure(p, L) {
+  if (L.bottoms !== undefined) return L;
+  const r = hashRand(p.id * 13 + 5), pk = n => Math.floor(r() * n), F = p.g === 'F', y = p.born + 30;
+  return Object.assign(L, { pattern: r() < .7 ? 0 : 1 + pk(9), bottoms: F ? [0, 1, 2, 4, 5, 6, 8, 9][pk(8)] : [0, 1, 2, 3, 6, 7, 8][pk(7)], bottomColour: pk(FIG_COLOURS.length), shoes: y < 1960 ? [3, 6][pk(2)] : F ? [0, 1, 2, 3, 4, 5, 7][pk(7)] : [0, 1, 2, 3, 6, 8][pk(6)], bag: r() < .6 ? 0 : 1 + pk(9), tattoo: r() < .85 ? 0 : 1 + pk(4), pose: pk(5) });
+}
+// The body, drawn under the head. o: the portrait's list of SVG pieces; cx: the middle; skin and cloth colours.
+function figureBody(L, o, uid, cx, skin, cloth, pr) {
+  const b = L.build, top = L.outfit, bot = L.bottoms || 0, shoe = L.shoes || 0, pose = L.pose || 0, bag = L.bag || 0, tat = L.tattoo || 0;
+  const sw = [17, 18, 20, 22, 24, 26, 15, 16, 23, 20][b], ww = [12, 13, 15, 17, 19, 23, 12, 12, 17, 15][b], hp = [14, 15, 17, 19, 21, 25, 14, 14, 18, 22][b];
+  const sy = 87, wy = 132, hy = 146, legLen = [70, 72, 70, 70, 70, 70, 62, 80, 70, 68][b], fy = hy + legLen, lw = Math.max(5, hp / 2 - 1.5);
+  const bc = FIG_COLOURS[L.bottomColour || 0], dkc = mixHex(cloth, '#000', .28), dkb = mixHex(bc, '#000', .3), skinD = mixHex(skin, '#000', .15);
+  const lx = cx - hp / 2 - .5, rx = cx + hp / 2 + .5;
+  // backdrop shadow
+  o.push(`<ellipse cx="${cx}" cy="${fy + 7}" rx="${hp + 14}" ry="4" fill="#000" opacity=".16"/>`);
+  // a guitar case or backpack sits behind you
+  if (bag === 6) o.push(`<g transform="rotate(14 ${cx + 6} 120)"><path d="M${cx + 2} 70 Q${cx + 14} 66 ${cx + 16} 80 L${cx + 20} 150 Q${cx + 26} 172 ${cx + 10} 178 Q${cx - 6} 172 ${cx} 150 Z" fill="#2B2B2B"/><path d="M${cx + 8} 76 L${cx + 10} 170" stroke="#555" stroke-width="1"/></g>`);
+  if (bag === 2) o.push(`<rect x="${cx - sw + 2}" y="${sy + 2}" width="${(sw - 2) * 2}" height="40" rx="8" fill="${mixHex(bc, '#fff', .2)}"/>`);
+  // legs: skin first, then whatever covers them
+  for (const x of [lx, rx]) o.push(`<rect x="${x - lw}" y="${hy}" width="${lw * 2}" height="${legLen}" rx="${lw}" fill="${skin}"/>`);
+  const longLeg = [0, 1, 2, 6, 7, 8, 9].includes(bot) || top === 19;
+  const legC = top === 19 ? cloth : bc, legD = top === 19 ? dkc : dkb;
+  if (longLeg) {
+    const flare = bot === 8 && top !== 19 ? 5 : 0, slim = (bot === 1 || bot === 9) && top !== 19 ? -1.2 : 0;
+    for (const x of [lx, rx]) o.push(`<path d="M${x - lw - 1.5} ${hy - 2} L${x + lw + 1.5} ${hy - 2} L${x + lw + slim + flare} ${fy - 1} L${x - lw - slim - flare} ${fy - 1} Z" fill="${legC}" stroke="${legD}" stroke-width=".7"/><path d="M${x} ${hy + 6} L${x} ${fy - 3}" stroke="${legD}" stroke-width=".8" opacity=".6"/>`);
+    if (bot === 0 && top !== 19) for (const x of [lx, rx]) o.push(`<path d="M${x - lw + 1} ${hy + 2} L${x - lw + 1} ${fy - 3}" stroke="${mixHex(bc, '#fff', .45)}" stroke-width=".6" stroke-dasharray="1.5 1.5"/>`);
+    if (bot === 7) for (const x of [lx, rx]) o.push(`<rect x="${x - lw - 1}" y="${hy + 26}" width="${lw + 1}" height="10" rx="1.5" fill="${legD}"/>`);
+    if (bot === 6) for (const x of [lx, rx]) o.push(`<path d="M${x} ${hy + 4} L${x} ${fy - 2}" stroke="${mixHex(bc, '#fff', .3)}" stroke-width=".9"/>`);
+  } else if (bot === 3) for (const x of [lx, rx]) o.push(`<path d="M${x - lw - 1.5} ${hy - 2} L${x + lw + 1.5} ${hy - 2} L${x + lw + 2} ${hy + 22} L${x - lw - 2} ${hy + 22} Z" fill="${bc}"/>`);
+  o.push(`<rect x="${cx - hp - 1}" y="${hy - 8}" width="${hp * 2 + 2}" height="${longLeg || bot === 3 ? 12 : 8}" rx="3" fill="${longLeg ? legC : bot === 3 ? bc : skin}"/>`);
+  if (bot === 4 && top !== 10 && top !== 19) o.push(`<path d="M${cx - ww - 1} ${wy} L${cx + ww + 1} ${wy} L${cx + hp + 7} ${hy + 22} L${cx - hp - 7} ${hy + 22} Z" fill="${bc}"/>`);
+  if (bot === 5 && top !== 10 && top !== 19) o.push(`<path d="M${cx - ww - 1} ${wy} L${cx + ww + 1} ${wy} L${cx + hp + 13} ${fy - 9} Q${cx} ${fy - 4} ${cx - hp - 13} ${fy - 9} Z" fill="${bc}"/><path d="M${cx - 4} ${hy} L${cx - 7} ${fy - 9} M${cx + 5} ${hy} L${cx + 9} ${fy - 9}" stroke="${dkb}" stroke-width=".7" opacity=".5"/>`);
+  if (tat === 4) o.push(`<path d="M${lx - 2} ${fy - 10} l3 -3 l3 3 l-3 3 z" fill="#2B3A66" opacity=".7"/>`);
+  // shoes
+  const SH = [['#F4F2EE', cloth], ['#C8102E', '#F4F2EE'], ['#5A3A22', '#3B2516'], ['#3B2516', '#2A1A10'], ['#151515', '#8C2E2E'], ['#B98A55', skin], ['#7A4A28', '#4E2E18'], ['#151515', '#333'], ['#B98A55', '#8C5A2E'], ['#F2C6D6', '#FFFFFF']][shoe];
+  for (const [x, dir] of [[lx, -1], [rx, 1]]) {
+    const h = [5, 8, 12, 4, 5, 3, 4, 14, 13, 6][shoe];
+    if (h > 6) o.push(`<rect x="${x - lw - .5}" y="${fy - h}" width="${lw * 2 + 1}" height="${h}" fill="${SH[0]}"/>`);
+    o.push(`<path d="M${x - lw - 1 + (dir < 0 ? -4 : 0)} ${fy + 5} Q${x - lw - 1 + (dir < 0 ? -4 : 0)} ${fy - 3} ${x} ${fy - 3} Q${x + lw + 1 + (dir > 0 ? 4 : 0)} ${fy - 2} ${x + lw + 1 + (dir > 0 ? 4 : 0)} ${fy + 5} Z" fill="${SH[0]}"/><rect x="${x - lw - 1 + (dir < 0 ? -4 : 0)}" y="${fy + 3.5}" width="${lw * 2 + 6}" height="${shoe === 7 ? 4 : 2}" fill="${SH[1]}"/>`);
+    if (shoe === 4) o.push(`<rect x="${x + dir * (lw - 1) - 1}" y="${fy + 3}" width="2" height="5" fill="${SH[0]}"/>`);
+    if (shoe === 5) o.push(`<path d="M${x - lw} ${fy - 1} L${x + lw} ${fy + 2}" stroke="${SH[0]}" stroke-width="1.5"/>`);
+    if (shoe === 9) o.push(`<ellipse cx="${x}" cy="${fy + 1}" rx="${lw + 4}" ry="5" fill="#FFFFFF" opacity=".6"/>`);
+  }
+  // the top: a torso, longer for dresses and coats
+  const long = top === 10 ? hy + 40 : top === 18 ? hy + 34 : hy + 4, lowW = top === 10 ? hp + 12 : top === 18 ? hp + 7 : hp + 1;
+  const body = `M${cx - sw} ${sy + 3} Q${cx - sw - 1} ${sy - 3} ${cx - sw + 9} ${sy - 4} L${cx - 9} 84 Q${cx} 89 ${cx + 9} 84 L${cx + sw - 9} ${sy - 4} Q${cx + sw + 1} ${sy - 3} ${cx + sw} ${sy + 3} L${cx + ww + 1} ${wy} L${cx + lowW} ${long} L${cx - lowW} ${long} L${cx - ww - 1} ${wy} Z`;
+  const tc = top === 19 ? '#F4F2EE' : cloth;
+  o.push(`<path d="${body}" fill="${tc}" stroke="${mixHex(tc, '#000', .35)}" stroke-width=".9"/>`);
+  // pattern on top (Hawaiian shirts come patterned)
+  const pat = top === 16 && !L.pattern ? 4 : top === 2 && !L.pattern ? 2 : L.pattern || 0;
+  if (pat && top !== 19) { const pc = mixHex(cloth, pat === 6 ? '#3B2516' : '#FFFFFF', pat === 6 ? .6 : .55), P0 = {
+      1: `<rect width="8" height="3.5" fill="${pc}"/>`, 2: `<rect width="8" height="3" fill="${pc}" opacity=".7"/><rect width="3" height="8" fill="${pc}" opacity=".7"/>`, 3: `<circle cx="4" cy="4" r="1.6" fill="${pc}"/>`,
+      4: `<circle cx="4" cy="4" r="1.3" fill="#FFE27A"/><circle cx="2.3" cy="4" r="1.1" fill="${pc}"/><circle cx="5.7" cy="4" r="1.1" fill="${pc}"/><circle cx="4" cy="2.3" r="1.1" fill="${pc}"/><circle cx="4" cy="5.7" r="1.1" fill="${pc}"/>`,
+      5: `<circle cx="2" cy="2" r="3" fill="#E85D9A" opacity=".5"/><circle cx="6" cy="6" r="3" fill="#1FA3A0" opacity=".5"/><circle cx="6" cy="1" r="2" fill="#E3A72F" opacity=".5"/>`,
+      6: `<ellipse cx="3" cy="3" rx="1.6" ry="1.1" fill="none" stroke="${pc}" stroke-width=".9"/><ellipse cx="6.5" cy="6.5" rx="1.2" ry=".9" fill="${pc}"/>`, 7: `<rect width=".6" height="8" fill="${pc}"/>`,
+      8: `<circle cx="2" cy="3" r="2.4" fill="#4E5B3A" opacity=".6"/><circle cx="6.5" cy="6" r="2.2" fill="#2F3A24" opacity=".6"/><circle cx="6" cy="1.5" r="1.4" fill="#8C8A5A" opacity=".6"/>`,
+      9: `<path d="M4 1.5 l.7 1.6 l1.7 .1 l-1.3 1.1 l.4 1.7 l-1.5 -.9 l-1.5 .9 l.4 -1.7 l-1.3 -1.1 l1.7 -.1 z" fill="${pc}"/>` }[pat];
+    o.push(`<defs><pattern id="${uid}pt" width="8" height="8" patternUnits="userSpaceOnUse"${pat === 1 || pat === 7 ? ' patternTransform="rotate(90)"' : ''}>${P0}</pattern></defs><path d="${body}" fill="url(#${uid}pt)"/>`); }
+  // the garment's own details
+  if (top === 19) o.push(`<path d="M${cx - ww} 104 L${cx + ww} 104 L${cx + ww + 1} ${wy} L${cx + hp + 1} ${hy + 4} L${cx - hp - 1} ${hy + 4} L${cx - ww - 1} ${wy} Z" fill="${cloth}"/><path d="M${cx - ww + 2} 104 L${cx - sw + 6} ${sy - 3} M${cx + ww - 2} 104 L${cx + sw - 6} ${sy - 3}" stroke="${cloth}" stroke-width="3"/><circle cx="${cx - ww + 3}" cy="106" r="1.3" fill="#E3C27A"/><circle cx="${cx + ww - 3}" cy="106" r="1.3" fill="#E3C27A"/><rect x="${cx - 5}" y="112" width="10" height="8" rx="1" fill="${dkc}"/>`);
+  if (top === 13) o.push(`<path d="M${cx + 1} 98 L${cx - 5} 112 L${cx} 112 L${cx - 3} 124 L${cx + 6} 106 L${cx + 1} 106 L${cx + 4} 98 Z" fill="#FFE27A"/><circle cx="${cx}" cy="111" r="11" fill="none" stroke="#FFFFFF" stroke-width="1" opacity=".6"/>`);
+  if (top === 14) o.push(Array.from({ length: 26 }, (_, i) => `<circle cx="${cx - sw + 4 + pr() * (sw * 2 - 8)}" cy="${sy + 2 + pr() * (hy - sy - 2)}" r="${.6 + pr() * .8}" fill="#FFFFFF" opacity="${.4 + pr() * .5}"/>`).join(''));
+  if (top === 15 || top === 12) o.push(`<path d="M${cx - 7} 86 L${cx - 4} ${hy + 3} L${cx + 4} ${hy + 3} L${cx + 7} 86 Z" fill="${top === 12 ? '#151515' : '#F4F2EE'}"/>${top === 15 ? [96, 108, 120, 132].map(y => `<circle cx="${cx - 6}" cy="${y}" r="1" fill="${dkc}"/>`).join('') : `<path d="M${cx - sw} ${sy + 3} L${cx - sw - 6} 124 L${cx - sw + 4} 124 Z M${cx + sw} ${sy + 3} L${cx + sw + 6} 124 L${cx + sw - 4} 124 Z" fill="${cloth}"/>`}`);
+  if (top === 17) o.push([98, 108, 118, 128, 138].map(y => `<path d="M${cx - sw + 1} ${y} Q${cx} ${y + 2} ${cx + sw - 1} ${y}" stroke="${dkc}" stroke-width="1" fill="none"/>`).join(''));
+  if (top === 18) o.push(`<rect x="${cx - ww - 2}" y="${wy - 2}" width="${ww * 2 + 4}" height="4" fill="${dkc}"/><rect x="${cx - 3}" y="${wy - 2.5}" width="6" height="5" fill="none" stroke="#C9A646" stroke-width="1"/><path d="M${cx} 88 L${cx} ${long}" stroke="${dkc}" stroke-width=".8"/>`);
+  if (top === 4) o.push(`<path d="M${cx + 2} 90 L${cx + 1} ${hy}" stroke="#C0C0C0" stroke-width="1"/>`);
+  if (top === 3) o.push(`<path d="M${cx - sw + 4} 104 Q${cx - 6} 106 ${cx - 2} 104 M${cx + 2} 104 Q${cx + 6} 106 ${cx + sw - 4} 104" stroke="${mixHex(cloth, '#fff', .35)}" stroke-width=".8" fill="none"/>`);
+  if (top === 10) o.push(`<rect x="${cx - ww - 1}" y="${wy - 2}" width="${ww * 2 + 2}" height="3" fill="${dkc}"/>`);
+  // arms: sleeves in the top's colour, short sleeves showing skin
+  const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : top === 11 ? cloth : cloth, aw = [5, 5.5, 6, 6.5, 7, 7.5, 4.8, 5, 7.5, 6.3][b], wide = top === 12 ? 4 : top === 17 ? 2 : 0;
+  const arm = (pts, side) => {
+    const [s, e, h] = pts, path = `M${s[0]} ${s[1]} Q${e[0]} ${e[1]} ${h[0]} ${h[1]}`;
+    o.push(`<path d="${path}" stroke="${mixHex(short ? skin : sleeve, '#000', .35)}" stroke-width="${aw * 2 + 1.6}" stroke-linecap="round" fill="none"/><path d="${path}" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/>`);
+    if (short) o.push(`<path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${mixHex(sleeve, '#000', .35)}" stroke-width="${aw * 2 + 2.6}" stroke-linecap="round"/><path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${sleeve}" stroke-width="${aw * 2 + 1}" stroke-linecap="round"/>`);
+    else if (wide) o.push(`<path d="M${(s[0] + e[0]) / 2} ${(s[1] + e[1]) / 2} Q${e[0]} ${e[1]} ${h[0] + (side < 0 ? -1 : 1) * 1} ${h[1] - 6}" stroke="${sleeve}" stroke-width="${aw * 2 + wide * 2}" stroke-linecap="round" fill="none"/>`);
+    if (top === 11) o.push(`<path d="${path}" stroke="#FFFFFF" stroke-width="1.2" fill="none" transform="translate(${side * (aw - 1.5)} 0)"/>`);
+    o.push(`<circle cx="${h[0]}" cy="${h[1] + 2}" r="${aw * .82}" fill="${skin}"/>`);
+    if (tat === 1 && side < 0 && short) o.push(`<path d="M${e[0] - 2} ${e[1] + 4} q3 4 0 8 q-3 4 0 8" stroke="#2B3A66" stroke-width="1.6" fill="none" opacity=".75"/>`);
+    if (tat === 2 && side < 0) o.push(`<circle cx="${h[0]}" cy="${h[1] - 4}" r="1.3" fill="#2B3A66" opacity=".75"/>`);
+    if (tat === 3 && side > 0) o.push(`<path d="M${h[0] - 1.5} ${h[1] + 1} l3 0 l-1.5 2.5 z" fill="#2B3A66" opacity=".8"/>`);
+    if (L.wrist && side < 0) { const band = ['', '#3B3226', '#C9A646', '#8C6A2E', '#1E1E1E'][L.wrist]; o.push(`<rect x="${h[0] - aw}" y="${h[1] - 4}" width="${aw * 2}" height="${L.wrist === 2 ? 2 : 3}" fill="${band}"/>${L.wrist !== 2 ? `<rect x="${h[0] - 2.2}" y="${h[1] - 5}" width="4.4" height="4.4" rx="${L.wrist === 4 ? 1 : 2.2}" fill="${L.wrist === 4 ? '#2C4F7C' : '#F3EFF8'}" stroke="${band}" stroke-width=".8"/>` : ''}`); }
+  };
+  const lS = [cx - sw + 3, sy + 3], rS = [cx + sw - 3, sy + 3];
+  const down = side => [side < 0 ? lS : rS, [cx + side * (sw + 4), 118], [cx + side * (sw + 4), 146]];
+  if (pose === 3) {   // arms crossed
+    o.push(`<path d="M${cx - sw + 2} 112 Q${cx} 106 ${cx + sw - 2} 116" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${cx + sw - 2} 110 Q${cx} 116 ${cx - sw + 2} 120" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${lS[0]} ${lS[1]} L${cx - sw + 1} 112 M${rS[0]} ${rS[1]} L${cx + sw - 1} 110" stroke="${sleeve}" stroke-width="${aw * 2}" stroke-linecap="round"/><circle cx="${cx + sw - 1}" cy="116" r="${aw * .8}" fill="${skin}"/><circle cx="${cx - sw + 1}" cy="120" r="${aw * .8}" fill="${skin}"/>`);
+  } else {
+    arm(pose === 4 ? [lS, [cx - sw - 3, 118], [cx - hp + 3, 138]] : down(-1), -1);
+    arm(pose === 1 ? [rS, [cx + sw + 12, 116], [cx + ww + 3, 132]] : pose === 2 ? [rS, [cx + sw + 12, 72], [cx + sw + 6, 50]] : pose === 4 ? [rS, [cx + sw + 3, 118], [cx + hp - 3, 138]] : down(1), 1);
+  }
+  // what you're carrying, in front
+  const hx = cx + sw + 4, hyy = 148;
+  if (bag === 1 && pose !== 3) o.push(`<path d="M${hx - 3} ${hyy} L${hx - 7} ${hyy + 6} L${hx + 9} ${hyy + 6} L${hx + 5} ${hyy}" stroke="#C9B48A" stroke-width="1.4" fill="none"/><rect x="${hx - 8}" y="${hyy + 6}" width="18" height="18" rx="1.5" fill="#E9DCC0"/><text x="${hx + 1}" y="${hyy + 17}" font-size="4" text-anchor="middle" fill="#7A2E2E" font-family="sans-serif" font-weight="700">FILM</text>`);
+  if (bag === 2) o.push(`<path d="M${cx - sw + 6} ${sy - 2} L${cx - sw + 7} ${wy}" stroke="${dkb}" stroke-width="2.4"/><path d="M${cx + sw - 6} ${sy - 2} L${cx + sw - 7} ${wy}" stroke="${dkb}" stroke-width="2.4"/>`);
+  if (bag === 3 || bag === 4) o.push(`<path d="M${cx - sw + 4} ${sy - 2} L${cx + hp + 4} ${hy - 4}" stroke="${bag === 3 ? '#1E1E1E' : '#6B4E3A'}" stroke-width="2.4"/><rect x="${cx + hp - 4}" y="${hy - 8}" width="${bag === 3 ? 16 : 20}" height="${bag === 3 ? 12 : 14}" rx="2" fill="${bag === 3 ? '#2B2B2B' : '#8A6A4A'}"/>${bag === 3 ? `<circle cx="${cx + hp + 4}" cy="${hy - 2}" r="3" fill="#555"/>` : `<rect x="${cx + hp - 4}" y="${hy - 8}" width="20" height="5" fill="#6B4E3A"/>`}`);
+  if (bag === 5 && pose !== 3) o.push(`<rect x="${hx - 6}" y="${hyy}" width="13" height="7" rx="1.5" fill="#C9A646"/><rect x="${hx - 6}" y="${hyy}" width="13" height="2.5" fill="#A68631"/>`);
+  if (bag === 7) o.push(`<g transform="rotate(-8 ${cx - sw} 118)"><rect x="${cx - sw - 8}" y="110" width="13" height="17" fill="#FFFFFF" stroke="#BBB" stroke-width=".6"/><path d="M${cx - sw - 6} 114 h9 M${cx - sw - 6} 117 h7 M${cx - sw - 6} 120 h9" stroke="#999" stroke-width=".5"/></g>`);
+  if (bag === 8 && pose !== 3) o.push(`<rect x="${hx - 3.5}" y="${hyy - 4}" width="7" height="10" rx="1" fill="#F4F2EE"/><rect x="${hx - 3.5}" y="${hyy - 1}" width="7" height="3" fill="#8A5A37"/><rect x="${hx - 4}" y="${hyy - 6}" width="8" height="2.5" rx="1" fill="#2B2B2B"/>`);
+  if (bag === 9 && pose !== 3) o.push(`<circle cx="${hx + 1}" cy="${hyy + 6}" r="7" fill="#B9B5AE" stroke="#8A8680" stroke-width="1"/><circle cx="${hx + 1}" cy="${hyy + 6}" r="2" fill="#8A8680"/>`);
+}
+// head-to-toe, for the places with room
+function figureOf(p, h) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, h, false, true); }
+// </figure>
+// <chatter>
+// ---------------- Chatter: what people text and email about when nothing's on fire ----------------
+// Friends text about their shoots, your news, the season, the city, the film they watched last night, the person
+// they saw at the supermarket. The inbox fills with the rest of a life: the union, your cinema, your old school, a
+// journalist, your family. Everything is filled from the world as it is that week, so it reads like it's about
+// your life and not anyone's. Choices come from hashes of the week and the person, never the game's dice.
+
+// ---- texts ----
+const CHAT = {
+  shoot: ['day {n} on {film}. we\'re behind, it\'s raining, and the catering is incredible', 'we got the big scene on {film} in one take today and the crew applauded. it\'s been that kind of week', 'first week on {film} done. I have slept eleven hours total', '{film} update: the lead has adopted a pigeon. it has a chair now', 'night shoots on {film} all week. I have forgotten what the sun is for', 'the director of {film} just said "one more" for the ninth time. send help', 'we\'re shooting {film} in a real hospital and I keep apologising to patients'],
+  news: ['just saw the news about {mile}!! are you kidding?? proud of you', 'saw it in the trades: {mile}. look at you', 'ok so {mile}?? when were you going to tell me', 'my mum read about {mile}. she\'s telling her whole book club', 'congratulations on {mile}! drinks are on you, obviously'],
+  m0: ['new year resolution: finish the script. it\'s the 4th. I have not opened the script', 'january in {city}: everyone\'s broke and pretending to be on a cleanse', 'happy new year! this is the one. I can feel it. I say that every year'],
+  m1: ['awards season is my sport. who wins best film, go', 'I\'ve watched every nominee this year. I need a hobby that isn\'t films', 'my predictions for the big night are locked. loser buys dinner'],
+  m2: ['spring in {city} and suddenly everyone is shooting outdoors', 'blossom everywhere. I\'ve taken forty photos of one tree', 'it\'s finally light after 6pm. I feel like a new person'],
+  m5: ['too hot to think. come to the beach', 'every set in {city} is a sauna this week', 'summer blockbuster season: I\'m going to see everything with an explosion in the trailer'],
+  m9: ['horror season! movie night at mine, bring something terrifying', 'I carved a pumpkin to look like a clapperboard. nobody understands it', 'watched three horror films alone last night. sleeping with the light on, no regrets'],
+  m11: ['office party season. which ones are you going to', 'it\'s snowing in my heart and also on my car', 'what are you doing for the holidays? if the answer is "sleeping" I respect it'],
+  city: ['found a tiny bar near {place} that only plays film scores', 'they\'re filming something on {place} and have blocked my entire street', 'the best coffee in {city} is at the laundrette near {place}. trust me', 'went for a walk round {place} and ended up as an extra in someone\'s music video', 'a man near {place} was walking a cat on a lead. the cat was in charge', 'there\'s a new noodle place by {place}. we\'re going. that\'s not a question'],
+  film: ['have you seen {title}? watch it tonight and call me', 'rewatched {title}. it holds up. the ending!!', 'unpopular opinion: {title} is better than its reputation', 'just found out {title} was shot in nineteen days. how', 'can\'t stop thinking about the last shot of {title}', 'is {title} a comfort film or a cry film? asking for me'],
+  gossip: ['{other} just booked something huge. don\'t tell anyone I told you', 'saw {other} at the supermarket in sunglasses. indoors. at night', 'is it me or is {other} everywhere this month', '{other} sent a 2,000-word email about a fire exit. I have so many questions', 'heard {other} has a new project. heard it\'s "a lot"'],
+  life: ['bad day. tell me something good', 'I adopted a plant. it already looks disappointed in me', 'my landlord wants to "have a chat". pray for me', 'learning to cook. the smoke alarm is learning too', 'my mum asked when I\'m getting a real job. again', 'ran 5k this morning. telling everyone', 'can\'t sleep. thinking about that scene in {title}', 'I\'ve started journaling. day one: "I don\'t know what to write"', 'bought a fancy coffee machine. I am now a coffee person. it\'s my whole personality', 'my neighbour is learning the trumpet. it\'s going about as well as you\'d think'],
+  biz: ['they want a "gritty reboot" of a cereal advert. I wish I was joking', 'an agent called me "kiddo" today. I am 34', 'a producer said "let\'s circle back" and then left the building', 'if one more person says "content" I\'m moving to a farm', 'got notes on my script that just said "more"', 'a casting call asked for "someone who looks like they\'ve seen things but is fun at parties"', 'the trades say the industry is "in transition". it has been in transition my whole life'],
+  plan: ['brunch sunday? I\'ll book somewhere with good eggs', 'film club this month: you pick', 'double bill at the rep cinema on friday. you, me, terrible popcorn?', 'we should do a pub quiz. I need someone who knows cinematographers', 'let\'s go to a matinee like retired people. midweek, empty cinema, perfect'],
+  memory: ['remember the party where we met? I still think about that dip', 'found a photo of us near {place} from ages ago. we look so young', 'I just walked past the place where we had that terrible coffee. good times', 'do you remember our first job? I still have the lanyard']
+};
+function chatSeed(id) { return hashRand(S.week * 977 + id * 131 + ((S.me && S.me.phoneN) || 0) * 7); }
+function chatterText(id) {
+  const M = S.me, q = P(id), r = chatSeed(id), pk = L => L[Math.floor(r() * L.length)];
+  const f = typeof theirActive === 'function' ? theirActive(id) : null, mon = dateOf(S.week).getUTCMonth();
+  const mile = (M.milestones || []).filter(m => S.week - m.w <= 3 && ['credit', 'prize', 'film', 'level', 'work'].includes(m.kind)).pop();
+  const others = Object.keys(M.known).map(Number).filter(x => x !== id && P(x) && !P(x).dead);
+  const films = S.films.filter(g => g.rel !== null && g.rel > S.week - 52 * 8 && (g.reviews || 0) >= 60);
+  const H = HUBS[M.hub] || {}, place = (H.places || ['the high street'])[Math.floor(r() * (H.places || [1]).length)];
+  const cats = ['city', 'film', 'life', 'biz', 'plan', 'memory', 'life', 'film'];
+  if (f) cats.push('shoot', 'shoot', 'shoot');
+  if (mile) cats.push('news', 'news', 'news', 'news');
+  if (others.length) cats.push('gossip', 'gossip');
+  if (CHAT['m' + mon]) cats.push('m' + mon, 'm' + mon);
+  const cat = pk(cats), title = films.length ? films[Math.floor(r() * films.length)].title : 'that film';
+  const day = f ? Math.max(1, Math.round((S.week - (f.stageStartW || f.stageEnd - 6 || S.week)) * 5 + r() * 4)) : 3;
+  return pk(CHAT[cat]).replace('{film}', f ? f.title : 'this shoot').replace('{n}', String(clamp(day, 2, 60))).replace('{mile}', mile ? (/: (.+)$/.test(mile.t) ? mile.t.match(/: (.+)$/)[1] : 'your news') : 'your news')
+    .replace(/\{city\}/g, hubName(M.hub)).replace(/\{place\}/g, String(place).replace(/^the /i, 'the ')).replace(/\{title\}/g, title).replace('{other}', others.length ? P(others[Math.floor(r() * others.length)]).name.split(' ')[0] : 'someone');
+}
+
+// ---- email: the rest of a life ----
+const LIFE_MAIL = [
+  ['news', 'Your union', 'Union news', 'Day rates go up {pct}% from January. A reminder that turnaround is ten hours, not "ten-ish". The annual meeting has free sandwiches and an argument about parking.'],
+  ['news', 'The {city} Repertory Cinema', 'This month at the Rep', 'This month: a season of {genre} films, a silent classic with live piano, and a midnight screening of {title} that will sell out in an hour. Members get in free on Tuesdays.'],
+  ['news', 'Alumni office', 'Alumni news', 'Your class is having a reunion. Three of your classmates have films out this year, one has a podcast, and one has opened a bakery that is, apparently, excellent.'],
+  ['news', 'Film Society', 'Screening list', 'Coming up: {title}, a documentary about projectionists, and a quiz night where the prize is a 1970s light meter.'],
+  ['news', 'Festival office', 'Submissions are open', 'Submissions for this year\'s {fest} are open. Early-bird fee until the end of the month. Please, for the love of everything, check your subtitles.'],
+  ['news', 'Rental house', 'Spring sale', 'We\'re clearing out last year\'s kit: lenses, lights, a dolly with personality. Industry discount for anyone with a crew card.'],
+  ['news', 'Your streaming service', 'Because you watched {title}', 'We think you\'ll like: eleven films with "{word}" in the title and a documentary about competitive gardening.'],
+  ['news', 'The Daily Slate', 'Ten films to see this month', 'Our critics pick ten, starting with {title}. Number seven will divide the room. Number three will make you call your mother.'],
+  ['inbox', 'A journalist, {paper}', 'A quick quote?', 'Hi {me}, I\'m writing a piece about working in {city} right now and a colleague said you\'d be honest. Ten minutes on the phone, whenever suits?'],
+  ['inbox', 'A film student', 'Advice for a first-year?', 'Hi {me}, sorry to email out of the blue. I\'m in my first year and I love your work. If you could tell your younger self one thing, what would it be? I\'ll understand if you\'re too busy.'],
+  ['inbox', 'Home', 'Call your mother', 'She says you haven\'t called in a fortnight and she saw a programme about how dangerous {city} is. Also the dog misses you. Love, everyone.'],
+  ['inbox', 'Your old teacher', 'I saw your name', 'I saw your name in a newspaper and told my whole class I taught you. They were not as impressed as I was. I hope you\'re well, and eating properly.'],
+  ['inbox', 'Your landlord', 'Boiler service, Thursday', 'An engineer will be round on Thursday between 8am and 6pm to look at the boiler. Please make sure there is access. Please also stop leaving film reels in the hallway.'],
+  ['inbox', 'The dental practice', 'Appointment reminder', 'This is a reminder that you are overdue a check-up. We know you\'re busy. Teeth don\'t care.'],
+  ['inbox', 'Your bank', 'A new card is on its way', 'Your new card will arrive within five working days. Your old card will keep working until it doesn\'t.'],
+  ['inbox', 'A neighbour', 'Your parcel', 'Hi, I\'ve got a parcel for you. It\'s heavy and it clanks. I\'m in most evenings. No rush, but it\'s in my hallway and the cat has opinions about it.'],
+  ['inbox', 'A podcast producer', 'Would you come on the show?', 'Hi {me}, we do a show about how films actually get made, and we\'d love an hour with you. Remote is fine. The host asks good questions and laughs too loudly.'],
+  ['inbox', 'Your old flatmate', 'Guess who', 'Remember me? I\'m back in {city} for a week and I still owe you for that pizza. Coffee? I\'ll bring the money and an apology.'],
+  ['inbox', 'Museum of the Moving Image', 'Would you donate something?', 'We\'re building a collection about working film crews and wondered if you had a call sheet, a lanyard or a story we could keep.'],
+  ['inbox', 'A screenwriting group', 'You\'re invited', 'We meet every other Wednesday in the back room of a pub near {place}. Ten pages each, honest notes, no egos. Well, small egos.'],
+  ['news', 'The {city} film commission', 'New incentives', 'The city has announced new incentives for productions shooting locally. Expect more crews, more blocked streets and more jobs.'],
+  ['news', 'Weekend weather', 'Sunshine this weekend', 'Bright and warm in {city} all weekend. Perfect for exterior shoots, picnics and pretending you\'re not checking your email.'],
+  ['news', 'Box office report', 'The weekend\'s numbers', '{title} led the weekend. Two newcomers opened soft, a horror film doubled its budget, and somebody\'s passion project quietly found its audience.'],
+  ['inbox', 'Your gym', 'We miss you', 'It\'s been a while! Your membership is still active, which is to say we\'re still taking your money. Come back. The rowing machine misses you.'],
+  ['inbox', 'Charity screening committee', 'Volunteers needed', 'We need volunteers for a charity screening next month: ushering, raffle, holding a bucket and smiling. All proceeds go to the children\'s hospital.']
+];
+const PAPERS_CH = ['The Daily Slate', 'Screen Weekly', 'The Hollywood Ledger', 'The Evening Courier', 'Reel World'];
+function chatterMailWeek(r) {
+  const M = S.me; if (!M || r() > .45) return;
+  const T = LIFE_MAIL[Math.floor(r() * LIFE_MAIL.length)], films = S.films.filter(g => g.rel !== null && g.rel > S.week - 52 * 6 && (g.reviews || 0) >= 55);
+  const H = HUBS[M.hub] || {}, place = (H.places || ['the high street'])[Math.floor(r() * (H.places || [1]).length)], fest = typeof FESTIVALS !== 'undefined' && FESTIVALS.length ? FESTIVALS[Math.floor(r() * FESTIVALS.length)].name : 'the festival';
+  const fill = s => s.replace(/\{me\}/g, ME().name.split(' ')[0]).replace(/\{city\}/g, hubName(M.hub)).replace(/\{place\}/g, place).replace(/\{title\}/g, films.length ? films[Math.floor(r() * films.length)].title : 'the big film').replace('{genre}', String(['noir', 'musical', 'western', 'horror', 'science-fiction'][Math.floor(r() * 5)])).replace('{pct}', String(2 + Math.floor(r() * 4))).replace('{fest}', fest).replace('{paper}', PAPERS_CH[Math.floor(r() * PAPERS_CH.length)]).replace('{word}', String(TW.noun[Math.floor(r() * TW.noun.length)]));
+  mail(T[0], fill(T[1]), fill(T[2]), fill(T[3]));
+}
+// </chatter>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -28350,7 +28689,7 @@ function viewPerson(id) {
   const current = S.active.map(i => S.films[i]).filter(f => keyIds(f).includes(p.id));
   const roleIn = f => f.xc && f.xc[p.id] ? f.xc[p.id] : (f.dir === p.id || (f.codir || []).includes(p.id)) ? (f.wri.includes(p.id) ? 'Writer-director' : 'Director') : f.cast.includes(p.id) ? ['Lead', 'Co-lead', 'Supporting'][f.cast.indexOf(p.id)] : f.wri.includes(p.id) ? 'Writer' : f.dp === p.id ? 'Cinematography' : f.ed === p.id ? 'Editor' : f.prod === p.id ? 'Producer' : crewRole(f, p.id);
   const repRow = (l, v, cls) => `<div class="rep"><span>${l}</span>${bar(v, 100, cls)}<b>${Math.round(v)}</b></div>`;
-  return `<div class="head detail partyhead"><div class="pf">${portraitOf(p, 112)}</div><div><p class="eyebrow">${!p.player && typeof currentPost === 'function' && currentPost(p) ? esc(currentPost(p)) + ' · ' : ''}${p.player ? ROLE_LABEL[p.role] : esc(p.occ || occupationOf(p))}${!p.player && !p.occ && occupationOf(p) !== ROLE_LABEL[p.role] ? ' · ' + ROLE_LABEL[p.role] : ''} · ${esc(hubName(p.hub))}</p><h2>${esc(p.name)}</h2>
+  return `<div class="head detail partyhead"><div class="pf">${typeof figureOf === 'function' ? figureOf(p, 230) : portraitOf(p, 112)}</div><div><p class="eyebrow">${!p.player && typeof currentPost === 'function' && currentPost(p) ? esc(currentPost(p)) + ' · ' : ''}${p.player ? ROLE_LABEL[p.role] : esc(p.occ || occupationOf(p))}${!p.player && !p.occ && occupationOf(p) !== ROLE_LABEL[p.role] ? ' · ' + ROLE_LABEL[p.role] : ''} · ${esc(hubName(p.hub))}</p><h2>${esc(p.name)}</h2>
   <p class="lede">${p.player ? '<b>This is you.</b> ' : ''}${pron(p)[0]} ${pron(p)[1]} ${ageOf(p)}${p.dead ? ' (died)' : ''}, born ${p.born}. ${p.credits.length} credit${p.credits.length === 1 ? '' : 's'}${p.debut !== null && p.credits.length ? `, debut in ${yearOf(S.films[p.credits[0]].rel)}` : ''}. Status: ${esc(personStatus(p))}.</p>
   <div class="traits">${p.traits.map(t => `<span class="chip trait" title="${esc(TRAITS[t].d)}">${esc(t)}</span>`).join('')}${S.me && S.me.known[p.id] && typeof temperOf === 'function' ? ` <span class="chip" title="How they handle being crossed">${esc(TEMPER[temperOf(p)].label)}</span>` : ''}</div>
   ${p.player && S.me ? `<p class="muted">${esc(ORIGIN.edu[S.me.edu].label)}. Loves ${S.me.love.map(g => g.toLowerCase()).join(', ') || 'everything'}${S.me.hate.length ? '; can\u2019t stand ' + S.me.hate.map(g => g.toLowerCase()).join(' or ') : ''}.${S.me.favs.length ? ' Favourite films: ' + S.me.favs.map(f => esc(S.cat.allFilms[f].t)).join(', ') + '.' : ''}</p>` : ''}</div></div>
@@ -28533,7 +28872,7 @@ function viewCreator() {
   return buildBanner() + `<div class="head"><p class="eyebrow">Your career</p><h2>Who are you?</h2><p class="lede">You arrive on the last night of ${S.startYear - 1}, at a New Year's Eve party full of people who already work in film. Every choice here changes something: what you can do, who you know, what you owe. No build is best.</p><p class="lede">After that the world is yours. Thousands of people are already making films around you; you can chase a credit, a cult hit, an award, a fortune or a circle of collaborators you'd walk through fire for. Green marks show what helps a roll, red what hurts it.</p></div>
   <div class="ccrand"><button class="btn-s" data-randcc="basics">Randomise the basics</button> <button class="btn-s" data-randcc="all">Randomise everything</button> <span class="muted">Then tweak anything, or just go to the party.</span></div>
   <section class="panel cc"><h3>The basics</h3>
-   <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 150)}</div><div>
+   <div class="ccface"><div class="pf">${portraitSVG(c.look, c.age, 300, false, true)}</div><div>
    <div class="ccrow"><label>Name <input id="cc-name" type="text" maxlength="40" value="${esc(c.name)}"></label><button class="linkish" data-cc="rename">Suggest another</button></div>
    <div class="ccrow"><label>Pronouns <select id="cc-g">${[['X', 'they/them'], ['F', 'she/her'], ['M', 'he/him']].map(([v, t]) => `<option value="${v}"${c.g === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
    <label>Age <input id="cc-age" type="number" min="18" max="45" value="${c.age}"></label>
@@ -28869,6 +29208,7 @@ function homePanel() {
   const M = S.me, H = M.home, lay = homeLayout(), spots = HOME_SPOTS[M.life] || [];
   const spotName = { wallL: 'Left wall', wallL2: 'Left wall, by the door', wallR: 'Right wall', floorL: 'Left corner', floorC: 'By the window', floorR: 'Right corner', corner: 'Back corner', sill: 'Windowsill', wallC: 'Over the window', wallM: 'Middle wall', nook: 'The reading nook', sill2: 'Second sill', floorX: 'Middle of the room' };
   return `<section class="panel"><h3>Your place</h3>
+   ${typeof roomStyleHTML === 'function' ? roomStyleHTML() : ''}
    <p class="muted">${M.life === 'couch' ? 'You\'re on a friend\'s couch: there\'s a windowsill and that\'s it. Anything bigger waits in a box until you have a room of your own.' : `${esc(ORIGIN.life[M.life].label)}: ${(HOME_SPOTS[M.life] || []).length} spots for things.`} Things only help once they're in the room.</p>
    ${H.items.length ? `<h4>Arrange</h4><div class="arr">${H.items.map(id => { const F = FURNITURE[id], ok = spots.filter(s => fits(F.kind, s.kind));
      return `<label>${esc(F.name)} <select data-place="${id}"><option value="">${lay[id] ? 'Wherever there\'s room' : 'In a box (no room)'}</option>${ok.map(s => `<option value="${s.id}"${H.layout[id] === s.id ? ' selected' : ''}>${esc(spotName[s.id] || s.id)}</option>`).join('')}</select></label>`; }).join('')}</div>
@@ -29085,13 +29425,14 @@ function careerClick(t) {
   if (t.dataset.courses !== undefined) { UI.courses = !!t.dataset.courses; render(true); return true; }
   if (t.dataset.jobinfo !== undefined) { UI.jobinfo = t.dataset.jobinfo || null; render(true); return true; }
   if (t.dataset.abandon) { if (!UI.abandon) { UI.abandon = true; render(true); return true; } UI.abandon = false; clearSave(); build(S.startYear, S.seed, S.depth); return true; }
+  if (t.dataset.rstyle) { const [k, v] = t.dataset.rstyle.split(':'); doAct({ t: 'roomstyle', k, v: +v }); render(true); return true; }
   if (t.dataset.retire !== undefined) { if (t.dataset.retire === '2') { UI.retireAsk = false; doAct({ t: 'retire' }); } else UI.retireAsk = t.dataset.retire === '1'; render(true); return true; }
   if (t.dataset.nextgen) { doAct({ t: 'nextgen' }); UI.dtab = 'today'; UI.tab = 'you'; UI.stack = []; render(); return true; }
   if (t.dataset.startover) { clearSave(); build(S.startYear, S.seed, S.depth); return true; }
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

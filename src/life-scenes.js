@@ -224,7 +224,7 @@ function lifeScene(pool) {
   const s = ppick(L), known = Object.keys(M.known).map(Number).filter(id => !P(id).dead);
   const ctx = { head: null, film: null, mates: [], contact: known.length ? ppick(known) : null, star: null };
   if (/\{contact\}/.test(s.text) && ctx.contact === null) return;
-  const text = fillScene(s.text, ctx).replace('{fieldword}', ppick(['casting', 'post-production', 'a studio\'s development office', 'an agency', 'documentaries']));
+  const text = fillScene(s.text.replace('{fieldword}', ppick(['casting', 'post-production', 'a studio\'s development office', 'an agency', 'documentaries'])), ctx);
   inbox('scene', s.title, text, { scene: s.id, ctx, choices: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });
 }
 // A working day: a decent chance of a scene from your job's family, or from the shared life of a shoot.
@@ -256,7 +256,7 @@ function holdInterview(post) {
   const M = S.me, t = tmplOf(post), target = clamp(hireOdds(post) / shortlistOdds(post), .1, .95);
   const sub = t.subs[0], dc = st => { const m = checkMods(st).mod; return clamp(Math.round(20 - 20 * target + m), 4, 19); };
   const f = post.film !== null ? S.films[post.film] : null;
-  const who = post.head !== null ? P(post.head).name : 'the hiring manager';
+  const who = post.head !== null ? P(post.head).name : 'The hiring manager';
   inbox('interview', `Interview: ${post.t}`, `${who} sees you about ${post.t.toLowerCase()}${f ? ' on ' + f.title : ''}. Twenty minutes, a cold coffee and a long list of other candidates. How do you play it?`, { post, choices: [
     { k: 'craft', label: `Talk about the work: ${statLabel(sub).toLowerCase()}`, check: [sub, dc(sub)] },
     { k: 'charm', label: 'Charm them', check: ['cha', dc('cha')] },

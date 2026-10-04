@@ -107,7 +107,7 @@ function awardsWeek() {
     inbox('invite', `The ${mk}`, `${why} The ceremony is ${slotLabel(slot)}. Black tie, a long night, and the whole business in one room.`, { person: host !== undefined && host !== null ? host : noms[0].prod, ev: 'awards', slot, what: `the ${mk} Film Awards`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Watch it at home' }] });
   } else {
     const best = wins.find(a => /Best Film/.test(a.name));
-    inbox('note', `The ${mk}`, `You watch on television with a takeaway.${best ? ` ${S.films[best.film].title} wins Best Film.` : ''} One day, you tell yourself.`);
+    inbox('note', `The ${mk}`, `You watch on television with a takeaway.${best ? ` The Best Film prize goes to ${S.films[best.film].title}.` : ''} One day, you tell yourself.`);
   }
 }
 function awardsNight(x, L) {

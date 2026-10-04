@@ -130,6 +130,20 @@ const INVITES = [
   { k: 'festival', t: 'a festival premiere', never: 1, senior: 1, meet: 3, tie: 4, stand: .8, cost: 200, e: 6 },
   { k: 'awards', t: 'the awards', never: 1, senior: 1, meet: 2, tie: 4, stand: .6, cost: 120, stress: -2 }
 ];
+// How people actually invite you: in their own words, with the day in the sentence.
+const INVITE_TXT = {
+  birthday: ['it\'s my birthday drinks {when}. you coming?', 'birthday drinks {when}! please come, I need at least one person who isn\'t my cousin', 'I\'m turning another year older {when}. drinks. you in?'],
+  dinner: ['I\'m doing a dinner party at mine {when}. you in?', 'come for dinner at mine {when}? I\'m attempting a risotto, lower your expectations', 'small dinner at my place {when}, six of us, good wine. come'],
+  screening: ['cast and crew screening of {film} {when}. want to come?', 'they\'re screening {film} for the crew {when}. come with me?'],
+  premiere: ['I\'ve got a spare ticket to the {film} premiere {when}. come with me?', '{film} premiere {when}. I need a plus-one who won\'t embarrass me'],
+  tableread: ['I\'m doing a table read of my new script {when}. would you come and read a part?', 'table read of my new thing {when}. I need actors and honesty. bring both'],
+  football: ['five-a-side {when}, we\'re a player short. you in?', 'football {when}? we lost 9-1 last week, you can\'t make it worse'],
+  gallery: ['gallery opening {when}. free wine, strange art. come?', 'a friend\'s show opens {when}. come and pretend to understand it with me'],
+  karaoke: ['karaoke with my crew {when}. no excuses', 'we\'re doing karaoke {when}. I\'ve already picked your song'],
+  wrap: ['wrap party for {film} {when}! come', 'we wrapped {film}!! party {when}, you\'re coming']
+};
+function whenTxt(w) { return /^(next|this|tomorrow|tonight|on )/i.test(w) ? w : 'on ' + w; }
+function inviteText(k, when, film, mine, seed) { const L = INVITE_TXT[k]; return L ? pickLine(L, seed).replace('{when}', whenTxt(when)).replace('{film}', film) : `are you free for ${mine} ${whenTxt(when)}?`; }
 function inviteFrom(id) {
   const M = S.me, q = P(id);
   const film = S.films.find && S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
@@ -138,8 +152,9 @@ function inviteFrom(id) {
   if (!slot) return;
   const what = v.t.replace('{who}', q.name).replace('{film}', film ? film.title : 'the film');
   const mine = v.t.replace("{who}'s", 'my').replace(' with {who}', '').replace('{film}', film ? film.title : 'the film');
-  sms(id, `${pickLine(['are you free for', 'come to', 'you HAVE to come to', 'any chance you can make'], id + S.week)} ${mine}? ${slotLabel(slot)}`, 'invite');
-  inbox('invite', `${q.name} invites you`, `${q.name} asks you to ${what}, ${slotLabel(slot)}.`, { person: id, ev: v.k, film: film ? film.id : undefined, slot, what, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Make an excuse' }] });
+  sms(id, inviteText(v.k, slotLabel(slot), film ? film.title : 'the film', mine, id + S.week), 'invite');
+  const theirs = v.t.replace("{who}'s", 'their').replace(' with {who}', ' with them').replace('{film}', film ? film.title : 'the film');
+  inbox('invite', `${q.name} invites you`, `${q.name} invites you to ${theirs}, ${slotLabel(slot)}.`, { person: id, ev: v.k, film: film ? film.id : undefined, slot, what, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Make an excuse' }] });
 }
 function askFrom(id) {
   const q = P(id), slot = freeSlot({ days: [5, 6], blocks: [0, 1], from: 1 });

@@ -188,8 +188,8 @@ const BIDS = { low: ['Bid the low estimate', .9, .2], fair: ['Bid the high estim
 function relicGive(k, paid, how) {
   const M = S.me, R = RELIC[k];
   M.bz.push({ id: M.seq++, k, name: R.name, w: S.week, paid, seed: M.seq * 7 + 3 });
-  diary(`Money: ${how}: ${R.name} (${fmtCash(paid)}).`);
-  milestone(`Acquired ${R.name.toLowerCase()} (${R.y})`, 'home');
+  diary(paid ? `Money: ${how}: ${R.name} (${fmtCash(paid)}).` : `${how.charAt(0).toUpperCase() + how.slice(1)}: ${R.name}.`);
+  milestone(`Acquired ${/^[A-Z][a-z]/.test(R.name) && !/^[A-Z][a-z]+ [A-Z]/.test(R.name) ? R.name[0].toLowerCase() + R.name.slice(1) : R.name} (${R.y})`, 'home');
 }
 function relicRival() {
   const r = hashRand(S.week * 17 + 3);
@@ -345,7 +345,7 @@ function shopWeek() {
   const M = S.me;
   for (const k of Object.keys(M.subs || {})) { const it = SHOP[k]; if (!it) continue; const c = usd(it.sub); if (M.cash < c) { delete M.subs[k]; M.owned2 = (M.owned2 || []).filter(x => x !== k); diary(`${it.label} cancelled your subscription: the card bounced.`); } else M.cash -= c; }
   if (M.jobs.length && prnd() < .004) { const L = relicPool().filter(R => R.tier === 'rare' && !relicOwned(R.k)); if (L.length) { const R = L[Math.floor(prnd() * L.length)]; M.bz = M.bz || []; relicGive(R.k, 0, 'a wrap-party present from the props department'); inbox('note', 'From the props department, with love', `The prop master hands you a box at the wrap party: ${R.name.toLowerCase()}. "It was going in a skip. You looked like you'd appreciate it."`); } }
-  if (S.week % 4 === 0 && typeof mail === 'function') { const now = bzDrops(S.week / 4).map(k => BZ_BY[k].name); mail('news', 'The Bazaar', `This month's drops: ${now.join(', ')}`, `Limited runs, gone in four weeks: ${now.join('; ')}. Also at auction this quarter: ${RELIC[relicAuction().id].name.toLowerCase()}.`); }
+  if (S.week % 4 === 0 && typeof mail === 'function') { const now = bzDrops(S.week / 4).map(k => BZ_BY[k].name), lc = t => /^[A-Z][a-z]/.test(t) && !/^[A-Z][a-z]+ [A-Z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t, list = L => L.length > 1 ? L.slice(0, -1).map(lc).join(', ') + ' and ' + lc(L[L.length - 1]) : lc(L[0]); mail('news', 'The Bazaar', `New this month: ${list(now)}`, `Limited runs, gone in four weeks: ${list(now)}. Also up for auction this quarter: ${lc(RELIC[relicAuction().id].name)}.`); }
 }
 
 // ---- grander places to live ----

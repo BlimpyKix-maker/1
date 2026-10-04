@@ -101,17 +101,26 @@ function fullCredits(f) {
    <details class="more"><summary>Full cast and crew</summary>${credit('Also starring', x.bits)}<div class="crewlist">${crewNames(f).map(([r, n]) => `<div class="cr"><span>${esc(r)}</span><span>${esc(n)}</span></div>`).join('')}</div></details></section>`;
 }
 // ---- people ----
+// A job title as it reads in a sentence: the first of any slashed alternatives, no bracketed abbreviations.
+function occPhrase(occ) {
+  let o = occ.split(' / ')[0].replace(/\s*\([^)]*\)/g, '').trim().toLowerCase().replace(/\b(ad|dp|vfx|cg|tv|ceo|vp)\b/g, m => m.toUpperCase()).replace(/\bsecond second\b/, 'second second');
+  const an = /^(a|e|i|o|u(?!ni|ti|s[aeiou]|r)|honou?r)/i.test(o) && !/^(one|eu)/i.test(o);
+  return (an ? 'an ' : 'a ') + o;
+}
+// Traits that are things people are, not adjectives: "an auteur", "a team player".
+const TRAIT_NOUN = new Set(['auteur', 'gossip', 'health nut', 'team player', 'method', 'cinephile', 'early riser', 'lone wolf', 'workhorse', 'hustler', 'late bloomer', 'perfectionist', 'party animal', 'optimist', 'night owl']);
+function traitList(ts) { const L = ts.map(x => { const t = x.toLowerCase(); return t === 'method' ? 'a method actor' : TRAIT_NOUN.has(t) ? (/^[aeiou]/.test(t) ? 'an ' : 'a ') + t : t; }); return L.length > 1 ? L.slice(0, -1).join(', ') + ' and ' + L[L.length - 1] : L[0]; }
 function personBio(p) {
   if (p.player) return '';
   const cr = p.credits.map(i => S.films[i]).filter(f => f && f.rel !== null).sort((a, b) => a.rel - b.rel);
   const best = cr.slice().sort((a, b) => b.reviews - a.reviews)[0], big = cr.slice().sort((a, b) => b.total - a.total)[0];
-  const b = backstoryOf(p), occ = (p.occ || occupationOf(p)).toLowerCase(), P0 = pron(p);
-  let t = `${p.name} is ${/^[aeiou]/.test(occ) ? 'an' : 'a'} ${occ} based in ${hubName(p.hub)}`;
+  const b = backstoryOf(p), occ = p.occ || occupationOf(p), P0 = pron(p);
+  let t = `${p.name} is ${occPhrase(occ)} based in ${hubName(p.hub)}`;
   t += cr.length ? `, with ${cr.length} credit${cr.length > 1 ? 's' : ''} since ${yearOf(cr[0].rel)}.` : ', still waiting on a first credit.';
-  if (best) t += ` Best known for ${best.title} (${yearOf(best.rel)})${big && big !== best ? ` and the hit ${big.title}` : ''}.`;
+  if (best) t += ` Best known for ${best.title} (${yearOf(best.rel)})${big && big !== best ? `, and for the hit ${big.title}` : ''}.`;
   if (p.awards.length) t += ` ${P0[0]} ${P0[0] === 'They' ? 'have' : 'has'} won ${p.awards.length} award${p.awards.length > 1 ? 's' : ''}.`;
-  if (b && b.from) t += ` Grew up in ${b.from}.`;
-  if (p.traits.length) t += ` Known for being ${p.traits.slice(0, 2).map(x => x.toLowerCase()).join(' and ')}.`;
+  if (b && b.from) t += ` Grew up ${/island/.test(b.from) ? 'on' : 'in'} ${b.from}.`;
+  if (p.traits.length) t += ` Colleagues describe ${P0[0] === 'They' ? 'them' : P0[0] === 'She' ? 'her' : 'him'} as ${traitList(p.traits.slice(0, 2))}.`;
   return t;
 }
 // The archive's masthead: switch between films and people.

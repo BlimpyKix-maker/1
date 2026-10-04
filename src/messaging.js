@@ -393,8 +393,8 @@ function mailOptAct(m, k) {
 function workMailWeek() {
   const M = S.me, me = ME();
   for (const p of M.past.filter(p => p.to === S.week)) {
-    const f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, where = f ? f.title : (p.mco || 'the company');
-    mail('inbox', `Accounts, ${where}`, `Remittance: ${p.t}`, `Payment for your work as ${p.t.toLowerCase()} on ${where} has been sent. Please allow three to five working days. Do not reply to this email; nobody reads it.`, null);
+    const f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, emp = p.mco || (p.co !== null && p.co !== undefined && S.companies[p.co] ? S.companies[p.co].name : null), where = f ? f.title : emp || 'the job';
+    mail('inbox', f || emp ? `Accounts, ${where}` : 'Payroll', `Remittance: ${p.t.split(',')[0]}`, `Your final payment for ${f ? `your work on ${where}` : emp ? `your time at ${emp}` : `your work as ${p.t.toLowerCase()}`} has been sent. Please allow three to five working days. Do not reply to this email; nobody reads it.`, null);
     if (p.head !== null && p.head !== undefined && M.known[p.head] && !P(p.head).dead && !p.quit) { const q = P(p.head), good = (p.score || 0) >= 0; mail('inbox', sigOf(q), good ? `Thank you` : 'Wrapping up', good ? `Hi ${me.name.split(' ')[0]},\n\nJust wanted to say thank you for ${where}. You made my life easier, which is the highest compliment I give.\n\n${q.name.split(' ')[0]}` : `Hi ${me.name.split(' ')[0]},\n\nThat was a hard one. Thanks for sticking it out on ${where}. Let's both do better next time.\n\n${q.name.split(' ')[0]}`, { k: 'opt', kind: 'wrap', id: q.id, opts: WRAP_OPTS }); }
   }
   for (const id of me.credits) { const f = S.films[id]; if (f && f.rel === S.week) mail('offers', `${f.co !== null ? S.companies[f.co].name : 'The producers'} · Publicity`, `Invitation: the premiere of ${f.title}`, `You are warmly invited to the premiere of ${f.title}, followed by a reception. Black tie optional; enthusiasm mandatory. Please RSVP.`, { k: 'opt', kind: 'premiere', film: f.id, opts: [['p_go', 'Accept with pleasure'], ['p_no', 'Send regrets']] }); }

@@ -417,6 +417,11 @@ function endParty() {
 
 // ---------------- Inbox ----------------
 function inbox(kind, title, text, extra = {}) {
+  // plural names take a bare apostrophe ("Tester Pictures' next film"); a situation's "ask your boss" and "pull in a
+  // colleague" options only appear when there is a boss or a colleague to ask
+  const fixPoss = t => typeof t === 'string' ? t.replace(/([^s'])s's\b/g, "$1s'") : t;
+  title = fixPoss(title); text = fixPoss(text);
+  if (kind === 'scene' && extra.choices && extra.ctx && /^sit_/.test(extra.scene || '')) extra = Object.assign({}, extra, { choices: extra.choices.filter(c => !(c.k === 'ask' && (extra.ctx.head === null || extra.ctx.head === undefined)) && !(c.k === 'mate' && !(extra.ctx.mates || []).length)) });
   const it = { id: S.me.seq++, w: S.week, kind, title, text, ...extra };
   S.me.inbox.push(it);
   if (kind !== 'note' && S.me.wk) S.me.wk.beats = (S.me.wk.beats || 0) + 1;   // something happened this week (late-game.js)
@@ -771,7 +776,7 @@ function finishJob(j, L, quit) {
     if (k && !k.tags.includes('Worked for them')) k.tags.push('Worked for them');
     if (o > 20) M.refs[j.head] = (M.refs[j.head] || 0) + 1;
   }
-  const txt = quit ? `You leave ${j.t.toLowerCase()}${f ? ' on ' + f.title : ''}.` : `${f ? f.title + ' wraps your part' : 'Your stint as ' + j.t.toLowerCase() + ' ends'}.${credited ? ' Your name will be in the credits.' : ''}${j.head !== null && opinion(j.head) > 20 ? ` ${P(j.head).name} says to call them for the next one.` : ''}`;
+  const txt = quit ? `You leave your job as ${j.t.toLowerCase()}${f ? ' on ' + f.title : ''}.` : `${f ? f.title + ' wraps your part' : 'Your stint as ' + j.t.toLowerCase() + ' ends'}.${credited ? ' Your name will be in the credits.' : ''}${j.head !== null && opinion(j.head) > 20 ? ` ${P(j.head).name} says to call them for the next one.` : ''}`;
   (L ? L.push(txt) : diary(txt));
   if (!quit && f) inbox('note', f ? 'Wrapped' : 'Job done', txt);
 }
@@ -826,7 +831,7 @@ function afterTick(fresh) {
     const who = ids.find(id => M.known[id] && !seen.has(id));
     if (who === undefined) continue;
     seen.add(who);
-    inbox('news', `News: ${P(who).name}`, n.text, n.ref && n.ref.film !== undefined ? { film: n.ref.film } : { person: who });
+    inbox('news', n.ref && n.ref.film !== undefined ? `From the set of ${S.films[n.ref.film].title}` : `News about ${P(who).name}`, n.ref && n.ref.film !== undefined ? `${n.text} (${P(who).name}, whom you know, is on it.)` : n.text, n.ref && n.ref.film !== undefined ? { film: n.ref.film } : { person: who });
   }
   // a contact who likes you and is starting a film remembers you
   for (const id of S.active) {
@@ -928,7 +933,13 @@ function pickScene(j) {
   return { id: s.id, title: s.title, text: fillScene(s.text, ctx), ctx, opts: s.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check, hint: o.check ? statLabel(o.check[0]) : null })) };
 }
 function statLabel(k) { return MINDS[k] || (SUB2C[k] ? CRAFTS[SUB2C[k]].subs[k] : k); }
-function fillScene(t, ctx) { return t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : 'someone').replace(/\b([Tt]he) The /g, '$1 '); }
+// who a scene means when nobody specific is there
+const FILL_FALLBACK = { head: 'your boss', dir: 'the director', lead: 'the lead actor', dp: 'the cinematographer', prod: 'the producer', contact: 'a friend', star: 'the star', mates: 'a colleague' };
+const A_ROLE = { actor: 'an actor', director: 'a director', writer: 'a writer', dp: 'a cinematographer', editor: 'an editor', producer: 'a producer', composer: 'a composer', designer: 'a production designer', costume: 'a costume designer', sound: 'a sound recordist', vfx: 'a visual effects artist', makeup: 'a make-up artist', casting: 'a casting director', ad: 'an assistant director', stunts: 'a stunt performer' };
+function fillScene(t, ctx) {
+  const s = t.replace(/\{(\w+)\}/g, (_, k) => k === 'film' ? (ctx.film !== null && ctx.film !== undefined ? S.films[ctx.film].title : 'the job') : ctx[k] !== undefined && ctx[k] !== null && typeof ctx[k] === 'number' ? P(ctx[k]).name : FILL_FALLBACK[k] || 'someone').replace(/\b([Tt]he) The /g, '$1 ');
+  return s.replace(/(^|[.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase());
+}
 
 function sceneResolve(it, k) {
   const s = SCENES.find(x => x.id === it.scene), o = s.opts.find(x => x.k === k), M = S.me, me = ME();
@@ -954,7 +965,7 @@ function sceneResolve(it, k) {
   if (fx.rel && ctx.contact != null) setRel(ctx.contact, fx.rel === 'none' ? null : fx.rel);
   if (fx.cohab && ctx.contact != null) { M.cohab = ctx.contact; milestone(`Moved in with ${P(ctx.contact).name}`, 'love'); }
   if (fx.script && ctx.script) { const sc = (M.scripts || []).find(x => x.id === ctx.script && x.stage === 'writing'); if (sc) { sc.pages = clamp(sc.pages + fx.script, 0, sc.target - 1); sc.q += fx.script * avg(['struc', 'dial', 'char', 'orig'].map(k => me.sk[k])); } }
-  if (fx.meet) { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = ` You meet ${q.name}, ${ROLE_LABEL[q.role].toLowerCase()}.`; } }
+  if (fx.meet) { const q = bestIn(M.hub, s.meetRole ? [s.meetRole] : ROLES, q => -Math.abs(q.standing - me.standing - 10) + prnd() * 30); if (q) { meet(q.id, 'Met out', 5); t0 = s.meetRole ? ` (That's ${q.name}.)` : ` You get talking to ${q.name}, ${A_ROLE[q.role] || ROLE_LABEL[q.role].toLowerCase()}.`; } }
   for (const x in fx.xp || {}) growSub(me, x, fx.xp[x]);
   const job = M.jobs.find(j => j.id === it.job);
   if (fx.shadow && job) job.shadow = 1;
@@ -1029,6 +1040,7 @@ function applyAct(a) {
   switch (a.t) {
     case 'create': startCareer(a.c); if (typeof legacyGreet === 'function') legacyGreet(); return true;
     case 'retire': return retireAct();
+    case 'roomstyle': return roomStyleAct(a);
     case 'nextgen': return nextGenAct();
     case 'startwork': return startWork(a);
     case 'mail': return mailAct(a);

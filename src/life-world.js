@@ -49,7 +49,7 @@ const NPC_EVENTS = [
   { k: 'lawsuit', w: 1, ok: p => p.credits.length > 4, go: () => {}, t: () => 'is suing a studio over profits from an old hit that somehow never made any' },
   { k: 'comeback', w: 1, ok: p => p.standing < 30 && ageOf(p) > 45, go: p => { p.standing = clamp(p.standing + 6, 0, 100); }, t: () => 'is having a late-career comeback after a film festival rediscovered their old work' },
   { k: 'tattoo', w: 1, personal: 1, ok: p => ageOf(p) < 45, go: () => {}, t: () => 'got a tattoo of a line from a film, and spelt it slightly wrong' },
-  { k: 'move', w: 1, ok: () => true, go: p => { p.hood = ppick(['by the beach', 'in the hills', 'across town', 'downtown', 'near the studios']); }, t: p => `moved ${p.hood}` }
+  { k: 'move', w: 1, ok: () => true, go: p => { p.hood = ppick(['by the beach', 'in the hills', 'across town', 'downtown', 'near the studios']); }, t: p => `moved ${{ 'by the beach': 'to a flat by the beach', 'in the hills': 'up into the hills', 'across town': 'across town', downtown: 'downtown', 'near the studios': 'to be near the studios' }[p.hood] || p.hood}` }
 ];
 function spouseName(p) { const N = NAMES[HUBS[p.hub].lang] || NAMES.en; return ppick(N.M.concat(N.F)) + ' ' + ppick(N.L); }
 function npcLivesWeek() {

@@ -3,13 +3,13 @@
 // the side hustle, the classes, the nights in and out, and the small jobs. Many of them open a door or close one:
 // a new name in your phone, a reputation, a favour owed, someone who now thinks less of you.
 const LOW_ROAD = [
-  { id: "lr_bus2", v: ["transit"], title: "The night bus", text: "The last bus home. A man at the back is quietly crying over a stack of headshots.", teach: "Most actors work other jobs for years; casting directors see thousands of headshots a week, and the photo is often the only thing that gets read.", opts: [
+  { id: "lr_bus2", meetRole: "actor", v: ["transit"], title: "The night bus", text: "The last bus home. A man at the back is quietly crying over a stack of headshots.", teach: "Most actors work other jobs for years; casting directors see thousands of headshots a week, and the photo is often the only thing that gets read.", opts: [
     { k: "talk", label: "Sit with him", check: ["cha", 10], ok: { meet: 1, stress: -1 }, bad: {}, t: "He's an actor who just lost a part he'd been promised. By the end of the route you're both laughing. He takes your number.", tb: "He'd rather be alone. You respect that." },
     { k: "leave", label: "Give him some space", ok: {}, t: "You look out of the window. Everyone's carrying something." }] },
   { id: "lr_train", v: ["transit"], title: "The delayed train", text: "Signal failure. Forty minutes stuck between stations, and you're due on set.", teach: "Being late on set costs money by the minute; crews call ahead the moment they know, and good ADs remember who did.", opts: [
     { k: "call", label: "Call ahead straight away", check: ["com", 9], ok: { flag: "reliable" }, bad: { stress: 2 }, t: "The AD says 'thanks for the heads-up' and means it.", tb: "No signal in the tunnel. You arrive late and flustered." },
     { k: "script", label: "Use the time to read", ok: { xp: { tas: .05 } }, t: "You finish a script someone lent you. Annoyingly, it's good." }] },
-  { id: "lr_busker", v: ["transit"], title: "The busker", text: "A busker in the station is playing a film theme beautifully, to nobody.", opts: [
+  { id: "lr_busker", meetRole: "composer", v: ["transit"], title: "The busker", text: "A busker in the station is playing a film theme beautifully, to nobody.", opts: [
     { k: "listen", label: "Stop and listen, drop a coin", ok: { stress: -2, cash: -2 }, t: "Three minutes of something lovely before the day starts." },
     { k: "ask", label: "Ask if they've ever thought of scoring films", check: ["cha", 11], ok: { meet: 1 }, bad: {}, t: "They've scored three student shorts. You swap numbers; you'll need music one day.", tb: "They have, and they're very tired of being asked." }] },
   { id: "lr_lost", v: ["transit"], title: "The lost tourist", text: "A tourist with a paper map is asking for the studios. You're going that way.", opts: [
@@ -87,10 +87,10 @@ const LOW_LIFE = {
     { id: "lh_wedding", title: "The wedding video", text: "A couple you served at the bar want you to film their wedding. Cash, this Saturday.", opts: [
       { k: "shoot", label: "Shoot it properly", check: ["comp", 10], ok: { cash: 300, xp: { comp: .08 }, energy: -10 }, bad: { cash: 150, energy: -10 }, t: "The first dance at golden hour. They cry when they see it. So do you, a bit.", tb: "The battery dies during the vows. They're very nice about it." },
       { k: "no", label: "Say you're not a wedding person", ok: {}, t: "They hire someone else. The bar tips stay the same." }] },
-    { id: "lh_delivery", title: "The delivery", text: "Your delivery drop is a film production office. They look desperate.", opts: [
+    { id: "lh_delivery", meetRole: "producer", title: "The delivery", text: "Your delivery drop is a film production office. They look desperate.", opts: [
       { k: "offer", label: "Mention you're looking for production work", check: ["cha", 11], ok: { meet: 1, refs: 1 }, bad: {}, t: "The coordinator takes your number. 'We lose a runner a week.'", tb: "They take the pizza and close the door." },
       { k: "drop", label: "Just drop it off", ok: { cash: 8 }, t: "A good tip. Back on the bike." }] },
-    { id: "lh_rude", title: "The rude customer", text: "A customer is rude to you all evening, then leaves a business card: they're a casting director.", opts: [
+    { id: "lh_rude", meetRole: "casting", title: "The rude customer", text: "A customer is rude to you all evening, then leaves a business card: they're a casting director.", opts: [
       { k: "call", label: "Call them anyway", check: ["com", 12], ok: { meet: 1 }, bad: { stress: 3 }, t: "On the phone they're charming. 'Oh God, was I awful? Bad day.' They call you in for a reader job.", tb: "They don't remember you, or pretend not to." },
       { k: "bin", label: "Bin the card", ok: { stress: -1 }, t: "Life's too short. Probably." }] },
     { id: "lh_extra", title: "Background work", text: "A friend says a TV shoot needs fifty extras tomorrow. It pays, and there's lunch.", teach: "Background actors are hired through specialist agencies; a day on set as an extra is how many crew first see how a set actually works.", opts: [
