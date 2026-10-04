@@ -187,12 +187,21 @@ function filmReviews(f) {
   const mine = S.me ? (S.me.myReviews || []).filter(v => v.film === f.id) : [];
   for (const v of mine) { out.unshift({ who: ME().name, out: v.out || 'your blog', sc: v.sc, q: v.q, mine: 1, counts: criticCounts() }); if (criticCounts()) { sum += v.sc; if (v.sc >= 58) pos++; } }
   const n = N + mine.filter(() => criticCounts()).length;
-  return RVC.m[key] = { list: out, n, score: Math.round(sum / Math.max(1, n)), thumbs: Math.round(pos / Math.max(1, n) * 100) };
+  // Rogerscore: the leading critics only, weighted by their outlet's standing (famous takes count double)
+  let ws = 0, wt = 0; for (const v of out) { if (v.sc === null || (v.mine && !v.counts)) continue; const w = v.famous ? 2 : v.mine ? 1 : ({ 1: 1.6, 2: 1.2, 3: .9 }[(CRITIC[v.who] && OUTLET[CRITIC[v.who].out] || {}).tier] || 1); ws += v.sc * w; wt += w; }
+  const top = wt ? Math.round(ws / wt) : Math.round(sum / Math.max(1, n));
+  // Audience: what ticket buyers thought, out of ten; crowds forgive what critics don't, and the other way round
+  const ar = hashRand(f.id * 389 + 5)(), gA = { Action: 8, Comedy: 6, Horror: 2, Superhero: 9, Animation: 7, Musical: 5, Romance: 4, 'Sci-fi': 4, 'Martial arts': 6, Documentary: -2, Drama: -3, Period: -4, War: 1, Western: 2 }[f.genre] || 0;
+  const aud = Math.round(clamp(base * .5 + 28 + gA + Math.min(14, Math.log2(1 + (f.hitRatio || 0)) * 5) + (f.cult || 0) * .08 + (ar - .5) * 12, 12, 97)) / 10;
+  return RVC.m[key] = { list: out, n, score: top, thumbs: Math.round(pos / Math.max(1, n) * 100), aud, audN: Math.round(Math.max(120, (f.total || 1) * (y < 1995 ? 400 : 6000) * (.5 + ar))) };
 }
+// the three numbers, side by side and the same size, each with what it is
+const SCORE_HOW = { thumbs: 'Share of all counted critics, big outlets and small, who gave it a positive review (60 or better).', roger: 'Weighted average of the leading critics only: the major papers, magazines and broadcasters count most.', aud: 'Ticket buyers\' average rating out of ten. Crowds and critics often disagree.' };
+function scoreTiles(R) { const cls = (v, g, b) => v >= g ? 'good' : v < b ? 'bad' : ''; return `<div class="rt-tiles"><div><b class="rt-big ${cls(R.thumbs, 60, 40)}">${R.thumbs}%</b><span>Thumbs</span><small>${R.n} critics · ${esc(THUMB_LABEL(R.thumbs))}</small><small class="muted">${SCORE_HOW.thumbs}</small></div><div><b class="rt-big ${cls(R.score, 60, 40)}">${R.score}</b><span>Rogerscore</span><small>out of 100</small><small class="muted">${SCORE_HOW.roger}</small></div><div><b class="rt-big ${cls(R.aud, 6.5, 4.5)}">${R.aud.toFixed(1)}</b><span>Audience</span><small>${R.audN.toLocaleString()} ratings</small><small class="muted">${SCORE_HOW.aud}</small></div></div>`; }
 function thumbBadge(R) { const c = R.thumbs >= 70 ? 'good' : R.thumbs < 45 ? 'bad' : ''; return `<span class="rt-badge ${c}"><b>${R.thumbs}%</b> ${R.thumbs >= 60 ? '👍' : R.thumbs >= 45 ? '👉' : '👎'}</span>`; }
 function rogerPanelHTML(f) {
   const R = filmReviews(f); if (!R) return '';
-  return `<section class="panel rt"><h3>Roger That <span class="muted small">the review aggregator</span></h3><div class="rt-top"><div><b class="rt-big">${R.thumbs}%</b><span>Thumb-o-meter · ${THUMB_LABEL(R.thumbs)}</span></div><div><b class="rt-big">${R.score}</b><span>Rogerscore · ${R.n} reviews</span></div></div>
+  return `<section class="panel rt"><h3>Roger That <span class="muted small">the review aggregator</span></h3>${scoreTiles(R)}
    <ul class="rt-list">${R.list.slice(0, 8).map(v => `<li class="${v.famous ? 'famous' : ''}${v.mine ? ' mine' : ''}"><span class="rt-s ${v.sc === null ? '' : v.sc >= 60 ? 'good' : v.sc < 40 ? 'bad' : ''}">${v.sc === null ? '—' : v.sc}</span><div><q>${esc(v.q)}</q><small>${esc(v.who)}${v.out ? ', ' + esc(v.out) : ''}${v.famous ? ' · <i>famous take</i>' : ''}${v.mine && !v.counts ? ' · not counted yet' : ''}</small></div></li>`).join('')}</ul>${R.list.length > 8 ? `<p class="muted small">And ${R.n - 8} more reviews.</p>` : ''}</section>`;
 }
 // ---- the app ----
@@ -200,15 +209,15 @@ function rogerApp() {
   const t = UI.rt || 'now', q = (UI.rtq || '').toLowerCase().trim(), y = S.year;
   const tabs = [['now', 'Now showing'], ['year', 'Best of ' + y], ['all', 'All-time'], ['critics', 'Critics'], ['mine', 'Your reviews']];
   let body = '';
-  const row = f => { const R = filmReviews(f); return R ? `<tr><td>${fl(f.id)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n">${thumbBadge(R)}</td><td class="n">${R.score}</td><td class="n muted">${R.n}</td></tr>` : ''; };
-  const table = L => `<table class="os-table"><thead><tr><th>Film</th><th>Year</th><th>Genre</th><th class="n">Thumbs</th><th class="n">Rogerscore</th><th class="n">Reviews</th></tr></thead><tbody>${L.map(row).join('') || '<tr><td colspan="6" class="muted">Nothing here yet.</td></tr>'}</tbody></table>`;
+  const row = f => { const R = filmReviews(f); return R ? `<tr><td>${fl(f.id)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n">${R.thumbs}%</td><td class="n">${R.score}</td><td class="n">${R.aud.toFixed(1)}</td><td class="n muted">${R.n}</td></tr>` : ''; };
+  const table = L => `<table class="os-table"><thead><tr><th>Film</th><th>Year</th><th>Genre</th><th class="n" title="${SCORE_HOW.thumbs}">Thumbs</th><th class="n" title="${SCORE_HOW.roger}">Rogerscore</th><th class="n" title="${SCORE_HOW.aud}">Audience</th><th class="n">Critics</th></tr></thead><tbody>${L.map(row).join('') || '<tr><td colspan="7" class="muted">Nothing here yet.</td></tr>'}</tbody></table>`;
   const rel = S.films.filter(f => f.rel !== null && f.reviews !== undefined && f.rel <= S.week);
   if (t === 'now') body = table(rel.filter(f => S.week - f.rel < 12).sort((a, b) => b.rel - a.rel).slice(0, 40));
   else if (t === 'year') body = table(rel.filter(f => yearOf(f.rel) === y).sort((a, b) => b.reviews - a.reviews).slice(0, 50));
   else if (t === 'all') body = `<div class="os-tools"><input id="rtq" type="search" placeholder="Search any film…" value="${esc(UI.rtq || '')}"></div>${table((q ? rel.filter(f => f.title.toLowerCase().includes(q) || (f.real && f.real.toLowerCase().includes(q))) : rel.filter(f => f.reviews >= 88)).sort((a, b) => b.reviews - a.reviews).slice(0, 80))}`;
   else if (t === 'critics') body = `<table class="os-table"><thead><tr><th>Critic</th><th>Outlet</th><th>Years</th><th>Temperament</th></tr></thead><tbody>${CRITICS.map(c => CRITIC[c[0]]).filter(c => c.from <= y).map(c => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(OUTLET[c.out].name)} <span class="muted small">${esc(OUTLET[c.out].kind)}</span></td><td class="muted">${c.from}–${c.to && c.to < y ? c.to : 'now'}</td><td class="muted">${esc(c.style)}</td></tr>`).join('')}</tbody></table>`;
   else body = myReviewsHTML();
-  return `<div class="rtapp"><div class="rt-brand"><b>Roger That</b><span>${rel.length.toLocaleString()} films · every review, one number</span></div><div class="np-tabs">${tabs.map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-rt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
+  return `<div class="rtapp"><div class="rt-brand"><b>Roger That</b><span>${rel.length.toLocaleString()} films · three ways to read the reviews</span></div><p class="small muted"><b>Thumbs</b>: ${SCORE_HOW.thumbs} <b>Rogerscore</b>: ${SCORE_HOW.roger} <b>Audience</b>: ${SCORE_HOW.aud}</p><div class="np-tabs">${tabs.map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-rt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
 }
 // ---- you, the critic ----
 function criticCounts() { const M = S.me; if (!M) return false; return (M.jobs || []).some(j => /^crit_/.test(j.k)) || followers('blog') >= 5000 || (M.critic && M.critic.approved); }

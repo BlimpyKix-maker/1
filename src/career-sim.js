@@ -696,6 +696,7 @@ function closeWeek(a) {
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
   if (typeof correspondWeek === 'function') correspondWeek();
+  if (typeof weatherWeek === 'function') weatherWeek();
   if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof shopWeek === 'function') shopWeek();
@@ -1104,6 +1105,8 @@ function applyAct(a) {
     case 'invest': case 'withdraw': return coMoney(a);
     case 'selffund': return selfFund(a);
     case 'coinv': return coinvAct(a);
+    case 'cgpost': return cgPostAct(a);
+    case 'cgfollow': return cgFollow(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);

@@ -8,41 +8,41 @@
 
 // [key, name, kind, hub, founded, originals from, new shows a year, about]
 const TV_NETS_RAW = [
-  ['nbs', 'NBS', 'broadcast', 'newyork', 1946, 1946, 6, 'The oldest of the big three networks: comedies, cop shows and the late-night institution.'],
-  ['cbn', 'CBN', 'broadcast', 'newyork', 1948, 1948, 6, 'The "Tiffany network": sitcoms, procedurals and the audience that never changes the channel.'],
-  ['abn', 'ABN', 'broadcast', 'hollywood', 1948, 1948, 6, 'Third of the big three; family comedies, soaps and the odd glorious experiment.'],
-  ['vix', 'The Vix Network', 'broadcast', 'hollywood', 1986, 1986, 4, 'The upstart fourth network: animation, reality and shows the others wouldn\'t touch.'],
-  ['seen', 'The Seen', 'broadcast', 'hollywood', 2006, 2006, 3, 'Young-adult drama and superheroes on a budget.'],
-  ['pbn', 'PBN', 'public', 'newyork', 1970, 1970, 2, 'Public television: documentaries, imported period drama and the best children\'s programming in the world.'],
-  ['hbx', 'HBX', 'premium', 'newyork', 1972, 1983, 2, 'Premium cable that decided it wasn\'t television, and changed what television could be.'],
-  ['showtyme', 'Showtyme', 'premium', 'newyork', 1976, 1986, 1, 'The other premium channel: darker, stranger, often brilliant.'],
-  ['amx', 'AMX', 'cable', 'newyork', 1984, 2007, 1, 'Old films on a loop, until a drama about advertising men made it a prestige network.'],
-  ['fxn', 'FXN', 'cable', 'hollywood', 1994, 2002, 2, 'Basic cable with premium ambitions.'],
-  ['comedyc', 'Comedy Centrale', 'cable', 'newyork', 1991, 1992, 1, 'Stand-up, sketch, satire and one very rude cartoon.'],
-  ['mtvee', 'MTVee', 'cable', 'newyork', 1981, 1992, 1, 'Music videos, then reality television, then reality television about music videos.'],
-  ['nickel', 'Nickelodium', 'kids', 'newyork', 1979, 1980, 1, 'Television for children, made to be slimed.'],
-  ['toonx', 'Cartoon Networx', 'kids', 'hollywood', 1992, 1994, 1, 'Animation around the clock, and late at night, for grown-ups.'],
-  ['netflicks', 'Netflicks', 'streaming', 'hollywood', 2013, 2013, 6, 'The red envelope company that became the biggest channel in the world.'],
-  ['hula', 'Hula', 'streaming', 'hollywood', 2012, 2014, 2, 'Network television the day after, and then shows of its own.'],
-  ['prime', 'Prime Viewing', 'streaming', 'hollywood', 2015, 2015, 3, 'A shopping company\'s streaming service, with fantasy budgets.'],
-  ['dizplus', 'Dizney+', 'streaming', 'hollywood', 2019, 2019, 3, 'Every princess, every superhero, every galaxy far away.'],
-  ['peartv', 'Pear TV+', 'streaming', 'hollywood', 2019, 2019, 2, 'A phone company\'s streamer: few shows, expensive ones.'],
-  ['bbx', 'BBX One', 'public', 'london', 1946, 1946, 4, 'Britain\'s public broadcaster: period drama, sitcoms, a time-travelling doctor.'],
-  ['itvee', 'ITVee', 'broadcast', 'london', 1955, 1955, 3, 'Commercial television for Britain: soaps, quizzes and stately homes.'],
-  ['chan4', 'Channel Four', 'broadcast', 'london', 1982, 1982, 2, 'Public-service but commercial, and pleased to shock.'],
-  ['nkh', 'NKH', 'public', 'tokyo', 1953, 1953, 2, 'Japan\'s public broadcaster: the morning drama every household watches with breakfast.'],
-  ['fujitv', 'Fuji Telecast', 'broadcast', 'tokyo', 1959, 1959, 2, 'Trendy dramas and game shows with very elaborate punishments.'],
-  ['kbx', 'KBX', 'broadcast', 'seoul', 1961, 1961, 2, 'Korean drama: sixteen episodes, one great love, a truck.'],
-  ['sbx', 'SBX', 'broadcast', 'seoul', 1991, 1991, 2, 'Korea\'s commercial network, where K-drama became a global export.'],
-  ['dooradarshan', 'Dooradarshan', 'public', 'mumbai', 1959, 1959, 2, 'India\'s public broadcaster, whose epics emptied the streets on Sunday mornings.'],
-  ['starplus', 'Star Plus', 'broadcast', 'mumbai', 1992, 1992, 2, 'Daily family serials, saas-bahu sagas, thousands of episodes.'],
-  ['globus', 'Rede Globus', 'broadcast', 'rio', 1965, 1965, 3, 'The telenovela factory of Brazil: the whole country watches at nine.'],
-  ['televista', 'Televista', 'broadcast', 'mexico', 1955, 1955, 3, 'Mexico\'s giant: telenovelas exported to half the planet.'],
-  ['tfun', 'TF Un', 'broadcast', 'paris', 1975, 1975, 1, 'France\'s biggest channel: crime dramas set in pretty towns.'],
-  ['ardeins', 'Das Erste Eins', 'public', 'berlin', 1954, 1954, 1, 'German public television and its Sunday-night crime show, unbroken since 1970.'],
-  ['raiuno', 'RAY Uno', 'public', 'rome', 1954, 1954, 1, 'Italy\'s public channel: variety, period drama and the song contest.'],
-  ['maple', 'The Maple Network', 'public', 'toronto', 1952, 1952, 1, 'Canada\'s public broadcaster: hockey, comedy and very polite drama.'],
-  ['ausbc', 'AusBC', 'public', 'sydney', 1956, 1956, 1, 'Australia\'s public broadcaster: comedy, crime and the odd children\'s cartoon about dogs.']
+  ['nbs', 'Meridian Broadcasting', 'broadcast', 'newyork', 1946, 1946, 6, 'The oldest of the big three networks: comedies, cop shows and the late-night institution.'],
+  ['cbn', 'Keystone Television', 'broadcast', 'newyork', 1948, 1948, 6, 'The "Tiffany network": sitcoms, procedurals and the audience that never changes the channel.'],
+  ['abn', 'Lighthouse Network', 'broadcast', 'hollywood', 1948, 1948, 6, 'Third of the big three; family comedies, soaps and the odd glorious experiment.'],
+  ['vix', 'Redwood Network', 'broadcast', 'hollywood', 1986, 1986, 4, 'The upstart fourth network: animation, reality and shows the others wouldn\'t touch.'],
+  ['seen', 'Ninefold', 'broadcast', 'hollywood', 2006, 2006, 3, 'Young-adult drama and superheroes on a budget.'],
+  ['pbn', 'Commons Public TV', 'public', 'newyork', 1970, 1970, 2, 'Public television: documentaries, imported period drama and the best children\'s programming in the world.'],
+  ['hbx', 'Velvet', 'premium', 'newyork', 1972, 1983, 2, 'Premium cable that decided it wasn\'t television, and changed what television could be.'],
+  ['showtyme', 'Marquee Premium', 'premium', 'newyork', 1976, 1986, 1, 'The other premium channel: darker, stranger, often brilliant.'],
+  ['amx', 'Ampersand', 'cable', 'newyork', 1984, 2007, 1, 'Old films on a loop, until a drama about advertising men made it a prestige network.'],
+  ['fxn', 'Blue Ember', 'cable', 'hollywood', 1994, 2002, 2, 'Basic cable with premium ambitions.'],
+  ['comedyc', 'Giggle Box', 'cable', 'newyork', 1991, 1992, 1, 'Stand-up, sketch, satire and one very rude cartoon.'],
+  ['mtvee', 'Jukebox TV', 'cable', 'newyork', 1981, 1992, 1, 'Music videos, then reality television, then reality television about music videos.'],
+  ['nickel', 'Treehouse Kids', 'kids', 'newyork', 1979, 1980, 1, 'Television for children, made to be slimed.'],
+  ['toonx', 'Inkwell Toons', 'kids', 'hollywood', 1992, 1994, 1, 'Animation around the clock, and late at night, for grown-ups.'],
+  ['netflicks', 'Streamly', 'streaming', 'hollywood', 2013, 2013, 6, 'The red envelope company that became the biggest channel in the world.'],
+  ['hula', 'Couchwave', 'streaming', 'hollywood', 2012, 2014, 2, 'Network television the day after, and then shows of its own.'],
+  ['prime', 'Parcel Plus', 'streaming', 'hollywood', 2015, 2015, 3, 'A shopping company\'s streaming service, with fantasy budgets.'],
+  ['dizplus', 'Castle+', 'streaming', 'hollywood', 2019, 2019, 3, 'Every princess, every superhero, every galaxy far away.'],
+  ['peartv', 'Orchard+', 'streaming', 'hollywood', 2019, 2019, 2, 'A phone company\'s streamer: few shows, expensive ones.'],
+  ['bbx', 'Albion One', 'public', 'london', 1946, 1946, 4, 'Britain\'s public broadcaster: period drama, sitcoms, a time-travelling doctor.'],
+  ['itvee', 'Tower Television', 'broadcast', 'london', 1955, 1955, 3, 'Commercial television for Britain: soaps, quizzes and stately homes.'],
+  ['chan4', 'Signal Four', 'broadcast', 'london', 1982, 1982, 2, 'Public-service but commercial, and pleased to shock.'],
+  ['nkh', 'Kumo Public Broadcasting', 'public', 'tokyo', 1953, 1953, 2, 'Japan\'s public broadcaster: the morning drama every household watches with breakfast.'],
+  ['fujitv', 'Sakura Telecast', 'broadcast', 'tokyo', 1959, 1959, 2, 'Trendy dramas and game shows with very elaborate punishments.'],
+  ['kbx', 'Hanbit Broadcasting', 'broadcast', 'seoul', 1961, 1961, 2, 'Korean drama: sixteen episodes, one great love, a truck.'],
+  ['sbx', 'Namsan TV', 'broadcast', 'seoul', 1991, 1991, 2, 'Korea\'s commercial network, where K-drama became a global export.'],
+  ['dooradarshan', 'Bharat Vision', 'public', 'mumbai', 1959, 1959, 2, 'India\'s public broadcaster, whose epics emptied the streets on Sunday mornings.'],
+  ['starplus', 'Comet Plus', 'broadcast', 'mumbai', 1992, 1992, 2, 'Daily family serials, saas-bahu sagas, thousands of episodes.'],
+  ['globus', 'Rede Estrela', 'broadcast', 'rio', 1965, 1965, 3, 'The telenovela factory of Brazil: the whole country watches at nine.'],
+  ['televista', 'Telesol', 'broadcast', 'mexico', 1955, 1955, 3, 'Mexico\'s giant: telenovelas exported to half the planet.'],
+  ['tfun', 'Tricolore Un', 'broadcast', 'paris', 1975, 1975, 1, 'France\'s biggest channel: crime dramas set in pretty towns.'],
+  ['ardeins', 'Ostwind Eins', 'public', 'berlin', 1954, 1954, 1, 'German public television and its Sunday-night crime show, unbroken since 1970.'],
+  ['raiuno', 'Tevere Uno', 'public', 'rome', 1954, 1954, 1, 'Italy\'s public channel: variety, period drama and the song contest.'],
+  ['maple', 'Northern Lights Network', 'public', 'toronto', 1952, 1952, 1, 'Canada\'s public broadcaster: hockey, comedy and very polite drama.'],
+  ['ausbc', 'Southern Cross Broadcasting', 'public', 'sydney', 1956, 1956, 1, 'Australia\'s public broadcaster: comedy, crime and the odd children\'s cartoon about dogs.']
 ];
 const TV_NETS = {}; for (const [k, name, kind, hub, founded, orig, per, d] of TV_NETS_RAW) TV_NETS[k] = { k, name, kind, hub, founded, orig, per, d };
 // What kind of shows each kind of channel makes (weights), and the genres' shapes.
@@ -214,7 +214,26 @@ function tvViewers(s, season) {   // average viewers per episode for a season, m
 const EP_A = ['Pilot', 'The One Where', 'Homecoming', 'Cold Open', 'The Long Night', 'Exit Strategy', 'Blood Money', 'Second Chances', 'The Reunion', 'Fault Lines', 'Ghosts', 'Christmas Special', 'The Wedding', 'Unfinished Business', 'Lockdown', 'Day One', 'The Trial', 'Endgame', 'Old Habits', 'Small Mercies'];
 function episodeTitles(s, season, n) { const r = hashRand(s.seed + season * 97); return Array.from({ length: n }, (_, i) => season === 1 && i === 0 ? 'Pilot' : EP_A[1 + Math.floor(r() * (EP_A.length - 1))] + (r() < .3 ? ` (Part ${1 + Math.floor(r() * 2)})` : '')); }
 // ---- the Emmets for television: every September ----
-const TV_CATS = [['Outstanding Drama Series', ['prestige', 'drama', 'crime', 'scifi', 'period']], ['Outstanding Comedy Series', ['sitcom', 'animation']], ['Outstanding Limited Series', ['limited', 'doc']], ['Lead Actor or Actress, Drama', ['prestige', 'drama', 'crime', 'scifi', 'period'], 'cast'], ['Lead Actor or Actress, Comedy', ['sitcom'], 'cast'], ['Writing for a Drama Series', ['prestige', 'drama', 'crime'], 'creator'], ['Directing for a Drama Series', ['prestige', 'drama', 'scifi'], 'dir']];
+// [category, genres that qualify, who's named (cast = the lead, cast2 = the second lead, creator, dir), what it honours]
+const TV_CATS = [
+  ['Outstanding Drama Series', ['prestige', 'drama', 'crime', 'scifi', 'period', 'procedural'], null, 'The year\'s best continuing drama, voted by the whole academy.'],
+  ['Outstanding Comedy Series', ['sitcom', 'animation'], null, 'The best half-hour (or so) of the year, live audience or not.'],
+  ['Outstanding Limited Series', ['limited'], null, 'A story told in one season and finished: the miniseries and the anthology.'],
+  ['Lead Performer, Drama', ['prestige', 'drama', 'crime', 'scifi', 'period'], 'cast', 'The lead of a drama series, judged on one submitted episode.'],
+  ['Supporting Performer, Drama', ['prestige', 'drama', 'crime', 'scifi', 'period', 'procedural'], 'cast2', 'The scene-stealer of a drama ensemble.'],
+  ['Lead Performer, Comedy', ['sitcom'], 'cast', 'The lead of a comedy series: timing, warmth and the face that sells the joke.'],
+  ['Supporting Performer, Comedy', ['sitcom'], 'cast2', 'The neighbour, the boss, the best friend who gets the biggest laughs.'],
+  ['Lead Performer, Limited Series', ['limited'], 'cast', 'A star turn across a single, finished story.'],
+  ['Writing for a Drama Series', ['prestige', 'drama', 'crime', 'scifi'], 'creator', 'One episode\'s script: structure, dialogue and the scene everyone talked about.'],
+  ['Writing for a Comedy Series', ['sitcom', 'animation'], 'creator', 'The funniest single script of the year.'],
+  ['Directing for a Drama Series', ['prestige', 'drama', 'scifi', 'crime'], 'dir', 'One episode\'s direction: the long take, the set piece, the quiet close-up.'],
+  ['Directing for a Comedy Series', ['sitcom'], 'dir', 'Comedy is rhythm, and this is the episode with the best of it.'],
+  ['Outstanding Animated Program', ['animation', 'kids'], null, 'Drawn, modelled or stop-motion, for adults or for everyone.'],
+  ['Outstanding Documentary Series', ['doc'], null, 'Nonfiction television: true crime, nature, history and the people in it.'],
+  ['Outstanding Competition Program', ['reality'], null, 'Bake-offs, talent shows and islands: the best of reality television.'],
+  ['Outstanding Talk Series', ['talk', 'variety'], null, 'Late night and daytime: the desk, the band, the guest who said too much.'],
+  ['Outstanding Children\'s Program', ['kids'], null, 'Television made for children that adults secretly watch too.']
+];
 function tvEmmets(y) {
   const A = archive(), key = 'tve:' + y; if (A[key]) return A[key];
   if (y < 1949 || y > S.year || (y === S.year && dateOf(S.week).getUTCMonth() < 8)) return A[key] = [];
@@ -222,7 +241,7 @@ function tvEmmets(y) {
   for (const [cat, gs, who] of TV_CATS) {
     const L = air.filter(s => gs.includes(s.g)).map(s => [s, s.q + (s.legend ? 25 : 0) + hashRand(s.seed + y * 7 + cat.length)() * 30]).sort((a, b) => b[1] - a[1]);
     if (!L.length) continue; const s = L[0][0], P1 = tvPeople(s);
-    out.push({ cat, show: s.id, person: who === 'cast' ? P1.cast[0] : who === 'creator' ? P1.creator : who === 'dir' ? P1.dirs[0] : null, noms: L.slice(1, 5).map(x => x[0].id) });
+    out.push({ cat, show: s.id, person: who === 'cast' ? P1.cast[0] : who === 'cast2' ? (P1.cast[1] ?? P1.cast[0]) : who === 'creator' ? P1.creator : who === 'dir' ? P1.dirs[0] : null, noms: L.slice(1, 5).map(x => x[0].id) });
   }
   return A[key] = out;
 }
@@ -258,7 +277,7 @@ function tvApp() {
   let body = '';
   if (tab === 'now') {
     const mkt = (HUBS[M.hub] || {}).m || 'US', L = all.filter(s => s.m === mkt && tvOnAir(s, S.year)).map(s => [s, tvViewers(s, S.year - s.y + 1) * (.9 + hashRand(s.seed + S.week)() * .2)]).sort((a, b) => b[1] - a[1]).slice(0, 25);
-    body = `<p class="muted small">The most-watched shows in ${esc(MARKETS[mkt] ? MARKETS[mkt].name : mkt)} this week. Streaming counts views in the first week.</p><table class="grid small"><thead><tr><th>#</th><th>Show</th><th>Channel</th><th>Season</th><th>Viewers</th></tr></thead><tbody>${L.map(([s, v], i) => `<tr${s.mine ? ' class="mine"' : ''}><td>${i + 1}</td><td>${tvLink(s)}</td><td>${netLink(s.net)}</td><td>${S.year - s.y + 1}</td><td>${v.toFixed(1)}M</td></tr>`).join('')}</tbody></table>`;
+    body = (typeof primetimeHTML === 'function' ? primetimeHTML() : '') + `<h4>The ratings</h4><p class="muted small">The most-watched shows in ${esc(MARKETS[mkt] ? MARKETS[mkt].name : mkt)} this week. Streaming counts views in the first week.</p><table class="grid small"><thead><tr><th>#</th><th>Show</th><th>Channel</th><th>Season</th><th>Viewers</th></tr></thead><tbody>${L.map(([s, v], i) => `<tr${s.mine ? ' class="mine"' : ''}><td>${i + 1}</td><td>${tvLink(s)}</td><td>${netLink(s.net)}</td><td>${S.year - s.y + 1}</td><td>${v.toFixed(1)}M</td></tr>`).join('')}</tbody></table>`;
   } else if (tab === 'nets') {
     body = `<table class="grid small"><thead><tr><th>Channel</th><th>Kind</th><th>Where</th><th>Since</th><th>On air</th></tr></thead><tbody>${Object.values(TV_NETS).filter(n => n.founded <= S.year).map(n => `<tr><td>${netLink(n.k)}</td><td>${esc(n.kind)}</td><td>${esc(hubName(n.hub))}</td><td>${n.founded}</td><td>${all.filter(s => s.net === n.k && tvOnAir(s, S.year)).length}</td></tr>`).join('')}</tbody></table>`;
   } else if (tab === 'shows') {
@@ -269,9 +288,7 @@ function tvApp() {
     const y = UI.tvy || S.year, ys = []; for (let k = S.year; k >= 1950; k--) ys.push(k);
     const prem = all.filter(s => s.y === y && s.m === 'US').sort((a, b) => b.q - a.q).slice(0, 15), fin = all.filter(s => s.y + s.seasons - 1 === y && s.seasons >= 3 && s.m === 'US' && s.last < 9999).slice(0, 10), top = all.filter(s => s.m === 'US' && tvOnAir(s, y)).map(s => [s, tvViewers(s, y - s.y + 1)]).sort((a, b) => b[1] - a[1]).slice(0, 10);
     body = `<div class="filt"><label><span>Year</span>${sel('tv-y', ys.map(k => [k, String(k)]), y)}</label></div><div class="cols two"><section><h4>Most watched, ${y}</h4><ol class="small">${top.map(([s, v]) => `<li>${tvLink(s)} <span class="muted">${esc(TV_NETS[s.net].name)} · ${v.toFixed(1)}M</span></li>`).join('')}</ol><h4>Final seasons</h4><ul class="plain small">${fin.map(s => `<li>${tvLink(s)} <span class="muted">after ${s.seasons} seasons</span></li>`).join('') || '<li class="muted">None of note.</li>'}</ul></section><section><h4>New shows</h4><ul class="plain small">${prem.map(s => `<li>${tvLink(s)} <span class="muted">${esc(TV_NETS[s.net].name)} · ${esc(TV_GENRES[s.g].label.toLowerCase())}</span></li>`).join('')}</ul>${tvEmmets(y).length ? `<h4>Emmets</h4><ul class="plain small">${tvEmmets(y).map(e => `<li>${esc(e.cat)}: ${tvLink(tvShow(e.show))}${e.person !== null && e.person !== undefined ? ` (${pl(e.person)})` : ''}</li>`).join('')}</ul>` : ''}</section></div>`;
-  } else if (tab === 'emmets') {
-    const ys = []; for (let y = S.year; y >= Math.max(1949, S.year - 40); y--) ys.push(y);
-    body = `<p class="muted small">Television's academy, every September. Drama, comedy and limited series, plus the performers, writers and directors.</p><table class="grid small"><thead><tr><th>Year</th><th>Drama</th><th>Comedy</th><th>Limited</th></tr></thead><tbody>${ys.map(y => { const E = tvEmmets(y), c = k => { const e = E.find(x => x.cat === k); return e ? tvLink(tvShow(e.show)) : ''; }; return E.length ? `<tr><td>${y}</td><td>${c('Outstanding Drama Series')}</td><td>${c('Outstanding Comedy Series')}</td><td>${c('Outstanding Limited Series')}</td></tr>` : ''; }).join('')}</tbody></table>`;
+  } else if (tab === 'emmets') { body = typeof emmetsHTML === 'function' ? emmetsHTML() : '';
   } else body = myTvHTML();
   return `<div class="tvapp"><p class="bf-row">${tabs.map(([k, l]) => `<button class="pill${tab === k ? ' on' : ''}" data-tvt="${k}">${l}</button>`).join('')}</p>${body}</div>`;
 }
@@ -281,12 +298,12 @@ function myTvHTML() {
   const M = S.me, me = ME(), shows = M.shows || [], dev = M.tvdev, nets = Object.values(TV_NETS).filter(n => n.orig <= S.year && (HUBS[n.hub] || {}).m === (HUBS[M.hub] || {}).m);
   const cred = Object.entries(M.tvCred || {});
   return `<h4>Your shows</h4>${shows.length ? `<ul class="plain">${shows.map(s => `<li>${tvLink(s)} <span class="muted">${esc(TV_NETS[s.net].name)} · ${s.seas.length} season${s.seas.length > 1 ? 's' : ''} · ${s.status}${s.seas.length ? ` · last season ${s.seas[s.seas.length - 1].v.toFixed(1)}M` : ''}</span></li>`).join('')}</ul>` : '<p class="muted small">None yet.</p>'}
-   ${dev ? `<p class="small">In development: <b>${esc(dev.title)}</b> at ${esc(TV_NETS[dev.net].name)}, the pilot is due ${fmtDate(dev.due, true)}.</p>` : `<h4>Pitch a show</h4><p class="small">Channels take pitches from people with a track record (standing ${Object.entries(PITCH_BAR).map(([k, v]) => `${k} ${v}`).join(', ')}; yours is ${Math.floor(me.standing)}). A finished script helps. One pitch per channel every six months.</p>
-     <div class="filt"><label><span>Channel</span>${sel('tvp-net', nets.map(n => [n.k, `${n.name} (${n.kind})`]), UI.tvpn || (nets[0] || {}).k)}</label><label><span>Kind of show</span>${sel('tvp-g', Object.entries(TV_GENRES).filter(([k]) => !['soap', 'talk', 'variety', 'asadora', 'serial', 'telenovela', 'kdrama'].includes(k)).map(([k, G]) => [k, G.label]), UI.tvpg2 || 'drama')}</label><label class="filt-q"><span>Title</span><input id="tvp-title" type="text" maxlength="50" placeholder="Your show's title"></label></div><p><button class="btn-s" data-tvpitch="1">Pitch it</button></p>`}
+   ${typeof tvPitchHTML === 'function' ? tvPitchHTML() : ''}
    ${cred.length ? `<h4>Your television credits</h4><ul class="plain small">${cred.map(([id, r]) => { const s = tvShow(id); return s ? `<li>${tvLink(s)} <span class="muted">${esc(r)}</span></li>` : ''; }).join('')}</ul>` : ''}`;
 }
 function tvAct(a) {
   const M = S.me, me = ME();
+  if (a.k === 'pitch' && typeof tvPitchAct === 'function') return tvPitchAct(a);
   if (a.k === 'pitch') {
     const net = TV_NETS[a.net], g = TV_GENRES[a.g] ? a.g : 'drama'; if (!net || net.orig > S.year || M.tvdev) return false;
     M.tvPitch = M.tvPitch || {}; if (S.week - (M.tvPitch[net.k] ?? -999) < 26) return false;
@@ -306,9 +323,10 @@ function tvWeek() {
   // credits for TV jobs
   for (const j of M.jobs) if (j.show) (M.tvCred = M.tvCred || {})[j.show] = j.t.split(',')[0];
   // a pilot is due
-  const dev = M.tvdev; if (dev && S.week >= dev.due) {
+  if (typeof tvDevWeek === 'function') tvDevWeek();
+  const dev = M.tvdev; if (dev && (!dev.stage || dev.stage === 'pilot') && S.week >= dev.due) {
     M.tvdev = null; const net = TV_NETS[dev.net];
-    const sk = ['struc', 'dial', 'char', 'vstory'].reduce((t, s) => t + skillOf(me, s), 0) / 4, q = clamp(Math.round(sk * 3.4 + 22 + me.standing / 5 + pgauss() * 10), 10, 97);
+    const sk = ['struc', 'dial', 'char', 'vstory'].reduce((t, s) => t + skillOf(me, s), 0) / 4, q = clamp(Math.round(sk * 3.4 + 22 + me.standing / 5 + (dev.ep !== undefined ? 6 : 0) + (dev.notes || 0) + pgauss() * 10), 10, 97);
     if (prnd() < clamp((q - 45) / 40, .1, .85)) {
       const s = { id: 'me~' + ((M.shows || []).length + 1), mine: 1, net: net.k, g: dev.g, title: dev.title, y: S.year, seasons: 1, last: 9999, m: (HUBS[net.hub] || {}).m || 'US', seed: M.id * 977 + S.week, q, pop: .5, seas: [], status: 'on air', cast: [] };
       const r = hashRand(s.seed); for (let k = 0; k < 4; k++) { const id = tvPickPerson(r, s.m, 'actor', S.year); if (id !== null) s.cast.push(id); }
@@ -373,14 +391,17 @@ function tvClick(t) {
   const d = t.dataset;
   if (d.tvt) { UI.tvt = d.tvt; render(true); return true; }
   if (d.tvpg !== undefined) { UI.tvpg = +d.tvpg; render(true); return true; }
-  if (d.tvpitch) { const n0 = S.me.rollN || 0; doAct({ t: 'tv', k: 'pitch', net: UI.tvpn || ($('#tvp-net') || {}).value, g: UI.tvpg2 || ($('#tvp-g') || {}).value || 'drama', title: ($('#tvp-title') || {}).value || '' }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; }
+  if (d.tvpitch) { const n0 = S.me.rollN || 0; doAct({ t: 'tv', k: 'pitch', net: UI.tvpn || ($('#tvp-net') || {}).value, g: UI.tvpg2 || ($('#tvp-g') || {}).value || 'drama', title: ($('#tvp-title') || {}).value || '', route: UI.tvpr || ($('#tvp-route') || {}).value }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; }
   return false;
 }
 function tvChange(e) {
   const id = e.target.id, v = e.target.value;
   if (id === 'tv-g') { UI.tvg = v; UI.tvpg = 0; render(true); return true; }
   if (id === 'tv-y') { UI.tvy = +v; render(true); return true; }
-  if (id === 'tvp-net') { UI.tvpn = v; return true; }
+  if (id === 'tvp-net') { UI.tvpn = v; render(true); return true; }
+  if (id === 'tvp-route') { UI.tvpr = v; return true; }
+  if (id === 'tvp-title') { UI.tvpt = v; return true; }
+  if (id === 'em-y') { UI.emy = +v; render(true); return true; }
   if (id === 'tvp-g') { UI.tvpg2 = v; return true; }
   return false;
 }

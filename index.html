@@ -187,6 +187,19 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 #savebadge { color: var(--slate-muted, #8FB0AA); margin-left: 8px; }
 .os-txt { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.08); } .os-txt p { margin: 2px 0 6px; } .os-txt .quick { display: flex; flex-wrap: wrap; gap: 4px; } .os-txt .compose { display: flex; gap: 6px; margin-top: 6px; } .os-txt .compose input { flex: 1; min-width: 0; }
 .mrow.unread b, .mrow.unread span, .os-row.unread b { font-weight: 800; } .mrow:not(.unread) { opacity: .8; }
+.wxapp .wxnow { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; } .wxbig { font-size: 42px; font-weight: 800; margin: 4px 0; }
+.wxweek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin: 6px 0 12px; } .wxd { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 8px; background: rgba(255,255,255,.05); text-align: center; } .wxd.on { outline: 2px solid var(--accent); } .wxi { font-size: 24px; } .wxweek.small .wxi { font-size: 18px; }
+.wxyear { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; height: 110px; align-items: end; } .wxyear > div { position: relative; height: 100%; display: flex; align-items: flex-end; justify-content: center; gap: 2px; } .wxyear i { display: block; width: 40%; border-radius: 3px 3px 0 0; } .wxyear i.t { background: #c9a227; } .wxyear i.r { background: #4a7fbf; opacity: .8; } .wxyear small { position: absolute; bottom: -16px; font-size: 10px; }
+.cg { max-width: 560px; margin: 0 auto; } .cg-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; } .cg-logo { font-family: Georgia, serif; font-style: italic; font-size: 24px; }
+.cg-stories { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 10px; } .cg-st { background: none; border: 0; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; } .cg-st .pavatar { outline: 2px solid #f5576c; outline-offset: 2px; }
+.cg-post { border: 1px solid rgba(255,255,255,.1); border-radius: 12px; margin: 0 0 14px; overflow: hidden; } .cg-post header { display: flex; gap: 8px; align-items: center; padding: 8px 10px; } .cg-post p { margin: 4px 10px; } .cg-act { display: flex; gap: 12px; align-items: center; padding: 6px 10px; }
+.cg-ph { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; } .cg-ph.small { aspect-ratio: 1; border-radius: 6px; } .cg-em { font-size: 64px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.25)); } .cg-ph.small .cg-em { font-size: 28px; } .cg-cap { position: absolute; left: 10px; bottom: 8px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.5); font-size: 14px; } .cg-ph.small .cg-cap { display: none; }
+.cg-av { font-size: 24px; } .cg-sugg { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; } .cg-acc { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; }
+.cg-me { display: flex; gap: 12px; align-items: center; } .cg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 10px; } .cg-new .compose { display: flex; gap: 6px; } .cg-new input { flex: 1; min-width: 0; }
+.rt-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 8px 0 12px; } .rt-tiles > div { display: flex; flex-direction: column; gap: 2px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; } .rt-tiles .rt-big { font-size: 30px; line-height: 1.1; } .rt-tiles span { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; } .rt-tiles small { font-size: 11px; line-height: 1.35; }
+@media (max-width: 560px) { .rt-tiles { grid-template-columns: 1fr; } }
+.rh-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; } .rh-card { flex: 0 0 120px; display: flex; flex-direction: column; gap: 3px; font-size: 13px; } .rh-card svg { width: 110px; height: auto; border-radius: 6px; } .rh-buzz li, .rh-ann li { margin: 0 0 8px; }
+.em-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; } .em-cat { border: 1px solid var(--line); border-radius: 10px; padding: 10px; } .em-cat h5 { margin: 0 0 4px; } .em-cat p { margin: 4px 0; }
 .finbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 6px 0; background: var(--line); }
 .finbar span { display: block; height: 100%; }
 .finleg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; }
@@ -328,7 +341,7 @@ ol.chart { list-style: none; padding: 0; margin: 0; } ol.chart li { display: gri
 .mrow { display: grid; grid-template-columns: 130px minmax(0, 1fr) 70px; gap: 6px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 5px 4px; font: inherit; font-size: 13px; color: inherit; cursor: pointer; } .mrow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .mrow.on { background: color-mix(in srgb, var(--accent) 10%, transparent); } .mrow.act b::before { content: '● '; color: var(--accent); }
 .ticks { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px; margin-bottom: 8px; } .tick { display: grid; grid-template-columns: 1fr 120px 40px; align-items: center; gap: 6px; font-size: 12px; } .tick svg { width: 120px; height: 28px; }
 .seq { display: flex; flex-direction: column; gap: 3px; } .srow { display: flex; gap: 3px; align-items: center; } .srow span { width: 54px; font-size: 12px; color: var(--muted); } .step { width: 26px; height: 22px; border: 1px solid var(--line); border-radius: 3px; background: var(--panel); cursor: pointer; } .step.downbeat { border-left: 2px solid var(--muted); } .step.on { background: var(--accent); border-color: var(--accent); }
-.wave { display: flex; gap: 2px; align-items: center; height: 46px; } .seg { width: 14px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: none; cursor: pointer; padding: 0; } .seg i { display: block; width: 8px; background: var(--data, #3b6ea5); border-radius: 2px; } .seg.um i { background: var(--gold, #c9a227); } .seg.cut { opacity: .2; }
+.wave { display: flex; gap: 2px; align-items: center; height: 46px; } .wave .seg { width: 14px; height: 44px; display: flex; align-items: center; justify-content: center; border: 0; background: none; cursor: pointer; padding: 0; } .wave .seg i { display: block; width: 8px; background: var(--data, #3b6ea5); border-radius: 2px; } .wave .seg.um i { background: var(--gold, #c9a227); } .wave .seg.cut { opacity: .2; }
 .timeline { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; } .clip2 { padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; background: color-mix(in srgb, var(--data, #3b6ea5) 12%, var(--panel)); cursor: pointer; font: inherit; color: inherit; } .clip2.on { outline: 2px solid var(--accent); }
 .memgrid { display: grid; grid-template-columns: repeat(4, 54px); gap: 6px; } .mem { height: 54px; font-size: 24px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; } .mem.up { background: color-mix(in srgb, var(--accent) 12%, var(--panel)); }
 .cuepad { display: flex; gap: 10px; align-items: center; } .cuelight { width: 26px; height: 26px; border-radius: 50%; background: var(--line); transition: background .08s; } .cuelight.lit { background: var(--accent); box-shadow: 0 0 14px var(--accent); }
@@ -836,7 +849,7 @@ tr.blocked td { opacity: .55; }
   <button data-tab="news">Trade press</button>
   <button data-tab="bo">Box office</button>
   <button data-tab="tv">TV</button>
-  <button data-tab="films" title="The Recorded Entertainment Encyclopedia &amp; Library: films and people">REEL</button>
+  <button data-tab="reel_home" title="The Recorded Entertainment Encyclopedia &amp; Library">REEL</button>
   <button data-tab="cos">Companies</button>
   <button data-tab="awards">Awards</button>
   <button data-tab="careers">Careers</button>
@@ -10313,6 +10326,7 @@ function release(f) {
     if (fs > 0) for (const m in f.gross) if (m !== f.m && m !== fm) f.gross[m] *= tgt / fs;
     f.gross[fm] = f.fixedHome;
   }
+  if (typeof wxBoxMul === 'function') { const wk = wxBoxMul(f); if (wk !== 1 && f.gross[f.m]) f.gross[f.m] *= wk; }   // the opening weekend's weather, from the day you arrive
   f.total = Object.values(f.gross).reduce((s, v) => s + v, 0);
   f.foreign = f.total - (f.gross[f.m] || 0);
   f.reviews = Math.round(clamp(q + gauss() * (f.fixedQ != null ? 2 : 6) + (f.fixedQ != null ? 0 : (CRITIC_BIAS[f.genre] || 0)), 3, 99));
@@ -11281,6 +11295,7 @@ function closeWeek(a) {
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
   if (typeof correspondWeek === 'function') correspondWeek();
+  if (typeof weatherWeek === 'function') weatherWeek();
   if (typeof currSchoolWeek === 'function') currSchoolWeek();
   if (typeof bazaarWeek === 'function') bazaarWeek();
   if (typeof shopWeek === 'function') shopWeek();
@@ -11689,6 +11704,8 @@ function applyAct(a) {
     case 'invest': case 'withdraw': return coMoney(a);
     case 'selffund': return selfFund(a);
     case 'coinv': return coinvAct(a);
+    case 'cgpost': return cgPostAct(a);
+    case 'cgfollow': return cgFollow(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
     case 'rewrite': return rewriteScript(a);
@@ -15030,7 +15047,7 @@ function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar ho
 // for when you should be writing. Most open a window onto the game; a few are just for fiddling with.
 const APPS = [
   ['mail', '✉️', 'Mail'], ['jobs', '💼', 'CrewList'], ['trades', '📰', 'The Daily Slate'], ['gea', '🎞️', 'REEL'], ['bank', '🏦', 'Bank'],
-  ['flick', '📸', 'Flick'], ['notes', '📝', 'Notes'], ['sweep', '🎬', 'Clapper Sweep'], ['weather', '⛅', 'Weather'], ['write', '✍️', 'Scriptwriter']
+  ['flick', '📸', 'Clapgram'], ['notes', '📝', 'Notes'], ['sweep', '🎬', 'Clapper Sweep'], ['weather', '⛅', 'Weather'], ['write', '✍️', 'Scriptwriter']
 ];
 // Flick: what your contacts post. Same posts every week for the same people (hash), plus their real life events.
 const FLICK_POSTS = ['On set at 5am. Coffee number three. {film}', 'Wrapped! Thank you to the best crew in the world 🎬', 'Brunch with the best people', 'New headshots. Be honest.', 'The view from today\'s location 🌅', 'Rewatching an old favourite tonight. Some films just hold up.', 'Reading scripts in the park like a cliché', 'My dog has better taste in films than most critics', 'Can\'t say what I\'m working on. But it\'s big. 🤐', 'Festival season. Send help (and snacks).', 'Grateful.', 'This sunset did NOT need to go this hard'];
@@ -15064,10 +15081,10 @@ function appWindow(k) {
     case 'trades': { const L = []; for (let i = S.news.length - 1; i >= 0 && L.length < 14; i--) L.push(i); return `<p class="eyebrow">The Daily Slate · ${fmtDate(S.week, true)}</p><ul class="plain">${L.map(i => `<li><a href="#" class="lk" data-go="article:${i}">${esc(S.news[i].text)}</a> <span class="muted small">${esc(S.news[i].type)}</span></li>`).join('')}</ul>`; }
     case 'gea': { const tabsG = `<p class="bf-row"><span class="gealogo">REEL</span> <button class="pill${UI.geatab !== 'star' ? ' on' : ''}" data-geatab="search">Search</button><button class="pill${UI.geatab === 'star' ? ' on' : ''}" data-geatab="star">⭐ Buzz Index</button></p>`; if (UI.geatab === 'star' && typeof starmeterHTML === 'function') return tabsG + starmeterHTML(); const q = (UI.gq || '').toLowerCase().trim(); const F = q.length > 1 ? S.films.filter(f => f.title.toLowerCase().includes(q)).slice(0, 8) : [], Pp = q.length > 1 ? S.people.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8) : []; return tabsG + `<p><input id="gq" type="search" placeholder="Search everything: films, people, companies, artists, songs, prizes, lessons…" value="${esc(UI.gq || '')}"></p>${F.length || Pp.length ? `<div class="cols two"><div><h4>Films</h4><ul class="plain">${F.map(f => `<li>${fl(f.id)} <span class="muted">${f.rel !== null ? yearOf(f.rel) : 'in production'}</span></li>`).join('')}</ul></div><div><h4>People</h4><ul class="plain">${Pp.map(p => `<li>${pl(p.id)} <span class="muted">${esc(ROLE_LABEL[p.role])}</span></li>`).join('')}</ul></div></div>` : '<p class="muted">Type at least two letters.</p>'}${typeof worldSearchHTML === 'function' ? worldSearchHTML(q) : ''}<p><button class="linkish" data-gea="films">Open the full archive ›</button></p>`; }
     case 'bank': { const life = ORIGIN.life[M.life], c = typeof myCo === 'function' ? myCo() : null; const money = M.diary.filter(d => /^Money:/.test(d.t)).slice(-6).reverse(); return `<div class="kpis mini"><div><span>Balance</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b></div><div><span>Rent</span><b>${fmtCash(usd(life.rent))}/wk</b></div><div><span>Owed</span><b>${fmtCash(M.debt + (M.shark || 0))}</b></div>${c ? `<div><span>${esc(c.name)}</span><b>${fmtCash(Math.round(c.cash * 1e6))}</b></div>` : ''}</div><h4>Recent weeks</h4><ul class="plain">${money.map(d => `<li><time>${fmtDate(d.w, true)}</time> ${esc(d.t.replace(/^Money: /, ''))}</li>`).join('') || '<li class="muted">Nothing yet.</li>'}</ul>`; }
-    case 'flick': { const L = flickFeed(); return `<div class="flick">${L.map(x => `<div class="post">${phoneAvatar(x.who, 34)}<div><b>${pl(x.who)}</b> <span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w' : 'this week'}</span><p>${esc(x.t)}</p>${(M.liked || {})[x.id] ? '<span class="muted small">♥ Liked</span>' : `<button class="linkish" data-like="${x.id}|${x.who}">♡ Like</button>`}</div></div>`).join('') || '<p class="muted">Nobody you know has posted anything. Meet more people.</p>'}</div>`; }
+    case 'flick': if (typeof clapgramApp === 'function') return clapgramApp(); { const L = flickFeed(); return `<div class="flick">${L.map(x => `<div class="post">${phoneAvatar(x.who, 34)}<div><b>${pl(x.who)}</b> <span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w' : 'this week'}</span><p>${esc(x.t)}</p>${(M.liked || {})[x.id] ? '<span class="muted small">♥ Liked</span>' : `<button class="linkish" data-like="${x.id}|${x.who}">♡ Like</button>`}</div></div>`).join('') || '<p class="muted">Nobody you know has posted anything. Meet more people.</p>'}</div>`; }
     case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
     case 'sweep': { if (!UI.sweep) sweepNew(); const G = UI.sweep; return `<p class="muted small">${G.over > 0 ? 'Cleared! That\'s a wrap.' : G.over < 0 ? 'Boom. Reshoot?' : 'Find the clean takes. Avoid the 9 bad ones.'} <button class="btn-s ghost" data-sweep="new">New game</button></p><div class="sweep" style="grid-template-columns:repeat(${G.n}, 28px)">${Array.from({ length: G.n * G.n }, (_, i) => { const o = G.open.includes(i), m = G.mines.includes(i), c = o && !m ? sweepCount(i) : 0; return `<button class="cell${o ? ' open' : ''}${o && m ? ' mine' : ''}" data-sweep="${i}" ${o || G.over ? 'disabled' : ''}>${o ? (m ? '💥' : c || '') : ''}</button>`; }).join('')}</div>`; }
-    case 'weather': { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
+    case 'weather': if (typeof weatherApp === 'function') return weatherApp(); { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
     case 'write': return `<p>Your scripts live in the Create tab.</p><p><button class="btn-s" data-dtab="create">Open your scripts ›</button></p>`;
     default: return appWindow2(k);
   }
@@ -19970,7 +19987,7 @@ const OS_GROUPS = [
   ['Play', ['sweep', 'match', 'cue', 'scramble', 'store']]
 ];
 const OS_EXTRA = { library: ['📚', 'Craft Library', 'Every field\'s lessons: how it\'s done, the decisions, and examples from this world'], home: ['🏠', 'Home', 'Everything that needs you, at a glance'], cal: ['📅', 'Calendar', 'Your week and everything booked'], contacts: ['👥', 'Contacts', 'The people who matter, and when you last spoke'] };
-const OS_SUB = { mail: 'Offers, replies and fan mail', jobs: 'Every listing you\'ve heard about, with your odds', trades: 'The trade paper: this week and the archive', gea: 'Search everything: films, people, companies, artists, songs, prizes and lessons', bank: 'Balance, net worth and where the money went', flick: 'What your contacts are posting', notes: 'Saved in this browser', sweep: 'Find the clean takes', weather: 'Conditions in your city', write: 'Your scripts', ticker: 'The Bourse: shares in the companies that make films', studio: 'Record and mix', cutroom: 'Cut your video', store: 'Games and pro software', match: 'A memory game', cue: 'Hit the cue on the beat', scramble: 'Unscramble film words', bazaar: 'Gear, books, experiences and film history' };
+const OS_SUB = { mail: 'Offers, replies and fan mail', jobs: 'Every listing you\'ve heard about, with your odds', trades: 'The trade paper: this week and the archive', gea: 'Search everything: films, people, companies, artists, songs, prizes and lessons', bank: 'Balance, net worth and where the money went', flick: 'The industry\'s photo app: sets, wraps, premieres and pets', notes: 'Saved in this browser', sweep: 'Find the clean takes', weather: 'Conditions in your city', write: 'Your scripts', ticker: 'The Bourse: shares in the companies that make films', studio: 'Record and mix', cutroom: 'Cut your video', store: 'Games and pro software', match: 'A memory game', cue: 'Hit the cue on the beat', scramble: 'Unscramble film words', bazaar: 'Gear, books, experiences and film history' };
 function osApp(k) { if (OS_EXTRA[k]) return [k].concat(OS_EXTRA[k]); const A = APPS.find(a => a[0] === k); return A ? [A[0], A[1], A[2], OS_SUB[k] || ''] : null; }
 function osBadge(k) {
   const M = S.me;
@@ -22496,12 +22513,21 @@ function filmReviews(f) {
   const mine = S.me ? (S.me.myReviews || []).filter(v => v.film === f.id) : [];
   for (const v of mine) { out.unshift({ who: ME().name, out: v.out || 'your blog', sc: v.sc, q: v.q, mine: 1, counts: criticCounts() }); if (criticCounts()) { sum += v.sc; if (v.sc >= 58) pos++; } }
   const n = N + mine.filter(() => criticCounts()).length;
-  return RVC.m[key] = { list: out, n, score: Math.round(sum / Math.max(1, n)), thumbs: Math.round(pos / Math.max(1, n) * 100) };
+  // Rogerscore: the leading critics only, weighted by their outlet's standing (famous takes count double)
+  let ws = 0, wt = 0; for (const v of out) { if (v.sc === null || (v.mine && !v.counts)) continue; const w = v.famous ? 2 : v.mine ? 1 : ({ 1: 1.6, 2: 1.2, 3: .9 }[(CRITIC[v.who] && OUTLET[CRITIC[v.who].out] || {}).tier] || 1); ws += v.sc * w; wt += w; }
+  const top = wt ? Math.round(ws / wt) : Math.round(sum / Math.max(1, n));
+  // Audience: what ticket buyers thought, out of ten; crowds forgive what critics don't, and the other way round
+  const ar = hashRand(f.id * 389 + 5)(), gA = { Action: 8, Comedy: 6, Horror: 2, Superhero: 9, Animation: 7, Musical: 5, Romance: 4, 'Sci-fi': 4, 'Martial arts': 6, Documentary: -2, Drama: -3, Period: -4, War: 1, Western: 2 }[f.genre] || 0;
+  const aud = Math.round(clamp(base * .5 + 28 + gA + Math.min(14, Math.log2(1 + (f.hitRatio || 0)) * 5) + (f.cult || 0) * .08 + (ar - .5) * 12, 12, 97)) / 10;
+  return RVC.m[key] = { list: out, n, score: top, thumbs: Math.round(pos / Math.max(1, n) * 100), aud, audN: Math.round(Math.max(120, (f.total || 1) * (y < 1995 ? 400 : 6000) * (.5 + ar))) };
 }
+// the three numbers, side by side and the same size, each with what it is
+const SCORE_HOW = { thumbs: 'Share of all counted critics, big outlets and small, who gave it a positive review (60 or better).', roger: 'Weighted average of the leading critics only: the major papers, magazines and broadcasters count most.', aud: 'Ticket buyers\' average rating out of ten. Crowds and critics often disagree.' };
+function scoreTiles(R) { const cls = (v, g, b) => v >= g ? 'good' : v < b ? 'bad' : ''; return `<div class="rt-tiles"><div><b class="rt-big ${cls(R.thumbs, 60, 40)}">${R.thumbs}%</b><span>Thumbs</span><small>${R.n} critics · ${esc(THUMB_LABEL(R.thumbs))}</small><small class="muted">${SCORE_HOW.thumbs}</small></div><div><b class="rt-big ${cls(R.score, 60, 40)}">${R.score}</b><span>Rogerscore</span><small>out of 100</small><small class="muted">${SCORE_HOW.roger}</small></div><div><b class="rt-big ${cls(R.aud, 6.5, 4.5)}">${R.aud.toFixed(1)}</b><span>Audience</span><small>${R.audN.toLocaleString()} ratings</small><small class="muted">${SCORE_HOW.aud}</small></div></div>`; }
 function thumbBadge(R) { const c = R.thumbs >= 70 ? 'good' : R.thumbs < 45 ? 'bad' : ''; return `<span class="rt-badge ${c}"><b>${R.thumbs}%</b> ${R.thumbs >= 60 ? '👍' : R.thumbs >= 45 ? '👉' : '👎'}</span>`; }
 function rogerPanelHTML(f) {
   const R = filmReviews(f); if (!R) return '';
-  return `<section class="panel rt"><h3>Roger That <span class="muted small">the review aggregator</span></h3><div class="rt-top"><div><b class="rt-big">${R.thumbs}%</b><span>Thumb-o-meter · ${THUMB_LABEL(R.thumbs)}</span></div><div><b class="rt-big">${R.score}</b><span>Rogerscore · ${R.n} reviews</span></div></div>
+  return `<section class="panel rt"><h3>Roger That <span class="muted small">the review aggregator</span></h3>${scoreTiles(R)}
    <ul class="rt-list">${R.list.slice(0, 8).map(v => `<li class="${v.famous ? 'famous' : ''}${v.mine ? ' mine' : ''}"><span class="rt-s ${v.sc === null ? '' : v.sc >= 60 ? 'good' : v.sc < 40 ? 'bad' : ''}">${v.sc === null ? '—' : v.sc}</span><div><q>${esc(v.q)}</q><small>${esc(v.who)}${v.out ? ', ' + esc(v.out) : ''}${v.famous ? ' · <i>famous take</i>' : ''}${v.mine && !v.counts ? ' · not counted yet' : ''}</small></div></li>`).join('')}</ul>${R.list.length > 8 ? `<p class="muted small">And ${R.n - 8} more reviews.</p>` : ''}</section>`;
 }
 // ---- the app ----
@@ -22509,15 +22535,15 @@ function rogerApp() {
   const t = UI.rt || 'now', q = (UI.rtq || '').toLowerCase().trim(), y = S.year;
   const tabs = [['now', 'Now showing'], ['year', 'Best of ' + y], ['all', 'All-time'], ['critics', 'Critics'], ['mine', 'Your reviews']];
   let body = '';
-  const row = f => { const R = filmReviews(f); return R ? `<tr><td>${fl(f.id)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n">${thumbBadge(R)}</td><td class="n">${R.score}</td><td class="n muted">${R.n}</td></tr>` : ''; };
-  const table = L => `<table class="os-table"><thead><tr><th>Film</th><th>Year</th><th>Genre</th><th class="n">Thumbs</th><th class="n">Rogerscore</th><th class="n">Reviews</th></tr></thead><tbody>${L.map(row).join('') || '<tr><td colspan="6" class="muted">Nothing here yet.</td></tr>'}</tbody></table>`;
+  const row = f => { const R = filmReviews(f); return R ? `<tr><td>${fl(f.id)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n">${R.thumbs}%</td><td class="n">${R.score}</td><td class="n">${R.aud.toFixed(1)}</td><td class="n muted">${R.n}</td></tr>` : ''; };
+  const table = L => `<table class="os-table"><thead><tr><th>Film</th><th>Year</th><th>Genre</th><th class="n" title="${SCORE_HOW.thumbs}">Thumbs</th><th class="n" title="${SCORE_HOW.roger}">Rogerscore</th><th class="n" title="${SCORE_HOW.aud}">Audience</th><th class="n">Critics</th></tr></thead><tbody>${L.map(row).join('') || '<tr><td colspan="7" class="muted">Nothing here yet.</td></tr>'}</tbody></table>`;
   const rel = S.films.filter(f => f.rel !== null && f.reviews !== undefined && f.rel <= S.week);
   if (t === 'now') body = table(rel.filter(f => S.week - f.rel < 12).sort((a, b) => b.rel - a.rel).slice(0, 40));
   else if (t === 'year') body = table(rel.filter(f => yearOf(f.rel) === y).sort((a, b) => b.reviews - a.reviews).slice(0, 50));
   else if (t === 'all') body = `<div class="os-tools"><input id="rtq" type="search" placeholder="Search any film…" value="${esc(UI.rtq || '')}"></div>${table((q ? rel.filter(f => f.title.toLowerCase().includes(q) || (f.real && f.real.toLowerCase().includes(q))) : rel.filter(f => f.reviews >= 88)).sort((a, b) => b.reviews - a.reviews).slice(0, 80))}`;
   else if (t === 'critics') body = `<table class="os-table"><thead><tr><th>Critic</th><th>Outlet</th><th>Years</th><th>Temperament</th></tr></thead><tbody>${CRITICS.map(c => CRITIC[c[0]]).filter(c => c.from <= y).map(c => `<tr><td><b>${esc(c.name)}</b></td><td>${esc(OUTLET[c.out].name)} <span class="muted small">${esc(OUTLET[c.out].kind)}</span></td><td class="muted">${c.from}–${c.to && c.to < y ? c.to : 'now'}</td><td class="muted">${esc(c.style)}</td></tr>`).join('')}</tbody></table>`;
   else body = myReviewsHTML();
-  return `<div class="rtapp"><div class="rt-brand"><b>Roger That</b><span>${rel.length.toLocaleString()} films · every review, one number</span></div><div class="np-tabs">${tabs.map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-rt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
+  return `<div class="rtapp"><div class="rt-brand"><b>Roger That</b><span>${rel.length.toLocaleString()} films · three ways to read the reviews</span></div><p class="small muted"><b>Thumbs</b>: ${SCORE_HOW.thumbs} <b>Rogerscore</b>: ${SCORE_HOW.roger} <b>Audience</b>: ${SCORE_HOW.aud}</p><div class="np-tabs">${tabs.map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-rt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
 }
 // ---- you, the critic ----
 function criticCounts() { const M = S.me; if (!M) return false; return (M.jobs || []).some(j => /^crit_/.test(j.k)) || followers('blog') >= 5000 || (M.critic && M.critic.approved); }
@@ -24691,41 +24717,41 @@ amb('x_shortoswald', 'legend', 'Win the Oswald for best short film', () => [(S.m
 
 // [key, name, kind, hub, founded, originals from, new shows a year, about]
 const TV_NETS_RAW = [
-  ['nbs', 'NBS', 'broadcast', 'newyork', 1946, 1946, 6, 'The oldest of the big three networks: comedies, cop shows and the late-night institution.'],
-  ['cbn', 'CBN', 'broadcast', 'newyork', 1948, 1948, 6, 'The "Tiffany network": sitcoms, procedurals and the audience that never changes the channel.'],
-  ['abn', 'ABN', 'broadcast', 'hollywood', 1948, 1948, 6, 'Third of the big three; family comedies, soaps and the odd glorious experiment.'],
-  ['vix', 'The Vix Network', 'broadcast', 'hollywood', 1986, 1986, 4, 'The upstart fourth network: animation, reality and shows the others wouldn\'t touch.'],
-  ['seen', 'The Seen', 'broadcast', 'hollywood', 2006, 2006, 3, 'Young-adult drama and superheroes on a budget.'],
-  ['pbn', 'PBN', 'public', 'newyork', 1970, 1970, 2, 'Public television: documentaries, imported period drama and the best children\'s programming in the world.'],
-  ['hbx', 'HBX', 'premium', 'newyork', 1972, 1983, 2, 'Premium cable that decided it wasn\'t television, and changed what television could be.'],
-  ['showtyme', 'Showtyme', 'premium', 'newyork', 1976, 1986, 1, 'The other premium channel: darker, stranger, often brilliant.'],
-  ['amx', 'AMX', 'cable', 'newyork', 1984, 2007, 1, 'Old films on a loop, until a drama about advertising men made it a prestige network.'],
-  ['fxn', 'FXN', 'cable', 'hollywood', 1994, 2002, 2, 'Basic cable with premium ambitions.'],
-  ['comedyc', 'Comedy Centrale', 'cable', 'newyork', 1991, 1992, 1, 'Stand-up, sketch, satire and one very rude cartoon.'],
-  ['mtvee', 'MTVee', 'cable', 'newyork', 1981, 1992, 1, 'Music videos, then reality television, then reality television about music videos.'],
-  ['nickel', 'Nickelodium', 'kids', 'newyork', 1979, 1980, 1, 'Television for children, made to be slimed.'],
-  ['toonx', 'Cartoon Networx', 'kids', 'hollywood', 1992, 1994, 1, 'Animation around the clock, and late at night, for grown-ups.'],
-  ['netflicks', 'Netflicks', 'streaming', 'hollywood', 2013, 2013, 6, 'The red envelope company that became the biggest channel in the world.'],
-  ['hula', 'Hula', 'streaming', 'hollywood', 2012, 2014, 2, 'Network television the day after, and then shows of its own.'],
-  ['prime', 'Prime Viewing', 'streaming', 'hollywood', 2015, 2015, 3, 'A shopping company\'s streaming service, with fantasy budgets.'],
-  ['dizplus', 'Dizney+', 'streaming', 'hollywood', 2019, 2019, 3, 'Every princess, every superhero, every galaxy far away.'],
-  ['peartv', 'Pear TV+', 'streaming', 'hollywood', 2019, 2019, 2, 'A phone company\'s streamer: few shows, expensive ones.'],
-  ['bbx', 'BBX One', 'public', 'london', 1946, 1946, 4, 'Britain\'s public broadcaster: period drama, sitcoms, a time-travelling doctor.'],
-  ['itvee', 'ITVee', 'broadcast', 'london', 1955, 1955, 3, 'Commercial television for Britain: soaps, quizzes and stately homes.'],
-  ['chan4', 'Channel Four', 'broadcast', 'london', 1982, 1982, 2, 'Public-service but commercial, and pleased to shock.'],
-  ['nkh', 'NKH', 'public', 'tokyo', 1953, 1953, 2, 'Japan\'s public broadcaster: the morning drama every household watches with breakfast.'],
-  ['fujitv', 'Fuji Telecast', 'broadcast', 'tokyo', 1959, 1959, 2, 'Trendy dramas and game shows with very elaborate punishments.'],
-  ['kbx', 'KBX', 'broadcast', 'seoul', 1961, 1961, 2, 'Korean drama: sixteen episodes, one great love, a truck.'],
-  ['sbx', 'SBX', 'broadcast', 'seoul', 1991, 1991, 2, 'Korea\'s commercial network, where K-drama became a global export.'],
-  ['dooradarshan', 'Dooradarshan', 'public', 'mumbai', 1959, 1959, 2, 'India\'s public broadcaster, whose epics emptied the streets on Sunday mornings.'],
-  ['starplus', 'Star Plus', 'broadcast', 'mumbai', 1992, 1992, 2, 'Daily family serials, saas-bahu sagas, thousands of episodes.'],
-  ['globus', 'Rede Globus', 'broadcast', 'rio', 1965, 1965, 3, 'The telenovela factory of Brazil: the whole country watches at nine.'],
-  ['televista', 'Televista', 'broadcast', 'mexico', 1955, 1955, 3, 'Mexico\'s giant: telenovelas exported to half the planet.'],
-  ['tfun', 'TF Un', 'broadcast', 'paris', 1975, 1975, 1, 'France\'s biggest channel: crime dramas set in pretty towns.'],
-  ['ardeins', 'Das Erste Eins', 'public', 'berlin', 1954, 1954, 1, 'German public television and its Sunday-night crime show, unbroken since 1970.'],
-  ['raiuno', 'RAY Uno', 'public', 'rome', 1954, 1954, 1, 'Italy\'s public channel: variety, period drama and the song contest.'],
-  ['maple', 'The Maple Network', 'public', 'toronto', 1952, 1952, 1, 'Canada\'s public broadcaster: hockey, comedy and very polite drama.'],
-  ['ausbc', 'AusBC', 'public', 'sydney', 1956, 1956, 1, 'Australia\'s public broadcaster: comedy, crime and the odd children\'s cartoon about dogs.']
+  ['nbs', 'Meridian Broadcasting', 'broadcast', 'newyork', 1946, 1946, 6, 'The oldest of the big three networks: comedies, cop shows and the late-night institution.'],
+  ['cbn', 'Keystone Television', 'broadcast', 'newyork', 1948, 1948, 6, 'The "Tiffany network": sitcoms, procedurals and the audience that never changes the channel.'],
+  ['abn', 'Lighthouse Network', 'broadcast', 'hollywood', 1948, 1948, 6, 'Third of the big three; family comedies, soaps and the odd glorious experiment.'],
+  ['vix', 'Redwood Network', 'broadcast', 'hollywood', 1986, 1986, 4, 'The upstart fourth network: animation, reality and shows the others wouldn\'t touch.'],
+  ['seen', 'Ninefold', 'broadcast', 'hollywood', 2006, 2006, 3, 'Young-adult drama and superheroes on a budget.'],
+  ['pbn', 'Commons Public TV', 'public', 'newyork', 1970, 1970, 2, 'Public television: documentaries, imported period drama and the best children\'s programming in the world.'],
+  ['hbx', 'Velvet', 'premium', 'newyork', 1972, 1983, 2, 'Premium cable that decided it wasn\'t television, and changed what television could be.'],
+  ['showtyme', 'Marquee Premium', 'premium', 'newyork', 1976, 1986, 1, 'The other premium channel: darker, stranger, often brilliant.'],
+  ['amx', 'Ampersand', 'cable', 'newyork', 1984, 2007, 1, 'Old films on a loop, until a drama about advertising men made it a prestige network.'],
+  ['fxn', 'Blue Ember', 'cable', 'hollywood', 1994, 2002, 2, 'Basic cable with premium ambitions.'],
+  ['comedyc', 'Giggle Box', 'cable', 'newyork', 1991, 1992, 1, 'Stand-up, sketch, satire and one very rude cartoon.'],
+  ['mtvee', 'Jukebox TV', 'cable', 'newyork', 1981, 1992, 1, 'Music videos, then reality television, then reality television about music videos.'],
+  ['nickel', 'Treehouse Kids', 'kids', 'newyork', 1979, 1980, 1, 'Television for children, made to be slimed.'],
+  ['toonx', 'Inkwell Toons', 'kids', 'hollywood', 1992, 1994, 1, 'Animation around the clock, and late at night, for grown-ups.'],
+  ['netflicks', 'Streamly', 'streaming', 'hollywood', 2013, 2013, 6, 'The red envelope company that became the biggest channel in the world.'],
+  ['hula', 'Couchwave', 'streaming', 'hollywood', 2012, 2014, 2, 'Network television the day after, and then shows of its own.'],
+  ['prime', 'Parcel Plus', 'streaming', 'hollywood', 2015, 2015, 3, 'A shopping company\'s streaming service, with fantasy budgets.'],
+  ['dizplus', 'Castle+', 'streaming', 'hollywood', 2019, 2019, 3, 'Every princess, every superhero, every galaxy far away.'],
+  ['peartv', 'Orchard+', 'streaming', 'hollywood', 2019, 2019, 2, 'A phone company\'s streamer: few shows, expensive ones.'],
+  ['bbx', 'Albion One', 'public', 'london', 1946, 1946, 4, 'Britain\'s public broadcaster: period drama, sitcoms, a time-travelling doctor.'],
+  ['itvee', 'Tower Television', 'broadcast', 'london', 1955, 1955, 3, 'Commercial television for Britain: soaps, quizzes and stately homes.'],
+  ['chan4', 'Signal Four', 'broadcast', 'london', 1982, 1982, 2, 'Public-service but commercial, and pleased to shock.'],
+  ['nkh', 'Kumo Public Broadcasting', 'public', 'tokyo', 1953, 1953, 2, 'Japan\'s public broadcaster: the morning drama every household watches with breakfast.'],
+  ['fujitv', 'Sakura Telecast', 'broadcast', 'tokyo', 1959, 1959, 2, 'Trendy dramas and game shows with very elaborate punishments.'],
+  ['kbx', 'Hanbit Broadcasting', 'broadcast', 'seoul', 1961, 1961, 2, 'Korean drama: sixteen episodes, one great love, a truck.'],
+  ['sbx', 'Namsan TV', 'broadcast', 'seoul', 1991, 1991, 2, 'Korea\'s commercial network, where K-drama became a global export.'],
+  ['dooradarshan', 'Bharat Vision', 'public', 'mumbai', 1959, 1959, 2, 'India\'s public broadcaster, whose epics emptied the streets on Sunday mornings.'],
+  ['starplus', 'Comet Plus', 'broadcast', 'mumbai', 1992, 1992, 2, 'Daily family serials, saas-bahu sagas, thousands of episodes.'],
+  ['globus', 'Rede Estrela', 'broadcast', 'rio', 1965, 1965, 3, 'The telenovela factory of Brazil: the whole country watches at nine.'],
+  ['televista', 'Telesol', 'broadcast', 'mexico', 1955, 1955, 3, 'Mexico\'s giant: telenovelas exported to half the planet.'],
+  ['tfun', 'Tricolore Un', 'broadcast', 'paris', 1975, 1975, 1, 'France\'s biggest channel: crime dramas set in pretty towns.'],
+  ['ardeins', 'Ostwind Eins', 'public', 'berlin', 1954, 1954, 1, 'German public television and its Sunday-night crime show, unbroken since 1970.'],
+  ['raiuno', 'Tevere Uno', 'public', 'rome', 1954, 1954, 1, 'Italy\'s public channel: variety, period drama and the song contest.'],
+  ['maple', 'Northern Lights Network', 'public', 'toronto', 1952, 1952, 1, 'Canada\'s public broadcaster: hockey, comedy and very polite drama.'],
+  ['ausbc', 'Southern Cross Broadcasting', 'public', 'sydney', 1956, 1956, 1, 'Australia\'s public broadcaster: comedy, crime and the odd children\'s cartoon about dogs.']
 ];
 const TV_NETS = {}; for (const [k, name, kind, hub, founded, orig, per, d] of TV_NETS_RAW) TV_NETS[k] = { k, name, kind, hub, founded, orig, per, d };
 // What kind of shows each kind of channel makes (weights), and the genres' shapes.
@@ -24897,7 +24923,26 @@ function tvViewers(s, season) {   // average viewers per episode for a season, m
 const EP_A = ['Pilot', 'The One Where', 'Homecoming', 'Cold Open', 'The Long Night', 'Exit Strategy', 'Blood Money', 'Second Chances', 'The Reunion', 'Fault Lines', 'Ghosts', 'Christmas Special', 'The Wedding', 'Unfinished Business', 'Lockdown', 'Day One', 'The Trial', 'Endgame', 'Old Habits', 'Small Mercies'];
 function episodeTitles(s, season, n) { const r = hashRand(s.seed + season * 97); return Array.from({ length: n }, (_, i) => season === 1 && i === 0 ? 'Pilot' : EP_A[1 + Math.floor(r() * (EP_A.length - 1))] + (r() < .3 ? ` (Part ${1 + Math.floor(r() * 2)})` : '')); }
 // ---- the Emmets for television: every September ----
-const TV_CATS = [['Outstanding Drama Series', ['prestige', 'drama', 'crime', 'scifi', 'period']], ['Outstanding Comedy Series', ['sitcom', 'animation']], ['Outstanding Limited Series', ['limited', 'doc']], ['Lead Actor or Actress, Drama', ['prestige', 'drama', 'crime', 'scifi', 'period'], 'cast'], ['Lead Actor or Actress, Comedy', ['sitcom'], 'cast'], ['Writing for a Drama Series', ['prestige', 'drama', 'crime'], 'creator'], ['Directing for a Drama Series', ['prestige', 'drama', 'scifi'], 'dir']];
+// [category, genres that qualify, who's named (cast = the lead, cast2 = the second lead, creator, dir), what it honours]
+const TV_CATS = [
+  ['Outstanding Drama Series', ['prestige', 'drama', 'crime', 'scifi', 'period', 'procedural'], null, 'The year\'s best continuing drama, voted by the whole academy.'],
+  ['Outstanding Comedy Series', ['sitcom', 'animation'], null, 'The best half-hour (or so) of the year, live audience or not.'],
+  ['Outstanding Limited Series', ['limited'], null, 'A story told in one season and finished: the miniseries and the anthology.'],
+  ['Lead Performer, Drama', ['prestige', 'drama', 'crime', 'scifi', 'period'], 'cast', 'The lead of a drama series, judged on one submitted episode.'],
+  ['Supporting Performer, Drama', ['prestige', 'drama', 'crime', 'scifi', 'period', 'procedural'], 'cast2', 'The scene-stealer of a drama ensemble.'],
+  ['Lead Performer, Comedy', ['sitcom'], 'cast', 'The lead of a comedy series: timing, warmth and the face that sells the joke.'],
+  ['Supporting Performer, Comedy', ['sitcom'], 'cast2', 'The neighbour, the boss, the best friend who gets the biggest laughs.'],
+  ['Lead Performer, Limited Series', ['limited'], 'cast', 'A star turn across a single, finished story.'],
+  ['Writing for a Drama Series', ['prestige', 'drama', 'crime', 'scifi'], 'creator', 'One episode\'s script: structure, dialogue and the scene everyone talked about.'],
+  ['Writing for a Comedy Series', ['sitcom', 'animation'], 'creator', 'The funniest single script of the year.'],
+  ['Directing for a Drama Series', ['prestige', 'drama', 'scifi', 'crime'], 'dir', 'One episode\'s direction: the long take, the set piece, the quiet close-up.'],
+  ['Directing for a Comedy Series', ['sitcom'], 'dir', 'Comedy is rhythm, and this is the episode with the best of it.'],
+  ['Outstanding Animated Program', ['animation', 'kids'], null, 'Drawn, modelled or stop-motion, for adults or for everyone.'],
+  ['Outstanding Documentary Series', ['doc'], null, 'Nonfiction television: true crime, nature, history and the people in it.'],
+  ['Outstanding Competition Program', ['reality'], null, 'Bake-offs, talent shows and islands: the best of reality television.'],
+  ['Outstanding Talk Series', ['talk', 'variety'], null, 'Late night and daytime: the desk, the band, the guest who said too much.'],
+  ['Outstanding Children\'s Program', ['kids'], null, 'Television made for children that adults secretly watch too.']
+];
 function tvEmmets(y) {
   const A = archive(), key = 'tve:' + y; if (A[key]) return A[key];
   if (y < 1949 || y > S.year || (y === S.year && dateOf(S.week).getUTCMonth() < 8)) return A[key] = [];
@@ -24905,7 +24950,7 @@ function tvEmmets(y) {
   for (const [cat, gs, who] of TV_CATS) {
     const L = air.filter(s => gs.includes(s.g)).map(s => [s, s.q + (s.legend ? 25 : 0) + hashRand(s.seed + y * 7 + cat.length)() * 30]).sort((a, b) => b[1] - a[1]);
     if (!L.length) continue; const s = L[0][0], P1 = tvPeople(s);
-    out.push({ cat, show: s.id, person: who === 'cast' ? P1.cast[0] : who === 'creator' ? P1.creator : who === 'dir' ? P1.dirs[0] : null, noms: L.slice(1, 5).map(x => x[0].id) });
+    out.push({ cat, show: s.id, person: who === 'cast' ? P1.cast[0] : who === 'cast2' ? (P1.cast[1] ?? P1.cast[0]) : who === 'creator' ? P1.creator : who === 'dir' ? P1.dirs[0] : null, noms: L.slice(1, 5).map(x => x[0].id) });
   }
   return A[key] = out;
 }
@@ -24941,7 +24986,7 @@ function tvApp() {
   let body = '';
   if (tab === 'now') {
     const mkt = (HUBS[M.hub] || {}).m || 'US', L = all.filter(s => s.m === mkt && tvOnAir(s, S.year)).map(s => [s, tvViewers(s, S.year - s.y + 1) * (.9 + hashRand(s.seed + S.week)() * .2)]).sort((a, b) => b[1] - a[1]).slice(0, 25);
-    body = `<p class="muted small">The most-watched shows in ${esc(MARKETS[mkt] ? MARKETS[mkt].name : mkt)} this week. Streaming counts views in the first week.</p><table class="grid small"><thead><tr><th>#</th><th>Show</th><th>Channel</th><th>Season</th><th>Viewers</th></tr></thead><tbody>${L.map(([s, v], i) => `<tr${s.mine ? ' class="mine"' : ''}><td>${i + 1}</td><td>${tvLink(s)}</td><td>${netLink(s.net)}</td><td>${S.year - s.y + 1}</td><td>${v.toFixed(1)}M</td></tr>`).join('')}</tbody></table>`;
+    body = (typeof primetimeHTML === 'function' ? primetimeHTML() : '') + `<h4>The ratings</h4><p class="muted small">The most-watched shows in ${esc(MARKETS[mkt] ? MARKETS[mkt].name : mkt)} this week. Streaming counts views in the first week.</p><table class="grid small"><thead><tr><th>#</th><th>Show</th><th>Channel</th><th>Season</th><th>Viewers</th></tr></thead><tbody>${L.map(([s, v], i) => `<tr${s.mine ? ' class="mine"' : ''}><td>${i + 1}</td><td>${tvLink(s)}</td><td>${netLink(s.net)}</td><td>${S.year - s.y + 1}</td><td>${v.toFixed(1)}M</td></tr>`).join('')}</tbody></table>`;
   } else if (tab === 'nets') {
     body = `<table class="grid small"><thead><tr><th>Channel</th><th>Kind</th><th>Where</th><th>Since</th><th>On air</th></tr></thead><tbody>${Object.values(TV_NETS).filter(n => n.founded <= S.year).map(n => `<tr><td>${netLink(n.k)}</td><td>${esc(n.kind)}</td><td>${esc(hubName(n.hub))}</td><td>${n.founded}</td><td>${all.filter(s => s.net === n.k && tvOnAir(s, S.year)).length}</td></tr>`).join('')}</tbody></table>`;
   } else if (tab === 'shows') {
@@ -24952,9 +24997,7 @@ function tvApp() {
     const y = UI.tvy || S.year, ys = []; for (let k = S.year; k >= 1950; k--) ys.push(k);
     const prem = all.filter(s => s.y === y && s.m === 'US').sort((a, b) => b.q - a.q).slice(0, 15), fin = all.filter(s => s.y + s.seasons - 1 === y && s.seasons >= 3 && s.m === 'US' && s.last < 9999).slice(0, 10), top = all.filter(s => s.m === 'US' && tvOnAir(s, y)).map(s => [s, tvViewers(s, y - s.y + 1)]).sort((a, b) => b[1] - a[1]).slice(0, 10);
     body = `<div class="filt"><label><span>Year</span>${sel('tv-y', ys.map(k => [k, String(k)]), y)}</label></div><div class="cols two"><section><h4>Most watched, ${y}</h4><ol class="small">${top.map(([s, v]) => `<li>${tvLink(s)} <span class="muted">${esc(TV_NETS[s.net].name)} · ${v.toFixed(1)}M</span></li>`).join('')}</ol><h4>Final seasons</h4><ul class="plain small">${fin.map(s => `<li>${tvLink(s)} <span class="muted">after ${s.seasons} seasons</span></li>`).join('') || '<li class="muted">None of note.</li>'}</ul></section><section><h4>New shows</h4><ul class="plain small">${prem.map(s => `<li>${tvLink(s)} <span class="muted">${esc(TV_NETS[s.net].name)} · ${esc(TV_GENRES[s.g].label.toLowerCase())}</span></li>`).join('')}</ul>${tvEmmets(y).length ? `<h4>Emmets</h4><ul class="plain small">${tvEmmets(y).map(e => `<li>${esc(e.cat)}: ${tvLink(tvShow(e.show))}${e.person !== null && e.person !== undefined ? ` (${pl(e.person)})` : ''}</li>`).join('')}</ul>` : ''}</section></div>`;
-  } else if (tab === 'emmets') {
-    const ys = []; for (let y = S.year; y >= Math.max(1949, S.year - 40); y--) ys.push(y);
-    body = `<p class="muted small">Television's academy, every September. Drama, comedy and limited series, plus the performers, writers and directors.</p><table class="grid small"><thead><tr><th>Year</th><th>Drama</th><th>Comedy</th><th>Limited</th></tr></thead><tbody>${ys.map(y => { const E = tvEmmets(y), c = k => { const e = E.find(x => x.cat === k); return e ? tvLink(tvShow(e.show)) : ''; }; return E.length ? `<tr><td>${y}</td><td>${c('Outstanding Drama Series')}</td><td>${c('Outstanding Comedy Series')}</td><td>${c('Outstanding Limited Series')}</td></tr>` : ''; }).join('')}</tbody></table>`;
+  } else if (tab === 'emmets') { body = typeof emmetsHTML === 'function' ? emmetsHTML() : '';
   } else body = myTvHTML();
   return `<div class="tvapp"><p class="bf-row">${tabs.map(([k, l]) => `<button class="pill${tab === k ? ' on' : ''}" data-tvt="${k}">${l}</button>`).join('')}</p>${body}</div>`;
 }
@@ -24964,12 +25007,12 @@ function myTvHTML() {
   const M = S.me, me = ME(), shows = M.shows || [], dev = M.tvdev, nets = Object.values(TV_NETS).filter(n => n.orig <= S.year && (HUBS[n.hub] || {}).m === (HUBS[M.hub] || {}).m);
   const cred = Object.entries(M.tvCred || {});
   return `<h4>Your shows</h4>${shows.length ? `<ul class="plain">${shows.map(s => `<li>${tvLink(s)} <span class="muted">${esc(TV_NETS[s.net].name)} · ${s.seas.length} season${s.seas.length > 1 ? 's' : ''} · ${s.status}${s.seas.length ? ` · last season ${s.seas[s.seas.length - 1].v.toFixed(1)}M` : ''}</span></li>`).join('')}</ul>` : '<p class="muted small">None yet.</p>'}
-   ${dev ? `<p class="small">In development: <b>${esc(dev.title)}</b> at ${esc(TV_NETS[dev.net].name)}, the pilot is due ${fmtDate(dev.due, true)}.</p>` : `<h4>Pitch a show</h4><p class="small">Channels take pitches from people with a track record (standing ${Object.entries(PITCH_BAR).map(([k, v]) => `${k} ${v}`).join(', ')}; yours is ${Math.floor(me.standing)}). A finished script helps. One pitch per channel every six months.</p>
-     <div class="filt"><label><span>Channel</span>${sel('tvp-net', nets.map(n => [n.k, `${n.name} (${n.kind})`]), UI.tvpn || (nets[0] || {}).k)}</label><label><span>Kind of show</span>${sel('tvp-g', Object.entries(TV_GENRES).filter(([k]) => !['soap', 'talk', 'variety', 'asadora', 'serial', 'telenovela', 'kdrama'].includes(k)).map(([k, G]) => [k, G.label]), UI.tvpg2 || 'drama')}</label><label class="filt-q"><span>Title</span><input id="tvp-title" type="text" maxlength="50" placeholder="Your show's title"></label></div><p><button class="btn-s" data-tvpitch="1">Pitch it</button></p>`}
+   ${typeof tvPitchHTML === 'function' ? tvPitchHTML() : ''}
    ${cred.length ? `<h4>Your television credits</h4><ul class="plain small">${cred.map(([id, r]) => { const s = tvShow(id); return s ? `<li>${tvLink(s)} <span class="muted">${esc(r)}</span></li>` : ''; }).join('')}</ul>` : ''}`;
 }
 function tvAct(a) {
   const M = S.me, me = ME();
+  if (a.k === 'pitch' && typeof tvPitchAct === 'function') return tvPitchAct(a);
   if (a.k === 'pitch') {
     const net = TV_NETS[a.net], g = TV_GENRES[a.g] ? a.g : 'drama'; if (!net || net.orig > S.year || M.tvdev) return false;
     M.tvPitch = M.tvPitch || {}; if (S.week - (M.tvPitch[net.k] ?? -999) < 26) return false;
@@ -24989,9 +25032,10 @@ function tvWeek() {
   // credits for TV jobs
   for (const j of M.jobs) if (j.show) (M.tvCred = M.tvCred || {})[j.show] = j.t.split(',')[0];
   // a pilot is due
-  const dev = M.tvdev; if (dev && S.week >= dev.due) {
+  if (typeof tvDevWeek === 'function') tvDevWeek();
+  const dev = M.tvdev; if (dev && (!dev.stage || dev.stage === 'pilot') && S.week >= dev.due) {
     M.tvdev = null; const net = TV_NETS[dev.net];
-    const sk = ['struc', 'dial', 'char', 'vstory'].reduce((t, s) => t + skillOf(me, s), 0) / 4, q = clamp(Math.round(sk * 3.4 + 22 + me.standing / 5 + pgauss() * 10), 10, 97);
+    const sk = ['struc', 'dial', 'char', 'vstory'].reduce((t, s) => t + skillOf(me, s), 0) / 4, q = clamp(Math.round(sk * 3.4 + 22 + me.standing / 5 + (dev.ep !== undefined ? 6 : 0) + (dev.notes || 0) + pgauss() * 10), 10, 97);
     if (prnd() < clamp((q - 45) / 40, .1, .85)) {
       const s = { id: 'me~' + ((M.shows || []).length + 1), mine: 1, net: net.k, g: dev.g, title: dev.title, y: S.year, seasons: 1, last: 9999, m: (HUBS[net.hub] || {}).m || 'US', seed: M.id * 977 + S.week, q, pop: .5, seas: [], status: 'on air', cast: [] };
       const r = hashRand(s.seed); for (let k = 0; k < 4; k++) { const id = tvPickPerson(r, s.m, 'actor', S.year); if (id !== null) s.cast.push(id); }
@@ -25056,14 +25100,17 @@ function tvClick(t) {
   const d = t.dataset;
   if (d.tvt) { UI.tvt = d.tvt; render(true); return true; }
   if (d.tvpg !== undefined) { UI.tvpg = +d.tvpg; render(true); return true; }
-  if (d.tvpitch) { const n0 = S.me.rollN || 0; doAct({ t: 'tv', k: 'pitch', net: UI.tvpn || ($('#tvp-net') || {}).value, g: UI.tvpg2 || ($('#tvp-g') || {}).value || 'drama', title: ($('#tvp-title') || {}).value || '' }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; }
+  if (d.tvpitch) { const n0 = S.me.rollN || 0; doAct({ t: 'tv', k: 'pitch', net: UI.tvpn || ($('#tvp-net') || {}).value, g: UI.tvpg2 || ($('#tvp-g') || {}).value || 'drama', title: ($('#tvp-title') || {}).value || '', route: UI.tvpr || ($('#tvp-route') || {}).value }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; }
   return false;
 }
 function tvChange(e) {
   const id = e.target.id, v = e.target.value;
   if (id === 'tv-g') { UI.tvg = v; UI.tvpg = 0; render(true); return true; }
   if (id === 'tv-y') { UI.tvy = +v; render(true); return true; }
-  if (id === 'tvp-net') { UI.tvpn = v; return true; }
+  if (id === 'tvp-net') { UI.tvpn = v; render(true); return true; }
+  if (id === 'tvp-route') { UI.tvpr = v; return true; }
+  if (id === 'tvp-title') { UI.tvpt = v; return true; }
+  if (id === 'em-y') { UI.emy = +v; render(true); return true; }
   if (id === 'tvp-g') { UI.tvpg2 = v; return true; }
   return false;
 }
@@ -28722,7 +28769,7 @@ function sectorsHeldHTML() {
 // series, every record, every online channel's videos, every podcast season and every play, each with a page and
 // the people who made it. Your own releases sit among them. Each category has a search, a city filter, sorting and
 // pages of fifty.
-const REEL_CATS = [['films', 'Films'], ['people', 'People'], ['reel_tv', 'Television'], ['reel_music', 'Music'], ['reel_creator', 'Online video'], ['reel_podcast', 'Podcasts'], ['reel_stage', 'Theatre']];
+const REEL_CATS = [['reel_home', 'Home'], ['films', 'Films'], ['people', 'People'], ['reel_tv', 'Television'], ['reel_music', 'Music'], ['reel_creator', 'Online video'], ['reel_podcast', 'Podcasts'], ['reel_stage', 'Theatre']];
 function geaHead(cur) { return `<div class="geahead"><span class="gealogo">REEL</span><span class="muted">The Recorded Entertainment Encyclopedia &amp; Library</span><span class="reelseg">${REEL_CATS.map(([k, l]) => `<button class="pill${cur === k ? ' on' : ''}" data-gea="${k}">${l}</button>`).join('')}</span></div>`; }
 const REEL_FIELD = { reel_music: 'music', reel_creator: 'creator', reel_podcast: 'podcast', reel_stage: 'stage' };
 const REEL_UNIT = { music: 'Release', creator: 'Video', podcast: 'Season', stage: 'Production' };
@@ -28743,6 +28790,7 @@ function reelRows(field) {
   return rows;
 }
 function reelView(tab) {
+  if (tab === 'reel_home') return () => reelHomeHTML();
   if (tab === 'reel_tv') return () => reelTvHTML();
   if (REEL_FIELD[tab]) return () => reelFieldHTML(tab);
   return null;
@@ -28784,6 +28832,27 @@ function worksCreditsHTML(p) {
   if (!p.player || !S.me) return '';
   const W = (S.me.works || []).slice().sort((a, b) => b.rel - a.rel); if (!W.length) return '';
   return `<h3>Music, video, podcasts and stage</h3><div class="tw"><table class="grid"><thead><tr><th>Released</th><th>Title</th><th>Kind</th><th class="n">Audience</th><th class="n">Quality</th></tr></thead><tbody>${W.map(w => `<tr><td>${fmtDate(w.rel, true)}</td><td><a href="#" class="lk" data-go="work:${w.id}">${esc(w.title)}</a></td><td>${esc((WORK_TYPES[w.type] || {}).label || w.type)}</td><td class="n">${Math.round(w.units || 0).toLocaleString()}</td><td class="n">${Math.round(w.q)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ---- the front page: what's hot, what's coming, what people are saying, and the old films having a moment ----
+const ANNIV = [10, 20, 25, 30, 40, 50, 60, 75, 100];
+function reelHomeHTML() {
+  const M = S.me, hub = M ? M.hub : HUB_IDS[0], wk = S.week;
+  const out = S.films.filter(f => f.rel !== null && f.rel <= wk && wk - f.rel < 5 && !f.archive).sort((a, b) => (b.total || 0) - (a.total || 0)).slice(0, 8);
+  const soon = S.active.map(i => S.films[i]).filter(f => f.stage === 3 && f.stageEnd >= wk && f.stageEnd - wk <= 10).sort((a, b) => (a.tier - b.tier) || a.stageEnd - b.stageEnd).slice(0, 8);
+  const buzz = S.news.map((n, i) => [n, i]).filter(([n]) => wk - n.w < 10 && n.type && !/^(Release|Trend|Weekend)$/.test(n.type)).slice(-8).reverse();
+  const y = S.year, annL = [];
+  for (const a of ANNIV) { const L = S.films.filter(f => f.rel !== null && yearOf(f.rel) === y - a && ((f.reviews || 0) >= 80 || (f.hitRatio || 0) >= 4 || (f.cult || 0) >= 60)).sort((p, q) => (q.reviews || 0) + (q.cult || 0) * .3 - (p.reviews || 0) - (p.cult || 0) * .3).slice(0, a >= 50 ? 2 : 1); for (const f of L) annL.push([f, a]); }
+  const VENUES = ['a restored 70mm print at the old Grand', 'an outdoor screening in the park', 'a cast reunion and Q&A', 'a sing-along midnight show', 'a new 4K restoration at the film archive', 'a marathon with the director\'s commentary live', 'a gala at the festival palace'];
+  const ann = annL.slice(0, 8).map(([f, a], i) => ({ f, a, ev: VENUES[(f.id + i) % VENUES.length], when: wk + 1 + ((f.id * 7) % 9) }));
+  const tvOn = typeof tvAllPlus === 'function' ? tvAllPlus().filter(s => typeof tvStatus === 'function' && tvStatus(s) === 'on air').sort((a, b) => (b.legend ? 1 : 0) - (a.legend ? 1 : 0) || b.y - a.y).slice(0, 6) : [];
+  const card = (f, sub) => `<div class="rh-card"><a href="#" data-go="film:${f.id}">${posterSVG(f, 110)}</a><b>${fl(f.id)}</b><small class="muted">${sub}</small></div>`;
+  return geaHead('reel_home') + `<div class="head"><h2>REEL</h2><p class="lede">${S.films.filter(f => f.rel !== null).length.toLocaleString()} films, every person who made them, and everything on television, on record and on stage. Here's what's happening this week.</p></div>
+   <section class="panel"><h3>🔥 Hot right now</h3><div class="rh-row">${out.map(f => card(f, `${fmtM(f.total)} worldwide · ${f.reviews}/100`)).join('') || '<p class="muted">A quiet week at the cinema.</p>'}</div></section>
+   <section class="panel"><h3>🗓️ Coming soon</h3><div class="rh-row">${soon.map(f => card(f, `${fmtDate(f.stageEnd, true)} · ${f.co !== null ? esc(S.companies[f.co].name) : 'independent'}`)).join('') || '<p class="muted">Nothing dated yet.</p>'}</div></section>
+   <div class="cols two"><section class="panel"><h3>👀 The buzz</h3><ul class="plain rh-buzz">${buzz.map(([n, i]) => `<li><span class="chip">${esc(n.type)}</span> <a href="#" class="lk" data-go="article:${i}">${esc(n.text)}</a></li>`).join('') || '<li class="muted">Nobody\'s talking. Suspicious.</li>'}</ul></section>
+    <section class="panel"><h3>🎂 Anniversaries and revivals</h3><ul class="plain rh-ann">${ann.map(x => `<li><b>${fl(x.f.id)}</b> turns ${x.a} <span class="muted small">(${yearOf(x.f.rel)})</span><br><span class="small">Celebrated with ${esc(x.ev)}, ${fmtDate(x.when, true)}${x.a >= 50 ? '. A landmark.' : '.'}</span></li>`).join('') || '<li class="muted">No big birthdays this year.</li>'}</ul></section></div>
+   ${tvOn.length ? `<section class="panel"><h3>📺 On television now</h3><ul class="plain">${tvOn.map(s => `<li>${tvLink(s)} <span class="muted small">${typeof netLink === 'function' ? netLink(s.net) : ''} · season ${Math.min(s.seasons, S.year - s.y + 1)}</span></li>`).join('')}</ul></section>` : ''}`;
 }
 // </reel2>
 // <financing>
@@ -29515,6 +29584,307 @@ function mailEchoAfter(x, n0) {
   m.body = parts.join('\n\n');
 }
 // </correspond>
+// <weather>
+// ---------------- Weather ----------------
+// Every city has a climate: its hemisphere, how warm it runs, how far the seasons swing, and when the rain comes
+// (a dry Mediterranean summer, a monsoon, a northern winter of snow). Each day's weather is worked out from that and
+// the date, the same every time it's asked, and the city's big weather events (a heatwave, a cold snap, a storm)
+// land on top. It matters twice over: on a shoot (rain days, lost exteriors, perfect light) and at the cinema, where a
+// wet, cold weekend fills the seats, a glorious one empties them unless the film is the one everyone's talking about,
+// and a blizzard or a hurricane shuts the doors.
+// [hemisphere 1 north / -1 south, mean °C, seasonal swing, climate kind]
+const CLIMATE = {
+  hollywood: [1, 19, 5, 'med'], newyork: [1, 13, 12, 'cont'], toronto: [1, 9, 14, 'cont'], mexico: [1, 17, 3, 'high'], london: [1, 11, 6, 'ocean'], paris: [1, 12, 7, 'ocean'],
+  rome: [1, 16, 8, 'med'], berlin: [1, 10, 10, 'cont'], madrid: [1, 15, 10, 'med'], hongkong: [1, 23, 6, 'monsoon'], taipei: [1, 23, 6, 'monsoon'], tokyo: [1, 16, 10, 'humid'],
+  seoul: [1, 13, 14, 'humid'], beijing: [1, 13, 15, 'cont'], mumbai: [1, 27, 3, 'monsoon'], chennai: [1, 29, 3, 'monsoon'], sydney: [-1, 18, 5, 'humid'], wellington: [-1, 13, 4, 'ocean'],
+  lagos: [1, 27, 2, 'wet'], cairo: [1, 22, 7, 'desert'], rio: [-1, 24, 3, 'wet'], buenosaires: [-1, 18, 7, 'humid'], moscow: [1, 6, 15, 'cont'], stockholm: [1, 7, 11, 'cont'],
+  copenhagen: [1, 9, 8, 'ocean'], kolkata: [1, 27, 5, 'monsoon'], prague: [1, 9, 10, 'cont'], warsaw: [1, 8, 11, 'cont'], budapest: [1, 11, 11, 'cont'], helsinki: [1, 6, 12, 'cont'],
+  istanbul: [1, 15, 9, 'med'], tehran: [1, 18, 12, 'desert'], dakar: [1, 25, 3, 'wet'], manila: [1, 28, 2, 'monsoon'], bangkok: [1, 29, 2, 'monsoon'], hochiminh: [1, 28, 2, 'monsoon'],
+  bogota: [1, 14, 1, 'high'], jakarta: [1, 28, 1, 'wet'], johannesburg: [-1, 16, 6, 'high']
+};
+// chance of a wet day by month (Jan..Dec, northern), per climate kind
+const RAIN_BY = {
+  med: [.28, .26, .22, .14, .07, .03, .01, .02, .07, .14, .22, .27], cont: [.3, .28, .3, .32, .35, .36, .34, .32, .3, .3, .32, .32], ocean: [.45, .4, .38, .36, .35, .33, .32, .34, .36, .42, .46, .47],
+  monsoon: [.04, .04, .06, .1, .2, .6, .75, .72, .55, .25, .1, .05], humid: [.18, .2, .3, .35, .38, .45, .4, .38, .4, .3, .22, .18], wet: [.2, .22, .3, .4, .45, .45, .4, .38, .4, .42, .35, .25],
+  desert: [.06, .06, .05, .04, .02, .01, .01, .01, .01, .03, .05, .06], high: [.1, .12, .15, .3, .4, .45, .45, .45, .4, .35, .2, .1]
+};
+const WX = { sun: ['☀️', 'Sunny'], fair: ['🌤️', 'Fair'], cloud: ['☁️', 'Overcast'], rain: ['🌧️', 'Rain'], storm: ['⛈️', 'Storms'], snow: ['❄️', 'Snow'], heat: ['🔥', 'Scorching'], fog: ['🌫️', 'Fog'], wind: ['💨', 'Gales'] };
+function wxMonth(w) { return Math.floor(((w % 52) + 52) % 52 / 4.34); }
+// one day's weather in one city
+function wxDay(hub, w, d = 0) {
+  const C = CLIMATE[hub] || [1, 15, 8, 'ocean'], [ns, mean, amp, kind] = C, idx = HUB_IDS.indexOf(hub), r = hashRand((idx + 7) * 100003 + w * 7 + d), m = wxMonth(w);
+  const season = Math.cos(((w % 52) / 52 * 2 * Math.PI) - (ns > 0 ? 3.6 : .46));   // peaks in high summer for each hemisphere
+  const hi = Math.round(mean + amp * season + 4 + (r() - .5) * 6), lo = Math.round(hi - 7 - r() * 4);
+  const mm = ns > 0 ? m : (m + 6) % 12, wetP = RAIN_BY[kind][mm];
+  let k = 'sun'; const x = r();
+  if (x < wetP) k = hi <= 1 ? 'snow' : r() < (kind === 'monsoon' || kind === 'wet' ? .35 : .15) ? 'storm' : 'rain';
+  else if (x < wetP + .22) k = kind === 'ocean' && r() < .3 ? 'fog' : 'cloud';
+  else if (x < wetP + .4) k = 'fair';
+  if (k === 'sun' && hi >= 34) k = 'heat';
+  if (k === 'cloud' && r() < .08) k = 'wind';
+  // the city's weather events, where you live
+  const ev = S.me && S.me.hub === hub && typeof worldOn === 'function' ? worldOn().filter(e => e.from <= w && e.to > w).map(e => e.k) : [];
+  let note = '';
+  if (ev.includes('heat')) { k = 'heat'; note = 'heatwave'; }
+  if (ev.includes('cold')) { k = hi < 4 ? 'snow' : 'cloud'; note = 'cold snap'; }
+  if (ev.includes('storm')) { k = 'storm'; note = 'storm warning'; }
+  return { k, hi: ev.includes('heat') ? Math.max(hi, 35) : ev.includes('cold') ? Math.min(hi, 2) : hi, lo: ev.includes('cold') ? Math.min(lo, -4) : lo, wet: Math.round(wetP * 100), note };
+}
+// how a day's weather treats a shoot: below 0 is lost time, above is a gift
+function wxShoot(x) { return { sun: .5, fair: 1, cloud: .3, rain: -1, storm: -2.5, snow: -2, heat: -1, fog: -.5, wind: -1.5 }[x.k] || 0; }
+// how a weekend's weather moves cinema crowds: a multiplier on the opening
+function wxCrowd(hub, w) {
+  const days = [4, 5, 6].map(d => wxDay(hub, w, d)), m = wxMonth(w), summer = (CLIMATE[hub] || [1])[0] > 0 ? m >= 5 && m <= 7 : m === 11 || m <= 1;
+  let k = 1; const why = [];
+  const wet = days.filter(x => x.k === 'rain' || x.k === 'cloud' || x.k === 'fog').length, nice = days.filter(x => x.k === 'sun' || x.k === 'fair').length;
+  if (wet >= 2) { k += .07; why.push('a grey, wet weekend sent people indoors'); }
+  if (nice >= 3 && !summer) { k -= .05; why.push('a glorious weekend kept people outside'); }
+  if (days.some(x => x.k === 'heat')) { k += summer ? .06 : .02; why.push('the heat drove people into air-conditioned cinemas'); }
+  if (days.some(x => x.k === 'snow')) { k -= .14; why.push('snow closed roads and kept people home'); }
+  if (days.some(x => x.k === 'storm')) { k -= days.filter(x => x.k === 'storm').length >= 2 ? .2 : .08; why.push('storms shut cinemas on the opening night'); }
+  return { k: Math.max(.6, k), why };
+}
+// the box office hook: openings in the player's time, in the film's home city
+function wxBoxMul(f) {
+  if (!S.me || !S.me.party) return 1;   // the world before you arrived keeps its history
+  const c = wxCrowd(f.hub, S.week); if (c.k === 1) return 1;
+  f.wx = { k: +c.k.toFixed(2), why: c.why[0] || '' };
+  return c.k;
+}
+// Weekly: the weather on shoots you're part of
+function weatherWeek() {
+  const M = S.me; if (!M || !M.party || !M.party.done) return;
+  const days = [0, 1, 2, 3, 4].map(d => wxDay(M.hub, S.week, d)), sc = days.reduce((t, x) => t + wxShoot(x), 0);
+  const filming = M.jobs.map(j => j.film !== null && j.film !== undefined ? S.films[j.film] : null).filter(f => f && f.stage === 2 && f.hub === M.hub);
+  const own = typeof finFilms === 'function' ? finFilms().filter(f => f.stage === 2 && f.hub === M.hub) : [];
+  for (const f of [...new Set([...filming, ...own])]) {
+    if (sc <= -4) { const isOwn = own.includes(f); if (isOwn) { f.cost += f.budget * .015; if (f.fin) f.fin.log.push({ w: S.week, t: `Weather: ${days.filter(x => wxShoot(x) < 0).length} days lost to ${WX[days.find(x => wxShoot(x) < 0).k][1].toLowerCase()}. Cover sets and overtime.`, tone: 'bad' }); }
+      diary(`Weather on ${f.title}: ${WX[days.find(x => wxShoot(x) < 0).k][1].toLowerCase()} most of the week. The schedule slips; everyone is soaked and short-tempered.`); W_STRESS(2); }
+    else if (sc >= 3) { if (own.includes(f)) { f.qBonus = (f.qBonus || 0) + .5; if (f.fin) f.fin.log.push({ w: S.week, t: 'Weather: a perfect week of light. The exteriors look expensive.', tone: 'good' }); } diary(`Weather on ${f.title}: a perfect week. Golden hour every evening, and the dailies glow.`); }
+  }
+}
+function W_STRESS(v) { const W = S.me.wk; if (W) W.stress = (W.stress || 0) + v; else S.me.stress = clamp(S.me.stress + v, 0, 100); }
+
+// ---- the app ----
+function weatherApp() {
+  const M = S.me, hub = UI.wxHub && CLIMATE[UI.wxHub] ? UI.wxHub : M.hub, W = M.wk, today = W ? W.day : 0;
+  const week = [0, 1, 2, 3, 4, 5, 6].map(d => wxDay(hub, S.week, d)), next = [0, 1, 2, 3, 4, 5, 6].map(d => wxDay(hub, S.week + 1, d));
+  const now = week[today], crowd = wxCrowd(hub, S.week), crowdN = wxCrowd(hub, S.week + 1), C = CLIMATE[hub] || [1, 15, 8, 'ocean'];
+  const shoot = week.slice(today, 5).reduce((t, x) => t + wxShoot(x), 0);
+  const day = (x, i, base) => `<div class="wxd${base + i === today && base === 0 ? ' on' : ''}"><small>${DAYS7[i].slice(0, 3)}</small><span class="wxi">${WX[x.k][0]}</span><b>${x.hi}°</b><small class="muted">${x.lo}°</small><small>${esc(WX[x.k][1])}</small></div>`;
+  const months = Array.from({ length: 12 }, (_, m) => { const w = Math.round(m * 4.34 + 2), xs = [0, 2, 4, 6].map(d => wxDay(hub, w, d)); return { m, hi: Math.round(xs.reduce((t, x) => t + x.hi, 0) / xs.length), wet: xs[0].wet }; });
+  const lo = Math.min(...months.map(x => x.hi)) - 2, hiT = Math.max(...months.map(x => x.hi)) + 2;
+  const bars = `<div class="wxyear">${months.map(x => `<div title="${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][x.m]}: about ${x.hi}°, rain on ${x.wet}% of days"><i class="t" style="height:${Math.round((x.hi - lo) / Math.max(1, hiT - lo) * 100)}%"></i><i class="r" style="height:${x.wet}%"></i><small>${'JFMAMJJASOND'[x.m]}</small></div>`).join('')}</div>`;
+  const ev = typeof worldOn === 'function' && hub === M.hub ? worldOn().filter(e => e.from <= S.week) : [];
+  const pct = k => `${k >= 1 ? '+' : '−'}${Math.round(Math.abs(k - 1) * 100)}%`;
+  const kind = { med: 'Mediterranean: dry, bright summers, mild wet winters', cont: 'Continental: hot summers, hard winters', ocean: 'Maritime: mild, changeable, often grey', monsoon: 'Monsoon: a dry season, then months of downpours', humid: 'Humid subtropical: muggy summers, storms', wet: 'Tropical: warm all year, rain any day', desert: 'Desert: hot, dry, the odd cold night', high: 'Highland: spring all year, afternoon rain in the wet season' }[C[3]];
+  return `<div class="wxapp"><div class="wxnow"><div><p class="eyebrow">${esc(hubName(hub))} · ${DAYS7[today]}</p><p class="wxbig">${WX[now.k][0]} ${now.hi}°</p><p>${esc(WX[now.k][1])}, low of ${now.lo}°${now.note ? ` · <b>${esc(now.note)}</b>` : ''}</p></div>
+    <label class="small">City ${sel('wx-hub', HUB_IDS.filter(h => CLIMATE[h]).map(h => [h, hubName(h)]), hub)}</label></div>
+   <h5>This week</h5><div class="wxweek">${week.map((x, i) => day(x, i, 0)).join('')}</div>
+   <h5>Next week</h5><div class="wxweek small">${next.map((x, i) => day(x, i, 7)).join('')}</div>
+   <div class="os-grid">
+    ${osCard('On set', `<p class="os-big">${shoot >= 2 ? '🎬 Good' : shoot <= -3 ? '🌧️ Rough' : '⛅ Mixed'}</p><p class="small">${shoot >= 2 ? 'Exteriors should go to plan, and the light will be kind.' : shoot <= -3 ? 'Expect lost days, cover sets and overtime. Shoots in town will slip.' : 'Some exteriors will move. Keep a cover set ready.'}</p><p class="small muted">Rain, storms, snow, gales and heat cost shooting days; a run of clear days is a gift. It shows in your own productions' budgets and quality, and in your mood on set.</p>`)}
+    ${osCard('At the cinema this weekend', `<p class="os-big">${crowd.k === 1 ? 'Normal' : pct(crowd.k)}</p><p class="small">${crowd.why.length ? esc(crowd.why.join('; ')) + '.' : 'Ordinary weather: crowds as usual.'}</p><p class="small muted">Next weekend: ${crowdN.k === 1 ? 'normal' : pct(crowdN.k)}${crowdN.why.length ? ', ' + esc(crowdN.why[0]) : ''}. Openings in ${esc(hubName(hub))} feel it.</p>`)}
+    ${osCard('Warnings', ev.length ? ev.map(e => { const X = WORLD_EVENTS.find(x => x.k === e.k); return `<p><b>${esc(X.t)}</b> until ${fmtDate(e.to, true)}<br><span class="small muted">${esc(X.d)}</span></p>`; }).join('') : '<p class="muted small">None in force.</p>')}
+   </div>
+   <h5>The year in ${esc(hubName(hub))} <span class="muted small">${esc(kind)}</span></h5>${bars}<p class="small muted">Bars: typical high temperature (gold) and how often it rains (blue), month by month.</p></div>`;
+}
+function weatherChange(e) { if (e.target.id === 'wx-hub') { UI.wxHub = e.target.value; render(true); return true; } return false; }
+// </weather>
+// <clapgram>
+// ---------------- Clapgram ----------------
+// The industry's photo app (it used to be called Flick). Everyone you know posts: call times and craft-services
+// tables, wrap parties, premieres, awards, new jobs and new dogs, built from what's really happening to them, and
+// studios push the films opening soon. Famous people post too, with the likes to match. Stories run along the top.
+// You can post as well: followers come from who you are and what you share, comments come from your circle, and a
+// photo from a closed set while you're shooting is the kind of thing producers notice.
+const CG_BG = [['#f6d365', '#fda085'], ['#a1c4fd', '#c2e9fb'], ['#d4fc79', '#96e6a1'], ['#fbc2eb', '#a6c1ee'], ['#ffecd2', '#fcb69f'], ['#cfd9df', '#e2ebf0'], ['#f093fb', '#f5576c'], ['#4facfe', '#00f2fe'], ['#43e97b', '#38f9d7'], ['#fa709a', '#fee140'], ['#30cfd0', '#330867'], ['#5ee7df', '#b490ca']];
+const CG_KIND = {
+  set: ['🎬', 'On set', ['Call time 5am. Coffee number three.', 'Somewhere between setup 14 and setup 15.', 'The crew that makes it happen.', 'Lunch is the best part of the day and I will not be taking questions.']],
+  wrap: ['🍾', 'That\'s a wrap', ['That\'s a wrap! Thank you to the best crew in the world.', 'Wrapped. Sleeping for a week. Love you all.', 'Last day. Didn\'t cry. (Cried.)']],
+  premiere: ['🎟️', 'Premiere night', ['Premiere night. Pinch me.', 'Out this Friday. Go see it in a cinema, with strangers.', 'Red carpet, borrowed shoes.']],
+  award: ['🏆', 'Award', ['I have no speech prepared and I\'m still shaking.', 'Thank you. Just… thank you.', 'For everyone who ever said I couldn\'t.']],
+  job: ['💼', 'News', ['Some news: new job, new chapter.', 'Can finally say it: I\'m on a new project.', 'Day one. Pretending I know where the toilets are.']],
+  life: ['✨', 'Life', ['Big week.', 'Some personal news.', 'Life, eh.']],
+  food: ['🍜', 'Food', ['Craft services outdid themselves.', 'Post-shoot noodles are a human right.', 'Brunch with the best people.']],
+  pet: ['🐶', 'Pets', ['My dog has better taste in films than most critics.', 'Supervisor, apparently.', 'Meet the newest member of the crew.']],
+  view: ['🌅', 'Location', ['The view from today\'s location.', 'Magic hour, as promised.', 'Not a bad office.']],
+  throwback: ['📼', 'Throwback', ['Throwback to my first ever set. The hair. The confidence.', 'Ten years ago today.', 'Found this in a box. Who remembers?']],
+  thought: ['💭', 'Thoughts', ['Rewatching an old favourite tonight. Some films just hold up.', 'Hot take: the intermission should come back.', 'Reading scripts in the park like a cliché.']],
+  promo: ['📣', 'Coming soon', ['Coming soon.', 'In cinemas this month.', 'The trailer is out. Tell your friends.']]
+};
+const CG_COMMENTS = ['obsessed', 'this!!', 'ICONIC', 'so proud of you', 'need the full story', 'when are we getting a drink', 'stop it 😭', 'the hair though', 'legend', 'who took this, it\'s gorgeous', 'can\'t wait', 'take me with you', 'deserved', 'ok but where is this', '❤️❤️', 'save me a seat'];
+function cgHandle(p) { return '@' + p.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, '').slice(0, 16); }
+function cgFollowers(p) { const f = p.fame || 0; return Math.round(120 + f * f * 40 + p.standing * 25 + (hashRand(p.id * 13)() * 300)); }
+function cgFmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : String(n); }
+// what everyone posted, built from their lives and their work
+function cgFeed() {
+  const M = S.me, out = [], ids = [...new Set(aliveKnown().concat(M.follow || []))].filter(id => P(id) && !P(id).dead);
+  const tag = f => f ? '#' + f.title.replace(/[^A-Za-z0-9]+/g, '') : '';
+  for (const id of ids) {
+    const p = P(id), r = hashRand(id * 31 + S.week * 7);
+    for (const e of (p.life || []).filter(e => S.week - e.w < 6)) out.push({ id: `l${id}-${e.w}`, who: id, w: e.w, k: 'life', t: e.t + '.' });
+    const fA = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id) && f.stage >= 0 && f.stage < 4);
+    const fR = (p.credits || []).slice(-2).map(i => S.films[i]).find(f => f && f.rel !== null && S.week - f.rel >= 0 && S.week - f.rel < 3);
+    if (fR) out.push({ id: `r${id}-${fR.id}`, who: id, w: fR.rel, k: 'premiere', t: pickLine(CG_KIND.premiere[2], id) + ' ' + tag(fR), film: fR.id });
+    else if (fA && fA.stage === 2 && r() < .5) out.push({ id: `s${id}-${S.week}`, who: id, w: S.week, k: r() < .7 ? 'set' : 'view', t: pickLine(CG_KIND.set[2], id + S.week) + ' ' + tag(fA), film: fA.id });
+    else if (fA && fA.stage === 3 && fA.stageEnd - S.week > 8 && r() < .2) out.push({ id: `w${id}-${fA.id}`, who: id, w: S.week, k: 'wrap', t: pickLine(CG_KIND.wrap[2], id) + ' ' + tag(fA), film: fA.id });
+    else if (r() < .3) { const k = ['food', 'pet', 'thought', 'throwback', 'view'][Math.floor(r() * 5)]; out.push({ id: `p${id}-${S.week}`, who: id, w: S.week, k, t: pickLine(CG_KIND[k][2], id + S.week) }); }
+    const aw = (S.awards || []).filter(a => a.y === S.year && (a.people || []).includes(id)).slice(-1)[0];
+    if (aw) out.push({ id: `a${id}-${aw.y}`, who: id, w: S.week, k: 'award', t: `${aw.name.split(':').pop().trim()}. ${pickLine(CG_KIND.award[2], id)}`, film: aw.film });
+  }
+  // studios push what's opening soon
+  for (const f of S.active.map(i => S.films[i]).filter(f => f.hub === M.hub && f.co !== null && f.stage === 3 && f.stageEnd - S.week <= 4 && f.stageEnd >= S.week).slice(0, 3))
+    out.push({ id: `c${f.id}`, co: f.co, w: S.week, k: 'promo', t: `${pickLine(CG_KIND.promo[2], f.id)} ${f.title}, ${fmtDate(f.stageEnd, true)}. ${tag(f)}`, film: f.id });
+  for (const x of M.posts || []) out.push(Object.assign({ mine: 1 }, x));
+  return out.sort((a, b) => b.w - a.w || (b.mine ? 1 : 0) - (a.mine ? 1 : 0)).slice(0, 30);
+}
+function cgLikes(x) { const base = x.mine ? x.likes : x.co !== undefined ? 800 + hashRand(x.co)() * 9000 : cgFollowers(P(x.who)) * (.04 + hashRand(x.id.length * 97 + (x.who || 0))() * .08) * (x.k === 'award' || x.k === 'premiere' ? 3 : x.k === 'pet' ? 1.6 : 1); return Math.round(base); }
+function cgPhoto(x, size = 'big') {
+  const g = CG_BG[Math.abs(hashRand((x.who || x.co || 7) * 17 + x.w)() * CG_BG.length | 0)], K = CG_KIND[x.k] || CG_KIND.thought;
+  const f = x.film !== undefined ? S.films[x.film] : null, cap = f ? f.title : K[1];
+  return `<div class="cg-ph ${size}" style="background:linear-gradient(135deg,${g[0]},${g[1]})"><span class="cg-em">${K[0]}</span><span class="cg-cap">${esc(cap)}</span></div>`;
+}
+function cgPost(x) {
+  const M = S.me, who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? S.companies[x.co].name : who.name;
+  const handle = x.co !== undefined ? '@' + S.companies[x.co].name.toLowerCase().replace(/[^a-z]+/g, '') : cgHandle(who);
+  const likes = cgLikes(x) + ((M.liked || {})[x.id] ? 1 : 0), r = hashRand(x.id.length * 131 + (x.who || 0) + x.w);
+  const com = x.mine ? (x.comments || []) : aliveKnown().filter(id => id !== x.who).slice(0, 12).filter(() => r() < .25).slice(0, 2).map(id => [id, CG_COMMENTS[Math.floor(r() * CG_COMMENTS.length)]]);
+  return `<article class="cg-post">
+   <header>${x.co !== undefined ? '<span class="cg-av">🏢</span>' : phoneAvatar(x.mine ? ME().id : x.who, 30)}<div><b>${x.co !== undefined ? cl(x.co) : x.mine ? esc(name) : pl(x.who)}</b> <span class="muted small">${esc(handle)}${(who && (who.fame || 0) > 60) || x.co !== undefined ? ' ✔︎' : ''}</span><br><span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w ago' : 'this week'}${x.film !== undefined ? ' · ' + fl(x.film) : ''}</span></div></header>
+   ${cgPhoto(x)}
+   <div class="cg-act">${x.mine ? `<span>♥ ${cgFmt(likes)}</span>` : (M.liked || {})[x.id] ? `<span class="good">♥ ${cgFmt(likes)}</span>` : x.co !== undefined ? `<span>♡ ${cgFmt(likes)}</span>` : `<button class="linkish" data-like="${x.id}|${x.who}">♡ ${cgFmt(likes)}</button>`}<span class="muted small">${com.length} comment${com.length === 1 ? '' : 's'}</span></div>
+   <p><b>${esc(handle.slice(1))}</b> ${esc(x.t)}</p>${com.map(([id, t]) => `<p class="small"><b>${esc(cgHandle(P(id)).slice(1))}</b> ${esc(t)}</p>`).join('')}
+  </article>`;
+}
+// you post
+function cgPostAct(a) {
+  const M = S.me, me = ME(), K = CG_KIND[a.k]; if (!K || !['set', 'food', 'pet', 'view', 'throwback', 'thought', 'job'].includes(a.k)) return false;
+  if ((M.posts || []).some(x => x.w === S.week)) return false;   // one a week, like a person with a life
+  const text = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 160) || pickLine(K[2], S.week);
+  const fol = M.cgFol = Math.round((M.cgFol || cgFollowers(me)) * 1);
+  const film = M.jobs.map(j => j.film).find(f => f !== null && f !== undefined);
+  const appeal = { set: 1.4, view: 1.2, pet: 1.7, food: .9, throwback: 1.1, thought: .8, job: 1.5 }[a.k] * (.6 + prnd() * .9);
+  const likes = Math.round(fol * .06 * appeal + 3);
+  const comments = aliveKnown().filter(id => opinion(id) > 15).slice(0, 8).filter(() => prnd() < .3).slice(0, 3).map(id => [id, CG_COMMENTS[Math.floor(prnd() * CG_COMMENTS.length)]]);
+  for (const [id] of comments) addTie(me, P(id), .5);
+  M.cgFol = fol + Math.round(likes * (.05 + prnd() * .1));
+  me.fame = clamp((me.fame || 0) + Math.min(.3, likes / 20000), 0, 100);
+  const x = { id: 'm' + S.week, w: S.week, k: a.k, t: text, likes, comments, film: a.k === 'set' && film !== undefined ? film : undefined };
+  (M.posts = M.posts || []).push(x); if (M.posts.length > 40) M.posts.shift();
+  // a photo from a closed set: the producer sees everything
+  if (a.k === 'set' && film !== undefined && prnd() < .35) { const f = S.films[film], head = f.prod; if (head !== undefined && P(head)) { addTie(me, P(head), -6); inbox('note', 'About that photo', `${P(head).name} saw your post from the set of ${f.title}. "Closed set means closed set." It comes down; the producer remembers.`, { person: head }); x.t += ' [deleted]'; } }
+  return true;
+}
+function clapgramApp() {
+  const M = S.me, me = ME(), tab = UI.cgTab || 'feed', feed = cgFeed();
+  const stories = [...new Set(feed.filter(x => S.week - x.w < 1 && x.who !== undefined && !x.mine).map(x => x.who))].slice(0, 12);
+  const tabs = [['feed', 'Home'], ['explore', 'Explore'], ['me', 'You']].map(([k, l]) => `<button class="pill${tab === k ? ' on' : ''}" data-cgtab="${k}">${l}</button>`).join('');
+  let body = '';
+  if (tab === 'feed') body = `<div class="cg-stories">${stories.map(id => `<button class="cg-st" data-go="person:${id}">${phoneAvatar(id, 44)}<small>${esc(P(id).name.split(' ')[0])}</small></button>`).join('') || '<span class="muted small">No stories this week.</span>'}</div>
+    <div class="cg-feed">${feed.map(cgPost).join('') || '<p class="muted">Nobody you know has posted yet. Meet people, or follow some on Explore.</p>'}</div>`;
+  else if (tab === 'explore') {
+    const tags = {}; for (const f of S.active.map(i => S.films[i]).filter(f => f.hub === M.hub && f.stage >= 2)) tags['#' + f.title.replace(/[^A-Za-z0-9]+/g, '')] = (tags['#' + f.title.replace(/[^A-Za-z0-9]+/g, '')] || 0) + (f.tier === 1 ? 5 : 2);
+    for (const g of Object.keys(AMB).slice(0, 6)) tags['#' + g.replace(/\W+/g, '') + 'Films'] = 1 + hashRand(g.length + S.week)() * 3;
+    const sugg = S.pool[M.hub] ? Object.values(S.pool[M.hub]).flat().map(P).filter(p => p && !p.dead && !M.known[p.id] && !(M.follow || []).includes(p.id) && (p.fame || 0) > 30).sort((a, b) => b.fame - a.fame).slice(0, 8) : [];
+    body = `<h5>Trending in ${esc(hubName(M.hub))}</h5><div class="bf-row">${Object.entries(tags).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([t]) => `<span class="pill">${esc(t)}</span>`).join('')}</div>
+     <h5>Accounts to follow</h5><div class="cg-sugg">${sugg.map(p => `<div class="cg-acc">${portraitOf(p, 48)}<b>${pl(p.id)}</b><span class="muted small">${esc(cgHandle(p))} · ${cgFmt(cgFollowers(p))}</span><button class="btn-s" data-cgfollow="${p.id}">Follow</button></div>`).join('') || '<p class="muted small">You follow everyone worth following.</p>'}</div>`;
+  } else {
+    const fol = M.cgFol || cgFollowers(me), posts = (M.posts || []).slice().reverse(), posted = posts.some(x => x.w === S.week);
+    body = `<div class="cg-me">${portraitOf(me, 64)}<div><b>${esc(me.name)}</b> <span class="muted">${esc(cgHandle(me))}</span><p class="small"><b>${cgFmt(fol)}</b> followers · <b>${posts.length}</b> posts · following <b>${Object.keys(M.known).length + (M.follow || []).length}</b></p></div></div>
+     <div class="cg-new"><h5>New post</h5>${posted ? '<p class="muted small">You\'ve posted this week. Leave them wanting more.</p>' : `<div class="bf-row">${['set', 'view', 'food', 'pet', 'throwback', 'thought', 'job'].map(k => `<button class="pill${(UI.cgK || 'thought') === k ? ' on' : ''}" data-cgk="${k}">${CG_KIND[k][0]} ${CG_KIND[k][1]}</button>`).join('')}</div><div class="compose own"><input id="cg-text" maxlength="160" placeholder="Write a caption…" value="${esc(UI.cgText || '')}"><button class="btn-s" data-cgpost="1">Post</button></div><p class="small muted">Pets and set photos do best. A photo from a closed set can cost you with the producer.</p>`}</div>
+     <div class="cg-grid">${posts.map(x => `<div title="${esc(x.t)} · ♥ ${x.likes}">${cgPhoto(x, 'small')}</div>`).join('') || '<p class="muted small">No posts yet.</p>'}</div>`;
+  }
+  return `<div class="cg"><div class="cg-top"><b class="cg-logo">Clapgram</b><span class="bf-row">${tabs}</span></div>${body}</div>`;
+}
+function cgClick(t) {
+  const d = t.dataset;
+  if (d.cgtab) { UI.cgTab = d.cgtab; render(true); return true; }
+  if (d.cgk) { UI.cgK = d.cgk; render(true); return true; }
+  if (d.cgpost) { const v = ($('#cg-text') || {}).value || ''; doAct({ t: 'cgpost', k: UI.cgK || 'thought', text: v }); UI.cgText = ''; render(true); return true; }
+  if (d.cgfollow) { doAct({ t: 'cgfollow', id: +d.cgfollow }); render(true); return true; }
+  return false;
+}
+function cgFollow(a) { const M = S.me, p = P(a.id); if (!p || p.dead || M.known[a.id]) return false; M.follow = M.follow || []; if (M.follow.includes(a.id)) return false; M.follow.push(a.id); if (M.follow.length > 60) M.follow.shift(); return true; }
+// </clapgram>
+// <tv3>
+// ---------------- Television, the way it really works ----------------
+// Nobody walks into a network with an idea. You get into the room through someone: an agent, a producer with a
+// television track record who attaches themselves, your own production company, or a name that opens doors on its
+// own. Then the long road: the pitch meeting, a script order, network notes (and maybe a rewrite), a pilot order,
+// the pilot, and a series order or a pass. Every stage can stall. The Emmets get the whole ceremony: every category,
+// what it honours, the winner and the nominees. And the guide shows tonight's primetime, channel by channel.
+function tvRoutes(net) {
+  const M = S.me, me = ME(), bar = PITCH_BAR[net.kind] || 25, R = [];
+  if (M.agent) R.push({ k: 'agent', label: `Your agent sets the meeting`, bonus: 1 });
+  const prods = Object.keys(M.known).map(Number).filter(id => { const p = P(id); return p && !p.dead && opinion(id) >= 20 && (p.role === 'producer' || p.role === 'writer') && p.standing >= 40 && (typeof tvCreditsOf !== 'function' || tvCreditsOf(id).length || p.standing >= 60); }).sort((a, b) => P(b).standing - P(a).standing).slice(0, 3);
+  for (const id of prods) R.push({ k: 'ep:' + id, label: `${P(id).name} attaches as executive producer`, bonus: 3, ep: id });
+  const c = typeof myCo === 'function' ? myCo() : null; if (c && c.closed === null && (c.hits >= 1 || c.tier <= 2)) R.push({ k: 'co', label: `Pitch through ${c.name}`, bonus: 1 });
+  if (me.standing >= bar + 10) R.push({ k: 'name', label: 'Your name opens the door', bonus: 2 });
+  else if (me.standing >= bar && (M.agent || prods.length)) R.push({ k: 'name', label: 'Your track record', bonus: 0 });
+  return R;
+}
+function tvWaysIn() {
+  const M = S.me, me = ME(), tvFolk = Object.keys(M.known).map(Number).filter(id => P(id) && !P(id).dead && typeof tvCreditsOf === 'function' && tvCreditsOf(id).length).slice(0, 3);
+  return `<ul class="plain small"><li>🗂️ ${M.agent ? 'You have an agent: they can get you in once your standing is close to the channel\'s bar.' : 'Get an agent. Agencies send their clients into rooms you can\'t reach alone.'}</li>
+   <li>🤝 Get to know a producer or writer with television credits (opinion 20 or better), and they can attach themselves.${tvFolk.length ? ` You know ${tvFolk.map(pl).join(', ')}.` : ''}</li>
+   <li>🏢 Run a production company with a hit behind it.</li><li>📺 Work on a show first: the job board has writers' rooms and TV crews.</li><li>⭐ Or build your name: standing ${Math.floor(me.standing)} now.</li></ul>`;
+}
+// the whole development road, one stage at a time
+function tvDevWeek() {
+  const M = S.me, me = ME(), dev = M.tvdev; if (!dev || !dev.stage || dev.stage === 'pilot' || S.week < dev.due) return;
+  const net = TV_NETS[dev.net];
+  if (dev.stage === 'script') {
+    const ok = roll('tas', 13 - (dev.ep !== undefined ? 2 : 0) + (dev.rewrites ? 1 : 0));
+    if (ok) { dev.stage = 'pilot'; dev.due = S.week + 14; dev.notes = (M.lastRoll.d + M.lastRoll.mod - M.lastRoll.DC) >= 5 ? 4 : 1; M.cash += usd(25000) - (typeof taxOn === 'function' ? taxOn(usd(25000)) : 0); inbox('note', `${net.name} orders a pilot`, `The notes call goes well. They want to shoot ${dev.title}: a pilot, a director, a cast. ${dev.ep !== undefined ? P(dev.ep).name + ' handles the network; you handle the show.' : 'You\'re on your own with the network. Good luck.'}`, { result: { ok, roll: M.lastRoll, t: 'Pilot order.' } }); milestone(`Pilot order: ${dev.title}`, 'work'); }
+    else if (!dev.rewrites) { dev.rewrites = 1; dev.due = S.week + 6; inbox('note', `Notes on ${dev.title}`, `${net.name} has notes. Forty-one of them. "Can the lead be more likeable? Can it be funnier? Can it be set somewhere cheaper?" Six weeks for a rewrite.`, { result: { ok, roll: M.lastRoll, t: 'A rewrite.' } }); }
+    else { M.tvdev = null; inbox('note', `${net.name} passes on ${dev.title}`, `After the rewrite, the executive who bought it leaves for another channel, and the new one has "a different vision". The script goes in the drawer. You keep the fee.`, { result: { ok, roll: M.lastRoll, t: 'Dead in development.' } }); }
+  }
+}
+function tvPitchAct(a) {
+  const M = S.me, me = ME(), net = TV_NETS[a.net], g = TV_GENRES[a.g] ? a.g : 'drama';
+  if (!net || net.orig > S.year || M.tvdev) return false;
+  M.tvPitch = M.tvPitch || {}; if (S.week - (M.tvPitch[net.k] ?? -999) < 26) return false;
+  const R = tvRoutes(net), route = R.find(x => x.k === a.route) || R[0]; if (!route) return false;
+  M.tvPitch[net.k] = S.week;
+  const title = String(a.title || '').replace(/\s+/g, ' ').trim().slice(0, 50) || tvTitle(g, hashRand(M.id * 31 + S.week), NAMES.en);
+  const script = (M.scripts || []).some(s => s.grade && 'AB'.includes(String(s.grade)[0]));
+  const crowded = tvAll().filter(s => s.net === net.k && s.g === g && tvOnAir(s, S.year)).length;
+  const ok = roll('pack', 14 + ({ premium: 3, streaming: 2, broadcast: 1 }[net.kind] || 0) + Math.min(3, crowded) - (script ? 2 : 0) - route.bonus);
+  if (ok) {
+    M.tvdev = { net: net.k, g, title, w: S.week, stage: 'script', due: S.week + 8, ep: route.ep };
+    const fee = usd(route.ep !== undefined ? 30000 : 20000); M.cash += fee - (typeof taxOn === 'function' ? taxOn(fee) : 0);
+    if (route.ep !== undefined) meet(route.ep, `Executive producer on ${title}`, 6);
+    inbox('note', `${net.name} buys ${title}`, `${route.label}, and the room goes your way. A script order: ${fmtCash(fee)} to write the pilot, eight weeks, then the network's notes.${crowded ? ` They already have ${crowded} ${TV_GENRES[g].label.toLowerCase()}${crowded > 1 ? 's' : ''} on air, so it has to stand out.` : ''}`, { result: { ok, roll: M.lastRoll, t: 'Script order.' } });
+    milestone(`Sold a television pitch to ${net.name}`, 'work');
+  } else inbox('note', `${net.name} passes`, `${pickLine(['"We have something too similar in development."', '"Love you, not this."', '"Can you make it a limited series? Or a podcast?"', '"It\'s not a fit for the brand right now."'], S.week)} They'll take another meeting in six months.${crowded >= 2 ? ` (They have ${crowded} shows like it already.)` : ''}`, { result: { ok, roll: M.lastRoll, t: 'A pass.' } });
+  return true;
+}
+function tvPitchHTML() {
+  const M = S.me, dev = M.tvdev, nets = Object.values(TV_NETS).filter(n => n.orig <= S.year && (HUBS[n.hub] || {}).m === (HUBS[M.hub] || {}).m);
+  if (dev) { const st = { script: 'Writing the pilot script', pilot: 'Shooting the pilot' }[dev.stage || 'pilot']; return `<h4>In development</h4><p class="small"><b>${esc(dev.title)}</b> at ${netLink(dev.net)} · ${st}, next step ${fmtDate(dev.due, true)}${dev.ep !== undefined ? ` · executive producer ${pl(dev.ep)}` : ''}${dev.rewrites ? ' · after a rewrite' : ''}</p><p class="small muted">Pitch → script order → network notes → pilot order → pilot → series order. Any step can stall.</p>`; }
+  const nk = UI.tvpn && TV_NETS[UI.tvpn] ? UI.tvpn : (nets[0] || {}).k, net = TV_NETS[nk], R = net ? tvRoutes(net) : [];
+  return `<h4>Pitch a show</h4><p class="small">Channels don't take pitches from strangers. You need a way into the room, and the better the way in, the better your odds. A strong finished script helps; a channel already full of shows like yours is harder.</p>
+   <div class="filt"><label><span>Channel</span>${sel('tvp-net', nets.map(n => [n.k, `${n.name} (${n.kind})`]), nk)}</label><label><span>Kind of show</span>${sel('tvp-g', Object.entries(TV_GENRES).filter(([k]) => !['soap', 'talk', 'variety', 'asadora', 'serial', 'telenovela', 'kdrama'].includes(k)).map(([k, G]) => [k, G.label]), UI.tvpg2 || 'drama')}</label><label class="filt-q"><span>Title</span><input id="tvp-title" type="text" maxlength="50" placeholder="Your show's title" value="${esc(UI.tvpt || '')}"></label></div>
+   ${R.length ? `<p class="small"><b>Your way in:</b> ${sel('tvp-route', R.map(x => [x.k, x.label]), UI.tvpr && R.some(x => x.k === UI.tvpr) ? UI.tvpr : R[0].k)}</p><button class="btn-s" data-tvpitch="1" ${S.week - ((M.tvPitch || {})[nk] ?? -999) < 26 ? 'disabled' : ''}>Take the meeting</button>${S.week - ((M.tvPitch || {})[nk] ?? -999) < 26 ? ' <span class="muted small">They saw you recently. Six months between pitches.</span>' : ''}` : `<p class="small bad">No way into ${net ? esc(net.name) : 'a channel'} yet.</p>${tvWaysIn()}`}`;
+}
+// the Emmets, all of it
+function emmetsHTML() {
+  const ys = []; for (let y = S.year; y >= Math.max(1949, S.year - 60); y--) ys.push(y);
+  const y = UI.emy && ys.includes(UI.emy) ? UI.emy : ys.find(k => tvEmmets(k).length) || ys[0], E = tvEmmets(y);
+  return `<p class="muted small">Television's academy votes every September: ${TV_CATS.length} categories, from the big series prizes to the craft and the children's shows. The statuette is a winged figure holding an atom; nobody remembers why.</p>
+   <div class="filt"><label><span>Year</span>${sel('em-y', ys.map(k => [k, String(k)]), y)}</label></div>
+   ${E.length ? `<div class="em-grid">${TV_CATS.map(([cat, , who, d]) => { const e = E.find(x => x.cat === cat); if (!e) return ''; const s = tvShow(e.show); return `<div class="em-cat"><h5>${esc(cat)}</h5><p class="small muted">${esc(d)}</p><p>🏆 ${who && e.person !== null && e.person !== undefined ? `${pl(e.person)}, ` : ''}${s ? tvLink(s) : ''}</p>${e.noms.length ? `<p class="small">Also nominated: ${e.noms.map(id => { const x = tvShow(id); return x ? tvLink(x) : ''; }).filter(Boolean).join(', ')}</p>` : ''}</div>`; }).join('')}</div>` : '<p class="muted">The ceremony hasn\'t happened yet this year: it\'s in September.</p>'}`;
+}
+// tonight's primetime on the big channels in your market
+function primetimeHTML() {
+  const M = S.me, mkt = (HUBS[M.hub] || {}).m || 'US', nets = Object.values(TV_NETS).filter(n => (HUBS[n.hub] || {}).m === mkt && ['broadcast', 'public', 'cable', 'premium'].includes(n.kind) && n.founded <= S.year).slice(0, 6);
+  if (!nets.length) return '';
+  const day = M.wk ? M.wk.day : 0, all = typeof tvAllPlus === 'function' ? tvAllPlus() : tvAll();
+  const grid = nets.map(n => { const on = all.filter(s => s.net === n.k && tvOnAir(s, S.year)).sort((a, b) => hashRand(a.seed + S.week * 7 + day)() - hashRand(b.seed + S.week * 7 + day)()).slice(0, 3); return `<tr><td><b>${netLink(n.k)}</b></td>${[0, 1, 2].map(i => `<td class="small">${on[i] ? tvLink(on[i]) + `<br><span class="muted">${esc(TV_GENRES[on[i].g].label)}</span>` : '<span class="muted">Film or repeats</span>'}</td>`).join('')}</tr>`; }).join('');
+  return `<h4>Tonight, ${DAYS7[day]}</h4><div class="tw"><table class="grid small"><thead><tr><th>Channel</th><th>8 pm</th><th>9 pm</th><th>10 pm</th></tr></thead><tbody>${grid}</tbody></table></div>`;
+}
+// </tv3>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -29844,6 +30214,7 @@ function viewFilm(id) {
     ${f.awards.length ? `<h4>Awards</h4><ul class="plain">${f.awards.map(a => `<li>✦ ${typeof bodyLink === 'function' ? bodyLink(a) : esc(a)}</li>`).join('')}</ul>` : ''}${f.legacy ? `<h4>Legacy</h4><p>Rediscovered as a classic in ${f.legacy}.</p>` : ''}</section><div></div></div>` + (typeof rogerPanelHTML === 'function' ? rogerPanelHTML(f) : '') + (typeof filmStaffHTML === 'function' ? filmStaffHTML(f) : '') + cm;
   }
   if (typeof finStackHTML === 'function' && f.tier) body += finStackHTML(f);
+  if (f.wx && f.wx.why) body += `<p class="note">${f.wx.k > 1 ? '🌧️' : '☀️'} Opening weekend weather: ${esc(f.wx.why)} (${f.wx.k > 1 ? '+' : '−'}${Math.round(Math.abs(f.wx.k - 1) * 100)}% at home).</p>`;
   return `<div class="head detail filmhead"><div class="posterwrap">${posterSVG(f, 170)}<button class="btn-s ghost" data-trailer="${f.id}">▶ Trailer</button></div><div><p class="eyebrow">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${released ? 'Released ' + fmtDate(f.rel, true) : 'Greenlit ' + fmtDate(f.gl, true)}</p><h2>${esc(f.title)}</h2>
   <p class="lede">${f.co === null ? 'An independent production' : { 1: 'A major-studio', 2: 'A mid-size', 3: 'A low-budget' }[f.tier] + ' production for ' + esc(S.companies[f.co].name)}, directed by ${esc(P(f.dir).name)}.</p><p class="logline">${esc(filmLogline(f))}</p><p class="tagline">“${esc(filmTagline(f))}”</p>${stillsHTML(f)}</div></div>${body}${typeof filmStoryHTML === "function" ? filmStoryHTML(f) : ""}${filmRunHTML(f)}${filmReviewsHTML(f)}${released ? '' : cinePanel(true, null, filmTriviaHTML(f))}`;
 }
@@ -30508,6 +30879,7 @@ function careerClick(t) {
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
   if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.coinv && finClick(t)) return true;
+  if (typeof cgClick === 'function' && cgClick(t)) return true;
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
@@ -30526,7 +30898,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -30856,6 +31228,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('change', e => {
   if (typeof savesChange === 'function' && savesChange(e)) return;
+  if (typeof weatherChange === 'function' && weatherChange(e)) return;
   if (careerChange(e)) return;
   if (typeof chartChange === 'function' && chartChange(e)) return;
   if (typeof boardChange === 'function' && boardChange(e)) return;
