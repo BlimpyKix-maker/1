@@ -200,6 +200,12 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 @media (max-width: 560px) { .rt-tiles { grid-template-columns: 1fr; } }
 .rh-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; } .rh-card { flex: 0 0 120px; display: flex; flex-direction: column; gap: 3px; font-size: 13px; } .rh-card svg { width: 110px; height: auto; border-radius: 6px; } .rh-buzz li, .rh-ann li { margin: 0 0 8px; }
 .em-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; } .em-cat { border: 1px solid var(--line); border-radius: 10px; padding: 10px; } .em-cat h5 { margin: 0 0 4px; } .em-cat p { margin: 4px 0; }
+.mk-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; margin: 6px 0 10px; } .mk-sum > div { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.eco-bars { display: grid; grid-template-columns: repeat(21, minmax(0, 1fr)); gap: 2px; height: 90px; align-items: end; margin-bottom: 16px; } .eco-bars > div { position: relative; height: 100%; display: flex; align-items: flex-end; } .eco-bars i { display: block; width: 100%; background: var(--accent); border-radius: 2px 2px 0 0; opacity: .8; } .eco-bars small { position: absolute; bottom: -14px; font-size: 9px; }
+.sw-page { background: #fffdf6; color: #222; border-radius: 6px; padding: 14px 18px; font-family: 'Courier New', monospace; } .sw-title { font-weight: 700; text-align: center; margin: 0; letter-spacing: .1em; } .sw-prog { height: 6px; background: #e8e2d0; border-radius: 3px; margin: 8px 0; } .sw-prog i { display: block; height: 100%; background: #c9a227; border-radius: 3px; }
+.sw-beats { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin: 6px 0; } .sw-beats label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; } .sw-beats select { width: 100%; } .sw-cov { margin: 4px 0; }
+.mx-lv { width: 80px; margin-left: 8px; } .cut-tl { display: flex; flex-wrap: wrap; gap: 6px; } .cut-clip { display: flex; flex-direction: column; gap: 3px; } .cut-clip.on .clip2 { outline: 2px solid var(--accent); }
+.cut-pred { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin: 10px 0; } .cut-pred > div { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; } .cut-curve { display: flex; align-items: flex-end; gap: 3px; height: 50px; } .cut-curve i { flex: 1; background: #4a7fbf; border-radius: 2px 2px 0 0; }
 .finbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 6px 0; background: var(--line); }
 .finbar span { display: block; height: 100%; }
 .finleg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; }
@@ -11705,6 +11711,9 @@ function applyAct(a) {
     case 'selffund': return selfFund(a);
     case 'coinv': return coinvAct(a);
     case 'cgpost': return cgPostAct(a);
+    case 'angel': return angelAct(a);
+    case 'outline': return outlineAct(a);
+    case 'scriptsess': return scriptSessAct(a);
     case 'cgfollow': return cgFollow(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);
@@ -12521,7 +12530,7 @@ function liveOn(a) {
   }
 }
 function card(icon, title, lines, extra = {}) { const W = S.me.wk; W.cards.push({ d: W.day, b: W.block, icon, title, lines: lines.filter(Boolean), ...extra }); if (W.cards.length > 60) W.cards.splice(0, W.cards.length - 60); }
-function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g) W.gains[k] = (W.gains[k] || 0) + g; }
+function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g && W) W.gains[k] = (W.gains[k] || 0) + g; }   // works between weeks too (the computer apps)
 function dayPlan() { return effectivePlan(); }
 function blockStep(a) {
   const M = S.me, W = M.wk, d = W.day, b = W.block;
@@ -14549,6 +14558,7 @@ function selfFund(a) {
   // the capital stack: incentive, pre-sales, a gap loan, then the company, then investors for the rest
   let plan = finPlan(budget, { rb: a.rb, ps: a.ps, gap: a.gap, genre: src.genre, lead, dir: direct ? me.id : dirPick });
   let share = 0, invest = 0, psNote = '';
+  { const ang = typeof takeAngels === 'function' && c.cash < plan.equity * .9 ? takeAngels() / 1e6 : 0; if (ang > 0) { c.cash += ang; invest += ang; share = clamp(invest / budget * 1.2, .05, .6); } }   // the angels' money goes in first
   if (plan.ps > 0) {
     if (src.invTry !== undefined && S.week - src.invTry < 4) return false;
     if (!roll('pack', presaleDC(src.genre, lead))) { psNote = 'The sales agent takes it to the market and comes back with nothing: no pre-sales. '; plan = finPlan(budget, { rb: a.rb, genre: src.genre }); }
@@ -14557,7 +14567,7 @@ function selfFund(a) {
     if (!a.inv || c.cash < plan.equity * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) { if (psNote) { src.invTry = S.week; inbox('note', `The financing on ${src.title} doesn't close`, `${psNote}Without that money there's a hole the company can't fill.`, { result: { ok: false, roll: M.lastRoll, t: 'No pre-sales.' } }); return true; } return false; }
     src.invTry = S.week;
     if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `${psNote}Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
-    invest = plan.equity - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+    const more = plan.equity - Math.max(0, c.cash); invest += more; share = clamp(invest / budget * 1.15, .1, .8); c.cash += more;
   }
   // the outside money arrives at closing; the fees go straight out
   for (const x of plan.parts) c.cash += x.amt;
@@ -15085,7 +15095,7 @@ function appWindow(k) {
     case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
     case 'sweep': { if (!UI.sweep) sweepNew(); const G = UI.sweep; return `<p class="muted small">${G.over > 0 ? 'Cleared! That\'s a wrap.' : G.over < 0 ? 'Boom. Reshoot?' : 'Find the clean takes. Avoid the 9 bad ones.'} <button class="btn-s ghost" data-sweep="new">New game</button></p><div class="sweep" style="grid-template-columns:repeat(${G.n}, 28px)">${Array.from({ length: G.n * G.n }, (_, i) => { const o = G.open.includes(i), m = G.mines.includes(i), c = o && !m ? sweepCount(i) : 0; return `<button class="cell${o ? ' open' : ''}${o && m ? ' mine' : ''}" data-sweep="${i}" ${o || G.over ? 'disabled' : ''}>${o ? (m ? '💥' : c || '') : ''}</button>`; }).join('')}</div>`; }
     case 'weather': if (typeof weatherApp === 'function') return weatherApp(); { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
-    case 'write': return `<p>Your scripts live in the Create tab.</p><p><button class="btn-s" data-dtab="create">Open your scripts ›</button></p>`;
+    case 'write': return typeof scriptwriterApp === 'function' ? scriptwriterApp() : '';
     default: return appWindow2(k);
   }
   return '';
@@ -16951,7 +16961,7 @@ function seqScore(G) {
 }
 function playSeq() {
   if (typeof window === 'undefined' || !window.AudioContext && !window.webkitAudioContext) return;
-  const ctx = UI.actx = UI.actx || new (window.AudioContext || window.webkitAudioContext)(), G = seqGrid(), t0 = ctx.currentTime + .05, step = .22;
+  const ctx = UI.actx = UI.actx || new (window.AudioContext || window.webkitAudioContext)(), G = seqGrid(), t0 = ctx.currentTime + .05, step = 30 / ((UI.mix && UI.mix.bpm) || 136);
   const freq = [55, 180, 98, 262, 523], type = ['sine', 'square', 'triangle', 'sawtooth', 'triangle'], melody = [523, 587, 659, 784, 659, 587, 523, 440];
   for (let r = 0; r < SEQ_ROWS.length; r++) for (let c = 0; c < SEQ_N; c++) if (G[r][c]) {
     const o = ctx.createOscillator(), g = ctx.createGain(), t = t0 + c * step;
@@ -19044,7 +19054,7 @@ const pctS = v => `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '
 function marketApp() {
   const M = S.me, T = UI.mkt = UI.mkt || { tab: 'market', sel: null, q: 10 }, L = listedCos();
   const idx = indexVal(S.week), idxW = indexVal(S.week - 1) || idx || 1, idxY = indexVal(S.week - 52) || idx || 1;
-  const tabs = [['market', '🎬 Film studios'], ['sectors', '🎵📺 Music, TV & more'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
+  const tabs = [['market', '📈 All markets'], ['studios', '🎬 Studios only'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
   const head = `<div class="bourse-h"><span class="bourse-logo">BOURSE</span><span><b>BOX-50</b> ${idx.toFixed(1)} ${pctS((idx / idxW - 1) * 100)} <span class="muted small">1Y ${pctS((idx / Math.max(1e-6, idxY) - 1) * 100)}</span></span>${[['box', '🎬 Box office'], ['music', '🎵 Music'], ['video', '📺 Online video'], ['pod', '🎙️ Podcasts']].map(([k, l]) => { const a = fieldIndex(k, S.week - 4), b = fieldIndex(k, S.week); return a > 0 ? `<span class="small">${l} ${pctS((b / a - 1) * 100)}</span>` : ''; }).join('')}</div>
    <div class="bf-row">${tabs.map(([k, l]) => `<button class="pill${T.tab === k ? ' on' : ''}" data-mkt="tab:${k}">${l}</button>`).join('')}</div>`;
   if (T.sel !== null && S.companies[T.sel]) return head + stockPage(S.companies[T.sel]);
@@ -19062,6 +19072,7 @@ function marketApp() {
      ${(M.trades || []).length ? `<h4>Recent trades</h4><ul class="plain small">${M.trades.slice(-8).reverse().map(t => `<li>${fmtDate(t.w, true)} · ${t.n > 0 ? 'Bought' : 'Sold'} ${Math.abs(t.n)} ${esc(tickerOf(S.companies[t.co]))} at $${t.px}</li>`).join('')}</ul>` : ''}`;
   }
   if (T.tab === 'news') { const N = []; for (const c of L) for (let w = S.week; w > S.week - 8; w--) for (const e of mktBar(c, w).ev) N.push([w, c, e]); N.sort((a, b) => b[0] - a[0] || Math.abs(b[2][1]) - Math.abs(a[2][1])); return head + `<ul class="plain small mnews">${N.slice(0, 30).map(([w, c, e]) => `<li><span class="muted">${fmtDate(w, true)}</span> <a href="#" class="lk" data-mkt="sel:${c.id}"><b>${esc(tickerOf(c))}</b></a> ${pctS(e[1] * 100)} · ${esc(e[0])}</li>`).join('') || '<li class="muted">A quiet market.</li>'}</ul>`; }
+  if (T.tab === 'market' && typeof allMarketHTML === 'function') return head + allMarketHTML();
   const movers = L.map(c => [c, chg(c, 1)]).sort((a, b) => b[1] - a[1]);
   return head + `<p class="small">Top movers: ${movers.slice(0, 3).map(([c, v]) => `<a href="#" class="lk" data-mkt="sel:${c.id}">${esc(tickerOf(c))}</a> ${pctS(v)}`).join(' · ')} — ${movers.slice(-3).reverse().map(([c, v]) => `<a href="#" class="lk" data-mkt="sel:${c.id}">${esc(tickerOf(c))}</a> ${pctS(v)}`).join(' · ')}</p>` + table(L.slice().sort((a, b) => mcap(b) - mcap(a)).slice(0, 40));
 }
@@ -22751,7 +22762,8 @@ function bankAct(a) {
   else if (a.k === 'cd') { const wk = [26, 52, 104][+a.term || 0]; if (amt <= 0 || M.cash < amt) return false; M.cash -= amt; B.cds.push({ amt, rate: cdRate(wk), from: S.week, due: S.week + wk }); }
   else if (a.k === 'breakcd') { const i = +a.i, c = B.cds[i]; if (!c) return false; M.cash += Math.round(c.amt * .97); B.cds.splice(i, 1); B.hist.push({ w: S.week, t: 'Broke a term deposit early (3% penalty)' }); }
   else if (a.k === 'borrow') { if (amt <= 0 || B.loan + amt > creditLimit(M)) return false; B.loan += amt; B.lrate = loanRate(M); M.cash += amt; B.hist.push({ w: S.week, t: `Borrowed ${fmtCash(amt)} at ${B.lrate.toFixed(1)}%` }); }
-  else if (a.k === 'repay') { const k = Math.min(amt, B.loan, M.cash); if (k <= 0) return false; M.cash -= k; B.loan -= k; B.score = clamp(B.score + 2, 300, 850); }
+  else if (a.k === 'repay') { let k = Math.min(amt, B.loan, M.cash); if (k <= 0 && B.sbl > 0) { k = Math.min(amt, B.sbl, M.cash); if (k <= 0) return false; M.cash -= k; B.sbl -= k; B.hist.push({ w: S.week, t: `Repaid ${fmtCash(k)} on the credit line` }); return true; } if (k <= 0) return false; M.cash -= k; B.loan -= k; B.score = clamp(B.score + 2, 300, 850); }
+  else if (a.k === 'sbl') { const lim = typeof sblLimit === 'function' ? sblLimit(M) - (B.sbl || 0) : 0; if (amt <= 0 || amt > lim) return false; B.sbl = (B.sbl || 0) + amt; M.cash += amt; B.hist.push({ w: S.week, t: `Drew ${fmtCash(amt)} against your portfolio` }); }
   else return false;
   return true;
 }
@@ -22790,6 +22802,10 @@ function bankWeek() {
   sectorDivWeek(); taxYear(M);
   if (B.sav > 0) { const i = Math.round(B.sav * savRate() / 100 / 52 * 100) / 100; B.sav += i; B.earned = (B.earned || 0) + i; }
   for (let k = B.cds.length - 1; k >= 0; k--) { const c = B.cds[k]; if (S.week >= c.due) { const pay = Math.round(c.amt * (1 + c.rate / 100 * (c.due - c.from) / 52)); M.cash += pay; B.cds.splice(k, 1); mail('news', 'Your bank', 'Term deposit matured', `${fmtCash(c.amt)} at ${c.rate.toFixed(2)}% has matured: ${fmtCash(pay)} has been paid into your account.`); } }
+  if (B.sbl > 0) {   // the portfolio line: weekly interest, and a margin call if the shares fall too far
+    const int = Math.round(B.sbl * (rateAt(S.year) + 1.5) / 100 / 52); M.cash -= int;
+    const nw = osNetWorth(); if (B.sbl > nw.shares * .7 && M.port) { let need = B.sbl - nw.shares * .5; for (const id in M.port) { if (need <= 0) break; const c = S.companies[+id], n = M.port[id]; if (!c || !n) continue; const px = mktPrice(c), k = Math.min(n, Math.ceil(need / px)); M.port[id] -= k; B.sbl = Math.max(0, B.sbl - k * px); need -= k * px; } mail('news', 'Your bank', 'Margin call', 'Your shares fell below the level the credit line needs. The bank sold some of them to cover it.'); B.hist.push({ w: S.week, t: 'Margin call: shares sold to cover the credit line' }); }
+  }
   if (B.loan > 0) {
     const int = B.loan * B.lrate / 100 / 52, pay = Math.max(int * 1.3, B.loan * .01);
     if (M.cash >= pay) { M.cash -= Math.round(pay); B.loan = Math.max(0, B.loan + int - pay); if (S.week % 13 === 0) B.score = clamp(B.score + 3, 300, 850); }
@@ -22824,7 +22840,9 @@ function bankHTML() {
    ${osCard('Term deposits', `<p class="small">Lock money away for a better rate: 6 months ${cdRate(26).toFixed(2)}%, 1 year ${cdRate(52).toFixed(2)}%, 2 years ${cdRate(104).toFixed(2)}%. Breaking early costs 3%.</p><div class="bank-f"><button class="os-btn" data-bank="cd:0">6 months</button><button class="os-btn" data-bank="cd:1">1 year</button><button class="os-btn" data-bank="cd:2">2 years</button></div>${B.cds.length ? `<ul class="os-list">${B.cds.map((c, i) => `<li><b>${fmtCash(c.amt)}</b><span class="muted">${c.rate.toFixed(2)}% · matures ${fmtDate(c.due, true)}</span><button class="linkish" data-bank="breakcd:${i}">Break</button></li>`).join('')}</ul>` : ''}`)}
    ${osCard('Tax', (() => { const T0 = M.taxYr, T = T0 && T0.y === S.year ? T0 : { y: S.year, inc: 0, paid: 0, earned: 0 }, H = (M.taxHist || []).slice(-1)[0]; return `<p class="small">This year you've earned <b>${fmtCash(Math.round(T.earned || 0))}</b> and paid <b>${fmtCash(Math.round(T.paid))}</b> in tax${T.earned ? ` (${Math.round(T.paid / T.earned * 100)}%)` : ''}. It comes out as you're paid, so nothing is owed at the end.</p>${H ? `<p class="small muted">Last year: ${fmtCash(Math.round(H.paid))} on ${fmtCash(Math.round(H.inc * wageF(M.hub)))}.</p>` : ''}<p class="small muted">Investment gains and dividends aren't taxed here.</p>`; })())}
    ${osCard('Borrowing', `<p class="small">Credit score <b>${B.score}</b> · limit ${fmtCash(lim)} · rate ${loanRate(M).toFixed(1)}%</p>${B.loan > 0 ? `<p>You owe <b class="bad">${fmtCash(Math.round(B.loan))}</b> at ${B.lrate.toFixed(1)}%. Payments come out weekly.</p>` : ''}<div class="bank-f"><button class="os-btn" data-bank="borrow">Borrow</button>${B.loan > 0 ? '<button class="os-btn" data-bank="repay">Repay</button>' : ''}</div><p class="small muted">Use loans to fund a film, a home or a bet on the market. Miss payments and the score falls, the rate rises and the limit shrinks.</p>`)}
-   ${osCard('The economy', economyHTML())}</div>`;
+   ${osCard('Credit score', `<p class="os-big">${B.score}</p><p class="small muted">${B.score >= 740 ? 'Excellent: the best rates and limits.' : B.score >= 670 ? 'Good.' : B.score >= 580 ? 'Fair: rates are higher.' : 'Poor: borrowing is expensive and limited.'} It rises with on-time payments and repaying early; it falls with missed payments.</p>`)}
+   ${osCard('Statement', (B.hist || []).length ? `<ul class="os-list">${B.hist.slice(-8).reverse().map(h => `<li><span class="muted">${fmtDate(h.w, true)}</span><span>${esc(h.t)}</span></li>`).join('')}</ul>` : '<p class="small muted">Nothing unusual on the account.</p>')}</div>
+   ${typeof privateBankHTML === 'function' ? '<h4>Private banking</h4>' + privateBankHTML() : ''}`;
 }
 function bankClick(t) {
   const d = t.dataset;
@@ -29885,6 +29903,294 @@ function primetimeHTML() {
   return `<h4>Tonight, ${DAYS7[day]}</h4><div class="tw"><table class="grid small"><thead><tr><th>Channel</th><th>8 pm</th><th>9 pm</th><th>10 pm</th></tr></thead><tbody>${grid}</tbody></table></div>`;
 }
 // </tv3>
+// <finance2>
+// ---------------- The Bourse, the economy and the bank, grown up ----------------
+// One market: every listed company in the game, studios and labels and networks and streamers and theatres, in a
+// single table you can filter by industry and sort however you like. Tips come from somewhere: people you actually
+// know (and what they'd know), published analysts, tracking surveys and plain hearsay, and every source keeps a
+// track record you can check. The economy page says what the weather in the markets means for you. The bank grows a
+// private side once you're worth something: a credit line against your portfolio, and the angels and family offices
+// who put money into films, if you can get a meeting and make the case.
+
+// ---- one market ----
+function mktRows() {
+  const M = S.me, rows = [];
+  for (const c of listedCos()) rows.push({ k: 'c' + c.id, co: c.id, tk: tickerOf(c), name: c.name, ind: 'Film studios', px: mktPrice(c), d1: chg(c, 1), d52: chg(c, 52), cap: mcap(c), y: c.tier === 1 ? 2.4 : 0, own: (M.port || {})[c.id] || 0, spark: spark(c) });
+  for (const s of SECTORS.map(x => SECTOR[x[0]]).filter(sectorOpen)) rows.push({ k: 's' + s.k, sk: s.k, tk: s.tk, name: s.name, ind: s.sec, px: sectorPrice(s), d1: sChg(s, 1), d52: sChg(s, 52), cap: null, y: sYield(s) * 100, own: (M.sport || {})[s.k] || 0, spark: sSpark(s), s });
+  return rows;
+}
+function allMarketHTML() {
+  const T = UI.mkt, M = S.me, R = mktRows(), inds = {}; for (const r of R) inds[r.ind] = (inds[r.ind] || 0) + 1;
+  const f = UI.mkf || 'all', srt = UI.mks || 'cap', q = (UI.mkq || '').toLowerCase().trim();
+  let L = R.filter(r => (f === 'all' || r.ind === f) && (!q || r.tk.toLowerCase().includes(q) || r.name.toLowerCase().includes(q)));
+  const key = { cap: r => r.cap ?? r.px * 2, d1: r => r.d1, d52: r => r.d52, px: r => r.px, y: r => r.y, name: r => r.name };
+  L.sort((a, b) => srt === 'name' ? a.name.localeCompare(b.name) : key[srt](b) - key[srt](a));
+  const movers = R.slice().sort((a, b) => b.d1 - a.d1), byInd = Object.keys(inds).map(k => { const G = R.filter(r => r.ind === k); return [k, G.reduce((t, r) => t + r.d52, 0) / G.length]; }).sort((a, b) => b[1] - a[1]);
+  const trade = r => r.co !== undefined ? `<button class="btn-s" data-mkt="buy:${r.co}">Buy</button>${r.own ? ` <button class="btn-s ghost" data-mkt="sell:${r.co}">Sell</button>` : ''}` : `<button class="btn-s" data-sec="buy:${r.sk}">Buy</button>${r.own ? ` <button class="btn-s ghost" data-sec="sell:${r.sk}">Sell</button>` : ''}`;
+  const nm = r => r.co !== undefined ? `<a href="#" class="lk" data-mkt="sel:${r.co}"><b>${esc(r.tk)}</b></a>` : `<b>${esc(r.tk)}</b>`;
+  return `<div class="mk-sum"><div><span class="muted small">Best industry this year</span><b>${esc(byInd[0][0])} ${pctS(byInd[0][1])}</b></div><div><span class="muted small">Worst</span><b>${esc(byInd[byInd.length - 1][0])} ${pctS(byInd[byInd.length - 1][1])}</b></div><div><span class="muted small">Top movers this week</span><b class="small">${movers.slice(0, 3).map(r => `${esc(r.tk)} ${pctS(r.d1)}`).join(' · ')}</b></div></div>
+   <div class="filt"><label class="filt-q"><span>Search</span><input id="mkq" type="search" placeholder="Ticker or company…" value="${esc(UI.mkq || '')}"></label><label><span>Industry</span>${sel('mk-ind', [['all', `Everything (${R.length})`], ...Object.entries(inds).sort((a, b) => b[1] - a[1]).map(([k, n]) => [k, `${k} (${n})`])], f)}</label><label><span>Sort</span>${sel('mk-sort', [['cap', 'Biggest'], ['d1', 'This week'], ['d52', 'This year'], ['y', 'Dividend yield'], ['px', 'Price'], ['name', 'Name']], srt)}</label><label><span>Shares a trade</span><input id="mkt-q" type="number" min="1" value="${T.q || 10}"></label></div>
+   <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>Industry</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n">Yield</th><th class="n">Own</th><th></th></tr></thead><tbody>${L.slice(0, 120).map(r => `<tr><td>${nm(r)}</td><td class="small">${esc(r.name)}</td><td class="small muted">${esc(r.ind)}</td><td>${r.spark}</td><td class="n">$${r.px.toFixed(2)}</td><td class="n">${pctS(r.d1)}</td><td class="n">${pctS(r.d52)}</td><td class="n small">${r.y ? r.y.toFixed(1) + '%' : '–'}</td><td class="n">${r.own || ''}</td><td>${trade(r)}</td></tr>`).join('')}</tbody></table></div>
+   <p class="small muted">${L.length} listings${L.length > 120 ? ', showing 120' : ''}. Studio tickers open their own page. Every company pays its dividend quarterly where it has one.</p>`;
+}
+function mktChange(e) { const id = e.target.id, v = e.target.value; if (id === 'mk-ind') { UI.mkf = v; render(true); return true; } if (id === 'mk-sort') { UI.mks = v; render(true); return true; } if (id === 'mkq') { UI.mkq = v; render(true); return true; } return false; }
+
+// ---- tips that come from somewhere ----
+const ANALYSTS = ['Barnum & Wexley', 'Strand Securities', 'Quayle Partners', 'Mercer Hollis', 'Lindqvist Capital'];
+const TIP_KIND = { insider: ['🤫', 'Someone on the film', .86], informed: ['🎬', 'Someone in the business', .66], analyst: ['📊', 'Analyst note', .7], tracking: ['📈', 'Tracking survey', .73], hearsay: ['💬', 'Hearsay', .47] };
+function tipsThisWeek() {
+  const M = S.me, out = [], r = hashRand(S.week * 2357 + 3), known = Object.keys(M.known || {}).map(Number).filter(id => P(id) && !P(id).dead);
+  const up = S.films.filter(f => f.rel === null && f.stage === 3 && f.co !== null && S.companies[f.co] && S.companies[f.co].closed === null && S.companies[f.co].owner === undefined && f.stageEnd - S.week <= 4 && f.stageEnd >= S.week);
+  for (let i = 0; i < 5 && up.length; i++) {
+    const f = up.splice(Math.floor(r() * up.length), 1)[0], c = S.companies[f.co], q0 = f.q !== undefined ? f.q : 55, truth = q0 >= 62 ? 1 : q0 < 48 ? -1 : 0;
+    const on = known.find(id => keyIds(f).includes(id)), inb = known.filter(id => P(id).hub === f.hub && opinion(id) > 0);
+    const kind = on !== undefined && r() < .7 ? 'insider' : inb.length && r() < .45 ? 'informed' : ['analyst', 'tracking', 'hearsay', 'hearsay'][Math.floor(r() * 4)];
+    const who = kind === 'insider' ? on : kind === 'informed' ? inb[Math.floor(r() * inb.length)] : null;
+    const src = kind === 'insider' ? `${P(who).name}, who worked on it` : kind === 'informed' ? `${P(who).name}, who saw a test screening` : kind === 'analyst' ? `An analyst at ${ANALYSTS[Math.floor(r() * ANALYSTS.length)]}` : kind === 'tracking' ? 'Pre-release tracking' : pickLine(['Clapgram chatter', 'a man at the gym', 'an online forum', 'your cousin who "knows people"'], f.id);
+    const rel = TIP_KIND[kind][2], right = r() < rel, claim = truth === 0 ? (r() < .5 ? 1 : -1) : right ? truth : -truth;
+    const why = claim > 0 ? pickLine(['the test audience applauded at the end', 'word of mouth is building', 'the trailer numbers are huge', 'the pre-sales are strong'], f.id) : pickLine(['the test screening went badly', 'reshoots, and the studio is nervous', 'tracking is soft', 'nobody is talking about it'], f.id);
+    out.push({ f: f.id, co: c.id, src, who, kind, rel, insider: kind === 'insider' ? 1 : 0, claim, why, opens: f.stageEnd });
+  }
+  // and one about the rest of the business: the numbers coming out next month
+  const S2 = SECTORS.map(x => SECTOR[x[0]]).filter(sectorOpen); if (S2.length) { const s = S2[Math.floor(r() * S2.length)], fut = (sectorPrice(s, S.week + 4) / sectorPrice(s) - 1), kind = r() < .5 ? 'analyst' : 'hearsay', rel = TIP_KIND[kind][2], claim = (r() < rel ? 1 : -1) * (fut >= 0 ? 1 : -1);
+    out.push({ s: s.k, src: kind === 'analyst' ? `An analyst at ${ANALYSTS[Math.floor(r() * ANALYSTS.length)]}` : 'A friend in the industry', kind, rel, insider: 0, claim, why: claim > 0 ? 'next month\'s numbers will beat expectations' : 'next month\'s numbers will disappoint', opens: S.week + 4 }); }
+  return out;
+}
+function tipJudge(t) {
+  if (t.s) { if (S.week < t.opens) return null; const s = SECTOR[t.s], ch = sectorPrice(s, t.opens) / sectorPrice(s, t.w) - 1; return (ch >= 0 ? 1 : -1) === t.claim; }
+  const f = S.films[t.f]; if (!f || f.rel === null || S.week < f.rel + 2) return null; const truth = (f.hitRatio || 0) >= 1.4 ? 1 : (f.hitRatio || 0) < .8 ? -1 : 0; return truth === 0 ? null : truth === t.claim;
+}
+function tipsHTML() {
+  const M = S.me, T = tipsThisWeek(); M.tipsSeen = M.tipsSeen || []; M.tipLog = M.tipLog || [];
+  for (const t of T) { const k = S.week + ':' + (t.co ?? t.s); if (!M.tipsSeen.includes(k)) { M.tipsSeen.push(k); M.tipLog.push({ w: S.week, f: t.f, s: t.s, claim: t.claim, kind: t.kind, opens: t.opens }); } }
+  if (M.tipsSeen.length > 60) M.tipsSeen.splice(0, M.tipsSeen.length - 60); if (M.tipLog.length > 200) M.tipLog.splice(0, M.tipLog.length - 200);
+  const rec = {}; for (const t of M.tipLog) { const j = tipJudge(t); if (j === null) continue; const x = rec[t.kind] = rec[t.kind] || [0, 0]; x[1]++; if (j) x[0]++; }
+  const line = t => { const k = TIP_KIND[t.kind]; if (t.s) { const s = SECTOR[t.s]; return `<li>${k[0]} <b>${esc(t.src)}</b>: ${esc(s.name)} (${esc(s.tk)}), ${esc(t.why)}. <span class="muted small">${esc(k[1])} · right about ${Math.round(t.rel * 100)}% of the time</span> <button class="linkish" data-sec="buy:${t.s}">Buy</button></li>`; }
+    const f = S.films[t.f], c = S.companies[t.co]; return `<li>${k[0]} <b>${esc(t.src)}</b> says ${fl(f.id)} (${esc(tickerOf(c))}) will <b class="${t.claim > 0 ? 'good' : 'bad'}">${t.claim > 0 ? 'open big' : 'flop'}</b>: ${esc(t.why)}. <span class="muted small">Opens ${fmtDate(t.opens, true)} · ${esc(k[1])}, usually right ${Math.round(t.rel * 100)}% of the time${t.insider ? ' · <b class="bad">trading on this is insider dealing</b>' : ''}</span> <a href="#" class="lk" data-mkt="sel:${c.id}">Trade ›</a></li>`; };
+  return `<p class="small muted">Where tips come from matters. People who worked on a film know the most, and trading on what they tell you is a crime the regulator does look for. Published analysts and tracking surveys are fair game. Hearsay is a coin toss with a story attached.</p>
+   <ul class="plain mnews">${T.map(line).join('') || '<li class="muted">Quiet week. Nothing big opening soon.</li>'}</ul>
+   <h4>Track record</h4><table class="grid small"><thead><tr><th>Source</th><th class="n">Right</th><th class="n">Called</th></tr></thead><tbody>${Object.entries(TIP_KIND).map(([k, v]) => { const x = rec[k] || [0, 0]; return `<tr><td>${v[0]} ${esc(v[1])}</td><td class="n">${x[1] ? Math.round(x[0] / x[1] * 100) + '%' : '–'}</td><td class="n">${x[1]}</td></tr>`; }).join('')}</tbody></table><p class="small muted">Tips you've seen, judged once the film opened or the numbers came out.</p>`;
+}
+
+// ---- the economy, explained ----
+function economyHTML() {
+  const ev = macroNow(), lvl = macroAt(S.week), lvlY = macroAt(S.week - 52), y = S.year, rate = rateAt(y), infl = (cpi(y) / cpi(y - 1) - 1) * 100, M = S.me;
+  const prod = S.active.length, prodY = typeof fieldIndex === 'function' ? fieldIndex('box', S.week) / Math.max(.01, fieldIndex('box', S.week - 52)) : 1;
+  const mood = lvl >= 1.08 ? 'Euphoric' : lvl >= 1.02 ? 'Bullish' : lvl >= .98 ? 'Calm' : lvl >= .9 ? 'Nervous' : 'Panic';
+  const wfx = typeof worldFx === 'function' ? worldFx() : {};
+  const rates = Array.from({ length: 21 }, (_, i) => [y - 20 + i, rateAt(y - 20 + i)]), rmax = Math.max(...rates.map(x => x[1]), 1);
+  const advice = [];
+  if (rate >= 4) advice.push('Rates are high: term deposits pay well and loans are expensive. Borrow only for something that earns more.');
+  else if (rate <= 1.5) advice.push('Rates are low: savings earn little, borrowing is cheap. Good years to finance a film or buy property.');
+  if (lvl < .92) advice.push('The market is in a panic. Prices are low for everyone, including good companies; patient money does well here.');
+  if (lvl > 1.08) advice.push('The market is euphoric. Prices are stretched: a good time to take some profit, not to borrow to buy.');
+  if (infl > 4) advice.push(`Inflation is running at ${infl.toFixed(1)}%: cash in a current account is quietly shrinking.`);
+  if ((wfx.jobs || 1) < 1) advice.push('Fewer productions are hiring: apply widely, and keep side income going.');
+  if ((wfx.jobs || 1) > 1) advice.push('Productions are hiring: a good moment to push for better jobs and better rates.');
+  if (!advice.length) advice.push('Nothing unusual. Spread your money: some saved, some invested, some for the next opportunity.');
+  return `<div class="kpis mini"><div><span>Interest rate</span><b>${rate.toFixed(2)}%</b></div><div><span>Inflation</span><b>${infl.toFixed(1)}%</b></div><div><span>Market mood</span><b class="${lvl >= 1 ? 'good' : 'bad'}">${mood}</b></div><div><span>Market, 1 year</span><b>${pctS((lvl / lvlY - 1) * 100)}</b></div><div><span>Box office, 1 year</span><b>${pctS((prodY - 1) * 100)}</b></div><div><span>Films in production</span><b>${prod.toLocaleString()}</b></div></div>
+   <div class="cols two"><section><h4>What it means for you</h4><ul class="plain small">${advice.map(a => `<li>💡 ${esc(a)}</li>`).join('')}</ul>
+    <h4>In the news</h4>${ev.length ? `<ul class="plain small">${ev.map(e => `<li><b>${esc(e.name)}</b> <span class="muted">${esc(e.d)}</span></li>`).join('')}</ul>` : '<p class="small muted">No big story moving the market right now.</p>'}</section>
+   <section><h4>Interest rates, twenty years</h4><div class="eco-bars">${rates.map(([yy, v]) => `<div title="${yy}: ${v.toFixed(2)}%"><i style="height:${Math.round(v / rmax * 100)}%"></i><small>${yy % 5 === 0 ? yy : ''}</small></div>`).join('')}</div>
+    <p class="small muted">Savings ${savRate().toFixed(2)}% · 1-year deposit ${cdRate(52).toFixed(2)}% · your loan rate ${loanRate(M).toFixed(1)}%.</p></section></div>`;
+}
+
+// ---- the bank's private side ----
+function sblLimit(M) { const nw = osNetWorth(); return Math.max(0, Math.round(nw.shares * .5)); }
+// the people with money who back films
+function angelsOf(hub) {
+  const r = hashRand(HUB_IDS.indexOf(hub) * 9973 + 5), N = NAMES[HUBS[hub].lang] || NAMES.en, out = [], kinds = ['Family office', 'Tech founder', 'Hedge-fund manager', 'Old money', 'Retired studio head', 'Real-estate heir', 'Music mogul', 'Sports star'];
+  const pk = L => L[Math.floor(r() * L.length)];
+  for (let i = 0; i < 8; i++) { const g = r() < .5 ? 'M' : 'F', name = `${pk(N[g] || N.M)} ${pk(N.L)}`, likes = Object.keys(AMB).sort(() => r() - .5).slice(0, 2), worth = Math.round((20 + Math.pow(r(), 2) * 1500)) * 1e6;
+    out.push({ i, name, kind: kinds[Math.floor(r() * kinds.length)], worth, likes, appetite: .3 + r() * .6, ticket: Math.round((.1 + r() * .9) * Math.min(worth * .01, 5e6) / 5e4) * 5e4 }); }
+  return out;
+}
+function angelAct(a) {
+  const M = S.me, me = ME(), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub)[+a.i]; if (!A || !c || c.closed !== null) return false;
+  M.angelTry = M.angelTry || {}; if (S.week - (M.angelTry[A.i] ?? -999) < 26) return false; M.angelTry[A.i] = S.week;
+  const nw = osNetWorth().total, dc = Math.round(clamp(18 - me.standing / 12 - c.hits * 2 - (nw > usd(1e6) ? 1 : 0) - A.appetite * 4 - ((M.love || []).some(g => A.likes.includes(g)) ? 1 : 0), 6, 19));
+  const ok = roll('fin', dc), amt = usd(A.ticket);
+  if (ok) { (M.angelFund = M.angelFund || []).push({ who: A.name, amt, w: S.week }); inbox('note', `${A.name} is in`, `Lunch runs to four hours. ${A.name} (${A.kind.toLowerCase()}) commits ${fmtCash(amt)} to your company's next film, for a share of what it earns. It's waiting when you greenlight.`, { result: { ok, roll: M.lastRoll, t: 'Committed.' } }); milestone(`${A.name} backs your next film`, 'work'); }
+  else inbox('note', `${A.name} passes`, `"I like you. I don't like the risk." ${A.name} will take another meeting in six months, after your next hit.`, { result: { ok, roll: M.lastRoll, t: 'A pass.' } });
+  return true;
+}
+// committed angel money goes into the next film's equity
+function takeAngels() { const M = S.me, L = M.angelFund || []; if (!L.length) return 0; const t = L.reduce((s, x) => s + x.amt, 0); M.angelFund = []; return t; }
+function privateBankHTML() {
+  const M = S.me, B = bankOf(M), nw = osNetWorth(), lim = sblLimit(M), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub);
+  const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[a.i] ?? -999) < 26; return `<tr><td><b>${esc(a.name)}</b><br><span class="muted small">${esc(a.kind)}</span></td><td class="n small">${fmtM(a.worth / 1e6)}</td><td class="small">${a.likes.map(esc).join(', ')}</td><td class="n small">${fmtCash(usd(a.ticket))}</td><td>${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait ? 'disabled' : ''}>${wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</td></tr>`; }).join('');
+  return `<div class="os-grid">${osCard('Securities-backed credit', `<p class="small">Borrow against your shares at ${(rateAt(S.year) + 1.5).toFixed(1)}%, up to half their value: ${fmtCash(lim)} available. If the market falls far enough, the bank sells your shares to cover it.</p><div class="bank-f"><button class="os-btn" data-bank="sbl" ${lim < 1000 ? 'disabled' : ''}>Draw ${fmtCash(Math.min(lim, Math.round(+UI.bkamt || 0)))} from the line</button></div>${B.sbl ? `<p class="small">Drawn: <b>${fmtCash(Math.round(B.sbl))}</b>. Interest comes out weekly; repay with the Repay button on Borrowing.</p>` : ''}`)}
+   ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet.</p>')}</div>
+   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each puts a cheque into a film they believe in, for a share of what it earns. The case you make rolls your Finance; hits, standing and shared taste help.</p>
+   <div class="tw"><table class="grid small"><thead><tr><th>Who</th><th class="n">Worth</th><th>Likes</th><th class="n">Usual cheque</th><th></th></tr></thead><tbody>${angels}</tbody></table></div>`;
+}
+function fin2Click(t) { if (t.dataset.angel !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'angel', i: +t.dataset.angel }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; } return false; }
+// </finance2>
+// <creative>
+// ---------------- The creative apps, as tools ----------------
+// Scriptwriter: your script on the screen, a beat board to outline it (lock a good outline and every page you write
+// after is better), focused writing sessions, and a reader's coverage of what you've finished.
+// Studio: for music, tempo, mood, an arrangement and a mixing desk on top of the step sequencer; for podcasts, a
+// guest, a running order and the edit. CutRoom: the clips for the kind of video you're making, trims, a grade, a music
+// bed, captions, and the title and thumbnail, with what the edit will probably do to retention and clicks.
+// Everything still lands as one session of work on the project, scored out of ten.
+
+// ---- Scriptwriter ----
+const BEAT_SLOTS = [['Opening image', 'setup'], ['Inciting incident', 'call'], ['Into act two', 'choice'], ['Fun and games', 'promise'], ['Midpoint', 'reversal'], ['All is lost', 'loss'], ['Climax', 'clash'], ['Final image', 'change']];
+const CARD_TEXT = {
+  setup: ['We meet {hero} in the life that\'s about to end', 'A morning ritual that tells us everything'], call: ['A stranger brings news that can\'t be ignored', 'The thing {hero} wanted most turns up, wrong'],
+  choice: ['{hero} says yes, and burns a bridge doing it', 'There\'s no going back: the door locks behind them'], promise: ['The {genre} we came for: set piece after set piece', 'The fun of the premise, at full volume'],
+  reversal: ['Everything {hero} believed turns out to be backwards', 'A win that costs more than a loss'], loss: ['The mentor is gone; the plan is in pieces', '{hero} alone in the rain, done'],
+  clash: ['Face to face with the thing they\'ve been running from', 'One last try, with everything learned'], change: ['The opening image again, but {hero} is different', 'A quiet ending that answers the first scene'],
+  filler: ['A long scene of people agreeing with each other', 'A flashback that explains what we already knew']
+};
+function beatCards(sc) {
+  const r = hashRand((sc.id || 1) * 131 + (sc.draft || 1)), hero = sc.hero || 'the hero', g = (sc.genre || 'drama').toLowerCase(), out = [];
+  for (const [, k] of BEAT_SLOTS) out.push({ k, t: CARD_TEXT[k][Math.floor(r() * 2)].replace('{hero}', hero).replace('{genre}', g) });
+  out.push({ k: 'filler', t: CARD_TEXT.filler[0] }, { k: 'filler', t: CARD_TEXT.filler[1] });
+  return out.map((c, i) => Object.assign(c, { i })).sort(() => r() - .5);
+}
+function beatScore(sc, pick) { let s = 0; const C = beatCards(sc); BEAT_SLOTS.forEach(([, want], i) => { const c = C.find(x => x.i === pick[i]); if (c && c.k === want) s++; else if (c && c.k === 'filler') s -= .5; }); return Math.max(0, s); }
+function outlineAct(a) {
+  const M = S.me, me = ME(), sc = (M.scripts || []).find(x => x.id === a.id && x.stage === 'writing'); if (!sc || sc.outlined === sc.draft) return false;
+  const pick = (a.pick || []).map(Number), cards = beatCards(sc); if (pick.length !== BEAT_SLOTS.length || new Set(pick).size !== pick.length || pick.some(i => !cards.some(c => c.i === i))) return false;
+  const s = beatScore(sc, pick), ok = roll('struc', 13 - Math.floor(s / 2));
+  sc.outlined = sc.draft; sc.prep = (sc.prep || 0) + (s >= 6 ? 2 : s >= 4 ? 1 : 0) + (ok ? 1 : 0); sc.outline = pick;
+  growSub(me, 'struc', .02 + s * .004);
+  diary(`Outlined ${sc.title}: ${s} of ${BEAT_SLOTS.length} beats where they belong${ok ? ', and it holds together' : ', though something in the middle sags'}.`);
+  return true;
+}
+const WRITE_FOCUS = { pages: ['📄 Push on: pages', 'More pages, less care.', null], dial: ['💬 Dialogue pass', 'Fewer pages; every line earns its place.', 'dial'], char: ['🧍 Character pass', 'Make them want something, and make it cost.', 'char'], stakes: ['🔥 Raise the stakes', 'What happens if they fail? Make it worse.', 'struc'] };
+function scriptSessAct(a) {
+  const M = S.me, me = ME(), sc = activeScript(), F = WRITE_FOCUS[a.f], day = S.week * 7 + (M.wk ? M.wk.day : 0);
+  if (!sc || !F || M.sessD === day) return false; M.sessD = day;
+  const L = []; writeOnScript(L, a.f === 'pages' ? .9 : .5);
+  if (F[2]) { sc.q += (skillOf(me, F[2]) - 8) * 1.5; growSub(me, F[2], .015); }
+  M.energy = clamp(M.energy - 7, 0, 100);
+  diary(`Scriptwriter: ${L.join(' ')}`);
+  return true;
+}
+function coverageOf(sc) {
+  const me = ME(), sk = k => skillOf(me, k), notes = [];
+  notes.push(['Structure', sk('struc') >= 12 || sc.outlined ? 'Confident: the turns land where they should.' : 'The middle wanders. An outline would help.']);
+  notes.push(['Dialogue', sk('dial') >= 12 ? 'Sharp and specific; people sound like people.' : 'On the nose: characters say what they feel.']);
+  notes.push(['Character', sk('char') >= 12 ? 'A lead we\'d follow anywhere.' : 'The lead reacts more than they choose.']);
+  notes.push(['Originality', sk('orig') >= 12 ? 'Feels like nobody else could have written it.' : 'Familiar beats; the premise needs a twist.']);
+  return notes;
+}
+function scriptwriterApp() {
+  const M = S.me, sc = activeScript(), done = (M.scripts || []).filter(x => x.grade).slice(-6).reverse(), today = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0);
+  let body = '';
+  if (sc) {
+    const pct = Math.round(sc.pages / Math.max(1, sc.target) * 100), perPage = sc.pages ? sc.q / sc.pages : 0, proj = clamp(Math.round(38 + (perPage - 6) * 5 + (sc.draft - 1) * 7), 5, 98);
+    const cards = beatCards(sc), pick = UI.beats && UI.beats.id === sc.id && UI.beats.d === sc.draft ? UI.beats.p : (UI.beats = { id: sc.id, d: sc.draft, p: BEAT_SLOTS.map(() => '') }).p;
+    body = `<div class="sw-page"><p class="sw-title">${esc(sc.title.toUpperCase())}</p><p class="muted small">${esc(sc.genre)} · ${esc(THEMES[sc.theme] || '')} · draft ${sc.draft}</p>
+      <div class="sw-prog"><i style="width:${pct}%"></i></div><p class="small">${sc.pages} of ${sc.target} pages · ${sc.sessions} sessions · heading for <b>${gradeOf(proj)}</b> on what's written so far${sc.prep ? ` · outline bonus +${sc.prep}` : ''}</p></div>
+     <h5>Write</h5><div class="bf-row">${Object.entries(WRITE_FOCUS).map(([k, F]) => `<button class="btn-s ghost" data-swsess="${k}" ${today ? 'disabled' : ''} title="${esc(F[1])}">${F[0]}</button>`).join('')}</div><p class="small muted">${today ? 'You\'ve done a session on the computer today.' : 'One session a day here, on top of the writing blocks in your diary.'}</p>
+     <h5>Beat board ${sc.outlined === sc.draft ? '<span class="chip good">outline locked</span>' : ''}</h5>
+     ${sc.outlined === sc.draft ? `<ol class="small">${(sc.outline || []).map((ci, i) => `<li><b>${BEAT_SLOTS[i][0]}</b>: ${esc((cards.find(c => c.i === ci) || {}).t || '')}</li>`).join('')}</ol>` : `<p class="small muted">Put a scene card on each beat. Two cards don't belong anywhere. A good outline makes every page after it better (and rolls your Structure).</p>
+      <div class="sw-beats">${BEAT_SLOTS.map(([l], i) => `<label><span>${l}</span>${sel('sw-beat-' + i, [['', 'Choose a scene…'], ...cards.map(c => [String(c.i), c.t])], String(pick[i]))}</label>`).join('')}</div>
+      <button class="btn-s" data-swoutline="${sc.id}" ${pick.some(x => x === '') ? 'disabled' : ''}>Lock the outline</button>`}
+     ${UI.sample ? `<p><button class="btn-s ghost" data-readpages="${sc.id}">📖 Read the pages</button></p>` : ''}`;
+  } else body = `<p>No script in progress. Start one on your writing desk.</p><p><button class="btn-s" data-app="create">Open Create</button></p>`;
+  return `<div class="swapp">${body}${done.length ? `<h5>Coverage on finished scripts</h5>${done.map(x => `<details class="sw-cov"><summary><b>${esc(x.title)}</b> <span class="grade g${x.grade}">${x.grade}</span> <span class="muted small">${x.score}/100 · draft ${x.draft}</span></summary><ul class="plain small">${coverageOf(x).map(([k, v]) => `<li><b>${k}:</b> ${esc(v)}</li>`).join('')}</ul></details>`).join('')}` : ''}</div>`;
+}
+
+// ---- Studio: music ----
+const MOODS = { major: 'Bright (major)', minor: 'Dark (minor)', modal: 'Dreamy (modal)' }, ARR = ['Intro', 'Verse', 'Chorus', 'Verse', 'Chorus', 'Bridge', 'Chorus', 'Outro'];
+function mixState() { return UI.mix = UI.mix || { bpm: 110, mood: 'major', lv: [70, 55, 60, 45, 65], arr: ARR.slice() }; }
+function musicScore(k) {
+  const G = seqGrid(), X = mixState(); let s = seqScore(G) * .6;
+  const lv = X.lv, spread = Math.max(...lv) - Math.min(...lv); if (spread <= 35) s += 1; if (lv[4] >= lv[1] && lv[0] >= 50) s += .5;   // melody over the snare, a kick you can feel
+  const ch = X.arr.filter(x => x === 'Chorus').length; if (ch >= 2 && ch <= 4) s += 1; if (X.arr.includes('Bridge')) s += .5; if (X.arr[0] === 'Intro' || X.arr[0] === 'Verse') s += .5;
+  if (k.type === 'score' && X.mood !== 'major' && X.bpm <= 100) s += 1; if (k.type === 'song' && X.bpm >= 90 && X.bpm <= 130) s += 1;
+  return clamp(Math.round(s), 0, 10);
+}
+// ---- Studio: podcast ----
+function podState() { return UI.pod = UI.pod || { guest: '', intro: 1, order: ['Cold open', 'Intro music', 'Interview', 'Listener mail', 'Sign-off'] }; }
+function podScore() {
+  const P0 = podState(), segs = podSegs(), cut = UI.cuts || []; let s = clamp(Math.round(cut.reduce((t, i) => t + (segs[i] === 'talk' ? -2 : 1), 0) / Math.max(1, segs.filter(x => x !== 'talk').length) * 10), 0, 10) * .6;
+  if (P0.order[0] === 'Cold open') s += 1; if (P0.order[P0.order.length - 1] === 'Sign-off') s += .5; if (P0.intro) s += .5;
+  if (P0.guest !== '' && P(+P0.guest)) s += Math.min(2, (P(+P0.guest).fame || 0) / 30 + .5);
+  return clamp(Math.round(s), 0, 10);
+}
+function studioApp() {
+  const M = S.me, k = M.make;
+  if (!k || !['song', 'score', 'musical', 'podcast'].includes(k.type)) return `<p>Open a song, score, musical or podcast project on Create, then work on it here.</p><p><button class="btn-s" data-app="create">Open Create</button></p>`;
+  const done = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0);
+  if (k.type === 'podcast') {
+    const segs = podSegs(), cut = UI.cuts || [], P0 = podState(), guests = aliveKnown().slice(0, 30).map(id => [String(id), P(id).name + (P(id).fame > 30 ? ' ★' : '')]);
+    return `<p><b>${esc(k.title)}</b> · episode ${(k.prog || 0) + 1}</p>
+     <div class="filt"><label><span>Guest</span>${sel('pod-guest', [['', 'No guest: just you'], ...guests], P0.guest)}</label><label><span>Intro music</span>${sel('pod-intro', [['1', 'Yes'], ['0', 'No']], String(P0.intro))}</label></div>
+     <h5>Running order <span class="muted small">click two to swap</span></h5><div class="timeline">${P0.order.map((x, i) => `<button class="clip2${UI.podPick === i ? ' on' : ''}" data-podord="${i}">${esc(x)}</button>`).join('')}</div>
+     <h5>The edit <span class="muted small">cut the ums and dead air, keep the talk</span></h5><div class="wave">${segs.map((s, i) => `<button class="seg ${s}${cut.includes(i) ? ' cut' : ''}" data-podcut="${i}" title="${s === 'um' ? 'um…' : s === 'gap' ? 'silence' : 'talking'}"><i style="height:${s === 'talk' ? 26 + (i * 7) % 14 : s === 'um' ? 10 : 3}px"></i></button>`).join('')}</div>
+     <p>${done ? '<span class="muted">You\'ve done a session today.</span>' : `<button class="btn-s" data-session="podcut2">Export the episode</button>`} <span class="muted small">Predicted: ${podScore()}/10. A cold open hooks; a famous guest brings their audience.</span></p>`;
+  }
+  const G = seqGrid(), X = mixState();
+  return `<p><b>${esc(k.title)}</b> · ${esc(WORK_TYPES[k.type].label)}</p>
+   <div class="filt"><label><span>Tempo</span><input id="mx-bpm" type="number" min="60" max="180" value="${X.bpm}"> BPM</label><label><span>Mood</span>${sel('mx-mood', Object.entries(MOODS), X.mood)}</label></div>
+   <div class="seq">${SEQ_ROWS.map((row, r) => `<div class="srow"><span>${row}</span>${G[r].map((v, c) => `<button class="step${v ? ' on' : ''}${c % 4 === 0 ? ' downbeat' : ''}" data-seq="${r}:${c}"></button>`).join('')}<input class="mx-lv" id="mx-lv-${r}" type="range" min="0" max="100" value="${X.lv[r]}" title="${row} level"></div>`).join('')}</div>
+   <h5>Arrangement <span class="muted small">click two sections to swap</span></h5><div class="timeline">${X.arr.map((x, i) => `<button class="clip2${UI.arrPick === i ? ' on' : ''}" data-arr="${i}">${esc(x)}</button>`).join('')}</div>
+   <p><button class="btn-s ghost" data-seqplay="1">▶ Play</button> ${done ? '<span class="muted">You\'ve done a session today.</span>' : `<button class="btn-s" data-session="studio2">Bounce the mix</button>`} <span class="muted small">Predicted: ${musicScore(k)}/10. Kick on the one, snare on the backbeat; keep the levels within reach of each other; two or three choruses and a bridge.${k.type === 'score' ? ' Scores like it darker and slower.' : ''}</span></p>`;
+}
+// ---- CutRoom ----
+const CUT_SETS = { video: ['Hook', 'Intro', 'Main point', 'Example', 'Joke', 'Payoff', 'Call to action', 'Outro'], blip: ['Hook', 'Setup', 'Twist', 'Punchline'], mv: ['Intro', 'Verse', 'Chorus', 'Verse', 'Bridge', 'Chorus', 'Outro'] };
+const CUT_IDEAL = { video: { first: 'Hook', last: 'Outro', after: [['Payoff', 'Main point'], ['Example', 'Main point']] }, blip: { first: 'Hook', last: 'Punchline', after: [['Twist', 'Setup']] }, mv: { first: 'Intro', last: 'Outro', after: [['Bridge', 'Verse']] } };
+function cutState(k) { if (!UI.cut || UI.cut.w !== S.week || UI.cut.t !== k.type) { const r = hashRand(S.week * 71 + k.type.length), L = CUT_SETS[k.type].slice().sort(() => r() - .5); UI.cut = { w: S.week, t: k.type, order: L, len: L.map(() => 1), grade: 'natural', music: 'upbeat', caps: 1, thumb: null, title: '' }; } return UI.cut; }
+function cutPredict(k) {
+  const C = cutState(k), I = CUT_IDEAL[k.type], O = C.order; let s = 0;
+  if (O[0] === I.first) s += 2.5; if (O[O.length - 1] === I.last) s += 1.5; for (const [a, b] of I.after) if (O.indexOf(a) > O.indexOf(b)) s += 1;
+  const tight = C.len.filter((x, i) => (O[i] === 'Hook' || O[i] === 'Intro') ? x === 0 : x <= 1).length / O.length; s += tight * 2;
+  if (C.caps) s += .5; if (k.type === 'mv' ? C.grade === 'stylised' : C.grade !== 'stylised') s += .5; if (k.type === 'blip' ? C.music === 'trending' : C.music !== 'none') s += .5;
+  const t = C.title.trim(), tq = t.length >= 25 && t.length <= 65 ? 1 : t.length ? .4 : 0, hook = /\d|\?|!|how|why|never|secret|tried/i.test(t) ? .5 : 0;
+  const ctr = (C.thumb === null ? 2 : [6.5, 3.5, 2.5, 5][C.thumb]) + tq * 1.5 + hook;
+  s += (C.thumb === 0 || C.thumb === 3 ? 1 : C.thumb === null ? -1 : 0) + tq + hook;
+  return { score: clamp(Math.round(s), 0, 10), ret: Math.round(clamp(30 + s * 5 + tight * 10, 15, 85)), ctr: +ctr.toFixed(1) };
+}
+function cutroomApp() {
+  const M = S.me, k = M.make;
+  if (!k || !['video', 'blip', 'mv'].includes(k.type)) return `<p>Open a video, Blip clip or music video project on Create, then cut it here.</p><p><button class="btn-s" data-app="create">Open Create</button></p>`;
+  const C = cutState(k), P0 = cutPredict(k), done = M.sessD === S.week * 7 + (M.wk ? M.wk.day : 0);
+  const curve = Array.from({ length: 10 }, (_, i) => Math.round(100 * Math.pow(P0.ret / 100, i / 9)));
+  return `<p><b>${esc(k.title)}</b> · ${esc(WORK_TYPES[k.type].label)}</p>
+   <h5>Timeline <span class="muted small">click two clips to swap; set each clip's length</span></h5>
+   <div class="cut-tl">${C.order.map((c, i) => `<div class="cut-clip${UI.pickC === i ? ' on' : ''}"><button class="clip2" data-clip2="${i}">${esc(c)}</button>${sel('cut-len-' + i, [['0', 'Tight'], ['1', 'Normal'], ['2', 'Long']], String(C.len[i]))}</div>`).join('')}</div>
+   <div class="filt"><label><span>Colour grade</span>${sel('cut-grade', [['natural', 'Natural'], ['warm', 'Warm'], ['stylised', 'Stylised']], C.grade)}</label><label><span>Music bed</span>${sel('cut-music', [['upbeat', 'Upbeat'], ['moody', 'Moody'], ['trending', 'Trending sound'], ['none', 'None']], C.music)}</label><label><span>Captions</span>${sel('cut-caps', [['1', 'On'], ['0', 'Off']], String(C.caps))}</label></div>
+   <h5>Packaging</h5><div class="filt"><label class="filt-q"><span>Title</span><input id="cut-title" maxlength="80" placeholder="What makes someone click?" value="${esc(C.title)}"></label></div>
+   <p class="small">Thumbnail: ${['😲 Big face, big arrow', '🌄 A pretty landscape', '🔤 Just the title', '🎯 One bold image, three words'].map((t, i) => `<button class="btn-s${C.thumb === i ? '' : ' ghost'}" data-thumb2="${i}">${t}</button>`).join(' ')}</p>
+   <div class="cut-pred"><div><span class="muted small">Predicted retention</span><div class="cut-curve">${curve.map(v => `<i style="height:${v}%"></i>`).join('')}</div><b>${P0.ret}%</b> <span class="muted small">watch to the end</span></div><div><span class="muted small">Click-through</span><b class="os-big">${P0.ctr}%</b></div><div><span class="muted small">Edit score</span><b class="os-big">${P0.score}/10</b></div></div>
+   <p>${done ? '<span class="muted">You\'ve done a session today.</span>' : `<button class="btn-s" data-session="edit2">Render the cut</button>`}</p>`;
+}
+function creativeClick(t) {
+  const d = t.dataset;
+  if (d.swsess) { doAct({ t: 'scriptsess', f: d.swsess }); render(true); return true; }
+  if (d.swoutline) { const n0 = S.me.rollN || 0; doAct({ t: 'outline', id: +d.swoutline, pick: (UI.beats || {}).p }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; }
+  if (d.arr !== undefined) { const X = mixState(), i = +d.arr; if (UI.arrPick === undefined || UI.arrPick === null) UI.arrPick = i; else { [X.arr[UI.arrPick], X.arr[i]] = [X.arr[i], X.arr[UI.arrPick]]; UI.arrPick = null; } render(true); return true; }
+  if (d.podord !== undefined) { const P0 = podState(), i = +d.podord; if (UI.podPick === undefined || UI.podPick === null) UI.podPick = i; else { [P0.order[UI.podPick], P0.order[i]] = [P0.order[i], P0.order[UI.podPick]]; UI.podPick = null; } render(true); return true; }
+  if (d.clip2 !== undefined) { const C = UI.cut, i = +d.clip2; if (!C) return true; if (UI.pickC === undefined || UI.pickC === null) UI.pickC = i; else { [C.order[UI.pickC], C.order[i]] = [C.order[i], C.order[UI.pickC]]; [C.len[UI.pickC], C.len[i]] = [C.len[i], C.len[UI.pickC]]; UI.pickC = null; } render(true); return true; }
+  if (d.thumb2 !== undefined) { if (UI.cut) UI.cut.thumb = +d.thumb2; render(true); return true; }
+  if (d.session === 'studio2' || d.session === 'podcut2' || d.session === 'edit2') {
+    const k = S.me.make, score = d.session === 'studio2' ? musicScore(k) : d.session === 'podcut2' ? podScore() : cutPredict(k).score;
+    if (d.session === 'podcut2') UI.cuts = []; if (d.session === 'edit2') UI.cut = null;
+    doAct({ t: 'session', score }); render(true); return true;
+  }
+  return false;
+}
+function creativeChange(e) {
+  const id = e.target.id, v = e.target.value;
+  let m;
+  if ((m = id.match(/^sw-beat-(\d)$/))) { if (UI.beats) UI.beats.p[+m[1]] = v === '' ? '' : +v; render(true); return true; }
+  if (id === 'mx-bpm') { mixState().bpm = clamp(+v || 110, 60, 180); render(true); return true; }
+  if (id === 'mx-mood') { mixState().mood = v; render(true); return true; }
+  if ((m = id.match(/^mx-lv-(\d)$/))) { mixState().lv[+m[1]] = +v; render(true); return true; }
+  if (id === 'pod-guest') { podState().guest = v; render(true); return true; }
+  if (id === 'pod-intro') { podState().intro = +v; render(true); return true; }
+  if ((m = id.match(/^cut-len-(\d)$/))) { if (UI.cut) UI.cut.len[+m[1]] = +v; render(true); return true; }
+  if (id === 'cut-grade' || id === 'cut-music' || id === 'cut-caps') { if (UI.cut) UI.cut[id.slice(4)] = id === 'cut-caps' ? +v : v; render(true); return true; }
+  if (id === 'cut-title') { if (UI.cut) UI.cut.title = v; render(true); return true; }
+  return false;
+}
+// </creative>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -30880,6 +31186,7 @@ function careerClick(t) {
   if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.coinv && finClick(t)) return true;
   if (typeof cgClick === 'function' && cgClick(t)) return true;
+  if (typeof fin2Click === 'function' && fin2Click(t)) return true;
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
@@ -30898,7 +31205,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -31198,6 +31505,7 @@ document.addEventListener('click', e => {
   if (UI.busy && !UI.earlyCC && !t.dataset.go && !t.dataset.tab && !t.dataset.back) return;
   if (typeof osCaptureGo === 'function' && osCaptureGo(t)) return;
   if (typeof savesClick === 'function' && savesClick(t)) return;
+  if (typeof creativeClick === 'function' && creativeClick(t)) return;
   if (careerClick(t)) return;
   if (t.dataset.go) { const g = t.dataset.go, ci = g.indexOf(':'), kind = g.slice(0, ci), id = g.slice(ci + 1); UI.stack.push({ kind, id: /^-?\d+$/.test(id) ? +id : id }); render(); return; }
   if (t.dataset.tab) { UI.tab = t.dataset.tab; UI.stack = []; render(); return; }
@@ -31229,6 +31537,8 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => {
   if (typeof savesChange === 'function' && savesChange(e)) return;
   if (typeof weatherChange === 'function' && weatherChange(e)) return;
+  if (typeof mktChange === 'function' && mktChange(e)) return;
+  if (typeof creativeChange === 'function' && creativeChange(e)) return;
   if (careerChange(e)) return;
   if (typeof chartChange === 'function' && chartChange(e)) return;
   if (typeof boardChange === 'function' && boardChange(e)) return;

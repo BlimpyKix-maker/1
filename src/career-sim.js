@@ -1106,6 +1106,9 @@ function applyAct(a) {
     case 'selffund': return selfFund(a);
     case 'coinv': return coinvAct(a);
     case 'cgpost': return cgPostAct(a);
+    case 'angel': return angelAct(a);
+    case 'outline': return outlineAct(a);
+    case 'scriptsess': return scriptSessAct(a);
     case 'cgfollow': return cgFollow(a);
     case 'festival': return submitFest(a);
     case 'newscript': return newScript(a);

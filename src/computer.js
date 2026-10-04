@@ -41,7 +41,7 @@ function appWindow(k) {
     case 'notes': { let v = ''; try { v = localStorage.getItem(notesKey()) || ''; } catch (e) { /* no storage */ } return `<textarea id="pc-notes" rows="12" placeholder="Ideas, names, a scene you can't stop thinking about…">${esc(v)}</textarea><p class="muted small">Saved in this browser as you type.</p>`; }
     case 'sweep': { if (!UI.sweep) sweepNew(); const G = UI.sweep; return `<p class="muted small">${G.over > 0 ? 'Cleared! That\'s a wrap.' : G.over < 0 ? 'Boom. Reshoot?' : 'Find the clean takes. Avoid the 9 bad ones.'} <button class="btn-s ghost" data-sweep="new">New game</button></p><div class="sweep" style="grid-template-columns:repeat(${G.n}, 28px)">${Array.from({ length: G.n * G.n }, (_, i) => { const o = G.open.includes(i), m = G.mines.includes(i), c = o && !m ? sweepCount(i) : 0; return `<button class="cell${o ? ' open' : ''}${o && m ? ' mine' : ''}" data-sweep="${i}" ${o || G.over ? 'disabled' : ''}>${o ? (m ? '💥' : c || '') : ''}</button>`; }).join('')}</div>`; }
     case 'weather': if (typeof weatherApp === 'function') return weatherApp(); { const on = typeof worldOn === 'function' ? worldOn().filter(e => e.from <= S.week) : []; return `<p class="big">${esc(hubName(M.hub))}</p><p>${on.length ? on.map(e => { const W = WORLD_EVENTS.find(x => x.k === e.k); return `<b>${esc(W.t)}</b>: ${esc(W.d)}`; }).join('<br>') : 'Nothing unusual this week. Good filming weather.'}</p>`; }
-    case 'write': return `<p>Your scripts live in the Create tab.</p><p><button class="btn-s" data-dtab="create">Open your scripts ›</button></p>`;
+    case 'write': return typeof scriptwriterApp === 'function' ? scriptwriterApp() : '';
     default: return appWindow2(k);
   }
   return '';

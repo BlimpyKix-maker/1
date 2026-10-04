@@ -138,7 +138,7 @@ function liveOn(a) {
   }
 }
 function card(icon, title, lines, extra = {}) { const W = S.me.wk; W.cards.push({ d: W.day, b: W.block, icon, title, lines: lines.filter(Boolean), ...extra }); if (W.cards.length > 60) W.cards.splice(0, W.cards.length - 60); }
-function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g) W.gains[k] = (W.gains[k] || 0) + g; }
+function weekGain(k, v) { const W = S.me.wk, g = growSub(ME(), k, v * learnRate(ME()) * condMul()); if (g && W) W.gains[k] = (W.gains[k] || 0) + g; }   // works between weeks too (the computer apps)
 function dayPlan() { return effectivePlan(); }
 function blockStep(a) {
   const M = S.me, W = M.wk, d = W.day, b = W.block;

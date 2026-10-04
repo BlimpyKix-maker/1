@@ -64,7 +64,7 @@ const pctS = v => `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '
 function marketApp() {
   const M = S.me, T = UI.mkt = UI.mkt || { tab: 'market', sel: null, q: 10 }, L = listedCos();
   const idx = indexVal(S.week), idxW = indexVal(S.week - 1) || idx || 1, idxY = indexVal(S.week - 52) || idx || 1;
-  const tabs = [['market', '🎬 Film studios'], ['sectors', '🎵📺 Music, TV & more'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
+  const tabs = [['market', '📈 All markets'], ['studios', '🎬 Studios only'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
   const head = `<div class="bourse-h"><span class="bourse-logo">BOURSE</span><span><b>BOX-50</b> ${idx.toFixed(1)} ${pctS((idx / idxW - 1) * 100)} <span class="muted small">1Y ${pctS((idx / Math.max(1e-6, idxY) - 1) * 100)}</span></span>${[['box', '🎬 Box office'], ['music', '🎵 Music'], ['video', '📺 Online video'], ['pod', '🎙️ Podcasts']].map(([k, l]) => { const a = fieldIndex(k, S.week - 4), b = fieldIndex(k, S.week); return a > 0 ? `<span class="small">${l} ${pctS((b / a - 1) * 100)}</span>` : ''; }).join('')}</div>
    <div class="bf-row">${tabs.map(([k, l]) => `<button class="pill${T.tab === k ? ' on' : ''}" data-mkt="tab:${k}">${l}</button>`).join('')}</div>`;
   if (T.sel !== null && S.companies[T.sel]) return head + stockPage(S.companies[T.sel]);
@@ -82,6 +82,7 @@ function marketApp() {
      ${(M.trades || []).length ? `<h4>Recent trades</h4><ul class="plain small">${M.trades.slice(-8).reverse().map(t => `<li>${fmtDate(t.w, true)} · ${t.n > 0 ? 'Bought' : 'Sold'} ${Math.abs(t.n)} ${esc(tickerOf(S.companies[t.co]))} at $${t.px}</li>`).join('')}</ul>` : ''}`;
   }
   if (T.tab === 'news') { const N = []; for (const c of L) for (let w = S.week; w > S.week - 8; w--) for (const e of mktBar(c, w).ev) N.push([w, c, e]); N.sort((a, b) => b[0] - a[0] || Math.abs(b[2][1]) - Math.abs(a[2][1])); return head + `<ul class="plain small mnews">${N.slice(0, 30).map(([w, c, e]) => `<li><span class="muted">${fmtDate(w, true)}</span> <a href="#" class="lk" data-mkt="sel:${c.id}"><b>${esc(tickerOf(c))}</b></a> ${pctS(e[1] * 100)} · ${esc(e[0])}</li>`).join('') || '<li class="muted">A quiet market.</li>'}</ul>`; }
+  if (T.tab === 'market' && typeof allMarketHTML === 'function') return head + allMarketHTML();
   const movers = L.map(c => [c, chg(c, 1)]).sort((a, b) => b[1] - a[1]);
   return head + `<p class="small">Top movers: ${movers.slice(0, 3).map(([c, v]) => `<a href="#" class="lk" data-mkt="sel:${c.id}">${esc(tickerOf(c))}</a> ${pctS(v)}`).join(' · ')} — ${movers.slice(-3).reverse().map(([c, v]) => `<a href="#" class="lk" data-mkt="sel:${c.id}">${esc(tickerOf(c))}</a> ${pctS(v)}`).join(' · ')}</p>` + table(L.slice().sort((a, b) => mcap(b) - mcap(a)).slice(0, 40));
 }

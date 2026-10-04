@@ -149,7 +149,8 @@ function bankAct(a) {
   else if (a.k === 'cd') { const wk = [26, 52, 104][+a.term || 0]; if (amt <= 0 || M.cash < amt) return false; M.cash -= amt; B.cds.push({ amt, rate: cdRate(wk), from: S.week, due: S.week + wk }); }
   else if (a.k === 'breakcd') { const i = +a.i, c = B.cds[i]; if (!c) return false; M.cash += Math.round(c.amt * .97); B.cds.splice(i, 1); B.hist.push({ w: S.week, t: 'Broke a term deposit early (3% penalty)' }); }
   else if (a.k === 'borrow') { if (amt <= 0 || B.loan + amt > creditLimit(M)) return false; B.loan += amt; B.lrate = loanRate(M); M.cash += amt; B.hist.push({ w: S.week, t: `Borrowed ${fmtCash(amt)} at ${B.lrate.toFixed(1)}%` }); }
-  else if (a.k === 'repay') { const k = Math.min(amt, B.loan, M.cash); if (k <= 0) return false; M.cash -= k; B.loan -= k; B.score = clamp(B.score + 2, 300, 850); }
+  else if (a.k === 'repay') { let k = Math.min(amt, B.loan, M.cash); if (k <= 0 && B.sbl > 0) { k = Math.min(amt, B.sbl, M.cash); if (k <= 0) return false; M.cash -= k; B.sbl -= k; B.hist.push({ w: S.week, t: `Repaid ${fmtCash(k)} on the credit line` }); return true; } if (k <= 0) return false; M.cash -= k; B.loan -= k; B.score = clamp(B.score + 2, 300, 850); }
+  else if (a.k === 'sbl') { const lim = typeof sblLimit === 'function' ? sblLimit(M) - (B.sbl || 0) : 0; if (amt <= 0 || amt > lim) return false; B.sbl = (B.sbl || 0) + amt; M.cash += amt; B.hist.push({ w: S.week, t: `Drew ${fmtCash(amt)} against your portfolio` }); }
   else return false;
   return true;
 }
@@ -188,6 +189,10 @@ function bankWeek() {
   sectorDivWeek(); taxYear(M);
   if (B.sav > 0) { const i = Math.round(B.sav * savRate() / 100 / 52 * 100) / 100; B.sav += i; B.earned = (B.earned || 0) + i; }
   for (let k = B.cds.length - 1; k >= 0; k--) { const c = B.cds[k]; if (S.week >= c.due) { const pay = Math.round(c.amt * (1 + c.rate / 100 * (c.due - c.from) / 52)); M.cash += pay; B.cds.splice(k, 1); mail('news', 'Your bank', 'Term deposit matured', `${fmtCash(c.amt)} at ${c.rate.toFixed(2)}% has matured: ${fmtCash(pay)} has been paid into your account.`); } }
+  if (B.sbl > 0) {   // the portfolio line: weekly interest, and a margin call if the shares fall too far
+    const int = Math.round(B.sbl * (rateAt(S.year) + 1.5) / 100 / 52); M.cash -= int;
+    const nw = osNetWorth(); if (B.sbl > nw.shares * .7 && M.port) { let need = B.sbl - nw.shares * .5; for (const id in M.port) { if (need <= 0) break; const c = S.companies[+id], n = M.port[id]; if (!c || !n) continue; const px = mktPrice(c), k = Math.min(n, Math.ceil(need / px)); M.port[id] -= k; B.sbl = Math.max(0, B.sbl - k * px); need -= k * px; } mail('news', 'Your bank', 'Margin call', 'Your shares fell below the level the credit line needs. The bank sold some of them to cover it.'); B.hist.push({ w: S.week, t: 'Margin call: shares sold to cover the credit line' }); }
+  }
   if (B.loan > 0) {
     const int = B.loan * B.lrate / 100 / 52, pay = Math.max(int * 1.3, B.loan * .01);
     if (M.cash >= pay) { M.cash -= Math.round(pay); B.loan = Math.max(0, B.loan + int - pay); if (S.week % 13 === 0) B.score = clamp(B.score + 3, 300, 850); }
@@ -222,7 +227,9 @@ function bankHTML() {
    ${osCard('Term deposits', `<p class="small">Lock money away for a better rate: 6 months ${cdRate(26).toFixed(2)}%, 1 year ${cdRate(52).toFixed(2)}%, 2 years ${cdRate(104).toFixed(2)}%. Breaking early costs 3%.</p><div class="bank-f"><button class="os-btn" data-bank="cd:0">6 months</button><button class="os-btn" data-bank="cd:1">1 year</button><button class="os-btn" data-bank="cd:2">2 years</button></div>${B.cds.length ? `<ul class="os-list">${B.cds.map((c, i) => `<li><b>${fmtCash(c.amt)}</b><span class="muted">${c.rate.toFixed(2)}% · matures ${fmtDate(c.due, true)}</span><button class="linkish" data-bank="breakcd:${i}">Break</button></li>`).join('')}</ul>` : ''}`)}
    ${osCard('Tax', (() => { const T0 = M.taxYr, T = T0 && T0.y === S.year ? T0 : { y: S.year, inc: 0, paid: 0, earned: 0 }, H = (M.taxHist || []).slice(-1)[0]; return `<p class="small">This year you've earned <b>${fmtCash(Math.round(T.earned || 0))}</b> and paid <b>${fmtCash(Math.round(T.paid))}</b> in tax${T.earned ? ` (${Math.round(T.paid / T.earned * 100)}%)` : ''}. It comes out as you're paid, so nothing is owed at the end.</p>${H ? `<p class="small muted">Last year: ${fmtCash(Math.round(H.paid))} on ${fmtCash(Math.round(H.inc * wageF(M.hub)))}.</p>` : ''}<p class="small muted">Investment gains and dividends aren't taxed here.</p>`; })())}
    ${osCard('Borrowing', `<p class="small">Credit score <b>${B.score}</b> · limit ${fmtCash(lim)} · rate ${loanRate(M).toFixed(1)}%</p>${B.loan > 0 ? `<p>You owe <b class="bad">${fmtCash(Math.round(B.loan))}</b> at ${B.lrate.toFixed(1)}%. Payments come out weekly.</p>` : ''}<div class="bank-f"><button class="os-btn" data-bank="borrow">Borrow</button>${B.loan > 0 ? '<button class="os-btn" data-bank="repay">Repay</button>' : ''}</div><p class="small muted">Use loans to fund a film, a home or a bet on the market. Miss payments and the score falls, the rate rises and the limit shrinks.</p>`)}
-   ${osCard('The economy', economyHTML())}</div>`;
+   ${osCard('Credit score', `<p class="os-big">${B.score}</p><p class="small muted">${B.score >= 740 ? 'Excellent: the best rates and limits.' : B.score >= 670 ? 'Good.' : B.score >= 580 ? 'Fair: rates are higher.' : 'Poor: borrowing is expensive and limited.'} It rises with on-time payments and repaying early; it falls with missed payments.</p>`)}
+   ${osCard('Statement', (B.hist || []).length ? `<ul class="os-list">${B.hist.slice(-8).reverse().map(h => `<li><span class="muted">${fmtDate(h.w, true)}</span><span>${esc(h.t)}</span></li>`).join('')}</ul>` : '<p class="small muted">Nothing unusual on the account.</p>')}</div>
+   ${typeof privateBankHTML === 'function' ? '<h4>Private banking</h4>' + privateBankHTML() : ''}`;
 }
 function bankClick(t) {
   const d = t.dataset;

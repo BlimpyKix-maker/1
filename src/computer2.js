@@ -126,7 +126,7 @@ function seqScore(G) {
 }
 function playSeq() {
   if (typeof window === 'undefined' || !window.AudioContext && !window.webkitAudioContext) return;
-  const ctx = UI.actx = UI.actx || new (window.AudioContext || window.webkitAudioContext)(), G = seqGrid(), t0 = ctx.currentTime + .05, step = .22;
+  const ctx = UI.actx = UI.actx || new (window.AudioContext || window.webkitAudioContext)(), G = seqGrid(), t0 = ctx.currentTime + .05, step = 30 / ((UI.mix && UI.mix.bpm) || 136);
   const freq = [55, 180, 98, 262, 523], type = ['sine', 'square', 'triangle', 'sawtooth', 'triangle'], melody = [523, 587, 659, 784, 659, 587, 523, 440];
   for (let r = 0; r < SEQ_ROWS.length; r++) for (let c = 0; c < SEQ_N; c++) if (G[r][c]) {
     const o = ctx.createOscillator(), g = ctx.createGain(), t = t0 + c * step;

@@ -259,6 +259,7 @@ function selfFund(a) {
   // the capital stack: incentive, pre-sales, a gap loan, then the company, then investors for the rest
   let plan = finPlan(budget, { rb: a.rb, ps: a.ps, gap: a.gap, genre: src.genre, lead, dir: direct ? me.id : dirPick });
   let share = 0, invest = 0, psNote = '';
+  { const ang = typeof takeAngels === 'function' && c.cash < plan.equity * .9 ? takeAngels() / 1e6 : 0; if (ang > 0) { c.cash += ang; invest += ang; share = clamp(invest / budget * 1.2, .05, .6); } }   // the angels' money goes in first
   if (plan.ps > 0) {
     if (src.invTry !== undefined && S.week - src.invTry < 4) return false;
     if (!roll('pack', presaleDC(src.genre, lead))) { psNote = 'The sales agent takes it to the market and comes back with nothing: no pre-sales. '; plan = finPlan(budget, { rb: a.rb, genre: src.genre }); }
@@ -267,7 +268,7 @@ function selfFund(a) {
     if (!a.inv || c.cash < plan.equity * .25 || (src.invTry !== undefined && S.week - src.invTry < 4)) { if (psNote) { src.invTry = S.week; inbox('note', `The financing on ${src.title} doesn't close`, `${psNote}Without that money there's a hole the company can't fill.`, { result: { ok: false, roll: M.lastRoll, t: 'No pre-sales.' } }); return true; } return false; }
     src.invTry = S.week;
     if (!roll('fin', investDC(src))) { inbox('note', 'The investors pass', `${psNote}Nobody wants to put money into ${src.title} yet. More standing, a hit or a better script would change that.`, { result: { ok: false, roll: M.lastRoll, t: 'They pass.' } }); return true; }
-    invest = plan.equity - Math.max(0, c.cash); share = clamp(invest / budget * 1.15, .1, .8); c.cash += invest;
+    const more = plan.equity - Math.max(0, c.cash); invest += more; share = clamp(invest / budget * 1.15, .1, .8); c.cash += more;
   }
   // the outside money arrives at closing; the fees go straight out
   for (const x of plan.parts) c.cash += x.amt;
