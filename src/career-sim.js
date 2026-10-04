@@ -1027,7 +1027,9 @@ function askFavour(id) {
 // ---------------- The dispatcher ----------------
 function applyAct(a) {
   switch (a.t) {
-    case 'create': startCareer(a.c); return true;
+    case 'create': startCareer(a.c); if (typeof legacyGreet === 'function') legacyGreet(); return true;
+    case 'retire': return retireAct();
+    case 'nextgen': return nextGenAct();
     case 'startwork': return startWork(a);
     case 'mail': return mailAct(a);
     case 'trade': return tradeAct(a);

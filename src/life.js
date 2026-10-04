@@ -191,7 +191,7 @@ function runBlock(k) {
 }
 function sleepNight() {
   const M = S.me, me = ME(), life = ORIGIN.life[M.life];
-  const sleep = 19 + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - Math.max(0, M.stress - 40) / 5;
+  const sleep = 19 + worldFx().sleep + (typeof hoodFx === 'function' ? hoodFx().rest || 0 : 0) + homeFx().energy * .8 + (M.body.stamina - 10) * .8 + life.rest * .6 + traitSum(me, 'energy') * .5 - (typeof ageSleepTax === 'function' ? ageSleepTax() : 0) - Math.max(0, M.stress - 40) / 5;
   M.energy = clamp(M.energy + clamp(sleep, 8, 40), 0, 100);
   const stressNow = M.stress + M.wk.stress;
   if (stressNow >= 96 && !M.burnout) { M.burnout = burnoutWeeks(); inbox('note', 'You hit the wall', M.burnout > 1 ? `Again. Your body has stopped negotiating: ${M.burnout} weeks of rest, whatever you planned. Bosses are starting to notice the pattern.` : 'You can\'t get out of bed. Your body has decided: next week is rest, whatever you planned.'); }
