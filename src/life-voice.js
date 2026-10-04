@@ -35,7 +35,7 @@ function newScript(a) {
   if ((M.scripts || []).filter(x => x.stage === 'writing').length >= 2) return false;
   const g = GENRES.includes(a.genre) ? a.genre : ppick(M.love.length ? M.love : GENRES), th = THEMES[a.theme] ? a.theme : ppick(GENRE_THEMES[g] || THEME_KEYS), tone = TONES[a.tone] ? a.tone : 'bittersweet';
   const used = new Set((M.scripts || []).map(x => x.title)), pool = (SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama).filter(t => !used.has(t));
-  const title = (a.title || '').trim().slice(0, 60) || (pool.length ? ppick(pool) : ppick(SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama) + ' ' + ((M.scripts || []).length + 1));
+  const title = String(a.title || '').trim().slice(0, 60) || (pool.length ? ppick(pool) : ppick(SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama) + ' ' + ((M.scripts || []).length + 1));
   const clip = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const premise = clip(a.premise, 400), hero = clip(a.hero, 120), setting = clip(a.setting, 120), notes = String(a.notes || '').trim().slice(0, 6000);
   const log = premise || `${hero ? hero.replace(/^./, c => c.toUpperCase()) : ppick(WHO).replace(/^./, c => c.toUpperCase())} ${WANTS[th]}${setting ? ', ' + setting : ''}.`;

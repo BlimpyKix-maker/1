@@ -28,14 +28,14 @@ function cgFeed() {
   const M = S.me, out = [], ids = [...new Set(aliveKnown().concat(M.follow || []))].filter(id => P(id) && !P(id).dead);
   const tag = f => f ? '#' + f.title.replace(/[^A-Za-z0-9]+/g, '') : '';
   for (const id of ids) {
-    const p = P(id), r = hashRand(id * 31 + S.week * 7);
+    const p = P(id), r = hashRand(((id * 2654435761) ^ (S.week * 40503 + 977)) >>> 0); r(); r();   // well-mixed, so neighbours don't all post the same thing
     for (const e of (p.life || []).filter(e => S.week - e.w < 6)) out.push({ id: `l${id}-${e.w}`, who: id, w: e.w, k: 'life', t: e.t + '.' });
     const fA = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id) && f.stage >= 0 && f.stage < 4);
     const fR = (p.credits || []).slice(-2).map(i => S.films[i]).find(f => f && f.rel !== null && S.week - f.rel >= 0 && S.week - f.rel < 3);
     if (fR) out.push({ id: `r${id}-${fR.id}`, who: id, w: fR.rel, k: 'premiere', t: pickLine(CG_KIND.premiere[2], id) + ' ' + tag(fR), film: fR.id });
     else if (fA && fA.stage === 2 && r() < .5) out.push({ id: `s${id}-${S.week}`, who: id, w: S.week, k: r() < .7 ? 'set' : 'view', t: pickLine(CG_KIND.set[2], id + S.week) + ' ' + tag(fA), film: fA.id });
     else if (fA && fA.stage === 3 && fA.stageEnd - S.week > 8 && r() < .2) out.push({ id: `w${id}-${fA.id}`, who: id, w: S.week, k: 'wrap', t: pickLine(CG_KIND.wrap[2], id) + ' ' + tag(fA), film: fA.id });
-    else if (r() < .3) { const k = ['food', 'pet', 'thought', 'throwback', 'view'][Math.floor(r() * 5)]; out.push({ id: `p${id}-${S.week}`, who: id, w: S.week, k, t: pickLine(CG_KIND[k][2], id + S.week) }); }
+    else for (let b = 0; b < 3; b++) { const wk = S.week - b, q = hashRand(((id * 2654435761) ^ (wk * 40503 + 31)) >>> 0); q(); if (q() < .28) { const k = ['food', 'pet', 'thought', 'throwback', 'view'][Math.floor(q() * 5)], L = CG_KIND[k][2]; out.push({ id: `p${id}-${wk}`, who: id, w: wk, k, t: L[Math.floor(q() * L.length)] }); break; } }   // their last post in the past three weeks
     const aw = (S.awards || []).filter(a => a.y === S.year && (a.people || []).includes(id)).slice(-1)[0];
     if (aw) out.push({ id: `a${id}-${aw.y}`, who: id, w: S.week, k: 'award', t: `${aw.name.split(':').pop().trim()}. ${pickLine(CG_KIND.award[2], id)}`, film: aw.film });
   }

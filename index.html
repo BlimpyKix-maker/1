@@ -193,7 +193,7 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .cg { max-width: 560px; margin: 0 auto; } .cg-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; } .cg-logo { font-family: Georgia, serif; font-style: italic; font-size: 24px; }
 .cg-stories { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 10px; } .cg-st { background: none; border: 0; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; } .cg-st .pavatar { outline: 2px solid #f5576c; outline-offset: 2px; }
 .cg-post { border: 1px solid rgba(255,255,255,.1); border-radius: 12px; margin: 0 0 14px; overflow: hidden; } .cg-post header { display: flex; gap: 8px; align-items: center; padding: 8px 10px; } .cg-post p { margin: 4px 10px; } .cg-act { display: flex; gap: 12px; align-items: center; padding: 6px 10px; }
-.cg-ph { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 4/3; } .cg-ph.small { aspect-ratio: 1; border-radius: 6px; } .cg-em { font-size: 64px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.25)); } .cg-ph.small .cg-em { font-size: 28px; } .cg-cap { position: absolute; left: 10px; bottom: 8px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.5); font-size: 14px; } .cg-ph.small .cg-cap { display: none; }
+.cg-ph { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 16/9; } .cg-ph.small { aspect-ratio: 1; border-radius: 6px; } .cg-em { font-size: 64px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.25)); } .cg-ph.small .cg-em { font-size: 28px; } .cg-cap { position: absolute; left: 10px; bottom: 8px; font-weight: 800; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.5); font-size: 14px; } .cg-ph.small .cg-cap { display: none; }
 .cg-av { font-size: 24px; } .cg-sugg { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; } .cg-acc { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; padding: 10px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; }
 .cg-me { display: flex; gap: 12px; align-items: center; } .cg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: 10px; } .cg-new .compose { display: flex; gap: 6px; } .cg-new input { flex: 1; min-width: 0; }
 .rt-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 8px 0 12px; } .rt-tiles > div { display: flex; flex-direction: column; gap: 2px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; } .rt-tiles .rt-big { font-size: 30px; line-height: 1.1; } .rt-tiles span { font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; } .rt-tiles small { font-size: 11px; line-height: 1.35; }
@@ -206,6 +206,8 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .sw-beats { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; margin: 6px 0; } .sw-beats label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; } .sw-beats select { width: 100%; } .sw-cov { margin: 4px 0; }
 .mx-lv { width: 80px; margin-left: 8px; } .cut-tl { display: flex; flex-wrap: wrap; gap: 6px; } .cut-clip { display: flex; flex-direction: column; gap: 3px; } .cut-clip.on .clip2 { outline: 2px solid var(--accent); }
 .cut-pred { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin: 10px 0; } .cut-pred > div { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; } .cut-curve { display: flex; align-items: flex-end; gap: 3px; height: 50px; } .cut-curve i { flex: 1; background: #4a7fbf; border-radius: 2px 2px 0 0; }
+.os-q { width: 100%; box-sizing: border-box; margin: 6px 0 8px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); color: inherit; } .os-gh { all: unset; cursor: pointer; } .os-hint { font-size: 11px; opacity: .6; margin: 12px 4px 4px; }
+@media (max-width: 760px) { .os-side .os-q, .os-side .os-hint { display: none; } .os-side { min-width: 0; } .os { min-width: 0; } }
 .finbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 6px 0; background: var(--line); }
 .finbar span { display: block; height: 100%; }
 .finleg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; }
@@ -11692,7 +11694,7 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
-    case 'text': return textSomeone(a);
+    case 'text': if (a.d !== undefined && !(a.d >= 0 && a.d <= 6 && a.b >= 0 && a.b <= 2)) return false; return textSomeone(a);
     case 'bazaar': return typeof bazaarAct === 'function' && bazaarAct(a);
     case 'relic': return typeof relicAct === 'function' && relicAct(a);
     case 'board': return typeof boardAct === 'function' && boardAct(a);
@@ -13017,7 +13019,7 @@ function newScript(a) {
   if ((M.scripts || []).filter(x => x.stage === 'writing').length >= 2) return false;
   const g = GENRES.includes(a.genre) ? a.genre : ppick(M.love.length ? M.love : GENRES), th = THEMES[a.theme] ? a.theme : ppick(GENRE_THEMES[g] || THEME_KEYS), tone = TONES[a.tone] ? a.tone : 'bittersweet';
   const used = new Set((M.scripts || []).map(x => x.title)), pool = (SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama).filter(t => !used.has(t));
-  const title = (a.title || '').trim().slice(0, 60) || (pool.length ? ppick(pool) : ppick(SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama) + ' ' + ((M.scripts || []).length + 1));
+  const title = String(a.title || '').trim().slice(0, 60) || (pool.length ? ppick(pool) : ppick(SCRIPT_NOUNS[g] || SCRIPT_NOUNS.Drama) + ' ' + ((M.scripts || []).length + 1));
   const clip = (v, n) => String(v || '').replace(/\s+/g, ' ').trim().slice(0, n);
   const premise = clip(a.premise, 400), hero = clip(a.hero, 120), setting = clip(a.setting, 120), notes = String(a.notes || '').trim().slice(0, 6000);
   const log = premise || `${hero ? hero.replace(/^./, c => c.toUpperCase()) : ppick(WHO).replace(/^./, c => c.toUpperCase())} ${WANTS[th]}${setting ? ', ' + setting : ''}.`;
@@ -20012,7 +20014,8 @@ function osPanel() {
   const listed = new Set(OS_GROUPS.flatMap(g => g[1])), more = APPS.map(a => a[0]).filter(x => !listed.has(x));
   const groups = OS_GROUPS.concat(more.length ? [['More', more]] : []);
   const time = W ? ['08:12', '13:40', '21:05'][W.block] : '09:00';
-  const side = groups.map(([g, ks]) => `<div class="os-g"><h6>${g}</h6>${ks.filter(osApp).map(x => { const a = osApp(x), b = osBadge(x), lock = typeof appLocked === 'function' && appLocked(x); return `<button class="os-i${x === k ? ' on' : ''}${lock ? ' locked' : ''}" data-app="${x}"><span class="os-ic">${a[1]}</span><span class="os-l">${esc(a[2])}</span>${b ? `<span class="os-b">${b}</span>` : lock ? '<span class="os-lock">🔒</span>' : ''}</button>`; }).join('')}</div>`).join('');
+  const oq = (UI.osq || '').toLowerCase().trim(), col = UI.osc = UI.osc || { Play: 1 };
+  const side = `<input id="os-q" class="os-q" type="search" placeholder="Find an app…" value="${esc(UI.osq || '')}">` + groups.map(([g, ks]) => { const L = ks.filter(osApp).filter(x => !oq || osApp(x)[2].toLowerCase().includes(oq) || x.includes(oq)); if (!L.length) return ''; const shut = !oq && col[g] && !L.includes(k); return `<div class="os-g"><h6><button class="os-gh" data-osg="${esc(g)}">${shut ? '▸' : '▾'} ${g}</button></h6>${shut ? '' : L.map(x => { const a = osApp(x), b = osBadge(x), lock = typeof appLocked === 'function' && appLocked(x); return `<button class="os-i${x === k ? ' on' : ''}${lock ? ' locked' : ''}" data-app="${x}"><span class="os-ic">${a[1]}</span><span class="os-l">${esc(a[2])}</span>${b ? `<span class="os-b">${b}</span>` : lock ? '<span class="os-lock">🔒</span>' : ''}</button>`; }).join('')}</div>`; }).join('') + '<p class="os-hint">Space: next step, from anywhere</p>';
   let body;
   const stackB = typeof osStackHTML === 'function' ? osStackHTML() : null;
   if (stackB) body = stackB; else try { body = typeof OS_VIEWS !== 'undefined' && OS_VIEWS[k] ? OS_VIEWS[k]() : k === 'home' ? osHome() : k === 'cal' ? osCal() : k === 'contacts' ? osContacts() : k === 'jobs' ? osJobs() : k === 'bank' ? osBank() : k === 'library' && typeof libraryHTML === 'function' ? libraryHTML() : k === 'trades' && typeof paperHTML === 'function' ? paperHTML() : appWindow(k); }
@@ -29740,14 +29743,14 @@ function cgFeed() {
   const M = S.me, out = [], ids = [...new Set(aliveKnown().concat(M.follow || []))].filter(id => P(id) && !P(id).dead);
   const tag = f => f ? '#' + f.title.replace(/[^A-Za-z0-9]+/g, '') : '';
   for (const id of ids) {
-    const p = P(id), r = hashRand(id * 31 + S.week * 7);
+    const p = P(id), r = hashRand(((id * 2654435761) ^ (S.week * 40503 + 977)) >>> 0); r(); r();   // well-mixed, so neighbours don't all post the same thing
     for (const e of (p.life || []).filter(e => S.week - e.w < 6)) out.push({ id: `l${id}-${e.w}`, who: id, w: e.w, k: 'life', t: e.t + '.' });
     const fA = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id) && f.stage >= 0 && f.stage < 4);
     const fR = (p.credits || []).slice(-2).map(i => S.films[i]).find(f => f && f.rel !== null && S.week - f.rel >= 0 && S.week - f.rel < 3);
     if (fR) out.push({ id: `r${id}-${fR.id}`, who: id, w: fR.rel, k: 'premiere', t: pickLine(CG_KIND.premiere[2], id) + ' ' + tag(fR), film: fR.id });
     else if (fA && fA.stage === 2 && r() < .5) out.push({ id: `s${id}-${S.week}`, who: id, w: S.week, k: r() < .7 ? 'set' : 'view', t: pickLine(CG_KIND.set[2], id + S.week) + ' ' + tag(fA), film: fA.id });
     else if (fA && fA.stage === 3 && fA.stageEnd - S.week > 8 && r() < .2) out.push({ id: `w${id}-${fA.id}`, who: id, w: S.week, k: 'wrap', t: pickLine(CG_KIND.wrap[2], id) + ' ' + tag(fA), film: fA.id });
-    else if (r() < .3) { const k = ['food', 'pet', 'thought', 'throwback', 'view'][Math.floor(r() * 5)]; out.push({ id: `p${id}-${S.week}`, who: id, w: S.week, k, t: pickLine(CG_KIND[k][2], id + S.week) }); }
+    else for (let b = 0; b < 3; b++) { const wk = S.week - b, q = hashRand(((id * 2654435761) ^ (wk * 40503 + 31)) >>> 0); q(); if (q() < .28) { const k = ['food', 'pet', 'thought', 'throwback', 'view'][Math.floor(q() * 5)], L = CG_KIND[k][2]; out.push({ id: `p${id}-${wk}`, who: id, w: wk, k, t: L[Math.floor(q() * L.length)] }); break; } }   // their last post in the past three weeks
     const aw = (S.awards || []).filter(a => a.y === S.year && (a.people || []).includes(id)).slice(-1)[0];
     if (aw) out.push({ id: `a${id}-${aw.y}`, who: id, w: S.week, k: 'award', t: `${aw.name.split(':').pop().trim()}. ${pickLine(CG_KIND.award[2], id)}`, film: aw.film });
   }
@@ -31187,6 +31190,7 @@ function careerClick(t) {
   if (t.dataset.coinv && finClick(t)) return true;
   if (typeof cgClick === 'function' && cgClick(t)) return true;
   if (typeof fin2Click === 'function' && fin2Click(t)) return true;
+  if (t.dataset.osg) { const c = UI.osc = UI.osc || { Play: 1 }; c[t.dataset.osg] = c[t.dataset.osg] ? 0 : 1; render(true); return true; }
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
   if (t.dataset.fest) { const [film, k] = t.dataset.fest.split(':'); doAct({ t: 'festival', film: +film, k }); render(true); return true; }
   if (t.dataset.optionspec) { doAct({ t: 'optionspec', id: +t.dataset.optionspec }); render(true); return true; }
@@ -31205,7 +31209,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -31539,6 +31543,7 @@ document.addEventListener('change', e => {
   if (typeof weatherChange === 'function' && weatherChange(e)) return;
   if (typeof mktChange === 'function' && mktChange(e)) return;
   if (typeof creativeChange === 'function' && creativeChange(e)) return;
+  if (e.target.id === 'os-q') { UI.osq = e.target.value; render(true); const q = document.getElementById('os-q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
   if (careerChange(e)) return;
   if (typeof chartChange === 'function' && chartChange(e)) return;
   if (typeof boardChange === 'function' && boardChange(e)) return;
@@ -31556,6 +31561,7 @@ document.addEventListener('change', e => {
 });
 let qTimer;
 document.addEventListener('input', e => {
+  if (e.target.id === 'os-q') { UI.osq = e.target.value; render(true); const q = document.getElementById('os-q'); if (q) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); } return; }
   const id = e.target.id;
   if (id === 'pc-notes') { try { localStorage.setItem(notesKey(), e.target.value); } catch (err) { /* no storage */ } return; }
   if (id === 'cq' || id === 'gq' || id === 'npq' || id === 'stq' || id === 'abq' || id === 'rtq' || id === 'chq' || id === 'brq' || id === 'tvq' || id === 'rlq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }

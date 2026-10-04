@@ -1087,7 +1087,7 @@ function applyAct(a) {
       return true;
     }
     case 'favour': return askFavour(a.id) && (refreshBoard(), true);
-    case 'text': return textSomeone(a);
+    case 'text': if (a.d !== undefined && !(a.d >= 0 && a.d <= 6 && a.b >= 0 && a.b <= 2)) return false; return textSomeone(a);
     case 'bazaar': return typeof bazaarAct === 'function' && bazaarAct(a);
     case 'relic': return typeof relicAct === 'function' && relicAct(a);
     case 'board': return typeof boardAct === 'function' && boardAct(a);
