@@ -198,7 +198,7 @@ function boardWeek() {
   // bets the board made come good or bad
   for (const b of (M.bets || []).filter(b => !b.done && S.week >= b.w)) { b.done = 1; const c = S.companies[b.co]; if (!c || c.closed !== null) continue; const good = prnd() < b.q; c.cash += good ? b.amt * .9 : -b.amt * .5; news('Company', good ? `${c.name}'s ${b.title} pays off handsomely.` : `${c.name}'s ${b.title} loses a fortune.`, { company: c.id }); if (b.vote) { const right = (b.vote === 'yes') === good; me.standing = clamp(me.standing + (right ? 1.5 : -1), 0, 100); if (onBoard(c)) inbox('note', `${b.title}: ${good ? 'a hit' : 'a write-off'}`, `${right ? 'You called it, and the other directors noticed.' : 'You voted the wrong way, and the minutes say so.'}`); } }
   // deals in progress
-  for (const D of (M.deals || []).filter(d => !d.done && S.week >= d.next)) dealWeek(D);
+  for (const D of (M.deals || []).filter(d => DEAL_STAGES[d.kind] && !d.done && S.week >= d.next)) dealWeek(D);
   // controlled companies pay out what you set
   for (const id in M.divPol || {}) { const c = S.companies[+id], p = M.divPol[id]; if (!c || !myCtrl()[id] || !p || S.week % 13 !== 6 || c.cash <= 0) continue; const out = c.cash * p / 4; c.cash -= out; const got = Math.round(out * 1e6 * stakeOf(c)); M.cash += got; diary(`Money: ${c.name} pays you a dividend of ${fmtCash(got)}.`); }
   // an executive package: the letter, the vesting, the bonus, the parachute
@@ -228,7 +228,7 @@ function boardroomApp() {
     const L = (M.boardLog || []).slice().reverse();
     body = L.length ? `<table class="grid small"><thead><tr><th>When</th><th>Company</th><th>Motion</th><th>You</th><th>Result</th></tr></thead><tbody>${L.map(x => `<tr><td>${fmtDate(x.w, true)}</td><td>${cl(x.co)}</td><td>${esc(x.t)}</td><td>${x.mine}</td><td class="${x.passed ? 'good' : 'bad'}">${x.passed ? 'Carried' : 'Defeated'} ${x.yes}–${9 - x.yes}</td></tr>`).join('')}</tbody></table>` : '<p class="muted">No meetings yet.</p>';
   } else if (tab === 'deals') {
-    const L = (M.deals || []).slice().reverse();
+    const L = (M.deals || []).filter(d => DEAL_STAGES[d.kind]).slice().reverse();
     body = L.length ? L.map(D => { const st = DEAL_STAGES[D.kind]; const name = D.kind === 'tender' ? `Tender offer for ${S.companies[D.co].name}` : `${S.companies[D.a].name} for ${S.companies[D.b].name}`; return `<div class="deal"><b>${esc(name)}</b> <span class="muted small">since ${fmtDate(D.w, true)} · ${Math.round(D.prem * 100)}% premium${D.price ? ' · ' + fmtM(D.price) : D.cost ? ' · ' + fmtCash(D.cost) : ''}</span><p class="small">${D.done ? `<b>${esc(D.done === 'won' || D.done === 'completed' ? 'Done: ' + D.done : 'Over: ' + D.done)}</b>` : st.map((s, i) => `<span class="${i < D.stage ? 'good' : i === D.stage ? '' : 'muted'}">${i < D.stage ? '✓' : i === D.stage ? '▶' : '·'} ${esc(s)}</span>`).join(' &nbsp; ')}</p></div>`; }).join('') : '<p class="muted">No deals yet.</p>';
   } else if (tab === 'buy') {
     const q = (UI.brq || '').toLowerCase(), L = listedCos().filter(c => !q || c.name.toLowerCase().includes(q)).sort((a, b) => mcap(b) - mcap(a)).slice(0, 40), mineCos = S.companies.filter(c => c.closed === null && controls(c));

@@ -56,7 +56,7 @@ function endorseWeek() {
 function endorseAccept(A) {
   const M = S.me, me = ME();
   M.cash += A.fee; me.fame = clamp((me.fame || 0) + 1.5, 0, 100); M.energy = clamp(M.energy - 6, 0, 100);
-  (M.deals = M.deals || []).push({ w: S.week, brand: A.brand, fee: A.fee });
+  (M.brandDeals = M.brandDeals || []).push({ w: S.week, brand: A.brand, fee: A.fee });
   if (A.shady === 2) (M.secrets = M.secrets || []).push({ w: S.week, risk: 3, what: `fronting ${A.brand}`, ad: 1 });
   if (A.shady && (M.flags = M.flags || {})) M.flags.sellout = S.week;
   milestone(`Became the face of ${A.brand}`, 'work');
@@ -78,9 +78,12 @@ function desktopWidgets() {
    <div class="widget"><h5>📈 Markets</h5><p class="small">${idx}</p>${port.length ? `<p class="small">Your shares: <b>${fmtCash(Math.round(val))}</b></p>` : '<p class="muted small">You own no shares.</p>'}<button class="linkish small" data-app="ticker">Open Ticker ›</button></div>
    <div class="widget"><h5>⭐ Buzz Index</h5><p class="small">You: <b>#${myStarRank().toLocaleString()}</b></p>${top.map(([id], i) => `<p class="small">${i + 1}. ${pl(id)}</p>`).join('')}<button class="linkish small" data-app="gea" data-geatab="star">See the chart ›</button></div>
    <div class="widget"><h5>📅 Coming up</h5>${ap.length ? ap.map(a => `<p class="small">${esc((APPT_KINDS[a.kind] || {}).label || a.kind)}${a.who != null ? ' · ' + pl(a.who) : ''}<br><span class="muted">${esc(slotLabel(a))}</span></p>`).join('') : '<p class="muted small">Nothing booked.</p>'}</div>
-   <div class="widget"><h5>🏦 Money</h5><p class="small"><b>${fmtCash(M.cash)}</b> in the bank</p><p class="small muted">Rent ${fmtCash(usd(ORIGIN.life[M.life].rent))}/wk${(M.deals || []).length ? ` · ${M.deals.length} brand deal${M.deals.length > 1 ? 's' : ''}` : ''}</p></div>
+   <div class="widget"><h5>🏦 Money</h5><p class="small"><b>${fmtCash(M.cash)}</b> in the bank</p><p class="small muted">Rent ${fmtCash(usd(ORIGIN.life[M.life].rent))}/wk${brandDealCount() ? ` · ${brandDealCount()} brand deal${brandDealCount() > 1 ? 's' : ''}` : ''}</p></div>
    <div class="widget wide"><h5>📰 The Daily Slate</h5>${news0.map(n => `<p class="small">${esc(n.text.slice(0, 140))}</p>`).join('')}</div>
    <div class="widget"><h5>🖼️ Wallpaper</h5><p class="small">${Object.entries(WALLS).map(([k, [l]]) => `<button class="pill${wall === k ? ' on' : ''}" data-wall="${k}">${esc(l)}</button>`).join(' ')}</p></div></div>`;
 }
 
 function curWall() { if (!UI.wall) { try { const w = typeof localStorage !== 'undefined' && localStorage.getItem('ab-wall'); UI.wall = w && WALLS[w] ? w : 'studio'; } catch (e) { UI.wall = 'studio'; } } return WALLS[UI.wall] ? UI.wall : 'studio'; }
+
+// endorsements live in M.brandDeals; older saves kept them in M.deals alongside the boardroom's takeovers
+function brandDealCount() { const M = S.me; return (M.brandDeals || []).length + (M.deals || []).filter(d => d.brand !== undefined).length; }
