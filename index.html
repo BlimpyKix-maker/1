@@ -208,6 +208,8 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .cut-pred { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin: 10px 0; } .cut-pred > div { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; } .cut-curve { display: flex; align-items: flex-end; gap: 3px; height: 50px; } .cut-curve i { flex: 1; background: #4a7fbf; border-radius: 2px 2px 0 0; }
 .os-q { width: 100%; box-sizing: border-box; margin: 6px 0 8px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); color: inherit; } .os-gh { all: unset; cursor: pointer; } .os-hint { font-size: 11px; opacity: .6; margin: 12px 4px 4px; }
 @media (max-width: 760px) { .os-side .os-q, .os-side .os-hint { display: none; } .os-side { min-width: 0; } .os { min-width: 0; } }
+.cg-ph { overflow: hidden; } .cg-bit { position: absolute; opacity: .55; filter: blur(.3px); pointer-events: none; } .cg-ph.big::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.28)); pointer-events: none; } .cg-ph.st-sepia { filter: sepia(.35); } .cg-ph.st-paper .cg-cap { color: #333; text-shadow: none; }
+.angels { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; } .angel { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--card, transparent); } .angel p { margin: 6px 0; } .ang-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; } .ang-dc { font: 600 11px/1 ui-monospace, monospace; padding: 4px 6px; border-radius: 6px; background: var(--line); white-space: nowrap; } .tag-new { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: var(--good); color: #fff; vertical-align: 1px; }
 .finbar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; margin: 6px 0; background: var(--line); }
 .finbar span { display: block; height: 100%; }
 .finleg { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; }
@@ -11299,6 +11301,7 @@ function closeWeek(a) {
   if (typeof corpWeek === 'function') corpWeek();
   if (typeof slateWeek === 'function') slateWeek();
   if (typeof finWeek === 'function') finWeek();
+  if (typeof angelWeek === 'function') angelWeek();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -11599,6 +11602,7 @@ function resolvePick(it, k) {
   const M = S.me, me = ME(), c = (it.choices || []).find(x => x.k === k);
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
+  if (typeof angelPick === 'function' && angelPick(it, k)) return true;
   if (socialPick(it, k)) return true;
   if (dealPick(it, k)) return true;
   if (bidPick(it, k)) return true;
@@ -29720,21 +29724,50 @@ function weatherChange(e) { if (e.target.id === 'wx-hub') { UI.wxHub = e.target.
 // You can post as well: followers come from who you are and what you share, comments come from your circle, and a
 // photo from a closed set while you're shooting is the kind of thing producers notice.
 const CG_BG = [['#f6d365', '#fda085'], ['#a1c4fd', '#c2e9fb'], ['#d4fc79', '#96e6a1'], ['#fbc2eb', '#a6c1ee'], ['#ffecd2', '#fcb69f'], ['#cfd9df', '#e2ebf0'], ['#f093fb', '#f5576c'], ['#4facfe', '#00f2fe'], ['#43e97b', '#38f9d7'], ['#fa709a', '#fee140'], ['#30cfd0', '#330867'], ['#5ee7df', '#b490ca']];
+// [main emoji, label, captions, scene emojis scattered behind, photo style]
 const CG_KIND = {
-  set: ['🎬', 'On set', ['Call time 5am. Coffee number three.', 'Somewhere between setup 14 and setup 15.', 'The crew that makes it happen.', 'Lunch is the best part of the day and I will not be taking questions.']],
-  wrap: ['🍾', 'That\'s a wrap', ['That\'s a wrap! Thank you to the best crew in the world.', 'Wrapped. Sleeping for a week. Love you all.', 'Last day. Didn\'t cry. (Cried.)']],
-  premiere: ['🎟️', 'Premiere night', ['Premiere night. Pinch me.', 'Out this Friday. Go see it in a cinema, with strangers.', 'Red carpet, borrowed shoes.']],
-  award: ['🏆', 'Award', ['I have no speech prepared and I\'m still shaking.', 'Thank you. Just… thank you.', 'For everyone who ever said I couldn\'t.']],
-  job: ['💼', 'News', ['Some news: new job, new chapter.', 'Can finally say it: I\'m on a new project.', 'Day one. Pretending I know where the toilets are.']],
-  life: ['✨', 'Life', ['Big week.', 'Some personal news.', 'Life, eh.']],
-  food: ['🍜', 'Food', ['Craft services outdid themselves.', 'Post-shoot noodles are a human right.', 'Brunch with the best people.']],
-  pet: ['🐶', 'Pets', ['My dog has better taste in films than most critics.', 'Supervisor, apparently.', 'Meet the newest member of the crew.']],
-  view: ['🌅', 'Location', ['The view from today\'s location.', 'Magic hour, as promised.', 'Not a bad office.']],
-  throwback: ['📼', 'Throwback', ['Throwback to my first ever set. The hair. The confidence.', 'Ten years ago today.', 'Found this in a box. Who remembers?']],
-  thought: ['💭', 'Thoughts', ['Rewatching an old favourite tonight. Some films just hold up.', 'Hot take: the intermission should come back.', 'Reading scripts in the park like a cliché.']],
-  promo: ['📣', 'Coming soon', ['Coming soon.', 'In cinemas this month.', 'The trailer is out. Tell your friends.']]
+  set: ['🎬', 'On set', ['Call time 5am. Coffee number three.', 'Somewhere between setup 14 and setup 15.', 'The crew that makes it happen. {mate} carried us today.', 'Lunch is the best part of the day and I will not be taking questions.', 'Rain machine, real rain, who can tell.', 'Day {n} of {m}. Still in love with this job.', 'Waiting on the light. Again.', '{mate} just nailed it in one take. One.'], ['🎥', '💡', '🎞️', '☕'], 'warm'],
+  wrap: ['🍾', 'That\'s a wrap', ['That\'s a wrap! Thank you to the best crew in the world.', 'Wrapped. Sleeping for a week. Love you all.', 'Last day. Didn\'t cry. (Cried.)', 'Wrap party survivors, {day} edition.', '{n} weeks, one family. Wrapped.'], ['🎉', '🥂', '🎊'], 'party'],
+  premiere: ['🎟️', 'Premiere night', ['Premiere night. Pinch me.', 'Out this Friday. Go see it in a cinema, with strangers.', 'Red carpet, borrowed shoes.', 'My mum is here. My MUM is here.', 'Two years of work, two hours of film. Go.'], ['✨', '📸', '🌟'], 'night'],
+  award: ['🏆', 'Award', ['I have no speech prepared and I\'m still shaking.', 'Thank you. Just… thank you.', 'For everyone who ever said I couldn\'t.', 'Sharing this one with {mate}. You know why.'], ['✨', '🌟', '🎖️'], 'gold'],
+  job: ['💼', 'News', ['Some news: new job, new chapter.', 'Can finally say it: I\'m on a new project.', 'Day one. Pretending I know where the toilets are.', 'Signed, sealed, terrified.'], ['📝', '🤝'], 'clean'],
+  life: ['✨', 'Life', ['Big week.', 'Some personal news.', 'Life, eh.'], ['💫'], 'soft'],
+  food: ['🍜', 'Food', ['Craft services outdid themselves.', 'Post-shoot noodles are a human right.', 'Brunch with the best people.', 'Ranked every taco truck in {city}. Thread.', 'Cooked for twelve. Survived.', 'The secret ingredient is exhaustion.'], ['🥢', '🌮', '🍕', '🥐', '🍣'], 'warm'],
+  pet: ['🐶', 'Pets', ['My dog has better taste in films than most critics.', 'Supervisor, apparently.', 'Meet the newest member of the crew.', 'He watched the whole rough cut. Didn\'t blink.', 'Script notes from management.'], ['🐾', '🦴', '🧶'], 'soft'],
+  cat: ['🐈', 'Pets', ['She sat on the script. Page 47 is now hers.', 'Head of Development, feline division.', 'No thoughts, only sunbeam.'], ['🐾', '🧶', '☀️'], 'soft'],
+  view: ['🌅', 'Location', ['The view from today\'s location.', 'Magic hour, as promised.', 'Not a bad office.', '{city}, you show-off.', 'We drove four hours for this shot. Worth it.'], ['🌄', '🏞️', '🌊', '🏙️'], 'sky'],
+  throwback: ['📼', 'Throwback', ['Throwback to my first ever set. The hair. The confidence.', '{y}. Who remembers?', 'Found this in a box. Who remembers?', 'Ten years ago today. {mate}, you look exactly the same.'], ['📷', '🎞️'], 'sepia'],
+  thought: ['💭', 'Thoughts', ['Rewatching an old favourite tonight. Some films just hold up.', 'Hot take: the intermission should come back.', 'Reading scripts in the park like a cliché.', 'Every film is a miracle. Every single one.', 'Unpopular opinion: the {genre} is the hardest genre to get right.'], ['📖', '☁️', '🖋️'], 'clean'],
+  gym: ['🏋️', 'Training', ['Training for the role. Send snacks.', '5am gym, because {day}s are relentless.', 'My trainer is a sadist and I love him.'], ['💪', '🥤'], 'clean'],
+  travel: ['✈️', 'Travel', ['Off to {place} for the shoot. See you in two months.', 'Airport lounge office. Living the dream.', 'Hello {place}. Be gentle.'], ['🧳', '🗺️', '🌍'], 'sky'],
+  coffee: ['☕', 'Coffee', ['This café is my office now.', 'Third flat white, first good idea.', 'Writing in public like a lunatic.'], ['🥐', '📓'], 'warm'],
+  gig: ['🎸', 'Night out', ['Front row. Ears ringing. Worth it.', 'Saw a band nobody\'s heard of. Next year everyone will.', 'Karaoke with the crew. Evidence deleted.'], ['🎤', '🎶', '🪩'], 'night'],
+  books: ['📚', 'Reading', ['Reading the book before everyone options it.', 'Library haul. Ambitious.', 'This novel would make a perfect limited series. Just saying.'], ['🔖', '☕'], 'sepia'],
+  festival: ['🎪', 'Festival', ['Lanyard on, sleep off. Festival mode.', 'Six films a day and one meal. Festival diet.', 'Queued in the rain for a midnight screening. No regrets.'], ['🎟️', '🌧️', '🎬'], 'party'],
+  carpet: ['📸', 'Red carpet', ['Borrowed the suit, kept the smile.', 'Look left, look right, look like you belong.', 'Thank you to the stylist who made this happen.'], ['✨', '🌟', '💎'], 'gold'],
+  gear: ['📷', 'Kit', ['New lens day. Everything looks cinematic now, including my breakfast.', 'Packing for the shoot: 40 kg of kit and one sock.', 'Old camera, new tricks.'], ['🔋', '🎞️', '🔦'], 'clean'],
+  page: ['📄', 'Pages', ['Page one. The scariest page.', 'FADE IN: (that\'s all I have so far)', 'Draft {n}. It\'s getting somewhere.'], ['✏️', '☕', '🗒️'], 'paper'],
+  home: ['🏡', 'Home', ['New flat. Two boxes unpacked. Forty to go.', 'Finally hung the posters.', 'Plants: 6. Plants alive: 4.'], ['🪴', '🛋️', '🖼️'], 'soft'],
+  weather: ['⛈️', 'Weather', ['Biblical weather in {city} today. Shoot cancelled, mood restored.', 'Too hot to think. Too hot to write. Writing anyway.', 'Snow day! Nobody is getting anything done.'], ['🌧️', '☂️', '❄️'], 'storm'],
+  promo: ['📣', 'Coming soon', ['Coming soon.', 'In cinemas this month.', 'The trailer is out. Tell your friends.', 'Tickets on sale now.'], ['🎬', '🍿', '🎟️'], 'night'],
+  ad: ['🛍️', 'Sponsored', ['Shot on the only lens you\'ll ever need.', 'The notebook writers swear by.', 'Hydrate like a stunt double.'], ['✨'], 'clean']
 };
-const CG_COMMENTS = ['obsessed', 'this!!', 'ICONIC', 'so proud of you', 'need the full story', 'when are we getting a drink', 'stop it 😭', 'the hair though', 'legend', 'who took this, it\'s gorgeous', 'can\'t wait', 'take me with you', 'deserved', 'ok but where is this', '❤️❤️', 'save me a seat'];
+const CG_STYLE = { warm: ['#f6d365', '#fda085'], party: ['#f093fb', '#f5576c'], night: ['#30cfd0', '#330867'], gold: ['#f7d774', '#b8860b'], clean: ['#e0eafc', '#cfdef3'], soft: ['#fbc2eb', '#a6c1ee'], sky: ['#4facfe', '#00f2fe'], sepia: ['#d6b98c', '#8b6b4a'], paper: ['#fdfbf3', '#e9e1c8'], storm: ['#536976', '#292e49'] };
+const CG_COMMENTS = {
+  any: ['obsessed', 'this!!', 'ICONIC', 'so proud of you', 'need the full story', 'when are we getting a drink', 'stop it 😭', 'legend', 'who took this, it\'s gorgeous', 'take me with you', 'deserved', 'ok but where is this', '❤️❤️', 'the energy here', 'main character behaviour'],
+  set: ['what are you shooting??', 'that light though', 'hydrate!!', 'is that the {mate} I know?', 'send me the call sheet, I\'ll bring coffee'],
+  wrap: ['congrats!!!', 'what a crew', 'can\'t wait to see it', 'sleep now, celebrate later'], premiere: ['save me a seat', 'buying tickets now', 'the outfit!!', 'so proud of you'], award: ['DESERVED', 'crying', 'speech!!', 'about time'],
+  pet: ['I would die for this dog', 'head of development indeed', 'more pet content please', 'GOOD BOY'], cat: ['the audacity', 'she\'s the real writer', 'cat tax paid'], food: ['recipe?', 'where is this', 'I\'m starving now, thanks'],
+  gym: ['ok Rocky', 'teach me', 'I got tired reading this'], travel: ['bring me back something', 'jealous', 'safe travels!'], gig: ['who is this band', 'next time take me', 'ears ok?'], festival: ['see you in the queue', 'what was the best one?'], weather: ['stay dry!', 'same here, total chaos'],
+  page: ['can I read it?', 'FADE IN is the hardest part', 'go go go'], home: ['housewarming when?', 'the plants are fine, probably'], ad: ['ad?? in this economy', 'I bought one, it\'s fine', 'sponsored, sure']
+};
+function cgComment(k, r, mate) { const L = (CG_COMMENTS[k] || []).concat(CG_COMMENTS.any); return L[Math.floor(r() * L.length)].replace('{mate}', mate || 'one'); }
+const CG_PLACES = ['Reykjavík', 'Marrakesh', 'Lisbon', 'the Highlands', 'Budapest', 'the desert', 'Cape Town', 'Kyoto', 'Patagonia', 'Sicily', 'Prague', 'Montréal'];
+// fill a caption: the city, a mate, the day, a number, the genre, a place, a year
+function cgFill(t, id, r) {
+  const M = S.me, mates = aliveKnown().filter(x => x !== id), mate = mates.length ? '@' + cgHandle(P(mates[Math.floor(r() * mates.length)])).slice(1) : '@everyone';
+  return t.replace('{city}', hubName(M.hub)).replace('{mate}', mate).replace('{day}', DAYS7[Math.floor(r() * 7)]).replace('{n}', 2 + Math.floor(r() * 30)).replace('{m}', 30 + Math.floor(r() * 30)).replace('{genre}', (Object.keys(AMB)[Math.floor(r() * Object.keys(AMB).length)] || 'drama').toLowerCase()).replace('{place}', CG_PLACES[Math.floor(r() * CG_PLACES.length)]).replace('{y}', S.year - 5 - Math.floor(r() * 20));
+}
 function cgHandle(p) { return '@' + p.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, '').slice(0, 16); }
 function cgFollowers(p) { const f = p.fame || 0; return Math.round(120 + f * f * 40 + p.standing * 25 + (hashRand(p.id * 13)() * 300)); }
 function cgFmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : String(n); }
@@ -29747,32 +29780,41 @@ function cgFeed() {
     for (const e of (p.life || []).filter(e => S.week - e.w < 6)) out.push({ id: `l${id}-${e.w}`, who: id, w: e.w, k: 'life', t: e.t + '.' });
     const fA = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id) && f.stage >= 0 && f.stage < 4);
     const fR = (p.credits || []).slice(-2).map(i => S.films[i]).find(f => f && f.rel !== null && S.week - f.rel >= 0 && S.week - f.rel < 3);
-    if (fR) out.push({ id: `r${id}-${fR.id}`, who: id, w: fR.rel, k: 'premiere', t: pickLine(CG_KIND.premiere[2], id) + ' ' + tag(fR), film: fR.id });
-    else if (fA && fA.stage === 2 && r() < .5) out.push({ id: `s${id}-${S.week}`, who: id, w: S.week, k: r() < .7 ? 'set' : 'view', t: pickLine(CG_KIND.set[2], id + S.week) + ' ' + tag(fA), film: fA.id });
-    else if (fA && fA.stage === 3 && fA.stageEnd - S.week > 8 && r() < .2) out.push({ id: `w${id}-${fA.id}`, who: id, w: S.week, k: 'wrap', t: pickLine(CG_KIND.wrap[2], id) + ' ' + tag(fA), film: fA.id });
-    else for (let b = 0; b < 3; b++) { const wk = S.week - b, q = hashRand(((id * 2654435761) ^ (wk * 40503 + 31)) >>> 0); q(); if (q() < .28) { const k = ['food', 'pet', 'thought', 'throwback', 'view'][Math.floor(q() * 5)], L = CG_KIND[k][2]; out.push({ id: `p${id}-${wk}`, who: id, w: wk, k, t: L[Math.floor(q() * L.length)] }); break; } }   // their last post in the past three weeks
+    if (fR) out.push({ id: `r${id}-${fR.id}`, who: id, w: fR.rel, k: 'premiere', t: cgFill(pickLine(CG_KIND.premiere[2], id), id, r) + ' ' + tag(fR), film: fR.id });
+    else if (fA && fA.stage === 2 && r() < .5) out.push({ id: `s${id}-${S.week}`, who: id, w: S.week, k: r() < .7 ? 'set' : 'view', t: cgFill(pickLine(CG_KIND.set[2], id + S.week), id, r) + ' ' + tag(fA), film: fA.id });
+    else if (fA && fA.stage === 3 && fA.stageEnd - S.week > 8 && r() < .2) out.push({ id: `w${id}-${fA.id}`, who: id, w: S.week, k: 'wrap', t: cgFill(pickLine(CG_KIND.wrap[2], id), id, r) + ' ' + tag(fA), film: fA.id });
+    else for (let b = 0; b < 3; b++) { const wk = S.week - b, q = hashRand(((id * 2654435761) ^ (wk * 40503 + 31)) >>> 0); q(); if (q() < .3) {
+      const wx = typeof wxDay === 'function' ? wxDay(p.hub || M.hub, wk, 2) : null, bad = wx && ['storm', 'snow', 'heat'].includes(wx.k);
+      const pool = ['food', 'pet', 'cat', 'thought', 'throwback', 'view', 'gym', 'travel', 'coffee', 'gig', 'books', 'gear', 'home'].concat(p.role === 'writer' ? ['page', 'page'] : [], (p.fame || 0) > 40 ? ['carpet', 'festival'] : []);
+      const k = bad && q() < .5 ? 'weather' : pool[Math.floor(q() * pool.length)], L = CG_KIND[k][2]; out.push({ id: `p${id}-${wk}`, who: id, w: wk, k, t: cgFill(L[Math.floor(q() * L.length)], id, q) }); break; } }   // their last post in the past three weeks
     const aw = (S.awards || []).filter(a => a.y === S.year && (a.people || []).includes(id)).slice(-1)[0];
-    if (aw) out.push({ id: `a${id}-${aw.y}`, who: id, w: S.week, k: 'award', t: `${aw.name.split(':').pop().trim()}. ${pickLine(CG_KIND.award[2], id)}`, film: aw.film });
+    if (aw) out.push({ id: `a${id}-${aw.y}`, who: id, w: S.week, k: 'award', t: `${aw.name.split(':').pop().trim()}. ${cgFill(pickLine(CG_KIND.award[2], id), id, r)}`, film: aw.film });
   }
   // studios push what's opening soon
   for (const f of S.active.map(i => S.films[i]).filter(f => f.hub === M.hub && f.co !== null && f.stage === 3 && f.stageEnd - S.week <= 4 && f.stageEnd >= S.week).slice(0, 3))
-    out.push({ id: `c${f.id}`, co: f.co, w: S.week, k: 'promo', t: `${pickLine(CG_KIND.promo[2], f.id)} ${f.title}, ${fmtDate(f.stageEnd, true)}. ${tag(f)}`, film: f.id });
+    out.push({ id: `c${f.id}`, co: f.co, w: S.week, k: 'promo', t: `${cgFill(pickLine(CG_KIND.promo[2], f.id), f.id, hashRand(f.id * 7 + 3))} ${f.title}, ${fmtDate(f.stageEnd, true)}. ${tag(f)}`, film: f.id });
+  const fam = S.pool[M.hub] ? Object.values(S.pool[M.hub]).flat().map(P).filter(p => p && !p.dead && (p.fame || 0) > 55 && !ids.includes(p.id)).sort((a, b) => b.fame - a.fame).slice(0, 12) : [];
+  for (let i = 0; i < Math.min(2, fam.length); i++) { const p = fam[(S.week * 5 + i * 7) % fam.length], q = hashRand(p.id * 977 + S.week); const k = ['carpet', 'travel', 'gym', 'set', 'pet', 'festival'][Math.floor(q() * 6)]; out.push({ id: `f${p.id}-${S.week}`, who: p.id, w: S.week, k, t: cgFill(CG_KIND[k][2][Math.floor(q() * CG_KIND[k][2].length)], p.id, q), sugg: 1 }); }
+  if (S.week % 3 === 0) { const q = hashRand(S.week * 31 + 7), brand = ['Lumenra Optics', 'Inkwell Notebooks', 'StuntFuel', 'Grip & Co.'][Math.floor(q() * 4)]; out.push({ id: `ad${S.week}`, ad: brand, w: S.week, k: 'ad', t: cgFill(CG_KIND.ad[2][Math.floor(q() * CG_KIND.ad[2].length)], 0, q) }); }
   for (const x of M.posts || []) out.push(Object.assign({ mine: 1 }, x));
   return out.sort((a, b) => b.w - a.w || (b.mine ? 1 : 0) - (a.mine ? 1 : 0)).slice(0, 30);
 }
 function cgLikes(x) { const base = x.mine ? x.likes : x.co !== undefined ? 800 + hashRand(x.co)() * 9000 : cgFollowers(P(x.who)) * (.04 + hashRand(x.id.length * 97 + (x.who || 0))() * .08) * (x.k === 'award' || x.k === 'premiere' ? 3 : x.k === 'pet' ? 1.6 : 1); return Math.round(base); }
 function cgPhoto(x, size = 'big') {
-  const g = CG_BG[Math.abs(hashRand((x.who || x.co || 7) * 17 + x.w)() * CG_BG.length | 0)], K = CG_KIND[x.k] || CG_KIND.thought;
-  const f = x.film !== undefined ? S.films[x.film] : null, cap = f ? f.title : K[1];
-  return `<div class="cg-ph ${size}" style="background:linear-gradient(135deg,${g[0]},${g[1]})"><span class="cg-em">${K[0]}</span><span class="cg-cap">${esc(cap)}</span></div>`;
+  const K = CG_KIND[x.k] || CG_KIND.thought, r = hashRand(((x.who || x.co || 7) * 2654435761 ^ (x.w * 977 + x.id.length)) >>> 0), g = CG_STYLE[K[4]] || CG_BG[Math.floor(r() * CG_BG.length)];
+  const f = x.film !== undefined ? S.films[x.film] : null, cap = f ? f.title : K[1], ang = 100 + Math.floor(r() * 80);
+  const bits = (K[3] || []).map((e, i) => `<span class="cg-bit" style="left:${8 + Math.floor(r() * 80)}%;top:${8 + Math.floor(r() * 70)}%;font-size:${16 + Math.floor(r() * 18)}px;transform:rotate(${Math.floor(r() * 40) - 20}deg)">${e}</span>`).join('');
+  return `<div class="cg-ph ${size} st-${K[4] || 'clean'}" style="background:linear-gradient(${ang}deg,${g[0]},${g[1]})">${size === 'big' ? bits : ''}<span class="cg-em">${K[0]}</span><span class="cg-cap">${esc(cap)}</span></div>`;
 }
 function cgPost(x) {
-  const M = S.me, who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? S.companies[x.co].name : who.name;
+  const M = S.me;
+  if (x.ad) return `<article class="cg-post"><header><span class="cg-av">🛍️</span><div><b>${esc(x.ad)}</b> <span class="muted small">Sponsored</span></div></header>${cgPhoto(x)}<p>${esc(x.t)}</p><p class="small muted">${cgComment('ad', hashRand(x.w * 3), '')}</p></article>`;
+  const who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? S.companies[x.co].name : who.name;
   const handle = x.co !== undefined ? '@' + S.companies[x.co].name.toLowerCase().replace(/[^a-z]+/g, '') : cgHandle(who);
   const likes = cgLikes(x) + ((M.liked || {})[x.id] ? 1 : 0), r = hashRand(x.id.length * 131 + (x.who || 0) + x.w);
-  const com = x.mine ? (x.comments || []) : aliveKnown().filter(id => id !== x.who).slice(0, 12).filter(() => r() < .25).slice(0, 2).map(id => [id, CG_COMMENTS[Math.floor(r() * CG_COMMENTS.length)]]);
+  const com = x.mine ? (x.comments || []) : aliveKnown().filter(id => id !== x.who).slice(0, 12).filter(() => r() < .25).slice(0, 3).map(id => [id, cgComment(x.k, r, cgHandle(P(x.who || id)).slice(1))]);
   return `<article class="cg-post">
-   <header>${x.co !== undefined ? '<span class="cg-av">🏢</span>' : phoneAvatar(x.mine ? ME().id : x.who, 30)}<div><b>${x.co !== undefined ? cl(x.co) : x.mine ? esc(name) : pl(x.who)}</b> <span class="muted small">${esc(handle)}${(who && (who.fame || 0) > 60) || x.co !== undefined ? ' ✔︎' : ''}</span><br><span class="muted small">${S.week - x.w ? (S.week - x.w) + 'w ago' : 'this week'}${x.film !== undefined ? ' · ' + fl(x.film) : ''}</span></div></header>
+   <header>${x.co !== undefined ? '<span class="cg-av">🏢</span>' : phoneAvatar(x.mine ? ME().id : x.who, 30)}<div><b>${x.co !== undefined ? cl(x.co) : x.mine ? esc(name) : pl(x.who)}</b> <span class="muted small">${esc(handle)}${(who && (who.fame || 0) > 60) || x.co !== undefined ? ' ✔︎' : ''}</span><br><span class="muted small">${x.sugg ? 'Suggested for you · ' : ''}${S.week - x.w ? (S.week - x.w) + 'w ago' : 'this week'}${x.film !== undefined ? ' · ' + fl(x.film) : ''}</span></div></header>
    ${cgPhoto(x)}
    <div class="cg-act">${x.mine ? `<span>♥ ${cgFmt(likes)}</span>` : (M.liked || {})[x.id] ? `<span class="good">♥ ${cgFmt(likes)}</span>` : x.co !== undefined ? `<span>♡ ${cgFmt(likes)}</span>` : `<button class="linkish" data-like="${x.id}|${x.who}">♡ ${cgFmt(likes)}</button>`}<span class="muted small">${com.length} comment${com.length === 1 ? '' : 's'}</span></div>
    <p><b>${esc(handle.slice(1))}</b> ${esc(x.t)}</p>${com.map(([id, t]) => `<p class="small"><b>${esc(cgHandle(P(id)).slice(1))}</b> ${esc(t)}</p>`).join('')}
@@ -29780,14 +29822,14 @@ function cgPost(x) {
 }
 // you post
 function cgPostAct(a) {
-  const M = S.me, me = ME(), K = CG_KIND[a.k]; if (!K || !['set', 'food', 'pet', 'view', 'throwback', 'thought', 'job'].includes(a.k)) return false;
+  const M = S.me, me = ME(), K = CG_KIND[a.k]; if (!K || !['set', 'food', 'pet', 'cat', 'view', 'throwback', 'thought', 'job', 'gym', 'travel', 'coffee', 'gig', 'books', 'gear', 'page', 'home'].includes(a.k)) return false;
   if ((M.posts || []).some(x => x.w === S.week)) return false;   // one a week, like a person with a life
-  const text = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 160) || pickLine(K[2], S.week);
+  const text = String(a.text || '').replace(/\s+/g, ' ').trim().slice(0, 160) || cgFill(pickLine(K[2], S.week), M.id, hashRand(S.week * 17 + 5));
   const fol = M.cgFol = Math.round((M.cgFol || cgFollowers(me)) * 1);
   const film = M.jobs.map(j => j.film).find(f => f !== null && f !== undefined);
-  const appeal = { set: 1.4, view: 1.2, pet: 1.7, food: .9, throwback: 1.1, thought: .8, job: 1.5 }[a.k] * (.6 + prnd() * .9);
+  const appeal = ({ set: 1.4, view: 1.2, pet: 1.7, cat: 1.8, food: .9, throwback: 1.1, thought: .8, job: 1.5, gym: 1, travel: 1.3, coffee: .7, gig: 1.1, books: .8, gear: 1, page: .9, home: 1.1 }[a.k] || 1) * (.6 + prnd() * .9);
   const likes = Math.round(fol * .06 * appeal + 3);
-  const comments = aliveKnown().filter(id => opinion(id) > 15).slice(0, 8).filter(() => prnd() < .3).slice(0, 3).map(id => [id, CG_COMMENTS[Math.floor(prnd() * CG_COMMENTS.length)]]);
+  const comments = aliveKnown().filter(id => opinion(id) > 15).slice(0, 8).filter(() => prnd() < .3).slice(0, 3).map(id => [id, cgComment(a.k, prnd, '')]);
   for (const [id] of comments) addTie(me, P(id), .5);
   M.cgFol = fol + Math.round(likes * (.05 + prnd() * .1));
   me.fame = clamp((me.fame || 0) + Math.min(.3, likes / 20000), 0, 100);
@@ -29813,7 +29855,7 @@ function clapgramApp() {
   } else {
     const fol = M.cgFol || cgFollowers(me), posts = (M.posts || []).slice().reverse(), posted = posts.some(x => x.w === S.week);
     body = `<div class="cg-me">${portraitOf(me, 64)}<div><b>${esc(me.name)}</b> <span class="muted">${esc(cgHandle(me))}</span><p class="small"><b>${cgFmt(fol)}</b> followers · <b>${posts.length}</b> posts · following <b>${Object.keys(M.known).length + (M.follow || []).length}</b></p></div></div>
-     <div class="cg-new"><h5>New post</h5>${posted ? '<p class="muted small">You\'ve posted this week. Leave them wanting more.</p>' : `<div class="bf-row">${['set', 'view', 'food', 'pet', 'throwback', 'thought', 'job'].map(k => `<button class="pill${(UI.cgK || 'thought') === k ? ' on' : ''}" data-cgk="${k}">${CG_KIND[k][0]} ${CG_KIND[k][1]}</button>`).join('')}</div><div class="compose own"><input id="cg-text" maxlength="160" placeholder="Write a caption…" value="${esc(UI.cgText || '')}"><button class="btn-s" data-cgpost="1">Post</button></div><p class="small muted">Pets and set photos do best. A photo from a closed set can cost you with the producer.</p>`}</div>
+     <div class="cg-new"><h5>New post</h5>${posted ? '<p class="muted small">You\'ve posted this week. Leave them wanting more.</p>' : `<div class="bf-row">${['set', 'view', 'food', 'pet', 'cat', 'coffee', 'gym', 'travel', 'gig', 'books', 'gear', 'page', 'home', 'throwback', 'thought', 'job'].map(k => `<button class="pill${(UI.cgK || 'thought') === k ? ' on' : ''}" data-cgk="${k}">${CG_KIND[k][0]} ${CG_KIND[k][1]}</button>`).join('')}</div><div class="compose own"><input id="cg-text" maxlength="160" placeholder="Write a caption…" value="${esc(UI.cgText || '')}"><button class="btn-s" data-cgpost="1">Post</button></div><p class="small muted">Pets and set photos do best. A photo from a closed set can cost you with the producer.</p>`}</div>
      <div class="cg-grid">${posts.map(x => `<div title="${esc(x.t)} · ♥ ${x.likes}">${cgPhoto(x, 'small')}</div>`).join('') || '<p class="muted small">No posts yet.</p>'}</div>`;
   }
   return `<div class="cg"><div class="cg-top"><b class="cg-logo">Clapgram</b><span class="bf-row">${tabs}</span></div>${body}</div>`;
@@ -29939,24 +29981,55 @@ function allMarketHTML() {
 function mktChange(e) { const id = e.target.id, v = e.target.value; if (id === 'mk-ind') { UI.mkf = v; render(true); return true; } if (id === 'mk-sort') { UI.mks = v; render(true); return true; } if (id === 'mkq') { UI.mkq = v; render(true); return true; } return false; }
 
 // ---- tips that come from somewhere ----
-const ANALYSTS = ['Barnum & Wexley', 'Strand Securities', 'Quayle Partners', 'Mercer Hollis', 'Lindqvist Capital'];
-const TIP_KIND = { insider: ['🤫', 'Someone on the film', .86], informed: ['🎬', 'Someone in the business', .66], analyst: ['📊', 'Analyst note', .7], tracking: ['📈', 'Tracking survey', .73], hearsay: ['💬', 'Hearsay', .47] };
+const ANALYSTS = ['Barnum & Wexley', 'Strand Securities', 'Quayle Partners', 'Mercer Hollis', 'Lindqvist Capital', 'Okonkwo Brothers', 'Tanaka Fairweather', 'Pell & Abernathy', 'Rosetti Kline', 'Harrow Street Research'];
+const TIP_KIND = { insider: ['🤫', 'Someone on the film', .86], informed: ['🎬', 'Someone in the business', .66], exhibitor: ['🎟️', 'A cinema booker', .71], analyst: ['📊', 'Analyst note', .7], tracking: ['📈', 'Tracking survey', .73], press: ['📰', 'Trade gossip column', .58], hearsay: ['💬', 'Hearsay', .47] };
+const HEARSAY = ['Clapgram chatter', 'a man at the gym', 'an online forum', 'your cousin who "knows people"', 'a taxi driver who drove the star', 'a group chat you shouldn\'t be in', 'a waiter at the studio commissary', 'your dentist', 'a fan account with 40K followers', 'a stranger at a wedding'];
+const COLUMNS = ['"Overheard" in The Daily Slate', 'the Back Lot Whispers column', 'a blind item in Reel Talk', 'the Monday Morning Grosses newsletter'];
+// why it will open big or flop: one story per angle, with the film's own people in it
+const TIP_WHY = {
+  test: [['the test audience applauded at the end', 'test scores came back in the 90s', 'the second test screening went even better than the first'], ['the test screening went badly', 'they lost a third of the test audience at the midpoint', 'test scores were so soft they\'re re-cutting the ending']],
+  trailer: [['the trailer numbers are huge', 'the trailer is the most-watched in the {genre} genre this year', 'the trailer\'s last shot became a meme overnight'], ['nobody is talking about the trailer', 'the trailer got ratioed online', 'they\'ve changed the trailer twice in a month']],
+  presale: [['the pre-sales are strong', 'opening-night shows are selling out in big cities', 'premium screens are already booked solid'], ['pre-sales are slow', 'cinemas are quietly moving it to smaller screens', 'premium screens went to the competition']],
+  embargo: [['the review embargo lifts a week early, which means they\'re confident', 'critics at the press screening stayed for the credits'], ['the review embargo lifts the night before it opens, which is never a good sign', 'there was no press screening at all']],
+  star: [['{star} is doing every talk show going', '{star} keeps calling it the best work of their life, and means it'], ['{star} is skipping half the press tour', '{star} and {dir} aren\'t speaking, apparently']],
+  shoot: [['the dailies were the talk of the lot', 'they came in under budget and on time, and it shows'], ['reshoots, and the studio is nervous', 'the edit has been taken off {dir}']],
+  spend: [['the studio just doubled the marketing spend', 'there are billboards for it everywhere'], ['the studio cut the marketing budget last week', 'the ads have mostly stopped']],
+  slot: [['it has the weekend to itself', 'the competition moved out of its way'], ['it opens against something much bigger', 'the date has moved twice, and nobody moves a date twice for a good reason']],
+  buzz: [['word of mouth is building', 'the exhibitors\' preview got a standing ovation', 'the merchandise orders came in triple'], ['tracking is soft', 'nobody is talking about it', 'exhibitors watched it in silence']]
+};
+const TIP_ANGLES = { insider: ['shoot', 'test', 'star', 'spend'], informed: ['test', 'shoot', 'star', 'buzz'], exhibitor: ['presale', 'slot', 'buzz'], analyst: ['presale', 'slot', 'spend', 'trailer'], tracking: ['trailer', 'presale', 'buzz'], press: ['star', 'shoot', 'embargo', 'spend'], hearsay: ['trailer', 'buzz', 'star', 'embargo'] };
+const SECTOR_WHY = {
+  box: [['cinema attendance is running ahead of last year', 'a crowded summer slate is coming'], ['attendance is softer than the headlines say', 'the next quarter\'s release calendar is thin']],
+  prod: [['every big shoot is booked through next year', 'studios are greenlighting again'], ['productions are being pushed', 'two big shoots just shut down']],
+  film: [['a wave of directors are shooting on film again', 'a big order from a festival restoration programme'], ['another lab just closed', 'the last holdouts are switching to digital']],
+  kids: [['the licensing deals for the holiday films are huge', 'retailers are restocking early'], ['retailers are sitting on unsold stock', 'the big family film slipped a year']],
+  music: [['streaming royalties are up again', 'a catalogue sale is being negotiated'], ['a royalty dispute is going to court', 'subscriber growth has stalled']],
+  video: [['subscriber numbers will surprise people', 'a price rise is sticking'], ['they\'re losing subscribers faster than they admit', 'content spending is out of control']],
+  pod: [['the ad market for audio is booming', 'a celebrity show is about to sign'], ['advertisers are pulling back', 'the top show is leaving']],
+  gold: [['big money is nervous, and runs to gold', 'central banks are buying'], ['everyone is feeling brave again', 'rates are going up']]
+};
 function tipsThisWeek() {
   const M = S.me, out = [], r = hashRand(S.week * 2357 + 3), known = Object.keys(M.known || {}).map(Number).filter(id => P(id) && !P(id).dead);
   const up = S.films.filter(f => f.rel === null && f.stage === 3 && f.co !== null && S.companies[f.co] && S.companies[f.co].closed === null && S.companies[f.co].owner === undefined && f.stageEnd - S.week <= 4 && f.stageEnd >= S.week);
+  const pk = L => L[Math.floor(r() * L.length)];
   for (let i = 0; i < 5 && up.length; i++) {
     const f = up.splice(Math.floor(r() * up.length), 1)[0], c = S.companies[f.co], q0 = f.q !== undefined ? f.q : 55, truth = q0 >= 62 ? 1 : q0 < 48 ? -1 : 0;
     const on = known.find(id => keyIds(f).includes(id)), inb = known.filter(id => P(id).hub === f.hub && opinion(id) > 0);
-    const kind = on !== undefined && r() < .7 ? 'insider' : inb.length && r() < .45 ? 'informed' : ['analyst', 'tracking', 'hearsay', 'hearsay'][Math.floor(r() * 4)];
+    const kind = on !== undefined && r() < .7 ? 'insider' : inb.length && r() < .45 ? 'informed' : pk(['analyst', 'tracking', 'exhibitor', 'press', 'hearsay', 'hearsay']);
     const who = kind === 'insider' ? on : kind === 'informed' ? inb[Math.floor(r() * inb.length)] : null;
-    const src = kind === 'insider' ? `${P(who).name}, who worked on it` : kind === 'informed' ? `${P(who).name}, who saw a test screening` : kind === 'analyst' ? `An analyst at ${ANALYSTS[Math.floor(r() * ANALYSTS.length)]}` : kind === 'tracking' ? 'Pre-release tracking' : pickLine(['Clapgram chatter', 'a man at the gym', 'an online forum', 'your cousin who "knows people"'], f.id);
+    const role = who !== undefined && who !== null ? (f.dir === who ? 'who directed it' : f.cast.includes(who) ? 'who is in it' : f.wri.includes(who) ? 'who wrote it' : f.prod === who ? 'who produced it' : 'who worked on it') : '';
+    const src = kind === 'insider' ? `${P(who).name}, ${role}` : kind === 'informed' ? `${P(who).name}, ${pk(['who saw a test screening', 'who saw a rough cut', 'who has a friend in marketing', 'who sat in on a mix'])}` : kind === 'analyst' ? `An analyst at ${pk(ANALYSTS)}` : kind === 'tracking' ? pk(['Pre-release tracking', 'The weekly awareness survey', 'Social-media tracking']) : kind === 'exhibitor' ? pk(['A booker at AMV Theatres', 'A regional cinema owner', 'A booker at Royal Regal']) : kind === 'press' ? pk(COLUMNS).replace(/^./, x => x.toUpperCase()) : pk(HEARSAY).replace(/^./, x => x.toUpperCase());
     const rel = TIP_KIND[kind][2], right = r() < rel, claim = truth === 0 ? (r() < .5 ? 1 : -1) : right ? truth : -truth;
-    const why = claim > 0 ? pickLine(['the test audience applauded at the end', 'word of mouth is building', 'the trailer numbers are huge', 'the pre-sales are strong'], f.id) : pickLine(['the test screening went badly', 'reshoots, and the studio is nervous', 'tracking is soft', 'nobody is talking about it'], f.id);
-    out.push({ f: f.id, co: c.id, src, who, kind, rel, insider: kind === 'insider' ? 1 : 0, claim, why, opens: f.stageEnd });
+    const angle = pk(TIP_ANGLES[kind]), star = f.cast[0] !== undefined && P(f.cast[0]) ? P(f.cast[0]).name : 'the lead', dir = P(f.dir) ? P(f.dir).name : 'the director';
+    const why = pk(TIP_WHY[angle][claim > 0 ? 0 : 1]).replace('{star}', star).replace('{dir}', dir).replace('{genre}', String(f.genre || 'drama').toLowerCase());
+    const sure = ['hearsay', 'tracking'].includes(kind) ? pk(['suggests', 'says']) : rel > .8 ? pk(['swears', 'is certain']) : rel > .65 ? pk(['says', 'reckons', 'thinks']) : pk(['heard', 'is fairly sure', 'has a feeling']);
+    out.push({ f: f.id, co: c.id, src, who, kind, rel, insider: kind === 'insider' ? 1 : 0, claim, why, sure, angle, opens: f.stageEnd });
   }
-  // and one about the rest of the business: the numbers coming out next month
-  const S2 = SECTORS.map(x => SECTOR[x[0]]).filter(sectorOpen); if (S2.length) { const s = S2[Math.floor(r() * S2.length)], fut = (sectorPrice(s, S.week + 4) / sectorPrice(s) - 1), kind = r() < .5 ? 'analyst' : 'hearsay', rel = TIP_KIND[kind][2], claim = (r() < rel ? 1 : -1) * (fut >= 0 ? 1 : -1);
-    out.push({ s: s.k, src: kind === 'analyst' ? `An analyst at ${ANALYSTS[Math.floor(r() * ANALYSTS.length)]}` : 'A friend in the industry', kind, rel, insider: 0, claim, why: claim > 0 ? 'next month\'s numbers will beat expectations' : 'next month\'s numbers will disappoint', opens: S.week + 4 }); }
+  // and one or two about the rest of the business: the numbers coming out next month
+  const S2 = SECTORS.map(x => SECTOR[x[0]]).filter(sectorOpen);
+  for (let j = 0; j < (r() < .4 ? 2 : 1) && S2.length; j++) { const s = S2.splice(Math.floor(r() * S2.length), 1)[0], fut = (sectorPrice(s, S.week + 4) / sectorPrice(s) - 1), kind = pk(['analyst', 'analyst', 'press', 'hearsay']), rel = TIP_KIND[kind][2], claim = (r() < rel ? 1 : -1) * (fut >= 0 ? 1 : -1);
+    const W = SECTOR_WHY[s.drv] || SECTOR_WHY.box;
+    out.push({ s: s.k, src: kind === 'analyst' ? `An analyst at ${pk(ANALYSTS)}` : kind === 'press' ? pk(COLUMNS).replace(/^./, x => x.toUpperCase()) : pk(['A friend in the industry', 'Someone at a conference', 'Your accountant\'s other client']), kind, rel, insider: 0, claim, sure: kind === 'hearsay' ? 'heard' : 'says', why: `${pk(W[claim > 0 ? 0 : 1])}; next month's numbers will ${claim > 0 ? 'beat expectations' : 'disappoint'}`, opens: S.week + 4 }); }
   return out;
 }
 function tipJudge(t) {
@@ -29968,8 +30041,8 @@ function tipsHTML() {
   for (const t of T) { const k = S.week + ':' + (t.co ?? t.s); if (!M.tipsSeen.includes(k)) { M.tipsSeen.push(k); M.tipLog.push({ w: S.week, f: t.f, s: t.s, claim: t.claim, kind: t.kind, opens: t.opens }); } }
   if (M.tipsSeen.length > 60) M.tipsSeen.splice(0, M.tipsSeen.length - 60); if (M.tipLog.length > 200) M.tipLog.splice(0, M.tipLog.length - 200);
   const rec = {}; for (const t of M.tipLog) { const j = tipJudge(t); if (j === null) continue; const x = rec[t.kind] = rec[t.kind] || [0, 0]; x[1]++; if (j) x[0]++; }
-  const line = t => { const k = TIP_KIND[t.kind]; if (t.s) { const s = SECTOR[t.s]; return `<li>${k[0]} <b>${esc(t.src)}</b>: ${esc(s.name)} (${esc(s.tk)}), ${esc(t.why)}. <span class="muted small">${esc(k[1])} · right about ${Math.round(t.rel * 100)}% of the time</span> <button class="linkish" data-sec="buy:${t.s}">Buy</button></li>`; }
-    const f = S.films[t.f], c = S.companies[t.co]; return `<li>${k[0]} <b>${esc(t.src)}</b> says ${fl(f.id)} (${esc(tickerOf(c))}) will <b class="${t.claim > 0 ? 'good' : 'bad'}">${t.claim > 0 ? 'open big' : 'flop'}</b>: ${esc(t.why)}. <span class="muted small">Opens ${fmtDate(t.opens, true)} · ${esc(k[1])}, usually right ${Math.round(t.rel * 100)}% of the time${t.insider ? ' · <b class="bad">trading on this is insider dealing</b>' : ''}</span> <a href="#" class="lk" data-mkt="sel:${c.id}">Trade ›</a></li>`; };
+  const line = t => { const k = TIP_KIND[t.kind]; if (t.s) { const s = SECTOR[t.s]; return `<li>${k[0]} <b>${esc(t.src)}</b> ${esc(t.sure || 'says')}: ${esc(s.name)} (${esc(s.tk)}), ${esc(t.why)}. <span class="muted small">${esc(k[1])} · right about ${Math.round(t.rel * 100)}% of the time</span> <button class="linkish" data-sec="buy:${t.s}">Buy</button></li>`; }
+    const f = S.films[t.f], c = S.companies[t.co]; return `<li>${k[0]} <b>${esc(t.src)}</b> ${esc(t.sure || 'says')} ${fl(f.id)} (${esc(tickerOf(c))}) will <b class="${t.claim > 0 ? 'good' : 'bad'}">${t.claim > 0 ? 'open big' : 'flop'}</b>: ${esc(t.why)}. <span class="muted small">Opens ${fmtDate(t.opens, true)} · ${esc(k[1])}, usually right ${Math.round(t.rel * 100)}% of the time${t.insider ? ' · <b class="bad">trading on this is insider dealing</b>' : ''}</span> <a href="#" class="lk" data-mkt="sel:${c.id}">Trade ›</a></li>`; };
   return `<p class="small muted">Where tips come from matters. People who worked on a film know the most, and trading on what they tell you is a crime the regulator does look for. Published analysts and tracking surveys are fair game. Hearsay is a coin toss with a story attached.</p>
    <ul class="plain mnews">${T.map(line).join('') || '<li class="muted">Quiet week. Nothing big opening soon.</li>'}</ul>
    <h4>Track record</h4><table class="grid small"><thead><tr><th>Source</th><th class="n">Right</th><th class="n">Called</th></tr></thead><tbody>${Object.entries(TIP_KIND).map(([k, v]) => { const x = rec[k] || [0, 0]; return `<tr><td>${v[0]} ${esc(v[1])}</td><td class="n">${x[1] ? Math.round(x[0] / x[1] * 100) + '%' : '–'}</td><td class="n">${x[1]}</td></tr>`; }).join('')}</tbody></table><p class="small muted">Tips you've seen, judged once the film opened or the numbers came out.</p>`;
@@ -30000,32 +30073,89 @@ function economyHTML() {
 
 // ---- the bank's private side ----
 function sblLimit(M) { const nw = osNetWorth(); return Math.max(0, Math.round(nw.shares * .5)); }
-// the people with money who back films
+// the people with money who back films: who they are, why they do it, and what they'll want for it
+const ANGEL_KIND = {
+  'Family office': ['Runs the money of a shipping family three generations deep.', 'Manages a fortune built on frozen food and invests it carefully.', 'Looks after a family that made its money in hotels and wants a little glamour.'],
+  'Tech founder': ['Sold a payments app at thirty-one and is bored.', 'Built a dating app, sold it, and now wants to "disrupt storytelling".', 'Made a fortune in cloud software; has opinions about screenplays.'],
+  'Hedge-fund manager': ['Runs a fund that bets against things; likes a film that bets on something.', 'Treats every cheque like a trade, with a stop-loss.', 'Collects art, wine and, lately, film credits.'],
+  'Old money': ['Nobody is quite sure where the money came from. Nobody asks.', 'Owns a lot of farmland and a box at the opera.', 'Has backed one film a decade since before you were born.'],
+  'Retired studio head': ['Ran a studio for twenty years and misses the phone ringing.', 'Greenlit three classics and a famous disaster; talks about the disaster more.', 'Left a studio with a golden parachute and a grudge.'],
+  'Real-estate heir': ['Inherited half a downtown and a love of red carpets.', 'Builds car parks by day and watches art films by night.', 'Owns the building three studios rent offices in.'],
+  'Music mogul': ['Signed four number-one acts and wants a soundtrack credit.', 'Ran a label through the vinyl, CD and streaming years and survived all three.', 'Started a festival in a field; now owns the field and the festival.'],
+  'Sports star': ['Retired from the pitch with a good knee and a better accountant.', 'Won everything twice and now wants a different kind of trophy.', 'Has a production company with their name on it and nothing in it yet.'],
+  'Restaurateur': ['Owns eleven restaurants and thinks a film is just a very long dinner service.', 'Built a burger chain from one van; loves an underdog.'],
+  'Lottery winner': ['Won big, invested well, and still can\'t believe it.', 'Bought a ticket on a whim nine years ago. Now has a family office.']
+};
+const ANGEL_MOTIVE = { prestige: ['Wants awards', 'They want a film that wins things. Bring them something serious.'], returns: ['Wants returns', 'A spreadsheet person: your hits matter more than your pitch.'], taste: ['Backs what they love', 'Only funds the genres they love, and goes all in when they do.'], glamour: ['Wants the glamour', 'They want to be near famous people. Your fame helps.'], legacy: ['Backs new voices', 'They like backing people on the way up, not the established names.'], home: ['Loves their city', 'They want to see their city on screen.'] };
+const ANGEL_ASK = { none: 'No strings. They trust you.', ep: 'An executive producer credit, in the opening titles.', cameo: 'A walk-on part. One line, maybe two.', premiere: 'Four seats at every premiere, and a photo with the cast.', nephew: 'A small part for a nephew who "has always wanted to act".', board: 'A seat on your company\'s board.', first: 'Their money comes out first, before anyone else is paid back.', notes: 'To see every cut, and to give notes on it.' };
 function angelsOf(hub) {
-  const r = hashRand(HUB_IDS.indexOf(hub) * 9973 + 5), N = NAMES[HUBS[hub].lang] || NAMES.en, out = [], kinds = ['Family office', 'Tech founder', 'Hedge-fund manager', 'Old money', 'Retired studio head', 'Real-estate heir', 'Music mogul', 'Sports star'];
-  const pk = L => L[Math.floor(r() * L.length)];
-  for (let i = 0; i < 8; i++) { const g = r() < .5 ? 'M' : 'F', name = `${pk(N[g] || N.M)} ${pk(N.L)}`, likes = Object.keys(AMB).sort(() => r() - .5).slice(0, 2), worth = Math.round((20 + Math.pow(r(), 2) * 1500)) * 1e6;
-    out.push({ i, name, kind: kinds[Math.floor(r() * kinds.length)], worth, likes, appetite: .3 + r() * .6, ticket: Math.round((.1 + r() * .9) * Math.min(worth * .01, 5e6) / 5e4) * 5e4 }); }
+  const r = hashRand(HUB_IDS.indexOf(hub) * 9973 + 5), N = NAMES[HUBS[hub].lang] || NAMES.en, out = [], used = new Set(), kinds = Object.keys(ANGEL_KIND), motives = Object.keys(ANGEL_MOTIVE), asks = Object.keys(ANGEL_ASK);
+  const make = (i, r, isNew) => { const pk = L => L[Math.floor(r() * L.length)], g = r() < .5 ? 'M' : 'F', name = `${pk(N[g] || N.M)} ${pk(N.L)}`, kind = pk(kinds), likes = Object.keys(AMB).sort(() => r() - .5).slice(0, 2), worth = Math.round((20 + Math.pow(r(), 2) * 1500)) * 1e6;
+    const motive = kind === 'Retired studio head' && r() < .6 ? 'prestige' : kind === 'Hedge-fund manager' && r() < .6 ? 'returns' : kind === 'Sports star' && r() < .5 ? 'glamour' : pk(motives);
+    const ask = motive === 'glamour' ? pk(['cameo', 'premiere', 'nephew']) : motive === 'returns' ? pk(['first', 'board', 'none']) : motive === 'prestige' ? pk(['ep', 'notes', 'none']) : pk(asks);
+    return { i, name, g, kind, bio: (() => { const B = ANGEL_KIND[kind], o = Math.floor(r() * B.length); for (let j = 0; j < B.length; j++) { const b = B[(o + j) % B.length]; if (!used.has(b)) { used.add(b); return b; } } return B[o]; })(), worth, likes, motive, ask, wait: 13 + Math.floor(r() * 4) * 9, appetite: .3 + r() * .6, ticket: Math.round((.1 + r() * .9) * Math.min(worth * .01, 5e6) / 5e4) * 5e4, isNew }; };
+  for (let i = 0; i < 8; i++) out.push(make(i, r, 0));
+  // new money arrives every year
+  const rn = hashRand(HUB_IDS.indexOf(hub) * 7919 + S.year * 31 + 1); for (let i = 8; i < 10; i++) out.push(make(i, rn, 1));
   return out;
 }
+function angelKey(A) { return A.name + '|' + A.kind; }
+// how hard the case is to make to this one
+function angelDC(A) {
+  const M = S.me, me = ME(), c = typeof myCo === 'function' ? myCo() : null, nw = osNetWorth().total, hits = c ? c.hits : 0, aw = (me.awards || []).length || 0;
+  let dc = 18 - me.standing / 12 - hits * 2 - (nw > usd(1e6) ? 1 : 0) - A.appetite * 4 - ((M.love || []).some(g => A.likes.includes(g)) ? 1 : 0);
+  if (A.motive === 'returns') dc -= hits;
+  if (A.motive === 'prestige') dc -= Math.min(3, aw) - 1;
+  if (A.motive === 'taste') dc += (M.love || []).some(g => A.likes.includes(g)) ? -3 : 2;
+  if (A.motive === 'glamour') dc -= Math.min(3, (me.fame || 0) / 20) - 1;
+  if (A.motive === 'legacy') dc -= me.standing < 40 ? 3 : -2;
+  return Math.round(clamp(dc, 6, 19));
+}
+function angelOffer(A, why) {
+  const amt = usd(A.ticket);
+  inbox('note', `${A.name} is in, with terms`, `${why} ${A.name} (${A.kind.toLowerCase()}) will put ${fmtCash(amt)} into your company's next film, for a share of what it earns. They want one thing: ${ANGEL_ASK[A.ask].replace(/^./, x => x.toLowerCase())}`,
+    { act: 'angeloffer', ang: angelKey(A), amt, ask: A.ask, choices: [{ k: 'yes', label: A.ask === 'none' ? 'Shake on it' : 'Agree to the terms' }, ...(A.ask === 'none' ? [] : [{ k: 'haggle', label: 'Push back on the terms', check: ['cha', 14] }]), { k: 'no', label: 'Thank them, and pass' }] });
+}
 function angelAct(a) {
-  const M = S.me, me = ME(), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub)[+a.i]; if (!A || !c || c.closed !== null) return false;
-  M.angelTry = M.angelTry || {}; if (S.week - (M.angelTry[A.i] ?? -999) < 26) return false; M.angelTry[A.i] = S.week;
-  const nw = osNetWorth().total, dc = Math.round(clamp(18 - me.standing / 12 - c.hits * 2 - (nw > usd(1e6) ? 1 : 0) - A.appetite * 4 - ((M.love || []).some(g => A.likes.includes(g)) ? 1 : 0), 6, 19));
-  const ok = roll('fin', dc), amt = usd(A.ticket);
-  if (ok) { (M.angelFund = M.angelFund || []).push({ who: A.name, amt, w: S.week }); inbox('note', `${A.name} is in`, `Lunch runs to four hours. ${A.name} (${A.kind.toLowerCase()}) commits ${fmtCash(amt)} to your company's next film, for a share of what it earns. It's waiting when you greenlight.`, { result: { ok, roll: M.lastRoll, t: 'Committed.' } }); milestone(`${A.name} backs your next film`, 'work'); }
-  else inbox('note', `${A.name} passes`, `"I like you. I don't like the risk." ${A.name} will take another meeting in six months, after your next hit.`, { result: { ok, roll: M.lastRoll, t: 'A pass.' } });
+  const M = S.me, c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub)[+a.i]; if (!A || !c || c.closed !== null) return false;
+  M.angelTry = M.angelTry || {}; const key = angelKey(A); if (S.week - (M.angelTry[key] ?? -999) < A.wait) return false; M.angelTry[key] = S.week;
+  const ok = roll('fin', angelDC(A));
+  if (ok) { const lunch = pickLine(['Lunch runs to four hours.', 'You pitch it on a golf course, badly, and they love it anyway.', 'They ask one question, about the ending, and nod.', 'Dinner at their house; the dog likes you, which seems to matter.', 'They read the script on the plane and call you from the runway.'], S.week + A.i); angelOffer(A, lunch); }
+  else inbox('note', `${A.name} passes`, `${pickLine(['"I like you. I don\'t like the risk."', '"Bring me something when you\'ve had a hit."', '"Not this one. Not yet."', '"My accountant would kill me."', '"I only back what I\'d watch twice."'], S.week + A.i)} ${A.name} will take another meeting in ${Math.round(A.wait / 4.3)} months.`, { result: { ok, roll: M.lastRoll, t: 'A pass.' } });
   return true;
+}
+function angelPick(it, k) {
+  if (it.act !== 'angeloffer') return false;
+  const M = S.me, me = ME(); it.done = true; it.picked = k;
+  if (k === 'no') { it.result = { t: 'You part as friends.' }; return true; }
+  let amt = it.amt, ask = it.ask, t = 'Done. The money waits for your next greenlight.';
+  if (k === 'haggle') { const ok = roll('cha', 14); if (ok) { amt = Math.round(amt * 1.15); ask = 'none'; t = 'They laugh, drop the condition and add a little more.'; } else { amt = Math.round(amt * .7); t = 'They keep the condition and trim the cheque.'; } it.result = { ok, roll: M.lastRoll, t }; }
+  else it.result = { t };
+  (M.angelFund = M.angelFund || []).push({ who: it.ang.split('|')[0], amt, w: S.week, ask });
+  milestone(`${it.ang.split('|')[0]} backs your next film`, 'work'); return true;
+}
+// now and then the money finds you
+function angelWeek() {
+  const M = S.me, me = ME(), c = typeof myCo === 'function' ? myCo() : null; if (!c || c.closed !== null || S.week % 4) return;
+  if ((M.inbox || []).some(x => x.act === 'angeloffer' && !x.done) || (M.angelFund || []).length >= 3) return;
+  const pull = .02 + (c.hits || 0) * .02 + Math.max(0, me.standing - 40) / 600 + Math.max(0, (me.fame || 0) - 30) / 800; if (prnd() >= pull) return;
+  const L = angelsOf(M.hub).filter(A => S.week - ((M.angelTry || {})[angelKey(A)] ?? -999) >= A.wait); if (!L.length) return;
+  const A = L[Math.floor(prnd() * L.length)]; (M.angelTry = M.angelTry || {})[angelKey(A)] = S.week;
+  angelOffer(A, pickLine([`A handwritten note arrives: "${A.name} would love to be part of whatever you do next."`, `${A.name}'s office calls. They saw your last film twice.`, `You're seated next to ${A.name} at a charity dinner. By dessert they've made an offer.`, `${A.name}'s assistant emails at 6am. Their boss "wants in".`], S.week));
 }
 // committed angel money goes into the next film's equity
 function takeAngels() { const M = S.me, L = M.angelFund || []; if (!L.length) return 0; const t = L.reduce((s, x) => s + x.amt, 0); M.angelFund = []; return t; }
 function privateBankHTML() {
   const M = S.me, B = bankOf(M), nw = osNetWorth(), lim = sblLimit(M), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub);
-  const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[a.i] ?? -999) < 26; return `<tr><td><b>${esc(a.name)}</b><br><span class="muted small">${esc(a.kind)}</span></td><td class="n small">${fmtM(a.worth / 1e6)}</td><td class="small">${a.likes.map(esc).join(', ')}</td><td class="n small">${fmtCash(usd(a.ticket))}</td><td>${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait ? 'disabled' : ''}>${wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</td></tr>`; }).join('');
+  const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[angelKey(a)] ?? -999) < a.wait, dc = angelDC(a), mv = ANGEL_MOTIVE[a.motive];
+    return `<div class="angel"><div class="ang-top"><div><b>${esc(a.name)}</b>${a.isNew ? ' <span class="tag-new">New money</span>' : ''}<br><span class="muted small">${esc(a.kind)} · worth ${fmtM(a.worth / 1e6)}</span></div><span class="ang-dc" title="How hard the case is to make">DC ${dc}</span></div>
+     <p class="small">${esc(a.bio)}</p><p class="small"><b>${esc(mv[0])}.</b> <span class="muted">${esc(mv[1])}</span></p>
+     <p class="small"><span class="muted">Loves</span> ${a.likes.map(esc).join(', ')} · <span class="muted">Usual cheque</span> <b>${fmtCash(usd(a.ticket))}</b><br><span class="muted">Usually asks for</span> ${esc(ANGEL_ASK[a.ask])}</p>
+     ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait ? 'disabled' : ''}>${wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
   return `<div class="os-grid">${osCard('Securities-backed credit', `<p class="small">Borrow against your shares at ${(rateAt(S.year) + 1.5).toFixed(1)}%, up to half their value: ${fmtCash(lim)} available. If the market falls far enough, the bank sells your shares to cover it.</p><div class="bank-f"><button class="os-btn" data-bank="sbl" ${lim < 1000 ? 'disabled' : ''}>Draw ${fmtCash(Math.min(lim, Math.round(+UI.bkamt || 0)))} from the line</button></div>${B.sbl ? `<p class="small">Drawn: <b>${fmtCash(Math.round(B.sbl))}</b>. Interest comes out weekly; repay with the Repay button on Borrowing.</p>` : ''}`)}
-   ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet.</p>')}</div>
-   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each puts a cheque into a film they believe in, for a share of what it earns. The case you make rolls your Finance; hits, standing and shared taste help.</p>
-   <div class="tw"><table class="grid small"><thead><tr><th>Who</th><th class="n">Worth</th><th>Likes</th><th class="n">Usual cheque</th><th></th></tr></thead><tbody>${angels}</tbody></table></div>`;
+   ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
+   <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Two new names arrive each year.</p>
+   <div class="angels">${angels}</div>`;
 }
 function fin2Click(t) { if (t.dataset.angel !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'angel', i: +t.dataset.angel }); render(true); if ((S.me.rollN || 0) > n0 && typeof showRollOverlay === 'function') showRollOverlay(S.me.lastRoll); return true; } return false; }
 // </finance2>

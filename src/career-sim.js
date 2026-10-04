@@ -692,6 +692,7 @@ function closeWeek(a) {
   if (typeof corpWeek === 'function') corpWeek();
   if (typeof slateWeek === 'function') slateWeek();
   if (typeof finWeek === 'function') finWeek();
+  if (typeof angelWeek === 'function') angelWeek();
   if (typeof stockWeek === 'function') stockWeek();
   if (typeof trophyWeek === 'function') trophyWeek();
   if (typeof msgWeek === 'function') msgWeek();
@@ -992,6 +993,7 @@ function resolvePick(it, k) {
   const M = S.me, me = ME(), c = (it.choices || []).find(x => x.k === k);
   if (!c || c.dis) return false;
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
+  if (typeof angelPick === 'function' && angelPick(it, k)) return true;
   if (socialPick(it, k)) return true;
   if (dealPick(it, k)) return true;
   if (bidPick(it, k)) return true;
