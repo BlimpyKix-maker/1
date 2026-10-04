@@ -71,13 +71,23 @@ function sectorDriver(s, w) {
   if (s.drv === 'film') return y < 2005 ? 1 + (y - 1950) * .02 : Math.max(.15, 2.1 - (y - 2005) * .25);
   if (s.drv === 'kids') return 1 + Math.max(0, y - 1975) * .03;
   if (s.drv === 'prod') return Math.max(.4, S.active.length / 60);
+  // the wider business: broadcast peaks then fades, cable rises and falls, streaming arrives, games crash and boom
+  if (s.drv === 'broadcast') return y < 1990 ? .6 + (y - 1950) * .02 : Math.max(.45, 1.4 - (y - 1990) * .025);
+  if (s.drv === 'cable') return y < 1980 ? .4 : y < 2010 ? .4 + (y - 1980) * .045 : Math.max(.6, 1.75 - (y - 2010) * .06);
+  if (s.drv === 'stream') return y < 2007 ? .3 : .3 + Math.min(2.6, (y - 2007) * .2);
+  if (s.drv === 'games') return y < 1983 ? .4 + Math.max(0, y - 1975) * .1 : y < 1986 ? .4 : .5 + (y - 1986) * .05;
+  if (s.drv === 'parks') return Math.max(.3, (1 + (y - 1955) * .02) * Math.pow(Math.max(.2, fieldIndex('box', w) || 1), .3));
+  if (s.drv === 'live') return Math.max(.3, (1 + (y - 1960) * .015) * Math.pow(Math.max(.3, fieldIndex('music', w) || .5), .4));
+  if (s.drv === 'stage') return 1 + (y - 1950) * .008;
+  if (s.drv === 'books') return y < 2008 ? 1 + (y - 1950) * .01 : Math.max(.7, 1.58 - (y - 2008) * .02);
+  if (s.drv === 'creator') return y < 2008 ? .2 : .2 + Math.min(2.5, (y - 2008) * .18);
   return 1 + (y - 1950) * .01;
 }
 let SBC = { S: null, m: new Map() };
 function sectorBar(s, w) {
   if (SBC.S !== S) SBC = { S, m: new Map() };
   const key = s.k + ':' + w; if (SBC.m.has(key)) return SBC.m.get(key);
-  let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand(s.k.length * 7919 + s.tk.charCodeAt(0) * 13 + (w - i) * 31)() - .5) * .05 * (1 - i / 7);
+  let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand((s.seed || s.k.length * 7919 + s.tk.charCodeAt(0) * 13) + (w - i) * 31)() - .5) * (s.vol || .05) * (1 - i / 7);
   const mf = s.beta >= 0 ? Math.pow(macroAt(w), s.beta) : Math.pow(macroAt(w), s.beta);
   const c = Math.max(.05, s.p0 * Math.pow(sectorDriver(s, w), .6) * mf * (1 + wander) * (typeof cpi === 'function' ? cpi(yearOf(w)) / cpi(2000) : 1));
   const r = hashRand(s.tk.charCodeAt(1) * 977 + w)(), o = c / (1 + (r - .5) * .04);
@@ -179,6 +189,7 @@ function bankHTML() {
 function bankClick(t) {
   const d = t.dataset;
   if (d.bank) { const [k, v] = d.bank.split(':'), amt = +((document.getElementById('bk-amt') || {}).value || 0); UI.bkamt = amt || ''; doAct(k === 'cd' ? { t: 'bank', k: 'cd', term: +v, amt } : k === 'breakcd' ? { t: 'bank', k, i: +v } : { t: 'bank', k, amt }); render(true); return true; }
+  if (d.secf) { UI.secf = d.secf; render(true); return true; }
   if (d.sec) { const [k, s] = d.sec.split(':'), q = Math.max(1, Math.round(+(document.getElementById('mkt-q') || {}).value || (UI.mkt && UI.mkt.q) || 10)); doAct({ t: 'strade', s, n: k === 'buy' ? q : -q }); render(true); return true; }
   return false;
 }

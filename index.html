@@ -183,7 +183,7 @@ table.grid.sortable thead th { cursor: pointer; user-select: none; } table.grid.
 .credits .more summary { cursor: pointer; margin-top: 8px; font-weight: 600; }
 .crewlist { columns: 2 220px; }
 .bio { font-size: 16px; line-height: 1.5; max-width: 820px; }
-.geahead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.geahead { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; } .reelseg { display: flex; flex-wrap: wrap; gap: 4px; }
 .gealogo { font: 800 26px/1 var(--f-display); letter-spacing: .08em; padding: 4px 10px; border: 3px solid var(--accent); color: var(--accent); border-radius: 4px; }
 #trailer { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.92); display: grid; place-items: center; padding: 12px; }
 #trailer .tv { width: min(960px, 100%); display: grid; gap: 8px; }
@@ -11955,7 +11955,7 @@ function roomRugSVG(r) {
 }
 function roomGlowSVG(RS, life, night) {
   const g = RS.glow || 0, op = night ? 1 : .75;
-  if (g === 1) return `<path d="M0 10 Q50 26 100 10 Q150 26 200 10 Q250 26 300 10 Q350 26 400 10" stroke="#333" stroke-width=".8" fill="none"/>${Array.from({ length: 20 }, (_, i) => { const x = 10 + i * 20, y = 10 + 10 * Math.sin((x % 100) / 100 * Math.PI) + 4; return `<circle cx="${x}" cy="${y}" r="3" fill="${['#FFE27A', '#E85D9A', '#7FD1B9', '#F28C28', '#B39DDB'][i % 5]}" opacity="${op}"/>${night ? `<circle cx="${x}" cy="${y}" r="8" fill="#FFE9A8" opacity=".18"/>` : ''}`; }).join('')}`;
+  if (g === 1) return `<path d="M0 10 Q50 26 100 10 Q150 26 200 10 Q250 26 300 10 Q350 26 400 10" stroke="#333" stroke-width=".8" fill="none"/>${Array.from({ length: 20 }, (_, i) => { const x = 10 + i * 20, t = (x % 100) / 100, y = 10 + 32 * t * (1 - t) + 3; return `<circle cx="${x}" cy="${y}" r="3" fill="${['#FFE27A', '#E85D9A', '#7FD1B9', '#F28C28', '#B39DDB'][i % 5]}" opacity="${op}"/>${night ? `<circle cx="${x}" cy="${y}" r="8" fill="#FFE9A8" opacity=".18"/>` : ''}`; }).join('')}`;
   if (g === 2) { const n = (ME().name || 'X')[0].toUpperCase(); return `<text x="70" y="70" font-size="34" font-family="'Brush Script MT', cursive" fill="#FF4FA3" opacity="${op}" stroke="#FFB3DA" stroke-width=".8">${esc(n)}♥</text>${night ? '<ellipse cx="88" cy="58" rx="40" ry="24" fill="#FF4FA3" opacity=".15"/>' : ''}`; }
   if (g === 3) return `<g transform="translate(${life === 'couch' ? 300 : 250} 160)"><rect x="-4" y="-6" width="8" height="6" fill="#555"/><path d="M-6 -6 L-3 -36 L3 -36 L6 -6 Z" fill="#E0457B" opacity=".85"/><circle cx="0" cy="-16" r="3" fill="#FFB347"/><circle cx="-1" cy="-27" r="2.2" fill="#FFB347"/><rect x="-4" y="-40" width="8" height="4" fill="#555"/>${night ? '<circle cx="0" cy="-20" r="22" fill="#E0457B" opacity=".18"/>' : ''}</g>`;
   if (g === 4) return `<line x1="200" y1="0" x2="200" y2="20" stroke="#888" stroke-width="1"/><circle cx="200" cy="30" r="10" fill="#C9CCD6"/>${Array.from({ length: 12 }, (_, i) => `<rect x="${193 + (i % 4) * 4}" y="${23 + Math.floor(i / 4) * 5}" width="3" height="3" fill="#FFFFFF" opacity=".7"/>`).join('')}${night ? Array.from({ length: 18 }, (_, i) => `<circle cx="${(i * 71) % 400}" cy="${(i * 37) % 170}" r="2" fill="${['#FFE27A', '#7FD1B9', '#E85D9A'][i % 3]}" opacity=".7"/>`).join('') : ''}`;
@@ -16873,6 +16873,7 @@ function computerClick(t) {
   if (typeof boardroomClick === 'function' && boardroomClick(t)) return true;
   if (typeof shortsClick === 'function' && shortsClick(t)) return true;
   if (typeof tvClick === 'function' && tvClick(t)) return true;
+  if (typeof reelClick === 'function' && reelClick(t)) return true;
   if (typeof gamesClick === 'function' && gamesClick(t)) return true;
   if (typeof osClick === 'function' && osClick(t)) return true;
   if (typeof osFoldClick === 'function' && osFoldClick(t)) return true;
@@ -16927,7 +16928,7 @@ function computerClick(t) {
   }
   return false;
 }
-const COMPUTER_CLICKS = '[data-tvt],[data-tvpg],[data-tvpitch],[data-sht],[data-board],[data-brt],[data-cht],[data-chpg],[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
+const COMPUTER_CLICKS = '[data-rlpg],[data-secf],[data-tvt],[data-tvpg],[data-tvpitch],[data-sht],[data-board],[data-brt],[data-cht],[data-chpg],[data-relic],[data-hl],[data-yq],[data-unsub],[data-storef],[data-osback],[data-osclose],[data-bank],[data-sec],[data-rt],[data-libf],[data-numdec],[data-npt],[data-paper],[data-osf],[data-osthread],[data-bz],[data-bzt],[data-mailsend],[data-wmax],[data-mkt],[data-wall],[data-smf],[data-mkf],[data-geatab],[data-mailf],[data-mailo],[data-mailact],[data-trade],[data-seq],[data-seqplay],[data-podcut],[data-clip],[data-thumb],[data-session],[data-buyapp],[data-mem],[data-cue],[data-scr]';
 // </computer2>
 // <mentor>
 // ---------------- Mentors, your films' stories, the year in entertainment ----------------
@@ -18855,7 +18856,7 @@ const pctS = v => `<span class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '▲' : '
 function marketApp() {
   const M = S.me, T = UI.mkt = UI.mkt || { tab: 'market', sel: null, q: 10 }, L = listedCos();
   const idx = indexVal(S.week), idxW = indexVal(S.week - 1) || idx || 1, idxY = indexVal(S.week - 52) || idx || 1;
-  const tabs = [['market', 'Studios'], ['sectors', 'Sectors & funds'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
+  const tabs = [['market', '🎬 Film studios'], ['sectors', '🎵📺 Music, TV & more'], ['watch', '★ Watchlist'], ['port', 'Portfolio'], ['tips', '💬 Tips'], ['econ', 'Economy'], ['news', 'Market news']];
   const head = `<div class="bourse-h"><span class="bourse-logo">BOURSE</span><span><b>BOX-50</b> ${idx.toFixed(1)} ${pctS((idx / idxW - 1) * 100)} <span class="muted small">1Y ${pctS((idx / Math.max(1e-6, idxY) - 1) * 100)}</span></span>${[['box', '🎬 Box office'], ['music', '🎵 Music'], ['video', '📺 Online video'], ['pod', '🎙️ Podcasts']].map(([k, l]) => { const a = fieldIndex(k, S.week - 4), b = fieldIndex(k, S.week); return a > 0 ? `<span class="small">${l} ${pctS((b / a - 1) * 100)}</span>` : ''; }).join('')}</div>
    <div class="bf-row">${tabs.map(([k, l]) => `<button class="pill${T.tab === k ? ' on' : ''}" data-mkt="tab:${k}">${l}</button>`).join('')}</div>`;
   if (T.sel !== null && S.companies[T.sel]) return head + stockPage(S.companies[T.sel]);
@@ -18869,6 +18870,7 @@ function marketApp() {
     const pos = Object.entries(M.port || {}).filter(([, n]) => n > 0).map(([id, n]) => [S.companies[+id], n]), val = pos.reduce((t, [c, n]) => t + mktPrice(c) * n, 0), cost = pos.reduce((t, [c]) => t + ((M.portCost || {})[c.id] || 0), 0);
     return head + `<div class="kpis mini"><div><span>Value</span><b>${fmtCash(Math.round(val))}</b></div><div><span>Cost</span><b>${fmtCash(Math.round(cost))}</b></div><div><span>Gain</span><b class="${val >= cost ? 'good' : 'bad'}">${fmtCash(Math.round(val - cost))}</b></div><div><span>Cash</span><b>${fmtCash(M.cash)}</b></div></div>
      <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th class="n">Shares</th><th class="n">Avg cost</th><th class="n">Price</th><th class="n">Value</th><th class="n">Gain</th></tr></thead><tbody>${pos.map(([c, n]) => { const cst = (M.portCost || {})[c.id] || 0, v = mktPrice(c) * n; return `<tr><td><a href="#" class="lk" data-mkt="sel:${c.id}">${esc(tickerOf(c))}</a></td><td class="n">${n}</td><td class="n">$${(cst / n).toFixed(2)}</td><td class="n">$${mktPrice(c).toFixed(2)}</td><td class="n">${fmtCash(Math.round(v))}</td><td class="n ${v >= cst ? 'good' : 'bad'}">${fmtCash(Math.round(v - cst))} (${((v / Math.max(1, cst) - 1) * 100).toFixed(1)}%)</td></tr>`; }).join('') || '<tr><td colspan="6" class="empty">No positions. Pick a stock in the Market tab.</td></tr>'}</tbody></table></div>
+     ${typeof sectorsHeldHTML === 'function' ? sectorsHeldHTML() : ''}
      ${(M.trades || []).length ? `<h4>Recent trades</h4><ul class="plain small">${M.trades.slice(-8).reverse().map(t => `<li>${fmtDate(t.w, true)} · ${t.n > 0 ? 'Bought' : 'Sold'} ${Math.abs(t.n)} ${esc(tickerOf(S.companies[t.co]))} at $${t.px}</li>`).join('')}</ul>` : ''}`;
   }
   if (T.tab === 'news') { const N = []; for (const c of L) for (let w = S.week; w > S.week - 8; w--) for (const e of mktBar(c, w).ev) N.push([w, c, e]); N.sort((a, b) => b[0] - a[0] || Math.abs(b[2][1]) - Math.abs(a[2][1])); return head + `<ul class="plain small mnews">${N.slice(0, 30).map(([w, c, e]) => `<li><span class="muted">${fmtDate(w, true)}</span> <a href="#" class="lk" data-mkt="sel:${c.id}"><b>${esc(tickerOf(c))}</b></a> ${pctS(e[1] * 100)} · ${esc(e[0])}</li>`).join('') || '<li class="muted">A quiet market.</li>'}</ul>`; }
@@ -22466,13 +22468,23 @@ function sectorDriver(s, w) {
   if (s.drv === 'film') return y < 2005 ? 1 + (y - 1950) * .02 : Math.max(.15, 2.1 - (y - 2005) * .25);
   if (s.drv === 'kids') return 1 + Math.max(0, y - 1975) * .03;
   if (s.drv === 'prod') return Math.max(.4, S.active.length / 60);
+  // the wider business: broadcast peaks then fades, cable rises and falls, streaming arrives, games crash and boom
+  if (s.drv === 'broadcast') return y < 1990 ? .6 + (y - 1950) * .02 : Math.max(.45, 1.4 - (y - 1990) * .025);
+  if (s.drv === 'cable') return y < 1980 ? .4 : y < 2010 ? .4 + (y - 1980) * .045 : Math.max(.6, 1.75 - (y - 2010) * .06);
+  if (s.drv === 'stream') return y < 2007 ? .3 : .3 + Math.min(2.6, (y - 2007) * .2);
+  if (s.drv === 'games') return y < 1983 ? .4 + Math.max(0, y - 1975) * .1 : y < 1986 ? .4 : .5 + (y - 1986) * .05;
+  if (s.drv === 'parks') return Math.max(.3, (1 + (y - 1955) * .02) * Math.pow(Math.max(.2, fieldIndex('box', w) || 1), .3));
+  if (s.drv === 'live') return Math.max(.3, (1 + (y - 1960) * .015) * Math.pow(Math.max(.3, fieldIndex('music', w) || .5), .4));
+  if (s.drv === 'stage') return 1 + (y - 1950) * .008;
+  if (s.drv === 'books') return y < 2008 ? 1 + (y - 1950) * .01 : Math.max(.7, 1.58 - (y - 2008) * .02);
+  if (s.drv === 'creator') return y < 2008 ? .2 : .2 + Math.min(2.5, (y - 2008) * .18);
   return 1 + (y - 1950) * .01;
 }
 let SBC = { S: null, m: new Map() };
 function sectorBar(s, w) {
   if (SBC.S !== S) SBC = { S, m: new Map() };
   const key = s.k + ':' + w; if (SBC.m.has(key)) return SBC.m.get(key);
-  let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand(s.k.length * 7919 + s.tk.charCodeAt(0) * 13 + (w - i) * 31)() - .5) * .05 * (1 - i / 7);
+  let wander = 0; for (let i = 0; i < 6; i++) wander += (hashRand((s.seed || s.k.length * 7919 + s.tk.charCodeAt(0) * 13) + (w - i) * 31)() - .5) * (s.vol || .05) * (1 - i / 7);
   const mf = s.beta >= 0 ? Math.pow(macroAt(w), s.beta) : Math.pow(macroAt(w), s.beta);
   const c = Math.max(.05, s.p0 * Math.pow(sectorDriver(s, w), .6) * mf * (1 + wander) * (typeof cpi === 'function' ? cpi(yearOf(w)) / cpi(2000) : 1));
   const r = hashRand(s.tk.charCodeAt(1) * 977 + w)(), o = c / (1 + (r - .5) * .04);
@@ -22574,6 +22586,7 @@ function bankHTML() {
 function bankClick(t) {
   const d = t.dataset;
   if (d.bank) { const [k, v] = d.bank.split(':'), amt = +((document.getElementById('bk-amt') || {}).value || 0); UI.bkamt = amt || ''; doAct(k === 'cd' ? { t: 'bank', k: 'cd', term: +v, amt } : k === 'breakcd' ? { t: 'bank', k, i: +v } : { t: 'bank', k, amt }); render(true); return true; }
+  if (d.secf) { UI.secf = d.secf; render(true); return true; }
   if (d.sec) { const [k, s] = d.sec.split(':'), q = Math.max(1, Math.round(+(document.getElementById('mkt-q') || {}).value || (UI.mkt && UI.mkt.q) || 10)); doAct({ t: 'strade', s, n: k === 'buy' ? q : -q }); render(true); return true; }
   return false;
 }
@@ -28430,6 +28443,132 @@ function chatterMailWeek(r) {
   mail(T[0], fill(T[1]), fill(T[2]), fill(T[3]));
 }
 // </chatter>
+// <market2>
+// ---------------- The rest of entertainment on the Bourse ----------------
+// The studios aren't the only listed companies. Record labels, publishers, podcast and creator networks, theatre
+// owners, television networks and streamers, cinema chains, game makers, theme parks, live-events promoters and
+// ticketing all trade here too, each following the part of the business that feeds it. They join the sector list
+// (finance.js) so buying, selling, the portfolio and dividends all work the same way.
+const ENT_EXTRA = [
+  // [key, name, sector, founded, driver, beta, start price, about]
+  ['xgame1', 'Ninetendo Interactive', 'Video games', 1977, 'games', 1.3, 24, 'Plumbers, princesses and handheld consoles. Lives on its own characters, and on hits.'],
+  ['xgame2', 'Electronic Farts', 'Video games', 1982, 'games', 1.5, 14, 'Sports games every autumn, a new one every year, the same one every year.'],
+  ['xgame3', 'Pixel Pirate Studios', 'Video games', 1996, 'games', 1.9, 6, 'An independent studio with one enormous hit and a lot of opinions about its sequel.'],
+  ['xpark1', 'Magic Kingdomland Resorts', 'Theme parks', 1955, 'parks', 1.2, 30, 'Castles, queues and the rides that films become. Gets a lift from every animated hit.'],
+  ['xpark2', 'Universe Parks & Studios', 'Theme parks', 1964, 'parks', 1.3, 18, 'Studio tours that grew into rollercoasters built on blockbusters.'],
+  ['xlive1', 'LiveNation Nights', 'Live events', 1996, 'live', 1.4, 16, 'Promotes the tours, owns the venues, sells the beer.'],
+  ['xtix', 'TicketMaestro', 'Ticketing', 1976, 'live', 1.1, 20, 'Every ticket to everything, plus a fee nobody can explain.'],
+  ['xradio', 'Clearwave Radio', 'Radio', 1972, 'broadcast', 1.0, 9, 'Hundreds of local stations playing the same forty songs.'],
+  ['xmerch', 'Collectorium', 'Collectibles', 1998, 'kids', 1.3, 8, 'Big-headed vinyl figures of every character in every franchise.'],
+  ['xbook', 'Pengwyn House Books', 'Publishing', 1935, 'books', .8, 18, 'Publishes the novels Hollywood buys. Steady, literate and quietly profitable.']
+];
+const MCO_DRIVER = { label: 'music', publisher: 'music', podcast: 'pod', creator: 'creator', theatre: 'stage' };
+const MCO_SECTOR = { label: 'Music', publisher: 'Music publishing', podcast: 'Audio', creator: 'Online video', theatre: 'Theatre' };
+const NET_DRIVER = { broadcast: 'broadcast', cable: 'cable', premium: 'cable', streaming: 'stream', kids: 'cable' };
+const NET_SECTOR = { broadcast: 'TV networks', cable: 'Cable TV', premium: 'Premium TV', streaming: 'Streaming', kids: 'Kids\' TV' };
+(function listEntertainment() {
+  const used = new Set(SECTORS.map(s => s[1]));
+  const tick = (name, n = 4) => { const w = name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(x => x && !/^(the|and|of|&|records?|music|group)$/i.test(x)); let t = (w.length >= 2 ? w.map(x => x[0]).join('') : (w[0] || name).slice(0, n)).toUpperCase().slice(0, n); let i = 0; while (used.has(t)) t = (t.slice(0, 3) + 'ABCDEFGHJKLMNPQRSTUVWXYZ'[i++ % 24]); used.add(t); return t; };
+  const seed = s => [...s].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7) % 100000;
+  const add = (k, tk, name, sec, from, drv, beta, p0, d, extra) => { SECTORS.push([k, tk, name, sec, from, drv, beta, p0, d]); SECTOR[k] = Object.assign({ k, tk, name, sec, from, drv, beta, p0, d, seed: seed(k), vol: .06 + (beta - 1) * .03 }, extra || {}); };
+  for (const [k, name, sec, from, drv, beta, p0, d] of ENT_EXTRA) add(k, tick(name), name, sec, from, drv, beta, p0, d);
+  if (typeof MEDIA_COS !== 'undefined') MEDIA_COS.forEach((c, i) => { if (c.tier > 2) return; add('mco' + i, tick(c.n), c.n, MCO_SECTOR[c.type] || 'Media', c.f, MCO_DRIVER[c.type] || 'music', c.tier === 1 ? 1 : 1.4, (c.type === 'podcast' ? .12 : 1) * (c.tier === 1 ? 22 + (i % 5) * 4 : 8 + (i % 4) * 2), c.d, { mco: i }); });
+  if (typeof TV_NETS !== 'undefined') for (const n of Object.values(TV_NETS)) { if (n.kind === 'public') continue; add('net_' + n.k, tick(n.name), n.name, NET_SECTOR[n.kind] || 'Television', n.founded, NET_DRIVER[n.kind] || 'broadcast', n.kind === 'streaming' ? 1.7 : 1.1, n.kind === 'streaming' ? 26 : 15, n.d, { net: n.k }); }
+})();
+// The sectors page, grouped: every part of the business on one screen, each name a link to its page where there is one.
+function sectorsHTML() {
+  const L = SECTORS.map(s => SECTOR[s[0]]).filter(sectorOpen), M = S.me, groups = {};
+  for (const s of L) (groups[s.sec] = groups[s.sec] || []).push(s);
+  const nameOf = s => s.mco !== undefined && typeof mcoLink === 'function' ? mcoLink(s.mco) : s.net && typeof netLink === 'function' ? netLink(s.net) : esc(s.name);
+  const row = s => `<tr><td><b>${esc(s.tk)}</b></td><td class="small">${nameOf(s)}<br><span class="muted">${esc(s.d.length > 70 ? s.d.slice(0, 68) + '…' : s.d)}</span></td><td>${sSpark(s)}</td><td class="n" data-v="${sectorPrice(s)}">$${sectorPrice(s).toFixed(2)}</td><td class="n" data-v="${sChg(s, 1)}">${pctS(sChg(s, 1))}</td><td class="n" data-v="${sChg(s, 52)}">${pctS(sChg(s, 52))}</td><td class="n">${(M.sport || {})[s.k] || 0}</td><td><button class="btn-s" data-sec="buy:${s.k}">Buy</button> ${(M.sport || {})[s.k] ? `<button class="btn-s ghost" data-sec="sell:${s.k}">Sell</button>` : ''}</td></tr>`;
+  const F = UI.secf || 'all', secs = Object.keys(groups).sort((a, b) => groups[b].length - groups[a].length);
+  const shown = F === 'all' ? secs : secs.filter(x => x === F);
+  const ix = sec => { const G = groups[sec], a = G.reduce((t, s) => t + sectorPrice(s, S.week - 52), 0), b = G.reduce((t, s) => t + sectorPrice(s), 0); return pctS((b / Math.max(1e-6, a) - 1) * 100); };
+  return `<p class="small muted">${L.length} listed companies beyond the studios: music, television and streaming, theatre, audio, online video, games, theme parks, live events and the businesses that live off the films. Each follows its own part of the business, plus the economy.</p>
+   <div class="bf-row"><button class="pill${F === 'all' ? ' on' : ''}" data-secf="all">Everything</button>${secs.map(x => `<button class="pill${F === x ? ' on' : ''}" data-secf="${esc(x)}">${esc(x)} <span class="muted small">${groups[x].length}</span></button>`).join('')}</div>
+   ${shown.map(sec => `<h4>${esc(sec)} <span class="muted small">1Y ${ix(sec)}</span></h4><div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th>6M</th><th class="n">Price</th><th class="n">1W</th><th class="n">1Y</th><th class="n">Own</th><th></th></tr></thead><tbody>${groups[sec].map(row).join('')}</tbody></table></div>`).join('')}
+   <h4>Funds</h4><div class="tw"><table class="grid small"><tbody><tr><td><b>BOX50</b></td><td class="small">BOX-50 index fund<br><span class="muted">Every listed studio at once</span></td><td></td><td class="n">$${fundPrice().toFixed(2)}</td><td class="n">${pctS((fundPrice() / fundPrice(S.week - 1) - 1) * 100)}</td><td class="n">${pctS((fundPrice() / fundPrice(S.week - 52) - 1) * 100)}</td><td class="n">${(M.sport || {}).box50 || 0}</td><td><button class="btn-s" data-sec="buy:box50">Buy</button> ${(M.sport || {}).box50 ? '<button class="btn-s ghost" data-sec="sell:box50">Sell</button>' : ''}</td></tr></tbody></table></div>`;
+}
+
+// the portfolio's other half: everything you hold beyond the studios
+function sectorsHeldHTML() {
+  const M = S.me, pos = Object.entries(M.sport || {}).filter(([, n]) => n > 0);
+  if (!pos.length) return '';
+  const px = k => k === 'box50' ? fundPrice() : sectorPrice(SECTOR[k]);
+  const val = pos.reduce((t, [k, n]) => t + px(k) * n, 0), cost = pos.reduce((t, [k]) => t + ((M.scost || {})[k] || 0), 0);
+  return `<h4>Music, TV and more <span class="muted small">worth ${fmtCash(Math.round(val))}, ${val >= cost ? '<span class="good">up</span>' : '<span class="bad">down</span>'} ${fmtCash(Math.round(Math.abs(val - cost)))}</span></h4><div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th>Company</th><th class="n">Shares</th><th class="n">Price</th><th class="n">Value</th><th class="n">Gain</th></tr></thead><tbody>${pos.map(([k, n]) => { const s = SECTOR[k], v = px(k) * n, c = (M.scost || {})[k] || 0; return `<tr><td><b>${esc(s ? s.tk : 'BOX50')}</b></td><td class="small">${esc(s ? s.name : 'BOX-50 index fund')}</td><td class="n">${n}</td><td class="n">$${px(k).toFixed(2)}</td><td class="n">${fmtCash(Math.round(v))}</td><td class="n ${v >= c ? 'good' : 'bad'}">${fmtCash(Math.round(v - c))}</td></tr>`; }).join('')}</tbody></table></div>`;
+}
+// </market2>
+// <reel2>
+// ---------------- REEL, all of it ----------------
+// The encyclopedia covered films and people. Everything else made in this world is a credit too: every television
+// series, every record, every online channel's videos, every podcast season and every play, each with a page and
+// the people who made it. Your own releases sit among them. Each category has a search, a city filter, sorting and
+// pages of fifty.
+const REEL_CATS = [['films', 'Films'], ['people', 'People'], ['reel_tv', 'Television'], ['reel_music', 'Music'], ['reel_creator', 'Online video'], ['reel_podcast', 'Podcasts'], ['reel_stage', 'Theatre']];
+function geaHead(cur) { return `<div class="geahead"><span class="gealogo">REEL</span><span class="muted">The Recorded Entertainment Encyclopedia &amp; Library</span><span class="reelseg">${REEL_CATS.map(([k, l]) => `<button class="pill${cur === k ? ' on' : ''}" data-gea="${k}">${l}</button>`).join('')}</span></div>`; }
+const REEL_FIELD = { reel_music: 'music', reel_creator: 'creator', reel_podcast: 'podcast', reel_stage: 'stage' };
+const REEL_UNIT = { music: 'Release', creator: 'Video', podcast: 'Season', stage: 'Production' };
+let REEL_CACHE = { k: null, rows: null };
+// every work by every figure in every city, newest first; cached for the week
+function reelRows(field) {
+  const key = field + ':' + S.week + ':' + ((S.me && S.me.works) || []).length;
+  if (REEL_CACHE.k === key) return REEL_CACHE.rows;
+  const rows = [], seen = new Set();
+  for (const h of HUB_IDS) for (const x0 of mediaFigures(h)) {
+    if (x0.field !== field || x0.from > S.year || seen.has(x0.name)) continue; seen.add(x0.name);
+    const x = Object.assign({ hub: h }, x0); x.fid = figId(x) || (h + '~' + mediaFigures(h).indexOf(x0));
+    for (const s of figReleases(x)) rows.push({ t: songTitle(x, s), w: s * 6, x, slot: s, hub: x.hub });
+  }
+  for (const w of ((S.me && S.me.works) || []).filter(w => (WORK_TYPES[w.type] || {}).field === field)) rows.push({ t: w.title, w: w.rel, mine: w, hub: S.me.hub });
+  rows.sort((a, b) => b.w - a.w);
+  REEL_CACHE = { k: key, rows };
+  return rows;
+}
+function reelView(tab) {
+  if (tab === 'reel_tv') return () => reelTvHTML();
+  if (REEL_FIELD[tab]) return () => reelFieldHTML(tab);
+  return null;
+}
+function reelFilters(n, hubs) {
+  const pg = UI.rlpg || 0, last = Math.max(0, Math.ceil(n / 50) - 1);
+  return `<div class="filt"><label class="filt-q"><span>Search</span><input id="rlq" type="search" placeholder="A title or a name…" value="${esc(UI.rlq || '')}"></label><label><span>City</span>${sel('rl-hub', [['ALL', 'Everywhere'], ...hubs.map(h => [h, hubName(h)])], UI.rlhub || 'ALL')}</label><label><span>Sort</span>${sel('rl-sort', [['new', 'Newest'], ['old', 'Oldest'], ['title', 'Title A–Z']], UI.rlsort || 'new')}</label></div>
+   <p class="muted small">${n.toLocaleString()} found. <button class="btn-s ghost" data-rlpg="${pg - 1}" ${pg ? '' : 'disabled'}>‹</button> page ${Math.min(pg, last) + 1} of ${last + 1} <button class="btn-s ghost" data-rlpg="${pg + 1}" ${pg < last ? '' : 'disabled'}>›</button></p>`;
+}
+function reelSlice(L) {
+  const s = UI.rlsort || 'new';
+  if (s === 'old') L = L.slice().reverse(); else if (s === 'title') L = L.slice().sort((a, b) => a.t.localeCompare(b.t));
+  const pg = Math.min(UI.rlpg || 0, Math.max(0, Math.ceil(L.length / 50) - 1));
+  return L.slice(pg * 50, pg * 50 + 50);
+}
+function reelFieldHTML(tab) {
+  const f = REEL_FIELD[tab], q = (UI.rlq || '').toLowerCase().trim(), hub = UI.rlhub || 'ALL', all = reelRows(f);
+  const L = all.filter(r => (hub === 'ALL' || r.hub === hub) && (!q || r.t.toLowerCase().includes(q) || (r.x ? r.x.name : ME().name).toLowerCase().includes(q)));
+  const hubs = [...new Set(all.map(r => r.hub))];
+  const figs = new Set(all.filter(r => r.x).map(r => r.x.name)).size;
+  const rowH = r => r.mine ? `<tr class="mine"><td><a href="#" class="lk" data-go="work:${r.mine.id}">${esc(r.t)}</a></td><td>${pl(ME().id)} <span class="chip good">You</span></td><td class="small">${esc(hubName(r.hub))}</td><td class="small">${fmtDate(r.w, true)}</td><td class="n">${Math.round(r.mine.units || 0).toLocaleString()}</td></tr>`
+    : `<tr><td>${songLink(r.x, r.slot)}</td><td>${figLink(r.x)}${r.x.legend ? ' <span class="aw">✦</span>' : ''}</td><td class="small">${esc(hubName(r.hub))}</td><td class="small">${fmtDate(r.w, true)}</td><td class="n muted small">${esc(KIND_LABEL[r.x.kind] || '')}</td></tr>`;
+  return geaHead(tab) + `<div class="head"><h2>${esc(FIELD_LABEL[f])}</h2><p class="lede">${all.length.toLocaleString()} ${esc(REEL_UNIT[f].toLowerCase())}s by ${figs} ${f === 'podcast' ? 'shows' : f === 'stage' ? 'writers and composers' : 'artists'} in ${hubs.length} cities. Every title has a page, with its credits.</p></div>
+   <section class="panel">${reelFilters(L.length, hubs)}<div class="tw"><table class="grid small"><thead><tr><th>${REEL_UNIT[f]}</th><th>By</th><th>City</th><th>Released</th><th class="n">${f === 'music' ? '' : ''}</th></tr></thead><tbody>${reelSlice(L).map(rowH).join('') || '<tr><td colspan="5" class="empty">Nothing matches.</td></tr>'}</tbody></table></div></section>`;
+}
+function reelTvHTML() {
+  const q = (UI.rlq || '').toLowerCase().trim(), hub = UI.rlhub || 'ALL', all = tvAllPlus().map(s => ({ s, t: s.title, w: s.y * 52, hub: TV_NETS[s.net].hub }));
+  all.sort((a, b) => b.s.y - a.s.y || (b.s.legend ? 1 : 0) - (a.s.legend ? 1 : 0));
+  const L = all.filter(r => (hub === 'ALL' || r.hub === hub) && (!q || r.t.toLowerCase().includes(q) || TV_NETS[r.s.net].name.toLowerCase().includes(q)));
+  const hubs = [...new Set(all.map(r => r.hub))];
+  const row = ({ s }) => { const P1 = tvPeople(s); return `<tr${s.mine ? ' class="mine"' : ''}><td>${tvLink(s)}${s.legend ? ' <span class="aw">✦</span>' : ''}${s.mine ? ' <span class="chip good">Yours</span>' : ''}</td><td class="small">${netLink(s.net)}</td><td class="small">${s.y}–${tvStatus(s) === 'on air' ? 'now' : Math.min(S.year, s.y + s.seasons - 1)}</td><td class="n">${s.seasons}</td><td class="small">${esc(TV_GENRES[s.g].label)}</td><td class="small">${s.legend ? esc(s.creatorName || '') : P1.creator !== null && P1.creator !== undefined ? pl(P1.creator) : ''}</td></tr>`; };
+  return geaHead('reel_tv') + `<div class="head"><h2>Television</h2><p class="lede">${all.length.toLocaleString()} series on ${Object.keys(TV_NETS).length} channels since the 1940s, from the landmarks to the ones cancelled after six episodes. Each has its seasons, ratings and cast.</p></div>
+   <section class="panel">${reelFilters(L.length, hubs)}<div class="tw"><table class="grid small"><thead><tr><th>Series</th><th>Channel</th><th>Years</th><th class="n">Seasons</th><th>Kind</th><th>Created by</th></tr></thead><tbody>${reelSlice(L).map(row).join('') || '<tr><td colspan="6" class="empty">Nothing matches.</td></tr>'}</tbody></table></div></section>`;
+}
+function reelClick(t) { if (t.dataset.rlpg !== undefined) { UI.rlpg = Math.max(0, +t.dataset.rlpg); render(true); return true; } return false; }
+function reelChange(e) { const id = e.target.id; if (id === 'rl-hub' || id === 'rl-sort') { UI[id === 'rl-hub' ? 'rlhub' : 'rlsort'] = e.target.value; UI.rlpg = 0; render(true); return true; } return false; }
+// your own works as credits on your profile: everything you've released, beside the films
+function worksCreditsHTML(p) {
+  if (!p.player || !S.me) return '';
+  const W = (S.me.works || []).slice().sort((a, b) => b.rel - a.rel); if (!W.length) return '';
+  return `<h3>Music, video, podcasts and stage</h3><div class="tw"><table class="grid"><thead><tr><th>Released</th><th>Title</th><th>Kind</th><th class="n">Audience</th><th class="n">Quality</th></tr></thead><tbody>${W.map(w => `<tr><td>${fmtDate(w.rel, true)}</td><td><a href="#" class="lk" data-go="work:${w.id}">${esc(w.title)}</a></td><td>${esc((WORK_TYPES[w.type] || {}).label || w.type)}</td><td class="n">${Math.round(w.units || 0).toLocaleString()}</td><td class="n">${Math.round(w.q)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+// </reel2>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -28712,6 +28851,7 @@ function viewPerson(id) {
   ${credits.map(f => `<tr><td>${yearOf(f.rel)}</td><td>${fl(f.id)}${f.awards.length ? ' <span class="aw">✦</span>' : ''}${histChip(f)}</td><td>${esc(roleIn(f))}</td><td>${esc(f.genre)}</td><td class="n">${reviewCell(f.reviews)}</td><td class="n">${fmtM(f.total)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">No released credits yet.</td></tr>'}
   </tbody></table></div>
 ${typeof tvCreditsHTML === 'function' ? tvCreditsHTML(p) : ''}
+${typeof worksCreditsHTML === 'function' ? worksCreditsHTML(p) : ''}
 ${typeof pressAboutHTML === 'function' ? pressAboutHTML(p.id) : ''}
 ${p.player ? '' : cinePanel(true, null, personTriviaHTML(p) + (p.real ? `<p class="muted">A figure from film history: films marked as history below happened; the rest of this filmography is this world's own.</p>` : ''))}`;
 }
@@ -29626,7 +29766,7 @@ function render(keepScroll) {
   const cur = UI.stack[UI.stack.length - 1];
   let html;
   if (cur) html = `<button class="back" data-back="1">← Back</button>` + (cur.kind === 'award' && typeof viewAwardBody === 'function' ? viewAwardBody(cur.id) : cur.kind === 'post' && typeof viewPost === 'function' ? viewPost(cur.id) : cur.kind === 'person' ? viewPerson(cur.id) : cur.kind === 'film' ? viewFilm(cur.id) : cur.kind === 'article' ? articleHTML(cur.id) : (typeof viewExtra === 'function' && viewExtra(cur)) || viewCompany(cur.id));
-  else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts, tv: typeof viewTv === 'function' ? viewTv : viewWorld }[UI.tab];
+  else html = { you: viewYou, news: viewNews, bo: viewBoxOffice, films: viewFilms, people: viewPeople, cos: viewCompanies, careers: viewCareers, world: viewWorld, awards: viewAwards, charts: viewCharts, tv: typeof viewTv === 'function' ? viewTv : viewWorld }[UI.tab] || (typeof reelView === 'function' ? reelView(UI.tab) : null) || viewWorld;
   if (typeof html === 'function') { try { html = html(); } catch (e) { console.error(e); html = `<section class="panel"><h3>Something broke drawing this page</h3><p>Your game is safe and saved. Try another tab, or reload. Details for the bug report: <code>${esc(e.message)}</code></p></section>`; } }
   $('#main').innerHTML = html;
   if (typeof applyTableSorts === 'function') applyTableSorts();
@@ -29748,6 +29888,7 @@ document.addEventListener('change', e => {
   if (typeof boardChange === 'function' && boardChange(e)) return;
   if (typeof shortsChange === 'function' && shortsChange(e)) return;
   if (typeof tvChange === 'function' && tvChange(e)) return;
+  if (typeof reelChange === 'function' && reelChange(e)) return;
   const id = e.target.id, v = e.target.value;
   const map = { 'bo-m': [UI.bo, 'm'], 'bo-y': [UI.bo, 'y'], 'aw-y': [UI.aw = UI.aw || {}, 'y'], 'f-hub': [UI.films, 'hub'], 'f-genre': [UI.films, 'genre'], 'f-year': [UI.films, 'year'], 'p-role': [UI.people, 'role'], 'j-sec': [UI.jobs, 'sec'], 'p-hub': [UI.people, 'hub'], 'p-status': [UI.people, 'status'], 'c-hub': [UI.cos, 'hub'], 'c-status': [UI.cos, 'status'], 'f-src': [UI.films, 'src'], 'p-src': [UI.people, 'src'] };
   if (map[id]) { map[id][0][map[id][1]] = v; render(true); return; }
@@ -29761,7 +29902,7 @@ let qTimer;
 document.addEventListener('input', e => {
   const id = e.target.id;
   if (id === 'pc-notes') { try { localStorage.setItem(notesKey(), e.target.value); } catch (err) { /* no storage */ } return; }
-  if (id === 'cq' || id === 'gq' || id === 'npq' || id === 'stq' || id === 'abq' || id === 'rtq' || id === 'chq' || id === 'brq' || id === 'tvq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
+  if (id === 'cq' || id === 'gq' || id === 'npq' || id === 'stq' || id === 'abq' || id === 'rtq' || id === 'chq' || id === 'brq' || id === 'tvq' || id === 'rlq') { UI[id] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'aw-q') { (UI.aw = UI.aw || {}).q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#aw-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'bo-q') { UI.bo.q = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#bo-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
   if (id === 'fav-q') { UI.favq = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#fav-q'); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 150); return; }
