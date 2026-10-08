@@ -179,16 +179,25 @@ function opinion(id) { return tie(ME(), P(id)); }
 // first contacts, your energy on New Year's Day, and maybe a first lead.
 function makeParty(c) {
   const hub = c.hub, role = c.role;
-  const g = {};
-  g.host = bestIn(hub, ['producer'], q => -Math.abs(q.standing - 55) + q.fame * .1 + prnd() * 10);
-  g.star = bestIn(hub, ['actor'], q => q.fame + prnd() * 8);
-  g.dir = bestIn(hub, ['director'], q => -Math.abs(q.standing - 62) + prnd() * 15);
-  g.vet = bestIn(hub, ['dp', 'editor', 'designer', 'sound'], q => q.standing * .6 + (S.year - q.born > 45 ? 15 : 0) + prnd() * 15);
-  g.writer = bestIn(hub, ['writer'], q => -Math.abs(q.standing - 45) + prnd() * 20);
-  g.coord = bestIn(hub, ['casting', 'producer', 'ad'], q => -Math.abs(q.standing - 35) + prnd() * 20);
-  g.reporter = bestIn(hub, ['writer'], q => -Math.abs(q.standing - 25) + prnd() * 20);
-  g.peer = youngNPC(hub, role);
-  for (const k in g) if (!g[k]) g[k] = makePerson(hub, { host: 'producer', star: 'actor', dir: 'director', vet: 'dp', writer: 'writer', coord: 'casting', reporter: 'writer', peer: role }[k], {});
+  const g = {}, used = new Set(), toks = q => q.name.split(' ').filter(w => w.length > 2);
+  // a room full of different people: nobody shares a first name or a surname with another guest
+  const pickG = (roles, score) => { const q = bestIn(hub, roles, x => score(x) - (toks(x).some(t => used.has(t)) ? 1e5 : 0) - (Object.values(g).includes(x) ? 1e6 : 0)); if (q) toks(q).forEach(t => used.add(t)); return q; };
+  g.host = pickG(['producer'], q => -Math.abs(q.standing - 55) + q.fame * .1 + prnd() * 30);
+  g.star = pickG(['actor'], q => q.fame * .6 + prnd() * 45);
+  g.dir = pickG(['director'], q => -Math.abs(q.standing - 55) * .6 + prnd() * 45);
+  g.vet = pickG(['dp', 'editor', 'designer', 'sound', 'costume', 'makeup', 'vfx', 'stunts'], q => q.standing * .6 + (S.year - q.born > 45 ? 15 : 0) + prnd() * 30);
+  g.writer = pickG(['writer'], q => -Math.abs(q.standing - 45) + prnd() * 35);
+  g.coord = pickG(['casting', 'producer', 'ad'], q => -Math.abs(q.standing - 35) + prnd() * 35);
+  g.reporter = pickG(['writer'], q => -Math.abs(q.standing - 25) + prnd() * 35);
+  g.agent = pickG(['producer', 'casting'], q => -Math.abs(q.standing - 50) + prnd() * 35);
+  g.exec = pickG(['producer'], q => q.standing * .5 + q.fame * .2 + prnd() * 35);
+  g.muso = pickG(['composer', 'sound'], q => -Math.abs(q.standing - 40) + prnd() * 35);
+  g.creator = pickG(['actor', 'editor', 'director'], q => -Math.abs(S.year - q.born - 26) * 2 + prnd() * 35);
+  g.critic = pickG(['writer'], q => -Math.abs(q.standing - 40) + prnd() * 35);
+  g.money = pickG(['producer'], q => q.fame * .3 + prnd() * 40);
+  const youngD = rl => { const L = S.pool[hub][rl].map(P).filter(q => !q.retired && !q.dead && S.year - q.born < 31 && q.credits.length < 3 && !S.me.known[q.id] && !toks(q).some(t => used.has(t)) && !Object.values(g).includes(q)); const q = L.length ? ppick(L) : youngNPC(hub, rl); toks(q).forEach(t => used.add(t)); return q; };
+  { const L = S.pool[hub][role].map(P).filter(q => !q.retired && !q.dead && S.year - q.born < 31 && q.credits.length < 3 && !S.me.known[q.id] && !toks(q).some(t => used.has(t))); g.peer = L.length ? ppick(L) : youngNPC(hub, role); toks(g.peer).forEach(t => used.add(t)); }
+  for (const k in g) if (!g[k]) g[k] = makePerson(hub, { host: 'producer', star: 'actor', dir: 'director', vet: 'dp', writer: 'writer', coord: 'casting', reporter: 'writer', agent: 'producer', exec: 'producer', muso: 'composer', creator: 'actor', critic: 'writer', money: 'producer', peer: role }[k], {});
   const ids = {};
   for (const k in g) ids[k] = g[k].id;
   if (c.quirk === 'parent') {
@@ -196,16 +205,20 @@ function makeParty(c) {
     if (par) { ids.parent = par.id; meet(par.id, 'Your parent', 60); trust(par.id, 40);
       const me = S.people[S.me.id] || null; if (me && typeof familyOfP === 'function') { familyOfP(me).parent = par.id; const kids = familyOfP(par).kids = familyOfP(par).kids || []; for (const sib of kids) { meet(sib, 'Your sibling', 30); (familyOfP(me).sibs = familyOfP(me).sibs || []).push(sib); } kids.push(me.id); } }
   }
-  if (c.quirk === 'rival') { const r = youngNPC(hub, role); ids.rival = r.id; meet(r.id, 'Rival', -35); }
+  if (c.quirk === 'rival') { const r = youngD(role); ids.rival = r.id; meet(r.id, 'Rival', -35); }
   const arr = c.arrival;
-  if (arr === 'plusone') { const f = youngNPC(hub, pick2(['ad', 'dp', 'designer', 'editor'])); ids.friend = f.id; meet(f.id, 'Old friend', 35); trust(f.id, 30); }
-  if (arr === 'date') { const f = youngNPC(hub, 'actor'); ids.friend = f.id; meet(f.id, 'Your date', 30); trust(f.id, 20); }
-  if (arr === 'band') { const f = youngNPC(hub, 'composer'); ids.friend = f.id; meet(f.id, 'Your bandmate', 30); trust(f.id, 30); }
+  if (arr === 'plusone') { const f = youngD(pick2(['ad', 'dp', 'designer', 'editor'])); ids.friend = f.id; meet(f.id, 'Old friend', 35); trust(f.id, 30); }
+  if (arr === 'date') { const f = youngD('actor'); ids.friend = f.id; meet(f.id, 'Your date', 30); trust(f.id, 20); }
+  if (arr === 'band') { const f = youngD('composer'); ids.friend = f.id; meet(f.id, 'Your bandmate', 30); trust(f.id, 30); }
   if (arr === 'family') meet(ids.host, 'Family friend', 18);
   if (arr === 'bar' || arr === 'catering') meet(ids.host, 'Hired you for the night', 4);
   if (arr === 'photographer') meet(ids.host, 'Hired you for the night', 6);
   if (arr === 'viral') { meet(ids.star, 'Saw your video', 10); }
-  return { step: 'arrive', ids, drinks: 0, leads: [], flags: {}, seen: [], visits: 0 };
+  // tonight's party: eight of the rooms are open, each with tonight's version of its scene, and something happens at midnight
+  const all = Object.keys(STATIONS), open = [];
+  while (open.length < 8 && all.length) open.push(all.splice(Math.floor(prnd() * all.length), 1)[0]);
+  const vars = {}; for (const k of open) vars[k] = Math.floor(prnd() * 3);
+  return { step: 'arrive', ids, drinks: 0, leads: [], flags: {}, seen: [], visits: 0, open, vars, wild: Math.floor(prnd() * MIDNIGHT_WILD.length) };
 }
 function pick2(a) { return a[Math.floor(prnd() * a.length)]; }
 function partyGuest(k) { return P(S.me.party.ids[k]); }
@@ -301,8 +314,9 @@ function partyScene(pt) {
     { k: 'mingle', label: 'Grab a drink and work the room', check: ['cha', 11] },
     { k: 'watch', label: 'Find a wall and watch who talks to whom', check: ['tas', 10] },
     { k: 'work', label: S.me.arrival === 'photographer' || S.me.arrival === 'bar' || S.me.arrival === 'catering' || S.me.arrival === 'band' ? 'Do your job, and do it well' : `Introduce yourself to ${n('host')}`, check: ['cha', S.me.arrival === 'family' ? 7 : S.me.arrival === 'crash' ? 14 : 11] }] };
-  if (pt.step === 'rooms') return { title: `Where next? (${PARTY_VISITS - pt.visits} before midnight)`, text: 'The party spreads through the house. You have time for a few more conversations before the countdown.', rooms: Object.keys(STATIONS).filter(k => !pt.seen.includes(k)).map(k => ({ k, where: STATIONS[k].where, who: n({ star: 'star', host: 'host', kitchen: 'vet', pool: 'writer', garden: 'coord', dance: 'peer', hall: 'reporter', balcony: 'dir' }[k]) })) };
-  if (pt.step in STATIONS) { const st = STATIONS[pt.step], sc = st.scene(n); return { title: st.where, text: sc.text, sys: st.sys, opts: sc.opts }; }
+  if (pt.step === 'rooms') return { title: `Where next? (${PARTY_VISITS - pt.visits} before midnight)`, text: 'The party spreads through the house. You have time for a few more conversations before the countdown.', rooms: (pt.open || Object.keys(STATIONS)).filter(k => !pt.seen.includes(k)).map(k => ({ k, where: STATIONS[k].where, who: n(STATIONS[k].who || 'host') })) };
+  if (pt.step in STATIONS) { const st = STATIONS[pt.step], sc = st.scene(n, (pt.vars || {})[pt.step] || 0); return { title: st.where, text: sc.text, sys: st.sys, opts: sc.opts }; }
+  if (pt.step === 'midnight' && pt.wild !== undefined && MIDNIGHT_WILD[pt.wild]) { const W = MIDNIGHT_WILD[pt.wild]; return { title: `Midnight: ${W.t}`, text: W.x(n), sys: 'Energy and stress: energy limits what you can do each week; stress builds up and has to be let out. Tonight\'s choices set both for New Year\'s Day.', opts: W.o(n) }; }
   if (pt.step === 'midnight') return { title: 'Midnight', text: 'The countdown. Champagne everywhere, strangers hugging, someone crying by the pool. The night could go on until dawn.', sys: 'Energy and stress: energy limits what you can do each week; stress builds from overwork, rejection and conflict, and too much of it burns you out.', opts: [
     { k: 'party', label: 'Keep going. It’s New Year’s Eve' }, { k: 'one', label: 'One glass for the toast, then water' }, { k: 'home', label: 'Slip out after the toast and get some sleep' }] };
   if (pt.step === 'late') {
@@ -365,7 +379,7 @@ function checkLabel(stat, dc) { const c = checkInfo(stat, dc); return `DC ${c.DC
 function partyPick(k) {
   const pt = S.me.party, M = S.me, g = pt.ids, n = x => (g[x] !== undefined ? P(g[x]).name : 'someone');
   if (pt.step === 'rooms') {
-    if (!STATIONS[k] || pt.seen.includes(k)) return false;
+    if (!STATIONS[k] || pt.seen.includes(k) || (pt.open && !pt.open.includes(k))) return false;
     pt.seen.push(k); pt.step = k; return true;
   }
   const scene = partyScene(pt), opt = scene && scene.opts.find(o => o.k === k);
@@ -379,12 +393,16 @@ function partyPick(k) {
     else if (ok) { meet(g.host, 'Met at the party', 10); M.cash += ['photographer', 'bar', 'catering', 'band'].includes(M.arrival) ? usd(60) : 0; t = ['photographer', 'bar', 'catering', 'band'].includes(M.arrival) ? `You're good at this, and ${n('host')} notices. A tip, and a nod that means more.` : `${n('host')} likes you. "Make yourself at home."`; }
     else if (M.arrival === 'crash') { meet(g.host, 'Met at the party', -6); pt.flags.thrown = 1; t = `${n('host')} asks who invited you. Security walks you to the garden, where the party turns out to be better anyway.`; }
     else { meet(g.host, 'Met at the party', -2); t = `${n('host')} is polite and busy. You lose them to someone more important.`; }
+    t += partyTier(k, ok, scene);
     pt.step = 'rooms';
     if (pt.flags.thrown) { pt.seen.push('host', 'star', 'kitchen', 'hall'); }
   } else if (pt.step in STATIONS) {
     t = STATIONS[pt.step].res(k, ok, g, n);
     pt.visits++;
-    pt.step = pt.visits >= PARTY_VISITS || Object.keys(STATIONS).every(s => pt.seen.includes(s)) ? 'midnight' : 'rooms';
+    t += partyTier(k, ok, scene);
+    pt.step = pt.visits >= PARTY_VISITS || (pt.open || Object.keys(STATIONS)).every(s => pt.seen.includes(s)) ? 'midnight' : 'rooms';
+  } else if (pt.step === 'midnight' && pt.wild !== undefined && MIDNIGHT_WILD[pt.wild]) {
+    const W = MIDNIGHT_WILD[pt.wild]; t = W.res(k, ok, g, n, pt) + partyTier(k, ok, scene); pt.step = 'late';
   } else if (pt.step === 'midnight') {
     if (k === 'party') { pt.drinks += 3; for (const x of ['host', 'peer', 'dir']) if (M.known[g[x]]) addTie(me0(), P(g[x]), 5); t = 'You dance, you hug strangers, you tell someone your dreams by the pool. It is a wonderful night.'; }
     else if (k === 'one') { pt.drinks++; t = 'One glass, then water. You keep your head.'; }
@@ -395,6 +413,7 @@ function partyPick(k) {
     else if (k === 'settle') t = ok ? (meet(g.dir, 'Met at the party', 10), meet(g.peer, 'Met at the party', 4), lead(g.dir), `${n('dir')} goes quiet, then grins. "Good answer. What do you do?"`) : (meet(g.dir, 'Met at the party', -4), meet(g.peer, 'Met at the party', 6), `${n('dir')} thinks your pick is sentimental and says so. ${n('peer')} sticks up for you.`);
     else if (k === 'joke') t = ok ? (meet(g.dir, 'Met at the party', 6), meet(g.peer, 'Met at the party', 8), 'Both of them are laughing. The argument is forgotten; you are not.') : (meet(g.peer, 'Met at the party', 2), 'The joke lands badly.');
     else { meet(g.dir, 'Met at the party', 5); meet(g.peer, 'Met at the party', -8); t = `${n('dir')} approves. ${n('peer')} remembers.`; }
+    t += partyTier(k, ok, scene);
     pt.step = 'done';
   }
   if (opt.check && S.me.lastRoll.crit > 0) { me0().standing += .5; t += ' A moment people will retell.'; }
