@@ -27,9 +27,35 @@ function autoClick(t) {
   return false;
 }
 // how relevant a posting is to who you are: your craft first, then your industry
+// 1: your own line of work (the department you came for); .8: next to it (shares your skills: a production lawyer,
+// for a producer); .6: your industry; .3: anything else.
+const CORE_WORK = {
+  actor: [/^Cast$/, /\b(actor|actress|performer|day player|stand-in|ensemble|guest star|recurring role|series regular|understudy|voice actor|narrator|lead role|supporting role)\b/i, /adapter|mixer|engineer|subtitle|localization|assistant to|casting/i],
+  director: [/^(Directed|Second Unit Director|Commercial Production)/, /\b(director|directing)\b/i, /(art|casting|musical|photography|development|training|creative|marketing|technical|managing|programme|program|festival|executive|sales|music) director|director (of|,)/i],
+  writer: [/^(Writing|Film and TV Development)/, /\b(writer|screenwriter|showrunner|story editor|playwright|story by|script editor|staff writer|lyricist)\b/i, /sign writer/i],
+  producer: [/^(Produced|Production Management|Film and TV Production|Executive Positions)/, /\b(producer|showrunner)\b/i, /record producer|podcast producer/i],
+  dp: [/^(Cinematography|Camera and Electrical)/, /\b(camera|cinematograph\w*|gaffer|grip|lighting|focus puller|steadicam|best boy|director of photography)\b/i],
+  editor: [/^(Film Editing|Editorial|Color Department)/, /\b(editor|editing|colou?rist|assembly)\b/i, /story editor|managing editor|magazine/i],
+  designer: [/^(Production Design|Art Department|Art Direction|Set Decoration|Property)/, /\b(production designer|art director|set designer|set decorator|scenic|props?|art department)\b/i],
+  costume: [/^(Costume|Makeup)/, /\b(costume|wardrobe|make-?up|hair and)\b/i],
+  composer: [/^Music/, /\b(composer|composition|music\w*|song\w*|orchestrat\w*|record producer|mix engineer|session musician|arranger)\b/i, /compositor|compositing/i],
+  casting: [/^Casting/, /\bcasting\b/i]
+};
+const JOB_ROW = {};
+function jobRow(p) { const id = p.jid || (tmplOf(p) || {}).jid; if (!id) return null; if (JOB_ROW[id] === undefined) JOB_ROW[id] = (JOBS.jobs || []).find(j => j.id === id) || null; return JOB_ROW[id]; }
+function coreWork(p) {
+  const C = CORE_WORK[ME().role]; if (!C) return false;
+  const J = jobRow(p), title = String(p.t || '');
+  if (C[2] && C[2].test(title)) return false;
+  // your own industry only (television counts as film): a theatre lighting designer is next to a DP's work, not it
+  const ind = typeof postIndustry === 'function' ? postIndustry(p) : 'film', field = S.me.field || 'film';
+  if (ind !== field && !(field === 'film' && ind === 'tv') && !(field === 'tv' && ind === 'film')) return false;
+  return !!((J && J.dept && C[0].test(J.dept)) || C[1].test(title));
+}
 function jobRelevance(p) {
   const me = ME(), t = tmplOf(p) || {}, subs = Object.keys(CRAFTS[MAIN[me.role] || 'wri'].subs), ind = typeof postIndustry === 'function' ? postIndustry(p) : 'film', field = S.me.field || 'film';
-  if ((t.subs || []).some(s => subs.includes(s))) return 1;
+  if (coreWork(p)) return 1;
+  if ((t.subs || []).some(s => subs.includes(s))) return .8;
   return ind === field ? .6 : .3;
 }
 // Your own craft comes first. Jobs near it (same industry) fill in; anything going (ushering, bar work) only when the
@@ -38,8 +64,9 @@ function craftJob(p) { return jobRelevance(p) >= 1; }
 function rankedFits(n) {
   const M = S.me, short = runwayWeeks() < 12, floor = careerLevel() >= 3 && !short ? tierLevel() - 1 : 0;   // established: nothing far below your level
   const L = M.board.filter(p => !blockedFrom(tmplOf(p)) && (p.tier || 1) >= floor).map(p => [p, hireOdds(p), jobRelevance(p)]);
-  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= 1 || x[2] >= .6 || short);
-  const ranked = want.sort((a, b) => b[1] * (b[2] >= 1 ? 1.8 : b[2] >= .6 ? 1 : .55) - a[1] * (a[2] >= 1 ? 1.8 : a[2] >= .6 ? 1 : .55));
+  const wt = x => x[2] >= 1 ? 1.8 : x[2] >= .8 ? 1.2 : x[2] >= .6 ? 1 : .55;
+  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
+  const ranked = want.sort((a, b) => b[1] * wt(b) - a[1] * wt(a));
   // never leave a broke player with nothing to apply for
   const out = ranked.length || M.jobs.length ? ranked : L.sort((a, b) => b[1] - a[1]);
   return out.slice(0, n).map(x => [x[0], x[1]]);

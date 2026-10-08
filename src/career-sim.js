@@ -418,6 +418,7 @@ function endParty() {
 
 // ---------------- Inbox ----------------
 function inbox(kind, title, text, extra = {}) {
+  if (extra.choices && extra.choices.length && extra.choices.every(c => c.dis)) extra = Object.assign({}, extra, { choices: extra.choices.concat([{ k: '_none', label: 'Let it go' }]) });
   // plural names take a bare apostrophe ("Tester Pictures' next film"); a situation's "ask your boss" and "pull in a
   // colleague" options only appear when there is a boss or a colleague to ask
   const fixPoss = t => typeof t === 'string' ? t.replace(/([^s'])s's\b/g, "$1s'") : t;
@@ -455,7 +456,7 @@ const POSTS = [
   { k: 'castasst', jid: 'c_casting_depa_casting_assistant', t: 'Casting Assistant', tier: 1, st: [1], head: 'cst', subs: ['eye', 'talent'], days: 5, rate: 190, cr: 1 },
   { k: 'crafty', jid: 'c_craft_servic_craft_service_assistant', t: 'Craft Service Assistant', tier: 1, st: [2], head: 'prod', subs: ['talent'], days: 5, rate: 170 },
   { k: 'utilsnd', jid: 'c_sound_depart_utility_sound_technician_', t: 'Utility Sound Technician', tier: 1, st: [2], head: 'snd', subs: ['sdes', 'sound'], days: 5, rate: 260, req: 5, cr: 1 },
-  { k: 'dayplayer', jid: 'c_cast_day_player_under_five', t: 'Day Player (a few lines)', tier: 2, st: [2], head: 'dir', subs: ['pres', 'range', 'comic'], days: 2, rate: 1100, weeks: 1, req: 7, cr: 1, actor: 1 },
+  { k: 'dayplayer', jid: 'c_cast_day_player_under_five', t: 'Day Player (a few lines)', tier: 1, st: [2], head: 'dir', subs: ['pres', 'range', 'comic'], days: 2, rate: 1100, weeks: 1, req: 7, cr: 1, actor: 1 },
   { k: 'ac2', jid: 'c_camera_and_e_second_assistant_camera_2', t: 'Second Assistant Camera', tier: 2, st: [2], head: 'dp', subs: ['move', 'speed', 'comp'], days: 5, rate: 550, req: 8, cr: 1 },
   { k: 'grip', jid: 'c_camera_and_e_grip', t: 'Grip', tier: 2, st: [2], head: 'dp', subs: ['light', 'move'], days: 5, rate: 500, req: 6, cr: 1 },
   { k: 'ae2', jid: 'c_editorial_de_second_assistant_editor', t: 'Second Assistant Editor', tier: 2, st: [3], head: 'ed', subs: ['cont', 'rhythm', 'shape'], days: 5, rate: 350, req: 7, cr: 1 },
@@ -524,10 +525,10 @@ function refreshBoard() {
   const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(30, heard + 8) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && !t.tv && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
-  M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
+  M.board = agentBoard(films).concat(film, depthBoard(films), typeof castingBoard === 'function' ? castingBoard(films) : [], awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   // you hear about work near your level, a tier or two either way; referrals and your agent's pitches still reach you
-  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
+  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || (p.casting && p.tier <= L + 2) || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
   if (typeof nameBoard === 'function') nameBoard();
   if (typeof leadBoard === 'function') { const L = leadBoard(), ids = new Set(L.map(p => p.id)); M.board = L.concat(M.board.filter(p => !ids.has(p.id))); }
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
@@ -1000,6 +1001,7 @@ function sceneResolve(it, k) {
 function resolvePick(it, k) {
   const M = S.me, me = ME(), c = (it.choices || []).find(x => x.k === k);
   if (!c || c.dis) return false;
+  if (k === '_none' && it.kind !== 'arc') { it.done = true; it.result = { t: 'You let it go.' }; return true; }
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (typeof angelPick === 'function' && angelPick(it, k)) return true;
   if (typeof fitPick === 'function' && fitPick(it, k)) return true;

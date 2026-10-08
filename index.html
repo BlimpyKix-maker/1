@@ -10636,6 +10636,8 @@ function monthly() {
     if (p.retired || p.dead) continue;
     p.fame *= .993; p.intl *= .995; p.heat *= .9;
     p.standing += (30 - p.standing) * .005;
+    // the very top has to be held: past 90 it eases back each month, and past 80 it fades while you're out of work
+    if (p.player && S.me) { if (p.standing > 90) p.standing -= (p.standing - 90) * .15; if (p.standing > 80 && !S.me.jobs.length) p.standing -= (p.standing - 80) * .05; }
     if (p.id % 3 !== slot) continue;   // skills update each quarter, a third of people each month
     if (p.player) { if (y - p.born > 64) { for (const k in p.sk) p.sk[k] = Math.max(1, p.sk[k] - .06 * rnd()); recalc(p); } continue; }   // the player grows only through what they do
     const a = y - p.born;
@@ -11181,6 +11183,7 @@ function endParty() {
 
 // ---------------- Inbox ----------------
 function inbox(kind, title, text, extra = {}) {
+  if (extra.choices && extra.choices.length && extra.choices.every(c => c.dis)) extra = Object.assign({}, extra, { choices: extra.choices.concat([{ k: '_none', label: 'Let it go' }]) });
   // plural names take a bare apostrophe ("Tester Pictures' next film"); a situation's "ask your boss" and "pull in a
   // colleague" options only appear when there is a boss or a colleague to ask
   const fixPoss = t => typeof t === 'string' ? t.replace(/([^s'])s's\b/g, "$1s'") : t;
@@ -11218,7 +11221,7 @@ const POSTS = [
   { k: 'castasst', jid: 'c_casting_depa_casting_assistant', t: 'Casting Assistant', tier: 1, st: [1], head: 'cst', subs: ['eye', 'talent'], days: 5, rate: 190, cr: 1 },
   { k: 'crafty', jid: 'c_craft_servic_craft_service_assistant', t: 'Craft Service Assistant', tier: 1, st: [2], head: 'prod', subs: ['talent'], days: 5, rate: 170 },
   { k: 'utilsnd', jid: 'c_sound_depart_utility_sound_technician_', t: 'Utility Sound Technician', tier: 1, st: [2], head: 'snd', subs: ['sdes', 'sound'], days: 5, rate: 260, req: 5, cr: 1 },
-  { k: 'dayplayer', jid: 'c_cast_day_player_under_five', t: 'Day Player (a few lines)', tier: 2, st: [2], head: 'dir', subs: ['pres', 'range', 'comic'], days: 2, rate: 1100, weeks: 1, req: 7, cr: 1, actor: 1 },
+  { k: 'dayplayer', jid: 'c_cast_day_player_under_five', t: 'Day Player (a few lines)', tier: 1, st: [2], head: 'dir', subs: ['pres', 'range', 'comic'], days: 2, rate: 1100, weeks: 1, req: 7, cr: 1, actor: 1 },
   { k: 'ac2', jid: 'c_camera_and_e_second_assistant_camera_2', t: 'Second Assistant Camera', tier: 2, st: [2], head: 'dp', subs: ['move', 'speed', 'comp'], days: 5, rate: 550, req: 8, cr: 1 },
   { k: 'grip', jid: 'c_camera_and_e_grip', t: 'Grip', tier: 2, st: [2], head: 'dp', subs: ['light', 'move'], days: 5, rate: 500, req: 6, cr: 1 },
   { k: 'ae2', jid: 'c_editorial_de_second_assistant_editor', t: 'Second Assistant Editor', tier: 2, st: [3], head: 'ed', subs: ['cont', 'rhythm', 'shape'], days: 5, rate: 350, req: 7, cr: 1 },
@@ -11287,10 +11290,10 @@ function refreshBoard() {
   const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(30, heard + 8) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
   const m = dateOf(S.week).getUTCMonth();
   const odd = ODD_JOBS.filter(t => !t.cat && !t.tv && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
-  M.board = agentBoard(films).concat(film, depthBoard(films), awayBoard(), odd);
+  M.board = agentBoard(films).concat(film, depthBoard(films), typeof castingBoard === 'function' ? castingBoard(films) : [], awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   // you hear about work near your level, a tier or two either way; referrals and your agent's pitches still reach you
-  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
+  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || (p.casting && p.tier <= L + 2) || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
   if (typeof nameBoard === 'function') nameBoard();
   if (typeof leadBoard === 'function') { const L = leadBoard(), ids = new Set(L.map(p => p.id)); M.board = L.concat(M.board.filter(p => !ids.has(p.id))); }
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
@@ -11763,6 +11766,7 @@ function sceneResolve(it, k) {
 function resolvePick(it, k) {
   const M = S.me, me = ME(), c = (it.choices || []).find(x => x.k === k);
   if (!c || c.dis) return false;
+  if (k === '_none' && it.kind !== 'arc') { it.done = true; it.result = { t: 'You let it go.' }; return true; }
   if (it.kind === 'interview') { resolveInterview(it, k); return true; }
   if (typeof angelPick === 'function' && angelPick(it, k)) return true;
   if (typeof fitPick === 'function' && fitPick(it, k)) return true;
@@ -12486,6 +12490,23 @@ function blockedFrom(t) {
   return null;
 }
 // The extra listings each week: catalogue crew jobs on films around you, industry jobs at companies, internships.
+// Casting calls: speaking parts are cast, not crewed, so they don't come up with the other jobs. Actors hear about a
+// few parts a week on films in town that are still casting, at their level: day players first, then supporting, then leads.
+function castingBoard(films) {
+  const M = S.me, me = ME(); if (MAIN[me.role] !== 'act') return [];
+  const L = tierLevel(), busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
+  // open calls reach one tier higher than ordinary postings: anyone can audition
+  const parts = POSTS.filter(t => t.tier <= L + 2 && t.tier >= Math.max(1, L - 2) && (t.actor || (() => { const J = typeof jobRow === 'function' ? jobRow(t) : null; return J && /^Cast$/.test(J.dept) || /voice actor|dubbing actor|narrator/i.test(t.t); })()) && !/Background|Extra|Stand-In|Double|Stunt|Assistant/i.test(t.t));
+  if (!parts.length) return [];
+  const out = [], n = 2 + Math.floor(L / 2) + (M.agent ? 1 : 0);
+  for (const f of films.slice().sort(() => prnd() - .5)) {
+    if (out.length >= n) break;
+    if (f.stage > 2 || prnd() > .45) continue;
+    const opts = parts.filter(t => t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
+    if (opts.length) { const p = makePost(ppick(opts), f); p.casting = 1; out.push(p); }
+  }
+  return out;
+}
 function depthBoard(films) {
   const M = S.me, L = tierLevel(), out = [];
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
@@ -19323,9 +19344,35 @@ function autoClick(t) {
   return false;
 }
 // how relevant a posting is to who you are: your craft first, then your industry
+// 1: your own line of work (the department you came for); .8: next to it (shares your skills: a production lawyer,
+// for a producer); .6: your industry; .3: anything else.
+const CORE_WORK = {
+  actor: [/^Cast$/, /\b(actor|actress|performer|day player|stand-in|ensemble|guest star|recurring role|series regular|understudy|voice actor|narrator|lead role|supporting role)\b/i, /adapter|mixer|engineer|subtitle|localization|assistant to|casting/i],
+  director: [/^(Directed|Second Unit Director|Commercial Production)/, /\b(director|directing)\b/i, /(art|casting|musical|photography|development|training|creative|marketing|technical|managing|programme|program|festival|executive|sales|music) director|director (of|,)/i],
+  writer: [/^(Writing|Film and TV Development)/, /\b(writer|screenwriter|showrunner|story editor|playwright|story by|script editor|staff writer|lyricist)\b/i, /sign writer/i],
+  producer: [/^(Produced|Production Management|Film and TV Production|Executive Positions)/, /\b(producer|showrunner)\b/i, /record producer|podcast producer/i],
+  dp: [/^(Cinematography|Camera and Electrical)/, /\b(camera|cinematograph\w*|gaffer|grip|lighting|focus puller|steadicam|best boy|director of photography)\b/i],
+  editor: [/^(Film Editing|Editorial|Color Department)/, /\b(editor|editing|colou?rist|assembly)\b/i, /story editor|managing editor|magazine/i],
+  designer: [/^(Production Design|Art Department|Art Direction|Set Decoration|Property)/, /\b(production designer|art director|set designer|set decorator|scenic|props?|art department)\b/i],
+  costume: [/^(Costume|Makeup)/, /\b(costume|wardrobe|make-?up|hair and)\b/i],
+  composer: [/^Music/, /\b(composer|composition|music\w*|song\w*|orchestrat\w*|record producer|mix engineer|session musician|arranger)\b/i, /compositor|compositing/i],
+  casting: [/^Casting/, /\bcasting\b/i]
+};
+const JOB_ROW = {};
+function jobRow(p) { const id = p.jid || (tmplOf(p) || {}).jid; if (!id) return null; if (JOB_ROW[id] === undefined) JOB_ROW[id] = (JOBS.jobs || []).find(j => j.id === id) || null; return JOB_ROW[id]; }
+function coreWork(p) {
+  const C = CORE_WORK[ME().role]; if (!C) return false;
+  const J = jobRow(p), title = String(p.t || '');
+  if (C[2] && C[2].test(title)) return false;
+  // your own industry only (television counts as film): a theatre lighting designer is next to a DP's work, not it
+  const ind = typeof postIndustry === 'function' ? postIndustry(p) : 'film', field = S.me.field || 'film';
+  if (ind !== field && !(field === 'film' && ind === 'tv') && !(field === 'tv' && ind === 'film')) return false;
+  return !!((J && J.dept && C[0].test(J.dept)) || C[1].test(title));
+}
 function jobRelevance(p) {
   const me = ME(), t = tmplOf(p) || {}, subs = Object.keys(CRAFTS[MAIN[me.role] || 'wri'].subs), ind = typeof postIndustry === 'function' ? postIndustry(p) : 'film', field = S.me.field || 'film';
-  if ((t.subs || []).some(s => subs.includes(s))) return 1;
+  if (coreWork(p)) return 1;
+  if ((t.subs || []).some(s => subs.includes(s))) return .8;
   return ind === field ? .6 : .3;
 }
 // Your own craft comes first. Jobs near it (same industry) fill in; anything going (ushering, bar work) only when the
@@ -19334,8 +19381,9 @@ function craftJob(p) { return jobRelevance(p) >= 1; }
 function rankedFits(n) {
   const M = S.me, short = runwayWeeks() < 12, floor = careerLevel() >= 3 && !short ? tierLevel() - 1 : 0;   // established: nothing far below your level
   const L = M.board.filter(p => !blockedFrom(tmplOf(p)) && (p.tier || 1) >= floor).map(p => [p, hireOdds(p), jobRelevance(p)]);
-  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= 1 || x[2] >= .6 || short);
-  const ranked = want.sort((a, b) => b[1] * (b[2] >= 1 ? 1.8 : b[2] >= .6 ? 1 : .55) - a[1] * (a[2] >= 1 ? 1.8 : a[2] >= .6 ? 1 : .55));
+  const wt = x => x[2] >= 1 ? 1.8 : x[2] >= .8 ? 1.2 : x[2] >= .6 ? 1 : .55;
+  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
+  const ranked = want.sort((a, b) => b[1] * wt(b) - a[1] * wt(a));
   // never leave a broke player with nothing to apply for
   const out = ranked.length || M.jobs.length ? ranked : L.sort((a, b) => b[1] - a[1]);
   return out.slice(0, n).map(x => [x[0], x[1]]);
@@ -24469,7 +24517,7 @@ const AGENDA = [
   { k: 'tentpole', when: c => c.cash > 0, t: c => `A tentpole for ${c.name}`, d: (c, x) => `Management wants to greenlight ${x.title}, a ${fmtM(x.amt)} franchise picture. The projections are ${x.q > .55 ? 'bullish' : 'optimistic in the way projections always are'}.`, pass: (c, x) => { c.cash -= x.amt * .3; (S.me.bets = S.me.bets || []).push({ co: c.id, w: S.week + 26, amt: x.amt, q: x.q, title: x.title, vote: x.vote }); } },
   { k: 'ceopay', t: c => `${ceoName(c)}'s new package`, d: (c, x) => `The compensation committee proposes ${fmtM(x.amt)} a year for ${ceoName(c)}, mostly in shares. The proxy advisers call it "generous".`, pass: (c, x) => { c.cash -= x.amt * .2; }, fail: (c, x) => { if (x.q < .4) news('Company', `${ceoName(c)} leaves ${c.name} after the board rejects a pay package.`, { company: c.id }); } },
   { k: 'fireceo', when: c => c.cash < 0 || (typeof chg === 'function' && chg(c, 52) < -15), t: c => `Replace ${ceoName(c)}?`, d: (c, x) => `A bad year: the shares are ${typeof chg === 'function' ? chg(c, 52).toFixed(0) : '?'}% over twelve months. Two directors want a new chief executive.`, pass: (c, x) => { news('Company', `${c.name} replaces its chief executive after a difficult year.`, { company: c.id }); if (corpRung() >= 6 || ME().standing >= 75) inbox('board', `${c.name} wants you to run it`, `The search committee has one name on its list: yours. The chief executive's chair at ${c.name}, ${fmtCash(usd(rungPay(c, 7)))} a year before the package.`, { act: 'ceooffer', co: c.id, choices: [{ k: 'yes', label: 'Take the job' }, { k: 'no', label: 'Decline' }] }); } },
-  { k: 'acquire', when: c => c.cash > 20 && acqTarget(c), t: c => `Buy ${acqTarget(c).name}?`, d: (c, x) => { const T = acqTarget(c); return `${T.name} is for sale at about ${fmtM(x.amt)}. Management says the library alone is worth it.`; }, pass: (c, x) => { const T = acqTarget(c); if (T && T.closed === null) mergeInto(c, T, x.amt, 'buys'); } },
+  { k: 'acquire', when: c => c.cash > 20 && acqTarget(c), t: c => `Buy ${(acqTarget(c) || { name: 'a rival' }).name}?`, d: (c, x) => { const T = acqTarget(c) || { name: 'A rival company' }; return `${T.name} is for sale at about ${fmtM(x.amt)}. Management says the library alone is worth it.`; }, pass: (c, x) => { const T = acqTarget(c); if (T && T.closed === null) mergeInto(c, T, x.amt, 'buys'); } },
   { k: 'stream', when: c => c.tier === 1 && !c.stream && S.year >= 2007, t: c => `${c.name} launches a streaming service`, d: (c, x) => `A direct-to-consumer service: ${fmtM(x.amt)} to build, years of losses, and the library pulled from everyone else.`, pass: (c, x) => { c.stream = S.year; c.cash -= x.amt; (S.me.bets = S.me.bets || []).push({ co: c.id, w: S.week + 104, amt: x.amt * 1.2, q: x.q, title: 'the streaming service', vote: x.vote }); news('Company', `${c.name} announces its own streaming service.`, { company: c.id }); } },
   { k: 'dividend', when: c => c.cash > 30, t: c => `A special dividend from ${c.name}`, d: (c, x) => `Return ${fmtM(x.amt)} of cash to shareholders. Investors love it; the slate gets thinner.`, pass: (c, x) => { c.cash -= x.amt; const got = Math.round(x.amt * 1e6 * stakeOf(c)); if (got > 0) { S.me.cash += got; diary(`Money: a special dividend from ${c.name}, ${fmtCash(got)}.`); } } },
   { k: 'scandal', t: c => `A scandal at ${c.name}`, d: (c, x) => `A senior executive is accused of bullying staff. The trades have it tomorrow. Fire them, or stand by them pending an inquiry.`, pass: (c, x) => { news('Company', `${c.name} fires a senior executive after allegations of bullying.`, { company: c.id }); }, fail: (c, x) => { if (x.q < .5) { c.cash -= 4; news('Company', `${c.name} under fire for standing by an executive accused of bullying.`, { company: c.id }); } } },
@@ -25457,9 +25505,9 @@ ODD_JOBS.push(
   { k: 'tv_coep', jid: 'tv_co_ep', t: 'Co-executive producer (writer)', tier: 4, subs: ['struc', 'pack', 'dial'], days: 5, rate: 3200, weeks: 26, fam: 'wri', tv: 1, d: 'The showrunner\'s number two: run the room, fix scripts, cast guest roles, sit in on the edit.' },
   { k: 'tv_showrunner', jid: 'tv_showrunner', t: 'Showrunner', tier: 5, subs: ['struc', 'pack', 'dact'], days: 5, rate: 6000, weeks: 30, fam: 'wri', tv: 1, d: 'Head writer and chief executive of the show. Every decision, every day.' },
   { k: 'tv_epdir', jid: 'tv_episode_director', t: 'Episode director', tier: 3, subs: ['vstory', 'dact', 'pace'], days: 5, rate: 3000, weeks: 3, fam: 'dir', tv: 1, d: 'Prep, shoot and cut one episode in the show\'s style, in eight days.' },
-  { k: 'tv_guest', jid: 'tv_guest_star', t: 'Guest star', tier: 1, subs: ['range', 'pres'], days: 3, rate: 1100, weeks: 1, fam: 'act', tv: 1, d: 'One episode: the suspect, the patient, the old flame. Make them remember you.' },
-  { k: 'tv_recurring', jid: 'tv_recurring', t: 'Recurring role', tier: 2, subs: ['range', 'pres', 'comic'], days: 3, rate: 1800, weeks: 8, fam: 'act', tv: 1, d: 'A character who comes back. If the audience likes you, they keep coming back.' },
-  { k: 'tv_regular', jid: 'tv_series_regular', t: 'Series regular', tier: 3, subs: ['range', 'pres', 'voice'], days: 4, rate: 4500, weeks: 22, fam: 'act', tv: 1, d: 'Your face in the opening titles, every week, for as long as the show lasts.' },
+  { k: 'tv_guest', jid: 'tv_guest_star', t: 'Guest star', tier: 2, subs: ['range', 'pres'], days: 3, rate: 1100, weeks: 1, fam: 'act', tv: 1, actor: 1, d: 'One episode: the suspect, the patient, the old flame. Make them remember you.' },
+  { k: 'tv_recurring', jid: 'tv_recurring', t: 'Recurring role', tier: 2, subs: ['range', 'pres', 'comic'], days: 3, rate: 1800, weeks: 8, fam: 'act', tv: 1, actor: 1, d: 'A character who comes back. If the audience likes you, they keep coming back.' },
+  { k: 'tv_regular', jid: 'tv_series_regular', t: 'Series regular', tier: 3, subs: ['range', 'pres', 'voice'], days: 4, rate: 4500, weeks: 22, fam: 'act', tv: 1, actor: 1, d: 'Your face in the opening titles, every week, for as long as the show lasts.' },
   { k: 'tv_pa', jid: 'tv_set_pa', t: 'Set PA (television)', tier: 1, subs: ['setm', 'eth'], days: 5, rate: 190, weeks: 12, fam: 'set', tv: 1, d: 'Lock up the set, wrangle extras, run the walkie. Television never stops shooting.' },
   { k: 'tv_camop', jid: 'tv_camera_operator', t: 'Camera operator (multi-camera)', tier: 2, subs: ['comp', 'move', 'speed'], days: 4, rate: 650, weeks: 20, fam: 'cam', tv: 1, d: 'Four cameras, a live audience, one chance at every joke.' },
   { k: 'tv_editor', jid: 'tv_editor', t: 'Television editor', tier: 3, subs: ['rhythm', 'shape', 'cont'], days: 5, rate: 900, weeks: 20, fam: 'edt', tv: 1, d: 'An episode a fortnight, to time, to the act breaks.' },
@@ -28309,7 +28357,7 @@ const LATE = [
     opts: [
       { k: 'go', label: c => `Go: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateFx({ stress: -30, energy: 25, xp: { tas: .3, vis: .3 }, pages: 40 }); return 'You fill a notebook. Half of it is about the light. The other half is a film.'; } },
       { k: 'no', label: () => 'Stay, there\'s always something', go: c => 'There is always something.' }] },
-  { id: 'lg_buyout', pool: 'late', need: () => holdings().some(h => h.val > 0 && h.k !== 'relic') && careerLevel() >= 4, mk: c => { const H = holdings().filter(h => h.val > 0 && h.k !== 'relic'); c.h = H[Math.floor(prnd() * H.length)].w; c.mult = lateR(1.1, 1.7); },
+  { id: 'lg_buyout', pool: 'late', need: () => holdings().some(h => h.val > 0 && h.k !== 'relic') && careerLevel() >= 4, mk: c => { const H = holdings().filter(h => h.val > 0 && h.k !== 'relic'); c.h = H[Math.floor(prnd() * H.length)].w; c.mult = lateR(.85, 1.25); },
     title: 'An offer for what you own', text: c => { const h = holdings().find(x => x.w === c.h); return h ? `A company wants to buy ${h.name.toLowerCase()} from you for ${fmtCash(h.val * c.mult)}.` : 'An offer comes and goes.'; },
     opts: [
       { k: 'sell', label: () => 'Sell', go: c => { const i = holdings().findIndex(x => x.w === c.h); if (i < 0) return 'It\'s already gone.'; const h = holdings()[i]; S.me.lateA.splice(i, 1); S.me.cash += Math.round(h.val * c.mult); return `Sold for ${fmtCash(h.val * c.mult)}. You drive past it once, afterwards.`; } },
@@ -28585,16 +28633,16 @@ const LATE_DUE = {
     else if (r > .6) { const m = lateR(.8, 1.4); S.me.cash += Math.round(c.amt * m); lateFx({ stand: .8 }); inbox('note', 'The film you backed finds its audience', `${who}'s film does steady business: ${fmtCash(c.amt * m)} back to you, and good reviews.`, { person: c.who }); }
     else if (r > .3) { const m = lateR(.2, .7); S.me.cash += Math.round(c.amt * m); inbox('note', 'The film you backed', `${who}'s film comes out quietly and goes away quietly. ${fmtCash(c.amt * m)} back. They're already writing the next one.`, { person: c.who }); }
     else inbox('note', 'The film you backed', `${who}'s film doesn't find a distributor. The money is gone. It played one festival, and you were there, and it was better than they'll ever know.`, { person: c.who }); },
-  rights: c => { const f = S.films[c.film]; if (!f) return; latePayItem('lp_rights', { film: c.film, offer: Math.round(c.amt * lateR(.7, 2.2)) }); },
+  rights: c => { const f = S.films[c.film]; if (!f) return; latePayItem('lp_rights', { film: c.film, offer: Math.round(c.amt * lateR(.55, 1.6)) }); },
   restored: c => { lateFx({ fame: 4, stand: 1.2, mile: 'A lost film you paid to restore premiered again' }); inbox('note', 'The restored film premieres', `The film you paid to restore, ${c.what.split(',')[0]}, plays to a full house at a festival. The pianist improvises for two hours. They thank you from the stage.`); },
   repay: c => { if (prnd() < .65) { S.me.cash += c.amt; if (P(c.who)) addTie(ME(), P(c.who), 4); inbox('note', `${lname(c.who)} pays you back`, `An envelope with ${fmtCash(c.amt)} and a note: "With interest, in gratitude."`, { person: c.who }); } else inbox('note', `${lname(c.who)} and the loan`, 'They still can\'t pay you back. They apologise every time you meet, which is less often now.', { person: c.who }); },
-  play: c => { const r = prnd(); if (r > .7) { const m = lateR(2, 4); S.me.cash += Math.round(c.amt * m); lateFx({ fame: 2, stand: .6 }); inbox('note', 'The play is a smash', `The transfer sells out for a year. Your share: ${fmtCash(c.amt * m)}. You go back on closing night and cry at the curtain call.`); } else if (r > .35) { S.me.cash += Math.round(c.amt * .9); inbox('note', 'The play closes', `It runs six months and breaks even, more or less: ${fmtCash(c.amt * .9)} back.`); } else inbox('note', 'The play closes early', 'Bad reviews and a hot summer. It closes in five weeks. The money is gone.'); },
+  play: c => { const r = prnd(); if (r > .82) { const m = lateR(2, 4); S.me.cash += Math.round(c.amt * m); lateFx({ fame: 2, stand: .6 }); inbox('note', 'The play is a smash', `The transfer sells out for a year. Your share: ${fmtCash(c.amt * m)}. You go back on closing night and cry at the curtain call.`); } else if (r > .4) { S.me.cash += Math.round(c.amt * .75); inbox('note', 'The play closes', `It runs six months and nearly breaks even: ${fmtCash(c.amt * .75)} back.`); } else inbox('note', 'The play closes early', 'Bad reviews and a hot summer. It closes in five weeks. The money is gone.'); },
   album: c => { const r = prnd(); if (r > .6) { S.me.cash += Math.round(c.amt * lateR(1.2, 3)); lateFx({ stand: .4 }); inbox('note', 'The album', `${lname(c.who)}'s record gets picked up by a label and played everywhere you go for a month.`, { person: c.who }); } else inbox('note', 'The album', `${lname(c.who)}'s record comes out. It's beautiful and almost nobody hears it. They dedicate it to you.`, { person: c.who }); if (P(c.who)) addTie(ME(), P(c.who), 4); },
   audit: c => { if (prnd() < .45) { const fine = Math.round(c.amt * .7); S.me.cash -= fine; lateFx({ stress: 12, stand: -.6 }); inbox('note', 'The tax office writes', `The film partnerships were a tax scheme, the tax office decides, and not a legal one. You owe ${fmtCash(fine)}. Your accountant has stopped answering the phone.`); } },
-  relic: c => { const h = holdings().find(x => x.k === 'relic' && x.name.toLowerCase() === c.what.toLowerCase()); if (h) latePayItem('lp_relic', { what: c.what, offer: Math.round(c.amt * lateR(.7, 1.8)), hw: h.w }); },
+  relic: c => { const h = holdings().find(x => x.k === 'relic' && x.name.toLowerCase() === c.what.toLowerCase()); if (h) latePayItem('lp_relic', { what: c.what, offer: Math.round(c.amt * lateR(.6, 1.5)), hw: h.w }); },
   startup: c => { const r = prnd(); if (r > .94) { const m = lateR(4, 10); S.me.cash += Math.round(c.amt * m); lateFx({ mile: 'A start-up you backed sold for a fortune' }); inbox('note', 'The start-up sells', `The company you backed (${c.what}) is bought by a tech giant. Your stake is worth ${fmtCash(c.amt * m)}. You still have the hoodie.`); } else if (r > .65) { S.me.cash += Math.round(c.amt * lateR(.8, 1.5)); inbox('note', 'The start-up', `The company (${c.what}) is bought by a rival for a modest sum. You get your money back, roughly.`); } else inbox('note', 'The start-up folds', `The company (${c.what}) runs out of money. The founders write a heartfelt post about what they learned. You learned something too.`); },
   doc: c => { const r = prnd(); if (r > .45) { lateFx({ stand: 1.2, fame: 3 }); S.me.cash += Math.round(c.amt * lateR(.3, 1.2)); if (P(c.who)) P(c.who).standing = clamp(P(c.who).standing + 5, 0, 100); inbox('note', 'The documentary', `${lname(c.who)}'s documentary about ${c.cause} wins the audience award at a festival and gets a broadcaster. You're thanked in the credits, first.`, { person: c.who }); } else inbox('note', 'The documentary', `The documentary about ${c.cause} is finished. A few festivals, a streaming release nobody notices. The people in it love it.`, { person: c.who }); },
-  pickup: c => { const r = prnd(); if (r > .75) { const m = lateR(2, 4); S.me.cash += Math.round(c.amt * m); lateFx({ stand: 1, fame: 2 }); inbox('note', `${c.title} breaks out`, `The film you picked up plays for months. ${fmtCash(c.amt * m)} back. The filmmakers send you a case of wine and their next script.`); } else if (r > .35) { S.me.cash += Math.round(c.amt * lateR(.7, 1.3)); inbox('note', `${c.title} comes and goes`, 'The film does respectable business and leaves cinemas with its dignity. You roughly break even.'); } else { S.me.cash += Math.round(c.amt * .2); inbox('note', `${c.title} struggles`, 'Opening weekend clashes with a superhero film. It\'s gone in a fortnight. A streamer buys it cheaply.'); } },
+  pickup: c => { const r = prnd(); if (r > .82) { const m = lateR(2, 4); S.me.cash += Math.round(c.amt * m); lateFx({ stand: 1, fame: 2 }); inbox('note', `${c.title} breaks out`, `The film you picked up plays for months. ${fmtCash(c.amt * m)} back. The filmmakers send you a case of wine and their next script.`); } else if (r > .4) { S.me.cash += Math.round(c.amt * lateR(.6, 1.1)); inbox('note', `${c.title} comes and goes`, 'The film does respectable business and leaves cinemas with its dignity. You roughly break even.'); } else { S.me.cash += Math.round(c.amt * .1); inbox('note', `${c.title} struggles`, 'Opening weekend clashes with a superhero film. It\'s gone in a fortnight. A streamer buys it cheaply.'); } },
   draft: c => { if (!P(c.who)) return; const q = P(c.who), sc = clamp(Math.round((q.c ? q.c.wri : 8) * 3 + 15 + prnd() * 30), 30, 92); if ((S.me.holdings || []).filter(h => h.made === undefined && !h.lapsed).length >= 2) { inbox('note', `The draft of ${c.title}`, `${q.name} sends the draft. It's ${gradeOf(sc) <= 'B' ? 'good' : 'not there yet'}. You have no room for another project, so you send it to a friend who does.`, { person: c.who }); addTie(ME(), q, 4); return; } lateOption({ who: c.who, title: c.title, genre: c.genre, score: sc }, 0); inbox('note', `The draft of ${c.title}`, `${q.name} delivers the draft you paid for. It's yours to develop: it's on your Create page as an option.`, { person: c.who }); },
   protege: c => { if (!P(c.who)) return; P(c.who).standing = clamp(P(c.who).standing + 10, 0, 100); lateFx({ stand: 1, fame: 2 }); inbox('note', `${lname(c.who)} thanks you`, `${lname(c.who)}, your protégé, wins their first award. In the speech, before their family, they thank you.`, { person: c.who }); }
 };
@@ -32363,6 +32411,7 @@ function arcStart() {
 function arcShow(x) {
   const a = ARC_BY[x.id], st = a && a.stages[x.st], M = S.me; if (!st) { x.done = true; return; }
   const choices = st.o.map(o => { const cost = arcCost(o.cost, x.c); return { k: o.k, label: arcFill(o.l, x.c), check: o.ck, cost, dis: cost && M.cash < cost ? 'Not enough in the bank' : undefined }; });
+  if (choices.every(c => c.dis)) choices.push({ k: '_none', label: 'You can\'t stretch to it. Let it go.' });   // never a decision you can't make
   inbox('arc', `📖 ${a.name} · ${arcFill(st.t, x.c)}`, arcFill(st.x, x.c), Object.assign({ arc: x.n, choices }, x.c.who !== null && x.c.who !== undefined ? { person: x.c.who } : {}, x.c.film !== null && x.c.film !== undefined ? { film: x.c.film } : {}));
   x.shown = S.week;
 }
@@ -32398,7 +32447,7 @@ function arcPick(it, k) {
   if (it.kind !== 'arc') return false;
   const M = S.me, x = (M.arcs || []).find(y => y.n === it.arc), a = x && ARC_BY[x.id], st = a && a.stages[x.st], o = st && st.o.find(q => q.k === k), ch = it.choices.find(q => q.k === k);
   it.done = true;
-  if (!o || !ch) { it.result = { t: 'It passes.' }; if (x) x.done = true; return true; }
+  if (!o || !ch) { it.result = { t: k === '_none' ? 'You let it go. Some things have to wait.' : 'It passes.' }; if (x) { x.done = true; x.end = x.end || `${a ? a.name : 'A story'}: let it go for lack of money.`; } return true; }
   if (ch.cost && M.cash < ch.cost) { it.result = { t: 'By the time you get round to it, the money isn\'t there.' }; x.done = true; return true; }
   if (ch.cost) M.cash -= ch.cost;
   const ok = o.ck ? roll(o.ck[0], o.ck[1]) : true, R = (ok ? o.ok : o.no || o.ok) || {};

@@ -527,6 +527,7 @@ function arcStart() {
 function arcShow(x) {
   const a = ARC_BY[x.id], st = a && a.stages[x.st], M = S.me; if (!st) { x.done = true; return; }
   const choices = st.o.map(o => { const cost = arcCost(o.cost, x.c); return { k: o.k, label: arcFill(o.l, x.c), check: o.ck, cost, dis: cost && M.cash < cost ? 'Not enough in the bank' : undefined }; });
+  if (choices.every(c => c.dis)) choices.push({ k: '_none', label: 'You can\'t stretch to it. Let it go.' });   // never a decision you can't make
   inbox('arc', `📖 ${a.name} · ${arcFill(st.t, x.c)}`, arcFill(st.x, x.c), Object.assign({ arc: x.n, choices }, x.c.who !== null && x.c.who !== undefined ? { person: x.c.who } : {}, x.c.film !== null && x.c.film !== undefined ? { film: x.c.film } : {}));
   x.shown = S.week;
 }
@@ -562,7 +563,7 @@ function arcPick(it, k) {
   if (it.kind !== 'arc') return false;
   const M = S.me, x = (M.arcs || []).find(y => y.n === it.arc), a = x && ARC_BY[x.id], st = a && a.stages[x.st], o = st && st.o.find(q => q.k === k), ch = it.choices.find(q => q.k === k);
   it.done = true;
-  if (!o || !ch) { it.result = { t: 'It passes.' }; if (x) x.done = true; return true; }
+  if (!o || !ch) { it.result = { t: k === '_none' ? 'You let it go. Some things have to wait.' : 'It passes.' }; if (x) { x.done = true; x.end = x.end || `${a ? a.name : 'A story'}: let it go for lack of money.`; } return true; }
   if (ch.cost && M.cash < ch.cost) { it.result = { t: 'By the time you get round to it, the money isn\'t there.' }; x.done = true; return true; }
   if (ch.cost) M.cash -= ch.cost;
   const ok = o.ck ? roll(o.ck[0], o.ck[1]) : true, R = (ok ? o.ok : o.no || o.ok) || {};

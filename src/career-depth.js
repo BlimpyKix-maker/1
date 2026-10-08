@@ -73,6 +73,23 @@ function blockedFrom(t) {
   return null;
 }
 // The extra listings each week: catalogue crew jobs on films around you, industry jobs at companies, internships.
+// Casting calls: speaking parts are cast, not crewed, so they don't come up with the other jobs. Actors hear about a
+// few parts a week on films in town that are still casting, at their level: day players first, then supporting, then leads.
+function castingBoard(films) {
+  const M = S.me, me = ME(); if (MAIN[me.role] !== 'act') return [];
+  const L = tierLevel(), busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
+  // open calls reach one tier higher than ordinary postings: anyone can audition
+  const parts = POSTS.filter(t => t.tier <= L + 2 && t.tier >= Math.max(1, L - 2) && (t.actor || (() => { const J = typeof jobRow === 'function' ? jobRow(t) : null; return J && /^Cast$/.test(J.dept) || /voice actor|dubbing actor|narrator/i.test(t.t); })()) && !/Background|Extra|Stand-In|Double|Stunt|Assistant/i.test(t.t));
+  if (!parts.length) return [];
+  const out = [], n = 2 + Math.floor(L / 2) + (M.agent ? 1 : 0);
+  for (const f of films.slice().sort(() => prnd() - .5)) {
+    if (out.length >= n) break;
+    if (f.stage > 2 || prnd() > .45) continue;
+    const opts = parts.filter(t => t.st.includes(f.stage) && headOf(f, t.head) !== null && !busy.has(f.id + ':' + t.k));
+    if (opts.length) { const p = makePost(ppick(opts), f); p.casting = 1; out.push(p); }
+  }
+  return out;
+}
 function depthBoard(films) {
   const M = S.me, L = tierLevel(), out = [];
   const busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
