@@ -34,3 +34,5 @@ Catalogue tools:
   a job board of tier 1–2 jobs drawn from films actually in production, on-set decisions, money,
   energy, stress, contacts with trust and favours, screen credits, and saves (seed plus action log,
   replayed on load).
+
+**Picking this up on another account?** Start with [`handoff/START-HERE.md`](handoff/START-HERE.md), then [`HANDOFF.md`](HANDOFF.md).
