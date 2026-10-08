@@ -11293,7 +11293,7 @@ function refreshBoard() {
   M.board = agentBoard(films).concat(film, depthBoard(films), typeof castingBoard === 'function' ? castingBoard(films) : [], awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   // you hear about work near your level, a tier or two either way; referrals and your agent's pitches still reach you
-  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || (p.casting && p.tier <= L + 2) || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
+  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || (p.casting && p.tier <= 2 && p.tier <= L + 2) || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
   if (typeof nameBoard === 'function') nameBoard();
   if (typeof leadBoard === 'function') { const L = leadBoard(), ids = new Set(L.map(p => p.id)); M.board = L.concat(M.board.filter(p => !ids.has(p.id))); }
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
@@ -11320,6 +11320,7 @@ function hireFactors(post) {
   const sc = subScore(t), req = postReq(t);
   F.push(['Your skills for it', post.tier <= 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
   if (t.actor) F.push(['Looks and presence', (M.body.looks - 10) * .06 + (me.sk.pres - 10) * .05]);
+  if (t.actor && (post.tier || 1) >= 3) F.push(['Star power', clamp(((me.fame || 0) - 20) * .035, -1.2, 1.2)]);   // leads go to names an audience knows
   F.push(['Track record', Math.min(1.1, me.credits.length * .18 + M.stats.weeks * .01)]);
   F.push(['Standing', (me.standing - 10) * .035]);
   if (post.head !== null) {
@@ -12496,7 +12497,7 @@ function castingBoard(films) {
   const M = S.me, me = ME(); if (MAIN[me.role] !== 'act') return [];
   const L = tierLevel(), busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   // open calls reach one tier higher than ordinary postings: anyone can audition
-  const parts = POSTS.filter(t => t.tier <= L + 2 && t.tier >= Math.max(1, L - 2) && (t.actor || (() => { const J = typeof jobRow === 'function' ? jobRow(t) : null; return J && /^Cast$/.test(J.dept) || /voice actor|dubbing actor|narrator/i.test(t.t); })()) && !/Background|Extra|Stand-In|Double|Stunt|Assistant/i.test(t.t));
+  const parts = POSTS.filter(t => t.tier <= (t.tier <= 2 ? L + 2 : L + 1) && t.tier >= Math.max(1, L - 2) && (t.actor || (() => { const J = typeof jobRow === 'function' ? jobRow(t) : null; return J && /^Cast$/.test(J.dept) || /voice actor|dubbing actor|narrator/i.test(t.t); })()) && !/Background|Extra|Stand-In|Double|Stunt|Assistant/i.test(t.t));
   if (!parts.length) return [];
   const out = [], n = 2 + Math.floor(L / 2) + (M.agent ? 1 : 0);
   for (const f of films.slice().sort(() => prnd() - .5)) {
@@ -23223,7 +23224,8 @@ function bankWeek() {
     if (M.cash >= pay) { M.cash -= Math.round(pay); B.loan = Math.max(0, B.loan + int - pay); if (S.week % 13 === 0) B.score = clamp(B.score + 3, 300, 850); }
     else { B.loan += int + 25; B.score = clamp(B.score - 15, 300, 850); B.missed = (B.missed || 0) + 1; if (B.missed % 4 === 1) mail('inbox', 'Your bank', 'Missed loan payment', `You missed this week's payment of ${fmtCash(Math.round(pay))}. A late fee has been added and your credit score has dropped to ${B.score}.`); }
   }
-  if (prnd() < .012) { const F = FATE[Math.floor(prnd() * FATE.length)], base = Math.max(usd(400), Math.abs(M.cash) * .05 + usd(300)), amt = Math.round(base * F[1] * (1 + prnd())); M.cash += amt; diary(`Money: ${F[0]} (${amt >= 0 ? '+' : ''}${fmtCash(amt)})`); inbox('note', F[0], `${F[2]} ${amt >= 0 ? '+' : ''}${fmtCash(amt)}.`); }
+  // luck is sized to a life, not a fortune (a millionaire's aunt doesn't leave them a million), and an inheritance comes once
+  if (prnd() < .012) { const F = FATE[Math.floor(prnd() * FATE.length)], base = Math.max(usd(400), Math.min(Math.abs(M.cash) * .05, usd(25000)) + usd(300)), amt = Math.round(base * F[1] * (1 + prnd())); const again = /aunt/.test(F[0]) && (M.flags || {}).inherited; if (!again) { if (/aunt/.test(F[0])) (M.flags = M.flags || {}).inherited = S.week; M.cash += amt; diary(`Money: ${F[0]} (${amt >= 0 ? '+' : ''}${fmtCash(amt)})`); inbox('note', F[0], `${F[2]} ${amt >= 0 ? '+' : ''}${fmtCash(amt)}.`); } }
   // insider trading has consequences
   for (const t of (M.insider || []).filter(x => !x.done && S.week >= x.w + 6)) { t.done = 1; if (prnd() < .3) { const fine = Math.round(Math.max(usd(2000), t.gain * 3)); M.cash -= fine; ME().standing = clamp(ME().standing - 6, 0, 100); news('Industry', `${ME().name} fined by the securities regulator over a well-timed share trade.`, { person: ME().id }); inbox('note', 'The securities regulator calls', `They noticed your trade before the opening weekend, and who you'd been talking to. The fine is ${fmtCash(fine)}, and the trades write it up.`); } }
 }
@@ -25296,7 +25298,9 @@ function netBaseViewers(kind, y) {   // average viewers (millions) for a solid s
 }
 function tvPools() {
   const A = archive(); if (A.tvPools) return A.tvPools;
-  const P0 = {}; for (const p of S.people) { if (!['actor', 'writer', 'director', 'producer'].includes(p.role)) continue; const m = (HUBS[p.hub] || {}).m || 'US'; ((P0[m] = P0[m] || {})[p.role] = P0[m][p.role] || []).push(p.id); }
+  // the pool is everyone who existed when it was first built; the size is kept in the world, so a loaded game rebuilds the same pools
+  if (!S.tvN) S.tvN = S.people.length;
+  const P0 = {}; for (const p of S.people.slice(0, S.tvN)) { if (!['actor', 'writer', 'director', 'producer'].includes(p.role)) continue; const m = (HUBS[p.hub] || {}).m || 'US'; ((P0[m] = P0[m] || {})[p.role] = P0[m][p.role] || []).push(p.id); }
   return A.tvPools = P0;
 }
 function tvPickPerson(r, m, role, y) {
@@ -29623,8 +29627,8 @@ function snapData(exact) {
   d.rest = rest;
   const str = JSON.stringify(d);
   // your own life is small and kept exact, so the journal replays onto exactly the numbers you left
-  const me = JSON.stringify(S.me === undefined ? null : S.me);
-  return '{"me":' + me + ',' + (exact ? str : snapRoundText(str)).slice(1);
+  const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
+  return '{"me":' + me + ',"mep":' + mp + ',' + (exact ? str : snapRoundText(str)).slice(1);
 }
 // put a save into the freshly built world
 function snapApply(str) {
@@ -29646,6 +29650,7 @@ function snapApply(str) {
     }
     L.length = d.n[set];
   }
+  if (d.mep && rest.me && S.people[rest.me.id]) S.people[rest.me.id] = d.mep;   // your own record, exact
   const keep = { people: S.people, films: S.films, companies: S.companies };
   S = Object.assign({}, rest, keep, { log: [] });   // a new object: every cache keyed on the old world lets go
   R = mulberry(d.r);
@@ -32465,7 +32470,7 @@ function callsMorning() {
   const M = S.me, W = M.wk; if (W.day !== 0 || careerLevel() < 3 || typeof craftJob !== 'function') return;
   if (M.jobs.some(craftJob) || S.week - (M.callW || -99) < 8 || M.inbox.some(it => it.kind === 'offer' && !it.done)) return;
   if (prnd() > (lookingForWork() ? .25 : .45)) return;
-  const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7);
+  const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7 && !((tmplOf(p) || {}).actor && (p.tier || 1) >= 3 && (ME().fame || 0) < 20 + (p.tier || 1) * 5));   // nobody calls an unknown to offer a lead
   if (!L.length) return;
   // your own industry first, then the most senior; the very top pick varies, so it isn't the same job every time
   const home = q => (typeof postIndustry !== 'function' || postIndustry(q) === (M.field || 'film')) ? 1 : 0;

@@ -157,7 +157,9 @@ function netBaseViewers(kind, y) {   // average viewers (millions) for a solid s
 }
 function tvPools() {
   const A = archive(); if (A.tvPools) return A.tvPools;
-  const P0 = {}; for (const p of S.people) { if (!['actor', 'writer', 'director', 'producer'].includes(p.role)) continue; const m = (HUBS[p.hub] || {}).m || 'US'; ((P0[m] = P0[m] || {})[p.role] = P0[m][p.role] || []).push(p.id); }
+  // the pool is everyone who existed when it was first built; the size is kept in the world, so a loaded game rebuilds the same pools
+  if (!S.tvN) S.tvN = S.people.length;
+  const P0 = {}; for (const p of S.people.slice(0, S.tvN)) { if (!['actor', 'writer', 'director', 'producer'].includes(p.role)) continue; const m = (HUBS[p.hub] || {}).m || 'US'; ((P0[m] = P0[m] || {})[p.role] = P0[m][p.role] || []).push(p.id); }
   return A.tvPools = P0;
 }
 function tvPickPerson(r, m, role, y) {

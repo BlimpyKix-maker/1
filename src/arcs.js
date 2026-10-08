@@ -581,7 +581,7 @@ function callsMorning() {
   const M = S.me, W = M.wk; if (W.day !== 0 || careerLevel() < 3 || typeof craftJob !== 'function') return;
   if (M.jobs.some(craftJob) || S.week - (M.callW || -99) < 8 || M.inbox.some(it => it.kind === 'offer' && !it.done)) return;
   if (prnd() > (lookingForWork() ? .25 : .45)) return;
-  const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7);
+  const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7 && !((tmplOf(p) || {}).actor && (p.tier || 1) >= 3 && (ME().fame || 0) < 20 + (p.tier || 1) * 5));   // nobody calls an unknown to offer a lead
   if (!L.length) return;
   // your own industry first, then the most senior; the very top pick varies, so it isn't the same job every time
   const home = q => (typeof postIndustry !== 'function' || postIndustry(q) === (M.field || 'film')) ? 1 : 0;

@@ -79,7 +79,7 @@ function castingBoard(films) {
   const M = S.me, me = ME(); if (MAIN[me.role] !== 'act') return [];
   const L = tierLevel(), busy = new Set(M.jobs.map(j => j.film + ':' + j.k));
   // open calls reach one tier higher than ordinary postings: anyone can audition
-  const parts = POSTS.filter(t => t.tier <= L + 2 && t.tier >= Math.max(1, L - 2) && (t.actor || (() => { const J = typeof jobRow === 'function' ? jobRow(t) : null; return J && /^Cast$/.test(J.dept) || /voice actor|dubbing actor|narrator/i.test(t.t); })()) && !/Background|Extra|Stand-In|Double|Stunt|Assistant/i.test(t.t));
+  const parts = POSTS.filter(t => t.tier <= (t.tier <= 2 ? L + 2 : L + 1) && t.tier >= Math.max(1, L - 2) && (t.actor || (() => { const J = typeof jobRow === 'function' ? jobRow(t) : null; return J && /^Cast$/.test(J.dept) || /voice actor|dubbing actor|narrator/i.test(t.t); })()) && !/Background|Extra|Stand-In|Double|Stunt|Assistant/i.test(t.t));
   if (!parts.length) return [];
   const out = [], n = 2 + Math.floor(L / 2) + (M.agent ? 1 : 0);
   for (const f of films.slice().sort(() => prnd() - .5)) {

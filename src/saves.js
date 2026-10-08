@@ -64,8 +64,8 @@ function snapData(exact) {
   d.rest = rest;
   const str = JSON.stringify(d);
   // your own life is small and kept exact, so the journal replays onto exactly the numbers you left
-  const me = JSON.stringify(S.me === undefined ? null : S.me);
-  return '{"me":' + me + ',' + (exact ? str : snapRoundText(str)).slice(1);
+  const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
+  return '{"me":' + me + ',"mep":' + mp + ',' + (exact ? str : snapRoundText(str)).slice(1);
 }
 // put a save into the freshly built world
 function snapApply(str) {
@@ -87,6 +87,7 @@ function snapApply(str) {
     }
     L.length = d.n[set];
   }
+  if (d.mep && rest.me && S.people[rest.me.id]) S.people[rest.me.id] = d.mep;   // your own record, exact
   const keep = { people: S.people, films: S.films, companies: S.companies };
   S = Object.assign({}, rest, keep, { log: [] });   // a new object: every cache keyed on the old world lets go
   R = mulberry(d.r);

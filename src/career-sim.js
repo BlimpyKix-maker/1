@@ -528,7 +528,7 @@ function refreshBoard() {
   M.board = agentBoard(films).concat(film, depthBoard(films), typeof castingBoard === 'function' ? castingBoard(films) : [], awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   // you hear about work near your level, a tier or two either way; referrals and your agent's pitches still reach you
-  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || (p.casting && p.tier <= L + 2) || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
+  { const L = tierLevel(); M.board = M.board.filter(p => p.ref || p.agent || (p.casting && p.tier <= 2 && p.tier <= L + 2) || p.tier === undefined || (p.tier >= L - 2 && p.tier <= L + 1 && (p.tier > 0 || L <= 1))); }
   if (typeof nameBoard === 'function') nameBoard();
   if (typeof leadBoard === 'function') { const L = leadBoard(), ids = new Set(L.map(p => p.id)); M.board = L.concat(M.board.filter(p => !ids.has(p.id))); }
   if (typeof worldFx === 'function' && worldFx().halt) M.board = M.board.filter(p => p.film === null || p.film === undefined);   // nobody hires during a strike
@@ -555,6 +555,7 @@ function hireFactors(post) {
   const sc = subScore(t), req = postReq(t);
   F.push(['Your skills for it', post.tier <= 1 ? clamp((sc - Math.max(req, 6)) * .15, -1.5, .8) : clamp((sc - Math.max(req, 8)) * .3, -2.5, 1.4)]);
   if (t.actor) F.push(['Looks and presence', (M.body.looks - 10) * .06 + (me.sk.pres - 10) * .05]);
+  if (t.actor && (post.tier || 1) >= 3) F.push(['Star power', clamp(((me.fame || 0) - 20) * .035, -1.2, 1.2)]);   // leads go to names an audience knows
   F.push(['Track record', Math.min(1.1, me.credits.length * .18 + M.stats.weeks * .01)]);
   F.push(['Standing', (me.standing - 10) * .035]);
   if (post.head !== null) {
