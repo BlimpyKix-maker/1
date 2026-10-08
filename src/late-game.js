@@ -15,13 +15,21 @@ function weeklyBurn() {
 }
 function runwayWeeks() { return Math.max(0, S.me.cash) / weeklyBurn(); }
 // Comfortable: a year of living costs in the bank, or a decent sum outright.
-function lateRich() { const M = S.me; return runwayWeeks() >= 52 || M.cash >= usd(120000); }
+// Real money, or a long runway and a name: the late game is for people who've made it, not a year of savings.
+function lateRich() { const M = S.me; return M.cash >= usd(150000) || (runwayWeeks() >= 104 && careerLevel() >= 4); }
 // Are you looking for work? You decide (the switch on Today); left alone, a year's savings and a few credits means no.
 function lookingForWork() {
   const M = S.me; if (!M) return true;
   if (M.looking === 'yes') return true;
   if (M.looking === 'no') return false;
-  return !(runwayWeeks() >= 52 && careerLevel() >= 2);
+  return !(runwayWeeks() >= 52 && careerLevel() >= 2 && hasFooting());
+}
+// a foothold in your own line of work: credits, a year in your craft, or a name
+function hasFooting() {
+  const M = S.me, me = ME();
+  if (careerLevel() >= 4 || me.credits.length >= 2) return true;
+  const craftWeeks = (M.past || []).filter(p => typeof craftJob !== 'function' || craftJob(p)).reduce((s, p) => s + Math.max(0, (p.to || S.week) - (p.from || p.to || S.week)), 0);
+  return craftWeeks >= 52 || (M.works || []).length >= 4;
 }
 // a round, readable amount of money: a share of what you have, inside a floor and ceiling (in today's dollars)
 function lateAmt(frac, lo, hi) {
@@ -152,10 +160,10 @@ const LATE = [
     opts: [
       { k: 'yes', label: c => `Fund it: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateFx({ tie: 10, stand: .3 }, c); lateLater(lateR(20, 40), 'album', { who: c.who, amt: c.amt }); return 'They send you rough mixes at midnight. You play them in the car with the windows down.'; } },
       { k: 'no', label: () => 'Pass', go: c => { lateFx({ tie: -1 }, c); return 'They make it anyway, on a laptop, years later.'; } }] },
-  { id: 'lg_fund', pool: 'late', cool: 104, need: () => careerLevel() >= 4, mk: c => { c.amt = lateAmt(.05, 20000, 1500000); c.who = lateWho('abroad'); },
+  { id: 'lg_fund', pool: 'late', cool: 260, need: () => careerLevel() >= 4, mk: c => { c.amt = lateAmt(.05, 20000, 1500000); c.who = lateWho('abroad'); },
     title: 'A fund for somewhere else', text: c => `A festival programmer asks if you'd seed a fund for first-time filmmakers ${c.who !== null ? 'in ' + HUBS[P(c.who).hub].name : 'abroad'}: ${fmtCash(c.amt)}, five films over five years, your name on it.`,
     opts: [
-      { k: 'yes', label: c => `Seed it: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { c.tag = 'Funded by you'; lateFx({ intl: 8, stand: 1.2, fame: 2, tie: 10, mile: 'Started a film fund abroad' }, c); return `The first grant goes to a script ${c.who !== null ? 'by ' + lname(c.who) : 'nobody at home would have read'}. You read it on the plane and cry at page 80.`; } },
+      { k: 'yes', label: c => `Seed it: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { c.tag = 'Funded by you'; lateFx({ intl: 8, stand: 1.2, fame: 2, tie: 10, mile: `Started a film fund ${c.who !== null ? 'in ' + HUBS[P(c.who).hub].name : 'abroad'}` }, c); return `The first grant goes to a script ${c.who !== null ? 'by ' + lname(c.who) : 'nobody at home would have read'}. You read it on the plane and cry at page 80.`; } },
       { k: 'no', label: () => 'Give at home instead', go: c => { lateFx({ stand: .3 }); return 'There\'s plenty to do here, you tell yourself, and it\'s true.'; } }] },
   { id: 'lg_ranch', pool: 'late', need: () => !holdings().some(h => h.k === 'ranch'), mk: c => { c.amt = lateAmt(.12, 60000, 3000000); c.place = ppick(['a ranch two hours out with a fake Western street left over from the fifties', 'a crumbling mansion that has played a haunted house in nine films', 'a disused factory with forty-foot ceilings, perfect for building sets', 'an old motel by a desert highway that every music video wants']); },
     title: 'A location for sale', text: c => `For sale: ${c.place}. ${fmtCash(c.amt)}. Productions rent it all year.`,
@@ -449,7 +457,7 @@ const LATE = [
 const LATE_BY = {}; for (const t of LATE) LATE_BY[t.id] = t;
 // open a 'late' item: fill the context, price the choices, grey out what you can't afford
 function lateOffer(pool) {
-  const M = S.me, seen = M.lateSeen = M.lateSeen || {}, cool = pool === 'late' ? 40 : 30;
+  const M = S.me, seen = M.lateSeen = M.lateSeen || {}, cool = pool === 'late' ? 104 : 78;   // each comes round every two years or so
   const L = LATE.filter(t => t.pool === pool && (seen[t.id] === undefined || (!t.once && S.week - seen[t.id] >= (t.cool || cool))) && (!t.need || t.need()));
   for (let tries = 0; tries < 4 && L.length; tries++) {
     const i = Math.floor(prnd() * L.length), t = L.splice(i, 1)[0], c = {};
@@ -529,7 +537,7 @@ function lateWeek() {
   const H = holdings().filter(h => h.k === 'cinema' || h.k === 'ranch');
   if (H.length && prnd() < .04) { const h = H[Math.floor(prnd() * H.length)];
     if (h.k === 'cinema') { const good = prnd() < .55; const v = Math.round(h.val * (good ? .004 : -.006)); M.cash += v; inbox('note', good ? 'A full house at your cinema' : 'Your cinema needs a new roof', good ? `A director turns up unannounced to introduce their own film at your cinema. Word gets out; it sells out. ${fmtCash(v)} extra this week.` : `The roof finally goes in a storm. ${fmtCash(-v)} to fix it. The audience on Saturday watches with umbrellas.`); }
-    else { const v = Math.round(h.val * .006); M.cash += v; inbox('note', 'A big booking at your location', `A studio books your location for a month of night shoots. ${fmtCash(v)}. They promise to repaint the barn.`); } }
+    else { const v = Math.round(Math.max(usd(2500), h.val * .015)); M.cash += v; inbox('note', 'A big booking at your location', `A studio books your location for a month of night shoots. ${fmtCash(v)}. They promise to repaint the barn.`); } }
 }
 // ---- the weekly rhythm ----
 // Called each morning: on Tuesdays, a chance of a late-game opportunity if you can afford one; on Friday (and, as a

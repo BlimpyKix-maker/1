@@ -3,12 +3,14 @@
 // happen to a life in film. Loaded after career-sim; it adds to POSTS and SCENES and is called from the week.
 
 // ---- Your level: how far up the ladder the board reaches ----
-// 0 nobody, 1 a few weeks' work, 2 credits to your name, 3 a working professional, 4 in demand, 5 established.
+// 0 nobody, 1 a few weeks' work, 2 finding your feet, 3 a working professional, 4 in demand, 5 established.
 function careerLevel() {
   const M = S.me, me = ME();
   // time served counts a little; the quality of what you delivered counts more (job scores from the work itself)
   const work = M.past.reduce((t, p) => t + clamp(p.score || 0, -4, 6), 0) + M.jobs.reduce((t, j) => t + clamp(j.score || 0, -4, 6), 0);
-  const base = clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5);
+  // a reputation needs something under it: without credits, released work or a senior post, it stops at 3 (and 4)
+  const body = me.credits.length + (M.works || []).filter(w => w.rel !== undefined).length * .5 + (typeof corpRung === 'function' && corpRung() >= 3 ? 3 : 0);
+  const base = Math.min(clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5), body >= 5 ? 5 : body >= 2 ? 4 : 3);
   if (base < 5) return base;
   // past the top of the craft, what counts is a name: awards, fame, a body of work, or the top of a company
   const aw = (me.awards || []).length, fame = me.fame || 0, cr = me.credits.length, rung = typeof corpRung === 'function' ? corpRung() : -1;
@@ -18,7 +20,7 @@ function careerLevel() {
 }
 // Jobs only come in five tiers: the levels above that are about your name, not the jobs you can do.
 function tierLevel() { return Math.min(5, careerLevel()); }
-const LEVEL_NAME = ['Nobody yet', 'Getting work', 'Credits to your name', 'Working professional', 'In demand', 'Established', 'A name people know', 'A legend of the business'];
+const LEVEL_NAME = ['Nobody yet', 'Getting work', 'Finding your feet', 'Working professional', 'In demand', 'Established', 'A name people know', 'A legend of the business'];
 
 // ---- The catalogue as postings ----
 const DEPT_HEAD = { Directed: 'prod', Writing: 'prod', Cast: 'dir', Produced: 'prod', Music: 'mus', Cinematography: 'dp', 'Film Editing': 'ed', 'Casting By': 'cst', 'Production Design': 'pd', 'Art Direction': 'pd', 'Set Decoration': 'pd', 'Costume Design': 'cos', 'Makeup Department': 'mu', 'Production Management': 'prod', 'Second Unit Director or Assistant Director': 'ad', 'Art Department': 'pd', 'Property Department': 'pd', 'Sound Department': 'snd', 'Special Effects': 'vfx', 'Visual Effects': 'vfx', Stunts: 'stn', 'Camera and Electrical Department': 'dp', 'Animation Department': 'vfx', 'Casting Department': 'cst', 'Costume and Wardrobe Department': 'cos', 'Editorial Department': 'ed', 'Location Management': 'prod', 'Music Department': 'mus', 'Script and Continuity Department': 'ad', 'Transportation Department': 'prod', 'Additional Crew': 'prod', Choreography: 'dir', 'Color Department': 'ed', 'Craft Services': 'prod', 'Health and Safety': 'ad', 'Intimacy Coordination': 'ad', Legal: 'prod', 'Production Department': 'prod', 'Production Finance and Accounting': 'prod', Publicity: 'prod', Puppetry: 'vfx', 'Voice Actors – Dubbing': 'dir', 'Studio Facilities/Equipment (Additional Crew)': 'prod' };

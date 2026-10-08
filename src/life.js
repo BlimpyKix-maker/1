@@ -222,7 +222,7 @@ function workDay() {
     const f = j.film !== null ? S.films[j.film] : null, t = tmplOf(j);
     out.push(`${f ? f.title : j.t}: ${pickLine(f ? JOB_DAY_LINES[f.stage] || JOB_DAY_LINES[2] : OFFICE_LINES, M.wk.day * 3 + M.wk.block + j.id)}`);
     if (typeof jobTaskBlock === 'function') jobTaskBlock(j, out);
-    if (M.energy < 20 && prnd() < .35) { mistakeAtWork(j); out.push('You\'re running on empty, and it shows.'); }
+    if (M.energy < 20 && prnd() < .35) { if (M.wk.slipW !== S.week) { M.wk.slipW = S.week; mistakeAtWork(j); } out.push('You\'re running on empty, and it shows.'); }
   }
   return out;
 }
@@ -230,7 +230,8 @@ function mistakeAtWork(j) {
   const M = S.me, me = ME();
   if (j.head !== null) addTie(me, P(j.head), -3);
   M.wk.stress += 4;
-  inbox('note', 'A mistake', `Exhausted, you ${pickLine(['mislabel a whole day\'s footage', 'forget the call sheet changes', 'send the wrong version to the producer', 'miss your cue', 'lose the keys to the truck'], S.week + j.id)}. ${j.head !== null ? P(j.head).name + ' notices.' : 'Someone notices.'}`);
+  const fam = typeof familyOf === 'function' ? familyOf(j) : 'any', slips = (typeof TIRED_SLIPS !== 'undefined' && (TIRED_SLIPS[fam] || TIRED_SLIPS.any)) || ['make a mistake'];
+  inbox('note', 'A mistake', `${pickLine(['Exhausted', 'Running on fumes', 'Half asleep', 'Too tired to think'], S.week + j.id * 3)}, you ${pickLine(slips, S.week + j.id)}. ${j.head !== null ? P(j.head).name + ' notices.' : 'Someone notices.'}`);
 }
 // The calendar date of a day in the current week (weeks are counted from their Monday).
 function dayDate(d) { const t = dateOf(S.week); const mon = new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5); return new Date(mon.getTime() + d * 864e5); }

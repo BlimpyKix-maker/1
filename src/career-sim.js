@@ -806,7 +806,11 @@ function networkDay(L) {
     names.push(`${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`);
     if (ok && prnd() < .12 && S.active.some(i => keyIds(S.films[i]).includes(q.id))) { M.refs[q.id] = (M.refs[q.id] || 0) + 1; L.push(`${q.name} mentions their film is hiring.`); }
   }
-  L.push(names.length ? `${ok ? 'A good night at the mixer' : 'An awkward mixer'}: you meet ${names.join(' and ')}.` : 'The mixer is half empty.');
+  if (names.length) { L.push(`${ok ? 'A good night' : 'An awkward night'} at ${pickLine(MIXER_VENUES, S.week + n)}: you meet ${names.join(' and ')}.`); return; }
+  // everyone's met: the evening deepens what you have instead
+  const ids = aliveKnown().filter(id => P(id).hub === M.hub);
+  if (ids.length >= 2) { const a = ppick(ids), b = ppick(ids.filter(x => x !== a)); addTie(me, P(a), ok ? 3 : 1); addTie(me, P(b), ok ? 2 : 1); if (M.known[a]) M.known[a].seen = S.week; if (M.known[b]) M.known[b].seen = S.week; L.push(pickLine(MIXER_SAME, S.week + a).replace('{a}', P(a).name).replace('{b}', P(b).name)); }
+  else L.push(`A quiet night at ${pickLine(MIXER_VENUES, S.week)}. You leave early and sleep well.`);
 }
 function catchupDay(L) {
   const M = S.me, me = ME(), id = M.catchWith;
@@ -1009,6 +1013,7 @@ function resolvePick(it, k) {
   if (typeof slatePick === 'function' && slatePick(it, k)) return true;
   if (typeof currPick === 'function' && currPick(it, k)) return true;
   if (typeof latePick === 'function' && latePick(it, k)) return true;
+  if (typeof arcPick === 'function' && arcPick(it, k)) return true;
   if (typeof coinvPick === 'function' && coinvPick(it, k)) return true;
   if (typeof finPick === 'function' && finPick(it, k)) return true;
   if (it.kind === 'agentoffer') {

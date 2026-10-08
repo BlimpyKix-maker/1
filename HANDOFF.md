@@ -115,6 +115,8 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/market3.js` | Full trading: `shortAct` (action `short`, open/cover, 50% margin), `orderAct` (action `order`: limit buy/sell, stop-loss, cancel; 20 max, 12-week expiry), `market3Week` (fills, borrow fee, margin calls); `tradePanelHTML(key)` (`c<id>` = studio, `s<key>` = sector); `tickerPageHTML(k)` (stack kind `ticker:<k>`: chart spans, KPIs, dividend note, clickable leaders and staff via `sectorRef`) |
 | `src/finance2.js` | One market (`mktRows`, `allMarketHTML`), sourced tips with track records (`tipsThisWeek`, `tipJudge`), `economyHTML`, private banking (securities line `sbl`, angels `angelsOf`/`angelAct`/`takeAngels` used by `selfFund`). Tips: 7 source kinds (`TIP_KIND`), angle-based reasons (`TIP_WHY`, `TIP_ANGLES`, `SECTOR_WHY`). Angels: `ANGEL_KIND` bios, `ANGEL_MOTIVE` (moves `angelDC`), `ANGEL_ASK` terms; success sends an `angeloffer` inbox (accept / haggle cha 14 / pass, `angelPick`), two new angels a year, `angelWeek` outreach every 4 weeks; `M.angelTry` keyed by name|kind |
 | `src/creative.js` | Scriptwriter (beat board `outlineAct`, `scriptSessAct`, coverage), Studio (mix, arrangement, podcast guest/order), CutRoom (clip sets, trims, packaging, predictions) |
+| `src/arcs.js` | Story arcs: multi-week storylines (`ARCS`, 41) built from your own people, films, city and money. Declarative stages `{ t, x, o: [{ k, l, ck, cost, ok, no }] }`, results `{ t, fx, n, w, end, mile, flag }`; text tokens `{who} {film} {co} {amt}` and pronouns `{they} {them} {their} {is} {s}` (`arcFill`). `arcMorning` (from `lifeMorningEvent`) shows due stages and starts new arcs on Wednesdays (one at a time below level 3, two after); `arcPick` (inbox kind `arc`); state `M.arcs`, `M.arcSeen` (5-year cooldown), `M.arcLog` shown as "Your stories" on the Life tab. Only real skill names in `xp` (bad names write NaN) |
+| `src/variety.js` | Wider content pools, appended to lists defined elsewhere: `MORE_LIFE` scenes per activity, `SPAM`, `FANS` (`{work}` = your newest release), `FAVOURS`, `INVITES`/`INVITE_TXT`, `YES_TXT`/`HELP_TXT`/`NO_TXT`, `ASK_WHAT`, `GOSSIP_LINES`, `INVITE_MAILS`, `MIXER_VENUES`/`MIXER_SAME` (networking once you know everyone), `TIRED_SLIPS` per job family |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -139,6 +141,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 - The computer's colours are tokens (`--os-*`) set per palette on `:root[data-pal=…]`; don't hard-code blues inside `.os` rules.
 
 ## Tests (run all before publishing)
+Long playthroughs (find repetition, quiet stretches, balance drift): `node tools/longplay.js <crew|actor|writer|musician|creator|producer|student|heir> [years] [out.json]`, then `node tools/longplay-report.js out.json... [--top N]` (progression per year, messages per channel, share repeated within a year, most repeated lines). `SAVE_OUT=x.applebox` also writes the career as a save file the Saves page can import (useful for looking at late-game screens in the browser).
 ```
 python3 tools/build.py
 node tools/playtest.js 60          # bot career; must print "replayed … IDENTICAL"
@@ -179,6 +182,10 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Room avatar moves rarely (home.js interval, `roomT % 10 || Math.random() < .35`).
 - Never use `confirm()`/`prompt()`/`alert()`: the artifact frame can block them (they then return no). Use a two-click button instead (see `sBtn` in saves.js, or Abandon career).
 - The character creator stores the name on every keystroke (input listener in index.html), since clicks re-render the form and Safari doesn't blur on button clicks.
+- Autopilot is craft-first (`rankedFits`, `craftJob` in autopilot.js): your own craft, then your industry, and odd jobs only with under 12 weeks of runway; while you only hold jobs outside your craft it keeps applying for craft work. `hasFooting()` (late-game.js): you count as "not looking" only with a year's runway, level 2 and a foothold (2 credits, a year of craft work, 4 releases, or level 4).
+- `lateRich()` is $150k, or two years' runway at level 4: the late game used to start with a year of savings and snowballed into millions without work.
+- `careerLevel` is capped by a body of work (credits + released works ÷ 2, +3 for a senior company rung): under 2 → max 3, under 5 → max 4.
+- Late opportunities cool down for 104 weeks (`late`) / 78 (`indie`); industry invitations per kind every 26 weeks; at most one exhausted mistake a week.
 - Boardroom crash fix: brand endorsements live in `M.brandDeals` (starmeter.js, `brandDealCount`); the Boardroom only reads `M.deals` entries whose `kind` is in `DEAL_STAGES`; `cl(id)` shows "a company no longer listed" for a missing company.
 
 ## Moving to another account

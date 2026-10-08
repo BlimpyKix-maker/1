@@ -246,7 +246,7 @@ function lifeDayEvent(act) {
   if (act.startsWith('evening:')) { if (act === 'evening:out' && prnd() < .2) lifeScene(LIFE_SCENES.out); else if (prnd() < .03) maybeEvent(); return; }
   if (LIFE_SCENES[act] && prnd() < .12) lifeScene(LIFE_SCENES[act]);
 }
-function lifeMorningEvent() { if (typeof roadEvent === 'function') roadEvent(); if (typeof lateMorning === 'function') lateMorning(); }
+function lifeMorningEvent() { if (typeof roadEvent === 'function') roadEvent(); if (typeof arcMorning === 'function') arcMorning(); if (typeof lateMorning === 'function') lateMorning(); }
 
 // ---- interviews ----
 // An application now goes to a shortlist; the interview is a scene where how you play it decides the offer.

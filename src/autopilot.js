@@ -10,7 +10,8 @@ function sensibleChoice(it) { const L = (it.choices || []).filter(c => !c.dis); 
 function autoBeforeStep() {
   const M = S.me; if (!M || !careerActive()) return;
   if (autoOn('minor')) for (const it of pending().filter(x => x.kind === 'scene')) { const k = sensibleChoice(it); if (k) doAct({ t: 'pick', id: it.id, k, auto: 1 }); }
-  if (autoOn('apply') && !M.jobs.length && lookingForWork() && typeof appSlots === 'function') {
+  // out of work, or only doing jobs outside your craft: keep applying for the work you came here to do
+  if (autoOn('apply') && lookingForWork() && (!M.jobs.length || !M.jobs.some(craftJob)) && typeof appSlots === 'function') {
     const slots = appSlots(); UI.apps = new Set([...UI.apps].filter(id => M.board.some(p => p.id === id)));
     if (!UI.apps.size && slots) for (const [p] of rankedFits(slots)) UI.apps.add(p.id);
   }
@@ -31,4 +32,14 @@ function jobRelevance(p) {
   if ((t.subs || []).some(s => subs.includes(s))) return 1;
   return ind === field ? .6 : .3;
 }
-function rankedFits(n) { return S.me.board.filter(p => !blockedFrom(tmplOf(p))).map(p => [p, hireOdds(p)]).sort((a, b) => b[1] * (.4 + jobRelevance(b[0])) - a[1] * (.4 + jobRelevance(a[0]))).slice(0, n); }
+// Your own craft comes first. Jobs near it (same industry) fill in; anything going (ushering, bar work) only when the
+// money is running out, or while you've nothing at all. Already working outside your craft: only craft jobs.
+function craftJob(p) { return jobRelevance(p) >= 1; }
+function rankedFits(n) {
+  const M = S.me, short = runwayWeeks() < 12, L = M.board.filter(p => !blockedFrom(tmplOf(p))).map(p => [p, hireOdds(p), jobRelevance(p)]);
+  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= 1 || x[2] >= .6 || short);
+  const ranked = want.sort((a, b) => b[1] * (b[2] >= 1 ? 1.8 : b[2] >= .6 ? 1 : .55) - a[1] * (a[2] >= 1 ? 1.8 : a[2] >= .6 ? 1 : .55));
+  // never leave a broke player with nothing to apply for
+  const out = ranked.length || M.jobs.length ? ranked : L.sort((a, b) => b[1] - a[1]);
+  return out.slice(0, n).map(x => [x[0], x[1]]);
+}

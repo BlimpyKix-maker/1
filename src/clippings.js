@@ -79,7 +79,7 @@ const AMBITIONS = [
   { k: 'credit', t: 'Earn a screen credit', p: () => [ME().credits.length + S.me.past.filter(x => x.credited).length > 0 ? 1 : 0, 1], rw: 2 },
   { k: 'script', t: 'Finish a script', p: () => [(S.me.scripts || []).filter(s => s.grade).length, 1], rw: 1 },
   { k: 'contest', t: 'Place in a competition', p: () => [(S.me.comps || []).filter(e => e.told && e.place !== 'out').length, 1], rw: 1 },
-  { k: 'level2', t: 'Reach level 2: credits to your name', p: () => [careerLevel(), 2], rw: 2 },
+  { k: 'level2', t: 'Reach level 2: finding your feet', p: () => [careerLevel(), 2], rw: 2 },
   { k: 'agent', t: 'Sign with an agent', p: () => [S.me.agent ? 1 : 0, 1], rw: 2 },
   { k: 'corner', t: 'Have someone in your corner', p: () => [Object.keys(S.me.champ || {}).length, 1], rw: 2 },
   { k: 'five', t: 'Five screen credits', p: () => [S.me.past.filter(x => x.credited).length, 5], rw: 2 },

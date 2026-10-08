@@ -45,7 +45,7 @@ function mentorOf() { const M = S.me; for (const id in M.rel || {}) if (M.rel[id
 function canRomance(id) {
   const M = S.me, q = P(id), r = (M.rel || {})[id];
   if (q.dead || partnerOf() !== null || (r && r.s === 'ex' && S.week - r.since < 26) || (r && r.s === 'mentor')) return false;
-  if (M.known[id].tags.includes('Your parent')) return false;
+  if (M.known[id] && M.known[id].tags.includes('Your parent')) return false;
   return Math.abs(ageOf(q) - ageOf(ME())) <= 10 && ageOf(q) >= 18;
 }
 function seniorTo(id) { return P(id).standing - ME().standing >= 20; }
@@ -97,7 +97,7 @@ function phoneTick(d, b) {
       if (known.length < 2) return;
       const a = ppick(known), b2 = ppick(known.filter(x => x !== a)), from = ppick(known.filter(x => x !== a && x !== b2).concat([null]));
       if ((M.phone || []).some(m => m.kind === 'gossip' && m.person === a && S.week - m.w < 5)) return;   // old news
-      sms(from, pickLine(GOSSIP_LINES, a + b2 + S.week).replace('{a}', P(a).name).replace('{b}', P(b2).name), 'gossip', { person: a });
+      sms(from, pickLine(GOSSIP_LINES, a + b2 + S.week).replace(/\{a\}/g, P(a).name).replace(/\{b\}/g, P(b2).name), 'gossip', { person: a });
       return;
     }
     case 'home': sms(null, ppick(HOME_CALLS), 'home'); M.wk.stress -= 1; return;
@@ -159,7 +159,7 @@ function inviteFrom(id) {
 function askFrom(id) {
   const q = P(id), slot = freeSlot({ days: [5, 6], blocks: [0, 1], from: 1 });
   if (!slot) return;
-  const what = pickLine(['help moving flat', 'a hand painting a set for their short', 'someone to run lines with before an audition', 'a lift to the airport at dawn', 'help building a bookcase that came in 140 pieces'], id + S.week);
+  const what = pickLine(ASK_WHAT, id + S.week);
   sms(id, `huge favour... ${what}? ${slotLabel(slot)}`, 'ask');
   inbox('ask', `${q.name} needs a favour`, `${q.name} asks for ${what}, ${slotLabel(slot)}. It'll eat the block and some energy.`, { person: id, slot, what, choices: [{ k: 'yes', label: 'Of course' }, { k: 'no', label: 'Say you can\'t' }] });
 }
@@ -170,8 +170,8 @@ function socialPick(it, k) {
     const q = P(it.person);
     if (k === 'yes') {
       if (!slotFree(it.slot)) { it.result = { t: 'You already have something then. You tell them, and they understand.' }; }
-      else { bookAppt(Object.assign({ kind: it.kind === 'invite' ? 'invite' : 'help', who: it.person, ev: it.ev, film: it.film, what: it.what }, it.slot)); sms(-1, it.kind === 'invite' ? 'yes! see you there' : 'of course. I\'ll be there', 'mine', { to: it.person }); it.result = { t: `In your diary: ${it.what}, ${slotLabel(it.slot)}.` }; }
-    } else { addTie(me, q, it.kind === 'ask' ? -3 : -1); sms(-1, pickLine(['so sorry, can\'t that night', 'ah, I\'m slammed. next time?', 'can\'t, sorry!! have fun'], it.id), 'mine', { to: it.person }); it.result = { t: it.kind === 'ask' ? `${q.name} says it's fine. It isn't quite.` : 'Next time.' }; }
+      else { bookAppt(Object.assign({ kind: it.kind === 'invite' ? 'invite' : 'help', who: it.person, ev: it.ev, film: it.film, what: it.what }, it.slot)); sms(-1, pickLine(it.kind === 'invite' ? YES_TXT : HELP_TXT, it.id + it.person), 'mine', { to: it.person }); it.result = { t: `In your diary: ${it.what}, ${slotLabel(it.slot)}.` }; }
+    } else { addTie(me, q, it.kind === 'ask' ? -3 : -1); sms(-1, pickLine(NO_TXT, it.id + it.person), 'mine', { to: it.person }); it.result = { t: it.kind === 'ask' ? `${q.name} says it's fine. It isn't quite.` : 'Next time.' }; }
     it.done = true; it.picked = k; return true;
   }
   return false;

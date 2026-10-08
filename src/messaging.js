@@ -416,7 +416,7 @@ const INVITE_MAILS = [
 ];
 function inviteMailWeek() {
   const M = S.me, me = ME(); if (prnd() > .3) return;
-  const L = INVITE_MAILS.filter(x => me.standing >= x.min && !(M.mail || []).some(m => m.act && m.act.inv === x.k && S.week - m.w < 10)); if (!L.length) return;
+  const L = INVITE_MAILS.filter(x => me.standing >= x.min && !(M.mail || []).some(m => m.act && m.act.inv === x.k && S.week - m.w < 26)); if (!L.length) return;
   const x = L[Math.floor(prnd() * L.length)], cos = S.companies.filter(c => c.hub === M.hub && c.closed === null), c = cos.length ? cos[Math.floor(prnd() * cos.length)] : null;
   mail('offers', c ? `${c.name} · Events` : 'Events team', x.subj, `Dear ${me.name.split(' ')[0]},\n\n${x.body}\n\nWarm regards,\nThe events team${c ? ', ' + c.name : ''}`, { k: 'opt', kind: 'invite', inv: x.k, opts: [['i_yes', x.yes], ['i_no', 'Politely decline']] });
 }
