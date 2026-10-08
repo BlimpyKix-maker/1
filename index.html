@@ -29712,7 +29712,7 @@ function savesHTML() {
   return `<section class="panel"><h3>Save your life</h3>
    <div class="ccrow"><label>Name <input id="save-name" maxlength="40" placeholder="${esc(snapLabel())}" value="${esc(UI.saveName || '')}"></label> <button class="btn-s" data-snew="1" ${man.length >= MAX_MANUAL ? 'disabled' : ''}>Save now</button> <span class="muted small">${man.length} of ${MAX_MANUAL} manual saves${man.length >= MAX_MANUAL ? ': delete or overwrite one to save again' : ''}</span></div>
    <div class="ccrow"><label>Autosave ${sel('save-auto', Object.entries(AUTO_EVERY), autoPref())}</label> <span class="muted small">The ${MAX_AUTO} most recent autosaves are kept. ${autoPref() === 'week' ? 'Weekly autosaves take a moment each week.' : ''}</span></div>
-   <div class="ccrow"><label class="btn-s ghost" style="cursor:pointer">Import a save file <input type="file" id="save-import" accept=".applebox,application/gzip" hidden></label> <span class="muted small">${esc(UI.saveIO || 'Export a save to keep a copy, or to carry your career to another browser or computer.')}</span></div>
+   <div class="ccrow"><label class="btn-s ghost" style="cursor:pointer">Import a save file <input type="file" id="save-import" accept=".applebox,.json,application/gzip,application/json" hidden></label> <span class="muted small">${esc(UI.saveIO || 'Export a save to keep a copy, or to carry your career to another browser or computer.')}</span></div>
    <p class="small muted">${UI.saveQuota ? `Using ${(UI.saveQuota[0] / 1e6).toFixed(0)} MB of the ${(UI.saveQuota[1] / 1e9).toFixed(1)} GB this browser allows. ` : ''}Saves live in this browser. A save made on an older version of the game loads on a newer one. Between saves, what you do is journalled, so closing the tab loses nothing.</p></section>
    <section class="panel"><h3>Manual saves <span class="count">${man.length}</span></h3>${man.length ? `<div class="tw"><table class="grid small"><tbody>${man.map(row).join('')}</tbody></table></div>` : '<p class="muted small">None yet.</p>'}</section>
    <section class="panel"><h3>Autosaves <span class="count">${auto.length}</span></h3>${auto.length ? `<div class="tw"><table class="grid small"><tbody>${auto.map(row).join('')}</tbody></table></div>` : '<p class="muted small">None yet. The first comes at the next turn of the schedule.</p>'}</section>`;
@@ -29737,10 +29737,18 @@ async function exportSlot(id) {
   UI.saveIO = 'Preparing the file…'; render(true);
   try {
     const str = await readSlot(id); if (!str) throw new Error('missing');
+    const base = (meta.name || meta.label || 'save').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').slice(0, 60);
+    // inside claude.ai the page can't download directly: the viewer's own save dialog takes it, as plain JSON
+    const dl = UI.downloads === undefined && typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function' ? (UI.downloads = await window.claude.use('downloads').catch(() => null)) : UI.downloads;
+    if (dl) {
+      try { await dl.save({ filename: base + '.applebox.json', data: new Blob([JSON.stringify({ applebox: SAVE_FILE_V, meta, snap: str })]) }); UI.saveIO = `Exported "${meta.name || meta.label}".`; }
+      catch (e) { UI.saveIO = e && e.code === 'declined' ? 'Export cancelled.' : 'Couldn\'t export that save here. Open the game from its file to export.'; }
+      render(true); return;
+    }
     const p = await pack(JSON.stringify({ applebox: SAVE_FILE_V, meta, snap: str }));
     const blob = p.z ? p.data : new Blob([p.data], { type: 'application/json' });
     const a = document.createElement('a'), url = URL.createObjectURL(blob);
-    a.href = url; a.download = (meta.name || meta.label || 'save').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').slice(0, 60) + '.applebox';
+    a.href = url; a.download = base + '.applebox';
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
     UI.saveIO = `Exported "${meta.name || meta.label}" (${(blob.size / 1e6).toFixed(1)} MB). If no download appeared, open the game from its file to export.`;
   } catch (e) { UI.saveIO = 'Couldn\'t export that save.'; }
