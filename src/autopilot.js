@@ -36,7 +36,8 @@ function jobRelevance(p) {
 // money is running out, or while you've nothing at all. Already working outside your craft: only craft jobs.
 function craftJob(p) { return jobRelevance(p) >= 1; }
 function rankedFits(n) {
-  const M = S.me, short = runwayWeeks() < 12, L = M.board.filter(p => !blockedFrom(tmplOf(p))).map(p => [p, hireOdds(p), jobRelevance(p)]);
+  const M = S.me, short = runwayWeeks() < 12, floor = careerLevel() >= 3 && !short ? tierLevel() - 1 : 0;   // established: nothing far below your level
+  const L = M.board.filter(p => !blockedFrom(tmplOf(p)) && (p.tier || 1) >= floor).map(p => [p, hireOdds(p), jobRelevance(p)]);
   const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= 1 || x[2] >= .6 || short);
   const ranked = want.sort((a, b) => b[1] * (b[2] >= 1 ? 1.8 : b[2] >= .6 ? 1 : .55) - a[1] * (a[2] >= 1 ? 1.8 : a[2] >= .6 ? 1 : .55));
   // never leave a broke player with nothing to apply for

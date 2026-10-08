@@ -47,8 +47,8 @@ const BRANDS = [
 ];
 function endorseWeek() {
   const M = S.me, me = ME(), s = starScore(me), r = hashRand(S.week * 59 + M.id);
-  if (s < 18 || r() > .12 + s / 400 || (M.mail || []).some(m => m.act && m.act.k === 'endorse' && !m.done && S.week - m.w < 6)) return;
-  const field = M.field && M.field !== 'film' ? M.field : null, L = BRANDS.filter(b => b[2].includes(me.role) || (field && b[2].includes(field)));
+  if (s < 18 || r() > .12 + s / 400 || (M.mail || []).some(m => m.act && m.act.k === 'endorse' && S.week - m.w < 13)) return;   // a brand a quarter at most
+  const field = M.field && M.field !== 'film' ? M.field : null, L = BRANDS.filter(b => (b[2].includes(me.role) || (field && b[2].includes(field))) && !(M.brandDeals || []).some(d => d.brand === b[0] && S.week - d.w < 156));
   if (!L.length) return;
   const b = L[Math.floor(r() * L.length)], fee = Math.round(usd(clamp(600 * Math.pow(s / 18, 2.2), 600, 400000)) / 50) * 50;
   mail('offers', `Partnerships, ${b[0]}`, `Front our campaign for ${b[1]}?`, `${pickLine([`We're launching ${b[1]} and we think you're exactly the right face for it.`, `Our customers know your work, and we'd love you to front our new campaign for ${b[1]}.`, `We're looking for someone with real credibility to front ${b[1]}, and your name keeps coming up.`], S.week)} A photo shoot, two social posts and a short film for our channels. Fee: ${fmtCash(fee)}.${b[3] === 2 ? ' (Your agent mutters that this one could age badly.)' : b[3] === 1 ? ' It\'s not glamorous, but the money is real.' : ''}`, { k: 'endorse', fee, brand: b[0], shady: b[3] });

@@ -535,6 +535,7 @@ function arcCost(v, c) { if (!v) return 0; if (typeof v === 'string') return Mat
 function arcMorning() {
   const M = S.me, W = M && M.wk; if (!W || !M.party || !M.party.done) return;
   if (W.day === 5 && (M.flags || {}).retreat) M.stress = clamp(M.stress - 2, 0, 100);   // a weekend place: Saturdays out of town
+  callsMorning();
   const due = arcActive().find(x => x.w <= S.week && x.shown !== S.week && !M.inbox.some(it => it.arc === x.n && !it.done));
   if (due && (W.day === 1 || W.day === 3 || W.day === 5 || (W.day === 6 && due.w < S.week))) { arcShow(due); return; }
   if (W.day === 2) {
@@ -571,6 +572,24 @@ function arcPick(it, k) {
   if (R.n && a.stages[R.n]) { x.st = R.n; x.part++; const w = R.w || [1, 3]; x.w = S.week + w[0] + Math.floor(prnd() * (w[1] - w[0] + 1)); }
   else { x.done = true; x.end = arcFill(R.end || R.t || '', x.c); x.w1 = S.week; (M.arcLog = M.arcLog || []).push({ id: x.id, name: a.name, w0: x.w0, w1: S.week, end: x.end, who: x.c.who, film: x.c.film }); if (M.arcLog.length > 200) M.arcLog.shift(); }
   return true;
+}
+// ---- the phone rings ----
+// Established people don't scan job boards: work finds them. With a name (level 3+) and nothing in your own craft on,
+// every couple of months someone calls with a job at your level, no interview: yes or no.
+function callsMorning() {
+  const M = S.me, W = M.wk; if (W.day !== 0 || careerLevel() < 3 || typeof craftJob !== 'function') return;
+  if (M.jobs.some(craftJob) || S.week - (M.callW || -99) < 8 || M.inbox.some(it => it.kind === 'offer' && !it.done)) return;
+  if (prnd() > (lookingForWork() ? .25 : .45)) return;
+  const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7);
+  if (!L.length) return;
+  // your own industry first, then the most senior; the very top pick varies, so it isn't the same job every time
+  const home = q => (typeof postIndustry !== 'function' || postIndustry(q) === (M.field || 'film')) ? 1 : 0;
+  L.sort((a, b) => home(b) - home(a) || (b.tier || 1) - (a.tier || 1) || b.rate - a.rate);
+  const p = L[Math.floor(prnd() * Math.min(3, L.length))];
+  const caller = p.head !== null && p.head !== undefined && M.known[p.head] ? p.head : (() => { const ids = aliveKnown().filter(id => opinion(id) > 5); return ids.length ? ppick(ids) : p.head; })();
+  const who = caller !== null && caller !== undefined && P(caller) ? P(caller).name : 'A producer';
+  M.callW = S.week;
+  inbox('offer', `A call: ${p.t}`, `${who} calls. ${pickLine(['They asked for you by name.', 'Your name came up in a meeting and nobody argued.', 'Someone dropped out and you were the first call.', 'They\'ve seen your work, and they want it on this.', 'No interview, no list. They want you.'], S.week + p.id)} ${offerText(p)}`, { post: p, person: caller !== null && caller !== undefined ? caller : undefined, choices: [{ k: 'yes', label: 'Take it' }, { k: 'no', label: 'Turn it down' }] });
 }
 // Life tab: the stories of your life so far
 function arcLogHTML() {
