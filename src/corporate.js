@@ -77,6 +77,15 @@ function corpPosts() {
   out.push(p);
   return out;
 }
+// who gets the senior floors: vice presidents have a reputation, presidents have a record, chiefs have both
+function corpGate(r) {
+  const me = ME(), L = careerLevel(), sc = (corpJob() || {}).score || 0;
+  if (r <= 3) return true;
+  if (r === 4) return me.standing >= 30;
+  if (r === 5) return me.standing >= 42 && L >= 4;
+  if (r === 6) return me.standing >= 58 && L >= 5 && sc >= 1;
+  return me.standing >= 72 && L >= 6 && sc >= 2;
+}
 // ---- the weekly life of a company person ----
 function corpWeek() {
   const M = S.me, me = ME(), j = corpJob();
@@ -84,13 +93,14 @@ function corpWeek() {
     const r = +j.k.slice(5), c = S.companies[j.co];
     if (j.co === undefined || !c || c.closed !== null) return;
     j.rungW = j.rungW ?? j.started;
-    const due = Math.max(26 + r * 6, 30 + r * 10 - Math.max(0, (j.score || 0)) * 2), boss = j.head;
-    if (r < 7 && S.week - j.rungW >= due && !pending().some(x => x.kind === 'corp') && (boss === null || boss === undefined || opinion(boss) >= 10) && (j.score || 0) >= -1 && hashRand(S.week * 7 + j.id)() < .25)
+    // the ladder narrows: years at each rung, and the top floors want a name in the business as well as results
+    const due = Math.max(40 + r * 14, 52 + r * 24 - Math.max(0, (j.score || 0)) * 3), boss = j.head;
+    if (r < 7 && S.week - j.rungW >= due && corpGate(r + 1) && !pending().some(x => x.kind === 'corp') && (boss === null || boss === undefined || opinion(boss) >= 10) && (j.score || 0) >= -1 && hashRand(S.week * 7 + j.id)() < .25)
       inbox('corp', `A promotion at ${c.name}`, `${boss !== null && boss !== undefined ? P(boss).name + ' calls you in.' : 'The boss calls you in.'} "We'd like you to be our ${LADDER[r + 1][0].toLowerCase()}." ${fmtCash(usd(rungPay(c, r + 1)))} a year. ${LADDER[r + 1][2]}`, { act: 'promote', job: j.id, choices: [{ k: 'yes', label: 'Accept the promotion' }, { k: 'no', label: 'Stay where you are for now' }] });
     // headhunters: good people get calls
     if (r >= 1 && r < 6 && S.week - j.rungW >= 26 && S.week % 9 === (j.id % 9) && !pending().some(x => x.kind === 'corp') && me.standing + r * 6 >= 22 && hashRand(S.week * 11 + j.id)() < .5) {
       const rivals = S.companies.filter(x => x.closed === null && x.owner === undefined && x.id !== c.id && x.tier <= c.tier + (r >= 4 ? 0 : 1) && (x.hub === M.hub || r >= 4));
-      if (rivals.length) { const x = rivals[Math.floor(hashRand(S.week + j.id)() * rivals.length)], nr = Math.min(7, r + 1), pay = Math.round(rungPay(x, nr) * 1.15);
+      if (rivals.length && corpGate(Math.min(7, r + 1))) { const x = rivals[Math.floor(hashRand(S.week + j.id)() * rivals.length)], nr = Math.min(7, r + 1), pay = Math.round(rungPay(x, nr) * 1.15);
         inbox('corp', `A headhunter calls`, `A recruiter from ${pickLine(['Vantage Search', 'Northbridge Partners', 'Halcyon Executive', 'Crowne & Lisle'], S.week)} has a client: ${x.name}${x.hub !== M.hub ? ' in ' + hubName(x.hub) : ''} wants a ${LADDER[nr][0].toLowerCase()}. ${fmtCash(usd(pay))} a year, more than you make now. They need an answer this week.`, { act: 'poach', job: j.id, to: x.id, r: nr, pay, choices: [{ k: 'take', label: `Take it: move to ${x.name}` }, { k: 'counter', label: 'Tell your boss and ask them to match', check: ['cha', 13] }, { k: 'no', label: 'Thank them and say no' }] }); }
     }
     // the dark arts: high rungs get offers a careful person refuses

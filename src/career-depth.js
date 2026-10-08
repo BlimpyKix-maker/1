@@ -9,11 +9,13 @@ function careerLevel() {
   // time served counts a little; the quality of what you delivered counts more (job scores from the work itself)
   const work = M.past.reduce((t, p) => t + clamp(p.score || 0, -4, 6), 0) + M.jobs.reduce((t, j) => t + clamp(j.score || 0, -4, 6), 0);
   // a reputation needs something under it: without credits, released work or a senior post, it stops at 3 (and 4)
-  const body = me.credits.length + (M.works || []).filter(w => w.rel !== undefined).length * .5 + (typeof corpRung === 'function' && corpRung() >= 3 ? 3 : 0);
-  const base = Math.min(clamp(Math.floor(me.credits.length * .35 + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5), body >= 5 ? 5 : body >= 2 ? 4 : 3);
+  // work for hire counts too (commercials, videos, episodes, the play above the pub), a little less than a film credit
+  const hired = (M.gigs || []).filter(g => g.q >= 45).length;
+  const body = me.credits.length + Math.min(6, hired * .4) + (M.works || []).filter(w => w.rel !== undefined).length * .5 + (typeof corpRung === 'function' && corpRung() >= 3 ? 3 : 0);
+  const base = Math.min(clamp(Math.floor(me.credits.length * .35 + Math.min(1.5, hired * .12) + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5), body >= 5 ? 5 : body >= 2 ? 4 : 3);
   if (base < 5) return base;
   // past the top of the craft, what counts is a name: awards, fame, a body of work, or the top of a company
-  const aw = (me.awards || []).length, fame = me.fame || 0, cr = me.credits.length, rung = typeof corpRung === 'function' ? corpRung() : -1;
+  const aw = (me.awards || []).length + Math.floor(((M.gigPrizes || []).length) / 2), fame = me.fame || 0, cr = me.credits.length + Math.floor(hired / 3), rung = typeof corpRung === 'function' ? corpRung() : -1;
   if (me.standing >= 80 && M.stats.weeks >= 400 && (aw >= 2 || fame >= 70 || cr >= 20 || rung >= 7)) return 7;
   if (me.standing >= 60 && M.stats.weeks >= 200 && (aw >= 1 || fame >= 35 || cr >= 8 || rung >= 5)) return 6;
   return 5;

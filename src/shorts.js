@@ -128,12 +128,13 @@ function viewShortFest(fk) {
 }
 function shortsApp() {
   const M = S.me, tab = UI.sht || 'now', y = UI.shy || S.year;
-  const tabs = [['now', '🎞️ This year'], ['past', '📜 Year by year'], ['fests', '🏛️ The festivals'], ['mine', `🎬 Your shorts (${(M.works || []).filter(w => w.type === 'short').length})`]];
+  const tabs = [['now', '🎞️ This year'], ['past', '📜 Year by year'], ['fests', '🏛️ The festivals'], ['cal', '🗓️ Deadlines & entries'], ['mine', `🎬 Your shorts (${(M.works || []).filter(w => w.type === 'short').length})`]];
   let body = '';
   if (tab === 'now' || tab === 'past') {
     const yy = tab === 'now' ? S.year : y, years = []; for (let k = S.year; k >= 1955; k--) years.push(k);
     body = (tab === 'past' ? `<div class="filt"><label><span>Year</span>${sel('sh-y', years.map(k => [k, String(k)]), yy)}</label></div>` : `<p class="muted small">Where the next generation of directors is coming from. Shorts that won are marked 🏆; names you might know later are linked.</p>`) +
       Object.values(SHORT_FEST).filter(F => F.founded <= yy).map(F => { const L = shortsOf(F.k, yy); return L.length ? `<h4><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a> <span class="muted small">${esc(hubName(F.hub))}</span></h4><ul class="plain small">${L.map(s => `<li>${s.won ? '🏆 ' : ''}${shortLink(s)} <span class="muted">by</span> ${shortWho(s)} <span class="muted">· ${s.mins} min · ${esc(s.kind.toLowerCase())}</span></li>`).join('')}</ul>` : `<h4>${esc(F.name)}</h4><p class="muted small">${yy === S.year ? 'Not held yet this year.' : 'No record.'}</p>`; }).join('');
+  } else if (tab === 'cal' && typeof shortsCalendarHTML === 'function') { body = shortsCalendarHTML();
   } else if (tab === 'fests') {
     body = `<table class="grid small"><thead><tr><th>Festival</th><th>Where</th><th>Since</th><th>When</th><th>Top prize</th><th></th></tr></thead><tbody>${Object.values(SHORT_FEST).map(F => `<tr><td><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a></td><td>${esc(hubName(F.hub))}</td><td>${F.founded}</td><td>${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][F.month]}</td><td>${esc(F.prize)}</td><td class="muted">${F.qual ? 'Oswald-qualifying' : ''}${F.kind !== 'all' ? ' · ' + F.kind : ''}</td></tr>`).join('')}</tbody></table>`;
   } else {

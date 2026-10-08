@@ -187,8 +187,9 @@ function coinvAct(a) {
 }
 function coinvOwed(x) {
   const f = S.films[x.f]; if (f.rel === null || f.rentals === undefined) return 0;
-  const eq = eqShare(f) * f.cost, pool = Math.max(0, f.rentals - f.pa - f.backend) + (f.afterTotal || 0) * .5;
-  let owed = Math.min(pool, eq * 1.2) + Math.max(0, pool - eq * 1.2) * .5;
+  const eq = eqShare(f) * f.cost, pool = typeof eqPool === 'function' ? eqPool(f) : Math.max(0, f.rentals - f.pa - f.backend) + (f.afterTotal || 0) * .5;
+  const prem = x.prem || 1.2, split = x.split || .5;   // the terms you negotiated (or the standard ones)
+  let owed = Math.min(pool, eq * prem) + Math.max(0, pool - eq * prem) * split;
   if (f.tier === 1 && f.co !== null) owed = pool * .85;
   return Math.round(owed * x.amt / Math.max(1e-6, eq));   // owed and eq in millions, amt in dollars
 }
@@ -244,9 +245,9 @@ function finPanelHTML() {
   const M = S.me, c = myCo(), mine = c ? c.films.map(i => S.films[i]).filter(f => f.fin && (f.rel === null || S.week - f.rel < 26)) : [];
   const own = mine.length ? `<h4>On the road</h4>${mine.map(f => `<div class="finfilm"><b>${fl(f.id)}</b> ${f.fin.over === 'collapsed' ? '<span class="chip bad">collapsed</span>' : ''}<br>${roadHTML(f)}${stackBar(finStackOf(f))}<p class="small muted">Budget ${fmtM(f.budget)}${f.cost > f.budget ? `, running at ${fmtM(f.cost)}` : ''}${f.fin.bonded ? ' · bonded' : ''}${f.fin.bondTook ? ' · <span class="bad">the guarantor has control</span>' : ''}</p>${f.fin.log.length ? `<ul class="plain small">${f.fin.log.slice(-4).reverse().map(e => `<li class="${e.tone}">${fmtDate(e.w, true)} · ${esc(e.t)}</li>`).join('')}</ul>` : ''}</div>`).join('')}` : '';
   const open = coinvOpen(), held = (M.coinv || []).slice().reverse().slice(0, 12);
-  const offer = f => { const amts = [.05, .1, .25].map(p => Math.round(f.cost * 1e6 * eqShare(f) * p)); return `<tr><td>${fl(f.id)}<br><span class="muted small">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${f.co !== null ? cl(f.co) : 'independent'}</span></td><td class="small">${pl(f.dir)}<br>${pl(f.cast[0])}</td><td class="n">${fmtM(f.cost)}</td><td class="small">${esc(f.status)}</td><td>${amts.map((v, i) => `<button class="btn-s ghost" data-coinv="${f.id}:${i}" ${M.cash < v ? 'disabled' : ''}>${fmtCash(v)}</button>`).join(' ')}</td></tr>`; };
+  const offer = f => { const amts = [.05, .1, .25].map(p => Math.round(f.cost * 1e6 * eqShare(f) * p)); return `<tr><td>${fl(f.id)}<br><span class="muted small">${esc(f.genre)} · ${esc(hubName(f.hub))} · ${f.co !== null ? cl(f.co) : 'independent'}</span></td><td class="small">${pl(f.dir)}<br>${pl(f.cast[0])}</td><td class="n">${fmtM(f.cost)}</td><td class="small">${esc(f.status)}</td><td><button class="btn-s" data-dealopen="${f.id}">Open talks</button></td></tr>`; };
   return `${own}<h4>Invest in other people's films</h4><p class="small muted">Equity is the money that gets paid back first (120%, then half the profit), and the money that's lost first. On a studio film you're in a slate deal, pro rata, after the studio's fee. Most films lose money; development is where they die. Statements come after the run and then once a year for three years.</p>
-   ${open.length ? `<div class="tw"><table class="grid small"><thead><tr><th>Film</th><th>Director, lead</th><th class="n">Budget</th><th>Stage</th><th>Put in</th></tr></thead><tbody>${open.map(offer).join('')}</tbody></table></div>` : '<p class="muted small">Nothing raising money in town this week.</p>'}
+   ${open.length ? `<div class="tw"><table class="grid small"><thead><tr><th>Film</th><th>Director, lead</th><th class="n">Budget</th><th>Stage</th><th></th></tr></thead><tbody>${open.map(offer).join('')}</tbody></table></div>` : '<p class="muted small">Nothing raising money in town this week.</p>'}
    ${held.length ? `<h4>Your stakes</h4><ul class="plain small">${held.map(x => { const f = S.films[x.f]; return `<li>${fl(f.id)} · in ${fmtCash(x.amt)} · ${x.lost ? '<span class="bad">lost</span>' : f.rel === null ? esc(f.status) : `back so far <b class="${x.paid >= x.amt ? 'good' : ''}">${fmtCash(x.paid)}</b>`}</li>`; }).join('')}</ul>` : ''}`;
 }
 function finClick(t) { if (t.dataset.coinv) { const [f, p] = t.dataset.coinv.split(':'); doAct({ t: 'coinv', f: +f, p: +p }); render(true); return true; } return false; }

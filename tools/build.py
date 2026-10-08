@@ -165,6 +165,14 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('arcs', '// ================= Apple Box — World Core UI ================='),
                      ('variety', '// ================= Apple Box — World Core UI ================='),
                      ('party2', '// ================= Apple Box — World Core UI ================='),
+                     ('dreams', '// ================= Apple Box — World Core UI ================='),
+                     ('gigs', '// ================= Apple Box — World Core UI ================='),
+                     ('dealroom', '// ================= Apple Box — World Core UI ================='),
+                     ('paths', '// ================= Apple Box — World Core UI ================='),
+                     ('art', '// ================= Apple Box — World Core UI ================='),
+                     ('works2', '// ================= Apple Box — World Core UI ================='),
+                     ('bank2', '// ================= Apple Box — World Core UI ================='),
+                     ('contests2', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

@@ -143,10 +143,13 @@ function startCareer(c) {
   if (c.quirk === 'ex') { const x = youngNPC(hub, ppick(['actor', 'director', 'writer', 'producer', 'dp'])); meet(x.id, 'Your ex', -6); trust(x.id, 10); }
   M.party = makeParty(c);
   diary('You arrive in ' + HUBS[hub].name + ' with ' + fmtCash(M.cash) + (M.debt ? ' and ' + fmtCash(M.debt) + ' of student debt' : '') + '.');
-  milestone(`Arrived in ${HUBS[hub].name} to become a ${ROLE_LABEL[c.role].toLowerCase()}, with ${fmtCash(M.cash)} to your name`, 'start');
+  milestone(`Arrived in ${HUBS[hub].name} to become ${(L0 => (/^[aeiou]/i.test(L0) ? 'an ' : 'a ') + L0.toLowerCase())(DREAM_BY[c.dream] && DREAM_BY[c.dream].role === c.role ? DREAM_BY[c.dream].label : ROLE_LABEL[c.role])}, with ${fmtCash(M.cash)} to your name`, 'start');
   // your field: what you set out to make. Outside film, you start with a first project on the go
-  S.me.field = FIELDS[c.field] ? c.field : 'film';
-  const first = { music: 'song', creator: 'video', podcast: 'podcast', stage: 'play' }[S.me.field];
+  // the dream decides where you start; careers begun before dreams existed keep the field they chose
+  const chosen = DREAM_BY[c.dream] && DREAM_BY[c.dream].role === c.role ? DREAM_BY[c.dream] : null, dream = chosen || DREAM_BY[c.role];
+  if (dream) S.me.dream = dream.k;
+  S.me.field = chosen ? chosen.field : FIELDS[c.field] ? c.field : dream ? dream.field : 'film';
+  const first = (dream && dream.first) || { music: 'song', creator: 'video', podcast: 'podcast', stage: 'play' }[S.me.field];
   if (first) { S.me.make = { type: first, title: workTitle(first, 0), prog: 0, need: WORK_TYPES[first].need, w: S.week, boost: 0 }; S.me.focus.day = 'make'; }
 }
 
@@ -593,6 +596,7 @@ function hireFactors(post) {
   F.push(['First impressions', (me.mind.cha - 10) * .05]);
   if (typeof fieldFactors === 'function') F.push(...fieldFactors(post));
   if (typeof almaFactors === 'function') F.push(...almaFactors(post));
+  if (typeof reelFactors === 'function') F.push(...reelFactors(post));
   if (typeof starFactors === 'function') F.push(...starFactors(post));
   if (typeof codexFactors === 'function') F.push(...codexFactors(post));
   if (typeof repFactors === 'function') F.push(...repFactors(post));
@@ -732,6 +736,11 @@ function closeWeek(a) {
   if (typeof criticWeek === 'function') criticWeek();
   if (typeof bankWeek === 'function') bankWeek();
   if (typeof lateWeek === 'function') lateWeek();
+  if (typeof fieldDrift === 'function') fieldDrift();
+  if (typeof gigWeek === 'function') gigWeek();
+  if (typeof dealRoomWeek === 'function') dealRoomWeek();
+  if (typeof pathWeek === 'function') pathWeek();
+  if (typeof bank2Week === 'function') bank2Week();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
@@ -1038,6 +1047,12 @@ function resolvePick(it, k) {
   if (typeof arcPick === 'function' && arcPick(it, k)) return true;
   if (typeof coinvPick === 'function' && coinvPick(it, k)) return true;
   if (typeof finPick === 'function' && finPick(it, k)) return true;
+  if (typeof gigPick === 'function' && gigPick(it, k)) return true;
+  if (typeof pdealPick === 'function' && pdealPick(it, k)) return true;
+  if (typeof pcallPick === 'function' && pcallPick(it, k)) return true;
+  if (typeof stakePick === 'function' && stakePick(it, k)) return true;
+  if (typeof pathOfferPick === 'function' && pathOfferPick(it, k)) return true;
+  if (typeof campusPick === 'function' && campusPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -1130,6 +1145,15 @@ function applyAct(a) {
     case 'email': return typeof emailAct === 'function' && emailAct(a);
     case 'reply': return replyText(a);
     case 'focus': return setFocus(a);
+    case 'dealopen': return typeof dealOpenInvest === 'function' && dealOpenInvest(a.f);
+    case 'dealsend': return typeof dealSend === 'function' && dealSend(a);
+    case 'dealtake': return typeof dealTakeCounter === 'function' && dealTakeCounter(a);
+    case 'dealwalk': return typeof dealWalk === 'function' && dealWalk(a);
+    case 'shortsubmit': return typeof shortSubmit === 'function' && shortSubmit(a);
+    case 'bank2': return typeof bank2Act === 'function' && bank2Act(a);
+    case 'labapply': return typeof labApply === 'function' && labApply(a.k);
+    case 'gigpitch': return typeof gigPitch === 'function' && gigPitch(a.id);
+    case 'dream': return typeof setDream === 'function' && setDream(a.k);
     case 'trip': return bookTrip(a);
     case 'dept': return investDept(a);
     case 'release': return setRelease(a);

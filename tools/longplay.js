@@ -13,6 +13,16 @@ const TYPES = {
   producer: { role: 'producer', field: 'film', wealth: 'comfortable', edu: 'business', hub: 'toronto', write: 1, produce: 1 },
   student:  { role: 'director', field: 'film', wealth: 'savings', edu: 'filmdir', hub: 'mumbai', school: 'mfa', make: ['short'] },
   heir:     { role: 'producer', field: 'stage', wealth: 'trust', edu: 'art', hub: 'paris', make: ['play'], invest: 1, produce: 1 },
+  // dreams beyond the ten crafts: the field comes from the work, not a menu
+  dj:        { dream: 'dj', wealth: 'broke', edu: 'self', hub: 'berlin', make: ['song'] },
+  standup:   { dream: 'standup', wealth: 'scraping', edu: 'drama', hub: 'london', make: ['play'] },
+  publicist: { dream: 'publicist', wealth: 'gettingby', edu: 'uni', hub: 'newyork' },
+  showrunner:{ dream: 'showrunner', wealth: 'savings', edu: 'uni', hub: 'hollywood', write: 1 },
+  podcaster: { dream: 'podcaster', wealth: 'gettingby', edu: 'self', hub: 'toronto', make: ['podcast'] },
+  gamedev:   { dream: 'gamedev', wealth: 'gettingby', edu: 'art', hub: 'seoul' },
+  critic:    { dream: 'critic', wealth: 'scraping', edu: 'uni', hub: 'paris', make: ['video'] },
+  // bounces between dreams: actor, then podcaster, then music video director, then producer
+  bouncer:   { dream: 'actor', wealth: 'gettingby', edu: 'drama', hub: 'hollywood', bounce: [[60, 'podcaster'], [150, 'mvdir'], [260, 'producer']], make: ['podcast', 'mv'] },
 };
 const names = Object.keys(TYPES), kind = TYPES[ARG] ? ARG : names[+ARG % names.length], T = TYPES[kind];
 const h = require('./harness.js'), r = s => h.run(s);
@@ -25,7 +35,8 @@ r(`globalThis.REC = []; globalThis.RECW = {};
   const _sms = sms; sms = function (from, t, kind = 'text', extra = {}) { const n = (S.me.phone || []).length; const out = _sms.apply(this, arguments); const m = S.me.phone[S.me.phone.length - 1]; if (m && from !== null && from !== undefined && from !== S.me.id) REC.push({ w: S.week, ch: 'text:' + kind, key: '', t: m.t }); return out; };
   const _mail = mail; mail = function (folder, from, subj, body, act) { REC.push({ w: S.week, ch: 'mail:' + folder, key: '', t: String(subj || '') + ' | ' + String(body || '').slice(0, 300), dec: !!act }); return _mail.apply(this, arguments); };
   const _diary = diary; diary = function (t) { REC.push({ w: S.week, ch: 'diary', key: '', t: String(t) }); return _diary.apply(this, arguments); };`);
-r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Long Player', role: '${T.role}', field: '${T.field}', wealth: '${T.wealth}', edu: '${T.edu}', hub: '${T.hub}', traits: ['Charming', 'Workhorse'], love: ['Drama', 'Horror'] }) })`);
+if (T.dream) { const d = JSON.parse(r(`JSON.stringify(DREAM_BY['${T.dream}'])`)); T.role = d.role; T.field = d.field; }
+r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Long Player', dream: '${T.dream || T.role}', role: '${T.role}', field: '${T.field}', wealth: '${T.wealth}', edu: '${T.edu}', hub: '${T.hub}', traits: ['Charming', 'Workhorse'], love: ['Drama', 'Horror'] }) })`);
 r(`partyAuto()`);
 const pick = it => { let L = (it.choices || []).filter(c => !c.dis); if (!L.length) return null; if (it.kind === 'offer') return (L.find(c => c.k === 'yes') || L[0]).k; if (it.kind === 'broke') return (L.find(c => c.k === 'down') || L.find(c => c.k === 'borrow') || L[0]).k; const keep = L.filter(c => !/go home|give up|pack up|retire|leave the business|quit the business/i.test(c.label || '')); if (keep.length) L = keep; return (rnd() < .45 ? L[0] : L[Math.floor(rnd() * L.length)]).k; };
 const answer = () => { for (let g = 0; g < 12; g++) { const P = JSON.parse(r(`JSON.stringify(pending().map(it => ({ id: it.id, kind: it.kind, choices: (it.choices || []).map(c => ({ k: c.k, dis: !!c.dis, label: c.label })) })))`)); if (!P.length) return; for (const it of P) { const k = pick(it); if (k) r(`doAct({ t: 'pick', id: ${JSON.stringify(it.id)}, k: ${JSON.stringify(k)} })`); } } };
@@ -38,6 +49,7 @@ for (let w = 0; w < WEEKS; w++) {
   const n0 = r('REC.length');
   try {
     answer();
+    for (const [bw, bk] of T.bounce || []) if (w === bw) r(`doAct({ t: 'dream', k: '${bk}' })`);
     if (rnd() < .35) r(`(() => { const ids = aliveKnown().sort((a, b) => opinion(b) - opinion(a)); const s = upcomingSlots(10)[${Math.floor(rnd() * 10)}]; if (ids.length && s) doAct(Object.assign({ t: 'text', id: ids[${Math.floor(rnd() * 8)} % ids.length], kind: '${['hi', 'coffee', 'drinks', 'mentor', 'hi'][Math.floor(rnd() * 5)]}' }, s)); })()`);
     if (rnd() < .6) r(`(() => { const m = (S.me.phone || []).slice().reverse().find(m => m.replyable && !m.replied && m.from >= 0); if (m) doAct({ t: 'reply', mid: m.id, kind: '${['warm', 'funny', 'brief', 'warm', 'own'][Math.floor(rnd() * 5)]}', text: '${['ha, same. how is the shoot going?', 'sorry, slammed this week. next week?', 'that is amazing news!!', 'ugh. want to grab a drink?'][Math.floor(rnd() * 4)]}' }); })()`);
     if (rnd() < .5) r(`(() => { const m = (S.me.mail || []).find(m => m.act && !m.done); if (m) doAct({ t: 'mail', id: m.id, k: '${rnd() < .6 ? 'yes' : 'no'}' }); })()`);
@@ -63,7 +75,7 @@ for (let w = 0; w < WEEKS; w++) {
   if (w % 52 === 51) snaps.push(JSON.parse(r(`JSON.stringify({ y: S.year, age: ME().age, cash: Math.round(S.me.cash), level: careerLevel(), credits: ME().credits.length, standing: Math.round(ME().standing), jobs: S.me.jobs.map(j => j.t), known: Object.keys(S.me.known).length, stress: Math.round(S.me.stress), hold: (S.me.lateA || []).length, holdNet: Math.round((S.me.lateA || []).reduce((t, h) => t + (h.net || 0), 0)), works: (S.me.works || []).filter(w => w.rel !== undefined).length, arcs: (S.me.arcLog || []).length })`)));
 }
 const rec = JSON.parse(r('JSON.stringify(REC)'));
-const final = JSON.parse(r(`JSON.stringify({ week: S.week, over: !!S.me.over, milestones: (S.me.milestones || []).map(m => m.t), seenSc: Object.keys(S.me.seenSc || {}).length, past: S.me.past.map(p => p.t), arcs: (S.me.arcLog || []).map(x => x.name + ': ' + x.end), nan: Object.entries(ME().sk).concat(Object.entries(ME().mind), [['cash', S.me.cash], ['standing', ME().standing], ['fame', ME().fame], ['energy', S.me.energy], ['stress', S.me.stress]]).filter(([k, v]) => typeof v !== 'number' || !isFinite(v)).map(([k]) => k) })`));
+const final = JSON.parse(r(`JSON.stringify({ week: S.week, over: !!S.me.over, fol: S.me.fol, field: S.me.field, dream: S.me.dream, fieldLog: S.me.fieldLog, gigs: (S.me.gigs || []).map(g => g.k + ':' + g.q), pdeals: (S.me.pdeals || []).map(d => d.k + ':' + d.pick), labs: (S.me.labs || []).map(x => x.k), talks: (S.me.talks || []).map(d => d.kind + ':' + d.status), streams: (S.me.streams || []).length, milestones: (S.me.milestones || []).map(m => m.t), seenSc: Object.keys(S.me.seenSc || {}).length, past: S.me.past.map(p => p.t), arcs: (S.me.arcLog || []).map(x => x.name + ': ' + x.end), nan: Object.entries(ME().sk).concat(Object.entries(ME().mind), [['cash', S.me.cash], ['standing', ME().standing], ['fame', ME().fame], ['energy', S.me.energy], ['stress', S.me.stress]]).filter(([k, v]) => typeof v !== 'number' || !isFinite(v)).map(([k]) => k) })`));
 const out = OUT || `longplay-${kind}.json`;
 // SAVE_OUT=<file.applebox>: also write the career as a save file the game can import (Saves page)
 if (process.env.SAVE_OUT) {

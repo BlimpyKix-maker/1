@@ -44,12 +44,13 @@ const CORE_WORK = {
 const JOB_ROW = {};
 function jobRow(p) { const id = p.jid || (tmplOf(p) || {}).jid; if (!id) return null; if (JOB_ROW[id] === undefined) JOB_ROW[id] = (JOBS.jobs || []).find(j => j.id === id) || null; return JOB_ROW[id]; }
 function coreWork(p) {
-  const C = CORE_WORK[ME().role]; if (!C) return false;
+  // a dream with its own idea of the work (DJ, publicist, puppeteer) says so; the rest go by their craft
+  const D = typeof dreamOf === 'function' ? dreamOf() : null, C = (D && D.core) || CORE_WORK[ME().role]; if (!C) return false;
   const J = jobRow(p), title = String(p.t || '');
   if (C[2] && C[2].test(title)) return false;
   // your own industry only (television counts as film): a theatre lighting designer is next to a DP's work, not it
   const ind = typeof postIndustry === 'function' ? postIndustry(p) : 'film', field = S.me.field || 'film';
-  if (ind !== field && !(field === 'film' && ind === 'tv') && !(field === 'tv' && ind === 'film')) return false;
+  if (!(D && D.core) && ind !== field && !(field === 'film' && ind === 'tv') && !(field === 'tv' && ind === 'film')) return false;
   return !!((J && J.dept && C[0].test(J.dept)) || C[1].test(title));
 }
 function jobRelevance(p) {

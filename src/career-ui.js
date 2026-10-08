@@ -24,14 +24,14 @@ function suggestName(hub, g) {
   return EAST[HUBS[hub].lang] ? `${l} ${f}` : `${f} ${l}`;
 }
 function ccDefaults() {
-  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', role: 'director', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], salt: Math.floor(Math.random() * 1e9), look: defaultLook() };
+  return { name: suggestName('hollywood', 'X'), g: 'X', age: 23, hub: 'hollywood', dream: 'director', role: 'director', field: 'film', wealth: 'gettingby', edu: 'filmdir', arrival: 'plusone', build: 'everyday', quirk: 'none', points: {}, traits: [], love: ['Drama'], hate: [], favs: [], salt: Math.floor(Math.random() * 1e9), look: defaultLook() };
 }
 // Randomise the basics (name, pronouns, age, hub, dream job, look) or the whole page. Display-side randomness only:
 // what you end up with is what gets saved.
 function randomCC(all) {
   const R0 = () => Math.random(), pk = L => L[Math.floor(R0() * L.length)];
   const c = UI.cc;
-  c.g = pk(['X', 'F', 'M']); c.hub = pk(MAJOR_HUBS); c.role = pk(DREAM_ROLES); c.age = 18 + Math.floor(R0() * 15);
+  c.g = pk(['X', 'F', 'M']); c.hub = pk(MAJOR_HUBS); { const d = pk(DREAMS); c.dream = d.k; c.role = d.role; c.field = d.field; } c.age = 18 + Math.floor(R0() * 15);
   c.name = suggestName(c.hub, c.g);
   for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
   if (c.g === 'F') c.look.facial = 0;
@@ -102,8 +102,8 @@ function viewCreator() {
    <div class="ccrow"><label>Pronouns <select id="cc-g">${[['X', 'they/them'], ['F', 'she/her'], ['M', 'he/him']].map(([v, t]) => `<option value="${v}"${c.g === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>
    <label>Age <input id="cc-age" type="number" min="18" max="45" value="${c.age}"></label>
    <label>Home hub ${sel('cc-hub', MAJOR_HUBS.map(h => [h, HUBS[h].name]), c.hub)}</label>
-   <label>Dream job ${sel('cc-role', DREAM_ROLES.map(r => [r, ROLE_LABEL[r]]), c.role)}</label>
-   <label>Your field ${sel('cc-field', Object.entries(FIELDS), c.field || 'film')}</label></div>
+   <label>Dream ${dreamSelect(c.dream || c.role)}</label></div>
+   <p class="note"><b>${esc((DREAM_BY[c.dream] || DREAM_BY.director).label)}.</b> ${esc((DREAM_BY[c.dream] || {}).blurb || `You'll train as ${(ROLE_LABEL[(DREAM_BY[c.dream] || {}).role] || 'a filmmaker').toLowerCase().replace(/^/, m => /^[aeiou]/i.test(ROLE_LABEL[(DREAM_BY[c.dream] || {}).role] || '') ? 'an ' : 'a ')}, and go after ${FIELDS[(DREAM_BY[c.dream] || {}).field || 'film'].toLowerCase()} work first.`)} You don't choose an industry: where you end up working decides it, and you can change course any time.</p>
    <p class="note">Living costs and pay follow the hub's economy in ${S.startYear}. Younger characters have more room to grow; older ones start more skilled. Your portrait ages with you, and you can change your style later.</p></div></div>
    <h4>Your look</h4>${lookControls(c)}</section>
   <section class="panel cc"><h3>Origin</h3><h4>Family money</h4>${grid('wealth', ORIGIN.wealth)}<h4>Education</h4><p class="muted">Degrees count later: some jobs and internships ask for them.</p>${grid('edu', ORIGIN.edu)}<h4>How you got to the party</h4>${grid('arrival', ORIGIN.arrival)}</section>
@@ -475,6 +475,7 @@ function viewDesk() {
   }).join('');
   return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(roleTitle(me.role))} · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
+   ${typeof dreamLine === 'function' ? dreamLine() : ''}
    <p class="voice">Your voice: ${topThemes(voiceOf()).map(k => `<span class="vt">${esc(THEMES[k])}</span>`).join(' ') || '<span class="muted">still finding it</span>'} <span class="muted">· loves ${esc(M.love.join(', ').toLowerCase() || 'everything')}</span>${typeof fitLabel === 'function' && S.me.fit && (S.me.fit.mus >= 1.5 || Math.abs(S.me.fit.mass) >= 1.5 || S.me.fit.goal) ? ` · <span class="muted">Body: ${esc(fitLabel())}</span>` : ''}</p>
    <p class="hlinks"><a href="#" class="lk" data-go="person:${me.id}">Your full sheet</a> · <button class="linkish" data-restyle="1">${UI.restyle ? 'Done changing your look' : 'Change your look'}</button> · <button class="linkish" data-dtab="life">Your place</button> · <button class="linkish" data-dtab="life">Your story</button> · <button class="linkish" data-guide="1">${UI.guide ? 'Close the guide' : 'How this works'}</button></p>
    <div class="kpis mini"><div><span>Cash</span><b class="${M.cash < 0 ? 'bad' : ''}">${fmtCash(M.cash)}</b><small class="muted">${fmtCash(rent)} a week to live${M.shark ? ` · owe ${fmtCash(M.shark)}` : ''}</small></div>
@@ -496,7 +497,7 @@ function viewDesk() {
      ${cityPanel()}`;
     case 'phone': return phonePanel();
     case 'computer': return computerPanel();
-    case 'work': return (typeof workWeekHTML === 'function' ? workWeekHTML() : '') + jobWorkHTML() + (typeof slateHTML === 'function' ? slateHTML() : '') + (M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : '') + `
+    case 'work': return (typeof workWeekHTML === 'function' ? workWeekHTML() : '') + jobWorkHTML() + (typeof gigsHTML === 'function' ? gigsHTML() : '') + (typeof slateHTML === 'function' ? slateHTML() : '') + (M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : '') + `
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
   ${typeof boardFilterHTML === 'function' ? boardFilterHTML() : ''}<div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${(typeof boardView === 'function' ? boardView() : M.board).map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing matches. Try another industry or level.</td></tr>'}</tbody></table></div>
@@ -610,6 +611,14 @@ function careerClick(t) {
   if (t.dataset.endweek) { playWeeks(+t.dataset.endweek); return true; }
   if (t.dataset.day) { playStep('day'); return true; }
   if (t.dataset.next) { playStep('next'); return true; }
+  if (typeof dealClick === 'function' && dealClick(t)) return true;
+  if (typeof weatherClick === 'function' && weatherClick(t)) return true;
+  if (typeof bank2Click === 'function' && bank2Click(t)) return true;
+  if (typeof shortsClick2 === 'function' && shortsClick2(t)) return true;
+  if (t.dataset.labapply) { doAct({ t: 'labapply', k: t.dataset.labapply }); render(true); return true; }
+  if (t.dataset.gigpitch) { doAct({ t: 'gigpitch', id: +t.dataset.gigpitch }); render(true); return true; }
+  if (t.dataset.gigv !== undefined) { UI.gigView = t.dataset.gigv || null; render(true); return true; }
+  if (t.dataset.gigall) { UI.gigAll = !UI.gigAll; render(true); return true; }
   if (t.dataset.randcc) { randomCC(t.dataset.randcc === 'all'); render(true); return true; }
   if (t.dataset.story !== undefined) { UI.story = !!t.dataset.story && !UI.story; render(true); return true; }
   if (t.dataset.move) { doAct({ t: 'move', i: +t.dataset.move }); render(true); return true; }
@@ -664,9 +673,9 @@ function careerClick(t) {
   return false;
 }
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
-function roleTitle(role) { const L = careerLevel(), R = ROLE_LABEL[role] || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
+function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -676,6 +685,9 @@ function careerChange(e) {
   const id = e.target.id, v = e.target.value, c = UI.cc;
   if (e.target.dataset.share && v) { doAct({ t: 'share', id: +e.target.dataset.share, to: +v }); render(true); return true; }
   if (typeof schoolChange === 'function' && schoolChange(id, v)) { render(true); return true; }
+  if (typeof dealChange === 'function' && dealChange(e)) { render(true); return true; }
+  if (typeof bank2Change === 'function' && bank2Change(e)) { render(true); return true; }
+  if (typeof shortsChange2 === 'function' && shortsChange2(e)) return true;
   if (id === 'mc-kind' || id === 'mc-to') { UI.mc = UI.mc || {}; UI.mc.text = ($('#mc-text') || {}).value || UI.mc.text || ''; UI.mc[id.slice(3)] = v; render(true); return true; }
   if (typeof awardsChange === 'function' && awardsChange(id, v)) { render(true); return true; }
   if (id === 'fest-y') { UI.festY = +v; render(true); return true; }
@@ -690,6 +702,7 @@ function careerChange(e) {
     const k = id.slice(3);
     if (k === 'age') c.age = clamp(+v || 23, 18, 45);
     else if (k === 'name') c.name = v;
+    else if (k === 'dream') { const d = DREAM_BY[v]; if (d) { c.dream = d.k; c.role = d.role; c.field = d.field; } }
     else c[k] = v;
     if (k === 'hub' || k === 'g') c.name = $('#cc-name') && $('#cc-name').value.trim() ? $('#cc-name').value : suggestName(c.hub, c.g);
     if (k === 'age' && c.age < 26) c.traits = c.traits.filter(t => t !== 'Late bloomer');
@@ -709,6 +722,7 @@ function careerChange(e) {
   if (/^pitch-\d+$/.test(id)) { (UI.pitch = UI.pitch || {})[+id.slice(6)] = v; render(true); return true; }
   if (/^tx-(id|kind|slot)$/.test(id)) { UI.txt[id.slice(3)] = v; if (id === 'tx-id') UI.txt.slot = 0; render(true); return true; }
   if (id === 'pl-train') { S.me.train = v; return true; }
+  if (id === 'dr-dream' && careerActive()) { if (DREAM_BY[v]) doAct({ t: 'dream', k: v }); render(true); return true; }
   if (id === 'pl-catch') { S.me.catchWith = v === '' ? null : +v; return true; }
   if (id === 'pl-life') { doAct({ t: 'life', v }); render(true); return true; }
   if (e.target.dataset.apply) { const pid = +e.target.dataset.apply; if (e.target.checked) UI.apps.add(pid); else UI.apps.delete(pid); render(true); return true; }

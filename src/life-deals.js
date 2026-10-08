@@ -176,18 +176,14 @@ function pitchDC(h, co) { return Math.round(clamp(({ 1: 21, 2: 18, 3: 16 }[co.ti
 function canPitch(h, co) { const M = S.me; return M.pitchW !== curW() && !(M.coYes || {})[co.id] && !(h.pitched[co.id] && S.week - h.pitched[co.id] < 8); }
 function pitchSpec(a) {
   const M = S.me, me = ME(), h = (M.holdings || []).find(y => y.id === a.id), co = S.companies[a.co];
-  if (!h || h.made !== undefined || !co || co.closed !== null || co.hub !== M.hub || !canPitch(h, co)) return false;
+  if (!h || h.made !== undefined || !co || co.closed !== null || co.hub !== M.hub || !canPitch(h, co) || (M.talks || []).some(d => d.h === h.id && d.status === 'open')) return false;
   h.pitched[co.id] = S.week; M.pitchW = curW();
   const ok = roll('pack', pitchDC(h, co)), r = M.lastRoll;
   if (!ok) { inbox('note', `${co.name} passes on ${h.title}`, `${pickLine(['"Not for us right now."', '"Love the writing, can\'t see the audience."', '"Bring it back with a star attached."', '"We have something too similar in development."'], h.id + co.id)} You can pitch it elsewhere.`, { result: { ok: false, roll: r, t: 'They pass.' } }); return true; }
-  const f = greenlight(M.hub, { genre: h.genre, wri: [h.writer], title: h.title, prod: me.id, co: co.id, score: h.score });
-  h.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = 'Producer'; (M.coYes = M.coYes || {})[co.id] = S.week;
-  const fee = clamp(Math.round(f.budget * 1e6 * .015 / 100) * 100, usd(15000), usd(400000));
-  M.cash += fee - taxOn(fee); me.standing = clamp(me.standing + 3, 0, 100);
-  addTie(me, P(h.writer), 10);
-  sms(h.writer, 'THEY SAID YES. WE\'RE MAKING IT', 'tip');
-  milestone(`${co.name} greenlit ${f.title}: you're producing`, 'credit');
-  inbox('news', `Green light: ${f.title}`, `${co.name} says yes. ${f.title} goes into production with a ${fmtM(f.budget)} budget, directed by ${P(f.dir).name}. You're the producer; your fee is ${fmtCash(fee)}.`, { film: f.id, result: { ok: true, roll: r, t: 'They\'re in.' } });
+  // a yes is the start of the deal, not the end of it: the producer's terms are negotiated in the Deal Room
+  const budget = budgetFor(co.tier, M.hub, h.genre, S.year), fee = clamp(Math.round(budget * 1e6 * .015 / 100) * 100, usd(15000), usd(400000));
+  inbox('note', `${co.name} says yes to ${h.title}`, `They want to make it. Now comes the deal.`, { result: { ok: true, roll: r, t: 'They\'re in.' } });
+  dealOpenProduce(h, co, fee, budget);
   return true;
 }
 function holdingsWeek() {

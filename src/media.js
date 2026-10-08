@@ -15,12 +15,12 @@ const PLATFORMS = {
 };
 const PLAT_OLD = { spinly: 'Radio & records', vidwire: 'Public-access TV', podhaus: 'Community radio', blip: null };   // before the platforms existed
 const WORK_TYPES = {
-  song: { label: 'Song', icon: '🎵', subs: ['song', 'theme'], need: 8, plat: 'spinly', field: 'music', base: 120, eng: .3, conv: .002, d: 'Write, record and release a song.' },
+  song: { label: 'Song', icon: '🎵', subs: ['song', 'theme'], need: 8, plat: 'spinly', field: 'music', base: 120, eng: .3, conv: .02, d: 'Write, record and release a song.' },
   score: { label: 'Composition / score', icon: '🎼', subs: ['score', 'orch'], need: 10, plat: 'library', field: 'music', base: 2, eng: 0, conv: 0, d: 'A piece of instrumental music for a library, a concert or a short film.' },
-  mv: { label: 'Music video', icon: '📹', subs: ['vstory', 'comp'], need: 6, plat: 'vidwire', field: 'music', base: 90, eng: .2, conv: .003, cost: 250, needs: 'song', d: 'Pictures for one of your songs. Drives streams of the song too.' },
-  video: { label: 'Vidwire video', icon: '▶️', subs: ['vstory', 'rhythm', 'pres'], need: 7, plat: 'vidwire', field: 'creator', base: 60, eng: .15, conv: .004, d: 'Plan, shoot and cut a video: essays, sketches, reviews, vlogs.' },
-  blip: { label: 'Blip clip', icon: '⚡', subs: ['comic', 'pres', 'impro'], need: 2, plat: 'blip', field: 'creator', base: 300, eng: .1, conv: .01, d: 'Sixty seconds or less. Cheap to make, easy to forget, sometimes enormous.' },
-  podcast: { label: 'Podcast episode', icon: '🎙️', subs: ['voice', 'dial', 'cha'], need: 4, plat: 'podhaus', field: 'podcast', base: 25, eng: .6, conv: .03, d: 'Record, edit and publish an episode. Audiences grow slowly and stay.' },
+  mv: { label: 'Music video', icon: '📹', subs: ['vstory', 'comp'], need: 6, plat: 'vidwire', field: 'music', base: 90, eng: .2, conv: .02, cost: 250, needs: 'song', d: 'Pictures for one of your songs. Drives streams of the song too.' },
+  video: { label: 'Vidwire video', icon: '▶️', subs: ['vstory', 'rhythm', 'pres'], need: 7, plat: 'vidwire', field: 'creator', base: 60, eng: .15, conv: .03, d: 'Plan, shoot and cut a video: essays, sketches, reviews, vlogs.' },
+  blip: { label: 'Blip clip', icon: '⚡', subs: ['comic', 'pres', 'impro'], need: 2, plat: 'blip', field: 'creator', base: 300, eng: .1, conv: .02, d: 'Sixty seconds or less. Cheap to make, easy to forget, sometimes enormous.' },
+  podcast: { label: 'Podcast episode', icon: '🎙️', subs: ['voice', 'dial', 'cha'], need: 4, plat: 'podhaus', field: 'podcast', base: 25, eng: .6, conv: .08, d: 'Record, edit and publish an episode. Audiences grow slowly and stay.' },
   play: { label: 'Stage play', icon: '🎭', subs: ['struc', 'dial', 'char'], need: 60, plat: 'stage', field: 'stage', base: 0, eng: 0, conv: 0, cost: 3200, d: 'Write a play and put it on at a fringe venue for two weeks.' },
   musical: { label: 'Musical', icon: '🎶', subs: ['song', 'struc', 'theme'], need: 100, plat: 'stage', field: 'stage', base: 0, eng: 0, conv: 0, cost: 9000, d: 'Book, music and lyrics. The hardest thing in the business to get right.' }
 };
@@ -74,9 +74,11 @@ function releaseWork(a) {
     if (q >= 78 && fill > .75) { w.pickup = 1; M.cash += usd(k.type === 'musical' ? 6000 : 2500); }
   } else {
     const z = pgauss(), fol = followers(T.plat);
-    const disc = T.base * Math.pow(10, (q - 50) / 22 + z * .75) * (1 + promo * .8) * (M.deal && ['song', 'mv'].includes(k.type) ? 2.5 : 1);   // a label's promotion
+    // discovery: quality and luck, promotion, a label's push, and the platforms favouring channels people already follow
+    const disc = T.base * Math.pow(10, (q - 50) / 22 + z * .75) * (1 + promo * .8) * (M.deal && ['song', 'mv'].includes(k.type) ? (M.deal.kind === 'indie' ? 1.6 : 2.5) : 1) * (1 + Math.sqrt(Math.max(0, fol)) / 30);
     w.v0 = Math.round(fol * T.eng + disc); w.z = z; w.df = w.v0 > 0 ? disc / w.v0 : 1;   // only newcomers become followers
     if (k.type === 'score') w.v0 = Math.max(0, Math.round((q - 35) / 12 + z));
+    if (typeof pathBoost === 'function') w.v0 = Math.round(w.v0 * pathBoost(T.plat));   // a label's marketing, a network's promotion
   }
   if (k.type === 'short' && typeof shortRelease === 'function') shortRelease(w);
   (M.works = M.works || []).push(w);
@@ -98,7 +100,7 @@ function mediaWeek() {
     if (units < 1 && age > 8) { w.done = 1; continue; }
     w.units += units; w.wk.push(units); if (w.wk.length > 26) w.wk.shift();
     const monet = !P0.gate || followers(w.plat) >= P0.gate;
-    let pay = Math.round(units * payNow(w.plat === 'spinly' && M.deal ? .0011 : P0.pay) * (monet ? 1 : 0));
+    let pay = Math.round(units * payNow(w.plat === 'spinly' && M.deal ? (M.deal.rate || .0011) : P0.pay) * (monet ? 1 : 0) * (typeof pathCut === 'function' ? pathCut(w.plat) : 1));
     if (w.plat === 'spinly' && M.deal && M.deal.rec < M.deal.adv) { const r = Math.min(pay, M.deal.adv - M.deal.rec); M.deal.rec += r; pay -= r; }   // the advance is paid back first
     w.earned += pay; M.cash += pay - taxOn(pay);
     M.fol[w.plat] = (M.fol[w.plat] || 0) + units * (w.df ?? 1) * T.conv * (.5 + w.q / 100);
