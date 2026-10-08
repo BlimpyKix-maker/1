@@ -105,11 +105,14 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/roger2.js` | Roger That browsable: `rtFilters`/`rtFilmTable` (genre, decade, verdict, min critics, sort; header click sorts), critic directory `rtCritics` (`RT_TEMPER`, `RT_WEIGHT`, `criticRecord`), `rtOutlets` |
 | `src/work2.js` | Work page week grid `workWeekHTML`, `fitChip` on board rows, `swapForOffer` (offer choice `swap`) |
 | `src/mine.js` | Your job/school pages: stack kinds `myjob:<id>`, `myschool:0` via `viewMine` (heads of department, cast, company staff; faculty, your year, alumni drawn from the town) |
-| `src/decide.js` | `decisionBoxHTML`: pending decisions in a sticky box at the top of #main (`UI.decI`, `UI.decMin`) |
-| `src/diary2.js` | Diary edits are actions (`calset`); pins (`calpin`, `M.calPins`, applied by `autoCal` via `applyPins`) and saved weeks (`calpreset`, `M.calPresets`) |
+| `src/decide.js` | `decisionBoxHTML`: pending decisions in a box inserted just above the computer (`.os-wrap`), below the portrait and basic info; not sticky (`UI.decI`, `UI.decMin`) |
+| `src/diary2.js` | Diary edits are actions (`calset`); pins (`calpin`, `M.calPins`, applied by `autoCal` via `applyPins`) and saved weeks (`calpreset`, `M.calPresets`); `diaryKeepHTML` is a slim one-line toolbar (keep checkbox, pin count, saved-weeks select, inline name field: no `prompt()`, which the artifact iframe can block) |
 | `src/make2.js` | Scriptwriter suite: tabs desk/story/chars/scenes/pages/punch/notes; action `swedit` (logline, title, char, scene, pages: 180 words = 1 page, 3/day), `punchup`; `fountain()` screenplay formatter |
 | `src/make3.js` | Studio (`st2`, `studioScore`, melody/groove/chord/mix/lyric reads, `st2Play` WebAudio), podcasts (`pod2`), CutRoom (`cut2`, `cutScore2`, thumbnail designer, preview), Notebook (`ideaAct`, sparks), Create hub `makeHubHTML`; `makesave` stores into `M.make.studio` |
 | `src/body.js` | Fitness `M.fit` {mus, mass, goal}: venues build muscle, `fitWeek` drift, role asks (`fitask` inbox, `fitPick`), drawn build via `look._fit` |
+| `src/tone.js` | Decisions never lecture: `stanceOf(label)` sorts choices into bold/careful/generous/plain; `stanceQuip` picks a win or miss line (hashRand, `{role}` = your job title) shown under the skill check (`result.quip`); `boldGambles` turns bold options that used to fail automatically into real rolls (cha/com 13) |
+| `src/msgfix.js` | Phone and mail read state: `phoneSeen` (`M.phoneSeen`), `threadUnread`, `phoneUnread` counts incoming only, `phoneFocus` (stake thread, else newest unread), `markAllRead` (`data-markread`), `msgScroll` (threads open at the newest message; mail jumps to the open email) |
+| `src/market3.js` | Full trading: `shortAct` (action `short`, open/cover, 50% margin), `orderAct` (action `order`: limit buy/sell, stop-loss, cancel; 20 max, 12-week expiry), `market3Week` (fills, borrow fee, margin calls); `tradePanelHTML(key)` (`c<id>` = studio, `s<key>` = sector); `tickerPageHTML(k)` (stack kind `ticker:<k>`: chart spans, KPIs, dividend note, clickable leaders and staff via `sectorRef`) |
 | `src/finance2.js` | One market (`mktRows`, `allMarketHTML`), sourced tips with track records (`tipsThisWeek`, `tipJudge`), `economyHTML`, private banking (securities line `sbl`, angels `angelsOf`/`angelAct`/`takeAngels` used by `selfFund`). Tips: 7 source kinds (`TIP_KIND`), angle-based reasons (`TIP_WHY`, `TIP_ANGLES`, `SECTOR_WHY`). Angels: `ANGEL_KIND` bios, `ANGEL_MOTIVE` (moves `angelDC`), `ANGEL_ASK` terms; success sends an `angeloffer` inbox (accept / haggle cha 14 / pass, `angelPick`), two new angels a year, `angelWeek` outreach every 4 weeks; `M.angelTry` keyed by name|kind |
 | `src/creative.js` | Scriptwriter (beat board `outlineAct`, `scriptSessAct`, coverage), Studio (mix, arrangement, podcast guest/order), CutRoom (clip sets, trims, packaging, predictions) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
@@ -167,6 +170,20 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - School ratings: `schoolRating` (out of 10, by percentile: 13 of 152 at 9+, median ~5.3); alumni hiring bonus and "great school" checks use it (`eliteSchool` = 8.5+).
 - Messaging: gossip only about known people you have feelings about (|opinion| ≥ 8), at most one every 4 weeks; newsletters and spam replace their previous issue; the mail inbox excludes newsletters and tracks read (`m.rd`).
 - Co-investment equity recoups 120% first, then half the rest; studio films are pro rata after a 15% fee. Statements at release +10 weeks, then yearly for three years.
+
+## Latest rounds (X and after)
+- Investors: `angelsOf` = 12 regulars + 6 that rotate each quarter (`Math.floor(S.week/13)`); `ANGEL_EXPOSURE` ties each to a sector; `angelFortune` (1-year return) sets worth, ticket and appetite; under .72 they step back, over 1.3 they're flush.
+- Recover day focus plans every free block as rest (`autoCal`, pins still win).
+- Table sorting: `cellVal` (jobboard.js) reads leading ▲/▼ as signs, so 1W/1Y sort by value, not closeness to zero. Yield column is "Dividend / yr".
+- Vacancies: `hubStaff` (corporate.js) fills from a wide pool, then a final pass fills any empty seat; `hop` (companies.js) falls back to staffOf. 0 of ~4,000 seats empty.
+- Room avatar moves rarely (home.js interval, `roomT % 10 || Math.random() < .35`).
+- Boardroom crash fix: brand endorsements live in `M.brandDeals` (starmeter.js, `brandDealCount`); the Boardroom only reads `M.deals` entries whose `kind` is in `DEAL_STAGES`; `cl(id)` shows "a company no longer listed" for a missing company.
+
+## Moving to another account
+- The code and its history are in the GitHub repo `BlimpyKix-maker/1`, branch `claude/cool-sagan-4jiu5s`. A new account needs access to that repo (add it as a collaborator, or fork/transfer it), or can start from the git bundle in the handoff package (`git clone apple-box.bundle apple-box`).
+- The game itself is one file, `index.html`; it runs from disk in any browser. The claude.ai artifact link belongs to the original account; a new account republishes `index.html` to get its own link (declare the `sample` capability for "Read the pages").
+- The handoff package also holds the conversation log and every request made so far, verbatim. Tell a new session to read this file first, then `your-requests.md`.
+- Session rules carried over: build with `python3 tools/build.py`, run all tests before publishing, keep world-gen deterministic, no real filmmaker or award names in trailers and taglines, don't scrape IMDb.
 
 ## Ideas queue (after the big notes pass)
 - `REAL_LOOKS` covers ~230 famous names; extend it for more (codes documented at the top of the file). The dead are drawn at ≤50.
