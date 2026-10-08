@@ -38,4 +38,4 @@ The code is at `github.com/BlimpyKix-maker/1`, branch `claude/cool-sagan-4jiu5s`
 (Upload `your-requests.md` and `conversation-log.md` to the session, or commit them to the repo, if they aren't there already.)
 
 ## Note on saved games
-Saved careers live in the browser's own storage, tied to the page address and device. They are not in this package. A new artifact link, or `index.html` opened from disk, starts with an empty Saves page. The game has no export button yet; ask the new session to add one if you want to carry a career across.
+Saved careers live in the browser's own storage, tied to the page address and device. They are not in this package. A new artifact link, or `index.html` opened from disk, starts with an empty Saves page. To carry a career across, open the Saves page on the old link, click Export next to a save to download it as a `.applebox` file, then use "Import a save file" on the new link and click Load.

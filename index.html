@@ -29512,16 +29512,19 @@ function snapData(exact) {
     }
     d.ch[set] = out;
   }
-  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log') rest[k] = S[k];
+  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
   d.rest = rest;
   const str = JSON.stringify(d);
-  return exact ? str : snapRoundText(str);
+  // your own life is small and kept exact, so the journal replays onto exactly the numbers you left
+  const me = JSON.stringify(S.me === undefined ? null : S.me);
+  return '{"me":' + me + ',' + (exact ? str : snapRoundText(str)).slice(1);
 }
 // put a save into the freshly built world
 function snapApply(str) {
   const d = JSON.parse(str);
   if (d.v !== SNAP_V) throw new Error('save format ' + d.v);
   const rest = d.rest;
+  if ('me' in d) rest.me = d.me;
   for (const set of SNAP_SETS) {
     const L = S[set], ch = d.ch[set], nb = d.base[set];
     for (let q = 0; q < ch.length; q += 2) {
@@ -29646,23 +29649,64 @@ function savesHTML() {
   const L = UI.saveList;
   if (!L) { saveList().then(x => { UI.saveList = x; render(true); }); try { navigator.storage.estimate().then(e => { UI.saveQuota = [e.usage || 0, e.quota || 0]; }); } catch (e) { /* no estimate */ } return '<p class="muted">Looking for your saves…</p>'; }
   const man = L.filter(x => x.kind === 'manual'), auto = L.filter(x => x.kind === 'auto');
-  const row = x => `<tr${x.seed !== S.seed || x.year !== S.startYear || x.depth !== S.depth ? ' class="muted"' : ''}><td><b>${esc(x.name || (x.kind === 'auto' ? 'Autosave' : 'Save'))}</b><br><span class="small muted">${esc(x.label)}</span></td><td class="small">${new Date(x.when).toLocaleString()}</td><td class="n small">${(x.size / 1e6).toFixed(1)} MB</td><td><button class="btn-s" data-sload="${x.id}">Load</button> ${x.kind === 'manual' ? `<button class="btn-s ghost" data-sover="${x.id}">Overwrite</button> ` : ''}<button class="btn-s ghost" data-sdel="${x.id}">Delete</button></td></tr>`;
+  const row = x => `<tr${x.seed !== S.seed || x.year !== S.startYear || x.depth !== S.depth ? ' class="muted"' : ''}><td><b>${esc(x.name || (x.kind === 'auto' ? 'Autosave' : 'Save'))}</b><br><span class="small muted">${esc(x.label)}</span></td><td class="small">${new Date(x.when).toLocaleString()}</td><td class="n small">${(x.size / 1e6).toFixed(1)} MB</td><td>${sBtn('sload', x.id, 'Load', 'Click again to load', '')} ${x.kind === 'manual' ? sBtn('sover', x.id, 'Overwrite', 'Click again to overwrite', ' ghost') + ' ' : ''}${sBtn('sdel', x.id, 'Delete', 'Click again to delete', ' ghost')} <button class="btn-s ghost" data-sexp="${x.id}" title="Download this save as a file, to keep or to open in another browser">Export</button></td></tr>`;
   return `<section class="panel"><h3>Save your life</h3>
    <div class="ccrow"><label>Name <input id="save-name" maxlength="40" placeholder="${esc(snapLabel())}" value="${esc(UI.saveName || '')}"></label> <button class="btn-s" data-snew="1" ${man.length >= MAX_MANUAL ? 'disabled' : ''}>Save now</button> <span class="muted small">${man.length} of ${MAX_MANUAL} manual saves${man.length >= MAX_MANUAL ? ': delete or overwrite one to save again' : ''}</span></div>
    <div class="ccrow"><label>Autosave ${sel('save-auto', Object.entries(AUTO_EVERY), autoPref())}</label> <span class="muted small">The ${MAX_AUTO} most recent autosaves are kept. ${autoPref() === 'week' ? 'Weekly autosaves take a moment each week.' : ''}</span></div>
+   <div class="ccrow"><label class="btn-s ghost" style="cursor:pointer">Import a save file <input type="file" id="save-import" accept=".applebox,application/gzip" hidden></label> <span class="muted small">${esc(UI.saveIO || 'Export a save to keep a copy, or to carry your career to another browser or computer.')}</span></div>
    <p class="small muted">${UI.saveQuota ? `Using ${(UI.saveQuota[0] / 1e6).toFixed(0)} MB of the ${(UI.saveQuota[1] / 1e9).toFixed(1)} GB this browser allows. ` : ''}Saves live in this browser. A save made on an older version of the game loads on a newer one. Between saves, what you do is journalled, so closing the tab loses nothing.</p></section>
    <section class="panel"><h3>Manual saves <span class="count">${man.length}</span></h3>${man.length ? `<div class="tw"><table class="grid small"><tbody>${man.map(row).join('')}</tbody></table></div>` : '<p class="muted small">None yet.</p>'}</section>
    <section class="panel"><h3>Autosaves <span class="count">${auto.length}</span></h3>${auto.length ? `<div class="tw"><table class="grid small"><tbody>${auto.map(row).join('')}</tbody></table></div>` : '<p class="muted small">None yet. The first comes at the next turn of the schedule.</p>'}</section>`;
 }
+// destructive buttons ask twice, in the page (the artifact frame can block confirm())
+function sBtn(k, id, label, sure, cls) { const on = UI.sAsk === k + ':' + id; return `<button class="btn-s${on ? '' : cls}" data-${k}="${id}">${on ? sure : label}</button>`; }
+function sSure(k, id) { if (UI.sAsk === k + ':' + id) { UI.sAsk = null; return true; } UI.sAsk = k + ':' + id; render(true); return false; }
 function savesClick(t) {
   const d = t.dataset;
-  if (d.snew) { saveNow('manual', (UI.saveName || '').trim()).then(() => { UI.saveName = ''; UI.saveList = null; render(true); }); return true; }
-  if (d.sover) { if (!confirm('Overwrite this save with your life as it is now?')) return true; const old = (UI.saveList || []).find(x => x.id === d.sover); saveNow('manual', old ? old.name : '', d.sover).then(() => { UI.saveList = null; render(true); }); return true; }
-  if (d.sdel) { if (!confirm('Delete this save for good?')) return true; deleteSlot(d.sdel).then(() => { UI.saveList = null; render(true); }); return true; }
-  if (d.sload) { const x = (UI.saveList || []).find(y => y.id === d.sload); if (!x || !confirm(`Load ${x.name || x.label}? Anything since your last save is lost.`)) return true; loadFromSlot(x); return true; }
+  if (d.snew) { const nm = document.getElementById('save-name'); if (nm) UI.saveName = nm.value; saveNow('manual', (UI.saveName || '').trim()).then(() => { UI.saveName = ''; UI.saveList = null; render(true); }); return true; }
+  if (d.sover) { if (!sSure('sover', d.sover)) return true; const old = (UI.saveList || []).find(x => x.id === d.sover); saveNow('manual', old ? old.name : '', d.sover).then(() => { UI.saveList = null; render(true); }); return true; }
+  if (d.sdel) { if (!sSure('sdel', d.sdel)) return true; deleteSlot(d.sdel).then(() => { UI.saveList = null; render(true); }); return true; }
+  if (d.sload) { const x = (UI.saveList || []).find(y => y.id === d.sload); if (!x || !sSure('sload', d.sload)) return true; loadFromSlot(x); return true; }
+  if (d.sexp) { exportSlot(d.sexp); return true; }
+  if (UI.sAsk) { UI.sAsk = null; render(true); }   // any other click calls off a pending "click again"
   return false;
 }
-function savesChange(e) { const id = e.target.id; if (id === 'save-name') { UI.saveName = e.target.value; return true; } if (id === 'save-auto') { setAutoPref(e.target.value); autoMark(); render(true); return true; } return false; }
+// ---- save files: export one slot, import one into this browser ----
+const SAVE_FILE_V = 1;
+async function exportSlot(id) {
+  const meta = (UI.saveList || []).find(x => x.id === id); if (!meta) return;
+  UI.saveIO = 'Preparing the file…'; render(true);
+  try {
+    const str = await readSlot(id); if (!str) throw new Error('missing');
+    const p = await pack(JSON.stringify({ applebox: SAVE_FILE_V, meta, snap: str }));
+    const blob = p.z ? p.data : new Blob([p.data], { type: 'application/json' });
+    const a = document.createElement('a'), url = URL.createObjectURL(blob);
+    a.href = url; a.download = (meta.name || meta.label || 'save').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').slice(0, 60) + '.applebox';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+    UI.saveIO = `Exported "${meta.name || meta.label}" (${(blob.size / 1e6).toFixed(1)} MB). If no download appeared, open the game from its file to export.`;
+  } catch (e) { UI.saveIO = 'Couldn\'t export that save.'; }
+  render(true);
+}
+async function importSaveFile(file) {
+  UI.saveIO = 'Reading ' + file.name + '…'; render(true);
+  try {
+    const buf = new Uint8Array(await file.arrayBuffer());
+    const gz = buf[0] === 0x1f && buf[1] === 0x8b;
+    if (gz && typeof DecompressionStream === 'undefined') throw new Error('This browser can\'t open compressed save files.');
+    const txt = gz ? await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text() : new TextDecoder().decode(buf);
+    let f = null; try { f = JSON.parse(txt); } catch (e) { f = null; }
+    if (!f || f.applebox !== SAVE_FILE_V || !f.meta || typeof f.snap !== 'string') throw new Error('That isn\'t an Apple Box save file.');
+    if (f.snap[0] !== '{') throw new Error('That save file is damaged.');
+    const m = f.meta, id = 'manual-' + Date.now().toString(36), p = await pack(f.snap);
+    const meta = { id, kind: 'manual', name: ('Imported: ' + (m.name || m.label || 'save')).slice(0, 40), when: Date.now(), seed: m.seed, year: m.year, depth: m.depth, week: m.week, label: m.label || '', build: m.build || BUILD_ID, size: p.z ? p.data.size : f.snap.length };
+    if (meta.seed === undefined || !meta.year || !meta.depth) throw new Error('That save file is missing its world.');
+    await idbDo('data', 'readwrite', st => st.put(p, id));
+    await idbDo('meta', 'readwrite', st => st.put(meta));
+    UI.saveIO = `Imported "${m.name || m.label}". It's in your manual saves: click Load to play it.`; UI.saveList = null;
+  } catch (e) { UI.saveIO = (e && e.message && / /.test(e.message)) ? e.message : 'Couldn\'t read that file.'; }
+  render(true);
+}
+function savesChange(e) { const id = e.target.id; if (id === 'save-name') { UI.saveName = e.target.value; return true; } if (id === 'save-import') { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) importSaveFile(f); return true; } if (id === 'save-auto') { setAutoPref(e.target.value); autoMark(); render(true); return true; } return false; }
 
 // What to open when the game starts: the newest save, unless there's a newer unsaved career in the journal, or an
 // old-style save from before save slots existed.
@@ -32737,7 +32781,7 @@ function careerClick(t) {
   return false;
 }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -33120,6 +33164,7 @@ document.addEventListener('change', e => {
 });
 let qTimer;
 document.addEventListener('input', e => {
+  if (e.target.id === 'cc-name' && UI.cc) { UI.cc.name = e.target.value; return; }   // kept as you type: a click elsewhere redraws the form
   if (typeof make2Input === 'function' && make2Input(e)) return;
   if (typeof make3Input === 'function' && make3Input(e)) return;
   if (e.target.dataset && e.target.dataset.uiq) { const k = e.target.dataset.uiq, id = e.target.id; UI[k] = e.target.value; clearTimeout(qTimer); qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = id && document.getElementById(id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180); return; }
