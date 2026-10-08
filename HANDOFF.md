@@ -141,6 +141,8 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 - The computer's colours are tokens (`--os-*`) set per palette on `:root[data-pal=…]`; don't hard-code blues inside `.os` rules.
 
 ## Tests (run all before publishing)
+System checks: `node tools/systemtest.js` (30 checks: markets, bank, company, film financing, co-investing, making, contests, home, Bazaar, weekly systems, NaN guard, replay); must print `0 failed`.
+
 Long playthroughs (find repetition, quiet stretches, balance drift): `node tools/longplay.js <crew|actor|writer|musician|creator|producer|student|heir> [years] [out.json]`, then `node tools/longplay-report.js out.json... [--top N]` (progression per year, messages per channel, share repeated within a year, most repeated lines). `SAVE_OUT=x.applebox` also writes the career as a save file the Saves page can import (useful for looking at late-game screens in the browser).
 ```
 python3 tools/build.py
@@ -182,6 +184,9 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Room avatar moves rarely (home.js interval, `roomT % 10 || Math.random() < .35`).
 - Never use `confirm()`/`prompt()`/`alert()`: the artifact frame can block them (they then return no). Use a two-click button instead (see `sBtn` in saves.js, or Abandon career).
 - The character creator stores the name on every keystroke (input listener in index.html), since clicks re-render the form and Safari doesn't blur on button clicks.
+- The phone rings (`callsMorning`, arcs.js): at level 3+ with nothing in your craft on, a direct offer (inbox kind `offer`, title "A call: …") every 8+ weeks, own industry first, near your tier; no interview. Autopilot skips posts more than a tier below `tierLevel()` once you're established.
+- Brand endorsements: one offer a quarter at most; a brand you fronted waits 156 weeks (`endorseWeek`).
+- The room shows two framed posters (`roomPosterFilms`: your released credits, then your favourite films via `favFilm`) on free left-wall spots, and a craft prop by the avatar (`craftPropSVG` by `MAIN[role]`). Your title grows: `roleTitle` (hopeful → working → the job → celebrated).
 - Autopilot is craft-first (`rankedFits`, `craftJob` in autopilot.js): your own craft, then your industry, and odd jobs only with under 12 weeks of runway; while you only hold jobs outside your craft it keeps applying for craft work. `hasFooting()` (late-game.js): you count as "not looking" only with a year's runway, level 2 and a foothold (2 credits, a year of craft work, 4 releases, or level 4).
 - `lateRich()` is $150k, or two years' runway at level 4: the late game used to start with a year of savings and snowballed into millions without work.
 - `careerLevel` is capped by a body of work (credits + released works ÷ 2, +3 for a senior company rung): under 2 → max 3, under 5 → max 4.

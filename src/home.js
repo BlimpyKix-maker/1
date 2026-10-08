@@ -104,6 +104,32 @@ function wallFillSVG(i, x, y, accent) {
   if (k === 1) return `<g transform="translate(${x + 4} ${y})"><rect x="2" y="3" width="30" height="40" rx="14" fill="#000" opacity=".08"/><rect width="30" height="40" rx="14" fill="#C9A646"/><rect x="3" y="3" width="24" height="34" rx="11" fill="#DDE7EE"/><path d="M8 10 L20 30" stroke="#FFFFFF" stroke-width="3" opacity=".6"/></g>`;
   return `<g transform="translate(${x + 4} ${y + 2})"><rect x="2" y="3" width="34" height="26" fill="#000" opacity=".08"/><rect width="34" height="26" fill="#FFFFFF" stroke="#2B2B2B" stroke-width="1.5"/><rect x="4" y="4" width="26" height="18" fill="${mixHex(accent, '#FFFFFF', .55)}"/><circle cx="12" cy="11" r="4" fill="${accent}"/><path d="M4 22 L14 14 L20 18 L30 10 L30 22 Z" fill="${mixHex(accent, '#000', .2)}"/></g>`;
 }
+// ---- what's on your walls and by your desk ----
+const FAV_FILM = new Map();
+function favFilm(fid) { const k = S.seed + ':' + fid; if (!FAV_FILM.has(k)) { const cf = S.cat.allFilms && S.cat.allFilms[fid]; FAV_FILM.set(k, cf ? (S.films.find(f => f.title === cf.t && f.rel !== null) || null) : null); } return FAV_FILM.get(k); }
+function roomPosterFilms() {
+  const M = S.me, me = ME(), L = [];
+  for (const id of me.credits.slice().reverse()) { const f = S.films[id]; if (f && f.rel !== null && f.rel <= S.week && !L.includes(f)) L.push(f); if (L.length >= 2) return L; }
+  for (const fid of M.favs || []) { const f = favFilm(fid); if (f && !L.includes(f)) L.push(f); if (L.length >= 2) break; }
+  return L;
+}
+function posterThumb(f, w) { return `<g transform="scale(${w / 200})">${posterSVG(f, 200)}</g>`; }
+// one small object that says what you do: drawn at 1 unit = 1px in a 400-wide room, standing on the floor at y=0
+function craftPropSVG(c, accent) {
+  const sh = '<ellipse cx="9" cy="0" rx="11" ry="2" fill="#000" opacity=".15"/>';
+  switch (c) {
+    case 'cam': return sh + '<path d="M9 -14 L2 0 M9 -14 L16 0 M9 -14 L9 0" stroke="#2B2B2B" stroke-width="1.4"/><rect x="2" y="-24" width="14" height="10" rx="1.5" fill="#2B2B2B"/><circle cx="17" cy="-19" r="3.4" fill="#444" stroke="#111"/><circle cx="17" cy="-19" r="1.6" fill="#7FA7C9"/><rect x="5" y="-27" width="6" height="3" fill="#C8553D"/>';
+    case 'mus': return sh + `<g transform="rotate(-14 9 -14)"><ellipse cx="9" cy="-6" rx="7" ry="6.5" fill="#B5652E"/><ellipse cx="9" cy="-14" rx="5.5" ry="5" fill="#B5652E"/><circle cx="9" cy="-8" r="2" fill="#3B2412"/><rect x="8" y="-34" width="2.4" height="22" fill="#5A3A22"/><rect x="7" y="-37" width="4.4" height="4" rx="1" fill="#3B2412"/></g>`;
+    case 'wri': return sh + '<rect x="0" y="-6" width="18" height="6" fill="#F4F1E6" stroke="#C9C2B0" stroke-width=".6"/><rect x="1" y="-11" width="17" height="5" fill="#ECE6D4" stroke="#C9C2B0" stroke-width=".6"/><rect x="0.5" y="-16" width="17" height="5" fill="#F4F1E6" stroke="#C9C2B0" stroke-width=".6"/><rect x="2" y="-16" width="3" height="16" fill="#C8553D" opacity=".7"/><rect x="2" y="-22" width="14" height="6" rx="1" fill="#2B2B2B"/><rect x="4" y="-27" width="10" height="5" fill="#F4F1E6"/>';
+    case 'dir': return sh + `<path d="M2 0 L14 -14 M16 0 L4 -14" stroke="#5A3A22" stroke-width="1.6"/><rect x="2" y="-16" width="14" height="3" fill="${accent}"/><rect x="2" y="-28" width="14" height="7" fill="${accent}"/><path d="M2 -28 L2 -13 M16 -28 L16 -13" stroke="#5A3A22" stroke-width="1.4"/><text x="9" y="-23" font-size="3.6" text-anchor="middle" fill="#FFF" font-family="sans-serif" font-weight="700">DIR</text>`;
+    case 'act': return sh + '<rect x="8" y="-34" width="2" height="34" fill="#3B3B3B"/><path d="M3 -34 L15 -34" stroke="#3B3B3B" stroke-width="1.6"/><path d="M4 -33 Q9 -28 14 -33 L15 -14 L3 -14 Z" fill="#7A2E4A"/><path d="M5 -20 L13 -20" stroke="#E3C27A" stroke-width=".8"/><ellipse cx="9" cy="-37" rx="4" ry="3" fill="#2B2B2B"/>';
+    case 'edt': return sh + '<rect x="0" y="-5" width="18" height="5" rx="1" fill="#8A8F96"/><rect x="1" y="-10" width="16" height="5" rx="1" fill="#6F757D"/><rect x="0" y="-15" width="18" height="5" rx="1" fill="#8A8F96"/><text x="9" y="-11.6" font-size="3" text-anchor="middle" fill="#fff" font-family="sans-serif">REEL 3</text><circle cx="9" cy="-21" r="6" fill="none" stroke="#2B2B2B" stroke-width="1.4"/><circle cx="9" cy="-21" r="1.4" fill="#2B2B2B"/>';
+    case 'pro': return sh + '<rect x="0" y="-12" width="18" height="12" rx="1.5" fill="#5A3A22"/><rect x="6" y="-15" width="6" height="3" rx="1" fill="none" stroke="#3B2412" stroke-width="1.2"/><rect x="0" y="-7" width="18" height="1" fill="#3B2412"/><rect x="2" y="-21" width="14" height="9" fill="#2B2B2B"/><path d="M2 -21 L16 -24 L16 -21 Z" fill="#2B2B2B"/><path d="M4 -23.4 L6 -21 M8 -23.9 L10 -21 M12 -24.4 L14 -21" stroke="#FFF" stroke-width="1"/>';
+    case 'des': return sh + `<rect x="8" y="-8" width="2" height="8" fill="#5A3A22"/><path d="M4 -8 L14 -8" stroke="#5A3A22" stroke-width="1.5"/><path d="M5 -30 Q9 -34 13 -30 L14 -22 Q9 -19 4 -22 Z M4 -22 Q9 -19 14 -22 L15 -9 L3 -9 Z" fill="${accent}"/><rect x="8" y="-35" width="2" height="5" fill="#5A3A22"/>`;
+    case 'fx': return sh + '<rect x="1" y="-12" width="16" height="12" rx="1" fill="#C8553D"/><rect x="1" y="-12" width="16" height="3" fill="#A6412D"/><rect x="7" y="-14" width="4" height="2" fill="#3B3B3B"/><path d="M4 -6 L14 -6" stroke="#FFF" stroke-width="1"/><circle cx="9" cy="-20" r="4.5" fill="#F4F1E6"/><circle cx="7.4" cy="-20.5" r=".9" fill="#222"/><circle cx="10.6" cy="-20.5" r=".9" fill="#222"/><path d="M7 -18 Q9 -16.5 11 -18" stroke="#222" stroke-width=".7" fill="none"/>';
+    default: return '';
+  }
+}
 // The scene. day: 0–5 for the light through the window.
 function homeSceneSVG(day) {
   const M = S.me, me = ME(), life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [], d = clamp(day ?? 0, 0, 5), night = d >= 5;
@@ -160,7 +186,11 @@ function homeSceneSVG(day) {
   // empty spots get the sort of thing people who live like this have
   const used = new Set(Object.values(lay)), fill = (ROOM_FILL[life] || []).slice(), floorSpots = spots.filter(s => s.kind === 'floor').sort((a, b) => a.x - b.x);
   for (let i = 0; i < floorSpots.length; i++) { const s = floorSpots[i]; if (used.has(s.id) || (!lay.bed && s.x < 100)) continue; const room = (floorSpots[i + 1] ? floorSpots[i + 1].x : 400) - s.x - 4, j = fill.findIndex(k => FILL_W[k] <= room && !(s.x < 230 && s.x + FILL_W[k] > 168)); if (j < 0) continue; o.push(fillPieceSVG(fill.splice(j, 1)[0], s.x, s.y, sofaC, wood)); }
-  if (big) spots.filter(s => s.kind === 'wall' && !used.has(s.id) && !((life === 'house' || life === 'estate') && s.x > 262 && s.x < 362)).forEach((s, i) => o.push(wallFillSVG(i + [...(M.hub || '')].reduce((a, c) => a + c.charCodeAt(0), 0), s.x, s.y + 6, accent)));
+  // framed posters: your own films first, then the films that made you want to do this
+  const PF = roomPosterFilms(), freeWall = spots.filter(s => s.kind === 'wall' && !used.has(s.id) && s.x < 140), posterSpots = new Set();
+  if (life === 'couch' && PF.length) o.push(`<g transform="translate(166 30) rotate(-3)">${posterThumb(PF[0], 26)}<rect x="8" y="-3" width="10" height="5" fill="#F3E9C6" opacity=".85"/></g>`);
+  else freeWall.slice(0, 2).forEach((s, i) => { const f = PF[i]; if (!f) return; posterSpots.add(s.id); o.push(`<g transform="translate(${s.x + 8} ${s.y + 2})"><rect x="2" y="3" width="30" height="44" fill="#000" opacity=".12"/><rect x="-2" y="-2" width="32" height="46" fill="${i ? '#2B2B2B' : '#C9A646'}"/>${posterThumb(f, 28)}</g>`); });
+  if (big) spots.filter(s => s.kind === 'wall' && !used.has(s.id) && !posterSpots.has(s.id) && !((life === 'house' || life === 'estate') && s.x > 262 && s.x < 362)).forEach((s, i) => o.push(wallFillSVG(i + [...(M.hub || '')].reduce((a, c) => a + c.charCodeAt(0), 0), s.x, s.y + 6, accent)));
   for (const [id, sp] of Object.entries(lay)) { const s = spots.find(x => x.id === sp); if (!s) continue; const F = FURNITURE[id]; if (F && F.kind !== 'wall') o.push(`<ellipse cx="${s.x + 24}" cy="${s.y + 1}" rx="28" ry="3" fill="#000" opacity=".14"/>`); else if (F) o.push(`<rect x="${s.x + 2}" y="${s.y + 3}" width="46" height="60" fill="#000" opacity=".07"/>`); o.push(furnitureSVG(id, s.x, s.y)); }
   if (!spots.some(s => s.id === 'sill' && used.has('sill')) && life !== 'couch') o.push(`<g transform="translate(${wx + 8} ${wy + wh + 2})"><path d="M0 0 L10 0 L9 -8 L1 -8 Z" fill="#C8553D"/><path d="M5 -8 Q0 -16 -2 -14 M5 -8 Q10 -18 13 -14 M5 -8 L5 -18" stroke="#2E7A4C" stroke-width="2.2" fill="none" stroke-linecap="round"/></g>`);
   if (me.credits.length && life !== 'couch') o.push(`<g transform="translate(${big ? 70 : 120} 104)">${me.credits.slice(0, 6).map((_, i) => `<rect x="${i * 9}" y="0" width="7" height="9" fill="#3B3226"/><rect x="${i * 9 + 1}" y="1" width="5" height="7" fill="#FFFFFF"/>`).join('')}</g>`);
@@ -173,6 +203,7 @@ function homeSceneSVG(day) {
   wall2.forEach((g, i) => o.push(`<g transform="translate(${life === 'couch' ? 210 + i * 26 : 290 + (i % 4) * 26} ${life === 'couch' ? 30 : 30 + Math.floor(i / 4) * 30})">${g}</g>`));
   if (wins) o.push(`<g transform="translate(${life === 'couch' ? 12 : 60} 118)">${Array.from({ length: Math.min(5, wins) }, (_, i) => `<path d="M${i * 10} 0 l6 0 l-1 5 l-2 0 l0 2 l2 0 l0 1 l-6 0 l0 -1 l2 0 l0 -2 l-2 0 z" fill="#D4AF37"/>`).join('')}<rect x="-2" y="8" width="${Math.min(5, wins) * 10 + 2}" height="2" fill="#6B4E3A"/></g>`);
   if (typeof relicSceneSVG === 'function') o.push(relicSceneSVG(lay));
+  if (life !== 'couch') o.push(`<g transform="translate(236 170)">${craftPropSVG(MAIN[me.role] || 'wri', accent)}</g>`);
   o.push(roomGlowSVG(RS, life, night), roomExtraSVG(RS, life));
   // you, standing in it, with a shadow
   // what you might be doing around the place: each spot is [shift from the middle, what's in the bubble, what it is]
