@@ -347,3 +347,11 @@ Under boardroom, I clicked into one of the categories and got this readout(“Th
 ## 2026-10-08 03:57
 
 Can you make a copy of this project and these conversations to be able to pass off to another account if need be?
+
+## 2026-10-08 04:01
+
+please add everything, thanks.
+
+## 2026-10-08 04:12
+
+can you be sure to include everything and also can you adjust the properties of the zip file so that it remains below 30mb?
