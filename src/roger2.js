@@ -36,16 +36,16 @@ function rtFilmRows(L) {
   if (fl0 === 'divisive') rows = rows.filter(x => Math.abs(x.R.score / 10 - x.R.aud) >= 1.8);
   if (fl0 === 'crowd') rows = rows.filter(x => x.R.aud * 10 - x.R.score >= 15);
   if (fl0 === 'critics') rows = rows.filter(x => x.R.score - x.R.aud * 10 >= 15);
-  const k = UI.rts || 'thumbs', dir = UI.rtdir === 'asc' ? 1 : -1;
+  const k = UI.rts || 'score', dir = UI.rtdir === 'asc' ? 1 : -1;
   const key = { thumbs: x => x.R.thumbs * 1000 + x.R.score, score: x => x.R.score, aud: x => x.R.aud, n: x => x.R.n, gap: x => Math.abs(x.R.score / 10 - x.R.aud), rel: x => x.f.rel, title: x => x.f.title }[k] || (x => x.R.thumbs);
   rows.sort((a, b) => { const A = key(a), B = key(b); return (typeof A === 'string' ? A.localeCompare(B) : A - B) * (k === 'title' ? -dir : dir); });
   return rows;
 }
 function rtFilmTable(L, max) {
   const rows = rtFilmRows(L), shown = rows.slice(0, (UI.rtmore || 1) * (max || 40));
-  const H = (k, l, n, tip) => `<th class="${n ? 'n' : ''}"${tip ? ` title="${esc(tip)}"` : ''}><button class="linkish rt-sort${(UI.rts || 'thumbs') === k ? ' on' : ''}" data-rtsort="${k}">${l}${(UI.rts || 'thumbs') === k ? (UI.rtdir === 'asc' ? ' ▲' : ' ▼') : ''}</button></th>`;
+  const H = (k, l, n, tip) => `<th class="${n ? 'n' : ''}"${tip ? ` title="${esc(tip)}"` : ''}><button class="linkish rt-sort${(UI.rts || 'score') === k ? ' on' : ''}" data-rtsort="${k}">${l}${(UI.rts || 'score') === k ? (UI.rtdir === 'asc' ? ' ▲' : ' ▼') : ''}</button></th>`;
   const badge = R => R.thumbs >= 75 && R.n >= 20 ? '<span class="rt-cert" title="Roger Approved: 75% or more of at least 20 critics liked it">✔ Approved</span>' : R.thumbs < 40 ? '<span class="rt-rot" title="Fewer than 40% of critics liked it">✖ Panned</span>' : '';
-  return `<p class="small muted">${rows.length.toLocaleString()} film${rows.length === 1 ? '' : 's'} match.</p><table class="os-table rt-table"><thead><tr>${H('title', 'Film')}${H('rel', 'Released')}<th>Genre</th>${H('thumbs', 'Thumbs', 1, SCORE_HOW.thumbs)}${H('score', 'Rogerscore', 1, SCORE_HOW.roger)}${H('aud', 'Audience', 1, SCORE_HOW.aud)}${H('n', 'Critics', 1)}${H('gap', 'Gap', 1, 'How far the critics and the crowd disagree')}</tr></thead><tbody>${shown.map(({ f, R }) => `<tr><td>${fl(f.id)} ${badge(R)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n ${R.thumbs >= 60 ? 'good' : R.thumbs < 40 ? 'bad' : ''}">${R.thumbs}%</td><td class="n">${R.score}</td><td class="n">${R.aud.toFixed(1)}</td><td class="n muted">${R.n}</td><td class="n muted">${(Math.abs(R.score / 10 - R.aud)).toFixed(1)}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">Nothing matches. Loosen a filter.</td></tr>'}</tbody></table>${rows.length > shown.length ? `<button class="os-btn" data-rtmore="1">Show more (${(rows.length - shown.length).toLocaleString()} left)</button>` : ''}`;
+  return `<p class="small muted">${rows.length.toLocaleString()} film${rows.length === 1 ? '' : 's'} match.</p><table class="os-table rt-table"><thead><tr>${H('title', 'Film')}${H('rel', 'Released')}<th>Genre</th>${H('score', 'Rogerscore', 1, SCORE_HOW.roger)}${H('thumbs', 'Thumbs', 1, SCORE_HOW.thumbs)}${H('aud', 'Audience', 1, SCORE_HOW.aud)}${H('n', 'Critics', 1)}${H('gap', 'Gap', 1, 'How far the critics and the crowd disagree')}</tr></thead><tbody>${shown.map(({ f, R }) => `<tr><td>${fl(f.id)} ${badge(R)}</td><td class="muted">${yearOf(f.rel)}</td><td>${esc(f.genre)}</td><td class="n ${R.score >= 60 ? 'good' : R.score < 40 ? 'bad' : ''}"><b>${R.score}</b></td><td class="n muted">${R.thumbs}%</td><td class="n">${R.aud.toFixed(1)}</td><td class="n muted">${R.n}</td><td class="n muted">${(Math.abs(R.score / 10 - R.aud)).toFixed(1)}</td></tr>`).join('') || '<tr><td colspan="8" class="muted">Nothing matches. Loosen a filter.</td></tr>'}</tbody></table>${rows.length > shown.length ? `<button class="os-btn" data-rtmore="1">Show more (${(rows.length - shown.length).toLocaleString()} left)</button>` : ''}`;
 }
 function rtFilters(decades) {
   const G = Object.keys(AMB).sort(), D = decades || [];
@@ -54,7 +54,7 @@ function rtFilters(decades) {
    ${D.length > 1 ? `<select data-ui="rtd" data-reset="rtmore" aria-label="Decade"><option value="">Every decade</option>${D.map(d => `<option value="${d}" ${+UI.rtd === d ? 'selected' : ''}>${d}s</option>`).join('')}</select>` : ''}
    <select data-ui="rtf" data-reset="rtmore" aria-label="Show"><option value="">All verdicts</option>${[['approved', '✔ Roger Approved'], ['rotten', '✖ Panned'], ['divisive', 'Critics vs crowd'], ['crowd', 'Crowd-pleasers critics missed'], ['critics', 'Critics\' darlings crowds skipped']].map(([k, l]) => `<option value="${k}" ${UI.rtf === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
    <select data-ui="rtn" data-reset="rtmore" aria-label="Minimum critics"><option value="0">Any number of critics</option>${[10, 20, 40, 80].map(n => `<option value="${n}" ${+UI.rtn === n ? 'selected' : ''}>${n}+ critics</option>`).join('')}</select>
-   <select data-ui="rts" aria-label="Sort">${[['thumbs', 'Sort: Thumbs'], ['score', 'Sort: Rogerscore'], ['aud', 'Sort: Audience'], ['n', 'Sort: most reviewed'], ['gap', 'Sort: most divisive'], ['rel', 'Sort: newest'], ['title', 'Sort: title']].map(([k, l]) => `<option value="${k}" ${(UI.rts || 'thumbs') === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
+   <select data-ui="rts" aria-label="Sort">${[['score', 'Sort: Rogerscore'], ['thumbs', 'Sort: Thumbs'], ['aud', 'Sort: Audience'], ['n', 'Sort: most reviewed'], ['gap', 'Sort: most divisive'], ['rel', 'Sort: newest'], ['title', 'Sort: title']].map(([k, l]) => `<option value="${k}" ${(UI.rts || 'score') === k ? 'selected' : ''}>${l}</option>`).join('')}</select>
    ${UI.rtg || UI.rtd || UI.rtf || +UI.rtn || UI.rtq ? '<button class="os-btn" data-rtclear="1">Clear filters</button>' : ''}</div>`;
 }
 function rtCritics() {
@@ -102,7 +102,7 @@ function rogerApp() {
    <div class="np-tabs">${tabs.map(([k, l]) => `<button class="${t === k ? 'on' : ''}" data-rt="${k}">${l}</button>`).join('')}</div>${body}</div>`;
 }
 function roger2Click(t) {
-  if (t.dataset.rtsort) { const k = t.dataset.rtsort; if ((UI.rts || 'thumbs') === k) UI.rtdir = UI.rtdir === 'asc' ? 'desc' : 'asc'; else { UI.rts = k; UI.rtdir = k === 'title' ? 'asc' : 'desc'; } render(true); return true; }
+  if (t.dataset.rtsort) { const k = t.dataset.rtsort; if ((UI.rts || 'score') === k) UI.rtdir = UI.rtdir === 'asc' ? 'desc' : 'asc'; else { UI.rts = k; UI.rtdir = k === 'title' ? 'asc' : 'desc'; } render(true); return true; }
   if (t.dataset.rtmore) { UI.rtmore = (UI.rtmore || 1) + 1; render(true); return true; }
   if (t.dataset.rtclear) { for (const k of ['rtg', 'rtd', 'rtf', 'rtn', 'rtq', 'rtmore']) UI[k] = ''; render(true); return true; }
   if (t.dataset.rt) UI.rtmore = 1;

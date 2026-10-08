@@ -616,7 +616,7 @@ function careerClick(t) {
   if (t.dataset.vehicle) { doAct({ t: 'vehicle', v: t.dataset.vehicle }); render(true); return true; }
   if (t.dataset.tonight) { const W = S.me.wk, d = W ? W.day : 0; calOf()[d][2] = t.dataset.tonight; render(true); return true; }
   if (t.dataset.calfill) { const P0 = CAL_PRESETS[t.dataset.calfill], W = S.me.wk, now = W ? W.day * 3 + W.block : 0, cal = calOf(); if (P0) for (let d = 0; d < 7; d++) for (let b = 0; b < 3; b++) if (d * 3 + b >= now) cal[d][b] = P0[d][b] === 'study' && !S.me.school ? 'hunt' : P0[d][b]; render(true); return true; }
-  if (t.dataset.app !== undefined) { UI.app = t.dataset.app || null; render(true); return true; }
+  if (t.dataset.app !== undefined) { UI.app = t.dataset.app === 'jobs' ? 'work' : (t.dataset.app || null); render(true); return true; }   // CrewList lives inside Work now
   if (t.dataset.like) { const [post, who] = t.dataset.like.split('|'); doAct({ t: 'like', post, who: +who }); render(true); return true; }
   if (t.dataset.sweep) { if (t.dataset.sweep === 'new') sweepNew(); else sweepOpen(+t.dataset.sweep); render(true); return true; }
   if (t.dataset.dept) { doAct({ t: 'dept', k: t.dataset.dept }); render(true); return true; }

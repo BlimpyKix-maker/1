@@ -169,6 +169,8 @@ async function saveRun(kind, name, id) {
   if (!BASE || !S.me) return null;
   SAVING = true; UI.saveMsg = kind === 'auto' ? 'Autosaving…' : 'Saving…'; saveBadge();
   await new Promise(r => setTimeout(r, 30));
+  // building a snapshot takes a moment of the page's attention: never while the dice are rolling
+  for (let i = 0; i < 200 && typeof document !== 'undefined' && document.getElementById('rollov'); i++) await new Promise(r => setTimeout(r, 250));
   try { const m = await writeSlot(kind, name, id); AUTO_AT = autoPeriod(); UI.saveMsg = `${kind === 'auto' ? 'Autosaved' : 'Saved'} · ${fmtDate(m.week, true)}`; UI.saveList = null; return m; }
   catch (e) { UI.saveMsg = 'Couldn\'t save: ' + ((e && e.name) || 'storage unavailable'); return null; }
   finally { SAVING = false; saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }

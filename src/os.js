@@ -26,7 +26,7 @@ function osBadge(k) {
 }
 function osPanel() {
   const M = S.me, W = M.wk, k = UI.app && osApp(UI.app) ? UI.app : 'home', A = osApp(k);
-  const listed = new Set(OS_GROUPS.flatMap(g => g[1])), more = APPS.map(a => a[0]).filter(x => !listed.has(x));
+  const listed = new Set(OS_GROUPS.flatMap(g => g[1])), more = APPS.map(a => a[0]).filter(x => !listed.has(x) && x !== 'jobs');   // CrewList is part of Work
   const groups = OS_GROUPS.concat(more.length ? [['More', more]] : []);
   const time = W ? ['08:12', '13:40', '21:05'][W.block] : '09:00';
   const oq = (UI.osq || '').toLowerCase().trim(), col = UI.osc = UI.osc || { Play: 1 };

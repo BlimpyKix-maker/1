@@ -2,7 +2,7 @@
 // A desktop with apps: mail, a crew job site, the trades, the archive, your bank, a social feed, notes and a game
 // for when you should be writing. Most open a window onto the game; a few are just for fiddling with.
 const APPS = [
-  ['mail', '✉️', 'Mail'], ['jobs', '💼', 'CrewList'], ['trades', '📰', 'The Daily Slate'], ['gea', '🎞️', 'REEL'], ['bank', '🏦', 'Bank'],
+  ['mail', '✉️', 'Mail'], ['jobs', '💼', 'Work'], ['trades', '📰', 'The Daily Slate'], ['gea', '🎞️', 'REEL'], ['bank', '🏦', 'Bank'],
   ['flick', '📸', 'Clapgram'], ['notes', '📝', 'Notes'], ['sweep', '🎬', 'Clapper Sweep'], ['weather', '⛅', 'Weather'], ['write', '✍️', 'Scriptwriter']
 ];
 // Flick: what your contacts post. Same posts every week for the same people (hash), plus their real life events.
