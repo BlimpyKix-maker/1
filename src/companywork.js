@@ -61,7 +61,7 @@ function slateWeek() {
     // the calls that come with the chair
     if (r >= 3 && S.week % 4 === j.id % 4 && !pending().some(x => x.kind === 'slate')) {
       const f = L[Math.floor(hashRand(S.week * 13 + j.id)() * L.length)], DS = SLATE_CALLS.filter(x => x.stage.includes(f.stage)), D = DS[Math.floor(hashRand(S.week * 7 + j.id)() * DS.length)];
-      if (D) inbox('slate', `${f.title}: ${D.title}`, D.text.replace('{film}', f.title).replace('{co}', c.name), { film: f.id, job: j.id, call: D.k, choices: D.opts.map(o => ({ k: o.k, label: o.label + (o.check ? ` (${statLabel(o.check[0])})` : '') })) });
+      if (D) inbox('slate', `${f.title}: ${D.title}`, D.text.replace('{film}', f.title).replace('{co}', c.name), { film: f.id, job: j.id, call: D.k, choices: D.opts.map(o => Object.assign({ k: o.k, label: o.label }, o.check ? { check: [o.check[0], o.check[1] + (r >= 6 ? -1 : 0)] } : {})) });
     }
   }
 }
@@ -78,7 +78,7 @@ function slatePick(it, k) {
   const M = S.me, me = ME(), f = S.films[it.film], j = M.jobs.find(x => x.id === it.job), D = SLATE_CALLS.find(x => x.k === it.call); it.done = true;
   if (!f || !j || !D || f.rel !== null) { it.result = { t: 'Too late: the decision was made without you.' }; return true; }
   const o = D.opts.find(x => x.k === k) || D.opts[D.opts.length - 1], r = jobRung(j), sw = .4 + r * .15;
-  let ok = true; if (o.check) ok = roll(o.check[0], o.check[1] + (r >= 6 ? -1 : 0));
+  let ok = true; if (o.check) ok = roll(o.check[0], o.check[1] + (r >= 6 ? -1 : 0));   // the same target the choice showed
   const dq = ok ? (o.q || 0) * sw : -Math.max(1, Math.abs(o.q || 0)) * sw * .5, dh = ok ? (o.hook || 0) * sw : -Math.max(1, Math.abs(o.hook || 0)) * sw * .5 - (o.risk ? 4 : 0);
   f.qBonus = (f.qBonus || 0) + dq; f.hook = clamp((f.hook || 50) + dh, 5, 99); f.you = (f.you || 0) + dq;
   if (o.cost) { const c = S.companies[j.co]; if (c) c.cash -= f.budget * .05; f.paMul = (f.paMul || 1) * 1.1; }

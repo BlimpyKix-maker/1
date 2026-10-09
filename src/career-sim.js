@@ -351,6 +351,8 @@ function checkMods(stat) {
     if (W.adv && W.adv.includes(stat)) { adv++; why.push(nm); }
     if (W.dis && W.dis.includes(stat)) { adv--; why.push(nm + ' (against)'); }
     if (W.bonus && W.bonus[stat]) { bonus += W.bonus[stat]; why.push(`${nm} ${W.bonus[stat] > 0 ? '+' : ''}${W.bonus[stat]}`); } }
+  // the extremes count: real mastery opens a gap, and being out of your depth shows
+  if (v >= 19) { bonus += 2; why.push('Mastery +2'); } else if (v >= 16) { bonus += 1; why.push('Expertise +1'); } else if (v <= 4) { bonus -= 1; why.push('Out of your depth −1'); }
   return { v, mod: mod + bonus, adv: Math.sign(adv), why };
 }
 // Wardrobe pieces the player owns and has on.
@@ -376,7 +378,7 @@ function roll(stat, dc) {
   S.me.lastRoll = { stat, d, dice, mod, DC, adv, ok, crit: d === 20 ? 1 : d === 1 ? -1 : 0, n: S.me.rollN, why: checkInfo(stat, DC - 1).why };
   return ok;
 }
-function rollText(r) { if (!r) return ''; return `d20 ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${r.d + r.mod} vs DC ${r.DC}${r.adv > 0 ? ' (advantage)' : r.adv < 0 ? ' (disadvantage)' : ''}${r.crit > 0 ? ' · natural 20' : r.crit < 0 ? ' · natural 1' : ''}`; }
+function rollText(r) { if (!r) return ''; const need = clamp(r.DC - r.mod, 2, 20); return `needed ${need}+ on the die (${Math.round(clamp((21 - need) / 20, .05, .95) * 100)}%) · rolled d20 ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${r.d + r.mod} vs DC ${r.DC}${r.adv > 0 ? ' (advantage)' : r.adv < 0 ? ' (disadvantage)' : ''}${r.crit > 0 ? ' · natural 20' : r.crit < 0 ? ' · natural 1' : ''}`; }
 function checkLabel(stat, dc) { const c = checkInfo(stat, dc); return `DC ${c.DC} · ${statLabel(stat)} ${c.mod >= 0 ? '+' : '−'}${Math.abs(c.mod)}${c.adv > 0 ? ' · advantage' : c.adv < 0 ? ' · disadvantage' : ''} · ${Math.round(c.p * 100)}%`; }
 
 function partyPick(k) {
@@ -719,6 +721,7 @@ function closeWeek(a) {
   if (typeof slateWeek === 'function') slateWeek();
   if (typeof finWeek === 'function') finWeek();
   if (typeof angelWeek === 'function') angelWeek();
+  if (typeof holdersWeek === 'function') holdersWeek();
   if (typeof fitWeek === 'function') fitWeek();
   if (typeof market3Week === 'function') market3Week();
   if (typeof stockWeek === 'function') stockWeek();
@@ -741,6 +744,7 @@ function closeWeek(a) {
   if (typeof dealRoomWeek === 'function') dealRoomWeek();
   if (typeof pathWeek === 'function') pathWeek();
   if (typeof bank2Week === 'function') bank2Week();
+  if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
@@ -1053,6 +1057,8 @@ function resolvePick(it, k) {
   if (typeof stakePick === 'function' && stakePick(it, k)) return true;
   if (typeof pathOfferPick === 'function' && pathOfferPick(it, k)) return true;
   if (typeof campusPick === 'function' && campusPick(it, k)) return true;
+  if (typeof unknownPick === 'function' && unknownPick(it, k)) return true;
+  if (typeof drunkPick === 'function' && drunkPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;

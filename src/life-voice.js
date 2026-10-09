@@ -154,7 +154,7 @@ const CONTESTS = [
 ];
 function enterContest(a) {
   const M = S.me, sc = (M.scripts || []).find(x => x.id === a.id), C = CONTESTS.find(c => c.k === a.c);
-  if (!sc || !sc.grade || !C || (sc.entered || []).includes(C.k)) return false;
+  if (!sc || !sc.grade || !C || (sc.entered || []).includes(C.k) || M.cash < usd(C.fee)) return false;
   M.cash -= usd(C.fee); (sc.entered = sc.entered || []).push(C.k);
   (M.contests = M.contests || []).push({ c: C.k, script: sc.id, due: S.week + 8 + Math.floor(prnd() * 6) });
   diary(`You send ${sc.title} to ${C.name}.`);

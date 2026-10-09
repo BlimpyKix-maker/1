@@ -255,7 +255,8 @@ function selfFund(a) {
   // the capital stack: incentive, pre-sales, a gap loan, then the company, then investors for the rest
   let plan = finPlan(budget, { rb: a.rb, ps: a.ps, gap: a.gap, genre: src.genre, lead, dir: direct ? me.id : dirPick });
   let share = 0, invest = 0, psNote = '';
-  { const ang = typeof takeAngels === 'function' && c.cash < plan.equity * .9 ? takeAngels() / 1e6 : 0; if (ang > 0) { c.cash += ang; invest += ang; share = clamp(invest / budget * 1.2, .05, .6); } }   // the angels' money goes in first
+  // the angels' money goes in first (most of it is already in the company's account)
+  { const T = typeof takeAngels === 'function' ? takeAngels() : { amt: 0, wired: 0 }; const ang = (T.amt || 0) / 1e6; if (ang > 0) { c.cash += ang - (T.wired || 0) / 1e6; invest += ang; share = clamp(invest / budget * 1.2, .05, .6); } }
   if (plan.ps > 0) {
     if (src.invTry !== undefined && S.week - src.invTry < 4) return false;
     if (!roll('pack', presaleDC(src.genre, lead))) { psNote = 'The sales agent takes it to the market and comes back with nothing: no pre-sales. '; plan = finPlan(budget, { rb: a.rb, genre: src.genre }); }

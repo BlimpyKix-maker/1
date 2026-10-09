@@ -42,10 +42,10 @@ function shortWeek() {
   for (const w of (M.works || []).filter(x => x.type === 'short' && x.circuit && !x.circuit.over)) {
     const C = w.circuit;
     for (const s of C.subs.filter(s => !s.done && S.week >= s.due)) {
-      s.done = 1; const F = SHORT_FEST[s.k], p = clamp(.5 + (w.q - SF_BAR[F.tier]) / 25, .03, .92);
+      s.done = 1; const F = SHORT_FEST[s.k], p = typeof shortSelOdds === 'function' ? shortSelOdds(w.q, F.tier) : clamp(.5 + (w.q - SF_BAR[F.tier]) / 25, .03, .92);
       if (prnd() >= p) { s.res = 'passed'; continue; }
       s.res = 'selected'; w.units += 3 + Math.floor(prnd() * 6); me.standing = clamp(me.standing + [0, 1.2, .7, .4][F.tier], 0, 100);
-      const win = prnd() < clamp((w.q - SF_BAR[F.tier] + 4) / 40, .03, .5);
+      const win = prnd() < (typeof shortWinOdds === 'function' ? shortWinOdds(w.q, F.tier) : clamp((w.q - SF_BAR[F.tier] + 4) / 40, .03, .5));
       if (win) {
         s.res = 'won'; C.laurels.push({ k: F.k, y: S.year, won: 1 }); const prize = usd([0, 5000, 2500, 1000][F.tier]); M.cash += prize;
         me.standing = clamp(me.standing + [0, 4, 2.5, 1.5][F.tier], 0, 100); me.fame = clamp((me.fame || 0) + [0, 3, 1.5, .5][F.tier], 0, 100);

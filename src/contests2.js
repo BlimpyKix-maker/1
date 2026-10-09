@@ -54,7 +54,7 @@ function compWorkBest(c) { return (S.me.works || []).filter(w => w.rel !== undef
   // contests that judge your released work: your best piece of the right kind is your entry
   enterComp = function (a) {
     const c = COMPS.find(x => x.k === a.k);
-    if (c && c.work) { const b = compWorkBest(c); if (b < 0) return false; const was = c.dc; c.dc = was - Math.round((b - 60) / 6); try { return _enter(a); } finally { c.dc = was; } }
+    if (c && c.work && compWorkBest(c) < 0) return false;   // the work's bonus is in compDC
     return _enter(a);
   };
 }
@@ -99,7 +99,7 @@ function shortsCalendarHTML() {
   const live = (M.works || []).filter(w => w.type === 'short' && w.circuit && S.week - w.rel <= 52);
   const pick = UI.shw !== undefined ? live.find(w => w.id === UI.shw) || live[0] : live[0];
   const order = Object.values(SHORT_FEST).filter(F => F.founded <= S.year).sort((a, b) => ((a.month - mo + 12) % 12) - ((b.month - mo + 12) % 12) || a.tier - b.tier);
-  const row = F => { const sent = pick && pick.circuit.subs.find(s => s.k === F.k), odds = pick ? clamp(.5 + (pick.q - SF_BAR[F.tier]) / 25, .03, .92) : null, ok = pick && F.kind !== 'student' && !(F.kind === 'anim' && ME().sk.digi < 8);
+  const row = F => { const sent = pick && pick.circuit.subs.find(s => s.k === F.k), odds = pick ? (typeof shortSelOdds === 'function' ? shortSelOdds(pick.q, F.tier) : .3) : null, ok = pick && F.kind !== 'student' && !(F.kind === 'anim' && ME().sk.digi < 8);
     return `<tr><td><b>${MON_[F.month]}</b></td><td><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a><br><span class="muted small">${esc(hubName(F.hub))} · ${['', 'A-list', 'major', 'regional'][F.tier]}${F.qual ? ' · Oswald-qualifying' : ''}${F.kind !== 'all' ? ' · ' + esc(F.kind) : ''}</span></td><td class="small">${esc(F.prize)}</td><td class="n small">${fmtCash(usd([0, 75, 50, 30][F.tier]))}</td><td class="small">${odds !== null ? Math.round(odds * 100) + '% to be selected' : ''}</td><td>${!pick ? '' : sent ? `<span class="chip ${sent.res === 'won' ? 'good' : sent.res === 'selected' ? 'good' : sent.res === 'passed' ? '' : 'hist'}">${sent.res || 'entered'}</span>` : ok ? `<button class="btn-s ghost" data-shsub="${pick.id}:${F.k}">Enter</button>` : '<span class="muted small">not eligible</span>'}</td></tr>`; };
   return `<p class="muted small">Every short-film festival, in the order their deadlines come round. Send your short where it has a chance: an A-list premiere makes a name, regional festivals collect laurels. A short stays eligible for a year.</p>
    ${live.length ? `<p>Planning for ${live.length > 1 ? sel('sh-w', live.map(w => [w.id, `${w.title} (quality ${w.q})`]), pick.id) : `<b>${esc(pick.title)}</b> (quality ${pick.q})`} · ${pick.circuit.subs.length} festivals entered · ${(pick.circuit.laurels || []).length} laurels</p>` : '<p class="small">Make a short (Create) to send it round.</p>'}

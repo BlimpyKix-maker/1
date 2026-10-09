@@ -177,7 +177,7 @@ function angelDC(A) {
 function angelOffer(A, why) {
   const amt = usd(A.ticket);
   inbox('note', `${A.name} is in, with terms`, `${why} ${A.name} (${A.kind.toLowerCase()}) will put ${fmtCash(amt)} into your company's next film, for a share of what it earns. They want one thing: ${ANGEL_ASK[A.ask].replace(/^./, x => x.toLowerCase())}`,
-    { act: 'angeloffer', ang: angelKey(A), amt, ask: A.ask, choices: [{ k: 'yes', label: A.ask === 'none' ? 'Shake on it' : 'Agree to the terms' }, ...(A.ask === 'none' ? [] : [{ k: 'haggle', label: 'Push back on the terms', check: ['cha', 14] }]), { k: 'no', label: 'Thank them, and pass' }] });
+    { act: 'angeloffer', ang: angelKey(A), amt, ask: A.ask, choices: [{ k: 'yes', label: (A.ask === 'none' ? 'Shake on it' : 'Agree to the terms') + `: ${fmtCash(amt)} for the next film` }, { k: 'slate', label: `A slate: ${fmtCash(Math.round(amt * 1.8))} across your next three films`, check: ['pack', 13] }, { k: 'company', label: `Sell them 10% of the company for ${fmtCash(Math.round(amt * 2.5))}`, check: ['fin', 12] }, ...(A.ask === 'none' ? [] : [{ k: 'haggle', label: 'Push back on the terms', check: ['cha', 14] }]), { k: 'no', label: 'Thank them, and pass' }] });
 }
 function angelAct(a) {
   const M = S.me, c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub)[+a.i]; if (!A || !c || c.closed !== null) return false;
@@ -191,11 +191,20 @@ function angelPick(it, k) {
   if (it.act !== 'angeloffer') return false;
   const M = S.me, me = ME(); it.done = true; it.picked = k;
   if (k === 'no') { it.result = { t: 'You part as friends.' }; return true; }
-  let amt = it.amt, ask = it.ask, t = 'Done. The money waits for your next greenlight.';
+  let amt = it.amt, ask = it.ask, t = 'Done. The money is wired to your company today and goes into the next film you greenlight.';
+  const c = typeof myCo === 'function' ? myCo() : null, who = it.ang.split('|')[0];
+  if (!c || c.closed !== null) { it.result = { t: 'You have no company for the money to go into.' }; return true; }
+  if (k === 'slate' || k === 'company') {
+    const ok = roll(k === 'slate' ? 'pack' : 'fin', k === 'slate' ? 13 : 12), r = M.lastRoll;
+    if (!ok) { amt = Math.round(amt * .8); c.cash += amt / 1e6; (M.angelFund = M.angelFund || []).push({ who, amt, w: S.week, ask, inCo: 1 }); it.result = { ok, roll: r, t: `They won't go that far. They put ${fmtCash(amt)} into the next film instead, and it's in your company's account now.` }; return true; }
+    if (k === 'slate') { const tot = Math.round(amt * 1.8); c.cash += tot / 1e6; for (let i = 0; i < 3; i++) (M.angelFund = M.angelFund || []).push({ who, amt: Math.round(tot / 3), w: S.week, ask, inCo: 1, slate: i + 1 }); it.result = { ok, roll: r, t: `A three-film slate: ${fmtCash(tot)} is in your company's account, and a third of it goes into each of your next three films.` }; milestone(`${who} backs a three-film slate`, 'work'); return true; }
+    const tot = Math.round(amt * 2.5); c.cash += tot / 1e6; (c.holders = c.holders || []).push({ who, pct: .1, w: S.week, paid: tot }); it.result = { ok, roll: r, t: `${who} buys 10% of ${c.name} for ${fmtCash(tot)}. The money is the company's to use; they take a tenth of its profits from now on.` }; milestone(`Sold 10% of ${c.name} to ${who}`, 'work'); return true;
+  }
   if (k === 'haggle') { const ok = roll('cha', 14); if (ok) { amt = Math.round(amt * 1.15); ask = 'none'; t = 'They laugh, drop the condition and add a little more.'; } else { amt = Math.round(amt * .7); t = 'They keep the condition and trim the cheque.'; } it.result = { ok, roll: M.lastRoll, t }; }
   else it.result = { t };
-  (M.angelFund = M.angelFund || []).push({ who: it.ang.split('|')[0], amt, w: S.week, ask });
-  milestone(`${it.ang.split('|')[0]} backs your next film`, 'work'); return true;
+  c.cash += amt / 1e6;   // the money moves today: it sits in the company until the next greenlight
+  (M.angelFund = M.angelFund || []).push({ who, amt, w: S.week, ask, inCo: 1 });
+  milestone(`${who} backs your next film`, 'work'); return true;
 }
 // now and then the money finds you
 function angelWeek() {
@@ -207,7 +216,19 @@ function angelWeek() {
   angelOffer(A, pickLine([`A handwritten note arrives: "${A.name} would love to be part of whatever you do next."`, `${A.name}'s office calls. They saw your last film twice.`, `You're seated next to ${A.name} at a charity dinner. By dessert they've made an offer.`, `${A.name}'s assistant emails at 6am. Their boss "wants in".`], S.week));
 }
 // committed angel money goes into the next film's equity
-function takeAngels() { const M = S.me, L = M.angelFund || []; if (!L.length) return 0; const t = L.reduce((s, x) => s + x.amt, 0); M.angelFund = []; return t; }
+// (slate money goes one tranche per film; money already wired to the company isn't added twice)
+function takeAngels() {
+  const M = S.me, L = M.angelFund || []; if (!L.length) return { amt: 0, wired: 0 };
+  const take = L.filter(x => !x.slate).concat(L.filter(x => x.slate).sort((a, b) => a.slate - b.slate).filter((x, i, A) => x.slate === A[0].slate));
+  M.angelFund = L.filter(x => !take.includes(x));
+  return { amt: take.reduce((s, x) => s + x.amt, 0), wired: take.filter(x => x.inCo).reduce((s, x) => s + x.amt, 0), who: take.map(x => x.who) };
+}
+// partners in the company take their share of what its films earn
+function holdersWeek() {
+  const c = typeof myCo === 'function' ? myCo() : null; if (!c || !(c.holders || []).length) return;
+  const pct = c.holders.reduce((s, h) => s + h.pct, 0);
+  for (const id of c.films) { const f = S.films[id]; if (!f || f.rel === null || f.holdersPaid || f.rentals === undefined) continue; f.holdersPaid = 1; const net = f.rentals - f.pa - f.backend - f.cost; if (net > 0) { const v = net * pct; c.cash -= v; for (const h of c.holders) h.got = (h.got || 0) + Math.round(v * h.pct / pct * 1e6); inbox('note', `Partners' share: ${f.title}`, `${f.title} made money, and your partners in ${c.name} take their ${Math.round(pct * 100)}%: ${fmtM(v)}.`, { film: f.id }); } }
+}
 function privateBankHTML() {
   const M = S.me, B = bankOf(M), nw = osNetWorth(), lim = sblLimit(M), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub);
   const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[angelKey(a)] ?? -999) < a.wait, dc = angelDC(a), mv = ANGEL_MOTIVE[a.motive];
@@ -216,7 +237,8 @@ function privateBankHTML() {
      <p class="small"><span class="muted">Loves</span> ${a.likes.map(esc).join(', ')} · <span class="muted">Usual cheque</span> <b>${fmtCash(usd(a.ticket))}</b><br><span class="muted">Usually asks for</span> ${esc(ANGEL_ASK[a.ask])}</p>
      ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait || a.out ? 'disabled' : ''}>${a.out ? 'Not investing right now' : wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
   return `<div class="os-grid">${osCard('Securities-backed credit', `<p class="small">Borrow against your shares at ${(rateAt(S.year) + 1.5).toFixed(1)}%, up to half their value: ${fmtCash(lim)} available. If the market falls far enough, the bank sells your shares to cover it.</p><div class="bank-f"><button class="os-btn" data-bank="sbl" ${lim < 1000 ? 'disabled' : ''}>Draw ${fmtCash(Math.min(lim, Math.round(+UI.bkamt || 0)))} from the line</button></div>${B.sbl ? `<p class="small">Drawn: <b>${fmtCash(Math.round(B.sbl))}</b>. Interest comes out weekly; repay with the Repay button on Borrowing.</p>` : ''}`)}
-   ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
+   ${c && (c.holders || []).length ? osCard('Partners in your company', `<ul class="os-list">${c.holders.map(h => `<li><b>${esc(h.who)}</b><span>${Math.round(h.pct * 100)}% · paid ${fmtCash(h.paid)}${h.got ? ` · taken ${fmtCash(h.got)}` : ''}</span></li>`).join('')}</ul>`) : ''}
+   ${osCard('Committed to your films', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}${x.slate ? ` · film ${x.slate} of a slate` : ''}${x.inCo ? ' · in the company account' : ''}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">The money is already in your company's account (${c ? fmtCash(Math.round(c.cash * 1e6)) : ''} in all). It goes into the equity when you greenlight, and they take a share of what that film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
    <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Their fortunes move with the part of the market they're in: a good year makes them keener and the cheques bigger, a bad one sends some to ground. A few new names arrive every quarter.</p>
    <div class="angels">${angels}</div>`;
 }

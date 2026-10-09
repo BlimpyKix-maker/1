@@ -2,7 +2,7 @@
 // Each company reads like a market terminal: a ticker, a share price that tracks what the company is really worth
 // (cash, the library's future earnings, the slate), its history month by month, a corporate structure, a logo,
 // and the lore at the bottom. The worth is the simulation's own numbers, so a hit moves the price and a flop sinks it.
-function tickerOf(c) { const w = c.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(x => x && !/^(the|and|of|films?|pictures?|studios?)$/i.test(x)); return (w.length >= 2 ? w.map(x => x[0]).join('') : (w[0] || c.name).slice(0, 4)).toUpperCase().slice(0, 4); }
+function tickerOf(c) { if (!c || !c.name) return "—"; const w = c.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(x => x && !/^(the|and|of|films?|pictures?|studios?)$/i.test(x)); return (w.length >= 2 ? w.map(x => x[0]).join('') : (w[0] || c.name).slice(0, 4)).toUpperCase().slice(0, 4); }
 function sharesOf(c) { return [0, 20, 4, .5][c.tier] * (0.6 + hashRand(c.id * 13 + 1)() * .8); }   // millions of shares
 // What the company is worth, in the world's millions: cash, what its library will still earn, what's in the pipeline.
 function companyWorth(c, libByOwner) {

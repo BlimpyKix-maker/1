@@ -693,6 +693,26 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .art { width: 100%; height: 100%; display: block; } .cg-ph.drawn { padding: 0; } .cg-ph.drawn .art { position: absolute; inset: 0; } .bzart { aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; margin: -2px 0 4px; } .bzart .art { width: 100%; height: 100%; }
 .wxscene { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/7; margin-bottom: 10px; } .wxscene .art { position: absolute; inset: 0; } .wxover { position: absolute; left: 16px; top: 10px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.45); } .wxover .wxbig { font-size: 44px; margin: 0; font-weight: 800; } .wxover .eyebrow { color: #fff; opacity: .9; }
 .wxcurve { width: 100%; height: 90px; } .wxworld { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; } .wxcity { display: grid; justify-items: center; gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; color: inherit; } .wxcity span { font-size: 22px; } .wxcity small { font-size: 11px; opacity: .75; } .wxbig.small { font-size: 20px; }
+#toasts { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: grid; gap: 6px; z-index: 9999; pointer-events: none; } .toast { background: #222; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.3); opacity: 1; transition: opacity .35s, transform .35s; max-width: 80vw; } .toast.good { background: #2e7d5b; } .toast.bad { background: #b23a33; } .toast.out { opacity: 0; transform: translateY(8px); }
+@keyframes tbob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-1.5px) } }
+@keyframes tblink { 0%,92%,100% { transform: scaleY(1) } 95% { transform: scaleY(.1) } }
+@keyframes ttwinkle { 0%,100% { opacity: .2; transform: translateY(0) } 50% { opacity: 1; transform: translateY(-3px) } }
+@keyframes twave { 0%,100% { transform: rotate(0) } 50% { transform: rotate(-14deg) } }
+@keyframes tspin { from { transform: scaleX(1) } 50% { transform: scaleX(-1) } to { transform: scaleX(1) } }
+@keyframes thop { 0%,80%,100% { transform: translateY(0) } 90% { transform: translateY(-4px) } }
+@keyframes tglow { 0%,100% { opacity: .5 } 50% { opacity: 1 } }
+.hero .t-head, .room .t-head, .toonlive .t-head { animation: tbob 3.2s ease-in-out infinite; transform-box: fill-box; }
+.hero .t-eyes, .room .t-eyes, .toonlive .t-eyes { animation: tblink 4.6s infinite; transform-box: fill-box; transform-origin: center; }
+.hero .t-aura text, .room .t-aura text, .toonlive .t-aura text { animation: ttwinkle 2.4s ease-in-out infinite; }
+.hero .t-wave, .room .t-wave, .toonlive .t-wave { animation: twave 1.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 0% 100%; }
+.hero .t-prop, .room .t-prop, .toonlive .t-prop { animation: tspin .5s linear infinite; transform-box: fill-box; transform-origin: center; }
+.hero .t-pet, .room .t-pet, .toonlive .t-pet { animation: thop 3.8s ease-in-out infinite; }
+.hero .t-halo, .room .t-halo, .toonlive .t-halo, .t-blink2 { animation: tglow 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .t-head, .t-eyes, .t-aura text, .t-wave, .t-prop, .t-pet, .t-halo, .t-blink2 { animation: none !important; } }
+.seasongrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; } .seam { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; } .seam.now { border-color: #c9a227; box-shadow: 0 0 0 2px rgba(201,162,39,.25); } .seam h4 { margin: 0 0 4px; } .sk { display: inline-block; width: 16px; height: 16px; line-height: 16px; text-align: center; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; } .sk-festival { background: #8a3b5a; } .sk-shorts { background: #3b6a8a; } .sk-contest { background: #6a8a3b; }
+#saveov { position: fixed; inset: 0; z-index: 9998; background: rgba(15,12,10,.35); display: grid; place-items: center; cursor: progress; } #saveov .sv-box { background: var(--panel, #fff); color: var(--ink, #222); padding: 16px 22px; border-radius: 12px; display: grid; gap: 8px; min-width: 260px; box-shadow: 0 10px 40px rgba(0,0,0,.35); } #saveov .sv-bar { height: 8px; background: var(--line, #ddd); border-radius: 6px; overflow: hidden; } #saveov .sv-bar i { display: block; height: 100%; width: 0; background: #c9a227; transition: width .15s; }
+.huntsw { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.bond { display: grid; gap: 2px; padding: 6px 10px; margin: 4px 0 6px; border-radius: 10px; background: rgba(201,162,39,.12); font-size: 12px; } .bond-bar { height: 5px; border-radius: 4px; background: rgba(0,0,0,.12); overflow: hidden; } .bond-bar i { display: block; height: 100%; background: #c9a227; }
 details.inl { display: inline; } details.inl[open] { display: block; margin-top: 4px; } details.inl summary { display: inline; cursor: pointer; }
 .listings, .venues, .whatson { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; margin: 6px 0; }
 .listing, .wo { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--bg); }
@@ -11123,6 +11143,8 @@ function checkMods(stat) {
     if (W.adv && W.adv.includes(stat)) { adv++; why.push(nm); }
     if (W.dis && W.dis.includes(stat)) { adv--; why.push(nm + ' (against)'); }
     if (W.bonus && W.bonus[stat]) { bonus += W.bonus[stat]; why.push(`${nm} ${W.bonus[stat] > 0 ? '+' : ''}${W.bonus[stat]}`); } }
+  // the extremes count: real mastery opens a gap, and being out of your depth shows
+  if (v >= 19) { bonus += 2; why.push('Mastery +2'); } else if (v >= 16) { bonus += 1; why.push('Expertise +1'); } else if (v <= 4) { bonus -= 1; why.push('Out of your depth −1'); }
   return { v, mod: mod + bonus, adv: Math.sign(adv), why };
 }
 // Wardrobe pieces the player owns and has on.
@@ -11148,7 +11170,7 @@ function roll(stat, dc) {
   S.me.lastRoll = { stat, d, dice, mod, DC, adv, ok, crit: d === 20 ? 1 : d === 1 ? -1 : 0, n: S.me.rollN, why: checkInfo(stat, DC - 1).why };
   return ok;
 }
-function rollText(r) { if (!r) return ''; return `d20 ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${r.d + r.mod} vs DC ${r.DC}${r.adv > 0 ? ' (advantage)' : r.adv < 0 ? ' (disadvantage)' : ''}${r.crit > 0 ? ' · natural 20' : r.crit < 0 ? ' · natural 1' : ''}`; }
+function rollText(r) { if (!r) return ''; const need = clamp(r.DC - r.mod, 2, 20); return `needed ${need}+ on the die (${Math.round(clamp((21 - need) / 20, .05, .95) * 100)}%) · rolled d20 ${r.d}${r.mod ? (r.mod > 0 ? ' + ' : ' − ') + Math.abs(r.mod) : ''} = ${r.d + r.mod} vs DC ${r.DC}${r.adv > 0 ? ' (advantage)' : r.adv < 0 ? ' (disadvantage)' : ''}${r.crit > 0 ? ' · natural 20' : r.crit < 0 ? ' · natural 1' : ''}`; }
 function checkLabel(stat, dc) { const c = checkInfo(stat, dc); return `DC ${c.DC} · ${statLabel(stat)} ${c.mod >= 0 ? '+' : '−'}${Math.abs(c.mod)}${c.adv > 0 ? ' · advantage' : c.adv < 0 ? ' · disadvantage' : ''} · ${Math.round(c.p * 100)}%`; }
 
 function partyPick(k) {
@@ -11491,6 +11513,7 @@ function closeWeek(a) {
   if (typeof slateWeek === 'function') slateWeek();
   if (typeof finWeek === 'function') finWeek();
   if (typeof angelWeek === 'function') angelWeek();
+  if (typeof holdersWeek === 'function') holdersWeek();
   if (typeof fitWeek === 'function') fitWeek();
   if (typeof market3Week === 'function') market3Week();
   if (typeof stockWeek === 'function') stockWeek();
@@ -11513,6 +11536,7 @@ function closeWeek(a) {
   if (typeof dealRoomWeek === 'function') dealRoomWeek();
   if (typeof pathWeek === 'function') pathWeek();
   if (typeof bank2Week === 'function') bank2Week();
+  if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
   // living
@@ -11825,6 +11849,8 @@ function resolvePick(it, k) {
   if (typeof stakePick === 'function' && stakePick(it, k)) return true;
   if (typeof pathOfferPick === 'function' && pathOfferPick(it, k)) return true;
   if (typeof campusPick === 'function' && campusPick(it, k)) return true;
+  if (typeof unknownPick === 'function' && unknownPick(it, k)) return true;
+  if (typeof drunkPick === 'function' && drunkPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -12986,7 +13012,7 @@ function runBlock(k) {
     case 'hustle': W.cashIn += usd(Math.round(75 * worldFx().hustle)); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
     case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
     case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
-    case 'out': W.stress += worldFx().out; L.push(pickLine(OUT_LINES, W.day)); break;
+    case 'out': W.stress += worldFx().out; L.push(pickLine(OUT_LINES, W.day)); if (typeof drunkText === 'function' && W.block === 2 && W.day >= 4) drunkText(); break;
     case 'read': weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); break;
     default: if (A.venue && typeof venueEvening === 'function') L.push(...venueEvening(A));
   }
@@ -13534,7 +13560,7 @@ const CONTESTS = [
 ];
 function enterContest(a) {
   const M = S.me, sc = (M.scripts || []).find(x => x.id === a.id), C = CONTESTS.find(c => c.k === a.c);
-  if (!sc || !sc.grade || !C || (sc.entered || []).includes(C.k)) return false;
+  if (!sc || !sc.grade || !C || (sc.entered || []).includes(C.k) || M.cash < usd(C.fee)) return false;
   M.cash -= usd(C.fee); (sc.entered = sc.entered || []).push(C.k);
   (M.contests = M.contests || []).push({ c: C.k, script: sc.id, due: S.week + 8 + Math.floor(prnd() * 6) });
   diary(`You send ${sc.title} to ${C.name}.`);
@@ -14953,7 +14979,8 @@ function selfFund(a) {
   // the capital stack: incentive, pre-sales, a gap loan, then the company, then investors for the rest
   let plan = finPlan(budget, { rb: a.rb, ps: a.ps, gap: a.gap, genre: src.genre, lead, dir: direct ? me.id : dirPick });
   let share = 0, invest = 0, psNote = '';
-  { const ang = typeof takeAngels === 'function' && c.cash < plan.equity * .9 ? takeAngels() / 1e6 : 0; if (ang > 0) { c.cash += ang; invest += ang; share = clamp(invest / budget * 1.2, .05, .6); } }   // the angels' money goes in first
+  // the angels' money goes in first (most of it is already in the company's account)
+  { const T = typeof takeAngels === 'function' ? takeAngels() : { amt: 0, wired: 0 }; const ang = (T.amt || 0) / 1e6; if (ang > 0) { c.cash += ang - (T.wired || 0) / 1e6; invest += ang; share = clamp(invest / budget * 1.2, .05, .6); } }
   if (plan.ps > 0) {
     if (src.invTry !== undefined && S.week - src.invTry < 4) return false;
     if (!roll('pack', presaleDC(src.genre, lead))) { psNote = 'The sales agent takes it to the market and comes back with nothing: no pre-sales. '; plan = finPlan(budget, { rb: a.rb, genre: src.genre }); }
@@ -15309,7 +15336,7 @@ function articleHTML(i) {
 // Each company reads like a market terminal: a ticker, a share price that tracks what the company is really worth
 // (cash, the library's future earnings, the slate), its history month by month, a corporate structure, a logo,
 // and the lore at the bottom. The worth is the simulation's own numbers, so a hit moves the price and a flop sinks it.
-function tickerOf(c) { const w = c.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(x => x && !/^(the|and|of|films?|pictures?|studios?)$/i.test(x)); return (w.length >= 2 ? w.map(x => x[0]).join('') : (w[0] || c.name).slice(0, 4)).toUpperCase().slice(0, 4); }
+function tickerOf(c) { if (!c || !c.name) return "—"; const w = c.name.replace(/[^A-Za-z ]/g, '').split(/\s+/).filter(x => x && !/^(the|and|of|films?|pictures?|studios?)$/i.test(x)); return (w.length >= 2 ? w.map(x => x[0]).join('') : (w[0] || c.name).slice(0, 4)).toUpperCase().slice(0, 4); }
 function sharesOf(c) { return [0, 20, 4, .5][c.tier] * (0.6 + hashRand(c.id * 13 + 1)() * .8); }   // millions of shares
 // What the company is worth, in the world's millions: cash, what its library will still earn, what's in the pipeline.
 function companyWorth(c, libByOwner) {
@@ -16239,16 +16266,37 @@ const COMP_CAT = { all: 'All', fits: 'Fits you', write: 'Writing', direct: 'Dire
 const COMP_TIER = { major: ['Major', 'bad'], industry: ['Industry', 'hist'], fun: ['Just for fun', 'good'] };
 function compOpen(c) { const m = dateOf(S.week).getUTCMonth(); return c.month === m || c.month === (m + 1) % 12; }
 function compFits(c) { const me = ME(), main = MAIN[me.role]; return (CRAFTS[main] && CRAFTS[main].subs[c.stat] !== undefined) || (c.genre && S.me.love.includes(c.genre)); }
+// the real target for an entry: the contest's bar, a little higher for majors, moved by what you send in. The odds on
+// the card use exactly this number.
+function compDC(c, sc) {
+  let dc = c.dc + (c.tier === 'major' ? 1 : 0);
+  if (c.need === 'script' && sc) dc -= Math.round((sc.score - 60) / 6) + (c.genre && sc.genre === c.genre ? 2 : c.genre ? -4 : 0);
+  if (c.work && typeof compWorkBest === 'function') { const b = compWorkBest(c); if (b >= 0) dc -= Math.round((b - 60) / 6); }
+  return dc;
+}
+function compScript(c) { const L = (S.me.scripts || []).filter(x => x.grade); const id = UI['comp-sc-' + c.k]; return L.find(x => String(x.id) === String(id)) || L[L.length - 1] || null; }
+// why you can't enter right now (null when you can): every lock says what it is
+function compBlock(c) {
+  const M = S.me, me = ME();
+  if (!compOpen(c)) return `Entries open in ${MON[(c.month + 11) % 12]}`;
+  if (compEntered(c)) return 'Already entered this year';
+  if (M.cash < usd(c.fee)) return `The fee is ${fmtCash(usd(c.fee))}; you have ${fmtCash(Math.max(0, M.cash))}`;
+  if (c.need === 'script' && !(M.scripts || []).some(x => x.grade)) return 'Needs a finished script (write one on the Create tab)';
+  if (c.work && typeof compWorkBest === 'function' && compWorkBest(c) < 0) return `Needs a released ${(typeof WORK_NEED_LABEL !== 'undefined' && WORK_NEED_LABEL[c.work[0]]) || 'work'} of yours`;
+  if (c.energy && M.energy + c.energy < 5) return `Too tired: it costs ${-c.energy} energy and you have ${Math.round(M.energy)}`;
+  if (c.genre && c.need === 'script' && !(M.scripts || []).some(x => x.grade && x.genre === c.genre)) return `${c.genre} scripts only: you'd be marked down without one`;
+  return null;
+}
 function compEntered(c) { const y = yearOf(S.week); return (S.me.comps || []).some(e => e.k === c.k && e.y === y); }
 // Enter: pay, roll now (the logged action carries it), learn the result when the judges are done.
 function enterComp(a) {
   const M = S.me, me = ME(), c = COMPS.find(x => x.k === a.k);
   if (!c || !compOpen(c) || compEntered(c) || M.cash < usd(c.fee)) return false;
-  let bonus = 0, sc = null;
-  if (c.need === 'script') { sc = (M.scripts || []).find(x => x.id === a.script && x.grade); if (!sc) return false; bonus = Math.round((sc.score - 60) / 6) + (c.genre && sc.genre === c.genre ? 2 : c.genre ? -4 : 0); }
+  let sc = null;
+  if (c.need === 'script') { sc = (M.scripts || []).find(x => x.id === a.script && x.grade); if (!sc) return false; }
   M.cash -= usd(c.fee);
   if (c.energy) M.energy = clamp(M.energy + c.energy, 0, 100);
-  const ok = roll(c.stat, c.dc + (c.tier === 'major' ? 1 : 0) - bonus), r = M.lastRoll, margin = r.d + r.mod - r.DC;
+  const ok = roll(c.stat, compDC(c, sc)), r = M.lastRoll, margin = r.d + r.mod - r.DC;
   // a natural 20 gets you into the final; only real quality wins it
   const place = ok ? (margin >= 6 || (r.crit > 0 && margin >= 2) ? 'win' : margin >= 3 ? 'runner' : 'final') : margin >= -3 ? 'mention' : 'out';
   (M.comps = M.comps || []).push({ k: c.k, y: yearOf(S.week), w: S.week, due: S.week + (c.tier === 'fun' ? 1 : c.tier === 'industry' ? 4 : 8), place, script: sc ? sc.id : null, roll: r });
@@ -16277,7 +16325,7 @@ function contestRulesHTML(c) {
   const M = S.me, T = COMP_TIER[c.tier], mine = ((M && M.comps) || []).filter(e => e.k === c.k).slice().reverse();
   return `<section class="panel"><h3>How it works</h3><p>${chip(T[0], T[1])} ${esc(c.d)}</p>
    <p class="small">Closes in <b>${MON[c.month]}</b>, entries open the month before · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''} · judged on <b>${esc(statLabel(c.stat).toLowerCase())}</b>${c.need === 'script' ? ' · needs a finished script' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''}${c.energy ? ' · a hard weekend' : ''}.</p>
-   ${M ? `<p class="small">Your odds today: ${oddsBar(c.stat, c.dc)}${compFits(c) ? ' ' + chip('Fits you', 'good') : ''}</p><p class="small">${compOpen(c) ? (compEntered(c) ? '<b>You\'ve entered this year.</b>' : 'Entries are open now: <button class="linkish" data-dtab="compete">enter from the Contests tab</button>.') : `Entries open in ${MON[(c.month + 11) % 12]}.`}</p>
+   ${M ? `<p class="small">Your odds today: ${oddsBar(c.stat, compDC(c, c.need === 'script' ? compScript(c) : null))}${compFits(c) ? ' ' + chip('Fits you', 'good') : ''}</p><p class="small">${compOpen(c) ? (compEntered(c) ? '<b>You\'ve entered this year.</b>' : 'Entries are open now: <button class="linkish" data-dtab="compete">enter from the Contests tab</button>.') : `Entries open in ${MON[(c.month + 11) % 12]}.`}</p>
    <h4>Your entries</h4>${mine.length ? `<ul class="plain small">${mine.map(e => `<li>${e.y}: ${e.told ? `<b>${PLACE_LABEL[e.place]}</b>` : 'waiting on the judges'}</li>`).join('')}</ul>` : '<p class="muted small">You haven\'t entered yet.</p>'}` : ''}</section>`;
 }
 function compPanel() {
@@ -16291,7 +16339,7 @@ function compPanel() {
     const scSel = c.need === 'script' ? (scripts.length ? sel('comp-sc-' + c.k, scripts.map(s => [String(s.id), `${s.title} (${s.grade})`]), UI['comp-sc-' + c.k] || String(scripts[scripts.length - 1].id)) : '<span class="muted small">Needs a finished script</span>') : c.work && typeof compWorkBest === 'function' ? (compWorkBest(c) >= 0 ? `<span class="small muted">Your best ${esc(WORK_NEED_LABEL[c.work[0]] || 'work')} (quality ${compWorkBest(c)}) is your entry</span>` : `<span class="muted small">Needs a released ${esc(WORK_NEED_LABEL[c.work[0]] || 'work')}</span>`) : '';
     return `<div class="comp${fits ? ' fits' : ''}"><div class="ch"><b>${compLink(c)}</b> ${chip(T[0], T[1])}${fits ? ' ' + chip('Fits you', 'good') : ''}</div><p class="small">${esc(c.d)}</p>
      <p class="small muted">Closes in ${MON[c.month]} · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''}${c.energy ? ' · a hard weekend' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''} · judged on ${esc(statLabel(c.stat).toLowerCase())}</p>
-     ${done ? `<p class="small"><b>Entered.</b> ${e.told ? PLACE_LABEL[e.place] : 'Waiting on the judges.'}</p>` : open ? `<div class="crow">${scSel}${oddsBar(c.stat, c.dc)}<button class="btn-s" data-comp="${c.k}" ${(c.need === 'script' && !scripts.length) || M.cash < usd(c.fee) ? 'disabled' : ''}>Enter</button></div>` : `<p class="small muted">Opens ${MON[(c.month + 11) % 12]}.</p>`}</div>`;
+     ${done ? `<p class="small"><b>Entered.</b> ${e.told ? PLACE_LABEL[e.place] : 'Waiting on the judges.'}</p>` : open ? `<div class="crow">${scSel}${oddsBar(c.stat, compDC(c, c.need === 'script' ? compScript(c) : null))}${(() => { const why = compBlock(c), soft = why && /marked down/.test(why); return `<button class="btn-s" data-comp="${c.k}" ${why && !soft ? `disabled title="${esc(why)}"` : ''}>Enter</button></div>${why ? `<p class="small ${soft ? 'muted' : 'bad'}">${esc(why)}</p>` : ''}`; })()}` : `<p class="small muted">Opens ${MON[(c.month + 11) % 12]}.</p>`}</div>`;
   };
   return `<section class="panel comps"><h3>Competitions</h3><p class="muted small">Entries open the month before each deadline. Your craft sets the odds; the roll on the day decides. Major prizes open doors; the fun ones give you trophies, stories and new friends.</p>
    <div class="fchips">${Object.entries(COMP_CAT).map(([k, l]) => `<button class="fchip${f === k ? ' on' : ''}" data-compf="${k}">${esc(l)}</button>`).join('')}</div>
@@ -18193,7 +18241,9 @@ function replyText(a) {
     }
   }
   sms(-1, mine, 'mine', { to: q.id });
+  if (typeof bondReply === 'function') d = bondReply(q, a.kind, d);   // tone counts
   addTie(me, q, d); M.known[q.id].seen = S.week;
+  if (typeof bondCheck === 'function') bondCheck(q.id);
   sms(q.id, back, 'text', { mood, topic: 'chat' });
   return true;
 }
@@ -19382,7 +19432,7 @@ function codexHTML() {
 // choice, so the week flows; anything that matters (offers, interviews, deals, invitations) still waits for you.
 // Every auto choice goes through the action log like a click, so saves replay the same.
 function autoOn(k) { const A = (S.me && S.me.auto) || {}; return A[k] !== false; }
-function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'oblig') { M.autoOblig = M.autoOblig === false ? true : false; return true; } if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
+function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'oblig') { M.autoOblig = M.autoOblig === false ? true : false; return true; } if (a.k === 'looking') { M.looking = ['no', 'craft', 'yes'].includes(a.v) ? a.v : lookingForWork() ? 'no' : 'yes'; if (M.looking === 'no') M.focus.noHunt = true; else M.focus.noHunt = false; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
 // the sensible choice: an option with no roll and no cost, else the first
 function sensibleChoice(it) { const L = (it.choices || []).filter(c => !c.dis); return (L.find(c => !c.check && !/quit|leave|skip|refuse|no thanks/i.test(c.label || '')) || L[0] || {}).k; }
 function autoBeforeStep() {
@@ -19444,11 +19494,18 @@ function rankedFits(n) {
   const M = S.me, short = runwayWeeks() < 12, floor = careerLevel() >= 3 && !short ? tierLevel() - 1 : 0;   // established: nothing far below your level
   const L = M.board.filter(p => !blockedFrom(tmplOf(p)) && (p.tier || 1) >= floor).map(p => [p, hireOdds(p), jobRelevance(p)]);
   const wt = x => x[2] >= 1 ? 1.8 : x[2] >= .8 ? 1.2 : x[2] >= .6 ? 1 : .55;
-  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
+  const want = M.jobs.length || M.looking === 'craft' ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
   const ranked = want.sort((a, b) => b[1] * wt(b) - a[1] * wt(a));
   // never leave a broke player with nothing to apply for
-  const out = ranked.length || M.jobs.length ? ranked : L.sort((a, b) => b[1] - a[1]);
+  const out = ranked.length || M.jobs.length || M.looking === 'craft' ? ranked : L.sort((a, b) => b[1] - a[1]);
   return out.slice(0, n).map(x => [x[0], x[1]]);
+}
+
+// the switch on the Work tab: off, only your own line of work, or anything that pays
+function huntSwitchHTML() {
+  const M = S.me, v = M.looking === 'no' || (!M.looking && !lookingForWork()) ? 'no' : M.looking === 'craft' ? 'craft' : 'yes';
+  const L = [['no', '🛑 Not looking', 'No applications go out and no hunting blocks are planned. Offers can still find you.'], ['craft', '🎯 Only my line of work', `Applications go only to ${typeof dreamLabel === 'function' ? dreamLabel().toLowerCase() : 'your craft'} work.`], ['yes', '💼 Anything that pays', 'Your craft first, then anything near it, and odd jobs when money is short.']];
+  return `<div class="huntsw"><b>Job hunting</b> ${L.map(([k, l, d]) => `<button class="pill${v === k ? ' on' : ''}" data-looking="${k}" title="${esc(d)}">${l}</button>`).join(' ')}<span class="muted small"> ${esc(L.find(x => x[0] === v)[2])}</span></div>`;
 }
 // </autopilot>
 // <market>
@@ -19529,11 +19586,11 @@ function marketApp() {
   if (T.tab === 'tips' && typeof tipsHTML === 'function') return head + tipsHTML();
   if (T.tab === 'econ' && typeof economyHTML === 'function') return head + economyHTML();
   if (T.tab === 'port') {
-    const pos = Object.entries(M.port || {}).filter(([, n]) => n > 0).map(([id, n]) => [S.companies[+id], n]), val = pos.reduce((t, [c, n]) => t + mktPrice(c) * n, 0), cost = pos.reduce((t, [c]) => t + ((M.portCost || {})[c.id] || 0), 0);
+    const pos = Object.entries(M.port || {}).filter(([, n]) => n > 0).map(([id, n]) => [S.companies[+id], n]).filter(([c]) => c), val = pos.reduce((t, [c, n]) => t + mktPrice(c) * n, 0), cost = pos.reduce((t, [c]) => t + ((M.portCost || {})[c.id] || 0), 0);
     return head + `<div class="kpis mini"><div><span>Value</span><b>${fmtCash(Math.round(val))}</b></div><div><span>Cost</span><b>${fmtCash(Math.round(cost))}</b></div><div><span>Gain</span><b class="${val >= cost ? 'good' : 'bad'}">${fmtCash(Math.round(val - cost))}</b></div><div><span>Cash</span><b>${fmtCash(M.cash)}</b></div></div>
      <div class="tw"><table class="grid small"><thead><tr><th>Ticker</th><th class="n">Shares</th><th class="n">Avg cost</th><th class="n">Price</th><th class="n">Value</th><th class="n">Gain</th></tr></thead><tbody>${pos.map(([c, n]) => { const cst = (M.portCost || {})[c.id] || 0, v = mktPrice(c) * n; return `<tr><td><a href="#" class="lk" data-mkt="sel:${c.id}">${esc(tickerOf(c))}</a></td><td class="n">${n}</td><td class="n">$${(cst / n).toFixed(2)}</td><td class="n">$${mktPrice(c).toFixed(2)}</td><td class="n">${fmtCash(Math.round(v))}</td><td class="n ${v >= cst ? 'good' : 'bad'}">${fmtCash(Math.round(v - cst))} (${((v / Math.max(1, cst) - 1) * 100).toFixed(1)}%)</td></tr>`; }).join('') || '<tr><td colspan="6" class="empty">No positions. Pick a stock in the Market tab.</td></tr>'}</tbody></table></div>
      ${typeof sectorsHeldHTML === 'function' ? sectorsHeldHTML() : ''}
-     ${(M.trades || []).length ? `<h4>Recent trades</h4><ul class="plain small">${M.trades.slice(-8).reverse().map(t => `<li>${fmtDate(t.w, true)} · ${t.n > 0 ? 'Bought' : 'Sold'} ${Math.abs(t.n)} ${esc(tickerOf(S.companies[t.co]))} at $${t.px}</li>`).join('')}</ul>` : ''}`;
+     ${(M.trades || []).length ? `<h4>Recent trades</h4><ul class="plain small">${M.trades.slice(-8).reverse().map(t => `<li>${fmtDate(t.w, true)} · ${t.short ? (t.n < 0 ? 'Shorted' : 'Covered') : t.n > 0 ? 'Bought' : 'Sold'} ${Math.abs(t.n)} ${esc(t.key && typeof tkName === 'function' ? tkName(t.key).split(' · ')[0] : tickerOf(S.companies[t.co]))} at $${t.px}</li>`).join('')}</ul>` : ''}`;
   }
   if (T.tab === 'news') { const N = []; for (const c of L) for (let w = S.week; w > S.week - 8; w--) for (const e of mktBar(c, w).ev) N.push([w, c, e]); N.sort((a, b) => b[0] - a[0] || Math.abs(b[2][1]) - Math.abs(a[2][1])); return head + `<ul class="plain small mnews">${N.slice(0, 30).map(([w, c, e]) => `<li><span class="muted">${fmtDate(w, true)}</span> <a href="#" class="lk" data-mkt="sel:${c.id}"><b>${esc(tickerOf(c))}</b></a> ${pctS(e[1] * 100)} · ${esc(e[0])}</li>`).join('') || '<li class="muted">A quiet market.</li>'}</ul>`; }
   if (T.tab === 'market' && typeof allMarketHTML === 'function') return head + allMarketHTML();
@@ -20749,7 +20806,7 @@ function slateWeek() {
     // the calls that come with the chair
     if (r >= 3 && S.week % 4 === j.id % 4 && !pending().some(x => x.kind === 'slate')) {
       const f = L[Math.floor(hashRand(S.week * 13 + j.id)() * L.length)], DS = SLATE_CALLS.filter(x => x.stage.includes(f.stage)), D = DS[Math.floor(hashRand(S.week * 7 + j.id)() * DS.length)];
-      if (D) inbox('slate', `${f.title}: ${D.title}`, D.text.replace('{film}', f.title).replace('{co}', c.name), { film: f.id, job: j.id, call: D.k, choices: D.opts.map(o => ({ k: o.k, label: o.label + (o.check ? ` (${statLabel(o.check[0])})` : '') })) });
+      if (D) inbox('slate', `${f.title}: ${D.title}`, D.text.replace('{film}', f.title).replace('{co}', c.name), { film: f.id, job: j.id, call: D.k, choices: D.opts.map(o => Object.assign({ k: o.k, label: o.label }, o.check ? { check: [o.check[0], o.check[1] + (r >= 6 ? -1 : 0)] } : {})) });
     }
   }
 }
@@ -20766,7 +20823,7 @@ function slatePick(it, k) {
   const M = S.me, me = ME(), f = S.films[it.film], j = M.jobs.find(x => x.id === it.job), D = SLATE_CALLS.find(x => x.k === it.call); it.done = true;
   if (!f || !j || !D || f.rel !== null) { it.result = { t: 'Too late: the decision was made without you.' }; return true; }
   const o = D.opts.find(x => x.k === k) || D.opts[D.opts.length - 1], r = jobRung(j), sw = .4 + r * .15;
-  let ok = true; if (o.check) ok = roll(o.check[0], o.check[1] + (r >= 6 ? -1 : 0));
+  let ok = true; if (o.check) ok = roll(o.check[0], o.check[1] + (r >= 6 ? -1 : 0));   // the same target the choice showed
   const dq = ok ? (o.q || 0) * sw : -Math.max(1, Math.abs(o.q || 0)) * sw * .5, dh = ok ? (o.hook || 0) * sw : -Math.max(1, Math.abs(o.hook || 0)) * sw * .5 - (o.risk ? 4 : 0);
   f.qBonus = (f.qBonus || 0) + dq; f.hook = clamp((f.hook || 50) + dh, 5, 99); f.you = (f.you || 0) + dq;
   if (o.cost) { const c = S.companies[j.co]; if (c) c.cash -= f.budget * .05; f.paMul = (f.paMul || 1) * 1.1; }
@@ -23363,11 +23420,11 @@ for (const k in FOLD) { const [i, n, d, fn] = FOLD[k]; OS_EXTRA[k] = [i, n, d]; 
 // Regroup the sidebar around the computer being the whole desk.
 OS_GROUPS.splice(0, OS_GROUPS.length,
   ['Today', ['home', 'today', 'feed', 'cal', 'week']],
+  ['You', ['standing', 'life', 'library']],
   ['Work', ['work', 'mail', 'phoneapp', 'contacts', 'people']],
   ['Make', ['create', 'write', 'studio', 'cutroom', 'notes', 'contests']],
   ['Money', ['bank', 'ticker', 'bazaar']],
   ['Industry', ['trades', 'roger', 'gea', 'boxoffice', 'companies', 'awards', 'charts', 'careers', 'world', 'flick', 'weather']],
-  ['You', ['standing', 'life', 'library']],
   ['Play', ['sweep', 'match', 'cue', 'scramble', 'store']]);
 // Pages opened from inside the computer stay inside it.
 function osStackHTML() {
@@ -25152,10 +25209,10 @@ function shortWeek() {
   for (const w of (M.works || []).filter(x => x.type === 'short' && x.circuit && !x.circuit.over)) {
     const C = w.circuit;
     for (const s of C.subs.filter(s => !s.done && S.week >= s.due)) {
-      s.done = 1; const F = SHORT_FEST[s.k], p = clamp(.5 + (w.q - SF_BAR[F.tier]) / 25, .03, .92);
+      s.done = 1; const F = SHORT_FEST[s.k], p = typeof shortSelOdds === 'function' ? shortSelOdds(w.q, F.tier) : clamp(.5 + (w.q - SF_BAR[F.tier]) / 25, .03, .92);
       if (prnd() >= p) { s.res = 'passed'; continue; }
       s.res = 'selected'; w.units += 3 + Math.floor(prnd() * 6); me.standing = clamp(me.standing + [0, 1.2, .7, .4][F.tier], 0, 100);
-      const win = prnd() < clamp((w.q - SF_BAR[F.tier] + 4) / 40, .03, .5);
+      const win = prnd() < (typeof shortWinOdds === 'function' ? shortWinOdds(w.q, F.tier) : clamp((w.q - SF_BAR[F.tier] + 4) / 40, .03, .5));
       if (win) {
         s.res = 'won'; C.laurels.push({ k: F.k, y: S.year, won: 1 }); const prize = usd([0, 5000, 2500, 1000][F.tier]); M.cash += prize;
         me.standing = clamp(me.standing + [0, 4, 2.5, 1.5][F.tier], 0, 100); me.fame = clamp((me.fame || 0) + [0, 3, 1.5, .5][F.tier], 0, 100);
@@ -28281,7 +28338,7 @@ function lateRich() { const M = S.me; return M.cash >= usd(150000) || (runwayWee
 // Are you looking for work? You decide (the switch on Today); left alone, a year's savings and a few credits means no.
 function lookingForWork() {
   const M = S.me; if (!M) return true;
-  if (M.looking === 'yes') return true;
+  if (M.looking === 'yes' || M.looking === 'craft') return true;
   if (M.looking === 'no') return false;
   return !(runwayWeeks() >= 52 && careerLevel() >= 2 && hasFooting());
 }
@@ -29729,12 +29786,17 @@ function snapBaseline() {
   }
   BASE = b; return b;
 }
+// skills travel as a compact array in this fixed order (and the craft averages are rebuilt from them)
+let SKO = null;
+function SK_ORDER() { if (!SKO) { SKO = []; for (const c in CRAFTS) for (const k in CRAFTS[c].subs) SKO.push(k); } return SKO; }
 // one entity against its baseline: the fields that changed (ties entry by entry), or null if none did
 function entDiff(set, i, e) {
   const fk = BASE.fk[set][i], fh = BASE.fh[set][i], out = {}; let any = false;
   const ks = Object.keys(e), seen = new Set();
   for (const k of ks) {
-    const id = keyId(k); seen.add(id); const j = fk.indexOf(id), js = JSON.stringify(e[k]);
+    const id = keyId(k); seen.add(id);
+    if (set === 'people' && k === 'c') continue;   // derived from the skills: recomputed on load
+    const j = fk.indexOf(id), js = JSON.stringify(e[k]);
     if (j >= 0 && fnv(js || 'u') === fh[j]) continue;
     if (set === 'people' && k === 'ties' && j >= 0) {
       const t = e.ties, d = {}, bk = BASE.tk[i], bv = BASE.tv[i], had = new Set();
@@ -29742,11 +29804,33 @@ function entDiff(set, i, e) {
       for (const x in t) if (!had.has(+x)) d[x] = t[x];
       out['~ties'] = d; any = true; continue;
     }
+    if (set === 'people' && k === 'sk' && e.sk && SK_ORDER().every(x => x in e.sk) && Object.keys(e.sk).length === SK_ORDER().length) { out['~sk'] = SK_ORDER().map(x => +snapRoundText(String(e.sk[x]))); any = true; continue; }
     out[k] = e[k] === undefined ? null : e[k]; any = true;
   }
   const gone = []; for (let j = 0; j < fk.length; j++) if (!seen.has(fk[j])) gone.push(KEYS[fk[j]]);
   if (gone.length) { out['~gone'] = gone; any = true; }
   return any ? out : null;
+}
+// the save, built a slice at a time so the page keeps breathing and a progress bar can move
+async function snapDataAsync(onProg) {
+  if (!BASE) throw new Error('no baseline');
+  const d = { v: SNAP_V, build: BUILD_ID, seed: S.seed, year: S.startYear, depth: S.depth, sig: BASE.sig, base: BASE.n, n: {}, ch: {}, r: R.s, pr: S.me && S.me.rng ? S.me.rng.s : null };
+  const total = SNAP_SETS.reduce((t, set) => t + S[set].length, 0); let done = 0, t0 = performance.now();
+  for (const set of SNAP_SETS) {
+    const L = S[set], nb = BASE.n[set], out = []; d.n[set] = L.length;
+    for (let i = 0; i < L.length; i++) {
+      if (i >= nb) out.push(i, L[i]); else { const x = entDiff(set, i, L[i]); if (x) out.push(i, x); }
+      if (++done % 400 === 0 && performance.now() - t0 > 30) { if (onProg) onProg(done / total * .85); await new Promise(r => setTimeout(r, 0)); t0 = performance.now(); }
+    }
+    d.ch[set] = out;
+  }
+  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
+  d.rest = rest;
+  if (onProg) onProg(.88); await new Promise(r => setTimeout(r, 0));
+  const str = JSON.stringify(d);
+  const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
+  if (onProg) onProg(.92);
+  return '{"me":' + me + ',"mep":' + mp + ',' + snapRoundText(str).slice(1);
 }
 // the save itself, as a string
 function snapData(exact) {
@@ -29781,6 +29865,7 @@ function snapApply(str) {
       const e = L[i];
       for (const k in x) {
         if (k === '~gone') { for (const g of x[k]) delete e[g]; continue; }
+        if (k === '~sk') { const o = {}, K = SK_ORDER(); for (let z = 0; z < K.length; z++) o[K[z]] = x[k][z]; e.sk = o; recalc(e); continue; }
         if (k === '~ties') { const t = e.ties = e.ties || {}; for (const id in x[k]) { if (x[k][id] === null) delete t[id]; else t[id] = x[k][id]; } continue; }
         e[k] = x[k];
       }
@@ -29816,8 +29901,11 @@ async function pack(str) {
 async function unpack(rec) { return rec.z ? await new Response(rec.data.stream().pipeThrough(new DecompressionStream('gzip'))).text() : rec.data; }
 function saveList() { return idbDo('meta', 'readonly', st => st.getAll()).then(L => (L || []).sort((a, b) => b.when - a.when)).catch(() => []); }
 async function writeSlot(kind, name, id) {
-  const str = snapData(), j0 = JOURNAL ? JOURNAL.log.length : 0;   // what's done from here on belongs after this save
+  const j0 = JOURNAL ? JOURNAL.log.length : 0;   // what's done from here on belongs after this save
+  const str = typeof document !== 'undefined' && typeof performance !== 'undefined' ? await snapDataAsync(saveProgress) : snapData();
+  saveProgress(.94);
   const p = await pack(str), size = p.z ? p.data.size : str.length;
+  saveProgress(.98);
   const meta = { id: id || kind + '-' + Date.now().toString(36), kind, name: name || '', when: Date.now(), seed: S.seed, year: S.startYear, depth: S.depth, week: S.week, label: snapLabel(), build: BUILD_ID, size };
   await idbDo('data', 'readwrite', st => st.put(p, meta.id));
   await idbDo('meta', 'readwrite', st => st.put(meta));
@@ -29873,7 +29961,15 @@ async function saveRun(kind, name, id) {
   for (let i = 0; i < 200 && typeof document !== 'undefined' && document.getElementById('rollov'); i++) await new Promise(r => setTimeout(r, 250));
   try { const m = await writeSlot(kind, name, id); AUTO_AT = autoPeriod(); UI.saveMsg = `${kind === 'auto' ? 'Autosaved' : 'Saved'} · ${fmtDate(m.week, true)}`; UI.saveList = null; return m; }
   catch (e) { UI.saveMsg = 'Couldn\'t save: ' + ((e && e.name) || 'storage unavailable'); return null; }
-  finally { SAVING = false; saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
+  finally { SAVING = false; saveProgress(null); saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
+}
+// a progress bar while saving: the screen is busy, not frozen, and nothing can change under the save
+function saveProgress(f) {
+  if (typeof document === 'undefined' || !document.body || !document.createElement) return;
+  let el = document.getElementById('saveov');
+  if (f === null) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'saveov'; el.innerHTML = '<div class="sv-box"><b>Saving your career…</b><span class="sv-bar"><i></i></span><small></small></div>'; document.body.appendChild(el); }
+  el.querySelector('i').style.width = Math.round(f * 100) + '%'; el.querySelector('small').textContent = Math.round(f * 100) + '%';
 }
 function saveBadge() { const el = typeof document !== 'undefined' && document.getElementById('savebadge'); if (el) el.textContent = UI.saveMsg || ''; }
 
@@ -30765,7 +30861,7 @@ function angelDC(A) {
 function angelOffer(A, why) {
   const amt = usd(A.ticket);
   inbox('note', `${A.name} is in, with terms`, `${why} ${A.name} (${A.kind.toLowerCase()}) will put ${fmtCash(amt)} into your company's next film, for a share of what it earns. They want one thing: ${ANGEL_ASK[A.ask].replace(/^./, x => x.toLowerCase())}`,
-    { act: 'angeloffer', ang: angelKey(A), amt, ask: A.ask, choices: [{ k: 'yes', label: A.ask === 'none' ? 'Shake on it' : 'Agree to the terms' }, ...(A.ask === 'none' ? [] : [{ k: 'haggle', label: 'Push back on the terms', check: ['cha', 14] }]), { k: 'no', label: 'Thank them, and pass' }] });
+    { act: 'angeloffer', ang: angelKey(A), amt, ask: A.ask, choices: [{ k: 'yes', label: (A.ask === 'none' ? 'Shake on it' : 'Agree to the terms') + `: ${fmtCash(amt)} for the next film` }, { k: 'slate', label: `A slate: ${fmtCash(Math.round(amt * 1.8))} across your next three films`, check: ['pack', 13] }, { k: 'company', label: `Sell them 10% of the company for ${fmtCash(Math.round(amt * 2.5))}`, check: ['fin', 12] }, ...(A.ask === 'none' ? [] : [{ k: 'haggle', label: 'Push back on the terms', check: ['cha', 14] }]), { k: 'no', label: 'Thank them, and pass' }] });
 }
 function angelAct(a) {
   const M = S.me, c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub)[+a.i]; if (!A || !c || c.closed !== null) return false;
@@ -30779,11 +30875,20 @@ function angelPick(it, k) {
   if (it.act !== 'angeloffer') return false;
   const M = S.me, me = ME(); it.done = true; it.picked = k;
   if (k === 'no') { it.result = { t: 'You part as friends.' }; return true; }
-  let amt = it.amt, ask = it.ask, t = 'Done. The money waits for your next greenlight.';
+  let amt = it.amt, ask = it.ask, t = 'Done. The money is wired to your company today and goes into the next film you greenlight.';
+  const c = typeof myCo === 'function' ? myCo() : null, who = it.ang.split('|')[0];
+  if (!c || c.closed !== null) { it.result = { t: 'You have no company for the money to go into.' }; return true; }
+  if (k === 'slate' || k === 'company') {
+    const ok = roll(k === 'slate' ? 'pack' : 'fin', k === 'slate' ? 13 : 12), r = M.lastRoll;
+    if (!ok) { amt = Math.round(amt * .8); c.cash += amt / 1e6; (M.angelFund = M.angelFund || []).push({ who, amt, w: S.week, ask, inCo: 1 }); it.result = { ok, roll: r, t: `They won't go that far. They put ${fmtCash(amt)} into the next film instead, and it's in your company's account now.` }; return true; }
+    if (k === 'slate') { const tot = Math.round(amt * 1.8); c.cash += tot / 1e6; for (let i = 0; i < 3; i++) (M.angelFund = M.angelFund || []).push({ who, amt: Math.round(tot / 3), w: S.week, ask, inCo: 1, slate: i + 1 }); it.result = { ok, roll: r, t: `A three-film slate: ${fmtCash(tot)} is in your company's account, and a third of it goes into each of your next three films.` }; milestone(`${who} backs a three-film slate`, 'work'); return true; }
+    const tot = Math.round(amt * 2.5); c.cash += tot / 1e6; (c.holders = c.holders || []).push({ who, pct: .1, w: S.week, paid: tot }); it.result = { ok, roll: r, t: `${who} buys 10% of ${c.name} for ${fmtCash(tot)}. The money is the company's to use; they take a tenth of its profits from now on.` }; milestone(`Sold 10% of ${c.name} to ${who}`, 'work'); return true;
+  }
   if (k === 'haggle') { const ok = roll('cha', 14); if (ok) { amt = Math.round(amt * 1.15); ask = 'none'; t = 'They laugh, drop the condition and add a little more.'; } else { amt = Math.round(amt * .7); t = 'They keep the condition and trim the cheque.'; } it.result = { ok, roll: M.lastRoll, t }; }
   else it.result = { t };
-  (M.angelFund = M.angelFund || []).push({ who: it.ang.split('|')[0], amt, w: S.week, ask });
-  milestone(`${it.ang.split('|')[0]} backs your next film`, 'work'); return true;
+  c.cash += amt / 1e6;   // the money moves today: it sits in the company until the next greenlight
+  (M.angelFund = M.angelFund || []).push({ who, amt, w: S.week, ask, inCo: 1 });
+  milestone(`${who} backs your next film`, 'work'); return true;
 }
 // now and then the money finds you
 function angelWeek() {
@@ -30795,7 +30900,19 @@ function angelWeek() {
   angelOffer(A, pickLine([`A handwritten note arrives: "${A.name} would love to be part of whatever you do next."`, `${A.name}'s office calls. They saw your last film twice.`, `You're seated next to ${A.name} at a charity dinner. By dessert they've made an offer.`, `${A.name}'s assistant emails at 6am. Their boss "wants in".`], S.week));
 }
 // committed angel money goes into the next film's equity
-function takeAngels() { const M = S.me, L = M.angelFund || []; if (!L.length) return 0; const t = L.reduce((s, x) => s + x.amt, 0); M.angelFund = []; return t; }
+// (slate money goes one tranche per film; money already wired to the company isn't added twice)
+function takeAngels() {
+  const M = S.me, L = M.angelFund || []; if (!L.length) return { amt: 0, wired: 0 };
+  const take = L.filter(x => !x.slate).concat(L.filter(x => x.slate).sort((a, b) => a.slate - b.slate).filter((x, i, A) => x.slate === A[0].slate));
+  M.angelFund = L.filter(x => !take.includes(x));
+  return { amt: take.reduce((s, x) => s + x.amt, 0), wired: take.filter(x => x.inCo).reduce((s, x) => s + x.amt, 0), who: take.map(x => x.who) };
+}
+// partners in the company take their share of what its films earn
+function holdersWeek() {
+  const c = typeof myCo === 'function' ? myCo() : null; if (!c || !(c.holders || []).length) return;
+  const pct = c.holders.reduce((s, h) => s + h.pct, 0);
+  for (const id of c.films) { const f = S.films[id]; if (!f || f.rel === null || f.holdersPaid || f.rentals === undefined) continue; f.holdersPaid = 1; const net = f.rentals - f.pa - f.backend - f.cost; if (net > 0) { const v = net * pct; c.cash -= v; for (const h of c.holders) h.got = (h.got || 0) + Math.round(v * h.pct / pct * 1e6); inbox('note', `Partners' share: ${f.title}`, `${f.title} made money, and your partners in ${c.name} take their ${Math.round(pct * 100)}%: ${fmtM(v)}.`, { film: f.id }); } }
+}
 function privateBankHTML() {
   const M = S.me, B = bankOf(M), nw = osNetWorth(), lim = sblLimit(M), c = typeof myCo === 'function' ? myCo() : null, A = angelsOf(M.hub);
   const angels = A.map(a => { const wait = S.week - ((M.angelTry || {})[angelKey(a)] ?? -999) < a.wait, dc = angelDC(a), mv = ANGEL_MOTIVE[a.motive];
@@ -30804,7 +30921,8 @@ function privateBankHTML() {
      <p class="small"><span class="muted">Loves</span> ${a.likes.map(esc).join(', ')} · <span class="muted">Usual cheque</span> <b>${fmtCash(usd(a.ticket))}</b><br><span class="muted">Usually asks for</span> ${esc(ANGEL_ASK[a.ask])}</p>
      ${c && c.closed === null ? `<button class="btn-s ghost" data-angel="${a.i}" ${wait || a.out ? 'disabled' : ''}>${a.out ? 'Not investing right now' : wait ? 'Recently met' : 'Ask for a meeting'}</button>` : '<span class="muted small">Needs a company</span>'}</div>`; }).join('');
   return `<div class="os-grid">${osCard('Securities-backed credit', `<p class="small">Borrow against your shares at ${(rateAt(S.year) + 1.5).toFixed(1)}%, up to half their value: ${fmtCash(lim)} available. If the market falls far enough, the bank sells your shares to cover it.</p><div class="bank-f"><button class="os-btn" data-bank="sbl" ${lim < 1000 ? 'disabled' : ''}>Draw ${fmtCash(Math.min(lim, Math.round(+UI.bkamt || 0)))} from the line</button></div>${B.sbl ? `<p class="small">Drawn: <b>${fmtCash(Math.round(B.sbl))}</b>. Interest comes out weekly; repay with the Repay button on Borrowing.</p>` : ''}`)}
-   ${osCard('Committed to your next film', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">It goes into the equity when you greenlight, and they take a share of what the film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
+   ${c && (c.holders || []).length ? osCard('Partners in your company', `<ul class="os-list">${c.holders.map(h => `<li><b>${esc(h.who)}</b><span>${Math.round(h.pct * 100)}% · paid ${fmtCash(h.paid)}${h.got ? ` · taken ${fmtCash(h.got)}` : ''}</span></li>`).join('')}</ul>`) : ''}
+   ${osCard('Committed to your films', (M.angelFund || []).length ? `<ul class="os-list">${M.angelFund.map(x => `<li><b>${esc(x.who)}</b><span>${fmtCash(x.amt)}${x.slate ? ` · film ${x.slate} of a slate` : ''}${x.inCo ? ' · in the company account' : ''}</span></li>${x.ask && x.ask !== 'none' ? `<li class="muted small">↳ ${esc(ANGEL_ASK[x.ask])}</li>` : ''}`).join('')}</ul><p class="small muted">The money is already in your company's account (${c ? fmtCash(Math.round(c.cash * 1e6)) : ''} in all). It goes into the equity when you greenlight, and they take a share of what that film earns.</p>` : '<p class="small muted">Nothing committed yet. Ask for a meeting below, or have a hit and wait for the phone to ring.</p>')}</div>
    <h4>Angels and family offices in ${esc(hubName(M.hub))}</h4><p class="small muted">${nw.total >= usd(250000) || ME().standing >= 35 ? 'They\'ll take your call.' : 'They\'ll take your call when you\'re worth more or better known; you can still try.'} Each has their own reasons and their own price. The case you make rolls your Finance against the DC shown; hits, standing, awards, fame and shared taste move it, depending on what they care about. Their fortunes move with the part of the market they're in: a good year makes them keener and the cheques bigger, a bad one sends some to ground. A few new names arrive every quarter.</p>
    <div class="angels">${angels}</div>`;
 }
@@ -33779,7 +33897,7 @@ const PCALLS = [
   ['over', [2], 'Eight days over', 'The shoot is running eight days over. The completion guarantor is asking questions.', [['pay', 'Find the money', 'fin', 12, 2, 0, .05, 0], ['cut', 'Cut two scenes', 'shape', 11, -1, 0, 0, 0], ['push', 'Push the director to go faster', 'cha', 13, 0, 0, .01, 0]]],
   ['tantrum', [2], 'The lead won\'t come out of their trailer', 'Your star is refusing to shoot until a scene is rewritten their way.', [['talk', 'Go in and talk them out', 'cha', 13, 1, 0, 0, 0], ['give', 'Give them the rewrite', null, 0, -1, 1, 0, 0], ['wait', 'Shoot around them for a day', 'bud', 11, 0, 0, .01, 0]]],
   ['improv', [2], 'The director is off the script', 'The director has started improvising whole scenes. The dailies are electric, or a mess.', [['let', 'Let them run', 'tas', 13, 3, 0, .01, 0], ['rein', 'Rein them in', 'cha', 12, 0, 0, 0, 0], ['both', 'Get the scripted version too', 'bud', 12, 1, 0, .02, 0]]],
-  ['safety', [2], 'An accident on set', 'A rigging failure. Nobody is badly hurt, but the crew is shaken and the union rep is here.', [['stop', 'Stop for two days and fix it properly', 'eth', 9, 1, 0, .02, 1], ['carry', 'Carry on with a safety officer', 'bud', 12, 0, 0, .005, 0], ['hush', 'Keep it quiet', 'cha', 15, 0, -3, 0, 0]]],
+  ['safety', [2], 'An accident on set', 'A rigging failure. Nobody is badly hurt, but the crew is shaken and the union rep is here.', [['stop', 'Stop for two days and fix it properly', 'eth', 9, 1, 0, .02, 1], ['carry', 'Carry on with a safety officer', 'bud', 12, 0, 0, .005, 0], ['hush', 'Keep it quiet', 'cha', 14, 1, 0, -.005, 0]]],
   ['dailies', [2], 'The dailies look flat', 'A week of footage and none of it has the life of the script.', [['reshoot', 'Reshoot the key scene', 'eye', 12, 3, 0, .02, 0], ['look', 'Change the look: new lenses, harder light', 'light', 13, 2, 0, .01, 0], ['trust', 'Trust it\'ll come together in the cut', null, 0, -1, 0, 0, 0]]],
   ['romance', [2], 'Rumours on set', 'The leads are rumoured to be together. The press is camped outside.', [['use', 'Let the rumours sell the film', 'mkt', 11, 0, 5, 0, 0], ['shield', 'Close the set', 'eth', 10, 1, 0, .005, 0], ['deny', 'Put out a statement', 'cha', 12, 0, 2, 0, 0]]],
   ['strike', [2], 'The crew threatens to walk', 'Fourteen-hour days, three weeks running. The crew wants turnaround respected, or they go.', [['agree', 'Agree to twelve-hour days', 'eth', 9, 1, 0, .03, 1], ['bonus', 'Pay a bonus to finish', 'fin', 11, 0, 0, .025, 0], ['hard', 'Hold the line', 'cha', 16, 0, 0, 0, 0]]],
@@ -34363,33 +34481,50 @@ function cgArt(k, r, cap) {
     default: return svgWrap(`<rect width="320" height="180" fill="url(#${g})"/>${aCloud(160, 80, 1.5, '#fff', .5)}`, aGrad(g, C[0], C[1]));
   }
 }
+// what a Bazaar item is, from its name (word boundaries, so "smart" isn't art and "scarf" isn't a car)
+const BZ_KINDS = [['book', /\b(book|novel|odyssey|kitten|handbook|lessons|guide|reviews)\b/], ['shoe', /\b(sneakers?|trainers?|shoes|boots|heels|loafers|slippers)\b/], ['hat', /\b(hat|cap|beret|fedora)\b/], ['bag', /\b(bag|tote|backpack|suitcase|luggage|briefcase|hatbox)\b/], ['watch', /\b(watch|ring|jewel\w*|necklace|pendant|cufflinks)\b/], ['clothes', /\b(jacket|coat|shirt|t-shirt|suit|dress|scarf|hoodie|jumper|sweater|tuxedo|gown|jeans|tracksuit|vest|black tie|stylist|sewing machine|make-up kit)\b/],
+  ['lens', /\blens(es)?\b/], ['camera', /\b(camera|drone|cam|super ?8|16mm|bolex|camcorder|gimbal)\b/], ['laptop', /\b(phone|smart glasses|typewriter|laptop|computer|software|editing suite|tablet|monitor|workstation|grading panel|licence|printer)\b/], ['phones', /\b(head ?phones|headset)\b/], ['mic', /\b(mics?|microphone|recorder|podcast|audio|vocal booth)\b/], ['lamp', /\b(lights?|lamp|led|panel)\b/],
+  ['guitar', /\bguitar\b/], ['keys', /\b(piano|keyboard|synth)\b/], ['vinyl', /\b(vinyl|record player|turntable|records|lp|box set|steelbook)\b/], ['console', /\b(console|arcade|controller|games? machine)\b/], ['board', /\b(skateboard|surfboard|scooter)\b/],
+  ['car', /\b(car|convertible|roadster|motorbike|motorcycle|vespa)\b/], ['bike', /\b(bike|bicycle)\b/], ['trophy', /\b(statuette|trophy|award|oscar|bird|falcon|globe|bronze)\b/], ['drink', /\b(mug|milk|coffee|tea|wine|whisky|champagne|bottle|drink|espresso|cask|single malt)\b/], ['plant', /\b(plant|flowers|bonsai)\b/],
+  ['poster', /\b(posters?|print|art|painting|paper|cel|still|frame|photograph|sketch|patron|trading cards)\b/], ['clap', /\bclapperboard\b/], ['script', /\b(scripts?|screenplay|draft|notebook|journal|pen)\b/], ['chair', /\b(chair|desk|sofa|bed|furniture|armchair)\b/],
+  ['ticket', /\b(tickets?|club|box at|island|crash mats|trip|tour|weekend|festival|pass|screening|dinner|experience|class|course|workshop|masterclass|lesson|retreat|seminar)\b/]];
+function bzKind(n, tab) { if (tab === 'books') return 'book'; for (const [k, re] of BZ_KINDS) if (re.test(n)) return k; if (tab === 'courses' || tab === 'experiences') return 'ticket'; return 'gift'; }
 // a product shot for the Bazaar: what the thing is, drawn
 function bzArt(k, B, tab) {
   const n = String((B && B.name) || k).toLowerCase(), r = hashRand([...String(k)].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0), g = artId();
   const bg = AP(r, [['#fdfcfb', '#e2d1c3'], ['#e0eafc', '#cfdef3'], ['#fbe7c6', '#f6d1a5'], ['#e6f4ea', '#cde7d6'], ['#f3e8ff', '#e0d1f7']]);
   const base = body => svgWrap(`<rect width="320" height="180" fill="url(#${g})"/><ellipse cx="160" cy="160" rx="110" ry="10" fill="#000" opacity=".12"/>${body}`, aGrad(g, bg[0], bg[1]));
-  if (tab === 'books' || /\bbook|novel|reading|odyssey|kitten|interview|trade|handbook|lessons|guide\b/.test(n) && !/booking/.test(n)) {
+  const K = bzKind(n, tab);
+  if (K === 'clap') return base(aClapper(110, 50, 1.6));
+  if (K === 'shoe') return base(`<path d="M70 120 Q72 92 100 90 L150 86 Q170 100 200 104 Q250 110 254 128 L254 140 L70 140 Z" fill="${AP(r, ['#f1faee', '#e63946', '#1d3557', '#ffb703', '#2a9d8f'])}"/><path d="M70 136 L254 136 L254 148 L70 148 Z" fill="#fff" stroke="#ccc"/><path d="M110 96 L150 120 M124 92 L160 116 M138 90 L170 112" stroke="#333" stroke-width="3"/><path d="M180 104 Q210 96 240 118" stroke="${AP(r, ['#ff006e', '#3a86ff', '#111'])}" stroke-width="8" fill="none"/>`);
+  if (K === 'hat') return base(`<ellipse cx="160" cy="128" rx="96" ry="18" fill="${AP(r, ['#3d405b', '#6b4226', '#222'])}"/><path d="M110 128 Q112 60 160 58 Q208 60 210 128 Z" fill="${AP(r, ['#3d405b', '#6b4226', '#222'])}"/><rect x="112" y="106" width="96" height="12" fill="#c9a227"/>`);
+  if (K === 'bag') return base(`<path d="M130 70 Q130 36 160 36 Q190 36 190 70" stroke="#5c4033" stroke-width="8" fill="none"/><rect x="100" y="66" width="120" height="86" rx="12" fill="${AP(r, ['#b5838d', '#6d597a', '#8d5524', '#264653'])}"/><rect x="150" y="96" width="20" height="10" rx="2" fill="#c9a227"/>`);
+  if (K === 'vinyl') return base(`<rect x="70" y="30" width="120" height="120" fill="${AP(r, ['#e76f51', '#264653', '#ffb703', '#6d597a'])}"/><circle cx="210" cy="90" r="58" fill="#111"/><circle cx="210" cy="90" r="40" fill="none" stroke="#333" stroke-width="2"/><circle cx="210" cy="90" r="16" fill="#e63946"/>`);
+  if (K === 'console') return base(`<rect x="90" y="70" width="140" height="60" rx="30" fill="#2b2d42"/><circle cx="125" cy="100" r="12" fill="#8d99ae"/><circle cx="195" cy="92" r="6" fill="#ef233c"/><circle cx="207" cy="104" r="6" fill="#06d6a0"/>`);
+  if (K === 'board') return base(`<rect x="60" y="88" width="200" height="22" rx="11" fill="${AP(r, ['#e63946', '#2a9d8f', '#ffb703'])}"/><circle cx="100" cy="120" r="9" fill="#333"/><circle cx="220" cy="120" r="9" fill="#333"/>`);
+  if (K === 'car') return base(`<path d="M60 120 L80 90 Q90 76 120 74 L200 74 Q228 76 240 96 L264 104 L264 124 L60 124 Z" fill="${AP(r, ['#e63946', '#1d3557', '#c9a227', '#2b2d42'])}"/><rect x="104" y="82" width="40" height="18" fill="#bde0fe"/><rect x="152" y="82" width="46" height="18" fill="#bde0fe"/><circle cx="100" cy="126" r="16" fill="#222"/><circle cx="224" cy="126" r="16" fill="#222"/>`);
+  if (K === 'book') {
     const col = AP(r, ['#264653', '#9b2226', '#005f73', '#3d405b', '#6a4c93', '#bb3e03']), t = String(B.name || '').replace(/^(the|a|an) /i, '').split(/[ :,]/).filter(Boolean).slice(0, 2).join(' ');
     return base(`<g transform="rotate(-6 160 90)"><rect x="112" y="22" width="96" height="134" rx="3" fill="${col}"/><rect x="112" y="22" width="10" height="134" fill="#000" opacity=".2"/><rect x="128" y="44" width="68" height="1.5" fill="#fff" opacity=".7"/>${aTxt(162, 72, 11, t.slice(0, 14), '#fff')}${aTxt(162, 88, 11, t.slice(14, 28), '#fff')}<rect x="128" y="128" width="68" height="1.5" fill="#fff" opacity=".7"/></g>`);
   }
-  if (/lens/.test(n)) return base(`<g fill="#1d1d1d"><rect x="100" y="70" width="60" height="56" rx="8"/><rect x="156" y="62" width="60" height="72" rx="6"/><rect x="212" y="56" width="16" height="84" rx="4"/></g><circle cx="222" cy="98" r="24" fill="#3b5d84"/><circle cx="216" cy="92" r="8" fill="#a9c7ea" opacity=".7"/><g stroke="#888" stroke-width="2"><path d="M170 62 v72 M186 62 v72 M200 62 v72"/></g>`);
-  if (/camera|drone|cam\b|super ?8|16mm|bolex/.test(n)) return base(/drone/.test(n) ? `<g fill="#2b2b2b"><rect x="130" y="80" width="60" height="22" rx="8"/><path d="M130 86 L80 66 M190 86 L240 66 M130 96 L80 116 M190 96 L240 116" stroke="#2b2b2b" stroke-width="5"/></g>${[[80, 62], [240, 62], [80, 120], [240, 120]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="26" ry="4" fill="#666"/>`).join('')}<circle cx="160" cy="108" r="8" fill="#3b5d84"/>` : `<rect x="96" y="60" width="110" height="74" rx="10" fill="#202020"/><rect x="112" y="48" width="36" height="16" rx="4" fill="#202020"/><circle cx="168" cy="98" r="30" fill="#111"/><circle cx="168" cy="98" r="20" fill="#3b5d84"/><circle cx="160" cy="90" r="6" fill="#bcd6f2" opacity=".7"/><rect x="106" y="70" width="18" height="10" rx="2" fill="#e63946"/>`);
-  if (/laptop|computer|software|editing suite|tablet|monitor/.test(n)) return base(`<rect x="90" y="40" width="140" height="92" rx="6" fill="#2d2f36"/><rect x="98" y="48" width="124" height="76" fill="url(#${g}s)"/><path d="M70 136 L250 136 L240 148 L80 148 Z" fill="#c8ccd4"/>`).replace('</defs>', aGrad(g + 's', '#5aa9e6', '#7fc8f8') + '</defs>');
-  if (/head ?phones|headset/.test(n)) return base(`<path d="M110 120 Q110 40 160 40 Q210 40 210 120" stroke="#222" stroke-width="12" fill="none"/><rect x="92" y="104" width="34" height="48" rx="12" fill="#222"/><rect x="194" y="104" width="34" height="48" rx="12" fill="#222"/><rect x="98" y="112" width="22" height="32" rx="8" fill="#e63946"/><rect x="200" y="112" width="22" height="32" rx="8" fill="#e63946"/>`);
-  if (/mic|recorder|podcast|audio/.test(n)) return base(`<rect x="146" y="30" width="28" height="64" rx="14" fill="#3a3a3a"/>${[0, 1, 2, 3, 4].map(i => `<rect x="148" y="${38 + i * 10}" width="24" height="2" fill="#777"/>`).join('')}<path d="M136 80 q0 30 24 30 q24 0 24 -30" stroke="#3a3a3a" stroke-width="5" fill="none"/><path d="M160 110 v36 M136 150 h48" stroke="#3a3a3a" stroke-width="6"/>`);
-  if (/light|lamp|led|panel/.test(n)) return base(aLamp(160, 40, .9, false));
-  if (/guitar/.test(n)) return base(`<g transform="rotate(-25 160 100)"><ellipse cx="160" cy="130" rx="34" ry="30" fill="#c0703a"/><ellipse cx="160" cy="96" rx="26" ry="22" fill="#c0703a"/><circle cx="160" cy="118" r="9" fill="#2b1a10"/><rect x="155" y="20" width="10" height="80" fill="#5c3b1e"/><rect x="151" y="12" width="18" height="16" rx="3" fill="#3a2614"/></g>`);
-  if (/piano|keyboard|synth/.test(n)) return base(`<rect x="60" y="80" width="200" height="50" rx="4" fill="#222"/>${Array.from({ length: 14 }, (_, i) => `<rect x="${66 + i * 13.5}" y="96" width="12" height="30" fill="#fafafa"/>`).join('')}${[0, 1, 3, 4, 5, 7, 8, 10, 11, 12].map(i => `<rect x="${74 + i * 13.5}" y="96" width="8" height="18" fill="#111"/>`).join('')}`);
-  if (/ticket|trip|tour|weekend|festival|pass|screening|dinner|experience|class|course|workshop|masterclass|lesson/.test(n) || tab === 'courses' || tab === 'experiences') return base(`<g transform="rotate(-5 160 90)"><path d="M70 50 h180 v26 a10 10 0 0 0 0 28 v26 h-180 v-26 a10 10 0 0 0 0 -28 z" fill="${AP(r, ['#f4d35e', '#ee964b', '#83c5be', '#e5989b'])}"/><path d="M200 52 v76" stroke="#fff" stroke-dasharray="4 4" stroke-width="2"/>${aTxt(132, 86, 13, tab === 'courses' || /class|course|workshop|masterclass|lesson/.test(n) ? 'ADMIT ONE STUDENT' : 'ADMIT ONE', '#3d2c00', 'middle', 'Arial,sans-serif')}${aTxt(132, 106, 9, String(B.name || '').slice(0, 26), '#3d2c00', 'middle', 'Arial,sans-serif', 400)}${aTxt(226, 96, 14, '№' + (100 + Math.floor(r() * 900)), '#3d2c00', 'middle', 'Courier New,monospace')}</g>`);
-  if (/poster|print|art|still|frame/.test(n)) return base(`<rect x="110" y="20" width="100" height="132" fill="#2b2b2b"/><rect x="118" y="28" width="84" height="116" fill="url(#${g}p)"/>${aFig(160, 126, 1, '#111')}`).replace('</defs>', aGrad(g + 'p', AP(r, ['#e76f51', '#2a9d8f', '#6d597a']), '#111') + '</defs>');
-  if (/script|screenplay|draft|notebook|journal|pen/.test(n)) return base(`<rect x="112" y="24" width="96" height="128" fill="#fdfbf3" stroke="#ccc"/>${aTxt(124, 44, 8, 'FADE IN:', '#222', 'start', 'Courier New,monospace')}${[0, 1, 2, 3, 4, 5, 6].map(i => `<rect x="${i % 3 === 1 ? 150 : 124}" y="${54 + i * 12}" width="${i % 3 === 1 ? 40 : 70}" height="3" fill="#bbb"/>`).join('')}<circle cx="118" cy="40" r="3" fill="#999"/><circle cx="118" cy="136" r="3" fill="#999"/>`);
-  if (/chair|desk|sofa|bed|furniture/.test(n)) return base(`<rect x="110" y="40" width="100" height="70" rx="10" fill="${AP(r, ['#355070', '#bc6c25', '#2a9d8f'])}"/><rect x="100" y="100" width="120" height="22" rx="8" fill="${AP(r, ['#4a6fa5', '#dda15e', '#57cc99'])}"/><path d="M114 122 v30 M206 122 v30" stroke="#333" stroke-width="5"/>`);
-  if (/watch|ring|jewel|necklace|pendant/.test(n)) return base(`<rect x="146" y="20" width="28" height="140" rx="8" fill="#5c4033"/><circle cx="160" cy="90" r="34" fill="#c9a227"/><circle cx="160" cy="90" r="27" fill="#fdf6e3"/><path d="M160 90 v-18 M160 90 h12" stroke="#222" stroke-width="3"/>`);
-  if (/jacket|coat|shirt|suit|dress|shoes|boots|hat|scarf|bag|sneaker|trainer/.test(n)) return base(`<path d="M120 40 L140 30 Q160 46 180 30 L200 40 L230 70 L212 88 L200 78 L200 150 L120 150 L120 78 L108 88 L90 70 Z" fill="${AP(r, ['#3d405b', '#e07a5f', '#81b29a', '#222', '#b5838d'])}"/><path d="M160 46 v100" stroke="#000" opacity=".2" stroke-width="2"/>`);
-  if (/coffee|tea|wine|whisky|champagne|bottle|drink|machine/.test(n)) return base(/coffee|machine|espresso/.test(n) ? `<rect x="120" y="40" width="80" height="100" rx="8" fill="#333"/><rect x="130" y="54" width="60" height="20" rx="4" fill="#111"/><rect x="146" y="100" width="28" height="28" rx="4" fill="#fff"/><circle cx="182" cy="64" r="4" fill="#e63946"/>` : `<rect x="146" y="40" width="28" height="110" rx="10" fill="#1b4332"/><rect x="152" y="20" width="16" height="26" fill="#1b4332"/><rect x="146" y="84" width="28" height="34" fill="#f1e3c8"/>`);
-  if (/statuette|trophy|award|oscar|bird|falcon|globe/.test(n)) return base(aTrophy(160, 152, 1.6));
-  if (/plant|flowers|bonsai/.test(n)) return base(`<path d="M160 120 q-40 -60 -10 -90 q10 40 10 90 q0 -60 30 -80 q10 50 -30 80" fill="#40916c"/><rect x="136" y="116" width="48" height="36" fill="#bc6c25"/>`);
-  if (/bike|bicycle|scooter|car|van/.test(n)) return base(`<circle cx="110" cy="120" r="28" fill="none" stroke="#222" stroke-width="6"/><circle cx="210" cy="120" r="28" fill="none" stroke="#222" stroke-width="6"/><path d="M110 120 L150 70 L200 70 L210 120 M150 70 L170 120 L110 120 M196 56 h20" stroke="${AP(r, ['#e63946', '#1d3557', '#2a9d8f'])}" stroke-width="6" fill="none"/>`);
+  if (K === 'lens') return base(`<g fill="#1d1d1d"><rect x="100" y="70" width="60" height="56" rx="8"/><rect x="156" y="62" width="60" height="72" rx="6"/><rect x="212" y="56" width="16" height="84" rx="4"/></g><circle cx="222" cy="98" r="24" fill="#3b5d84"/><circle cx="216" cy="92" r="8" fill="#a9c7ea" opacity=".7"/><g stroke="#888" stroke-width="2"><path d="M170 62 v72 M186 62 v72 M200 62 v72"/></g>`);
+  if (K === 'camera') return base(/drone/.test(n) ? `<g fill="#2b2b2b"><rect x="130" y="80" width="60" height="22" rx="8"/><path d="M130 86 L80 66 M190 86 L240 66 M130 96 L80 116 M190 96 L240 116" stroke="#2b2b2b" stroke-width="5"/></g>${[[80, 62], [240, 62], [80, 120], [240, 120]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="26" ry="4" fill="#666"/>`).join('')}<circle cx="160" cy="108" r="8" fill="#3b5d84"/>` : `<rect x="96" y="60" width="110" height="74" rx="10" fill="#202020"/><rect x="112" y="48" width="36" height="16" rx="4" fill="#202020"/><circle cx="168" cy="98" r="30" fill="#111"/><circle cx="168" cy="98" r="20" fill="#3b5d84"/><circle cx="160" cy="90" r="6" fill="#bcd6f2" opacity=".7"/><rect x="106" y="70" width="18" height="10" rx="2" fill="#e63946"/>`);
+  if (K === 'laptop') return base(`<rect x="90" y="40" width="140" height="92" rx="6" fill="#2d2f36"/><rect x="98" y="48" width="124" height="76" fill="url(#${g}s)"/><path d="M70 136 L250 136 L240 148 L80 148 Z" fill="#c8ccd4"/>`).replace('</defs>', aGrad(g + 's', '#5aa9e6', '#7fc8f8') + '</defs>');
+  if (K === 'phones') return base(`<path d="M110 120 Q110 40 160 40 Q210 40 210 120" stroke="#222" stroke-width="12" fill="none"/><rect x="92" y="104" width="34" height="48" rx="12" fill="#222"/><rect x="194" y="104" width="34" height="48" rx="12" fill="#222"/><rect x="98" y="112" width="22" height="32" rx="8" fill="#e63946"/><rect x="200" y="112" width="22" height="32" rx="8" fill="#e63946"/>`);
+  if (K === 'mic') return base(`<rect x="146" y="30" width="28" height="64" rx="14" fill="#3a3a3a"/>${[0, 1, 2, 3, 4].map(i => `<rect x="148" y="${38 + i * 10}" width="24" height="2" fill="#777"/>`).join('')}<path d="M136 80 q0 30 24 30 q24 0 24 -30" stroke="#3a3a3a" stroke-width="5" fill="none"/><path d="M160 110 v36 M136 150 h48" stroke="#3a3a3a" stroke-width="6"/>`);
+  if (K === 'lamp') return base(aLamp(160, 40, .9, false));
+  if (K === 'guitar') return base(`<g transform="rotate(-25 160 100)"><ellipse cx="160" cy="130" rx="34" ry="30" fill="#c0703a"/><ellipse cx="160" cy="96" rx="26" ry="22" fill="#c0703a"/><circle cx="160" cy="118" r="9" fill="#2b1a10"/><rect x="155" y="20" width="10" height="80" fill="#5c3b1e"/><rect x="151" y="12" width="18" height="16" rx="3" fill="#3a2614"/></g>`);
+  if (K === 'keys') return base(`<rect x="60" y="80" width="200" height="50" rx="4" fill="#222"/>${Array.from({ length: 14 }, (_, i) => `<rect x="${66 + i * 13.5}" y="96" width="12" height="30" fill="#fafafa"/>`).join('')}${[0, 1, 3, 4, 5, 7, 8, 10, 11, 12].map(i => `<rect x="${74 + i * 13.5}" y="96" width="8" height="18" fill="#111"/>`).join('')}`);
+  if (K === 'ticket') return base(`<g transform="rotate(-5 160 90)"><path d="M70 50 h180 v26 a10 10 0 0 0 0 28 v26 h-180 v-26 a10 10 0 0 0 0 -28 z" fill="${AP(r, ['#f4d35e', '#ee964b', '#83c5be', '#e5989b'])}"/><path d="M200 52 v76" stroke="#fff" stroke-dasharray="4 4" stroke-width="2"/>${aTxt(132, 86, 13, tab === 'courses' || /class|course|workshop|masterclass|lesson/.test(n) ? 'ADMIT ONE STUDENT' : 'ADMIT ONE', '#3d2c00', 'middle', 'Arial,sans-serif')}${aTxt(132, 106, 9, String(B.name || '').slice(0, 26), '#3d2c00', 'middle', 'Arial,sans-serif', 400)}${aTxt(226, 96, 14, '№' + (100 + Math.floor(r() * 900)), '#3d2c00', 'middle', 'Courier New,monospace')}</g>`);
+  if (K === 'poster') return base(`<rect x="110" y="20" width="100" height="132" fill="#2b2b2b"/><rect x="118" y="28" width="84" height="116" fill="url(#${g}p)"/>${aFig(160, 126, 1, '#111')}`).replace('</defs>', aGrad(g + 'p', AP(r, ['#e76f51', '#2a9d8f', '#6d597a']), '#111') + '</defs>');
+  if (K === 'script') return base(`<rect x="112" y="24" width="96" height="128" fill="#fdfbf3" stroke="#ccc"/>${aTxt(124, 44, 8, 'FADE IN:', '#222', 'start', 'Courier New,monospace')}${[0, 1, 2, 3, 4, 5, 6].map(i => `<rect x="${i % 3 === 1 ? 150 : 124}" y="${54 + i * 12}" width="${i % 3 === 1 ? 40 : 70}" height="3" fill="#bbb"/>`).join('')}<circle cx="118" cy="40" r="3" fill="#999"/><circle cx="118" cy="136" r="3" fill="#999"/>`);
+  if (K === 'chair') return base(`<rect x="110" y="40" width="100" height="70" rx="10" fill="${AP(r, ['#355070', '#bc6c25', '#2a9d8f'])}"/><rect x="100" y="100" width="120" height="22" rx="8" fill="${AP(r, ['#4a6fa5', '#dda15e', '#57cc99'])}"/><path d="M114 122 v30 M206 122 v30" stroke="#333" stroke-width="5"/>`);
+  if (K === 'watch') return base(`<rect x="146" y="20" width="28" height="140" rx="8" fill="#5c4033"/><circle cx="160" cy="90" r="34" fill="#c9a227"/><circle cx="160" cy="90" r="27" fill="#fdf6e3"/><path d="M160 90 v-18 M160 90 h12" stroke="#222" stroke-width="3"/>`);
+  if (K === 'clothes') return base(`<path d="M120 40 L140 30 Q160 46 180 30 L200 40 L230 70 L212 88 L200 78 L200 150 L120 150 L120 78 L108 88 L90 70 Z" fill="${AP(r, ['#3d405b', '#e07a5f', '#81b29a', '#222', '#b5838d'])}"/><path d="M160 46 v100" stroke="#000" opacity=".2" stroke-width="2"/>`);
+  if (K === 'drink') return base(/coffee|machine|espresso/.test(n) ? `<rect x="120" y="40" width="80" height="100" rx="8" fill="#333"/><rect x="130" y="54" width="60" height="20" rx="4" fill="#111"/><rect x="146" y="100" width="28" height="28" rx="4" fill="#fff"/><circle cx="182" cy="64" r="4" fill="#e63946"/>` : `<rect x="146" y="40" width="28" height="110" rx="10" fill="#1b4332"/><rect x="152" y="20" width="16" height="26" fill="#1b4332"/><rect x="146" y="84" width="28" height="34" fill="#f1e3c8"/>`);
+  if (K === 'trophy') return base(aTrophy(160, 152, 1.6));
+  if (K === 'plant') return base(`<path d="M160 120 q-40 -60 -10 -90 q10 40 10 90 q0 -60 30 -80 q10 50 -30 80" fill="#40916c"/><rect x="136" y="116" width="48" height="36" fill="#bc6c25"/>`);
+  if (K === 'bike') return base(`<circle cx="110" cy="120" r="28" fill="none" stroke="#222" stroke-width="6"/><circle cx="210" cy="120" r="28" fill="none" stroke="#222" stroke-width="6"/><path d="M110 120 L150 70 L200 70 L210 120 M150 70 L170 120 L110 120 M196 56 h20" stroke="${AP(r, ['#e63946', '#1d3557', '#2a9d8f'])}" stroke-width="6" fill="none"/>`);
   // anything else: a gift box with a ribbon
   return base(`<rect x="110" y="70" width="100" height="78" fill="${AP(r, ['#e63946', '#457b9d', '#2a9d8f', '#e9c46a', '#6d597a'])}"/><rect x="104" y="58" width="112" height="20" fill="${AP(r, ['#d62828', '#1d3557', '#21867a', '#d4a373', '#56425f'])}"/><rect x="154" y="58" width="12" height="90" fill="#fff"/><path d="M160 58 q-30 -30 -34 -6 q4 10 34 6 q30 4 34 -6 q-4 -24 -34 6" fill="#fff"/>`);
 }
@@ -34599,7 +34734,7 @@ function compWorkBest(c) { return (S.me.works || []).filter(w => w.rel !== undef
   // contests that judge your released work: your best piece of the right kind is your entry
   enterComp = function (a) {
     const c = COMPS.find(x => x.k === a.k);
-    if (c && c.work) { const b = compWorkBest(c); if (b < 0) return false; const was = c.dc; c.dc = was - Math.round((b - 60) / 6); try { return _enter(a); } finally { c.dc = was; } }
+    if (c && c.work && compWorkBest(c) < 0) return false;   // the work's bonus is in compDC
     return _enter(a);
   };
 }
@@ -34644,7 +34779,7 @@ function shortsCalendarHTML() {
   const live = (M.works || []).filter(w => w.type === 'short' && w.circuit && S.week - w.rel <= 52);
   const pick = UI.shw !== undefined ? live.find(w => w.id === UI.shw) || live[0] : live[0];
   const order = Object.values(SHORT_FEST).filter(F => F.founded <= S.year).sort((a, b) => ((a.month - mo + 12) % 12) - ((b.month - mo + 12) % 12) || a.tier - b.tier);
-  const row = F => { const sent = pick && pick.circuit.subs.find(s => s.k === F.k), odds = pick ? clamp(.5 + (pick.q - SF_BAR[F.tier]) / 25, .03, .92) : null, ok = pick && F.kind !== 'student' && !(F.kind === 'anim' && ME().sk.digi < 8);
+  const row = F => { const sent = pick && pick.circuit.subs.find(s => s.k === F.k), odds = pick ? (typeof shortSelOdds === 'function' ? shortSelOdds(pick.q, F.tier) : .3) : null, ok = pick && F.kind !== 'student' && !(F.kind === 'anim' && ME().sk.digi < 8);
     return `<tr><td><b>${MON_[F.month]}</b></td><td><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a><br><span class="muted small">${esc(hubName(F.hub))} · ${['', 'A-list', 'major', 'regional'][F.tier]}${F.qual ? ' · Oswald-qualifying' : ''}${F.kind !== 'all' ? ' · ' + esc(F.kind) : ''}</span></td><td class="small">${esc(F.prize)}</td><td class="n small">${fmtCash(usd([0, 75, 50, 30][F.tier]))}</td><td class="small">${odds !== null ? Math.round(odds * 100) + '% to be selected' : ''}</td><td>${!pick ? '' : sent ? `<span class="chip ${sent.res === 'won' ? 'good' : sent.res === 'selected' ? 'good' : sent.res === 'passed' ? '' : 'hist'}">${sent.res || 'entered'}</span>` : ok ? `<button class="btn-s ghost" data-shsub="${pick.id}:${F.k}">Enter</button>` : '<span class="muted small">not eligible</span>'}</td></tr>`; };
   return `<p class="muted small">Every short-film festival, in the order their deadlines come round. Send your short where it has a chance: an A-list premiere makes a name, regional festivals collect laurels. A short stays eligible for a year.</p>
    ${live.length ? `<p>Planning for ${live.length > 1 ? sel('sh-w', live.map(w => [w.id, `${w.title} (quality ${w.q})`]), pick.id) : `<b>${esc(pick.title)}</b> (quality ${pick.q})`} · ${pick.circuit.subs.length} festivals entered · ${(pick.circuit.laurels || []).length} laurels</p>` : '<p class="small">Make a short (Create) to send it round.</p>'}
@@ -34668,6 +34803,545 @@ function seasonHTML() {
 }
 { const _va = viewAwards; viewAwards = function () { const h = _va(); const i = h.indexOf('<div class="cols two">'); return i >= 0 ? h.slice(0, i) + seasonHTML() + h.slice(i) : seasonHTML() + h; }; }
 // </contests2>
+// <ux>
+// ---------------- Feel: toasts, a busy bar, and small things that make the screen answer you ----------------
+// A toast says why something didn't happen (or that it did) without a dialog. Display only: no game state.
+function toast(msg, kind) {
+  if (typeof document === 'undefined' || !document.body || !document.createElement) return;
+  let box = document.getElementById('toasts');
+  if (!box) { box = document.createElement('div'); box.id = 'toasts'; document.body.appendChild(box); }
+  const t = document.createElement('div'); t.className = 'toast ' + (kind || ''); t.textContent = msg; box.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 3200);
+}
+// </ux>
+// <intent>
+// ---------------- Judged by the dice, not by a moral code ----------------
+// A choice is judged by whether you pull it off, not by whether it was nice. A shady option that used to carry a
+// fixed penalty (a "fudged the numbers" mark, standing lost, a risk of the sack) now carries a roll: land it and it goes
+// the way you meant, with nobody the wiser; miss it and the world reacts however it reacts. Clean options that never
+// rolled stay as they are. Applied once, to every scene, when the game loads.
+const SHADY_FLAGS = ['fudger', 'scab', 'mudslinger'];
+const GOT_AWAY = ['It goes the way you meant it to. Nobody connects it to you.', 'You pull it off. Nobody asks a single question.', 'Smooth. If anyone noticed, they keep it to themselves.', 'It works, quietly. You never hear about it again.'];
+function intentNormalize(L) {
+  for (const s of L || []) for (const o of s.opts || []) {
+    const ok = o.ok || {}, shady = SHADY_FLAGS.includes(ok.flag) || ok.risk || ok.fire;
+    if (!shady || o._intent) continue;
+    o._intent = 1;
+    if (!o.check) {
+      // the effects as written become what happens when it goes wrong; success keeps only what you were after
+      o.bad = Object.assign({}, ok, o.bad || {});
+      const good = Object.assign({}, ok); delete good.flag; delete good.risk; delete good.fire; if (good.stand < 0) delete good.stand;
+      o.ok = good; o.check = [ok.flag === 'scab' || ok.flag === 'mudslinger' ? 'cha' : 'com', 12];
+      o.tb = o.t; o.t = GOT_AWAY[(s.id || '').length % GOT_AWAY.length];
+    } else if (SHADY_FLAGS.includes(ok.flag)) { const good = Object.assign({}, ok); delete good.flag; o.ok = good; }
+  }
+}
+if (typeof SCENES !== 'undefined') intentNormalize(SCENES);
+// </intent>
+// <season>
+// ---------------- The season: festivals, shorts and contests on a real calendar, with real odds ----------------
+// Festivals happen when they happen. You submit in the months before (the window opens four months out and closes a
+// month before), the line-up is announced the month the festival runs, and the prizes are given there. Programmers
+// see thousands of films for a few dozen slots: an A-list competition takes perhaps one submission in a hundred, a
+// friendly regional festival one in ten, and quality moves those odds a long way but never to certainty. Winning is
+// a further, smaller chance among the selected. Short-film festivals work the same way. Contests are a notch harder.
+// The Season page (Contests app) lays the whole year out month by month so you can plan it.
+
+// ---- feature festivals ----
+function festWindow(F) {   // weeks until the festival's month starts, and whether submissions are open now
+  const due = nextMonthWeek(F.month), wks = due - S.week;
+  return { due, wks, open: wks >= 4 && wks <= 18 };
+}
+// the chance a film is selected: by the festival's bar and level, the film's quality (or how it looks before it's
+// finished), and a nudge for small films at festivals that love discoveries
+function festSelOdds(F, f) {
+  const q = (f.q ?? preQ(f)) + ((f.tier === 3 || f.co === null) && F.small ? 4 : 0);
+  const cap = [0, .55, .7, .8][F.tier || 2], floor = [0, .01, .03, .06][F.tier || 2];
+  return clamp(floor + cap / (1 + Math.exp(-(q - F.bar - 3) / 3.5)), floor, cap);
+}
+function festWinOdds(F, f) { const q = f.q ?? preQ(f); return clamp(.03 + (q - F.bar - 4) / 45, .02, .3); }
+function festChanceLabel(p) { return p >= .45 ? 'a strong chance' : p >= .25 ? 'a real chance' : p >= .1 ? 'an outside chance' : 'a long shot'; }
+submitFest = function (a) {
+  const M = S.me, f = S.films[a.film], F = FESTIVALS.find(x => x.k === a.k);
+  if (!f || !F || !myFilms().includes(f) || !festEligible(f) || (typeof festFits === 'function' && !festFits(F, f)) || (M.fests || []).some(x => x.film === f.id && x.k === F.k) || M.cash < usd(F.fee)) return false;
+  const W = festWindow(F); if (!W.open) return false;
+  M.cash -= usd(F.fee);
+  (M.fests = M.fests || []).push({ film: f.id, k: F.k, due: W.due, w: S.week });
+  diary(`You submit ${f.title} to ${F.name}. The line-up is announced in ${MON[F.month]}.`);
+  return true;
+};
+festWeek = function () {
+  const M = S.me, me = ME();
+  for (const e of (M.fests || []).filter(x => !x.done && x.due <= S.week)) {
+    e.done = true;
+    const f = S.films[e.film], F = FESTIVALS.find(x => x.k === e.k); if (!f || !F) continue;
+    const ps = festSelOdds(F, f);
+    if (prnd() >= ps) { e.res = 'passed'; inbox('note', `${F.name.replace(/^the /, 'The ')}: not selected`, `${f.title} isn't in this year's line-up. ${pickLine(['Thousands of films, a few dozen slots.', 'The programmers wanted something else this year.', 'They sent the same two-line email to four thousand people.', 'A programmer you met once says it was close. It may even be true.'], f.id + e.due)}`, { film: f.id }); continue; }
+    e.sel = 1; e.res = 'selected'; f.cult = clamp((f.cult || 0) + 6, 0, 100); me.standing = clamp(me.standing + [0, 2.5, 1.5, 1][F.tier || 2], 0, 100);
+    const sec = (F.sections || ['the official selection'])[Math.floor(prnd() * Math.min(2, (F.sections || ['x']).length))];
+    let t = `${f.title} is in ${sec} at ${F.name}. ${F.d}`;
+    if (prnd() < festWinOdds(F, f)) {
+      e.res = 'won'; award(f, `${F.name.replace(/^the /, '')}: ${F.prize}`, [f.dir, f.prod].filter((x, i, A) => A.indexOf(x) === i));
+      me.fame = clamp((me.fame || 0) + [0, 5, 3, 2][F.tier || 2], 0, 100); me.standing = clamp(me.standing + [0, 4, 2.5, 1.5][F.tier || 2], 0, 100);
+      t += ` And it wins the ${F.prize}.`; milestone(`${f.title} won the ${F.prize} at ${F.name}`, 'prize');
+    } else milestone(`${f.title} selected for ${F.name}`, 'prize');
+    inbox('news', F.name.replace(/^the /, 'The '), t, { film: f.id });
+    if (f.rel === null && f.co === M.company && TERRITORIES.some(tt => !(f.dist || {})[tt]) && !pending().some(x => x.kind === 'bid' && x.film === f.id)) distributorBids(f, e.res === 'won');
+    const slot = freeSlot({ days: [3, 4, 5], blocks: [2], from: 1 }), host = [f.prod, f.dir, f.cast[0]].find(id => id !== me.id);
+    if (slot && host !== undefined) inbox('invite', `Go to ${F.name.replace(/^the /, 'The ')}?`, `Your film is screening. The premiere is ${slotLabel(slot)}: travel, a red carpet, and everyone who buys and sells films in one place.`, { person: host, ev: 'festival', slot, what: `the premiere at ${F.name}`, choices: [{ k: 'yes', label: `Go (${slotLabel(slot)})` }, { k: 'no', label: 'Stay home' }] });
+  }
+};
+
+// ---- short-film festivals: same shape ----
+function shortSelOdds(q, tier) { const bar = SF_BAR[tier], cap = [0, .5, .65, .8][tier]; return clamp(.02 + cap / (1 + Math.exp(-(q - bar - 2) / 4)), .02, cap); }
+function shortWinOdds(q, tier) { return clamp(.02 + (q - SF_BAR[tier] - 4) / 45, .015, .3); }
+
+// ---- contests: a notch harder ----
+for (const c of COMPS) if (!c._season) { c._season = 1; c.dc += c.tier === 'fun' ? 1 : c.tier === 'industry' ? 1 : 0; }
+
+// ---- the season, month by month ----
+function seasonEvents(m) {
+  const M = S.me, out = [];
+  for (const F of FESTIVALS) if (F.month === m && (F.founded || 0) <= S.year) out.push({ kind: 'Festival', name: F.name.replace(/^the /, 'The '), tier: F.tier || 2, mine: (M.fests || []).filter(x => x.k === F.k && !x.done).length, link: typeof bodyLink === 'function' ? bodyLink(F.name.replace(/^the /, 'The ')) : esc(F.name) });
+  for (const F of Object.values(typeof SHORT_FEST !== 'undefined' ? SHORT_FEST : {})) if (F.month === m && F.founded <= S.year) out.push({ kind: 'Shorts', name: F.name, tier: F.tier, mine: (M.works || []).filter(w => w.circuit && w.circuit.subs.some(s => s.k === F.k && !s.done)).length, link: `<a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a>` });
+  for (const c of COMPS) if (c.month === m) out.push({ kind: 'Contest', name: c.name, tier: c.tier === 'major' ? 1 : c.tier === 'industry' ? 2 : 3, mine: (M.comps || []).some(e => e.k === c.k && e.y === yearOf(S.week) && !e.told) ? 1 : 0, link: typeof compLink === 'function' ? compLink(c) : esc(c.name), cat: c.cat });
+  return out.sort((a, b) => a.tier - b.tier);
+}
+function seasonHTMLFull() {
+  const M = S.me, mo = dateOf(S.week).getUTCMonth(), MON_ = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const f = UI.seasonF || 'all';
+  const months = [0, 1, 2, 3, 4, 5].map(i => (mo + i) % 12);
+  const pending = (M.fests || []).filter(x => !x.done).length + (M.comps || []).filter(e => !e.told).length + (M.works || []).reduce((n, w) => n + ((w.circuit && w.circuit.subs) || []).filter(s => !s.done).length, 0);
+  const cell = m => { const L = seasonEvents(m).filter(e => f === 'all' || (f === 'mine' ? e.mine : e.kind === f)); return `<div class="seam${m === mo ? ' now' : ''}"><h4>${MON_[m]}${m === mo ? ' <span class="chip good">now</span>' : ''}</h4><ul class="plain small">${L.slice(0, 14).map(e => `<li><span class="sk sk-${e.kind.toLowerCase()}">${e.kind[0]}</span> ${e.link}${e.tier === 1 ? ' ★' : ''}${e.mine ? ' <b class="good">· yours</b>' : ''}</li>`).join('') || '<li class="muted">Nothing.</li>'}${L.length > 14 ? `<li class="muted">and ${L.length - 14} more</li>` : ''}</ul></div>`; };
+  return `<section class="panel"><h3>The season <span class="count">${pending} entr${pending === 1 ? 'y' : 'ies'} waiting on results</span></h3>
+   <p class="muted small">The next six months: <b>F</b> feature festivals (submit 1–4 months ahead; the line-up and prizes come in the festival's month), <b>S</b> short-film festivals, <b>C</b> contests (entries open the month before the deadline). ★ = the big ones. Selection is hard everywhere: an A-list festival takes one film in a hundred.</p>
+   <div class="fchips">${[['all', 'Everything'], ['mine', 'Yours'], ['Festival', 'Festivals'], ['Shorts', 'Shorts'], ['Contest', 'Contests']].map(([k, l]) => `<button class="fchip${f === k ? ' on' : ''}" data-seasonf="${k}">${l}</button>`).join('')}</div>
+   <div class="seasongrid">${months.map(cell).join('')}</div></section>`;
+}
+function seasonClick(t) { if (t.dataset.seasonf) { UI.seasonF = t.dataset.seasonf; render(true); return true; } return false; }
+// </season>
+// <phone2>
+// ---------------- The phone, with something riding on it ----------------
+// What makes a messaging loop worth playing (in games built on one): people with personalities you learn to read,
+// relationships that climb visible ranks and unlock real things, replies that can land or fall flat, and the world
+// texting you things you didn't expect. So:
+//  - Bond ranks (0–5) per contact, from how they feel about you and how far they trust you. Each rank unlocks a perk
+//    that does something: tips about work, a word in the right ear, joining your crew for less, bailing you out.
+//  - Every contact has a texting personality; replies that suit it count for more, ones that don't fall flat. The
+//    thread tells you what they like once you've talked a few times.
+//  - Rank-ups announce themselves. Unknown numbers turn up (a wrong number that becomes a gig, a scam to spot, a fan,
+//    a tip from nobody). And a late night out can end with a text you might regret: send it or delete it.
+// Rolls are the player's dice at the moment of the reply; everything else is read from the relationship.
+
+// ---- bonds ----
+const BOND = [
+  [0, 'Acquaintance', 'Nothing yet.'],
+  [1, 'Friendly', 'They answer quickly and remember what you told them.'],
+  [2, 'Tipster', 'Now and then they pass you work they hear about, before it\'s posted.'],
+  [3, 'Advocate', 'They put in a word: applications to their projects get a referral.'],
+  [4, 'Crew', 'They\'ll work on your projects for less, and come when you call.'],
+  [5, 'Ride or die', 'Once a year, when things go badly, they show up with real help.']
+];
+function bondOf(id) { const M = S.me, k = M.known[id]; if (!k) return 0; const o = opinion(id), t = k.trust || 0; return o >= 55 && t >= 70 ? 5 : o >= 42 && t >= 55 ? 4 : o >= 30 && t >= 40 ? 3 : o >= 18 && t >= 25 ? 2 : o >= 8 ? 1 : 0; }
+function bondProgress(id) { const o = opinion(id), steps = [8, 18, 30, 42, 55, 101], b = bondOf(id); const lo = b ? steps[b - 1] : -20, hi = steps[b]; return clamp((o - lo) / Math.max(1, hi - lo), 0, 1); }
+function bondHTML(id) {
+  if (id === null || id === undefined || !S.me.known[id]) return '';
+  const b = bondOf(id), nx = BOND[b + 1], like = S.me.known[id].tone ? TONE_LIKES[voiceOf_(P(id))] : null;
+  return `<div class="bond"><span class="bond-r">Bond ${b} · <b>${esc(BOND[b][1])}</b></span><span class="bond-bar"><i style="width:${Math.round(bondProgress(id) * 100)}%"></i></span><small>${nx ? `Next: ${esc(nx[1])} (${esc(nx[2])})` : 'As close as it gets.'}</small>${like ? `<small class="muted">Texts best with: ${esc(like[0])} · not: ${esc(like[1])}</small>` : '<small class="muted">Talk a little more to learn how they like to be texted.</small>'}</div>`;
+}
+// texting personalities, from the people themselves
+const TONE_OF = { laugh: 'funny', meme: 'funny', flirty: 'funny', jealous: 'edge', sympathy: 'warm', congrats: 'warm', thanks: 'warm', invite: 'warm', drinks: 'warm', st_call: 'warm', st_text: 'warm', st_reassure: 'warm', st_home: 'warm', st_keep: 'warm', spill: 'gossip', nogossip: 'straight', advise: 'straight', notsure: 'straight', brief: 'brief', st_busy: 'brief', st_later: 'brief', askmore: 'business', workgood: 'business', st_in: 'business', st_jump: 'business', st_sell: 'business', st_honest: 'straight', st_fight: 'edge', st_confront: 'edge', own: 'own' };
+const TONE_LIKES = { funny: ['jokes and memes', 'one-word answers'], warm: ['kindness and plans to meet', 'grumbling'], dry: ['short and straight', 'gushing'], gossip: ['the latest gossip', 'being a saint about it'], quiet: ['short, kind replies', 'big plans and noise'], plain: ['anything honest', 'nothing in particular'] };
+const TONE_FIT = { funny: { funny: 1.6, brief: .4, edge: 1 }, warm: { warm: 1.5, edge: .3, brief: .6 }, dry: { brief: 1.4, straight: 1.4, warm: .7, funny: 1.1 }, gossip: { gossip: 1.8, straight: .5, funny: 1.2 }, quiet: { brief: 1.3, warm: 1.2, funny: .7, gossip: .6 }, plain: {} };
+function replyFit(q, k) { const v = voiceOf_(q), t = TONE_OF[k] || (k && /^a[01]$/.test(k) ? 'straight' : null); if (!t) return 1; return (TONE_FIT[v] || {})[t] || 1; }
+function replyHint(q, k) { const f = replyFit(q, k); return f >= 1.3 ? ' 💛' : f <= .6 ? ' 🧊' : ''; }
+{ const _rl = replyLabel; replyLabel = function (m, k) { const base = _rl(m, k), q = m && m.from >= 0 ? P(m.from) : null; return q && S.me.known[m.from] && S.me.known[m.from].tone ? base + replyHint(q, k) : base; }; }
+// called from replyText as the tie moves: tone counts, and you learn theirs by talking
+function bondReply(q, k, d) {
+  const M = S.me, K = M.known[q.id]; if (!K) return d;
+  K.talks = (K.talks || 0) + 1; if (K.talks >= 3) K.tone = 1;
+  const f = replyFit(q, k), out = d > 0 ? d * f : d * (f < 1 ? 1.4 : 1);
+  return out;
+}
+// after the tie has moved: rank-ups
+function bondCheck(id) {
+  const M = S.me, K = M.known[id]; if (!K) return;
+  const b = bondOf(id), was = K.bond || 0;
+  if (b > was) { K.bond = b; if (b >= 2) { inbox('note', `${P(id).name}: bond ${b}, ${BOND[b][1]}`, `${BOND[b][2]}`, { person: id }); milestone(`${P(id).name} became ${['', 'friendly', 'a tipster', 'an advocate', 'crew', 'ride or die'][b]}`, 'life'); } if (typeof toast === 'function') toast(`${P(id).name}: bond ${b} · ${BOND[b][1]}`, 'good'); }
+  else if (b < was) K.bond = b;
+}
+// ---- what the ranks do, every week ----
+function bondWeek() {
+  const M = S.me, me = ME(); if (!M || !M.party || !M.party.done) return;
+  const ids = aliveKnown();
+  // tipsters pass on work
+  if (prnd() < .25) { const T = ids.filter(id => bondOf(id) >= 2 && typeof theirActive === 'function' && theirActive(id)); if (T.length) { const id = T[Math.floor(prnd() * T.length)], f = theirActive(id), p = typeof makeLead === 'function' ? makeLead(id, f) : null; if (p) sms(id, pickLine([`heads up: ${f.title} needs a ${p.t.toLowerCase()}. not posted yet. go`, `they're about to hire for ${f.title}. I said your name. apply this week`, `quiet tip: ${p.t.toLowerCase()} on ${f.title}. you'd be great`], S.week + id), 'tip'); } }
+  // advocates put a word in
+  for (const id of ids) if (bondOf(id) >= 3 && !M.refs[id]) M.refs[id] = 1;
+  // ride or die: once a year, when you're in trouble
+  if (M.cash < 0 || M.stress > 80) { const R = ids.filter(id => bondOf(id) >= 5 && S.week - ((M.known[id] || {}).rescued || -999) > 52); if (R.length) { const id = R[0]; M.known[id].rescued = S.week; const help = Math.round(Math.max(usd(800), -M.cash * 1.1)); if (M.cash < 0) M.cash += help; M.stress = clamp(M.stress - 15, 0, 100); sms(id, M.cash >= 0 && help > 0 ? `I sent you ${fmtCash(help)}. don't argue. pay me back whenever` : 'I\'m coming over. I\'m bringing food. no arguments', 'text', { mood: 'happy' }); milestone(`${P(id).name} turned up when it mattered`, 'life'); } }
+  surpriseText();
+}
+// ---- the world texts you ----
+const UNKNOWN = [
+  { k: 'wrong', t: 'hey is this the guy with the van? we need someone for a shoot saturday, cash', o: [['help', '"Not the van guy, but I can help"', 'cha', 12], ['correct', '"Wrong number, good luck!"', null, 0]] },
+  { k: 'scam', t: 'URGENT: your bank account is locked. verify here within 24h: secure-bank-verify.co', o: [['ignore', 'Delete it', 'tas', 9], ['click', 'Tap the link', null, 0]] },
+  { k: 'fan', t: 'sorry if this is weird. I saw your work and it made me cry on a train. that\'s all. thank you', o: [['thank', '"That means more than you know"', null, 0], ['ignore', 'Leave it on read', null, 0]] },
+  { k: 'tip', t: 'you don\'t know me. a studio is about to announce layoffs on friday. sell if you own any. delete this', o: [['act', 'Act on it', 'tas', 13], ['ignore', 'Ignore it', null, 0]] },
+  { k: 'vip', t: '[unknown number] this is the assistant of someone you\'d know. they want a coffee. thursday? no names over text', o: [['go', '"I\'ll be there"', 'cha', 13], ['no', '"Who is this?"', null, 0]] },
+  { k: 'ex', t: 'hi. it\'s been a while. I still think about that shoot we did. are you around?', o: [['meet', '"I\'d like that"', 'cha', 11], ['no', '"I\'m good, thanks"', null, 0]] }
+];
+function surpriseText() {
+  const M = S.me; if (prnd() > .06 || (M.unknown || []).some(x => !x.done)) return;
+  const U = UNKNOWN[Math.floor(prnd() * UNKNOWN.length)];
+  (M.unknown = M.unknown || []).push({ id: M.seq++, k: U.k, w: S.week, done: 0 });
+  inbox('unknown', 'A text from an unknown number', U.t, { unk: M.unknown[M.unknown.length - 1].id, uk: U.k, choices: U.o.map(([k, l, st, dc]) => Object.assign({ k, label: l }, st ? { check: [st, dc] } : {})) });
+}
+function unknownPick(it, k) {
+  if (it.kind !== 'unknown') return false;
+  const M = S.me, me = ME(), x = (M.unknown || []).find(y => y.id === it.unk); if (x) x.done = 1; it.done = true;
+  const U = UNKNOWN.find(u => u.k === it.uk), o = U && U.o.find(z => z[0] === k); if (!o) { it.result = { t: 'You put the phone down.' }; return true; }
+  const ok = o[2] ? roll(o[2], o[3]) : true, r = o[2] ? M.lastRoll : null; let t = '';
+  switch (it.uk + ':' + k) {
+    case 'wrong:help': if (ok) { const v = usd(250 + prnd() * 400); M.cash += v; const q = typeof youngNPC === 'function' ? youngNPC(M.hub, 'producer') : null; if (q) meet(q.id, 'A wrong number', 8); t = `You spend Saturday on a stranger's shoot, earn ${fmtCash(v)}, and leave with a producer's number.`; } else t = 'They wanted the van more than you. Fair.'; break;
+    case 'scam:ignore': t = ok ? 'Deleted. You notice the spelling of "secure" was wrong anyway.' : 'You delete it, then panic for an hour that you didn\'t.'; break;
+    case 'scam:click': { const v = Math.min(Math.max(0, M.cash), usd(300 + prnd() * 1200)); M.cash -= v; M.stress = clamp(M.stress + 8, 0, 100); t = `It was what it looked like. ${fmtCash(v)} gone before the bank freezes the card.`; break; }
+    case 'fan:thank': M.stress = clamp(M.stress - 5, 0, 100); me.fame = clamp((me.fame || 0) + .3, 0, 100); t = 'They send back a photo of a cat. You keep it.'; break;
+    case 'tip:act': { if (ok) { const v = Math.round(Math.max(usd(200), M.cash * .01)); M.cash += v; t = `It's true. You move early and come out ${fmtCash(v)} ahead.`; } else { const v = Math.round(Math.min(Math.max(0, M.cash) * .01, usd(2000))); M.cash -= v; t = `It was nonsense. You lose ${fmtCash(v)} getting out of something that was fine.`; } break; }
+    case 'vip:go': { if (ok) { const q = bestIn(M.hub, ['producer', 'director'], q => q.standing * .7 + prnd() * 30); if (q) { meet(q.id, 'A coffee nobody planned', 14); trust(q.id, 6); me.standing = clamp(me.standing + 1, 0, 100); t = `It's ${q.name}. They wanted to meet the person behind something you made. An hour becomes three.`; } else t = 'Nobody shows. A barista gives you a free muffin.'; } else t = 'They cancel by text, twice, and then go quiet.'; break; }
+    case 'ex:meet': { const q = bestIn(M.hub, ROLES, q => -Math.abs(q.standing - me.standing) + prnd() * 40); if (q && ok) { meet(q.id, 'An old shoot', 10); t = `It's ${q.name}. You laugh about the old shoot for an hour, and they mention a job.`; } else t = 'It was lovely, and it reminded you why it ended.'; break; }
+    default: t = 'You leave it there.';
+  }
+  it.result = { ok: o[2] ? ok : null, roll: r, t }; return true;
+}
+// a night out that ends with a text you might regret
+function drunkText() {
+  const M = S.me; if (M.party && !M.party.done) return;
+  const ids = aliveKnown().filter(id => ['ex', 'rival', 'cold', 'partner', 'close'].includes(relOf(id)) || opinion(id) < -5 || opinion(id) > 35); if (!ids.length || prnd() > .25) return;
+  const id = ids[Math.floor(prnd() * ids.length)], rel = relOf(id);
+  const t = rel === 'rival' || opinion(id) < -5 ? `you're overrated and everyone knows it` : rel === 'ex' ? `do you ever think about us` : rel === 'partner' ? `you're the best thing that ever happened to me. I mean it. also I lost my shoe` : `I LOVE YOU. you're my favourite person in this whole business`;
+  inbox('drunk', `2:14 a.m. A text to ${P(id).name}, unsent`, `"${t}"`, { person: id, txt: t, choices: [{ k: 'send', label: 'Send it. Chaos.', check: ['cha', 12] }, { k: 'delete', label: 'Delete it and go to sleep' }] });
+}
+function drunkPick(it, k) {
+  if (it.kind !== 'drunk') return false;
+  const M = S.me, me = ME(), id = it.person, q = P(id); it.done = true;
+  if (k === 'delete' || !q) { it.result = { t: 'Deleted. Future you will never know how close it was.' }; return true; }
+  const ok = roll('cha', 12), r = M.lastRoll; sms(-1, it.txt, 'mine', { to: id });
+  const bad = opinion(id) < -5 || relOf(id) === 'rival';
+  if (ok) { addTie(me, q, bad ? 6 : 5); sms(id, bad ? 'ha. ok. drinks sometime? you\'re not wrong about me' : pickLine(['😂 go to sleep. love you too', 'screenshotting this forever. ❤️', 'call me tomorrow, you menace'], S.week), 'text', { mood: 'happy' }); }
+  else { addTie(me, q, -6); if (prnd() < .3) { me.fame = clamp((me.fame || 0) + 1, 0, 100); me.standing = clamp(me.standing - 1, 0, 100); } sms(id, bad ? 'wow. ok. noted.' : '…are you ok?', 'text', { mood: 'none' }); }
+  it.result = { ok, roll: r, t: ok ? 'It lands. Somehow it was exactly the right thing to send.' : 'It does not land. You will think about this in the shower for a year.' };
+  if (typeof bondCheck === 'function') bondCheck(id);
+  return true;
+}
+// </phone2>
+// <toon>
+// ---------------- Toons: people with some life in them ----------------
+// Everyone is drawn as a toon now: a big expressive head, eyes with light in them, a mouth that matches the mood,
+// cheeks, freckles, face paint, and a body that strikes a pose. Your own face reacts to your week (stressed, tired,
+// buzzing), a sidekick can ride along, an aura can shimmer round you, and the head bobs and the eyes blink where
+// there's room for it (your desk and your room). Every old look still means what it meant: new options are appended,
+// and "Classic" in the Style row brings back the old drawings.
+// Drawn from the look alone (plus a stable hash for the little things NPCs never chose), so nothing here rolls dice.
+LOOK.head.opts.push('Crown', 'Wizard hat', 'Propeller beanie', 'Bunny ears', 'Cat ears', 'Halo', 'Devil horns', 'Party hat', 'Chef\'s hat', 'Top hat');
+LOOK.glasses.opts.push('Heart shades', 'Star shades', '3D glasses', 'Monocle');
+LOOK.hair.opts.push('Pigtails', 'Big curls', 'Side shave', 'Wolf cut', 'Beehive', 'Long waves');
+LOOK.hairColor.opts.push('#FF6FB5', '#6FC3FF', '#FFD23F', '#9BE564', '#FFFFFF');
+Object.assign(LOOK, {
+  style: { label: 'Style', opts: ['Toon', 'Classic'] },
+  eyeShape: { label: 'Eyes', opts: ['Round', 'Sleepy', 'Sparkly', 'Wink', 'Cat-eye', 'Dots', 'Starry', 'Heavy-lidded'] },
+  mouth: { label: 'Mouth', opts: ['Smile', 'Big grin', 'Smirk', 'Laughing', 'Cat mouth', 'Straight', 'Pout', 'Gap tooth'] },
+  cheeks: { label: 'Cheeks', opts: ['Plain', 'Blush', 'Freckles', 'Freckles and blush', 'Rosy', 'Dimples'] },
+  facePaint: { label: 'Face paint', opts: ['None', 'Star', 'Heart', 'Lightning', 'Glitter', 'Tear', 'Stripes'] },
+  sidekick: { label: 'Sidekick', opts: ['None', 'Cat', 'Dog', 'Parrot', 'Frog', 'Tiny robot', 'Ghost', 'Duck', 'Hamster'] },
+  aura: { label: 'Aura', opts: ['None', 'Sparkles', 'Hearts', 'Music notes', 'Stars', 'Flames', 'Bubbles', 'Film reel'] }
+});
+for (const k of ['style', 'eyeShape', 'mouth', 'cheeks', 'facePaint', 'sidekick', 'aura']) if (!LOOK_KEYS.includes(k)) LOOK_KEYS.push(k);
+// how you look this week, if it's you
+function toonMood(L) {
+  if (L._mood) return L._mood;
+  return 'calm';
+}
+function toonSVG(L, age, size, bare, fig) {
+  const uid = 'tn' + (++PORTRAIT_UID), H = fig ? 240 : 120;
+  const pr = hashRand(L.skin * 131 + L.hair * 17 + L.colour * 7 + L.face * 3 + L.outfit + L.eyes * 29 + 11);
+  const pick = (k, n) => L[k] !== undefined && L[k] !== null ? L[k] : Math.floor(pr() * n);
+  const eyeShape = L.eyeShape !== undefined ? L.eyeShape : [0, 0, 0, 1, 2, 4, 5, 7][Math.floor(pr() * 8)];
+  const mouth0 = L.mouth !== undefined ? L.mouth : [0, 0, 1, 2, 5, 0, 4, 6][Math.floor(pr() * 8)];
+  const cheeks = L.cheeks !== undefined ? L.cheeks : [0, 1, 0, 2, 1, 3][Math.floor(pr() * 6)];
+  const mood = toonMood(L);
+  const skin = LOOK.skin.opts[L.skin] || '#D19A72', skinD = mixHex(skin, '#000000', .16), skinL = mixHex(skin, '#FFFFFF', .2), line = mixHex(skin, '#000000', .5);
+  const grey = clamp((age - 46) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor] || '#3A2618', '#D9D6D0', grey), hcD = mixHex(hc, '#000000', .25);
+  const cloth = LOOK.colour.opts[L.colour] || '#2C4F7C', clothD = mixHex(cloth, '#000000', .25), clothL = mixHex(cloth, '#FFFFFF', .2);
+  const FT = L._fit || { mus: 0, mass: 0 };
+  const shape = (L.face || 0) % 10;
+  const cx = 60, cy = fig ? 48 : 54;
+  const rx = [30, 33, 31, 27, 31, 30, 33, 28, 35, 26][shape] + FT.mass * .25, ry = [31, 29, 29, 34, 31, 32, 30, 32, 28, 34][shape];
+  const o = [];
+  // ---- defs: gradients and patterns ----
+  const pat = L.pattern || 0;
+  o.push(`<defs><radialGradient id="${uid}sk" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="${skinL}"/><stop offset=".7" stop-color="${skin}"/><stop offset="1" stop-color="${skinD}"/></radialGradient>
+   <linearGradient id="${uid}bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${mixHex(cloth, '#FFFFFF', .78)}"/><stop offset="1" stop-color="${mixHex(cloth, '#FFFFFF', .55)}"/></linearGradient>
+   <linearGradient id="${uid}cl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${clothL}"/><stop offset="1" stop-color="${clothD}"/></linearGradient>
+   <pattern id="${uid}pt" width="8" height="8" patternUnits="userSpaceOnUse">${[
+    '', `<rect width="8" height="4" fill="${mixHex(cloth, '#fff', .35)}"/>`, `<rect width="4" height="4" fill="${mixHex(cloth, '#000', .2)}"/><rect x="4" y="4" width="4" height="4" fill="${mixHex(cloth, '#000', .2)}"/>`,
+    `<circle cx="4" cy="4" r="1.6" fill="${mixHex(cloth, '#fff', .6)}"/>`, `<circle cx="3" cy="3" r="2" fill="#F28C9B"/><circle cx="3" cy="3" r=".8" fill="#FFE27A"/>`, `<circle cx="4" cy="4" r="3.5" fill="${mixHex(cloth, '#FF6FB5', .5)}" opacity=".5"/>`,
+    `<circle cx="2" cy="3" r="1.5" fill="#3B2716"/><circle cx="6" cy="6" r="1.2" fill="#3B2716"/>`, `<rect x="3.6" width=".8" height="8" fill="${mixHex(cloth, '#fff', .5)}"/>`, `<circle cx="2" cy="2" r="2.5" fill="#4B5A2E"/><circle cx="6" cy="6" r="2.5" fill="#6B5A3A"/>`, `<path d="M4 1 L5 3.5 L7.5 3.6 L5.5 5 L6.3 7.5 L4 6 L1.7 7.5 L2.5 5 L.5 3.6 L3 3.5 Z" fill="#FFE27A"/>`][pat] || ''}</pattern></defs>`);
+  // ---- backdrop and aura ----
+  if (!bare) { o.push(`<rect width="120" height="${H}" rx="12" fill="url(#${uid}bg)"/>`); for (let i = 0; i < 7; i++) o.push(`<circle cx="${8 + pr() * 104}" cy="${8 + pr() * (H - 16)}" r="${1 + pr() * 2.5}" fill="#FFFFFF" opacity=".55"/>`); }
+  const aura = L.aura || 0;
+  if (aura) { const sym = ['', '✦', '♥', '♪', '★', '🔥', '◦', '🎞'][aura], col = ['', '#FFD23F', '#FF6FB5', '#6FC3FF', '#FFD23F', '#FF7A2F', '#9BE7FF', '#333'][aura]; o.push(`<g class="t-aura" fill="${col}" font-size="11" opacity=".9">${[[16, cy - 22], [100, cy - 26], [12, cy + 18], [106, cy + 12], [24, cy - 44], [94, cy + 36]].map(([x, y], i) => `<text x="${x}" y="${y}" style="animation-delay:${i * .4}s">${sym}</text>`).join('')}</g>`); }
+  // ---- body ----
+  const bw = [36, 38, 41, 45, 48, 52, 34, 36, 47, 44][(L.build || 0) % 10] + FT.mus * .8 + FT.mass * .6;
+  if (fig) o.push(toonBody(L, uid, cx, cy + ry, bw, skin, skinD, cloth, clothD, pat, line));
+  else {
+    const sy = cy + ry - 4;
+    o.push(`<rect x="${cx - 7}" y="${sy - 6}" width="14" height="14" fill="${skinD}"/>`);
+    o.push(`<path d="M${cx - bw / 2 - 8} 122 Q${cx - bw / 2 - 4} ${sy + 6} ${cx - 12} ${sy + 2} L${cx + 12} ${sy + 2} Q${cx + bw / 2 + 4} ${sy + 6} ${cx + bw / 2 + 8} 122 Z" fill="url(#${uid}cl)"/>`);
+    if (pat) o.push(`<path d="M${cx - bw / 2 - 8} 122 Q${cx - bw / 2 - 4} ${sy + 6} ${cx - 12} ${sy + 2} L${cx + 12} ${sy + 2} Q${cx + bw / 2 + 4} ${sy + 6} ${cx + bw / 2 + 8} 122 Z" fill="url(#${uid}pt)" opacity=".85"/>`);
+    o.push(toonCollar(L.outfit || 0, cx, sy + 2, cloth, clothD));
+  }
+  // ---- the head (it bobs) ----
+  o.push(`<g class="t-head">`);
+  const hb = toonHair(L.hair || 0, cx, cy, rx, ry, hc, hcD, age, L.hairline === 1);
+  o.push(hb[0]);
+  // ears
+  o.push(`<ellipse cx="${cx - rx + 1}" cy="${cy + 4}" rx="5" ry="6.5" fill="${skin}"/><ellipse cx="${cx + rx - 1}" cy="${cy + 4}" rx="5" ry="6.5" fill="${skin}"/>`);
+  if (L.ears) { const ec = ['', '#E8D27A', '#E8D27A', '#C0C0C0', '#E6F4FF'][L.ears] || '#E8D27A'; o.push(L.ears === 2 ? `<circle cx="${cx - rx + 1}" cy="${cy + 12}" r="3.5" fill="none" stroke="${ec}" stroke-width="1.6"/><circle cx="${cx + rx - 1}" cy="${cy + 12}" r="3.5" fill="none" stroke="${ec}" stroke-width="1.6"/>` : `<circle cx="${cx - rx + 1}" cy="${cy + 9}" r="1.8" fill="${ec}"/><circle cx="${cx + rx - 1}" cy="${cy + 9}" r="1.8" fill="${ec}"/>`); }
+  // face
+  const chin = [0, 0, 3, 0, -4, -3, 0, 2, 0, 0][shape];
+  o.push(`<path d="M${cx - rx} ${cy} Q${cx - rx} ${cy - ry} ${cx} ${cy - ry} Q${cx + rx} ${cy - ry} ${cx + rx} ${cy} Q${cx + rx - chin} ${cy + ry} ${cx} ${cy + ry} Q${cx - rx + chin} ${cy + ry} ${cx - rx} ${cy} Z" fill="url(#${uid}sk)"/>`);
+  // cheeks, freckles, dimples
+  const ey = cy + 3, ex = rx * .4;
+  if (cheeks === 1 || cheeks === 3 || cheeks === 4 || mood === 'buzzing') o.push(`<ellipse cx="${cx - ex - 5}" cy="${ey + 10}" rx="6" ry="3.5" fill="#FF6F8E" opacity="${cheeks === 4 ? .55 : .35}"/><ellipse cx="${cx + ex + 5}" cy="${ey + 10}" rx="6" ry="3.5" fill="#FF6F8E" opacity="${cheeks === 4 ? .55 : .35}"/>`);
+  if (cheeks === 2 || cheeks === 3 || L.mark === 3) for (const s of [-1, 1]) for (let i = 0; i < 4; i++) o.push(`<circle cx="${cx + s * (ex + 2 + (i % 2) * 4)}" cy="${ey + 7 + Math.floor(i / 2) * 3}" r=".8" fill="${mixHex(skin, '#5A2E12', .6)}"/>`);
+  if (cheeks === 5) o.push(`<path d="M${cx - ex - 6} ${ey + 13} q1 2 2 0 M${cx + ex + 4} ${ey + 13} q1 2 2 0" stroke="${line}" stroke-width=".9" fill="none"/>`);
+  // face paint
+  const fp = L.facePaint || 0;
+  if (fp) o.push([``, `<path d="M${cx + ex + 6} ${ey + 4} l1.5 3.4 3.6.3-2.8 2.3.9 3.5-3.2-1.9-3.2 1.9.9-3.5-2.8-2.3 3.6-.3z" fill="#FFD23F"/>`, `<path d="M${cx + ex + 7} ${ey + 11} c-2-3-6-1-3 2 l3 3 3-3c3-3-1-5-3-2z" fill="#FF4D79"/>`, `<path d="M${cx + ex + 6} ${ey + 3} l-3 6h3l-2 6 5-8h-3l2-4z" fill="#FFD23F" stroke="#E0A400" stroke-width=".5"/>`, [0, 1, 2, 3, 4, 5].map(i => `<circle cx="${cx + ex + 2 + (i % 3) * 3}" cy="${ey + 8 + Math.floor(i / 3) * 3}" r=".9" fill="#B39DDB"/>`).join(''), `<path d="M${cx - ex} ${ey + 7} q-1.5 3 0 4.5 q1.5-1.5 0-4.5z" fill="#6FC3FF"/>`, `<path d="M${cx - rx + 6} ${ey + 4} l8 -2 M${cx - rx + 6} ${ey + 8} l8 -2 M${cx + rx - 6} ${ey + 4} l-8 -2 M${cx + rx - 6} ${ey + 8} l-8 -2" stroke="#E0457B" stroke-width="2" stroke-linecap="round"/>`][fp] || '');
+  // eyes and brows (they blink)
+  const iris = LOOK.eyes.opts[L.eyes] || '#3B2716';
+  const eyeS = mood === 'tired' ? 1 : mood === 'buzzing' && eyeShape === 0 ? 2 : eyeShape;
+  o.push(`<g class="t-eyes">${[-1, 1].map(s => toonEye(eyeS, cx + s * ex, ey, iris, line, skin, s)).join('')}</g>`);
+  const bt = mood === 'stressed' ? [3, -1] : mood === 'tired' ? [0, 1] : [1, 0];
+  o.push(`<path d="M${cx - ex - 6} ${ey - 9 + bt[1]} Q${cx - ex} ${ey - 12 - bt[0]} ${cx - ex + 6} ${ey - 9 - (mood === 'stressed' ? 2 : 0)}" stroke="${hcD}" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M${cx + ex - 6} ${ey - 9 - (mood === 'stressed' ? 2 : 0)} Q${cx + ex} ${ey - 12 - bt[0]} ${cx + ex + 6} ${ey - 9 + bt[1]}" stroke="${hcD}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`);
+  // nose and mouth
+  o.push(`<path d="M${cx - 1.5} ${ey + 8} q1.5 1.6 3 0" stroke="${mixHex(skin, '#000', .3)}" stroke-width="1.2" fill="none" stroke-linecap="round"/>`);
+  const mouth = mood === 'stressed' ? 6 : mood === 'buzzing' ? 1 : mood === 'tired' ? 5 : mouth0;
+  o.push(toonMouth(mouth, cx, ey + 15, line));
+  if (L.mark === 1) o.push(`<circle cx="${cx + 3}" cy="${ey + 10}" r="1.6" fill="none" stroke="#C9A646" stroke-width="1"/>`);
+  if (L.mark === 2) o.push(`<circle cx="${cx + 3}" cy="${ey + 9}" r=".9" fill="#E6E6E6"/>`);
+  if (L.mark === 4) o.push(`<circle cx="${cx + ex + 6}" cy="${ey + 13}" r=".9" fill="#3A2416"/>`);
+  if (mood === 'stressed') o.push(`<path d="M${cx + rx - 4} ${cy - 10} q3 5 0 7 q-3-2 0-7z" fill="#9BE7FF"/>`);
+  if (mood === 'tired') o.push(`<text x="${cx + rx}" y="${cy - ry + 4}" font-size="9" fill="#555" font-weight="700">z</text><text x="${cx + rx + 6}" y="${cy - ry - 3}" font-size="7" fill="#555" font-weight="700">z</text>`);
+  // facial hair
+  if (L.facial) o.push(toonFacial(L.facial, cx, ey, rx, ry, cy, hc, hcD));
+  // hair in front, then glasses, then hats
+  o.push(hb[1]);
+  if (L.glasses) o.push(toonGlasses(L.glasses, cx, ex, ey));
+  if (L.head) o.push(toonHat(L.head, cx, cy, rx, ry, cloth, hc));
+  o.push('</g>');
+  // a neck piece on the bust
+  if (!fig && L.neck) o.push(toonNeck(L.neck, cx, cy + ry + 2, cloth));
+  // the sidekick
+  if (L.sidekick) o.push(toonPet(L.sidekick, fig ? 96 : 98, fig ? 214 : 108));
+  return `<svg class="portrait toon${fig ? ' figure' : ''}" viewBox="0 0 120 ${H}" width="${fig ? Math.round(size / 2) : size}" height="${size}" role="img" aria-label="${fig ? 'Full-length portrait' : 'Portrait'}">${o.join('')}</svg>`;
+}
+function toonEye(k, x, y, iris, line, skin, side) {
+  const white = '#FFFFFF';
+  switch (k) {
+    case 1: return `<ellipse cx="${x}" cy="${y}" rx="5.5" ry="5" fill="${white}"/><circle cx="${x}" cy="${y + .8}" r="3.6" fill="${iris}"/><circle cx="${x}" cy="${y + .8}" r="1.7" fill="#111"/><path d="M${x - 6} ${y - .5} Q${x} ${y - 6} ${x + 6} ${y - .5} L${x + 6} ${y - 5} L${x - 6} ${y - 5} Z" fill="${skin}"/><path d="M${x - 6} ${y - .5} Q${x} ${y - 2.5} ${x + 6} ${y - .5}" stroke="${line}" stroke-width="1.2" fill="none"/>`;
+    case 2: return `<ellipse cx="${x}" cy="${y}" rx="6" ry="7" fill="${white}"/><circle cx="${x}" cy="${y + .5}" r="5" fill="${iris}"/><circle cx="${x}" cy="${y + .5}" r="2.4" fill="#111"/><circle cx="${x + 1.8}" cy="${y - 2}" r="1.9" fill="#fff"/><circle cx="${x - 1.6}" cy="${y + 2.4}" r="1" fill="#fff"/><path d="M${x + 4} ${y - 7} l.7 1.6 1.7.2-1.3 1.1.4 1.7-1.5-.9-1.5.9.4-1.7-1.3-1.1 1.7-.2z" fill="#FFE27A"/>`;
+    case 3: return side > 0 ? `<path d="M${x - 5} ${y + 1} Q${x} ${y - 4} ${x + 5} ${y + 1}" stroke="${line}" stroke-width="2" fill="none" stroke-linecap="round"/>` : toonEye(0, x, y, iris, line, skin, side);
+    case 4: return `<path d="M${x - 6} ${y + 1} Q${x} ${y - 6} ${x + 6} ${y} Q${x} ${y + 5} ${x - 6} ${y + 1} Z" fill="${white}"/><circle cx="${x}" cy="${y}" r="3.4" fill="${iris}"/><circle cx="${x}" cy="${y}" r="1.6" fill="#111"/><path d="M${x - 6} ${y + 1} Q${x} ${y - 6} ${x + 6} ${y} l${side * 3} -3" stroke="#151515" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    case 5: return `<ellipse cx="${x}" cy="${y}" rx="2.4" ry="3" fill="#151515"/><circle cx="${x + .8}" cy="${y - 1}" r=".8" fill="#fff"/>`;
+    case 6: return `<ellipse cx="${x}" cy="${y}" rx="6" ry="6.5" fill="${white}"/><path d="M${x} ${y - 4.5} l1.3 3 3.2.2-2.5 2 .8 3.1-2.8-1.7-2.8 1.7.8-3.1-2.5-2 3.2-.2z" fill="${iris}"/><circle cx="${x + 2}" cy="${y - 2.5}" r="1.2" fill="#fff"/>`;
+    case 7: return `<ellipse cx="${x}" cy="${y}" rx="5.5" ry="5" fill="${white}"/><circle cx="${x}" cy="${y + 1}" r="3.8" fill="${iris}"/><circle cx="${x}" cy="${y + 1}" r="1.8" fill="#111"/><circle cx="${x + 1.3}" cy="${y - .2}" r="1" fill="#fff"/><path d="M${x - 6} ${y - 1} Q${x} ${y - 4} ${x + 6} ${y - 1} L${x + 6} ${y - 6} L${x - 6} ${y - 6} Z" fill="${mixHex(skin, '#000', .1)}"/><path d="M${x - 6} ${y - 1} Q${x} ${y - 4} ${x + 6} ${y - 1}" stroke="${line}" stroke-width="1.3" fill="none"/>`;
+    default: return `<ellipse cx="${x}" cy="${y}" rx="5.6" ry="6.4" fill="${white}"/><circle cx="${x}" cy="${y + .6}" r="4.2" fill="${iris}"/><circle cx="${x}" cy="${y + .6}" r="2" fill="#111"/><circle cx="${x + 1.5}" cy="${y - 1.2}" r="1.5" fill="#fff"/>`;
+  }
+}
+function toonMouth(k, x, y, line) {
+  switch (k) {
+    case 1: return `<path d="M${x - 8} ${y - 2} Q${x} ${y + 9} ${x + 8} ${y - 2} Z" fill="#7A2230"/><path d="M${x - 6.5} ${y - 1.4} L${x + 6.5} ${y - 1.4} L${x + 5.5} ${y + 1} L${x - 5.5} ${y + 1} Z" fill="#fff"/>`;
+    case 2: return `<path d="M${x - 5} ${y} Q${x + 1} ${y + 3} ${x + 6} ${y - 2}" stroke="${line}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    case 3: return `<ellipse cx="${x}" cy="${y + 1.5}" rx="6" ry="5" fill="#7A2230"/><ellipse cx="${x}" cy="${y + 4}" rx="3.5" ry="2" fill="#FF7A8A"/>`;
+    case 4: return `<path d="M${x - 5} ${y} q2.5 3 5 0 q2.5 3 5 0" stroke="${line}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    case 5: return `<path d="M${x - 4} ${y + 1} L${x + 4} ${y + 1}" stroke="${line}" stroke-width="1.8" stroke-linecap="round"/>`;
+    case 6: return `<path d="M${x - 4} ${y + 2} Q${x} ${y - 2} ${x + 4} ${y + 2}" stroke="${line}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+    case 7: return `<path d="M${x - 7} ${y - 1} Q${x} ${y + 7} ${x + 7} ${y - 1} Z" fill="#7A2230"/><rect x="${x - 3}" y="${y - 1}" width="2.6" height="3" fill="#fff"/><rect x="${x + .6}" y="${y - 1}" width="2.6" height="3" fill="#fff"/>`;
+    default: return `<path d="M${x - 6} ${y - 1} Q${x} ${y + 5} ${x + 6} ${y - 1}" stroke="${line}" stroke-width="1.9" fill="none" stroke-linecap="round"/>`;
+  }
+}
+// [behind the head, in front of it]
+function toonHair(k, cx, cy, rx, ry, c, d, age, recedes) {
+  const top = cy - ry, rec = recedes ? clamp((age - 32) / 30, 0, 1) * 8 : 0;
+  const cap = (h = 10, w = 2) => `<path d="M${cx - rx - w} ${cy - 2} Q${cx - rx - w} ${top - h} ${cx} ${top - h - 2} Q${cx + rx + w} ${top - h} ${cx + rx + w} ${cy - 2} Q${cx + rx * .6} ${top + 6 + rec} ${cx} ${top + 8 + rec} Q${cx - rx * .6} ${top + 6 + rec} ${cx - rx - w} ${cy - 2} Z" fill="${c}"/>`;
+  const fringe = `<path d="M${cx - rx + 2} ${cy - 8} Q${cx - rx * .5} ${top + 2} ${cx} ${top + 10 + rec} Q${cx + rx * .4} ${top + 2} ${cx + rx - 2} ${cy - 10} Q${cx + rx} ${top - 4} ${cx} ${top - 6} Q${cx - rx} ${top - 4} ${cx - rx + 2} ${cy - 8} Z" fill="${c}"/>`;
+  const curl = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`;
+  const long = (len, w = 6) => `<path d="M${cx - rx - w} ${cy - 4} Q${cx - rx - w - 2} ${cy + len} ${cx - rx + 6} ${cy + len + 6} L${cx + rx - 6} ${cy + len + 6} Q${cx + rx + w + 2} ${cy + len} ${cx + rx + w} ${cy - 4} Q${cx + rx} ${top - 12} ${cx} ${top - 12} Q${cx - rx} ${top - 12} ${cx - rx - w} ${cy - 4} Z" fill="${c}"/>`;
+  switch (k) {
+    case 0: return ['', `<path d="M${cx - rx + 3} ${cy - 8} Q${cx} ${top - 3} ${cx + rx - 3} ${cy - 8}" stroke="${mixHex(c, '#ffffff', .5)}" stroke-width="2" opacity=".35" fill="none"/>`];
+    case 1: return ['', `<path d="M${cx - rx + 1} ${cy - 6} Q${cx} ${top - 4} ${cx + rx - 1} ${cy - 6} Q${cx} ${top + 3} ${cx - rx + 1} ${cy - 6} Z" fill="${c}" opacity=".85"/>`];
+    case 2: return ['', cap(6) + fringe];
+    case 3: return ['', cap(8) + `<path d="M${cx - rx} ${cy - 8} Q${cx - rx * .3} ${top - 2} ${cx + rx} ${cy - 12} Q${cx + rx * .2} ${top + 4} ${cx - rx} ${cy - 8} Z" fill="${d}"/>`];
+    case 4: return ['', cap(6) + `<path d="M${cx - 12} ${top + 4} Q${cx - 6} ${top - 22} ${cx + 18} ${top - 12} Q${cx + 4} ${top - 6} ${cx + 12} ${top + 6} Z" fill="${c}"/>`];
+    case 5: return [[...Array(9)].map((_, i) => curl(cx - rx + i * rx / 4, top + 2 - Math.sin(i / 8 * Math.PI) * 10, 9)).join(''), [...Array(7)].map((_, i) => curl(cx - rx + 6 + i * rx / 3.4, top + 4, 6.5)).join('')];
+    case 6: return [`<ellipse cx="${cx}" cy="${cy - 10}" rx="${rx + 16}" ry="${ry + 12}" fill="${c}"/>`, `<path d="M${cx - rx + 4} ${cy - 10} Q${cx} ${top - 2} ${cx + rx - 4} ${cy - 10}" stroke="${d}" stroke-width="3" fill="none" opacity=".4"/>`];
+    case 7: return [`<path d="M${cx - rx - 6} ${cy - 6} Q${cx - rx - 8} ${cy + 22} ${cx - rx + 4} ${cy + 24} L${cx + rx - 4} ${cy + 24} Q${cx + rx + 8} ${cy + 22} ${cx + rx + 6} ${cy - 6} Z" fill="${c}"/>`, cap(10, 5) + `<path d="M${cx - rx} ${cy - 6} L${cx + rx} ${cy - 6} L${cx + rx} ${cy - 12} Q${cx} ${top - 4} ${cx - rx} ${cy - 12} Z" fill="${c}"/>`];
+    case 8: return [long(40), cap(10, 5) + fringe];
+    case 9: return [[-1, 1].map(s => [0, 1, 2, 3].map(i => `<rect x="${cx + s * (rx - 2 + i * 3) - 2}" y="${cy - 8}" width="5" height="${42 + i * 4}" rx="2.5" fill="${i % 2 ? c : d}"/>`).join('')).join(''), cap(10, 4) + [0, 1, 2, 3, 4].map(i => `<rect x="${cx - rx + 6 + i * rx / 2.6}" y="${top - 6}" width="5" height="14" rx="2.5" fill="${i % 2 ? c : d}"/>`).join('')];
+    case 10: return [`<path d="M${cx + rx - 2} ${top + 4} Q${cx + rx + 22} ${cy - 4} ${cx + rx + 8} ${cy + 34} Q${cx + rx + 16} ${cy} ${cx + rx - 6} ${top + 12} Z" fill="${c}"/>`, cap(10, 3) + fringe];
+    case 11: return [`<circle cx="${cx}" cy="${top - 10}" r="11" fill="${c}"/>`, cap(8, 3) + `<path d="M${cx - 9} ${top - 2} Q${cx} ${top - 6} ${cx + 9} ${top - 2}" stroke="${d}" stroke-width="2" fill="none"/>`];
+    case 12: return ['', `<path d="M${cx - 6} ${top + 2} L${cx - 4} ${top - 22} L${cx} ${top - 16} L${cx + 3} ${top - 24} L${cx + 6} ${top + 2} Z" fill="${c}"/><path d="M${cx - rx + 2} ${cy - 6} Q${cx - rx + 4} ${top + 6} ${cx - 7} ${top + 2} M${cx + rx - 2} ${cy - 6} Q${cx + rx - 4} ${top + 6} ${cx + 7} ${top + 2}" stroke="${c}" stroke-width="2" opacity=".5" fill="none"/>`];
+    case 13: return ['', cap(4, 1) + `<path d="M${cx - rx + 2} ${cy - 6} Q${cx - rx * .2} ${top + 14} ${cx + rx - 4} ${top + 4} Q${cx} ${top - 6} ${cx - rx + 2} ${cy - 6} Z" fill="${c}"/>`];
+    case 14: return [[-1, 1].map(s => `<path d="M${cx + s * (rx - 2)} ${cy} Q${cx + s * (rx + 8)} ${cy + 22} ${cx + s * (rx - 2)} ${cy + 46}" stroke="${c}" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="7 2"/>`).join(''), cap(8, 3) + `<path d="M${cx} ${top - 8} L${cx} ${top + 8}" stroke="${d}" stroke-width="1.5"/>`];
+    case 15: return [`<path d="M${cx - rx - 2} ${cy} Q${cx - rx} ${cy + 20} ${cx - rx + 8} ${cy + 22} L${cx + rx - 8} ${cy + 22} Q${cx + rx} ${cy + 20} ${cx + rx + 2} ${cy} Z" fill="${c}"/>`, cap(6, 2) + fringe];
+    case 16: return [[-1, 1].map(s => `<circle cx="${cx + s * (rx - 6)}" cy="${top - 4}" r="10" fill="${c}"/><circle cx="${cx + s * (rx - 6)}" cy="${top - 4}" r="5" fill="${d}" opacity=".35"/>`).join(''), cap(6, 2) + fringe];
+    case 17: return ['', cap(8, 3) + `<path d="M${cx - rx + 2} ${cy - 10} Q${cx} ${top - 12} ${cx + rx - 2} ${cy - 10}" stroke="${mixHex(c, '#fff', .45)}" stroke-width="2" fill="none" opacity=".6"/>`];
+    case 18: return [[-1, 1].map(s => `<path d="M${cx + s * (rx + 2)} ${cy - 10} q${s * 14} 8 ${s * 10} 26" stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="${cx + s * (rx + 1)}" cy="${cy - 10}" r="3" fill="#FF6FB5"/>`).join(''), cap(8, 3) + fringe];
+    case 19: return [[...Array(12)].map((_, i) => curl(cx - rx - 6 + (i % 6) * (rx + 6) / 2.5, cy - 14 + Math.floor(i / 6) * 22 + (i % 2) * 4, 10)).join(''), [...Array(6)].map((_, i) => curl(cx - rx + 4 + i * rx / 2.6, top + 2, 7.5)).join('')];
+    case 20: return ['', `<path d="M${cx - rx + 2} ${cy - 6} Q${cx - rx + 4} ${top + 4} ${cx - 2} ${top - 2} L${cx - 2} ${cy - 18} Z" fill="${c}" opacity=".5"/>` + `<path d="M${cx - 4} ${top - 6} Q${cx + rx + 6} ${top - 8} ${cx + rx + 4} ${cy + 8} Q${cx + rx * .4} ${top + 10} ${cx - 4} ${top + 8} Z" fill="${c}"/>`];
+    case 21: return [long(18, 8), cap(12, 6) + `<path d="M${cx - rx} ${cy - 4} l6 -12 l5 9 l6 -11 l5 10 l6 -10 l5 12" stroke="${c}" stroke-width="5" fill="none" stroke-linejoin="round"/>`];
+    case 22: return [`<ellipse cx="${cx}" cy="${top - 14}" rx="${rx - 4}" ry="20" fill="${c}"/>`, cap(8, 3) + `<path d="M${cx - rx + 8} ${top - 14} Q${cx} ${top - 30} ${cx + rx - 8} ${top - 14}" stroke="${d}" stroke-width="2" fill="none" opacity=".5"/>`];
+    case 23: return [`<path d="M${cx - rx - 7} ${cy - 4} q-6 14 2 26 q-6 14 4 24 L${cx + rx - 1} ${cy + 46} q10 -10 4 -24 q8 -12 2 -26 Q${cx + rx} ${top - 12} ${cx} ${top - 12} Q${cx - rx} ${top - 12} ${cx - rx - 7} ${cy - 4} Z" fill="${c}"/>`, cap(10, 5) + fringe];
+    default: return ['', cap(6) + fringe];
+  }
+}
+function toonFacial(k, cx, ey, rx, ry, cy, c, d) {
+  const chinY = cy + ry;
+  switch (k) {
+    case 1: return [...Array(14)].map((_, i) => `<circle cx="${cx - 14 + (i % 7) * 4.6}" cy="${ey + 16 + Math.floor(i / 7) * 5}" r=".6" fill="${d}" opacity=".6"/>`).join('');
+    case 2: return `<path d="M${cx - 9} ${ey + 13} Q${cx} ${ey + 8} ${cx + 9} ${ey + 13} Q${cx} ${ey + 11} ${cx - 9} ${ey + 13} Z" fill="${c}"/>`;
+    case 3: return `<path d="M${cx - 5} ${chinY - 7} Q${cx} ${chinY + 4} ${cx + 5} ${chinY - 7} Z" fill="${c}"/>`;
+    case 4: return `<path d="M${cx - rx + 6} ${cy + 6} Q${cx - rx + 8} ${chinY + 2} ${cx} ${chinY + 3} Q${cx + rx - 8} ${chinY + 2} ${cx + rx - 6} ${cy + 6} Q${cx} ${ey + 22} ${cx - rx + 6} ${cy + 6} Z" fill="${c}" opacity=".85"/>`;
+    case 5: return `<path d="M${cx - rx + 2} ${cy} Q${cx - rx + 2} ${chinY + 10} ${cx} ${chinY + 12} Q${cx + rx - 2} ${chinY + 10} ${cx + rx - 2} ${cy} Q${cx} ${ey + 20} ${cx - rx + 2} ${cy} Z" fill="${c}"/><path d="M${cx - 6} ${ey + 16} Q${cx} ${ey + 20} ${cx + 6} ${ey + 16}" stroke="#7A2230" stroke-width="1.6" fill="none"/>`;
+    case 6: return `<rect x="${cx - rx + 1}" y="${cy - 4}" width="5" height="14" rx="2" fill="${c}"/><rect x="${cx + rx - 6}" y="${cy - 4}" width="5" height="14" rx="2" fill="${c}"/>`;
+    case 7: return `<path d="M${cx - rx + 3} ${cy} Q${cx} ${chinY + 6} ${cx + rx - 3} ${cy}" stroke="${c}" stroke-width="3" fill="none"/>`;
+    case 8: return `<path d="M${cx - 12} ${ey + 16} Q${cx - 8} ${ey + 8} ${cx} ${ey + 12} Q${cx + 8} ${ey + 8} ${cx + 12} ${ey + 16} Q${cx + 13} ${ey + 10} ${cx + 15} ${ey + 8}" stroke="${c}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M${cx - 12} ${ey + 16} Q${cx - 13} ${ey + 10} ${cx - 15} ${ey + 8}" stroke="${c}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+    case 9: return `<path d="M${cx - 2} ${ey + 21} L${cx + 2} ${ey + 21} L${cx} ${ey + 25} Z" fill="${c}"/>`;
+    default: return '';
+  }
+}
+function toonGlasses(g, cx, ex, ey) {
+  const fr = g === 4 ? '#B9A06A' : '#252525';
+  const L = (x, f = 'rgba(255,255,255,.15)') => ({
+    1: `<circle cx="${x}" cy="${ey}" r="7" fill="${f}" stroke="${fr}" stroke-width="1.6"/>`, 2: `<rect x="${x - 7.5}" y="${ey - 6}" width="15" height="12" rx="2" fill="${f}" stroke="${fr}" stroke-width="1.6"/>`, 3: `<rect x="${x - 8}" y="${ey - 6.5}" width="16" height="13" rx="4" fill="${f}" stroke="${fr}" stroke-width="3"/>`,
+    4: `<circle cx="${x}" cy="${ey}" r="6.5" fill="${f}" stroke="${fr}" stroke-width="1"/>`, 5: `<path d="M${x - 8} ${ey - 3} Q${x} ${ey - 9} ${x + 8} ${ey - 5} L${x + 6} ${ey + 5} L${x - 6} ${ey + 5} Z" fill="${f}" stroke="${fr}" stroke-width="1.8"/>`, 6: `<path d="M${x - 8} ${ey - 4} L${x + 8} ${ey - 4} L${x + 6} ${ey + 6} Q${x} ${ey + 8} ${x - 6} ${ey + 6} Z" fill="rgba(40,40,60,.75)" stroke="#C9A646" stroke-width="1"/>`,
+    7: `<rect x="${x - 8}" y="${ey - 5}" width="16" height="10" rx="4" fill="#111" stroke="#111"/>`, 8: `<path d="M${x - 7} ${ey} L${x + 7} ${ey} Q${x + 7} ${ey + 6} ${x} ${ey + 6} Q${x - 7} ${ey + 6} ${x - 7} ${ey} Z" fill="${f}" stroke="${fr}" stroke-width="1.4"/>`, 9: `<rect x="${x - 7.5}" y="${ey - 5.5}" width="15" height="11" rx="3" fill="rgba(140,90,200,.45)" stroke="${fr}" stroke-width="1.4"/>`,
+    10: `<path d="M${x} ${ey + 7} l-7 -7 a3.6 3.6 0 0 1 7 -4 a3.6 3.6 0 0 1 7 4 z" fill="#FF4D79" stroke="#B0003A" stroke-width="1"/>`, 11: `<path d="M${x} ${ey - 8} l2.3 5 5.4.5-4.1 3.6 1.3 5.3-4.9-2.9-4.9 2.9 1.3-5.3-4.1-3.6 5.4-.5z" fill="#FFD23F" stroke="#C99A00" stroke-width="1"/>`, 12: `<rect x="${x - 8}" y="${ey - 5}" width="16" height="10" fill="${x < 60 ? 'rgba(255,40,40,.6)' : 'rgba(40,160,255,.6)'}" stroke="#fff" stroke-width="1.5"/>`
+  })[g] || '';
+  if (g === 13) return `<circle cx="${cx + ex}" cy="${ey}" r="7" fill="rgba(255,255,255,.2)" stroke="#C9A646" stroke-width="1.8"/><path d="M${cx + ex + 6} ${ey + 4} q4 10 -2 22" stroke="#C9A646" stroke-width=".8" fill="none"/>`;
+  return L(cx - ex) + L(cx + ex) + `<path d="M${cx - ex + 7} ${ey - 1} Q${cx} ${ey - 4} ${cx + ex - 7} ${ey - 1}" stroke="${fr}" stroke-width="1.5" fill="none"/>`;
+}
+function toonHat(h, cx, cy, rx, ry, cloth, hc) {
+  const top = cy - ry;
+  switch (h) {
+    case 1: return `<path d="M${cx - rx - 2} ${top + 10} Q${cx - rx} ${top - 14} ${cx} ${top - 14} Q${cx + rx} ${top - 14} ${cx + rx + 2} ${top + 10} Z" fill="${cloth}"/><path d="M${cx - rx - 2} ${top + 10} L${cx + rx + 22} ${top + 12} Q${cx + rx + 10} ${top + 4} ${cx + rx - 4} ${top + 4}" fill="${mixHex(cloth, '#000', .25)}"/><circle cx="${cx}" cy="${top - 14}" r="2.5" fill="${mixHex(cloth, '#000', .3)}"/>`;
+    case 2: return `<path d="M${cx - rx - 3} ${top + 12} Q${cx - rx} ${top - 20} ${cx} ${top - 20} Q${cx + rx} ${top - 20} ${cx + rx + 3} ${top + 12} Z" fill="${cloth}"/><rect x="${cx - rx - 4}" y="${top + 6}" width="${rx * 2 + 8}" height="9" rx="4" fill="${mixHex(cloth, '#000', .2)}"/><circle cx="${cx}" cy="${top - 22}" r="6" fill="${mixHex(cloth, '#fff', .5)}"/>`;
+    case 3: return `<path d="M${cx - rx - 2} ${top + 8} Q${cx} ${top - 14} ${cx + rx + 2} ${top + 8} Z" fill="#C8553D"/>${[0, 1, 2, 3].map(i => `<circle cx="${cx - rx + 10 + i * rx / 2}" cy="${top + 2}" r="1.4" fill="#fff"/>`).join('')}<path d="M${cx + rx} ${top + 6} l10 6 l-4 -10z" fill="#C8553D"/>`;
+    case 4: return `<ellipse cx="${cx}" cy="${top + 4}" rx="${rx + 16}" ry="6" fill="#4A3A2A"/><path d="M${cx - rx + 2} ${top + 4} Q${cx - rx + 4} ${top - 22} ${cx} ${top - 22} Q${cx + rx - 4} ${top - 22} ${cx + rx - 2} ${top + 4} Z" fill="#5C4632"/><rect x="${cx - rx + 2}" y="${top - 3}" width="${(rx - 2) * 2}" height="5" fill="#2A1E14"/>`;
+    case 5: return `<path d="M${cx - rx - 6} ${cy} Q${cx - rx - 6} ${top - 16} ${cx} ${top - 16} Q${cx + rx + 6} ${top - 16} ${cx + rx + 6} ${cy}" stroke="#222" stroke-width="5" fill="none"/><rect x="${cx - rx - 11}" y="${cy - 8}" width="10" height="17" rx="4" fill="#E0457B"/><rect x="${cx + rx + 1}" y="${cy - 8}" width="10" height="17" rx="4" fill="#E0457B"/>`;
+    case 6: return `<ellipse cx="${cx + 6}" cy="${top - 2}" rx="${rx + 6}" ry="10" fill="#7A2E2E" transform="rotate(-8 ${cx} ${top})"/><circle cx="${cx + 10}" cy="${top - 12}" r="2.5" fill="#7A2E2E"/>`;
+    case 7: return `<rect x="${cx - rx - 2}" y="${top + 2}" width="${rx * 2 + 4}" height="7" rx="3.5" fill="${cloth}"/>`;
+    case 8: return `<ellipse cx="${cx}" cy="${top + 2}" rx="${rx + 12}" ry="5" fill="#2E2A26"/><path d="M${cx - rx + 4} ${top + 2} Q${cx - rx + 6} ${top - 20} ${cx} ${top - 16} Q${cx + rx - 6} ${top - 20} ${cx + rx - 4} ${top + 2} Z" fill="#3A342E"/><rect x="${cx - rx + 4}" y="${top - 4}" width="${(rx - 4) * 2}" height="4" fill="#7A2E2E"/>`;
+    case 9: return `<path d="M${cx - rx - 2} ${top + 10} Q${cx - rx} ${top - 12} ${cx} ${top - 12} Q${cx + rx} ${top - 12} ${cx + rx + 2} ${top + 10} Z" fill="#1E2A38"/><path d="M${cx - rx - 2} ${top + 10} L${cx - rx - 22} ${top + 14} Q${cx - rx - 8} ${top + 4} ${cx - rx + 6} ${top + 4}" fill="#151E28"/><text x="${cx}" y="${top + 3}" font-size="7" text-anchor="middle" fill="#fff" font-weight="700">DIR</text>`;
+    case 10: return [0, 1, 2, 3, 4, 5, 6].map(i => `<circle cx="${cx - rx + 4 + i * (rx * 2 - 8) / 6}" cy="${top + 2 - Math.sin(i / 6 * Math.PI) * 6}" r="4.5" fill="${['#FF6FB5', '#FFD23F', '#9BE564', '#FF8A5B', '#B39DDB', '#FF6FB5', '#FFD23F'][i]}"/>`).join('');
+    case 11: return `<path d="M${cx - rx - 8} ${top + 8} Q${cx} ${top + 2} ${cx + rx + 8} ${top + 8} L${cx + rx - 4} ${top - 10} Q${cx} ${top - 16} ${cx - rx + 4} ${top - 10} Z" fill="#C2A878"/>`;
+    case 12: return `<path d="M${cx - rx - 14} ${top + 4} Q${cx} ${top + 12} ${cx + rx + 14} ${top + 4} Q${cx + rx + 6} ${top - 2} ${cx + rx - 4} ${top}" fill="#8B5A2B"/><path d="M${cx - rx + 4} ${top + 2} Q${cx - 6} ${top - 26} ${cx} ${top - 14} Q${cx + 6} ${top - 26} ${cx + rx - 4} ${top + 2} Z" fill="#9C6A3A"/>`;
+    case 13: return `<path d="M${cx - rx - 2} ${top + 8} L${cx + rx + 18} ${top + 10} Q${cx + rx} ${top + 2} ${cx - rx} ${top + 2} Z" fill="#E0457B"/><rect x="${cx - rx}" y="${top + 1}" width="${rx * 2}" height="4" fill="#E0457B"/>`;
+    case 14: return `<path d="M${cx - 18} ${top + 4} L${cx - 14} ${top - 16} L${cx - 6} ${top - 6} L${cx} ${top - 20} L${cx + 6} ${top - 6} L${cx + 14} ${top - 16} L${cx + 18} ${top + 4} Z" fill="#FFD23F" stroke="#C99A00" stroke-width="1"/><circle cx="${cx}" cy="${top - 2}" r="2.4" fill="#E0457B"/><circle cx="${cx - 10}" cy="${top}" r="1.8" fill="#6FC3FF"/><circle cx="${cx + 10}" cy="${top}" r="1.8" fill="#9BE564"/>`;
+    case 15: return `<path d="M${cx - rx - 6} ${top + 6} L${cx + 8} ${top - 52} L${cx + rx + 6} ${top + 6} Z" fill="#4B2683"/><ellipse cx="${cx}" cy="${top + 6}" rx="${rx + 10}" ry="5" fill="#3A1D66"/>${[[cx - 4, top - 20], [cx + 6, top - 34], [cx - 8, top - 6]].map(([x, y]) => `<text x="${x}" y="${y}" font-size="7" fill="#FFD23F">★</text>`).join('')}`;
+    case 16: return `<path d="M${cx - rx - 2} ${top + 10} Q${cx - rx} ${top - 12} ${cx} ${top - 12} Q${cx + rx} ${top - 12} ${cx + rx + 2} ${top + 10} Z" fill="#E63946"/><path d="M${cx - rx + 4} ${top + 2} Q${cx} ${top - 14} ${cx} ${top - 14} L${cx} ${top + 4} Z" fill="#FFD23F"/><path d="M${cx + rx - 4} ${top + 2} Q${cx} ${top - 14} ${cx} ${top - 14} L${cx} ${top + 4} Z" fill="#2F5BD3"/><rect x="${cx - 1}" y="${top - 20}" width="2" height="8" fill="#333"/><path d="M${cx - 12} ${top - 20} L${cx + 12} ${top - 20}" stroke="#E0457B" stroke-width="3" stroke-linecap="round" class="t-prop"/>`;
+    case 17: return [-1, 1].map(s => `<ellipse cx="${cx + s * 12}" cy="${top - 18}" rx="6" ry="18" fill="#FFFFFF" stroke="#ddd"/><ellipse cx="${cx + s * 12}" cy="${top - 16}" rx="3" ry="12" fill="#FFB6C8"/>`).join('');
+    case 18: return [-1, 1].map(s => `<path d="M${cx + s * (rx - 6)} ${top + 4} L${cx + s * (rx - 2)} ${top - 16} L${cx + s * (rx - 18)} ${top - 2} Z" fill="${hc}"/><path d="M${cx + s * (rx - 7)} ${top} L${cx + s * (rx - 4)} ${top - 10} L${cx + s * (rx - 14)} ${top - 1} Z" fill="#FFB6C8"/>`).join('');
+    case 19: return `<ellipse cx="${cx}" cy="${top - 12}" rx="${rx - 4}" ry="5" fill="none" stroke="#FFD23F" stroke-width="3" class="t-halo"/>`;
+    case 20: return [-1, 1].map(s => `<path d="M${cx + s * 14} ${top + 2} Q${cx + s * 20} ${top - 10} ${cx + s * 14} ${top - 18} Q${cx + s * 14} ${top - 8} ${cx + s * 8} ${top}" fill="#C0283C"/>`).join('');
+    case 21: return `<path d="M${cx - 12} ${top + 2} L${cx + 4} ${top - 30} L${cx + 14} ${top + 2} Z" fill="#FF6FB5"/><path d="M${cx - 8} ${top - 6} L${cx + 11} ${top - 6} M${cx - 3} ${top - 16} L${cx + 8} ${top - 16}" stroke="#FFD23F" stroke-width="2.5"/><circle cx="${cx + 4}" cy="${top - 31}" r="3.5" fill="#FFD23F"/>`;
+    case 22: return `<rect x="${cx - rx + 4}" y="${top - 6}" width="${(rx - 4) * 2}" height="12" fill="#fff" stroke="#ddd"/>${[0, 1, 2].map(i => `<circle cx="${cx - 12 + i * 12}" cy="${top - 12}" r="10" fill="#fff" stroke="#ddd"/>`).join('')}`;
+    case 23: return `<ellipse cx="${cx}" cy="${top + 2}" rx="${rx + 10}" ry="5" fill="#151515"/><rect x="${cx - rx + 6}" y="${top - 30}" width="${(rx - 6) * 2}" height="32" fill="#1E1E1E"/><rect x="${cx - rx + 6}" y="${top - 6}" width="${(rx - 6) * 2}" height="5" fill="#7A2E2E"/>`;
+    default: return '';
+  }
+}
+function toonCollar(k, cx, y, cloth, d) {
+  switch (k) {
+    case 1: return `<path d="M${cx - 16} ${y + 2} Q${cx} ${y + 16} ${cx + 16} ${y + 2}" stroke="${d}" stroke-width="4" fill="none"/><path d="M${cx - 5} ${y + 10} l-1 14 M${cx + 5} ${y + 10} l1 14" stroke="#eee" stroke-width="1.5"/>`;
+    case 5: return `<rect x="${cx - 12}" y="${y - 6}" width="24" height="12" rx="5" fill="${d}"/>`;
+    case 7: case 8: case 9: return `<path d="M${cx - 12} ${y} L${cx} ${y + 18} L${cx + 12} ${y}" fill="#F3F1EC"/><path d="M${cx - 12} ${y} L${cx - 4} ${y + 26} L${cx - 14} ${y + 24} Z M${cx + 12} ${y} L${cx + 4} ${y + 26} L${cx + 14} ${y + 24} Z" fill="${d}"/>${k === 9 ? `<path d="M${cx} ${y + 6} l-3 4 3 16 3-16z" fill="#7A2E2E"/>` : ''}`;
+    case 4: return `<path d="M${cx - 14} ${y} L${cx - 2} ${y + 22} L${cx - 18} ${y + 20} Z M${cx + 14} ${y} L${cx + 2} ${y + 22} L${cx + 18} ${y + 20} Z" fill="${d}"/>`;
+    case 13: return `<path d="M${cx - 10} ${y} l4 6 l6 -3 l6 3 l4 -6" stroke="#111" stroke-width="2" fill="none"/><circle cx="${cx}" cy="${y + 16}" r="6" fill="#FFD23F"/>`;
+    default: return `<path d="M${cx - 12} ${y} Q${cx} ${y + 10} ${cx + 12} ${y}" stroke="${d}" stroke-width="2.4" fill="none"/>`;
+  }
+}
+function toonNeck(k, cx, y, cloth) {
+  return ({ 1: `<path d="M${cx - 18} ${y + 2} Q${cx} ${y + 12} ${cx + 18} ${y + 2} L${cx + 8} ${y + 26} L${cx + 2} ${y + 12} Z" fill="#C8553D"/>`, 2: `<path d="M${cx - 12} ${y} Q${cx} ${y + 16} ${cx + 12} ${y}" stroke="#E8D27A" stroke-width="1.2" fill="none"/><circle cx="${cx}" cy="${y + 8}" r="2" fill="#E8D27A"/>`, 3: `<path d="M${cx - 13} ${y} Q${cx} ${y + 18} ${cx + 13} ${y}" stroke="#C9A646" stroke-width="2.5" fill="none" stroke-dasharray="2 1"/>`, 4: `<path d="M${cx - 9} ${y + 2} l9 4 9-4 0 8-9-4-9 4z" fill="#7A2E2E"/>`, 5: `<path d="M${cx - 12} ${y} L${cx} ${y + 26} L${cx + 12} ${y}" stroke="#2F5BD3" stroke-width="2" fill="none"/><rect x="${cx - 5}" y="${y + 24}" width="10" height="12" rx="1" fill="#fff" stroke="#2F5BD3"/>`, 6: `<path d="M${cx - 16} ${y} Q${cx} ${y + 10} ${cx + 16} ${y} L${cx + 4} ${y + 22} Z" fill="#B39DDB"/>`, 7: `<path d="M${cx - 10} ${y} Q${cx} ${y + 14} ${cx + 10} ${y}" stroke="#C9A646" stroke-width="1" fill="none"/><circle cx="${cx}" cy="${y + 8}" r="3" fill="#2EAD6B"/>` })[k] || '';
+}
+function toonPet(k, x, y) {
+  const s = (b) => `<g class="t-pet" transform="translate(${x - 12} ${y - 22})">${b}</g>`;
+  switch (k) {
+    case 1: return s(`<ellipse cx="12" cy="17" rx="10" ry="7" fill="#F28C28"/><circle cx="12" cy="9" r="7" fill="#F28C28"/><path d="M6 5 l1-6 4 4z M18 5 l-1-6 -4 4z" fill="#F28C28"/><circle cx="9.5" cy="9" r="1.2" fill="#111"/><circle cx="14.5" cy="9" r="1.2" fill="#111"/><path d="M22 17 q6-2 4-9" stroke="#F28C28" stroke-width="3" fill="none"/>`);
+    case 2: return s(`<ellipse cx="12" cy="17" rx="10" ry="7" fill="#C58B4D"/><circle cx="12" cy="9" r="7" fill="#C58B4D"/><ellipse cx="5" cy="9" rx="3" ry="6" fill="#8B5A2B"/><ellipse cx="19" cy="9" rx="3" ry="6" fill="#8B5A2B"/><circle cx="10" cy="9" r="1.2" fill="#111"/><circle cx="14" cy="9" r="1.2" fill="#111"/><ellipse cx="12" cy="12" rx="2" ry="1.4" fill="#111"/>`);
+    case 3: return s(`<ellipse cx="12" cy="13" rx="7" ry="10" fill="#2EAD6B"/><circle cx="12" cy="6" r="6" fill="#E63946"/><path d="M16 6 l5 2 -5 2z" fill="#FFD23F"/><circle cx="13" cy="5" r="1.2" fill="#111"/><path d="M8 20 l-2 6 M14 20 l2 6" stroke="#2EAD6B" stroke-width="2"/>`);
+    case 4: return s(`<ellipse cx="12" cy="16" rx="11" ry="7" fill="#6BBF59"/><circle cx="7" cy="9" r="4" fill="#6BBF59"/><circle cx="17" cy="9" r="4" fill="#6BBF59"/><circle cx="7" cy="9" r="2" fill="#fff"/><circle cx="17" cy="9" r="2" fill="#fff"/><circle cx="7" cy="9" r="1" fill="#111"/><circle cx="17" cy="9" r="1" fill="#111"/><path d="M7 17 q5 3 10 0" stroke="#2E6B22" stroke-width="1.2" fill="none"/>`);
+    case 5: return s(`<rect x="3" y="8" width="18" height="15" rx="4" fill="#B5B0A6"/><rect x="6" y="11" width="12" height="6" rx="2" fill="#1E2A38"/><circle cx="9" cy="14" r="1.4" fill="#6FC3FF"/><circle cx="15" cy="14" r="1.4" fill="#6FC3FF"/><path d="M12 8 v-5" stroke="#555" stroke-width="1.2"/><circle cx="12" cy="2.5" r="1.8" fill="#E63946" class="t-blink2"/>`);
+    case 6: return s(`<path d="M3 24 Q2 4 12 3 Q22 4 21 24 l-3 -3 -3 3 -3 -3 -3 3 -3 -3z" fill="#F7F7FF" stroke="#ddd"/><circle cx="9" cy="11" r="1.6" fill="#111"/><circle cx="15" cy="11" r="1.6" fill="#111"/><ellipse cx="12" cy="16" rx="2" ry="2.5" fill="#111"/>`);
+    case 7: return s(`<ellipse cx="12" cy="17" rx="10" ry="7" fill="#FFE27A"/><circle cx="10" cy="8" r="6" fill="#FFE27A"/><path d="M3 9 l4 -1 0 3z" fill="#F28C28"/><circle cx="9" cy="7" r="1.1" fill="#111"/>`);
+    case 8: return s(`<ellipse cx="12" cy="16" rx="10" ry="8" fill="#E3B27A"/><ellipse cx="12" cy="18" rx="6" ry="5" fill="#FFF3E0"/><circle cx="6" cy="9" r="3" fill="#E3B27A"/><circle cx="18" cy="9" r="3" fill="#E3B27A"/><circle cx="9" cy="13" r="1.2" fill="#111"/><circle cx="15" cy="13" r="1.2" fill="#111"/><circle cx="12" cy="15" r="1" fill="#FF6F8E"/>`);
+    default: return '';
+  }
+}
+// head to toe
+function toonBody(L, uid, cx, neckY, bw, skin, skinD, cloth, clothD, pat, line) {
+  const o = [], b = L.bottoms || 0, bc = (typeof FIG_COLOURS !== 'undefined' ? FIG_COLOURS : ['#2C4F7C'])[L.bottomColour || 0] || '#2C4F7C', bcD = mixHex(bc, '#000', .25), shoe = L.shoes || 0, pose = L.pose || 0;
+  const sh = bw / 2, ty = neckY + 4, wy = ty + 52, legL = 54, fy = wy + legL;
+  o.push(`<ellipse cx="${cx}" cy="${fy + 10}" rx="${sh + 6}" ry="4" fill="#000" opacity=".15"/>`);
+  // legs
+  const legs = (col) => `<path d="M${cx - sh + 6} ${wy} L${cx - 14} ${fy} L${cx - 3} ${fy} L${cx - 1} ${wy + 8} L${cx + 1} ${wy + 8} L${cx + 3} ${fy} L${cx + 14} ${fy} L${cx + sh - 6} ${wy} Z" fill="${col}"/>`;
+  if (b === 3) o.push(legs(skin) + `<path d="M${cx - sh + 5} ${wy - 2} L${cx - 15} ${wy + 22} L${cx - 1} ${wy + 22} L${cx} ${wy + 8} L${cx + 1} ${wy + 22} L${cx + 15} ${wy + 22} L${cx + sh - 5} ${wy - 2} Z" fill="${bc}"/>`);
+  else if (b === 4 || b === 5) o.push(legs(skin) + `<path d="M${cx - sh + 4} ${wy - 2} L${cx - sh - (b === 5 ? 6 : 2)} ${wy + (b === 5 ? 50 : 24)} L${cx + sh + (b === 5 ? 6 : 2)} ${wy + (b === 5 ? 50 : 24)} L${cx + sh - 4} ${wy - 2} Z" fill="${bc}"/>`);
+  else if (b === 9) o.push(legs(mixHex(bc, '#000', .1)));
+  else o.push(legs(bc) + `<path d="M${cx} ${wy + 8} L${cx} ${fy - 4}" stroke="${bcD}" stroke-width="1"/>`);
+  // shoes
+  const sc = ['#F2F2F2', '#E63946', '#4A3A2A', '#5C3A21', '#151515', '#C2A878', '#7A4A2A', '#151515', '#8B5A2B', '#FFB6C8'][shoe] || '#F2F2F2';
+  o.push([-1, 1].map(s => `<path d="M${cx + s * 8.5 - 7} ${fy - 2} Q${cx + s * 8.5 - 8} ${fy + 8} ${cx + s * 8.5 + s * 9} ${fy + 8} Q${cx + s * 8.5 + s * 9} ${fy} ${cx + s * 8.5 + 6} ${fy - 2} Z" fill="${sc}" stroke="${mixHex(sc, '#000', .3)}" stroke-width=".8"/>`).join(''));
+  // torso
+  const torso = `<path d="M${cx - sh} ${ty + 6} Q${cx - sh} ${ty - 2} ${cx - 10} ${ty - 3} L${cx + 10} ${ty - 3} Q${cx + sh} ${ty - 2} ${cx + sh} ${ty + 6} L${cx + sh - 2} ${wy + 2} L${cx - sh + 2} ${wy + 2} Z"`;
+  o.push(`<rect x="${cx - 6}" y="${neckY - 8}" width="12" height="12" fill="${skinD}"/>`);
+  o.push(`${torso} fill="url(#${uid}cl)"/>`); if (pat) o.push(`${torso} fill="url(#${uid}pt)" opacity=".85"/>`);
+  o.push(toonCollar(L.outfit || 0, cx, ty - 2, cloth, clothD));
+  // arms by pose
+  const arm = (s, d) => `<path d="${d}" stroke="${cloth}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
+  const hand = (x, y) => `<circle cx="${x}" cy="${y}" r="5" fill="${skin}"/>`;
+  const lx = cx - sh, rx2 = cx + sh;
+  if (pose === 2) o.push(arm(-1, `M${lx + 3} ${ty + 4} Q${lx - 6} ${ty + 26} ${lx - 2} ${wy}`) + hand(lx - 2, wy + 3) + `<g class="t-wave">${arm(1, `M${rx2 - 3} ${ty + 4} Q${rx2 + 10} ${ty - 6} ${rx2 + 8} ${ty - 24}`)}${hand(rx2 + 8, ty - 27)}</g>`);
+  else if (pose === 1) o.push(arm(-1, `M${lx + 3} ${ty + 4} Q${lx - 6} ${ty + 26} ${lx - 2} ${wy}`) + hand(lx - 2, wy + 3) + arm(1, `M${rx2 - 3} ${ty + 4} L${rx2 + 10} ${ty + 22} L${rx2 - 2} ${wy - 4}`) + hand(rx2 - 2, wy - 4));
+  else if (pose === 3) o.push(arm(-1, `M${lx + 3} ${ty + 6} Q${lx - 2} ${ty + 22} ${cx + 8} ${ty + 24}`) + arm(1, `M${rx2 - 3} ${ty + 6} Q${rx2 + 2} ${ty + 26} ${cx - 8} ${ty + 22}`) + hand(cx + 9, ty + 24) + hand(cx - 9, ty + 22));
+  else if (pose === 4) o.push(arm(-1, `M${lx + 3} ${ty + 4} Q${lx - 4} ${ty + 30} ${lx + 6} ${wy}`) + arm(1, `M${rx2 - 3} ${ty + 4} Q${rx2 + 4} ${ty + 30} ${rx2 - 6} ${wy}`));
+  else o.push(arm(-1, `M${lx + 3} ${ty + 4} Q${lx - 6} ${ty + 26} ${lx - 3} ${wy + 2}`) + hand(lx - 3, wy + 5) + arm(1, `M${rx2 - 3} ${ty + 4} Q${rx2 + 6} ${ty + 26} ${rx2 + 3} ${wy + 2}`) + hand(rx2 + 3, wy + 5));
+  // things you carry
+  const bag = L.bag || 0;
+  if (bag === 8) o.push(`<rect x="${rx2 - 1}" y="${wy - 8}" width="8" height="11" rx="2" fill="#fff" stroke="#8B5A2B"/><rect x="${rx2 - 1}" y="${wy - 6}" width="8" height="3" fill="#8B5A2B"/>`);
+  if (bag === 7) o.push(`<rect x="${lx - 12}" y="${wy - 10}" width="12" height="16" fill="#FDFBF3" stroke="#ccc"/>`);
+  if (bag === 1) o.push(`<path d="M${rx2 - 2} ${ty + 8} L${rx2 + 6} ${wy}" stroke="#C2A878" stroke-width="2"/><rect x="${rx2 - 2}" y="${wy - 2}" width="16" height="18" rx="2" fill="#E8DCC0"/>`);
+  if (L.neck) o.push(toonNeck(L.neck, cx, ty - 2, cloth));
+  if (L.tattoo === 1) o.push(`<path d="M${lx - 4} ${ty + 14} l3 4 M${lx - 5} ${ty + 22} l3 3" stroke="#2C4F7C" stroke-width="1.5"/>`);
+  return o.join('');
+}
+// everyone gets the new look unless they chose Classic; your face shows your week
+{ const _portrait = portraitSVG;
+  portraitSVG = function (L, age, size = 96, bare = false, fig = false) {
+    const LL = Object.assign(defaultLook(), migrateLook(Object.assign({}, L)));
+    if (LL.style === 1) return _portrait(L, age, size, bare, fig);
+    return toonSVG(LL, age, size, bare, fig);
+  };
+}
+{ const _lookOf = lookOf;
+  lookOf = function (p) {
+    const L = _lookOf(p);
+    if (p && p.player && S.me) { const M = S.me; L._mood = M.stress > 70 ? 'stressed' : M.energy < 22 ? 'tired' : (M.milestones || []).some(m => S.week - m.w <= 1 && ['prize', 'credit'].includes(m.kind)) ? 'buzzing' : 'calm'; }
+    return L;
+  };
+}
+// </toon>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -34842,7 +35516,8 @@ function viewCompanies() {
   </tbody></table></div>`;
 }
 
-function libCount(c) { if (c._lc && c._lc[0] === S.week) return c._lc[1]; const n = S.films.reduce((s, f) => s + (f.owner === c.id ? 1 : 0), 0); c._lc = [S.week, n]; return n; }
+let LIBC = null, LIBC_K = '';
+function libCount(c) { const k = S.week + ':' + S.films.length; if (LIBC_K !== k || !LIBC || LIBC.S !== S) { LIBC = { S, n: {} }; LIBC_K = k; for (const f of S.films) if (f.owner !== null && f.owner !== undefined) LIBC.n[f.owner] = (LIBC.n[f.owner] || 0) + 1; } return LIBC.n[c.id] || 0; }
 
 const LEVELS = ['Intern', 'Entry level', 'Crew / coordinator', 'Mid-level', 'Key / senior', 'Head / executive'];
 // The jobs catalogue is researched from real postings: keep the research, lose the real names.
@@ -35335,7 +36010,7 @@ function phonePanel() {
     const lastIn = msgs.slice().reverse().find(m => m.from !== -1);
     const canReply = q && lastIn && lastIn.replyable && !lastIn.replied && lastIn.id !== undefined;
     left = `<div class="ph-bar"><button class="linkish" data-thread="">‹</button>${phoneAvatar(open, 28)}<div><b>${q ? esc(q.name) : 'Home & gossip'}</b>${q ? `<small>${REL[rel].icon} ${esc(REL[rel].label)} · texts ${esc(TEXT_STYLES[textStyle(q)].label)}</small>` : ''}</div>${q ? `<a href="#" class="lk small" data-go="person:${open}">Profile</a>` : ''}</div>
-     <ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}${m.topic === 'stake' && !m.replied && !m.missed ? ' stake' : ''}"><p>${esc(m.t)}</p>${m.topic === 'stake' && !m.replied && !m.missed ? '<span class="stakechip">⏳ needs an answer this week</span>' : ''}<time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
+     ${typeof bondHTML === 'function' && open !== 'home' ? bondHTML(open) : ''}<ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}${m.topic === 'stake' && !m.replied && !m.missed ? ' stake' : ''}"><p>${esc(m.t)}</p>${m.topic === 'stake' && !m.replied && !m.missed ? '<span class="stakechip">⏳ needs an answer this week</span>' : ''}<time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
      ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div><details class="newtopic"><summary class="small">Or change the subject…</summary>${compose(true)}</details>` : q ? compose(true) : ''}`;
   } else {
     left = `<div class="ph-bar"><b>Messages</b>${phoneUnread() ? ` <span class="muted small">${phoneUnread()} unread</span> <button class="linkish small" data-markread="1">Mark all read</button>` : ''}</div><ul class="threads">${list.slice(0, 14).map(t => { const unread = typeof threadUnread === 'function' ? threadUnread(t.k) : t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
@@ -35415,7 +36090,7 @@ function companyPanel() {
      ${strategyPanel(c)}
      ${srcs.length ? `<h4>Make a film</h4>${srcs.map(([k, x]) => makeFilmForm(c, k, x)).join('')}<p class="muted small">A micro-budget costs a quarter, and the film will feel it. A famous lead costs more and sells more tickets. Directing takes you five days a week until release, and your directing craft shapes the film.</p>` : '<p class="muted small">Finish a script or option one to make a film with your company.</p>'}` : ''}`;
   }
-  const festRow = f => { const done = (M.fests || []).filter(x => x.film === f.id); return festEligible(f) ? `<span class="fests">${FESTIVALS.filter(F => done.some(x => x.k === F.k) || typeof festFits !== 'function' || festFits(F, f)).map(F => { const e = done.find(x => x.k === F.k); return e ? `<span class="chip ${e.sel ? 'good' : e.done ? '' : 'hist'}">${esc(F.name.replace(/^the /, ''))}: ${e.done ? (e.sel ? 'selected' : 'no') : 'waiting'}</span>` : `<button class="btn-s ghost" data-fest="${f.id}:${F.k}" title="${esc(F.d)} Entry ${fmtCash(usd(F.fee))}">${esc(F.name.replace(/^the /, ''))}</button>`; }).join(' ')}</span>` : ''; };
+  const festRow = f => { const done = (M.fests || []).filter(x => x.film === f.id); return festEligible(f) ? `<span class="fests">${FESTIVALS.filter(F => done.some(x => x.k === F.k) || typeof festFits !== 'function' || festFits(F, f)).map(F => { const e = done.find(x => x.k === F.k); return e ? `<span class="chip ${e.sel ? 'good' : e.done ? '' : 'hist'}">${esc(F.name.replace(/^the /, ''))}: ${e.done ? (e.sel ? 'selected' : 'no') : 'waiting'}</span>` : (() => { const W = typeof festWindow === 'function' ? festWindow(F) : { open: true }, p = typeof festSelOdds === 'function' ? festSelOdds(F, f) : 0; return W.open ? `<button class="btn-s ghost" data-fest="${f.id}:${F.k}" title="${esc(F.d)} Entry ${fmtCash(usd(F.fee))}. Line-up announced in ${MON[F.month]}. Programmers' odds for this film: ${Math.round(p * 100)}% (${festChanceLabel(p)}).">${esc(F.name.replace(/^the /, ''))} · ${MON[F.month]} · ${Math.round(p * 100)}%</button>` : ''; })(); }).join(' ')}</span><span class="small muted"> Submissions open 1–4 months before each festival; others appear here when their window opens.</span>` : ''; };
   return `<section class="panel"><h3>Your company and films</h3>${co}
    ${films.length ? `<h4>Your films</h4><ul class="plain specs">${films.map(f => `<li>${fl(f.id)} <span class="muted">${esc((f.xc && f.xc[me.id]) || (f.dir === me.id ? 'Director' : f.prod === me.id ? 'Producer' : f.wri.includes(me.id) ? 'Writer' : 'Crew'))} · ${esc(f.status)}${f.rel !== null ? ` · ${f.reviews}/100 · ${fmtM(f.total)} worldwide · ${money(f.theatrical)} at the box office` : ''}</span>${f.rel === null && f.stage >= 0 ? `<br>${stageCell(f)} <span class="muted small">${fmtM(f.cost)} budget · ${f.stage < 4 ? 'next stage ' + fmtDate(f.stageEnd, true) : ''}${f.investors ? ` · investors take ${Math.round(f.investors.share * 100)}%` : ''}</span>` : ''}${festEligible(f) ? '<br>' + festRow(f) : ''}</li>`).join('')}</ul><p class="muted small">Released films can go to festivals for a year. Selection depends on quality; small independent films get a little extra love.</p>` : ''}${typeof finPanelHTML === 'function' ? finPanelHTML() : ''}</section>`;
 }
@@ -35486,13 +36161,14 @@ function viewDesk() {
     return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.mco ? `${esc(p.mco)} <span class="muted">${esc(t.biz || '')}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w${typeof fitChip === 'function' ? '<br>' + fitChip(p) : ''}</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
       <td>${`<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
-  const conRows = known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
+  const conRows_ = () => known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
     const q = P(id), k = M.known[id], o = opinion(id);
     const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
     return `<tr><td>${pl(id)}</td><td>${esc(q.occ || occupationOf(q))}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${(() => { const t = tasteOf(q); return t.genres.map(g => M.love.includes(g) ? `<b class="good">♥ ${esc(g)}</b>` : esc(g)).join(', ') + ' · ' + (topThemes(voiceOf()).includes(t.theme) ? `<b class="good">${esc(THEMES[t.theme])}</b>` : esc(THEMES[t.theme])); })()}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
       <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
   }).join('');
-  return `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(roleTitle(me.role))} · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
+  // a desk part (an app on the computer) skips the hero: only the tab is needed
+  return `${UI.inPart ? '' : `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(roleTitle(me.role))} · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
    <p class="lede">${M.stats.weeks ? `${M.stats.weeks} weeks of paid work, ${me.credits.length} screen credit${me.credits.length === 1 ? '' : 's'}.` : 'No industry work yet.'} <span class="lvlchip" title="Your level decides which jobs you hear about">Level ${careerLevel()} · ${LEVEL_NAME[careerLevel()]}</span></p>
    ${typeof dreamLine === 'function' ? dreamLine() : ''}
    <p class="voice">Your voice: ${topThemes(voiceOf()).map(k => `<span class="vt">${esc(THEMES[k])}</span>`).join(' ') || '<span class="muted">still finding it</span>'} <span class="muted">· loves ${esc(M.love.join(', ').toLowerCase() || 'everything')}</span>${typeof fitLabel === 'function' && S.me.fit && (S.me.fit.mus >= 1.5 || Math.abs(S.me.fit.mass) >= 1.5 || S.me.fit.goal) ? ` · <span class="muted">Body: ${esc(fitLabel())}</span>` : ''}</p>
@@ -35502,12 +36178,13 @@ function viewDesk() {
   ${UI.restyle ? `<section class="panel cc"><h3>Your look</h3><p class="muted">Haircuts and new clothes. Ageing happens on its own. Pieces marked ★ were bought.</p>${lookControls({ look: Object.assign(defaultLook(), M.look) }, M.owned)}${wardrobeShop()}</section>` : ''}
   ${UI.guide || (UI.guide === undefined && !M.stats.apps && !M.stats.weeks && !M.wk) ? guidePanel() : ''}
   ${M.over ? (typeof epilogueHTML === 'function' ? epilogueHTML() : `<section class="panel"><h3>You left the business</h3><p>Your career ended in ${S.year}. The world keeps running; you can watch it from the other tabs.</p><button class="btn primary" data-startover="1">Start a new career</button></section>`) : ''}
+`}
   <div class="dstack">${(() => { switch (UI.dtab || 'computer') {
     case 'feed': return feedPanel();
-    case 'compete': return campaignHTML() + compPanel();
+    case 'compete': return (typeof seasonHTMLFull === 'function' ? seasonHTMLFull() : '') + campaignHTML() + compPanel();
     case 'diary': return `<section class="panel weekp"><h3>Your week</h3>${M.burnout ? '<p class="bad">Burnt out: this week is rest, whatever you plan.</p>' : ''}
      ${focusPanel()}
-     <details class="finetune"${M.focus && M.focus.auto && !UI.fineOpen ? '' : ' open'}><summary>Fine-tune the diary, block by block${Object.keys(M.calPins || {}).length ? ` <span class="chip">📌 ${Object.keys(M.calPins).length} pinned</span>` : ''}</summary>${typeof diaryKeepHTML === 'function' ? diaryKeepHTML() : ''}${weekGrid()}</details>
+     <details class="finetune"${UI.fineOpen ? ' open' : ''}><summary>Fine-tune the diary, block by block${Object.keys(M.calPins || {}).length ? ` <span class="chip">📌 ${Object.keys(M.calPins).length} pinned</span>` : ''}</summary>${typeof diaryKeepHTML === 'function' ? diaryKeepHTML() : ''}${weekGrid()}</details>
      ${plan.includes('train') ? `<div class="ccrow"><label>Class in ${sel('pl-train', Object.keys(CRAFTS).map(c => [c, CRAFTS[c].label]), M.train)}</label></div>` : ''}
      ${plan.includes('catchup') ? `<div class="ccrow"><label>Catch up with ${sel('pl-catch', [['', 'Choose someone…']].concat(known.filter(id => !P(id).dead).map(id => [id, P(id).name])), M.catchWith ?? '')}</label></div>` : ''}
      <p class="note">${Object.entries(BLOCK_ACTS).filter(([k, a]) => plan.includes(k) && a.d).map(([, a]) => `<b>${a.label}:</b> ${a.d}${a.cost ? ` (${fmtCash(usd(a.cost))} a block)` : ''}`).join(' ')}</p>
@@ -35516,7 +36193,7 @@ function viewDesk() {
      ${cityPanel()}`;
     case 'phone': return phonePanel();
     case 'computer': return computerPanel();
-    case 'work': return (typeof workWeekHTML === 'function' ? workWeekHTML() : '') + jobWorkHTML() + (typeof gigsHTML === 'function' ? gigsHTML() : '') + (typeof slateHTML === 'function' ? slateHTML() : '') + (M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : '') + `
+    case 'work': return (typeof huntSwitchHTML === 'function' ? huntSwitchHTML() : '') + (typeof workWeekHTML === 'function' ? workWeekHTML() : '') + jobWorkHTML() + (typeof gigsHTML === 'function' ? gigsHTML() : '') + (typeof slateHTML === 'function' ? slateHTML() : '') + (M.spec.pages || M.spec.drafts ? `<p class="muted">Spec script: ${M.spec.drafts ? M.spec.drafts + ' finished draft' + (M.spec.drafts > 1 ? 's' : '') + ', ' : ''}${M.spec.pages} pages into the next.</p>` : '') + `
   <h3>The board <span class="count">${picked.length} of ${slots} applications planned</span></h3>
   <p class="muted">What you've heard about this week in ${esc(hubName(M.hub))}. ${slots ? `Your ${countBlocks('hunt')} job-hunting block${countBlocks('hunt') > 1 ? 's' : ''} this week let you send ${slots} application${slots > 1 ? 's' : ''}.` : 'Plan at least two blocks of looking for work to apply.'} Hover the odds to see why.</p>
   ${typeof boardFilterHTML === 'function' ? boardFilterHTML() : ''}<div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Production</th><th>Reports to</th><th class="n">Time</th><th class="n">Pay / day (range)</th><th>Odds</th><th></th></tr></thead><tbody>${(typeof boardView === 'function' ? boardView() : M.board).map(boardRow).join('') || '<tr><td colspan="7" class="empty">Nothing matches. Try another industry or level.</td></tr>'}</tbody></table></div>
@@ -35525,7 +36202,7 @@ function viewDesk() {
     case 'standing': return standingHTML();
     case 'life': return pathsPanel() + (typeof legacyPanel === 'function' && !M.over ? legacyPanel() : '') + (typeof arcLogHTML === 'function' ? arcLogHTML() : '') + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
     case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
-  <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
+  <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows_() || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
   <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
     default: return `${typeof todayHub === 'function' ? todayHub() : ''}<div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
@@ -35634,6 +36311,8 @@ function careerClick(t) {
   if (typeof weatherClick === 'function' && weatherClick(t)) return true;
   if (typeof bank2Click === 'function' && bank2Click(t)) return true;
   if (typeof shortsClick2 === 'function' && shortsClick2(t)) return true;
+  if (typeof seasonClick === 'function' && seasonClick(t)) return true;
+  if (t.dataset.looking) { doAct({ t: 'auto', k: 'looking', v: t.dataset.looking }); toast(t.dataset.looking === 'no' ? 'No more applications will go out.' : t.dataset.looking === 'craft' ? 'Only your own line of work from now on.' : 'Anything that pays.'); render(true); return true; }
   if (t.dataset.labapply) { doAct({ t: 'labapply', k: t.dataset.labapply }); render(true); return true; }
   if (t.dataset.gigpitch) { doAct({ t: 'gigpitch', id: +t.dataset.gigpitch }); render(true); return true; }
   if (t.dataset.gigv !== undefined) { UI.gigView = t.dataset.gigv || null; render(true); return true; }
@@ -35662,7 +36341,7 @@ function careerClick(t) {
   if (t.dataset.mentor !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'mentor', id: +t.dataset.mentor }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.campaign) { const [film, k] = t.dataset.campaign.split(':'), n0 = S.me.rollN || 0; doAct({ t: 'campaign', film: +film, k }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.compf) { UI.compf = t.dataset.compf; render(true); return true; }
-  if (t.dataset.comp) { const k = t.dataset.comp, el = document.getElementById('comp-sc-' + k), n0 = S.me.rollN || 0; doAct({ t: 'compete', k, script: el ? +el.value : undefined }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.comp) { const k = t.dataset.comp, el = document.getElementById('comp-sc-' + k), n0 = S.me.rollN || 0; const ok = doAct({ t: 'compete', k, script: el ? +el.value : (UI['comp-sc-' + k] !== undefined ? +UI['comp-sc-' + k] : ((S.me.scripts || []).filter(x => x.grade).slice(-1)[0] || {}).id) }); if (!ok && typeof toast === 'function') { const c = COMPS.find(x => x.k === k); toast((c && typeof compBlock === 'function' && compBlock(c)) || 'You can\'t enter that right now.'); } render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.feedf) { UI.feedf = t.dataset.feedf; UI.feedN = 30; UI.dtab = 'feed'; render(true); return true; }
   if (t.dataset.feedmore) { UI.feedN = (UI.feedN || 30) + 30; render(true); return true; }
   if (t.dataset.fthread !== undefined) { UI.tab = 'you'; UI.dtab = 'phone'; UI.thread = +t.dataset.fthread; UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
@@ -35694,7 +36373,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

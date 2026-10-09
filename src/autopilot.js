@@ -4,7 +4,7 @@
 // choice, so the week flows; anything that matters (offers, interviews, deals, invitations) still waits for you.
 // Every auto choice goes through the action log like a click, so saves replay the same.
 function autoOn(k) { const A = (S.me && S.me.auto) || {}; return A[k] !== false; }
-function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'oblig') { M.autoOblig = M.autoOblig === false ? true : false; return true; } if (a.k === 'looking') { M.looking = lookingForWork() ? 'no' : 'yes'; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
+function autoAct(a) { const M = S.me; M.auto = M.auto || {}; if (a.k === 'oblig') { M.autoOblig = M.autoOblig === false ? true : false; return true; } if (a.k === 'looking') { M.looking = ['no', 'craft', 'yes'].includes(a.v) ? a.v : lookingForWork() ? 'no' : 'yes'; if (M.looking === 'no') M.focus.noHunt = true; else M.focus.noHunt = false; return true; } if (!['apply', 'minor'].includes(a.k)) return false; M.auto[a.k] = !autoOn(a.k); return true; }
 // the sensible choice: an option with no roll and no cost, else the first
 function sensibleChoice(it) { const L = (it.choices || []).filter(c => !c.dis); return (L.find(c => !c.check && !/quit|leave|skip|refuse|no thanks/i.test(c.label || '')) || L[0] || {}).k; }
 function autoBeforeStep() {
@@ -66,9 +66,16 @@ function rankedFits(n) {
   const M = S.me, short = runwayWeeks() < 12, floor = careerLevel() >= 3 && !short ? tierLevel() - 1 : 0;   // established: nothing far below your level
   const L = M.board.filter(p => !blockedFrom(tmplOf(p)) && (p.tier || 1) >= floor).map(p => [p, hireOdds(p), jobRelevance(p)]);
   const wt = x => x[2] >= 1 ? 1.8 : x[2] >= .8 ? 1.2 : x[2] >= .6 ? 1 : .55;
-  const want = M.jobs.length ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
+  const want = M.jobs.length || M.looking === 'craft' ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
   const ranked = want.sort((a, b) => b[1] * wt(b) - a[1] * wt(a));
   // never leave a broke player with nothing to apply for
-  const out = ranked.length || M.jobs.length ? ranked : L.sort((a, b) => b[1] - a[1]);
+  const out = ranked.length || M.jobs.length || M.looking === 'craft' ? ranked : L.sort((a, b) => b[1] - a[1]);
   return out.slice(0, n).map(x => [x[0], x[1]]);
+}
+
+// the switch on the Work tab: off, only your own line of work, or anything that pays
+function huntSwitchHTML() {
+  const M = S.me, v = M.looking === 'no' || (!M.looking && !lookingForWork()) ? 'no' : M.looking === 'craft' ? 'craft' : 'yes';
+  const L = [['no', '🛑 Not looking', 'No applications go out and no hunting blocks are planned. Offers can still find you.'], ['craft', '🎯 Only my line of work', `Applications go only to ${typeof dreamLabel === 'function' ? dreamLabel().toLowerCase() : 'your craft'} work.`], ['yes', '💼 Anything that pays', 'Your craft first, then anything near it, and odd jobs when money is short.']];
+  return `<div class="huntsw"><b>Job hunting</b> ${L.map(([k, l, d]) => `<button class="pill${v === k ? ' on' : ''}" data-looking="${k}" title="${esc(d)}">${l}</button>`).join(' ')}<span class="muted small"> ${esc(L.find(x => x[0] === v)[2])}</span></div>`;
 }

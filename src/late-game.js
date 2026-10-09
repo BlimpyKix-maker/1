@@ -20,7 +20,7 @@ function lateRich() { const M = S.me; return M.cash >= usd(150000) || (runwayWee
 // Are you looking for work? You decide (the switch on Today); left alone, a year's savings and a few credits means no.
 function lookingForWork() {
   const M = S.me; if (!M) return true;
-  if (M.looking === 'yes') return true;
+  if (M.looking === 'yes' || M.looking === 'craft') return true;
   if (M.looking === 'no') return false;
   return !(runwayWeeks() >= 52 && careerLevel() >= 2 && hasFooting());
 }

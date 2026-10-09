@@ -200,7 +200,7 @@ function runBlock(k) {
     case 'hustle': W.cashIn += usd(Math.round(75 * worldFx().hustle)); L.push(pickLine(HUSTLE_LINES, W.day + W.block)); break;
     case 'rest': L.push(pickLine(W.block === 0 ? MORNING_FREE : REST_LINES, W.day + W.block)); break;
     case 'home': L.push(pickLine(HOME_LINES, W.day)); break;
-    case 'out': W.stress += worldFx().out; L.push(pickLine(OUT_LINES, W.day)); break;
+    case 'out': W.stress += worldFx().out; L.push(pickLine(OUT_LINES, W.day)); if (typeof drunkText === 'function' && W.block === 2 && W.day >= 4) drunkText(); break;
     case 'read': weekGain('tas', .025); L.push(pickLine(READ_LINES, W.day)); break;
     default: if (A.venue && typeof venueEvening === 'function') L.push(...venueEvening(A));
   }

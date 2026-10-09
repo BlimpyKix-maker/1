@@ -173,6 +173,11 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('works2', '// ================= Apple Box — World Core UI ================='),
                      ('bank2', '// ================= Apple Box — World Core UI ================='),
                      ('contests2', '// ================= Apple Box — World Core UI ================='),
+                     ('ux', '// ================= Apple Box — World Core UI ================='),
+                     ('intent', '// ================= Apple Box — World Core UI ================='),
+                     ('season', '// ================= Apple Box — World Core UI ================='),
+                     ('phone2', '// ================= Apple Box — World Core UI ================='),
+                     ('toon', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

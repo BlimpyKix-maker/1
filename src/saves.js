@@ -29,12 +29,17 @@ function snapBaseline() {
   }
   BASE = b; return b;
 }
+// skills travel as a compact array in this fixed order (and the craft averages are rebuilt from them)
+let SKO = null;
+function SK_ORDER() { if (!SKO) { SKO = []; for (const c in CRAFTS) for (const k in CRAFTS[c].subs) SKO.push(k); } return SKO; }
 // one entity against its baseline: the fields that changed (ties entry by entry), or null if none did
 function entDiff(set, i, e) {
   const fk = BASE.fk[set][i], fh = BASE.fh[set][i], out = {}; let any = false;
   const ks = Object.keys(e), seen = new Set();
   for (const k of ks) {
-    const id = keyId(k); seen.add(id); const j = fk.indexOf(id), js = JSON.stringify(e[k]);
+    const id = keyId(k); seen.add(id);
+    if (set === 'people' && k === 'c') continue;   // derived from the skills: recomputed on load
+    const j = fk.indexOf(id), js = JSON.stringify(e[k]);
     if (j >= 0 && fnv(js || 'u') === fh[j]) continue;
     if (set === 'people' && k === 'ties' && j >= 0) {
       const t = e.ties, d = {}, bk = BASE.tk[i], bv = BASE.tv[i], had = new Set();
@@ -42,11 +47,33 @@ function entDiff(set, i, e) {
       for (const x in t) if (!had.has(+x)) d[x] = t[x];
       out['~ties'] = d; any = true; continue;
     }
+    if (set === 'people' && k === 'sk' && e.sk && SK_ORDER().every(x => x in e.sk) && Object.keys(e.sk).length === SK_ORDER().length) { out['~sk'] = SK_ORDER().map(x => +snapRoundText(String(e.sk[x]))); any = true; continue; }
     out[k] = e[k] === undefined ? null : e[k]; any = true;
   }
   const gone = []; for (let j = 0; j < fk.length; j++) if (!seen.has(fk[j])) gone.push(KEYS[fk[j]]);
   if (gone.length) { out['~gone'] = gone; any = true; }
   return any ? out : null;
+}
+// the save, built a slice at a time so the page keeps breathing and a progress bar can move
+async function snapDataAsync(onProg) {
+  if (!BASE) throw new Error('no baseline');
+  const d = { v: SNAP_V, build: BUILD_ID, seed: S.seed, year: S.startYear, depth: S.depth, sig: BASE.sig, base: BASE.n, n: {}, ch: {}, r: R.s, pr: S.me && S.me.rng ? S.me.rng.s : null };
+  const total = SNAP_SETS.reduce((t, set) => t + S[set].length, 0); let done = 0, t0 = performance.now();
+  for (const set of SNAP_SETS) {
+    const L = S[set], nb = BASE.n[set], out = []; d.n[set] = L.length;
+    for (let i = 0; i < L.length; i++) {
+      if (i >= nb) out.push(i, L[i]); else { const x = entDiff(set, i, L[i]); if (x) out.push(i, x); }
+      if (++done % 400 === 0 && performance.now() - t0 > 30) { if (onProg) onProg(done / total * .85); await new Promise(r => setTimeout(r, 0)); t0 = performance.now(); }
+    }
+    d.ch[set] = out;
+  }
+  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
+  d.rest = rest;
+  if (onProg) onProg(.88); await new Promise(r => setTimeout(r, 0));
+  const str = JSON.stringify(d);
+  const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
+  if (onProg) onProg(.92);
+  return '{"me":' + me + ',"mep":' + mp + ',' + snapRoundText(str).slice(1);
 }
 // the save itself, as a string
 function snapData(exact) {
@@ -81,6 +108,7 @@ function snapApply(str) {
       const e = L[i];
       for (const k in x) {
         if (k === '~gone') { for (const g of x[k]) delete e[g]; continue; }
+        if (k === '~sk') { const o = {}, K = SK_ORDER(); for (let z = 0; z < K.length; z++) o[K[z]] = x[k][z]; e.sk = o; recalc(e); continue; }
         if (k === '~ties') { const t = e.ties = e.ties || {}; for (const id in x[k]) { if (x[k][id] === null) delete t[id]; else t[id] = x[k][id]; } continue; }
         e[k] = x[k];
       }
@@ -116,8 +144,11 @@ async function pack(str) {
 async function unpack(rec) { return rec.z ? await new Response(rec.data.stream().pipeThrough(new DecompressionStream('gzip'))).text() : rec.data; }
 function saveList() { return idbDo('meta', 'readonly', st => st.getAll()).then(L => (L || []).sort((a, b) => b.when - a.when)).catch(() => []); }
 async function writeSlot(kind, name, id) {
-  const str = snapData(), j0 = JOURNAL ? JOURNAL.log.length : 0;   // what's done from here on belongs after this save
+  const j0 = JOURNAL ? JOURNAL.log.length : 0;   // what's done from here on belongs after this save
+  const str = typeof document !== 'undefined' && typeof performance !== 'undefined' ? await snapDataAsync(saveProgress) : snapData();
+  saveProgress(.94);
   const p = await pack(str), size = p.z ? p.data.size : str.length;
+  saveProgress(.98);
   const meta = { id: id || kind + '-' + Date.now().toString(36), kind, name: name || '', when: Date.now(), seed: S.seed, year: S.startYear, depth: S.depth, week: S.week, label: snapLabel(), build: BUILD_ID, size };
   await idbDo('data', 'readwrite', st => st.put(p, meta.id));
   await idbDo('meta', 'readwrite', st => st.put(meta));
@@ -173,7 +204,15 @@ async function saveRun(kind, name, id) {
   for (let i = 0; i < 200 && typeof document !== 'undefined' && document.getElementById('rollov'); i++) await new Promise(r => setTimeout(r, 250));
   try { const m = await writeSlot(kind, name, id); AUTO_AT = autoPeriod(); UI.saveMsg = `${kind === 'auto' ? 'Autosaved' : 'Saved'} · ${fmtDate(m.week, true)}`; UI.saveList = null; return m; }
   catch (e) { UI.saveMsg = 'Couldn\'t save: ' + ((e && e.name) || 'storage unavailable'); return null; }
-  finally { SAVING = false; saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
+  finally { SAVING = false; saveProgress(null); saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
+}
+// a progress bar while saving: the screen is busy, not frozen, and nothing can change under the save
+function saveProgress(f) {
+  if (typeof document === 'undefined' || !document.body || !document.createElement) return;
+  let el = document.getElementById('saveov');
+  if (f === null) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'saveov'; el.innerHTML = '<div class="sv-box"><b>Saving your career…</b><span class="sv-bar"><i></i></span><small></small></div>'; document.body.appendChild(el); }
+  el.querySelector('i').style.width = Math.round(f * 100) + '%'; el.querySelector('small').textContent = Math.round(f * 100) + '%';
 }
 function saveBadge() { const el = typeof document !== 'undefined' && document.getElementById('savebadge'); if (el) el.textContent = UI.saveMsg || ''; }
 

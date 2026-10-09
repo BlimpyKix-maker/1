@@ -33,11 +33,11 @@ for (const k in FOLD) { const [i, n, d, fn] = FOLD[k]; OS_EXTRA[k] = [i, n, d]; 
 // Regroup the sidebar around the computer being the whole desk.
 OS_GROUPS.splice(0, OS_GROUPS.length,
   ['Today', ['home', 'today', 'feed', 'cal', 'week']],
+  ['You', ['standing', 'life', 'library']],
   ['Work', ['work', 'mail', 'phoneapp', 'contacts', 'people']],
   ['Make', ['create', 'write', 'studio', 'cutroom', 'notes', 'contests']],
   ['Money', ['bank', 'ticker', 'bazaar']],
   ['Industry', ['trades', 'roger', 'gea', 'boxoffice', 'companies', 'awards', 'charts', 'careers', 'world', 'flick', 'weather']],
-  ['You', ['standing', 'life', 'library']],
   ['Play', ['sweep', 'match', 'cue', 'scramble', 'store']]);
 // Pages opened from inside the computer stay inside it.
 function osStackHTML() {

@@ -61,16 +61,37 @@ const COMP_CAT = { all: 'All', fits: 'Fits you', write: 'Writing', direct: 'Dire
 const COMP_TIER = { major: ['Major', 'bad'], industry: ['Industry', 'hist'], fun: ['Just for fun', 'good'] };
 function compOpen(c) { const m = dateOf(S.week).getUTCMonth(); return c.month === m || c.month === (m + 1) % 12; }
 function compFits(c) { const me = ME(), main = MAIN[me.role]; return (CRAFTS[main] && CRAFTS[main].subs[c.stat] !== undefined) || (c.genre && S.me.love.includes(c.genre)); }
+// the real target for an entry: the contest's bar, a little higher for majors, moved by what you send in. The odds on
+// the card use exactly this number.
+function compDC(c, sc) {
+  let dc = c.dc + (c.tier === 'major' ? 1 : 0);
+  if (c.need === 'script' && sc) dc -= Math.round((sc.score - 60) / 6) + (c.genre && sc.genre === c.genre ? 2 : c.genre ? -4 : 0);
+  if (c.work && typeof compWorkBest === 'function') { const b = compWorkBest(c); if (b >= 0) dc -= Math.round((b - 60) / 6); }
+  return dc;
+}
+function compScript(c) { const L = (S.me.scripts || []).filter(x => x.grade); const id = UI['comp-sc-' + c.k]; return L.find(x => String(x.id) === String(id)) || L[L.length - 1] || null; }
+// why you can't enter right now (null when you can): every lock says what it is
+function compBlock(c) {
+  const M = S.me, me = ME();
+  if (!compOpen(c)) return `Entries open in ${MON[(c.month + 11) % 12]}`;
+  if (compEntered(c)) return 'Already entered this year';
+  if (M.cash < usd(c.fee)) return `The fee is ${fmtCash(usd(c.fee))}; you have ${fmtCash(Math.max(0, M.cash))}`;
+  if (c.need === 'script' && !(M.scripts || []).some(x => x.grade)) return 'Needs a finished script (write one on the Create tab)';
+  if (c.work && typeof compWorkBest === 'function' && compWorkBest(c) < 0) return `Needs a released ${(typeof WORK_NEED_LABEL !== 'undefined' && WORK_NEED_LABEL[c.work[0]]) || 'work'} of yours`;
+  if (c.energy && M.energy + c.energy < 5) return `Too tired: it costs ${-c.energy} energy and you have ${Math.round(M.energy)}`;
+  if (c.genre && c.need === 'script' && !(M.scripts || []).some(x => x.grade && x.genre === c.genre)) return `${c.genre} scripts only: you'd be marked down without one`;
+  return null;
+}
 function compEntered(c) { const y = yearOf(S.week); return (S.me.comps || []).some(e => e.k === c.k && e.y === y); }
 // Enter: pay, roll now (the logged action carries it), learn the result when the judges are done.
 function enterComp(a) {
   const M = S.me, me = ME(), c = COMPS.find(x => x.k === a.k);
   if (!c || !compOpen(c) || compEntered(c) || M.cash < usd(c.fee)) return false;
-  let bonus = 0, sc = null;
-  if (c.need === 'script') { sc = (M.scripts || []).find(x => x.id === a.script && x.grade); if (!sc) return false; bonus = Math.round((sc.score - 60) / 6) + (c.genre && sc.genre === c.genre ? 2 : c.genre ? -4 : 0); }
+  let sc = null;
+  if (c.need === 'script') { sc = (M.scripts || []).find(x => x.id === a.script && x.grade); if (!sc) return false; }
   M.cash -= usd(c.fee);
   if (c.energy) M.energy = clamp(M.energy + c.energy, 0, 100);
-  const ok = roll(c.stat, c.dc + (c.tier === 'major' ? 1 : 0) - bonus), r = M.lastRoll, margin = r.d + r.mod - r.DC;
+  const ok = roll(c.stat, compDC(c, sc)), r = M.lastRoll, margin = r.d + r.mod - r.DC;
   // a natural 20 gets you into the final; only real quality wins it
   const place = ok ? (margin >= 6 || (r.crit > 0 && margin >= 2) ? 'win' : margin >= 3 ? 'runner' : 'final') : margin >= -3 ? 'mention' : 'out';
   (M.comps = M.comps || []).push({ k: c.k, y: yearOf(S.week), w: S.week, due: S.week + (c.tier === 'fun' ? 1 : c.tier === 'industry' ? 4 : 8), place, script: sc ? sc.id : null, roll: r });
@@ -99,7 +120,7 @@ function contestRulesHTML(c) {
   const M = S.me, T = COMP_TIER[c.tier], mine = ((M && M.comps) || []).filter(e => e.k === c.k).slice().reverse();
   return `<section class="panel"><h3>How it works</h3><p>${chip(T[0], T[1])} ${esc(c.d)}</p>
    <p class="small">Closes in <b>${MON[c.month]}</b>, entries open the month before · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''} · judged on <b>${esc(statLabel(c.stat).toLowerCase())}</b>${c.need === 'script' ? ' · needs a finished script' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''}${c.energy ? ' · a hard weekend' : ''}.</p>
-   ${M ? `<p class="small">Your odds today: ${oddsBar(c.stat, c.dc)}${compFits(c) ? ' ' + chip('Fits you', 'good') : ''}</p><p class="small">${compOpen(c) ? (compEntered(c) ? '<b>You\'ve entered this year.</b>' : 'Entries are open now: <button class="linkish" data-dtab="compete">enter from the Contests tab</button>.') : `Entries open in ${MON[(c.month + 11) % 12]}.`}</p>
+   ${M ? `<p class="small">Your odds today: ${oddsBar(c.stat, compDC(c, c.need === 'script' ? compScript(c) : null))}${compFits(c) ? ' ' + chip('Fits you', 'good') : ''}</p><p class="small">${compOpen(c) ? (compEntered(c) ? '<b>You\'ve entered this year.</b>' : 'Entries are open now: <button class="linkish" data-dtab="compete">enter from the Contests tab</button>.') : `Entries open in ${MON[(c.month + 11) % 12]}.`}</p>
    <h4>Your entries</h4>${mine.length ? `<ul class="plain small">${mine.map(e => `<li>${e.y}: ${e.told ? `<b>${PLACE_LABEL[e.place]}</b>` : 'waiting on the judges'}</li>`).join('')}</ul>` : '<p class="muted small">You haven\'t entered yet.</p>'}` : ''}</section>`;
 }
 function compPanel() {
@@ -113,7 +134,7 @@ function compPanel() {
     const scSel = c.need === 'script' ? (scripts.length ? sel('comp-sc-' + c.k, scripts.map(s => [String(s.id), `${s.title} (${s.grade})`]), UI['comp-sc-' + c.k] || String(scripts[scripts.length - 1].id)) : '<span class="muted small">Needs a finished script</span>') : c.work && typeof compWorkBest === 'function' ? (compWorkBest(c) >= 0 ? `<span class="small muted">Your best ${esc(WORK_NEED_LABEL[c.work[0]] || 'work')} (quality ${compWorkBest(c)}) is your entry</span>` : `<span class="muted small">Needs a released ${esc(WORK_NEED_LABEL[c.work[0]] || 'work')}</span>`) : '';
     return `<div class="comp${fits ? ' fits' : ''}"><div class="ch"><b>${compLink(c)}</b> ${chip(T[0], T[1])}${fits ? ' ' + chip('Fits you', 'good') : ''}</div><p class="small">${esc(c.d)}</p>
      <p class="small muted">Closes in ${MON[c.month]} · entry ${c.fee ? fmtCash(usd(c.fee)) : 'free'}${c.prize ? ' · prize ' + fmtCash(usd(c.prize)) : ''}${c.energy ? ' · a hard weekend' : ''}${c.genre ? ' · ' + esc(c.genre.toLowerCase()) + ' only' : ''} · judged on ${esc(statLabel(c.stat).toLowerCase())}</p>
-     ${done ? `<p class="small"><b>Entered.</b> ${e.told ? PLACE_LABEL[e.place] : 'Waiting on the judges.'}</p>` : open ? `<div class="crow">${scSel}${oddsBar(c.stat, c.dc)}<button class="btn-s" data-comp="${c.k}" ${(c.need === 'script' && !scripts.length) || M.cash < usd(c.fee) ? 'disabled' : ''}>Enter</button></div>` : `<p class="small muted">Opens ${MON[(c.month + 11) % 12]}.</p>`}</div>`;
+     ${done ? `<p class="small"><b>Entered.</b> ${e.told ? PLACE_LABEL[e.place] : 'Waiting on the judges.'}</p>` : open ? `<div class="crow">${scSel}${oddsBar(c.stat, compDC(c, c.need === 'script' ? compScript(c) : null))}${(() => { const why = compBlock(c), soft = why && /marked down/.test(why); return `<button class="btn-s" data-comp="${c.k}" ${why && !soft ? `disabled title="${esc(why)}"` : ''}>Enter</button></div>${why ? `<p class="small ${soft ? 'muted' : 'bad'}">${esc(why)}</p>` : ''}`; })()}` : `<p class="small muted">Opens ${MON[(c.month + 11) % 12]}.</p>`}</div>`;
   };
   return `<section class="panel comps"><h3>Competitions</h3><p class="muted small">Entries open the month before each deadline. Your craft sets the odds; the roll on the day decides. Major prizes open doors; the fun ones give you trophies, stories and new friends.</p>
    <div class="fchips">${Object.entries(COMP_CAT).map(([k, l]) => `<button class="fchip${f === k ? ' on' : ''}" data-compf="${k}">${esc(l)}</button>`).join('')}</div>

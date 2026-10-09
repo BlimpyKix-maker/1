@@ -139,7 +139,9 @@ function replyText(a) {
     }
   }
   sms(-1, mine, 'mine', { to: q.id });
+  if (typeof bondReply === 'function') d = bondReply(q, a.kind, d);   // tone counts
   addTie(me, q, d); M.known[q.id].seen = S.week;
+  if (typeof bondCheck === 'function') bondCheck(q.id);
   sms(q.id, back, 'text', { mood, topic: 'chat' });
   return true;
 }
