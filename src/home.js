@@ -287,7 +287,10 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined' && window.s
     const g = document.querySelector('svg.home-scene .me-walk'); if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
     roomT++; if (!(roomT === 2 || (roomT % 6 === 0 && Math.random() < .7))) return;   // soon after you arrive, then every quarter minute or so
     let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (A.length < 2) return;
-    const cur = +(g.dataset.i || 0); let i = Math.floor(Math.random() * A.length); if (i === cur) i = (i + 1) % A.length;
+    const cur = +(g.dataset.i || 0); let i = Math.floor(Math.random() * A.length);
+    // a creature with needs: the lowest one decides what they go and do, most of the time
+    try { const N = JSON.parse(g.dataset.needs || '{}'), low = Object.entries(N).sort((a, b) => a[1] - b[1])[0]; if (low && low[1] < 70 && typeof NEED_ACTS !== 'undefined' && Math.random() < .7) { const L = A.map((a, j) => [a, j]).filter(([a]) => NEED_ACTS[low[0]].includes(a[1])); if (L.length) i = L[Math.floor(Math.random() * L.length)][1]; } } catch (e) {}
+    if (i === cur) i = (i + 1) % A.length;
     const [dx, k, what] = A[i], prev = +(g.dataset.dx || 0);
     g.dataset.i = i; g.dataset.dx = dx; g.dataset.busy = '';
     g.classList.add('walking'); g.classList.toggle('left', dx < prev);
