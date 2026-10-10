@@ -39796,10 +39796,11 @@ function termKPIs() {
   ];
   return `<div class="tk-kpis">${T.map(([l, v, d, s]) => `<div class="tk-kpi"><span class="tk-l">${l}</span><b class="tk-v">${v}</b>${d}${s}</div>`).join('')}</div>`;
 }
+const TM_C = { w: -1 };
 function termMarket() {
   if (typeof listedCos !== 'function') return '';
-  const M = S.me, L = listedCos().map(c => [c, mktPrice(c), chg(c, 1), chg(c, 13)]).sort((a, b) => Math.abs(b[2]) - Math.abs(a[2])).slice(0, 9);
-  const idx = []; for (let i = 25; i >= 0; i--) idx.push(indexVal(S.week - i));
+  if (TM_C.w !== S.week || TM_C.n !== S.companies.length) { TM_C.w = S.week; TM_C.n = S.companies.length; TM_C.L = listedCos().map(c => [c, mktPrice(c), chg(c, 1), chg(c, 13)]).sort((a, b) => Math.abs(b[2]) - Math.abs(a[2])).slice(0, 9); TM_C.idx = []; for (let i = 25; i >= 0; i--) TM_C.idx.push(indexVal(S.week - i)); }   // prices only move once a week
+  const M = S.me, L = TM_C.L, idx = TM_C.idx;
   const iv = idx[idx.length - 1], ic = (iv / (idx[idx.length - 2] || iv) - 1) * 100;
   return `<section class="tk-p"><h4>MARKET <span class="tk-sub">AB-500 ${iv.toFixed(1)} ${dlt(ic, x => x.toFixed(2) + '%')}</span></h4>${tSpark(idx, 260, 34, 'wide')}
    <table class="tk-t"><thead><tr><th>Ticker</th><th class="n">Px</th><th class="n">1w</th><th class="n">13w</th><th class="n">You</th></tr></thead><tbody>${L.map(([c, px, d1, d13]) => `<tr><td><a href="#" class="lk" data-go="company:${c.id}">${esc(tTicker(c))}</a> <span class="tk-mut">${esc(c.name.slice(0, 18))}</span></td><td class="n">${px.toFixed(2)}</td><td class="n ${d1 >= 0 ? 'up' : 'dn'}">${fmtPct(d1)}</td><td class="n ${d13 >= 0 ? 'up' : 'dn'}">${fmtPct(d13)}</td><td class="n">${(M.port || {})[c.id] ? (M.port || {})[c.id] : ''}</td></tr>`).join('')}</tbody></table>
@@ -39966,7 +39967,8 @@ function futTrack(f) {
 }
 // the market's consensus: comps-heavy far out, tracking-heavy near release
 function futFair(f, w = S.week) { const left = clamp((f.stageEnd || w) - w, 0, 10), k = .97 - left * .03; return Math.exp((1 - k) * Math.log(futModel(f)) + k * Math.log(futTrack(f))); }
-function genreHeat(g) { const y = S.year, by = yy => { let a = 0, t = 0; for (const f of S.films) if (f.rel !== null && yearOf(f.rel) === yy) { t += f.total || 0; if (f.genre === g) a += f.total || 0; } return t ? a / t : 0; }; const a = by(y), b = by(y - 1); return b ? clamp(a / b, .7, 1.4) : 1; }
+function genreHeat(g) { const A = (FUT_C.k === S.week ? FUT_C : (FUT_C.k = S.week, FUT_C.m = {}, FUT_C)).m; if (A['h' + g] === undefined) A['h' + g] = genreHeat0(g); return A['h' + g]; }
+function genreHeat0(g) { const y = S.year, by = yy => { let a = 0, t = 0; for (const f of S.films) if (f.rel !== null && yearOf(f.rel) === yy) { t += f.total || 0; if (f.genre === g) a += f.total || 0; } return t ? a / t : 0; }; const a = by(y), b = by(y - 1); return b ? clamp(a / b, .7, 1.4) : 1; }
 function futList() {
   return S.films.filter(f => f.rel === null && f.stage === 3 && f.tier <= 2 && (f.stageEnd || 0) - S.week <= 10 && (f.stageEnd || 0) >= S.week).sort((a, b) => b.cost - a.cost).slice(0, 16);
 }
@@ -40042,6 +40044,41 @@ function whyPanel(f) {
 }
 { const _vf2 = viewFilm; viewFilm = function (id) { const h = _vf2(id), f = S.films[id]; if (!f || f.rel === null || !f.why) return h; return h + whyPanel(f); }; }
 // </futures>
+// <agent2>
+// ---------------- Agents who earn their ten per cent ----------------
+// Ablation testing showed an agent was dead weight: their listings sat a level or two above you (long odds), they took
+// a cut, and crew and writers never got approached at all (the offer needed a screen credit). Now:
+//  - an agent books you: every so often a direct offer at your level lands without an application, more often with
+//    a bigger agency and a hungrier style, less often when you're already working;
+//  - crew, writers and anyone with a few paid jobs behind them get approached too, not only people with screen credits.
+const AG_BOOK = { shark: .05, nurturer: .02, packager: .03, boutique: .025, quiet: 0 };
+function agentBookOdds() {
+  const M = S.me; if (!M || !M.agent) return 0;
+  return clamp(.04 + .03 * M.agent.tier + (AG_BOOK[M.agent.style] || 0) - (M.jobs.some(craftJob) ? .05 : 0), .01, .25);
+}
+function agentBook() {
+  const M = S.me; if (!M.agent || M.inbox.some(it => it.kind === 'offer' && !it.done) || S.week - (M.agent.bookW || -99) < 5) return;
+  if (prnd() > agentBookOdds()) return;
+  const L0 = tierLevel(), L = (M.board || []).filter(p => craftJob(p) && Math.abs((p.tier || 1) - L0) <= 1 && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7 && !p.agentBooked);
+  if (!L.length) return;
+  L.sort((a, b) => (b.tier || 1) - (a.tier || 1) || b.rate - a.rate);
+  const p = L[Math.floor(prnd() * Math.min(3, L.length))];
+  p.agent = 1; p.agentBooked = 1; p.rate = Math.round(p.rate * (1.08 + .05 * M.agent.tier)); M.agent.bookW = S.week; M.agent.books = (M.agent.books || 0) + 1;
+  const ag = M.agent.id !== undefined && P(M.agent.id) ? P(M.agent.id).name : M.agent.name;
+  inbox('offer', `Booked: ${p.t}`, `${ag} calls. ${pickLine(['"Don\'t thank me, just turn up."', '"I put you up for it on Tuesday. It\'s yours if you want it."', '"They wanted someone else. I talked them out of it."', '"Three calls and a lunch. You start when they say."', '"It\'s not glamorous, but it pays, and it\'s the right people."'], S.week + p.id)} No interview: your agent's word is enough. ${offerText(p)} The agency takes ${Math.round(M.agent.cut * 100)}%.`, { post: p, person: M.agent.id, choices: [{ k: 'yes', label: 'Accept' }, { k: 'no', label: 'Decline' }] });
+  M.stats.offers++;
+}
+{ const _aw = agentWeek; agentWeek = function () { _aw(); if (S.me && S.me.agent) agentBook(); }; }
+// paid work counts, not only screen credits
+{ const _ap = agentApproach; agentApproach = function () {
+  _ap(); const M = S.me, me = ME();
+  if (M.agent || pending().some(x => x.kind === 'agentoffer') || me.credits.length >= 1 || careerLevel() < 2 || me.standing < 12) return;
+  if (prnd() > .02 + careerLevel() * .006) return;
+  const L = agenciesIn(M.hub).filter(a => a.tier <= 1 + Math.floor(careerLevel() / 3) && agFits(a)); if (!L.length) return;
+  const ag = ppick(L);
+  inbox('agentoffer', `${ag.name} calls`, `Someone at ${ag.name} has heard about you from people you've worked with and wants to represent you. They book their clients directly, without the applications; ten per cent of everything.`, { ag: ag.i, choices: [{ k: 'yes', label: 'Sign with them' }, { k: 'no', label: 'Not yet' }] });
+}; }
+// </agent2>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

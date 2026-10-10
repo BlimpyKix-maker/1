@@ -38,10 +38,11 @@ function termKPIs() {
   ];
   return `<div class="tk-kpis">${T.map(([l, v, d, s]) => `<div class="tk-kpi"><span class="tk-l">${l}</span><b class="tk-v">${v}</b>${d}${s}</div>`).join('')}</div>`;
 }
+const TM_C = { w: -1 };
 function termMarket() {
   if (typeof listedCos !== 'function') return '';
-  const M = S.me, L = listedCos().map(c => [c, mktPrice(c), chg(c, 1), chg(c, 13)]).sort((a, b) => Math.abs(b[2]) - Math.abs(a[2])).slice(0, 9);
-  const idx = []; for (let i = 25; i >= 0; i--) idx.push(indexVal(S.week - i));
+  if (TM_C.w !== S.week || TM_C.n !== S.companies.length) { TM_C.w = S.week; TM_C.n = S.companies.length; TM_C.L = listedCos().map(c => [c, mktPrice(c), chg(c, 1), chg(c, 13)]).sort((a, b) => Math.abs(b[2]) - Math.abs(a[2])).slice(0, 9); TM_C.idx = []; for (let i = 25; i >= 0; i--) TM_C.idx.push(indexVal(S.week - i)); }   // prices only move once a week
+  const M = S.me, L = TM_C.L, idx = TM_C.idx;
   const iv = idx[idx.length - 1], ic = (iv / (idx[idx.length - 2] || iv) - 1) * 100;
   return `<section class="tk-p"><h4>MARKET <span class="tk-sub">AB-500 ${iv.toFixed(1)} ${dlt(ic, x => x.toFixed(2) + '%')}</span></h4>${tSpark(idx, 260, 34, 'wide')}
    <table class="tk-t"><thead><tr><th>Ticker</th><th class="n">Px</th><th class="n">1w</th><th class="n">13w</th><th class="n">You</th></tr></thead><tbody>${L.map(([c, px, d1, d13]) => `<tr><td><a href="#" class="lk" data-go="company:${c.id}">${esc(tTicker(c))}</a> <span class="tk-mut">${esc(c.name.slice(0, 18))}</span></td><td class="n">${px.toFixed(2)}</td><td class="n ${d1 >= 0 ? 'up' : 'dn'}">${fmtPct(d1)}</td><td class="n ${d13 >= 0 ? 'up' : 'dn'}">${fmtPct(d13)}</td><td class="n">${(M.port || {})[c.id] ? (M.port || {})[c.id] : ''}</td></tr>`).join('')}</tbody></table>

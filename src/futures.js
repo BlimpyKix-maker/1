@@ -48,7 +48,8 @@ function futTrack(f) {
 }
 // the market's consensus: comps-heavy far out, tracking-heavy near release
 function futFair(f, w = S.week) { const left = clamp((f.stageEnd || w) - w, 0, 10), k = .97 - left * .03; return Math.exp((1 - k) * Math.log(futModel(f)) + k * Math.log(futTrack(f))); }
-function genreHeat(g) { const y = S.year, by = yy => { let a = 0, t = 0; for (const f of S.films) if (f.rel !== null && yearOf(f.rel) === yy) { t += f.total || 0; if (f.genre === g) a += f.total || 0; } return t ? a / t : 0; }; const a = by(y), b = by(y - 1); return b ? clamp(a / b, .7, 1.4) : 1; }
+function genreHeat(g) { const A = (FUT_C.k === S.week ? FUT_C : (FUT_C.k = S.week, FUT_C.m = {}, FUT_C)).m; if (A['h' + g] === undefined) A['h' + g] = genreHeat0(g); return A['h' + g]; }
+function genreHeat0(g) { const y = S.year, by = yy => { let a = 0, t = 0; for (const f of S.films) if (f.rel !== null && yearOf(f.rel) === yy) { t += f.total || 0; if (f.genre === g) a += f.total || 0; } return t ? a / t : 0; }; const a = by(y), b = by(y - 1); return b ? clamp(a / b, .7, 1.4) : 1; }
 function futList() {
   return S.films.filter(f => f.rel === null && f.stage === 3 && f.tier <= 2 && (f.stageEnd || 0) - S.week <= 10 && (f.stageEnd || 0) >= S.week).sort((a, b) => b.cost - a.cost).slice(0, 16);
 }

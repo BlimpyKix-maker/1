@@ -155,6 +155,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/scenes2.js` | Scene variants. An `inbox` wrapper gives about half of all scenes a twist (`TWISTS` for job scenes, i.e. `extra.job` set; `LIFE_TWISTS` otherwise; `TW_TAG` suffixes the title) that shifts every checked choice's DC (copied onto the item's choices, so the odds shown are the odds rolled), and 40% get an extra generic move (`GX_OPTS` at work: pull in a colleague, go to the boss, buy time, joke, pay yourself; `LIFE_OPTS`: walk away, do the kind thing, text a friend). A `sceneResolve` wrapper rolls at the item's DC, applies the twist's payoff (`twistAfter`) and resolves `gx_*` moves (`gxResolve`). tools/longplay.js now records items after all wrappers |
 | `src/terminal.js` | The Terminal app (Today group): `termWeek` snapshots `M.hist` weekly (net worth, cash, standing, fame, buzz, network, stress, energy; 260 weeks). Panels: KPIs with sparklines (`tSpark`), market (AB-500 `indexVal`, movers), box office, genre heat, opportunities ranked by expected value (`postEV`), your book, signals. Themes amber/green/cyan/mono plus dense (`UI.tkTheme`, `UI.tkDense`, localStorage `ab-tk`). `tickerStrip` runs along the top of every computer app (osPanel wrapper, inside `.os-main`). Command palette: Ctrl/Cmd+K or `/` (`paletteItems` searches apps, people, films, companies) |
 | `src/futures.js` | Film futures (doAct `fut`): tier ≤2 films within 10 weeks of release list at a price in $M of forecast worldwide gross; $100 per $1M per contract, ±3.5% spread, 30 contracts per film, shorts need 50% margin; `futWeek` settles at release + 4 weeks, refunds collapsed films, fines 30% of profitable trades on your own films. Price = `futFair` (comps model `futModel` far out → tracking `futTrack` near release) × hashed noise narrowing with time. `bankability(p)` 0–99 from the last five lead/director films' gross/cost plus fame. `waterfallSVG` ("Where the money went") and `whyPanel` ("Why it did that": tracking at release vs result, appeal inputs; `f.why` recorded by a `release` wrapper) on film pages |
+| `src/agent2.js` | Agents earn their cut: `agentBook` (agentWeek wrapper) sends a direct offer at your level, with no application. Odds come from `agentBookOdds`: tier, style (`AG_BOOK`), lower while you're working, at most one every 5 weeks. An `agentApproach` wrapper lets agencies approach people with paid work (level 2+, standing 12+) and no screen credits |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -266,7 +267,19 @@ The player should feel like an executive with a trading desk: a lot of informati
 - Terminal, ticker strip and command palette (src/terminal.js). The ticker sits inside `.os-main`: placed before it, it broke the computer's grid layout.
 - Film futures, bankability, waterfall and why-panel (src/futures.js). Tuning history: with no spread and comps-only prices, a bot reading tracking made +$1.2M in two years, so the price now moves to tracking as release nears, tracking wobbles, a spread applies and positions are capped.
 - `fitTables` stacks any table wider than its box. Full-width Terminal panels use `.tk-wide` so their tables stay tabular.
-- Ablation (tools/ablation.js): see "Ablation findings" below.
+- Ablation (tools/ablation.js). Each run pins the character `salt`. Without it, every run had a different random salt (by design, for real players), and the first sweep measured salt noise instead of features. Clean sweep, 6 seeds × 3 years, mean vs base ($75k worth, standing 33, average stress 10):
+  - texting and replies: $243k, standing 43, stress 2;
+  - shorts: $194k, standing 46, +1 level;
+  - pets: stress 6, standing 42;
+  - relocating to Hollywood: $217k;
+  - school: $452k, but average stress 30;
+  - investing: $139k;
+  - negotiating: $128k;
+  - futures: +$84k trading P&L;
+  - generic gx moves: $198k, standing 49;
+  - bold stance: standing 43;
+  - **agent: $68k, an empty feature.** Only actors were ever approached, and an agent's listings sat above your level.
+- Fix: src/agent2.js. Agents book you directly at your level (`agentBook`, odds by tier and style); crew and writers at level 2+ get approached. Re-test: 5 of 6 careers sign, worth +46%, stress lower, slightly fewer screen credits (agents book paying work, not prestige).
 
 ## Round 8 decisions
 
