@@ -75,7 +75,8 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     o.push(`<rect width="120" height="${BH}" rx="10" fill="url(#${uid}b)"/>`);
     if (fig) o.push(`<rect y="${BH - 30}" width="120" height="30" fill="${mixHex(cloth, '#000', .25)}" opacity=".18"/>`);
     // studio backdrops: out-of-focus lights, a soft beam, a painted sweep, a halo
-    if (pat === 0) o.push(Array.from({ length: fig ? 14 : 9 }, () => `<circle cx="${(pr() * 120).toFixed(1)}" cy="${(pr() * (fig ? 200 : 110)).toFixed(1)}" r="${(5 + pr() * 14).toFixed(1)}" fill="#FFFFFF" opacity="${(.08 + pr() * .16).toFixed(2)}"/>`).join(''));
+    if (true) { /* a clean studio sweep: no bokeh or beams */ }
+    else if (pat === 0) o.push(Array.from({ length: fig ? 14 : 9 }, () => `<circle cx="${(pr() * 120).toFixed(1)}" cy="${(pr() * (fig ? 200 : 110)).toFixed(1)}" r="${(5 + pr() * 14).toFixed(1)}" fill="#FFFFFF" opacity="${(.08 + pr() * .16).toFixed(2)}"/>`).join(''));
     else if (pat === 1) o.push(`<path d="M-10 0 L50 0 L130 ${BH} L70 ${BH} Z" fill="#FFFFFF" opacity=".16"/><path d="M60 0 L80 0 L130 ${BH * .6} L120 ${BH * .7} Z" fill="#FFFFFF" opacity=".1"/>`);
     else if (pat === 2) o.push(`<ellipse cx="60" cy="${fig ? 120 : 70}" rx="70" ry="${fig ? 110 : 60}" fill="#FFFFFF" opacity=".2"/><ellipse cx="60" cy="${fig ? 120 : 70}" rx="44" ry="${fig ? 80 : 40}" fill="#FFFFFF" opacity=".14"/>`);
     else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/><circle cx="60" cy="40" r="30" fill="#FFFFFF" opacity=".12"/>`);

@@ -151,16 +151,17 @@ function toonNeeds() {
   return { energy: Math.round(M.energy), calm: Math.round(100 - M.stress), social: clamp(k * 18, 0, 100), fun: clamp(100 - (M.grind || 0) * 8, 0, 100) };
 }
 function toonSays(N) {
-  const low = Object.entries(N).sort((a, b) => a[1] - b[1])[0];
-  if (low[1] >= 60) return pickLine(['I\'m good! Let\'s make something.', 'Feeling great today.', 'Life\'s pretty good, actually.'], S.week);
-  return { energy: ['So tired. A nap? Or coffee. Both?', 'I need a proper night\'s sleep.'], calm: ['Everything is a lot right now. Music, maybe.', 'I need a walk. Or a scream into a pillow.'], social: ['I haven\'t seen anyone in ages. Text someone?', 'A night out would do me good.'], fun: ['All work. When did I last have fun?', 'Can we do something that isn\'t work?'] }[low[0]][S.week % 2];
+  const low = Object.entries(N).sort((a, b) => a[1] - b[1])[0], v = Math.round(low[1]);
+  if (low[1] >= 60) return `All levels above 60. Good week to push.`;
+  return { energy: `Energy ${v}: sleep, or coffee`, calm: `Calm ${v}: music, a walk, a quiet night`, social: `Social ${v}: text someone`, fun: `Fun ${v}: a night out, a game` }[low[0]];
 }
 { const _hs = homeSceneSVG;
   homeSceneSVG = function (day) {
     let s = _hs(day); const N = toonNeeds();
-    const meter = (x, icon, v, col) => `<g transform="translate(${x} 6)"><rect width="46" height="12" rx="6" fill="#000" opacity=".45"/><text x="7" y="9.2" font-size="8" text-anchor="middle">${icon}</text><rect x="13" y="4" width="29" height="4" rx="2" fill="#FFFFFF" opacity=".25"/><rect x="13" y="4" width="${Math.max(1, 29 * v / 100)}" height="4" rx="2" fill="${v < 30 ? '#FF6B6B' : v < 60 ? '#FFD23F' : col}"/></g>`;
-    const hud = `<g class="needs">${meter(6, '⚡', N.energy, '#7EE081')}${meter(56, '😌', N.calm, '#7EE081')}${meter(106, '💬', N.social, '#7EE081')}${meter(156, '🎈', N.fun, '#7EE081')}</g>`;
-    s = s.replace(/(<g class="me-walk" data-acts=')/, `<g class="me-say" opacity="${typeof UI !== 'undefined' && UI.toonSay > Date.now() ? 1 : 0}"><rect x="150" y="18" width="120" height="22" rx="11" fill="#fff" stroke="#0002"/><path d="M200 40 l4 6 l4 -6 z" fill="#fff"/><text x="210" y="32.5" font-size="7.5" text-anchor="middle" fill="#333" font-family="sans-serif">${esc(toonSays(N))}</text></g>$1`);
+    // a sleek readout: label, a thin bar, and the number
+    const meter = (x, label, v) => { const c = v < 30 ? '#FF6B6B' : v < 60 ? '#F2C14E' : '#7EE0A1'; return `<g transform="translate(${x} 5)"><rect width="76" height="12" rx="2" fill="#0B0F14" opacity=".7"/><text x="4" y="8.4" font-size="5.6" font-weight="700" letter-spacing=".6" fill="#C9D1D9" font-family="ui-sans-serif,system-ui,sans-serif">${label}</text><rect x="34" y="5" width="24" height="2" rx="1" fill="#FFFFFF" opacity=".18"/><rect x="34" y="5" width="${Math.max(1, 24 * v / 100).toFixed(1)}" height="2" rx="1" fill="${c}"/><text x="73" y="8.6" font-size="6.2" font-weight="700" text-anchor="end" fill="${c}" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">${Math.round(v)}</text></g>`; };
+    const hud = `<g class="needs">${meter(5, 'ENERGY', N.energy)}${meter(84, 'CALM', N.calm)}${meter(163, 'SOCIAL', N.social)}${meter(242, 'FUN', N.fun)}</g>`;
+    s = s.replace(/(<g class="me-walk" data-acts=')/, `<g class="me-say" opacity="${typeof UI !== 'undefined' && UI.toonSay > Date.now() ? 1 : 0}"><rect x="140" y="26" width="140" height="18" rx="3" fill="#0B0F14" opacity=".85"/><path d="M204 44 l4 5 l4 -5 z" fill="#0B0F14" opacity=".85"/><text x="210" y="37.6" font-size="7" text-anchor="middle" fill="#E6EDF3" font-family="ui-sans-serif,system-ui,sans-serif">${esc(toonSays(N))}</text></g>$1`);
     s = s.replace('<g class="me-walk" ', `<g class="me-walk" data-needs='${JSON.stringify(N)}' `);
     return s.replace(/<\/svg>$/, hud + '</svg>');
   };

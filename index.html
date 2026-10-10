@@ -698,7 +698,8 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .home-scene .me-walk.hop .me-bob { animation: thop2 .5s ease-out; } @keyframes thop2 { 0% { transform: translateY(0); } 40% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
 .home-scene .needs { pointer-events: none; } svg.home-scene > rect, .home-scene .visitor, .home-scene .act-prop { pointer-events: none; }
 .ctabs { margin: 4px 0 10px; } .cstep { display: inline-flex; gap: 3px; } .cstep i { width: 18px; height: 6px; border-radius: 3px; background: var(--line); } .cstep i.on { background: var(--accent); }
-.placego { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; } .placemap { width: 100%; height: auto; display: block; margin: 8px 0; } .placemap .pm-sea { fill: color-mix(in srgb, var(--accent) 7%, var(--bg, #fff)); } .placemap .pm-grid line { stroke: var(--line); stroke-width: 1; opacity: .6; } .placemap .pm-dot { cursor: pointer; } .placemap .pm-dot circle:not([fill]) { fill: var(--muted); } .placemap .pm-dot.on circle:not([fill]), .placemap .pm-dot:hover circle:not([fill]) { fill: var(--accent); } .placemap .pm-dot.here circle:not([fill]) { fill: #E0505E; } .placemap .pm-dot text { font-size: 13px; fill: #F2EDE6; paint-order: stroke; stroke: rgba(0,0,0,.7); stroke-width: 3px; } .placemap .pm-ping { fill: none !important; stroke: #FFB020; stroke-width: 3; animation: pmping 1.6s ease-out infinite; } @keyframes pmping { from { opacity: 1; } to { opacity: 0; } } .placecard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; } .placecard .reasons li { margin: 4px 0; }
+.contacts2 .cname a { display: block; white-space: nowrap; } .contacts2 .cname .muted { display: block; } .contacts2 td.num { font-variant-numeric: tabular-nums; white-space: nowrap; } .cbar { display: block; width: 46px; height: 3px; margin: 3px 0 0 auto; background: var(--line); border-radius: 2px; overflow: hidden; } .cbar i { display: block; height: 100%; background: var(--accent); } .cbar i.neg { background: #c77; } .contacts2 .nowrap { white-space: nowrap; } .linkish.on { font-weight: 700; text-decoration: underline; }
+.placego { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; } .placemap { width: 100%; height: auto; display: block; margin: 8px 0; } .placemap .pm-sea { fill: color-mix(in srgb, var(--accent) 7%, var(--bg, #fff)); } .placemap .pm-grid line { stroke: var(--line); stroke-width: 1; opacity: .6; } .placemap .pm-dot { cursor: pointer; } .placemap .pm-dot circle:not([fill]) { fill: var(--muted); } .placemap .pm-dot.on circle:not([fill]), .placemap .pm-dot:hover circle:not([fill]) { fill: var(--accent); } .placemap .pm-dot.here circle:not([fill]) { fill: #E0505E; } .placemap .pm-labels text { font-size: 11.5px; fill: #F2EDE6; paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: 3px; pointer-events: none; } .placemap .pm-eubox { fill: none; stroke: #F2EDE6; stroke-opacity: .35; stroke-dasharray: 3 3; } .placemap .pm-eulink { stroke: #F2EDE6; stroke-opacity: .25; stroke-dasharray: 3 3; } .placemap .pm-inset rect { fill: #000; fill-opacity: .28; stroke: #F2EDE6; stroke-opacity: .25; } .placemap .pm-cap { font-size: 10px; letter-spacing: 1.5px; fill: #F2EDE6; fill-opacity: .6; font-weight: 700; } .placemap .pm-ping { fill: none !important; stroke: #FFB020; stroke-width: 3; animation: pmping 1.6s ease-out infinite; } @keyframes pmping { from { opacity: 1; } to { opacity: 0; } } .placecard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; } .placecard .reasons li { margin: 4px 0; }
 .home-scene .pets { pointer-events: none; } .home-scene .pet-roam { animation: petroam 18s ease-in-out infinite alternate; } @keyframes petroam { 0% { transform: translateX(-40px); } 45% { transform: translateX(60px); } 55% { transform: translateX(60px); } 100% { transform: translateX(-30px); } } .home-scene .pet-tail { animation: pettail .5s ease-in-out infinite alternate; } @keyframes pettail { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } } .home-scene .pet-sad .pet-tail { animation: none; } .pet-swim { animation: petswim 6s ease-in-out infinite alternate; } @keyframes petswim { from { transform: translateX(-8px); } to { transform: translateX(8px); } } .pet-hop { animation: pethop 2.4s ease-in-out infinite; } @keyframes pethop { 0%, 80%, 100% { transform: translateY(0); } 88% { transform: translateY(-3px); } }
 .petgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin: 8px 0; } .petcard { display: flex; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; align-items: flex-start; } .petcard p { margin: 3px 0; } .petcard.mine { border-color: var(--accent); } .petpic { flex: none; background: color-mix(in srgb, var(--accent) 6%, transparent); border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .home-scene .pet-roam, .pet-tail, .pet-swim, .pet-hop { animation: none !important; } }
@@ -12197,7 +12198,8 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     o.push(`<rect width="120" height="${BH}" rx="10" fill="url(#${uid}b)"/>`);
     if (fig) o.push(`<rect y="${BH - 30}" width="120" height="30" fill="${mixHex(cloth, '#000', .25)}" opacity=".18"/>`);
     // studio backdrops: out-of-focus lights, a soft beam, a painted sweep, a halo
-    if (pat === 0) o.push(Array.from({ length: fig ? 14 : 9 }, () => `<circle cx="${(pr() * 120).toFixed(1)}" cy="${(pr() * (fig ? 200 : 110)).toFixed(1)}" r="${(5 + pr() * 14).toFixed(1)}" fill="#FFFFFF" opacity="${(.08 + pr() * .16).toFixed(2)}"/>`).join(''));
+    if (true) { /* a clean studio sweep: no bokeh or beams */ }
+    else if (pat === 0) o.push(Array.from({ length: fig ? 14 : 9 }, () => `<circle cx="${(pr() * 120).toFixed(1)}" cy="${(pr() * (fig ? 200 : 110)).toFixed(1)}" r="${(5 + pr() * 14).toFixed(1)}" fill="#FFFFFF" opacity="${(.08 + pr() * .16).toFixed(2)}"/>`).join(''));
     else if (pat === 1) o.push(`<path d="M-10 0 L50 0 L130 ${BH} L70 ${BH} Z" fill="#FFFFFF" opacity=".16"/><path d="M60 0 L80 0 L130 ${BH * .6} L120 ${BH * .7} Z" fill="#FFFFFF" opacity=".1"/>`);
     else if (pat === 2) o.push(`<ellipse cx="60" cy="${fig ? 120 : 70}" rx="70" ry="${fig ? 110 : 60}" fill="#FFFFFF" opacity=".2"/><ellipse cx="60" cy="${fig ? 120 : 70}" rx="44" ry="${fig ? 80 : 40}" fill="#FFFFFF" opacity=".14"/>`);
     else o.push(`<circle cx="60" cy="40" r="46" fill="#FFFFFF" opacity=".22"/><circle cx="60" cy="40" r="30" fill="#FFFFFF" opacity=".12"/>`);
@@ -35190,7 +35192,7 @@ LOOK.glasses.opts.push('Heart shades', 'Star shades', '3D glasses', 'Monocle');
 LOOK.hair.opts.push('Pigtails', 'Big curls', 'Side shave', 'Wolf cut', 'Beehive', 'Long waves');
 LOOK.hairColor.opts.push('#FF6FB5', '#6FC3FF', '#FFD23F', '#9BE564', '#FFFFFF');
 Object.assign(LOOK, {
-  style: { label: 'Style', opts: ['Toon', 'Classic'] },
+  style: { label: 'Style', opts: ['Realistic', 'Cartoon'] },
   eyeShape: { label: 'Eyes', opts: ['Round', 'Sleepy', 'Sparkly', 'Wink', 'Cat-eye', 'Dots', 'Starry', 'Heavy-lidded'] },
   mouth: { label: 'Mouth', opts: ['Smile', 'Big grin', 'Smirk', 'Laughing', 'Cat mouth', 'Straight', 'Pout', 'Gap tooth'] },
   cheeks: { label: 'Cheeks', opts: ['Plain', 'Blush', 'Freckles', 'Freckles and blush', 'Rosy', 'Dimples'] },
@@ -35478,7 +35480,7 @@ function toonBody(L, uid, cx, neckY, bw, skin, skinD, cloth, clothD, pat, line) 
 { const _portrait = portraitSVG;
   portraitSVG = function (L, age, size = 96, bare = false, fig = false) {
     const LL = Object.assign(defaultLook(), migrateLook(Object.assign({}, L)));
-    if (LL.style === 1) return _portrait(L, age, size, bare, fig);
+    if (LL.style !== 1) return _portrait(L, age, size, bare, fig);   // realistic by default; the cartoon look is opt-in
     return toonSVG(LL, age, size, bare, fig);
   };
 }
@@ -37581,16 +37583,17 @@ function toonNeeds() {
   return { energy: Math.round(M.energy), calm: Math.round(100 - M.stress), social: clamp(k * 18, 0, 100), fun: clamp(100 - (M.grind || 0) * 8, 0, 100) };
 }
 function toonSays(N) {
-  const low = Object.entries(N).sort((a, b) => a[1] - b[1])[0];
-  if (low[1] >= 60) return pickLine(['I\'m good! Let\'s make something.', 'Feeling great today.', 'Life\'s pretty good, actually.'], S.week);
-  return { energy: ['So tired. A nap? Or coffee. Both?', 'I need a proper night\'s sleep.'], calm: ['Everything is a lot right now. Music, maybe.', 'I need a walk. Or a scream into a pillow.'], social: ['I haven\'t seen anyone in ages. Text someone?', 'A night out would do me good.'], fun: ['All work. When did I last have fun?', 'Can we do something that isn\'t work?'] }[low[0]][S.week % 2];
+  const low = Object.entries(N).sort((a, b) => a[1] - b[1])[0], v = Math.round(low[1]);
+  if (low[1] >= 60) return `All levels above 60. Good week to push.`;
+  return { energy: `Energy ${v}: sleep, or coffee`, calm: `Calm ${v}: music, a walk, a quiet night`, social: `Social ${v}: text someone`, fun: `Fun ${v}: a night out, a game` }[low[0]];
 }
 { const _hs = homeSceneSVG;
   homeSceneSVG = function (day) {
     let s = _hs(day); const N = toonNeeds();
-    const meter = (x, icon, v, col) => `<g transform="translate(${x} 6)"><rect width="46" height="12" rx="6" fill="#000" opacity=".45"/><text x="7" y="9.2" font-size="8" text-anchor="middle">${icon}</text><rect x="13" y="4" width="29" height="4" rx="2" fill="#FFFFFF" opacity=".25"/><rect x="13" y="4" width="${Math.max(1, 29 * v / 100)}" height="4" rx="2" fill="${v < 30 ? '#FF6B6B' : v < 60 ? '#FFD23F' : col}"/></g>`;
-    const hud = `<g class="needs">${meter(6, '⚡', N.energy, '#7EE081')}${meter(56, '😌', N.calm, '#7EE081')}${meter(106, '💬', N.social, '#7EE081')}${meter(156, '🎈', N.fun, '#7EE081')}</g>`;
-    s = s.replace(/(<g class="me-walk" data-acts=')/, `<g class="me-say" opacity="${typeof UI !== 'undefined' && UI.toonSay > Date.now() ? 1 : 0}"><rect x="150" y="18" width="120" height="22" rx="11" fill="#fff" stroke="#0002"/><path d="M200 40 l4 6 l4 -6 z" fill="#fff"/><text x="210" y="32.5" font-size="7.5" text-anchor="middle" fill="#333" font-family="sans-serif">${esc(toonSays(N))}</text></g>$1`);
+    // a sleek readout: label, a thin bar, and the number
+    const meter = (x, label, v) => { const c = v < 30 ? '#FF6B6B' : v < 60 ? '#F2C14E' : '#7EE0A1'; return `<g transform="translate(${x} 5)"><rect width="76" height="12" rx="2" fill="#0B0F14" opacity=".7"/><text x="4" y="8.4" font-size="5.6" font-weight="700" letter-spacing=".6" fill="#C9D1D9" font-family="ui-sans-serif,system-ui,sans-serif">${label}</text><rect x="34" y="5" width="24" height="2" rx="1" fill="#FFFFFF" opacity=".18"/><rect x="34" y="5" width="${Math.max(1, 24 * v / 100).toFixed(1)}" height="2" rx="1" fill="${c}"/><text x="73" y="8.6" font-size="6.2" font-weight="700" text-anchor="end" fill="${c}" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">${Math.round(v)}</text></g>`; };
+    const hud = `<g class="needs">${meter(5, 'ENERGY', N.energy)}${meter(84, 'CALM', N.calm)}${meter(163, 'SOCIAL', N.social)}${meter(242, 'FUN', N.fun)}</g>`;
+    s = s.replace(/(<g class="me-walk" data-acts=')/, `<g class="me-say" opacity="${typeof UI !== 'undefined' && UI.toonSay > Date.now() ? 1 : 0}"><rect x="140" y="26" width="140" height="18" rx="3" fill="#0B0F14" opacity=".85"/><path d="M204 44 l4 5 l4 -5 z" fill="#0B0F14" opacity=".85"/><text x="210" y="37.6" font-size="7" text-anchor="middle" fill="#E6EDF3" font-family="ui-sans-serif,system-ui,sans-serif">${esc(toonSays(N))}</text></g>$1`);
     s = s.replace('<g class="me-walk" ', `<g class="me-walk" data-needs='${JSON.stringify(N)}' `);
     return s.replace(/<\/svg>$/, hud + '</svg>');
   };
@@ -38545,7 +38548,22 @@ function livingLine() {
   if (wx && (wx.hi <= 9 || wx.k === 'snow')) bits.push('scarf weather'); else if (wx && wx.hi >= 28) bits.push('too hot for this');
   return bits.length ? bits.join(' · ') : 'looking like yourself';
 }
-{ const _ts = toonSays; toonSays = function (N) { const a = ailNow(); if (a) return { cold: 'Ugh. *sniff*. Tissues?', flu: 'Everything hurts. Soup. Bed. Now.', sprain: 'Careful with the wrist!', cut: 'It\'s just a scratch. Mostly.', burn: 'Don\'t touch my shoulders. Ever.', hangover: 'Too bright. Why is it so bright.' }[a.k]; return _ts(N); }; }
+{ const _ts = toonSays; toonSays = function (N) { const a = ailNow(); if (a) return `${AILMENTS[a.k].label}: until ${fmtDate(a.until, true)}`; return _ts(N); }; }
+// the realistic drawing gets the same day-to-day marks
+{ const _pt = portraitSVG;
+  portraitSVG = function (L, age, size = 96, bare = false, fig = false) {
+    const out = _pt(L, age, size, bare, fig), C = L && L._cond;
+    if (!C || (L.style === 1) || !Object.keys(C).some(k => C[k])) return out;
+    const LL = Object.assign(defaultLook(), L), fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][LL.face || 0], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][LL.face || 0], cx = 60, cy = 52;
+    const skin = LOOK.skin.opts[LL.skin] || '#D19A72', hc = LOOK.hairColor.opts[LL.hairColor] || '#3A2618', o = [];
+    if (C.pale) o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${fw / 2}" ry="${fh / 2}" fill="#E8EFE4" opacity=".18"/>`);
+    if (C.tan) o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${fw / 2}" ry="${fh / 2}" fill="#7A4A22" opacity=".12"/>`);
+    o.push(toonCondFace(Object.assign({}, C, { pale: 0, tan: 0 }), cx, cy, cy - 3, fw * .2, fw / 2 - 2, fh / 2, skin, mixHex(skin, '#000', .5), hc, !!LL.facial));
+    if (C.messy && !LL.head) o.push(toonCondHair(C, cx, cy - 4, fh / 2, hc));
+    if (fig && C.wrap) o.push(toonCondBody(C, cx, cy + fh / 2 + 6, 42));
+    const k = out.lastIndexOf('</svg>'); return out.slice(0, k) + o.join('') + out.slice(k);
+  };
+}
 // </living>
 // <credits2>
 // ---------------- Your credits, all in one place ----------------
@@ -38883,17 +38901,46 @@ function placeReasons(h) {
   return out;
 }
 function SUB_LABEL(k) { for (const c in CRAFTS) if (CRAFTS[c].subs[k]) return CRAFTS[c].subs[k].toLowerCase(); return k; }
+// labels never collide: each one tries right, left, above, below, and is dropped (hover still names it) if none fit
+function placeLabels(items, taken, W, H) {
+  const out = [], hit = (b) => taken.some(t => b.x < t.x + t.w && b.x + b.w > t.x && b.y < t.y + t.h && b.y + b.h > t.y) || b.x < 2 || b.y < 2 || b.x + b.w > W - 2 || b.y + b.h > H - 2;
+  for (const it of items) {
+    const w = it.t.length * 6 + 4, h = 12, r = it.r;
+    const tries = [[it.x + r + 3, it.y - 6.5, 'start'], [it.x - r - 3 - w, it.y - 6.5, 'end'], [it.x - w / 2, it.y - r - 15, 'middle'], [it.x - w / 2, it.y + r + 2, 'middle'], [it.x + r, it.y - r - 12, 'start'], [it.x + r, it.y + r, 'start'], [it.x - r - w, it.y - r - 12, 'end'], [it.x - r - w, it.y + r, 'end']];
+    for (const [bx, by, a] of tries) { const b = { x: bx, y: by, w, h }; if (hit(b)) continue; taken.push(b);
+      const tx = a === 'start' ? bx + 1 : a === 'end' ? bx + w - 1 : bx + w / 2; out.push(`<text x="${tx.toFixed(1)}" y="${(by + 10).toFixed(1)}" text-anchor="${a}"${it.cls ? ` class="${it.cls}"` : ''}>${esc(it.t)}</text>`); break; }
+  }
+  return out.join('');
+}
+const EU_BOX = { lon0: -11, lon1: 41, lat0: 35, lat1: 63 };
 function placesMapSVG() {
   const M = S.me, W = 1000, H = 420, X = lon => (lon + 170) / 350 * W, Y = lat => (68 - lat) / 115 * H, sel = UI.placeSel || M.hub;
+  const inEU = h => { const [lon, lat] = HUB_XY[h]; return lon >= EU_BOX.lon0 && lon <= EU_BOX.lon1 && lat >= EU_BOX.lat0 && lat <= EU_BOX.lat1; };
+  // the Europe inset, in the empty Pacific corner
+  const I = { x: 14, y: 196, s: 5.4 }; I.w = (EU_BOX.lon1 - EU_BOX.lon0) * I.s; I.h = (EU_BOX.lat1 - EU_BOX.lat0) * I.s * 1.3;
+  const IX = lon => I.x + (lon - EU_BOX.lon0) * I.s, IY = lat => I.y + (EU_BOX.lat1 - lat) * I.s * 1.3;
   const grid = [];
   for (let lon = -150; lon <= 180; lon += 30) grid.push(`<line x1="${X(lon)}" y1="0" x2="${X(lon)}" y2="${H}"/>`);
   for (let lat = -40; lat <= 60; lat += 20) grid.push(`<line x1="0" y1="${Y(lat)}" x2="${W}" y2="${Y(lat)}"/>`);
   const tip = M.placeTip && S.week - M.placeTip.w < 12 ? M.placeTip.h : null;
-  const dots = HUB_IDS.filter(h => HUB_XY[h]).map(h => { const [lon, lat] = HUB_XY[h], x = X(lon), y = Y(lat), here = h === M.hub, on = h === sel, minor = HUBS[h].minor, r = here ? 9 : minor ? 4.5 : 6.5;
-    const label = !minor || on || here;
-    return `<g class="pm-dot${here ? ' here' : ''}${on ? ' on' : ''}" data-city="${h}" tabindex="0" role="button" aria-label="${esc(HUBS[h].name)}"><circle cx="${x}" cy="${y}" r="${r + 7}" fill="transparent"/>${h === tip ? `<circle cx="${x}" cy="${y}" r="${r + 6}" class="pm-ping"/>` : ''}<circle cx="${x}" cy="${y}" r="${r}"/>${label ? `<text x="${x > W - 110 ? x - r - 3 : x + r + 3}" y="${y + 4}"${x > W - 110 ? ' text-anchor="end"' : ''}>${esc(HUBS[h].name.split(' and ')[0])}${here ? ' (you)' : ''}</text>` : ''}</g>`; }).join('');
-  return `<svg class="placemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of film cities"><rect width="${W}" height="${H}" rx="12" class="pm-sea"/><g class="pm-grid">${grid.join('')}</g>${dots}</svg>`;
+  const dot = (h, x, y, big) => { const here = h === M.hub, on = h === sel, minor = HUBS[h].minor, r = (here ? 8 : minor ? 4 : 5.5) * (big ? 1 : 1);
+    return { r, svg: `<g class="pm-dot${here ? ' here' : ''}${on ? ' on' : ''}" data-city="${h}" tabindex="0" role="button" aria-label="${esc(HUBS[h].name)}"><title>${esc(HUBS[h].name)}</title><circle cx="${x}" cy="${y}" r="${r + 7}" fill="transparent"/>${h === tip ? `<circle cx="${x}" cy="${y}" r="${r + 6}" class="pm-ping"/>` : ''}<circle cx="${x}" cy="${y}" r="${r}"/></g>` }; };
+  const name = h => HUBS[h].name.split(' and ')[0] + (h === M.hub ? ' (you)' : '');
+  const prio = h => (h === M.hub ? 0 : h === sel ? 1 : HUBS[h].minor ? 3 : 2);
+  const taken = [{ x: I.x - 4, y: I.y - 18, w: I.w + 8, h: I.h + 22 }];
+  const world = HUB_IDS.filter(h => HUB_XY[h] && !inEU(h)).map(h => { const [lon, lat] = HUB_XY[h], x = X(lon), y = Y(lat), d = dot(h, x, y); taken.push({ x: x - d.r, y: y - d.r, w: d.r * 2, h: d.r * 2 }); return { h, x, y, r: d.r, svg: d.svg, t: name(h) }; });
+  const eu = HUB_IDS.filter(h => HUB_XY[h] && inEU(h));
+  const euMain = eu.map(h => { const [lon, lat] = HUB_XY[h]; return dot(h, X(lon), Y(lat)).svg; }).join('');
+  const euIn = eu.map(h => { const [lon, lat] = HUB_XY[h], x = IX(lon), y = IY(lat), d = dot(h, x, y, true); return { h, x, y, r: d.r, svg: d.svg, t: name(h) }; });
+  const takenI = euIn.map(e => ({ x: e.x - e.r, y: e.y - e.r, w: e.r * 2, h: e.r * 2 }));
+  const box = [X(EU_BOX.lon0), Y(EU_BOX.lat1), X(EU_BOX.lon1) - X(EU_BOX.lon0), Y(EU_BOX.lat0) - Y(EU_BOX.lat1)];
+  return `<svg class="placemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of film cities"><rect width="${W}" height="${H}" rx="12" class="pm-sea"/><g class="pm-grid">${grid.join('')}</g>
+   <rect class="pm-eubox" x="${box[0]}" y="${box[1]}" width="${box[2]}" height="${box[3]}" rx="4"/><path class="pm-eulink" d="M${box[0]} ${box[1] + box[3]} L${I.x + I.w} ${I.y}"/>
+   <g class="pm-inset"><rect x="${I.x - 4}" y="${I.y - 18}" width="${I.w + 8}" height="${I.h + 22}" rx="6"/><text x="${I.x + 2}" y="${I.y - 6}" class="pm-cap">EUROPE</text></g>
+   ${euMain}${world.map(w => w.svg).join('')}${euIn.map(e => e.svg).join('')}
+   <g class="pm-labels">${placeLabels(world.slice().sort((a, b) => prio(a.h) - prio(b.h)), taken, W, H)}${placeLabels(euIn.slice().sort((a, b) => prio(a.h) - prio(b.h)), takenI, W, H)}</g></svg>`;
 }
+
 function placesHTML() {
   const M = S.me; if (!M) return ''; const sel = HUBS[UI.placeSel] ? UI.placeSel : M.hub, here = sel === M.hub, wx = typeof wxDay === 'function' ? wxDay(sel, S.week, 2) : null;
   const R = placeReasons(sel), fee = moveFee(sel), trip = HUBS[sel].lang === HUBS[M.hub].lang ? 450 : 1100;
@@ -39750,11 +39797,18 @@ function viewDesk() {
     return `<tr${block ? ' class="blocked"' : ''}><td><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t)}</a>${p.agent ? ' ' + chip('Via your agent', 'good') : ''}${p.ref ? ' ' + chip('Referral', 'good') : ''}${t.cr ? ' ' + chip('Credit', 'hist') : ''}${p.tier === 0 ? ' ' + chip('Internship', 'hist') : ''}${t.tier >= 2 ? ` <span class="lvl" title="Job level">${'★'.repeat(t.tier)}</span>` : ''}${p.away ? ' ' + chip(`In ${hubName(p.away)}: you'd move`, HUBS[p.away].lang === HUBS[S.me.hub].lang ? 'hist' : 'warn') : ''}${block ? `<br><span class="bad small">⚠ ${esc(block)}: you'll be filtered out</span>` : ''}</td><td>${f ? fl(f.id) + ` <span class="muted">${esc(f.status.toLowerCase())}</span>` : p.mco ? `${esc(p.mco)} <span class="muted">${esc(t.biz || '')}</span>` : p.co !== undefined ? `<a href="#" class="lk" data-go="co:${p.co}">${esc(S.companies[p.co].name)}</a> <span class="muted">${esc(t.biz || '')}</span>` : `<span class="muted">${esc(t.d)}</span>`}</td><td>${p.head !== null ? pl(p.head) : '<span class="muted">—</span>'}</td><td class="n">${p.days}d × ${p.weeks}w${typeof fitChip === 'function' ? '<br>' + fitChip(p) : ''}</td><td class="n" title="Typical range for this job">${p.rate ? `${fmtCash(p.rate)}<br><span class="muted small">${fmtCash(Math.round(p.rate * .8 / 5) * 5)}–${fmtCash(Math.round(p.rate * 1.35 / 5) * 5)} · ~${fmtCash(Math.round(p.rate / 10))}/hr</span>` : 'unpaid'}</td><td><span class="odds-chip ${odds < .3 ? 'lo' : odds < .65 ? 'mid' : 'hi'}" title="${esc(why)}">${oddsBand(odds)}</span></td>
       <td>${`<label class="applyl"><input type="checkbox" data-apply="${p.id}" ${on ? 'checked' : ''} ${!on && picked.length >= slots ? 'disabled' : ''}> Apply</label>`}</td></tr>`;
   };
-  const conRows_ = () => known.sort((a, b) => opinion(b) - opinion(a)).map(id => {
-    const q = P(id), k = M.known[id], o = opinion(id);
+  const conSort = UI.consort || 'opinion', conKey = { opinion: id => opinion(id), trust: id => M.known[id].trust, memory: id => ((M.mem || {})[id] || { v: 0 }).v, recent: id => M.known[id].seen || 0 }[conSort] || (id => opinion(id));
+  const conBar = (v, lo, hi) => { const w = Math.round(clamp((v - lo) / (hi - lo), 0, 1) * 100); return `<span class="cbar"><i style="width:${w}%" class="${v < 0 ? 'neg' : ''}"></i></span>`; };
+  const conRows_ = () => known.slice().sort((a, b) => conKey(b) - conKey(a)).map(id => {
+    const q = P(id), k = M.known[id], o = opinion(id), mv = ((M.mem || {})[id] || { v: 0 }).v, rel = typeof relOf === 'function' ? relOf(id) : null, R = rel && typeof REL !== 'undefined' && REL[rel] ? REL[rel].label : '';
     const film = S.active.map(i => S.films[i]).find(f => keyIds(f).includes(id));
-    return `<tr><td>${pl(id)}</td><td>${esc(q.occ || occupationOf(q))}<span class="muted"> · ${esc(hubName(q.hub))}</span></td><td class="n ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}</td><td class="n">${Math.round(k.trust)}</td><td class="n">${k.due ? `<span class="good">${k.due} owed to you</span>` : ''}${k.due && k.owe ? ', ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td><td class="st">${(() => { const t = tasteOf(q); return t.genres.map(g => M.love.includes(g) ? `<b class="good">♥ ${esc(g)}</b>` : esc(g)).join(', ') + ' · ' + (topThemes(voiceOf()).includes(t.theme) ? `<b class="good">${esc(THEMES[t.theme])}</b>` : esc(THEMES[t.theme])); })()}</td><td class="st">${esc(k.tags.slice(-2).join(' · '))}</td><td class="st">${film ? fl(film.id) : esc(personStatus(q))}</td>
-      <td>${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in a favour' : 'Ask for a favour'}</button>` : ''}</td></tr>`;
+    const t = tasteOf(q), taste = t.genres.map(g => M.love.includes(g) ? `<b class="good">${esc(g)}</b>` : esc(g)).join(', ');
+    return `<tr title="${esc(k.tags.slice(-3).join(' · '))}"><td class="cname">${pl(id)}<span class="muted small">${esc(q.occ || occupationOf(q))} · ${esc(hubName(q.hub))}</span></td><td class="small">${esc(R)}</td>
+      <td class="n num ${o > 10 ? 'good' : o < -10 ? 'bad' : ''}">${o > 0 ? '+' : ''}${Math.round(o)}${conBar(o, -100, 100)}</td><td class="n num">${Math.round(k.trust)}${conBar(k.trust, 0, 100)}</td>
+      <td class="n num ${mv >= 1 ? 'good' : mv <= -1 ? 'bad' : 'muted'}">${Math.abs(mv) >= .5 ? (mv > 0 ? '+' : '') + mv.toFixed(1) : '—'}</td>
+      <td class="n small">${k.due ? `<span class="good">${k.due} owed</span>` : ''}${k.due && k.owe ? ' · ' : ''}${k.owe ? `<span class="bad">you owe ${k.owe}</span>` : ''}</td>
+      <td class="small">${taste}</td><td class="small">${film ? fl(film.id) : esc(personStatus(q))}</td>
+      <td class="nowrap">${(k.due > 0 || k.trust >= 60) && !q.dead ? `<button class="linkish" data-favour="${id}">${k.due > 0 ? 'Call in favour' : 'Ask favour'}</button>` : ''}</td></tr>`;
   }).join('');
   // a desk part (an app on the computer) skips the hero: only the tab is needed
   return `${UI.inPart ? '' : `<div class="hero"><div class="hs">${homeSceneSVG(M.wk ? M.wk.day : 0)}</div><div class="hid"><p class="eyebrow">${esc(roleTitle(me.role))} · ${esc(hubName(M.hub))} · age ${ageOf(me)}</p><h2>${esc(me.name)}</h2>
@@ -39791,8 +39845,8 @@ function viewDesk() {
     case 'standing': return standingHTML();
     case 'life': return pathsPanel() + (typeof legacyPanel === 'function' && !M.over ? legacyPanel() : '') + (typeof arcLogHTML === 'function' ? arcLogHTML() : '') + yearsHTML() + clippingsHTML() + homePanel() + storyHTML();
     case 'people': return mentorHTML() + cohortHTML() + circleHTML() + troupePanel() + `<h3>Contacts <span class="count">${known.length}</span></h3>
-  <div class="tw"><table class="grid"><thead><tr><th>Name</th><th>Job</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n">Favours</th><th>Taste</th><th>History</th><th>Now</th><th></th></tr></thead><tbody>${conRows_() || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
-  <p class="note">Opinion is how much they like you; trust is whether they believe you. A favour they owe makes them put in a word: your next application to them gets a referral.</p>`;
+  <p class="small">Sort by: ${['opinion', 'trust', 'memory', 'recent'].map(k => `<button class="linkish${conSort === k ? ' on' : ''}" data-consort="${k}">${k}</button>`).join(' · ')}</p><div class="tw"><table class="grid contacts2"><thead><tr><th>Person</th><th>Relationship</th><th class="n">Opinion</th><th class="n">Trust</th><th class="n" title="What they remember about you, from Standing">Memory</th><th class="n">Favours</th><th>Taste</th><th>Now</th><th></th></tr></thead><tbody>${conRows_() || '<tr><td colspan="9" class="empty">You don’t know anyone yet.</td></tr>'}</tbody></table></div>
+  <p class="note">Opinion (−100 to 100) is how much they like you; trust (0–100) is whether they believe you; memory is what they remember you doing, good or bad, and it spreads to their friends. A favour they owe makes them put in a word: your next application to them gets a referral. Hover a row for how you know them.</p>`;
     default: return `${typeof todayHub === 'function' ? todayHub() : ''}<div class="cols two desk">
    <section class="panel"><h3>Inbox ${pend.length ? `<span class="chip bad">${pend.length} to decide</span>` : ''}</h3>
     <ul class="inbox">${recent.map(card).join('') || (pend.length ? '' : '<li class="empty">Nothing yet.</li>')}</ul></section>
@@ -39844,6 +39898,7 @@ function playWeeks(n) {
 }
 function careerClick(t) {
   const c = UI.cc;
+  if (t.dataset.consort) { UI.consort = t.dataset.consort; render(true); return true; }
   if (typeof petClick === 'function' && petClick(t)) return true;
   if (typeof actor3Click === 'function' && actor3Click(t)) return true;
   if (typeof placesClick === 'function' && placesClick(t)) return true;
@@ -39975,7 +40030,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

@@ -68,17 +68,46 @@ function placeReasons(h) {
   return out;
 }
 function SUB_LABEL(k) { for (const c in CRAFTS) if (CRAFTS[c].subs[k]) return CRAFTS[c].subs[k].toLowerCase(); return k; }
+// labels never collide: each one tries right, left, above, below, and is dropped (hover still names it) if none fit
+function placeLabels(items, taken, W, H) {
+  const out = [], hit = (b) => taken.some(t => b.x < t.x + t.w && b.x + b.w > t.x && b.y < t.y + t.h && b.y + b.h > t.y) || b.x < 2 || b.y < 2 || b.x + b.w > W - 2 || b.y + b.h > H - 2;
+  for (const it of items) {
+    const w = it.t.length * 6 + 4, h = 12, r = it.r;
+    const tries = [[it.x + r + 3, it.y - 6.5, 'start'], [it.x - r - 3 - w, it.y - 6.5, 'end'], [it.x - w / 2, it.y - r - 15, 'middle'], [it.x - w / 2, it.y + r + 2, 'middle'], [it.x + r, it.y - r - 12, 'start'], [it.x + r, it.y + r, 'start'], [it.x - r - w, it.y - r - 12, 'end'], [it.x - r - w, it.y + r, 'end']];
+    for (const [bx, by, a] of tries) { const b = { x: bx, y: by, w, h }; if (hit(b)) continue; taken.push(b);
+      const tx = a === 'start' ? bx + 1 : a === 'end' ? bx + w - 1 : bx + w / 2; out.push(`<text x="${tx.toFixed(1)}" y="${(by + 10).toFixed(1)}" text-anchor="${a}"${it.cls ? ` class="${it.cls}"` : ''}>${esc(it.t)}</text>`); break; }
+  }
+  return out.join('');
+}
+const EU_BOX = { lon0: -11, lon1: 41, lat0: 35, lat1: 63 };
 function placesMapSVG() {
   const M = S.me, W = 1000, H = 420, X = lon => (lon + 170) / 350 * W, Y = lat => (68 - lat) / 115 * H, sel = UI.placeSel || M.hub;
+  const inEU = h => { const [lon, lat] = HUB_XY[h]; return lon >= EU_BOX.lon0 && lon <= EU_BOX.lon1 && lat >= EU_BOX.lat0 && lat <= EU_BOX.lat1; };
+  // the Europe inset, in the empty Pacific corner
+  const I = { x: 14, y: 196, s: 5.4 }; I.w = (EU_BOX.lon1 - EU_BOX.lon0) * I.s; I.h = (EU_BOX.lat1 - EU_BOX.lat0) * I.s * 1.3;
+  const IX = lon => I.x + (lon - EU_BOX.lon0) * I.s, IY = lat => I.y + (EU_BOX.lat1 - lat) * I.s * 1.3;
   const grid = [];
   for (let lon = -150; lon <= 180; lon += 30) grid.push(`<line x1="${X(lon)}" y1="0" x2="${X(lon)}" y2="${H}"/>`);
   for (let lat = -40; lat <= 60; lat += 20) grid.push(`<line x1="0" y1="${Y(lat)}" x2="${W}" y2="${Y(lat)}"/>`);
   const tip = M.placeTip && S.week - M.placeTip.w < 12 ? M.placeTip.h : null;
-  const dots = HUB_IDS.filter(h => HUB_XY[h]).map(h => { const [lon, lat] = HUB_XY[h], x = X(lon), y = Y(lat), here = h === M.hub, on = h === sel, minor = HUBS[h].minor, r = here ? 9 : minor ? 4.5 : 6.5;
-    const label = !minor || on || here;
-    return `<g class="pm-dot${here ? ' here' : ''}${on ? ' on' : ''}" data-city="${h}" tabindex="0" role="button" aria-label="${esc(HUBS[h].name)}"><circle cx="${x}" cy="${y}" r="${r + 7}" fill="transparent"/>${h === tip ? `<circle cx="${x}" cy="${y}" r="${r + 6}" class="pm-ping"/>` : ''}<circle cx="${x}" cy="${y}" r="${r}"/>${label ? `<text x="${x > W - 110 ? x - r - 3 : x + r + 3}" y="${y + 4}"${x > W - 110 ? ' text-anchor="end"' : ''}>${esc(HUBS[h].name.split(' and ')[0])}${here ? ' (you)' : ''}</text>` : ''}</g>`; }).join('');
-  return `<svg class="placemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of film cities"><rect width="${W}" height="${H}" rx="12" class="pm-sea"/><g class="pm-grid">${grid.join('')}</g>${dots}</svg>`;
+  const dot = (h, x, y, big) => { const here = h === M.hub, on = h === sel, minor = HUBS[h].minor, r = (here ? 8 : minor ? 4 : 5.5) * (big ? 1 : 1);
+    return { r, svg: `<g class="pm-dot${here ? ' here' : ''}${on ? ' on' : ''}" data-city="${h}" tabindex="0" role="button" aria-label="${esc(HUBS[h].name)}"><title>${esc(HUBS[h].name)}</title><circle cx="${x}" cy="${y}" r="${r + 7}" fill="transparent"/>${h === tip ? `<circle cx="${x}" cy="${y}" r="${r + 6}" class="pm-ping"/>` : ''}<circle cx="${x}" cy="${y}" r="${r}"/></g>` }; };
+  const name = h => HUBS[h].name.split(' and ')[0] + (h === M.hub ? ' (you)' : '');
+  const prio = h => (h === M.hub ? 0 : h === sel ? 1 : HUBS[h].minor ? 3 : 2);
+  const taken = [{ x: I.x - 4, y: I.y - 18, w: I.w + 8, h: I.h + 22 }];
+  const world = HUB_IDS.filter(h => HUB_XY[h] && !inEU(h)).map(h => { const [lon, lat] = HUB_XY[h], x = X(lon), y = Y(lat), d = dot(h, x, y); taken.push({ x: x - d.r, y: y - d.r, w: d.r * 2, h: d.r * 2 }); return { h, x, y, r: d.r, svg: d.svg, t: name(h) }; });
+  const eu = HUB_IDS.filter(h => HUB_XY[h] && inEU(h));
+  const euMain = eu.map(h => { const [lon, lat] = HUB_XY[h]; return dot(h, X(lon), Y(lat)).svg; }).join('');
+  const euIn = eu.map(h => { const [lon, lat] = HUB_XY[h], x = IX(lon), y = IY(lat), d = dot(h, x, y, true); return { h, x, y, r: d.r, svg: d.svg, t: name(h) }; });
+  const takenI = euIn.map(e => ({ x: e.x - e.r, y: e.y - e.r, w: e.r * 2, h: e.r * 2 }));
+  const box = [X(EU_BOX.lon0), Y(EU_BOX.lat1), X(EU_BOX.lon1) - X(EU_BOX.lon0), Y(EU_BOX.lat0) - Y(EU_BOX.lat1)];
+  return `<svg class="placemap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Map of film cities"><rect width="${W}" height="${H}" rx="12" class="pm-sea"/><g class="pm-grid">${grid.join('')}</g>
+   <rect class="pm-eubox" x="${box[0]}" y="${box[1]}" width="${box[2]}" height="${box[3]}" rx="4"/><path class="pm-eulink" d="M${box[0]} ${box[1] + box[3]} L${I.x + I.w} ${I.y}"/>
+   <g class="pm-inset"><rect x="${I.x - 4}" y="${I.y - 18}" width="${I.w + 8}" height="${I.h + 22}" rx="6"/><text x="${I.x + 2}" y="${I.y - 6}" class="pm-cap">EUROPE</text></g>
+   ${euMain}${world.map(w => w.svg).join('')}${euIn.map(e => e.svg).join('')}
+   <g class="pm-labels">${placeLabels(world.slice().sort((a, b) => prio(a.h) - prio(b.h)), taken, W, H)}${placeLabels(euIn.slice().sort((a, b) => prio(a.h) - prio(b.h)), takenI, W, H)}</g></svg>`;
 }
+
 function placesHTML() {
   const M = S.me; if (!M) return ''; const sel = HUBS[UI.placeSel] ? UI.placeSel : M.hub, here = sel === M.hub, wx = typeof wxDay === 'function' ? wxDay(sel, S.week, 2) : null;
   const R = placeReasons(sel), fee = moveFee(sel), trip = HUBS[sel].lang === HUBS[M.hub].lang ? 450 : 1100;

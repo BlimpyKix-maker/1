@@ -133,4 +133,19 @@ function livingLine() {
   if (wx && (wx.hi <= 9 || wx.k === 'snow')) bits.push('scarf weather'); else if (wx && wx.hi >= 28) bits.push('too hot for this');
   return bits.length ? bits.join(' · ') : 'looking like yourself';
 }
-{ const _ts = toonSays; toonSays = function (N) { const a = ailNow(); if (a) return { cold: 'Ugh. *sniff*. Tissues?', flu: 'Everything hurts. Soup. Bed. Now.', sprain: 'Careful with the wrist!', cut: 'It\'s just a scratch. Mostly.', burn: 'Don\'t touch my shoulders. Ever.', hangover: 'Too bright. Why is it so bright.' }[a.k]; return _ts(N); }; }
+{ const _ts = toonSays; toonSays = function (N) { const a = ailNow(); if (a) return `${AILMENTS[a.k].label}: until ${fmtDate(a.until, true)}`; return _ts(N); }; }
+// the realistic drawing gets the same day-to-day marks
+{ const _pt = portraitSVG;
+  portraitSVG = function (L, age, size = 96, bare = false, fig = false) {
+    const out = _pt(L, age, size, bare, fig), C = L && L._cond;
+    if (!C || (L.style === 1) || !Object.keys(C).some(k => C[k])) return out;
+    const LL = Object.assign(defaultLook(), L), fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][LL.face || 0], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][LL.face || 0], cx = 60, cy = 52;
+    const skin = LOOK.skin.opts[LL.skin] || '#D19A72', hc = LOOK.hairColor.opts[LL.hairColor] || '#3A2618', o = [];
+    if (C.pale) o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${fw / 2}" ry="${fh / 2}" fill="#E8EFE4" opacity=".18"/>`);
+    if (C.tan) o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${fw / 2}" ry="${fh / 2}" fill="#7A4A22" opacity=".12"/>`);
+    o.push(toonCondFace(Object.assign({}, C, { pale: 0, tan: 0 }), cx, cy, cy - 3, fw * .2, fw / 2 - 2, fh / 2, skin, mixHex(skin, '#000', .5), hc, !!LL.facial));
+    if (C.messy && !LL.head) o.push(toonCondHair(C, cx, cy - 4, fh / 2, hc));
+    if (fig && C.wrap) o.push(toonCondBody(C, cx, cy + fh / 2 + 6, 42));
+    const k = out.lastIndexOf('</svg>'); return out.slice(0, k) + o.join('') + out.slice(k);
+  };
+}

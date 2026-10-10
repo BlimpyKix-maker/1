@@ -10,7 +10,7 @@ LOOK.glasses.opts.push('Heart shades', 'Star shades', '3D glasses', 'Monocle');
 LOOK.hair.opts.push('Pigtails', 'Big curls', 'Side shave', 'Wolf cut', 'Beehive', 'Long waves');
 LOOK.hairColor.opts.push('#FF6FB5', '#6FC3FF', '#FFD23F', '#9BE564', '#FFFFFF');
 Object.assign(LOOK, {
-  style: { label: 'Style', opts: ['Toon', 'Classic'] },
+  style: { label: 'Style', opts: ['Realistic', 'Cartoon'] },
   eyeShape: { label: 'Eyes', opts: ['Round', 'Sleepy', 'Sparkly', 'Wink', 'Cat-eye', 'Dots', 'Starry', 'Heavy-lidded'] },
   mouth: { label: 'Mouth', opts: ['Smile', 'Big grin', 'Smirk', 'Laughing', 'Cat mouth', 'Straight', 'Pout', 'Gap tooth'] },
   cheeks: { label: 'Cheeks', opts: ['Plain', 'Blush', 'Freckles', 'Freckles and blush', 'Rosy', 'Dimples'] },
@@ -298,7 +298,7 @@ function toonBody(L, uid, cx, neckY, bw, skin, skinD, cloth, clothD, pat, line) 
 { const _portrait = portraitSVG;
   portraitSVG = function (L, age, size = 96, bare = false, fig = false) {
     const LL = Object.assign(defaultLook(), migrateLook(Object.assign({}, L)));
-    if (LL.style === 1) return _portrait(L, age, size, bare, fig);
+    if (LL.style !== 1) return _portrait(L, age, size, bare, fig);   // realistic by default; the cartoon look is opt-in
     return toonSVG(LL, age, size, bare, fig);
   };
 }
