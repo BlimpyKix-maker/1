@@ -126,6 +126,18 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/bank2.js` | Money history (`M.ledger`: weekly cash and net worth; charts on the Bank page), auto-saving a share of good weeks (`M.autoSave`, action `bank2`), trade prices on Bazaar gear/books/courses from level 3 (`bzPrice`) and gear effects that scale with level (`bzBang`) |
 | `src/contests2.js` | 31 more contests (online, audio, theatre, comedy, music, writing, producing); `work` contests judge your best released piece (`compWorkBest`); 20 more short-film festivals and a deadlines & entries planner (`shortSubmit`, action `shortsubmit`); `seasonHTML` (your awards season, on the Awards page) |
 | `src/weather.js` (additions) | Weather app: live scene, sunrise/sunset/golden hour (`WX_LAT`), wind/humidity/UV, best shoot days, hourly curve, world cities (`WX_WORLD`, `data-wxhub`) |
+| `src/toon.js` | Toon portraits for everyone (`toonSVG`, wraps `portraitSVG`; Classic via look `style: 1`): new LOOK keys style/eyeShape/mouth/cheeks/facePaint/sidekick/aura, extra hats/glasses/hair/colours appended (old indexes keep their meaning), moods from your week (`_mood` via `lookOf`), investor lapel pin (`_pin`). CSS animation classes `t-*` only run in `.hero`, `.home-scene`, `.toonlive` |
+| `src/room2.js` | Room life: `roomPropsSVG` (activity props shown by the room's animation loop instead of emoji bubbles), `roomVisitorSVG` (partner or close friend some weeks, hashed), funky `VEHICLES` (skates to jetpack), `vehicleSVG` drawings, `streetVehicleSVG` parked outside the window |
+| `src/ventures.js` | Bank tabs (`UI.bkTab`: Accounts/Ventures/Private/History; `UI.bkSplit` keeps the old bankHTML parts apart). Ventures: `VENT_KINDS` (11 kinds), yearly climate (`VENT_CLIMATE`, `ventClimate`), deal flow (`ventRefresh`), homework roll (`ventDD`, fin), invest/sell, monthly fail/exit/round/breakout, founder asks (`VENT_ASKS`, inbox kind `vent`), perks wired into `companyEdge`, `wxBoxMul`, `festSelOdds`, `bzDiscount`; investor tiers (`investorTier`, memoised) |
+| `src/luck.js` | Lucky Corner (OS app `luck`, Play group): Lotto 6/49 drawn twice a week in `luckWeek`, scratchcards (~55–65% back), roulette (single zero), blackjack (S17, 3:2, basic-strategy hint if fin ≥ 11 or com ≥ 13), slots (~89%), craps pass line, the races (17% overround). Action `luck`; `luckStake` scales small money by `wageF` without the $5 rounding of `usd` |
+| `src/school2.js` | Pop quizzes (`makeQuiz`: film notes from FICTION, technique from CURR, decades; taste rules out answers), GPA (`schoolMark`, `gpaOf`, learn() wrapper), grade effects (hireFactors, shorts/fest odds, distinction, probation/expulsion), year shorts (inbox `yearshort`), 17 more real-ish shorts festivals with `SF_INFO` (juries, sections, side door: market/campus/fund/residency/feature), sales (`shortsale`), campus invites (`campus2`) |
+| `src/party3.js` | Party moods (`PARTY_MOODS`, approach classification), gossip doors (`PARTY_RUMOURS`, options `r_*`), own guests for the games room (`shark`) and coat room (`celeb`), wrappers on makeParty/partyScene/partyPick |
+| `src/acting2.js` | Named parts (`makePart`) on casting posts with a skill they need (hire factor), 14 actor gigs (`ACT_GIGS`, ODD_BY only), auditions and callbacks (holdInterview/resolveInterview wrappers, `it.aud`), big scenes on set (inbox `bigscene`, `j.perf`), critics' notices after release |
+| `src/moments.js` | Day and block moments (`DAY_MOMENTS`, `BLOCK_MOMENTS`, hashed, never dice) added to `conditionsOf`; small energy effects applied once per block via lifeDayEvent |
+| `src/sports.js` | Leagues per market (`LEAGUES`, `SPORT_KINDS`), hashed fixtures/results (`weekGames`), tables, play-offs, champions; sportsbook (action `sport`), follow a team, `VENUES.game`, sports jobs (`SPORT_JOBS` via depthBoard), song sync licensing (`syncWeek`), halftime show (inbox `halftime`); OS app `sports` |
+| `src/crew.js` | The group chat (thread key `crew`, `m.grp`): `chatCrew`, news reactions (`CREW_SAY`, `M.crewSeen`), asks (inbox `crew`: lead/poll/night/bet), your weekly post (action `crew`, `crewSay`) |
+| `src/prodjourney.js` | Own-company films get stage decisions (`PJ_CALLS`, inbox `pj`), effects on qBonus/hook/cost/schedule/bond/streamer sale, written to `f.events` (the film's story) |
+| `src/co2.js` | Offices (`OFFICES`), key people (`KEY_POSTS`, real NPCs, skill from standing, salaries from company cash, poaching inbox `copoach`), genre brand (`coBrand`), all via companyEdge; panel appended to strategyPanel |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -215,6 +227,14 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Media audiences: follower conversion raised (song .02, mv .02, video .03, blip .02, podcast .08) and discovery grows with √followers/30, so steady good work compounds (a weekly singer reaches a label offer in ~2 years; shorts creators reach 5–50k).
 - Gig quality is level-relative: 50 + (skill − 4 − 2·lv)·3.2 + snag/control bonuses + noise.
 - Deal odds: logistic(1.6·(slack − cost) − .4), clamped 2–98%. Investing slack grows with how much the film still needs (`filmNeed`), your standing over the producer's, and first-look history; studios negotiate less.
+
+## Round 5 decisions
+- Dice: every displayed DC is the rolled DC (contests via `compDC`, slate calls, audition DCs from the same target as interviews). Mastery +2 at 19+, expertise +1 at 16+, −1 at 4 or below.
+- Intent, not morality: shady options get a real roll (`intent.js`); success means you got away with what you meant.
+- Festivals: selection is a logistic of quality vs bar with tier caps (A-list ≤55%), wins ≤30%, windows 4–18 weeks before the month.
+- Saves: entDiff compares plain fields directly, skills and ties field by field, objects against baseline JSON (no hashing); browser save ~2.5–6 s on an 80-week game, overlay only after 350 ms.
+- Ventures: monthly fail ≈1.6% + more for bad companies; exits rare early; breakouts ×3 for strong ones. A random investor about breaks even; homework pays.
+- Luck games stay at real house edges; the Lucky Corner nags (max 6) only while net worth < $400k.
 
 ## Moving to another account
 - The code and its history are in the GitHub repo `BlimpyKix-maker/1`, branch `claude/cool-sagan-4jiu5s`. A new account needs access to that repo (add it as a collaborator, or fork/transfer it), or can start from the git bundle in the handoff package (`git clone apple-box.bundle apple-box`).
