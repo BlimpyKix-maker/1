@@ -763,6 +763,8 @@ function closeWeek(a) {
   if (typeof shorts2Week === 'function') shorts2Week();
   if (typeof tvSeasonWeek === 'function') tvSeasonWeek();
   if (typeof encounterWeek === 'function') encounterWeek();
+  if (typeof termWeek === 'function') termWeek();
+  if (typeof futWeek === 'function') futWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1196,6 +1198,7 @@ function applyAct(a) {
     case 'crew': return typeof crewSay === 'function' && crewSay(a);
     case 'co2': return typeof co2Act === 'function' && co2Act(a);
     case 'pet': return typeof petAct === 'function' && petAct(a);
+    case 'fut': return typeof futAct === 'function' && futAct(a);
     case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
     case 'place2': return typeof placeAct === 'function' && placeAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);

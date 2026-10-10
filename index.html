@@ -701,6 +701,43 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .tvcals { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin: 6px 0; } .tvcal { border: 1px solid var(--line); border-radius: 4px; padding: 3px 4px; font-size: 10.5px; line-height: 1.2; } .tvcal b { display: block; font-size: 11px; } .tvcal span { color: var(--muted); } .tvcal.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); } .tvcal.on span { color: inherit; } .ladder { padding: 1px 5px; border-radius: 3px; } .ladder.on { background: var(--accent); color: #fff; font-weight: 700; }
 @media (max-width: 600px) { .tvcals { grid-template-columns: repeat(6, 1fr); } }
 .contacts2 .cname a { display: block; white-space: nowrap; } .contacts2 .cname .muted { display: block; } .contacts2 td.num { font-variant-numeric: tabular-nums; white-space: nowrap; } .cbar { display: block; width: 46px; height: 3px; margin: 3px 0 0 auto; background: var(--line); border-radius: 2px; overflow: hidden; } .cbar i { display: block; height: 100%; background: var(--accent); } .cbar i.neg { background: #c77; } .contacts2 .nowrap { white-space: nowrap; } .linkish.on { font-weight: 700; text-decoration: underline; }
+/* ---- the Terminal ---- */
+.tk { --tk-bg: #0B0E12; --tk-p: #11161D; --tk-line: #1F2833; --tk-fg: #D7DEE6; --tk-mut: #7D8A99; --tk-acc: #FFB000; --tk-up: #3DDC97; --tk-dn: #FF5C5C; background: var(--tk-bg); color: var(--tk-fg); border-radius: 10px; padding: 10px; font-family: ui-sans-serif, system-ui, sans-serif; }
+.tk-green { --tk-acc: #3DDC97; } .tk-cyan { --tk-acc: #4CC9F0; } .tk-mono { --tk-acc: #E6E6E6; --tk-up: #C8C8C8; --tk-dn: #8A8A8A; }
+.tk .n, .tk-v, .tk-t td.n, .tk .dl, .tks { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.tk-top { display: flex; align-items: center; gap: 8px; padding: 2px 4px 8px; border-bottom: 1px solid var(--tk-line); margin-bottom: 8px; flex-wrap: wrap; }
+.tk-brand { font-weight: 800; letter-spacing: 2px; color: var(--tk-acc); font-size: 13px; } .tk-sub { color: var(--tk-mut); font-size: 11px; font-weight: 400; letter-spacing: .3px; } .tk-sp { flex: 1; }
+.tk-chip { background: transparent; border: 1px solid var(--tk-line); color: var(--tk-mut); border-radius: 3px; font-size: 10px; padding: 1px 6px; text-transform: uppercase; letter-spacing: .6px; cursor: pointer; } .tk-chip.on { color: var(--tk-bg); background: var(--tk-acc); border-color: var(--tk-acc); }
+.tk-hint { color: var(--tk-mut); font-size: 10px; margin-left: 6px; }
+.tk-kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px; margin-bottom: 8px; }
+.tk-kpi { background: var(--tk-p); border: 1px solid var(--tk-line); border-radius: 6px; padding: 6px 8px; display: grid; grid-template-columns: 1fr auto; grid-template-areas: "l l" "v v" "d s"; row-gap: 1px; }
+.tk-l { grid-area: l; color: var(--tk-mut); font-size: 9.5px; letter-spacing: 1.2px; font-weight: 700; } .tk-v { grid-area: v; font-size: 18px; color: var(--tk-fg); } .tk-kpi .dl { grid-area: d; font-size: 10.5px; color: var(--tk-mut); align-self: end; } .tk-kpi .spark { grid-area: s; align-self: end; }
+.dl.up, .tk .up { color: var(--tk-up); } .dl.dn, .tk .dn { color: var(--tk-dn); }
+.spark polyline { stroke: var(--tk-acc, #FFB000); } .spark.dn polyline { stroke: var(--tk-dn, #FF5C5C); } .spark circle { fill: var(--tk-acc, #FFB000); } .spark.dn circle { fill: var(--tk-dn, #FF5C5C); } .spark.wide { display: block; width: 100%; margin: 2px 0 4px; }
+.tk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 8px; }
+.tk-wide { grid-column: 1 / -1; } .tk-wide .tk-t td .tk-chip { padding: 1px 6px; margin-left: 2px; }
+.tk-p { background: var(--tk-p); border: 1px solid var(--tk-line); border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.tk-p h4 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: 1.5px; color: var(--tk-acc); font-weight: 800; }
+.tk-t { width: 100%; border-collapse: collapse; font-size: 11.5px; } .tk-t th { color: var(--tk-mut); font-weight: 600; font-size: 9.5px; letter-spacing: .8px; text-align: left; border-bottom: 1px solid var(--tk-line); padding: 3px 4px; } .tk-t th.n { text-align: right; } .tk-t td { padding: 3px 4px; border-bottom: 1px solid rgba(255,255,255,.04); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; } .tk-t tr:hover td { background: rgba(255,255,255,.03); }
+.tk-t .lk, .tk .linkish { color: var(--tk-fg); text-decoration: none; } .tk-t .lk:hover, .tk .linkish:hover { color: var(--tk-acc); }
+.tk-mut { color: var(--tk-mut); } .tk-mine td { background: color-mix(in srgb, var(--tk-acc) 10%, transparent); }
+.tk-foot { margin: 6px 0 0; font-size: 11px; color: var(--tk-mut); }
+.tk-bars { display: grid; gap: 3px; } .tk-bar { display: grid; grid-template-columns: 90px 1fr 46px 52px; align-items: center; gap: 6px; font-size: 11px; } .tk-bar i { display: block; height: 6px; background: var(--tk-acc); border-radius: 1px; opacity: .85; } .tk-bar b { text-align: right; font-family: ui-monospace, monospace; font-weight: 500; }
+.tk-sig { list-style: none; margin: 0; padding: 0; font-size: 12px; } .tk-sig li { padding: 4px 0 4px 10px; border-left: 2px solid var(--tk-line); margin-bottom: 3px; } .tk-sig li.s-risk { border-color: var(--tk-dn); } .tk-sig li.s-edge { border-color: var(--tk-up); } .tk-sig li.s-act { border-color: var(--tk-acc); } .tk-sig .linkish { text-align: left; }
+.tk-dense .tk-t { font-size: 10.5px; } .tk-dense .tk-t td { padding: 1px 4px; } .tk-dense .tk-p { padding: 6px 8px; } .tk-dense .tk-v { font-size: 15px; }
+/* the ticker strip */
+.os-tickwrap { grid-column: 1 / -1; overflow: hidden; background: #07090C; border-bottom: 1px solid #1F2833; height: 22px; }
+.tks { overflow: hidden; white-space: nowrap; font-size: 11px; line-height: 22px; color: #B8C4D0; } .tks-run { display: inline-block; animation: tks 60s linear infinite; padding-left: 100%; } .tks b { color: #FFB000; font-weight: 700; margin-right: 4px; } .tks i { font-style: normal; } .tks i.up { color: #3DDC97; } .tks i.dn { color: #FF5C5C; } .tks-i { padding: 0 10px; } .tks-sep { color: #2E3A47; }
+@keyframes tks { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .tks-run { animation: none; padding-left: 0; } }
+/* the command palette */
+#ab-pal { display: none; } #ab-pal.on { display: flex; position: fixed; inset: 0; z-index: 9999; background: rgba(4,6,9,.55); backdrop-filter: blur(2px); justify-content: center; align-items: flex-start; padding-top: 12vh; }
+.pal-box { width: min(640px, 92vw); background: #0F141B; border: 1px solid #2A3644; border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.5); padding: 8px; }
+#pal-q { width: 100%; box-sizing: border-box; background: #0B0E12; color: #E6EDF3; border: 1px solid #2A3644; border-radius: 6px; padding: 10px 12px; font-size: 15px; outline: none; } #pal-q:focus { border-color: #FFB000; }
+#pal-r { max-height: 50vh; overflow: auto; margin-top: 6px; } .pal-i { display: flex; width: 100%; justify-content: space-between; gap: 10px; background: transparent; border: 0; color: #D7DEE6; text-align: left; padding: 7px 10px; border-radius: 5px; cursor: pointer; font-size: 13px; } .pal-i span { color: #7D8A99; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55%; } .pal-i.on, .pal-i:hover { background: #1A2230; } .pal-i.on b { color: #FFB000; }
+.pal-h { color: #7D8A99; font-size: 11px; margin: 6px 4px 2px; }
+@media (max-width: 600px) { .tk-grid { grid-template-columns: 1fr; } .tk-bar { grid-template-columns: 70px 1fr 40px 46px; } }
+.wf{display:block;max-width:560px;font:12px/1 var(--mono,ui-monospace,monospace)}.wf-l{fill:var(--muted,#888)}.wf-v{fill:currentColor;font-variant-numeric:tabular-nums}.wf-base{fill:#5b8def}.wf-neg{fill:#c9554a;opacity:.85}.wf-pos{fill:#3fa36b}.wf-loss{fill:#8b1e1e}
 .placego { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; } .placemap { width: 100%; height: auto; display: block; margin: 8px 0; } .placemap .pm-sea { fill: color-mix(in srgb, var(--accent) 7%, var(--bg, #fff)); } .placemap .pm-grid line { stroke: var(--line); stroke-width: 1; opacity: .6; } .placemap .pm-dot { cursor: pointer; } .placemap .pm-dot circle:not([fill]) { fill: var(--muted); } .placemap .pm-dot.on circle:not([fill]), .placemap .pm-dot:hover circle:not([fill]) { fill: var(--accent); } .placemap .pm-dot.here circle:not([fill]) { fill: #E0505E; } .placemap .pm-labels text { font-size: 11.5px; fill: #F2EDE6; paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: 3px; pointer-events: none; } .placemap .pm-eubox { fill: none; stroke: #F2EDE6; stroke-opacity: .35; stroke-dasharray: 3 3; } .placemap .pm-eulink { stroke: #F2EDE6; stroke-opacity: .25; stroke-dasharray: 3 3; } .placemap .pm-inset rect { fill: #000; fill-opacity: .28; stroke: #F2EDE6; stroke-opacity: .25; } .placemap .pm-cap { font-size: 10px; letter-spacing: 1.5px; fill: #F2EDE6; fill-opacity: .6; font-weight: 700; } .placemap .pm-ping { fill: none !important; stroke: #FFB020; stroke-width: 3; animation: pmping 1.6s ease-out infinite; } @keyframes pmping { from { opacity: 1; } to { opacity: 0; } } .placecard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; } .placecard .reasons li { margin: 4px 0; }
 .home-scene .pets { pointer-events: none; } .home-scene .pet-roam { animation: petroam 18s ease-in-out infinite alternate; } @keyframes petroam { 0% { transform: translateX(-40px); } 45% { transform: translateX(60px); } 55% { transform: translateX(60px); } 100% { transform: translateX(-30px); } } .home-scene .pet-tail { animation: pettail .5s ease-in-out infinite alternate; } @keyframes pettail { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } } .home-scene .pet-sad .pet-tail { animation: none; } .pet-swim { animation: petswim 6s ease-in-out infinite alternate; } @keyframes petswim { from { transform: translateX(-8px); } to { transform: translateX(8px); } } .pet-hop { animation: pethop 2.4s ease-in-out infinite; } @keyframes pethop { 0%, 80%, 100% { transform: translateY(0); } 88% { transform: translateY(-3px); } }
 .petgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin: 8px 0; } .petcard { display: flex; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; align-items: flex-start; } .petcard p { margin: 3px 0; } .petcard.mine { border-color: var(--accent); } .petpic { flex: none; background: color-mix(in srgb, var(--accent) 6%, transparent); border-radius: 8px; }
@@ -11643,6 +11680,8 @@ function closeWeek(a) {
   if (typeof shorts2Week === 'function') shorts2Week();
   if (typeof tvSeasonWeek === 'function') tvSeasonWeek();
   if (typeof encounterWeek === 'function') encounterWeek();
+  if (typeof termWeek === 'function') termWeek();
+  if (typeof futWeek === 'function') futWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -12076,6 +12115,7 @@ function applyAct(a) {
     case 'crew': return typeof crewSay === 'function' && crewSay(a);
     case 'co2': return typeof co2Act === 'function' && co2Act(a);
     case 'pet': return typeof petAct === 'function' && petAct(a);
+    case 'fut': return typeof futAct === 'function' && futAct(a);
     case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
     case 'place2': return typeof placeAct === 'function' && placeAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
@@ -39715,6 +39755,293 @@ function gxResolve(it, k, T) {
   if (T) twistAfter(it, T, ok);
 }
 // </scenes2>
+// <terminal>
+// ---------------- The Terminal: your career as a trading desk ----------------
+// Everything that moves, in one dense screen: what you're worth and how fast it's changing, your standing, fame,
+// buzz and network as time series, the market and the box office, which genres are heating up, the best openings
+// ranked by expected value, your book (positions, income, burn and runway), and the signals worth acting on.
+// A ticker runs across the top of the computer, and Ctrl+K (or /) opens a command palette that goes anywhere.
+// History is a weekly snapshot (`M.hist`); every number here is computed from the same state the game runs on.
+function termWeek() {
+  const M = S.me, me = ME(); if (!M) return;
+  const nw = typeof osNetWorth === 'function' ? osNetWorth().total : M.cash;
+  (M.hist = M.hist || []).push({ w: S.week, nw: Math.round(nw), cash: Math.round(M.cash), st: +me.standing.toFixed(2), fame: +(me.fame || 0).toFixed(2), buzz: Math.round(typeof starScore === 'function' ? starScore(me) : 0), known: Object.keys(M.known).length, stress: Math.round(M.stress), energy: Math.round(M.energy) });
+  if (M.hist.length > 260) M.hist.shift();
+}
+const fmtK = v => { const a = Math.abs(v), s = v < 0 ? '−' : ''; return a >= 1e9 ? `${s}$${(a / 1e9).toFixed(2)}B` : a >= 1e6 ? `${s}$${(a / 1e6).toFixed(2)}M` : a >= 1e4 ? `${s}$${(a / 1e3).toFixed(1)}K` : `${s}$${Math.round(a).toLocaleString('en-US')}`; };
+const fmtPct = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(1)}%`;
+function tSpark(vals, w = 96, h = 22, cls = '') {
+  const L = vals.filter(v => isFinite(v)); if (L.length < 2) return `<svg class="spark ${cls}" width="${w}" height="${h}"></svg>`;
+  const lo = Math.min(...L), hi = Math.max(...L), rg = hi - lo || 1, pts = L.map((v, i) => `${(i / (L.length - 1) * (w - 2) + 1).toFixed(1)},${(h - 2 - (v - lo) / rg * (h - 4)).toFixed(1)}`);
+  const up = L[L.length - 1] >= L[0];
+  return `<svg class="spark ${cls} ${up ? 'up' : 'dn'}" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><polyline points="${pts.join(' ')}" fill="none" stroke-width="1.4"/><circle cx="${pts[pts.length - 1].split(',')[0]}" cy="${pts[pts.length - 1].split(',')[1]}" r="1.8"/></svg>`;
+}
+function dlt(v, f = x => x.toFixed(1)) { return `<span class="dl ${v > 0 ? 'up' : v < 0 ? 'dn' : ''}">${v > 0 ? '▲' : v < 0 ? '▼' : '•'} ${f(Math.abs(v))}</span>`; }
+function histSeries(k, n = 52) { const H = (S.me.hist || []).slice(-n); return H.map(x => x[k]); }
+function histDelta(k, n) { const H = S.me.hist || []; if (H.length < 2) return 0; const a = H[Math.max(0, H.length - 1 - n)][k], b = H[H.length - 1][k]; return b - a; }
+function burnRate() { const H = (S.me.hist || []).slice(-9); if (H.length < 2) return 0; return (H[H.length - 1].cash - H[0].cash) / (H.length - 1); }
+function postEV(p) { const o = hireOdds(p); return { o, ev: o * (p.rate || 0) * (p.days || 1) * Math.min(26, p.weeks || 4) }; }
+function termKPIs() {
+  const M = S.me, me = ME(), nw = osNetWorth(), burn = burnRate(), runway = burn < 0 ? Math.floor(M.cash / -burn) : null;
+  const top = Object.keys(M.known).map(Number).filter(id => P(id) && !P(id).dead).map(id => opinion(id)).sort((a, b) => b - a).slice(0, 20), net = top.length ? top.reduce((a, b) => a + b, 0) / top.length : 0;
+  const T = [
+    ['NET WORTH', fmtK(nw.total), dlt(histDelta('nw', 1), fmtK), tSpark(histSeries('nw'))],
+    ['CASH', fmtK(M.cash), `<span class="dl">${burn >= 0 ? '+' : '−'}${fmtK(Math.abs(burn)).replace('−', '')}/wk</span>`, tSpark(histSeries('cash'))],
+    ['RUNWAY', runway === null ? '∞' : `${runway} wk`, `<span class="dl ${runway !== null && runway < 12 ? 'dn' : ''}">${runway === null ? 'cash-positive' : 'at current burn'}</span>`, ''],
+    ['STANDING', me.standing.toFixed(1), dlt(histDelta('st', 4)), tSpark(histSeries('st'))],
+    ['FAME', (me.fame || 0).toFixed(1), dlt(histDelta('fame', 4)), tSpark(histSeries('fame'))],
+    ['BUZZ', String(Math.round(typeof starScore === 'function' ? starScore(me) : 0)), dlt(histDelta('buzz', 4), x => x.toFixed(0)), tSpark(histSeries('buzz'))],
+    ['NETWORK', `${Object.keys(M.known).length}`, `<span class="dl">avg ${net >= 0 ? '+' : ''}${net.toFixed(0)} top-20</span>`, tSpark(histSeries('known'))],
+    ['LEVEL', `${careerLevel()}`, `<span class="dl">${esc(LEVEL_NAME[careerLevel()] || '')}</span>`, '']
+  ];
+  return `<div class="tk-kpis">${T.map(([l, v, d, s]) => `<div class="tk-kpi"><span class="tk-l">${l}</span><b class="tk-v">${v}</b>${d}${s}</div>`).join('')}</div>`;
+}
+function termMarket() {
+  if (typeof listedCos !== 'function') return '';
+  const M = S.me, L = listedCos().map(c => [c, mktPrice(c), chg(c, 1), chg(c, 13)]).sort((a, b) => Math.abs(b[2]) - Math.abs(a[2])).slice(0, 9);
+  const idx = []; for (let i = 25; i >= 0; i--) idx.push(indexVal(S.week - i));
+  const iv = idx[idx.length - 1], ic = (iv / (idx[idx.length - 2] || iv) - 1) * 100;
+  return `<section class="tk-p"><h4>MARKET <span class="tk-sub">AB-500 ${iv.toFixed(1)} ${dlt(ic, x => x.toFixed(2) + '%')}</span></h4>${tSpark(idx, 260, 34, 'wide')}
+   <table class="tk-t"><thead><tr><th>Ticker</th><th class="n">Px</th><th class="n">1w</th><th class="n">13w</th><th class="n">You</th></tr></thead><tbody>${L.map(([c, px, d1, d13]) => `<tr><td><a href="#" class="lk" data-go="company:${c.id}">${esc(tTicker(c))}</a> <span class="tk-mut">${esc(c.name.slice(0, 18))}</span></td><td class="n">${px.toFixed(2)}</td><td class="n ${d1 >= 0 ? 'up' : 'dn'}">${fmtPct(d1)}</td><td class="n ${d13 >= 0 ? 'up' : 'dn'}">${fmtPct(d13)}</td><td class="n">${(M.port || {})[c.id] ? (M.port || {})[c.id] : ''}</td></tr>`).join('')}</tbody></table>
+   <p class="tk-foot"><button class="linkish" data-app="ticker">Open the trading app ›</button></p></section>`;
+}
+function tTicker(c) { const w = c.name.replace(/[^A-Za-z ]/g, '').split(' ').filter(Boolean); return (w.length > 1 ? w.map(x => x[0]).join('') : w[0] || 'XX').slice(0, 4).toUpperCase(); }
+function termBox() {
+  const L = S.films.filter(f => f.rel !== null && S.week - f.rel < 10 && f.rel <= S.week).map(f => { const k = S.week - f.rel; return [f, weeklyGross(f, k, null), k > 0 ? weeklyGross(f, k - 1, null) : 0, k]; }).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const mine = new Set((typeof myFilms === 'function' ? myFilms() : []).map(f => f.id));
+  return `<section class="tk-p"><h4>BOX OFFICE <span class="tk-sub">this week, worldwide</span></h4><table class="tk-t"><thead><tr><th>#</th><th>Title</th><th class="n">Wk</th><th class="n">Gross</th><th class="n">Δ</th><th class="n">Cum</th></tr></thead><tbody>${L.map(([f, g, g0, k], i) => `<tr${mine.has(f.id) ? ' class="tk-mine"' : ''}><td>${i + 1}</td><td>${fl(f.id)}</td><td class="n">${k + 1}</td><td class="n">${fmtM(g)}</td><td class="n ${g >= g0 ? 'up' : 'dn'}">${k ? fmtPct((g / Math.max(.001, g0) - 1) * 100) : 'NEW'}</td><td class="n">${fmtM(f.total * Math.min(1, (k + 1) / 8))}</td></tr>`).join('')}</tbody></table></section>`;
+}
+function termGenres() {
+  const y = S.year, by = (yy) => { const o = {}; for (const f of S.films) if (f.rel !== null && yearOf(f.rel) === yy) o[f.genre] = (o[f.genre] || 0) + (f.total || 0); return o; };
+  const a = by(y), b = by(y - 1), tot = Object.values(a).reduce((s, v) => s + v, 0) || 1, totb = Object.values(b).reduce((s, v) => s + v, 0) || 1;
+  const L = GENRES.map(g => [g, (a[g] || 0) / tot * 100, (b[g] || 0) / totb * 100]).filter(x => x[1] > 0 || x[2] > 0).sort((p, q) => q[1] - p[1]).slice(0, 10), mx = Math.max(...L.map(x => x[1]), 1);
+  return `<section class="tk-p"><h4>GENRE HEAT <span class="tk-sub">share of ${y} grosses vs ${y - 1}</span></h4><div class="tk-bars">${L.map(([g, s, s0]) => `<div class="tk-bar"><span>${esc(g)}${S.me.love.includes(g) ? ' ♥' : ''}</span><i style="width:${(s / mx * 100).toFixed(0)}%"></i><b>${s.toFixed(1)}%</b>${dlt(s - s0, x => x.toFixed(1))}</div>`).join('')}</div></section>`;
+}
+function termOpps() {
+  const M = S.me, B = M.board.map(p => [p, postEV(p)]).sort((a, b) => b[1].ev - a[1].ev).slice(0, 7), P0 = pending();
+  return `<section class="tk-p"><h4>OPPORTUNITIES <span class="tk-sub">ranked by expected value (odds × pay × time)</span></h4><table class="tk-t"><thead><tr><th>Job</th><th class="n">Odds</th><th class="n">$/day</th><th class="n">EV</th></tr></thead><tbody>${B.map(([p, e]) => `<tr><td><a href="#" class="lk" data-go="post:${p.id}">${esc(p.t.slice(0, 42))}</a></td><td class="n ${e.o >= .5 ? 'up' : e.o < .2 ? 'dn' : ''}">${Math.round(e.o * 100)}%</td><td class="n">${fmtCash(p.rate)}</td><td class="n">${fmtK(e.ev)}</td></tr>`).join('') || '<tr><td colspan="4" class="tk-mut">No openings on your board.</td></tr>'}</tbody></table>
+   <p class="tk-foot">${P0.length ? `<b>${P0.length}</b> decision${P0.length > 1 ? 's' : ''} waiting · <button class="linkish" data-app="today">Decide ›</button>` : 'No decisions waiting.'} · <button class="linkish" data-app="work">Full board ›</button></p></section>`;
+}
+function termBook() {
+  const M = S.me, nw = osNetWorth(), rows = [];
+  const pay = M.jobs.reduce((t, j) => t + (j.rate || 0) * (j.days || 0), 0); if (pay) rows.push(['Jobs', `${M.jobs.length} running`, pay]);
+  const pets = (M.pets || []).filter(p => !p.gone); if (pets.length) rows.push(['Pets', `${pets.length}`, -pets.reduce((t, p) => t + usd((PET_BY[p.kind] || {}).wk || 0), 0) - (M.petSitter ? usd(70) : 0)]);
+  if (nw.shares) rows.push(['Shares', `${Object.keys(M.port || {}).length} positions`, null, nw.shares]);
+  if (nw.banked) rows.push(['Bank', 'savings & CDs', null, nw.banked]);
+  if (nw.things) rows.push(['Collectibles', 'kit, trophies', null, nw.things]);
+  if ((M.holdings || []).length) rows.push(['Options', `${(M.holdings || []).filter(h => h.made === undefined && !h.lapsed).length} scripts held`, null, null]);
+  const c = typeof myCo === 'function' ? myCo() : null; if (c && c.closed === null) rows.push([esc(c.name), `company cash`, null, Math.round(c.cash * 1e6)]);
+  if ((M.resLog || []).length) rows.push(['Residuals', 'last cheque', M.resLog[M.resLog.length - 1].amt / 13]);
+  if (nw.debt) rows.push(['Debt', '', null, -nw.debt]);
+  return `<section class="tk-p"><h4>YOUR BOOK <span class="tk-sub">net ${fmtK(nw.total)}</span></h4><table class="tk-t"><thead><tr><th>Line</th><th></th><th class="n">Weekly</th><th class="n">Value</th></tr></thead><tbody>${rows.map(([a, b, wk, v]) => `<tr><td>${a}</td><td class="tk-mut">${esc(b)}</td><td class="n ${wk > 0 ? 'up' : wk < 0 ? 'dn' : ''}">${wk === null || wk === undefined ? '' : fmtK(wk)}</td><td class="n">${v === null || v === undefined ? '' : fmtK(v)}</td></tr>`).join('') || '<tr><td colspan="4" class="tk-mut">Nothing on the books yet.</td></tr>'}</tbody></table></section>`;
+}
+function termSignals() {
+  const M = S.me, me = ME(), out = [];
+  if (pending().length) out.push(['act', `${pending().length} decision${pending().length > 1 ? 's' : ''} waiting`, 'today']);
+  if (M.stress > 70) out.push(['risk', `Stress ${Math.round(M.stress)}: performance and health at risk`, 'life']);
+  if (M.energy < 25) out.push(['risk', `Energy ${Math.round(M.energy)}: rest before big checks`, 'week']);
+  if (typeof ailNow === 'function' && ailNow()) out.push(['risk', `${AILMENTS[ailNow().k].label} until ${fmtDate(ailNow().until, true)}`, 'life']);
+  for (const id of Object.keys(M.black || {}).slice(0, 2)) out.push(['risk', `${P(+id).name} has it in for you (−1.8 on their jobs)`, 'people']);
+  for (const id of Object.keys(M.champ || {}).slice(0, 2)) out.push(['edge', `${P(+id).name} is in your corner (+0.9)`, 'people']);
+  const due = Object.keys(M.known).map(Number).filter(id => M.known[id].due > 0 && P(id) && !P(id).dead); if (due.length) out.push(['edge', `${due.length} favour${due.length > 1 ? 's' : ''} owed to you`, 'people']);
+  if (typeof STYLE_PATHS !== 'undefined') for (const [k, p] of Object.entries(STYLE_PATHS)) { const run = (M.pathRun || {})[k] || 0; if (!(M.paths || {})[k] && run >= STYLE_WEEKS - 5) out.push(['edge', `${p.name}: ${STYLE_WEEKS - run} weeks from unlocking`, 'standing']); }
+  if ((M.opHeat || 0) > 0) out.push(['risk', `Backroom heat ${(M.opHeat || 0).toFixed(1)}: exposure risk ${((M.opHeat || 0) * 1.2).toFixed(1)}%/wk`, 'standing']);
+  const c = typeof myCo === 'function' ? myCo() : null; if (c && c.closed === null && c.cash < 0) out.push(['risk', `${c.name} overdrawn by ${fmtK(-c.cash * 1e6)}`, 'create']);
+  if (S.sc && S.sc.broke) { const L = Object.keys(S.sc.broke).map(Number).filter(id => M.known[id] && S.sc.broke[id] === S.year); if (L.length) out.push(['edge', `${L.length} contact${L.length > 1 ? 's' : ''} broke out this year: ask for work`, 'shorts']); }
+  const mo = dateOf(S.week).getUTCMonth(); if (typeof TV_CAL !== 'undefined') out.push(['info', `TV: ${TV_CAL[mo][0].toLowerCase()}`, 'tv']);
+  return `<section class="tk-p"><h4>SIGNALS</h4><ul class="tk-sig">${out.slice(0, 12).map(([k, t, app]) => `<li class="s-${k}"><button class="linkish" data-app="${app}">${esc(t)}</button></li>`).join('') || '<li class="tk-mut">All quiet.</li>'}</ul></section>`;
+}
+function terminalHTML() {
+  if (!S.me) return '';
+  const T = UI.tkTheme || 'amber';
+  return `<div class="tk tk-${T}${UI.tkDense ? ' tk-dense' : ''}"><div class="tk-top"><span class="tk-brand">AB TERMINAL</span><span class="tk-sub">${esc(S.me && S.me.wk ? fmtDay(S.me.wk.day) : fmtDate(S.week, true))} · ${BLOCKS[S.me && S.me.wk ? S.me.wk.block : 0].toLowerCase()}</span><span class="tk-sp"></span>
+   ${['amber', 'green', 'cyan', 'mono'].map(k => `<button class="tk-chip${T === k ? ' on' : ''}" data-tk="theme:${k}">${k}</button>`).join('')}<button class="tk-chip${UI.tkDense ? ' on' : ''}" data-tk="dense:1">dense</button><span class="tk-hint">Ctrl+K: go anywhere</span></div>
+   ${termKPIs()}
+   <div class="tk-grid">${termOpps()}${termSignals()}${termMarket()}${termBox()}${termGenres()}${termBook()}</div></div>`;
+}
+// ---- the ticker strip across the computer ----
+function tickerStrip() {
+  if (!S.me) return ''; const items = [];
+  try {
+    if (typeof indexVal === 'function') { const a = indexVal(S.week), b = indexVal(S.week - 1); items.push(`<b>AB-500</b> ${a.toFixed(1)} <i class="${a >= b ? 'up' : 'dn'}">${fmtPct((a / (b || a) - 1) * 100)}</i>`); }
+    const nw = osNetWorth().total, d = histDelta('nw', 1); items.push(`<b>YOU</b> ${fmtK(nw)} <i class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : '−'}${fmtK(Math.abs(d)).replace('−', '')}</i>`);
+    items.push(`<b>STD</b> ${ME().standing.toFixed(1)} <i class="${histDelta('st', 1) >= 0 ? 'up' : 'dn'}">${histDelta('st', 1) >= 0 ? '+' : '−'}${Math.abs(histDelta('st', 1)).toFixed(2)}</i>`);
+    if (typeof listedCos === 'function') for (const c of listedCos().map(c => [c, chg(c, 1)]).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 6)) items.push(`<b>${esc(tTicker(c[0]))}</b> ${mktPrice(c[0]).toFixed(2)} <i class="${c[1] >= 0 ? 'up' : 'dn'}">${fmtPct(c[1])}</i>`);
+    const bo = S.films.filter(f => f.rel !== null && f.rel <= S.week && S.week - f.rel < 4).map(f => [f, weeklyGross(f, S.week - f.rel, null)]).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    for (const [f, g] of bo) items.push(`<b>${esc(f.title.toUpperCase().slice(0, 18))}</b> ${fmtM(g)}`);
+  } catch (e) { /* the ticker never breaks a page */ }
+  const row = items.map(x => `<span class="tks-i">${x}</span>`).join('<span class="tks-sep">│</span>');
+  return `<div class="tks"><div class="tks-run">${row}<span class="tks-sep">│</span>${row}</div></div>`;
+}
+{ const _op = osPanel; osPanel = function () { const h = _op(); if (UI.noTicker) return h; const m = '<div class="os-main">', i = h.indexOf(m); return i < 0 ? h : h.slice(0, i + m.length) + `<div class="os-tickwrap">${tickerStrip()}</div>` + h.slice(i + m.length); }; }
+OS_EXTRA.terminal = ['📈', 'Terminal', 'Everything that moves: worth, standing, market, box office, genre heat, openings by expected value, your book and signals'];
+OS_VIEWS.terminal = () => terminalHTML();
+{ const g = OS_GROUPS.find(x => x[0] === 'Today'); if (g && !g[1].includes('terminal')) g[1].splice(1, 0, 'terminal'); }
+function termClick(t) { const d = t.dataset.tk; if (!d) return false; const [k, v] = d.split(':'); if (k === 'theme') UI.tkTheme = v; if (k === 'dense') UI.tkDense = !UI.tkDense; try { localStorage.setItem('ab-tk', JSON.stringify({ t: UI.tkTheme, d: UI.tkDense })); } catch (e) { /* preferences are optional */ } render(true); return true; }
+try { const p = JSON.parse(localStorage.getItem('ab-tk') || 'null'); if (p) { UI.tkTheme = p.t; UI.tkDense = p.d; } } catch (e) { /* no stored preference */ }
+// ---- the command palette: Ctrl+K or / ----
+function paletteItems(q) {
+  const out = [], Q = q.toLowerCase().trim(), M = S.me;
+  for (const [k, a] of Object.entries(OS_EXTRA)) out.push({ t: `${a[0]} ${a[1]}`, d: a[2], attr: `data-app="${k}"`, s: a[1] + ' ' + a[2] });
+  if (typeof APPS !== 'undefined') for (const a of APPS) if (!OS_EXTRA[a[0]]) out.push({ t: `${a[1]} ${a[2]}`, d: a[3] || '', attr: `data-app="${a[0]}"`, s: a[2] + ' ' + (a[3] || '') });
+  if (M) {
+    for (const id of Object.keys(M.known).map(Number).filter(id => P(id))) out.push({ t: `👤 ${P(id).name}`, d: (P(id).occ || ROLE_LABEL[P(id).role] || '') + ' · ' + hubName(P(id).hub), attr: `data-go="person:${id}"`, s: P(id).name + ' ' + (P(id).occ || '') });
+    for (const f of (typeof myFilms === 'function' ? myFilms() : []).slice(0, 60)) out.push({ t: `🎬 ${f.title}`, d: `your film · ${f.genre}`, attr: `data-go="film:${f.id}"`, s: f.title + ' ' + f.genre });
+    for (const f of S.films.filter(f => f.rel !== null && S.week - f.rel < 30).slice(-80)) out.push({ t: `🎞️ ${f.title}`, d: `${f.genre} · ${fmtM(f.total)}`, attr: `data-go="film:${f.id}"`, s: f.title });
+    for (const c of S.companies.filter(c => c.closed === null).slice(0, 200)) out.push({ t: `🏢 ${c.name}`, d: hubName(c.hub), attr: `data-go="company:${c.id}"`, s: c.name });
+  }
+  if (!Q) return out.slice(0, 12);
+  const sc = x => { const s = x.s.toLowerCase(); const i = s.indexOf(Q); if (i === 0) return 3; if (i > 0) return 2; return Q.split(' ').every(w => s.includes(w)) ? 1 : 0; };
+  return out.map(x => [x, sc(x)]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 14).map(x => x[0]);
+}
+function paletteOpen() {
+  if (typeof document === 'undefined') return; let el = document.getElementById('ab-pal');
+  if (!el) { el = document.createElement('div'); el.id = 'ab-pal'; document.body.appendChild(el); }
+  el.innerHTML = `<div class="pal-box"><input id="pal-q" placeholder="Go to an app, a person, a film, a company…" autocomplete="off"><div id="pal-r"></div><p class="pal-h">↑↓ to move · Enter to open · Esc to close</p></div>`;
+  el.className = 'on'; UI.palI = 0; paletteRender(''); const q = document.getElementById('pal-q'); q.focus();
+  q.oninput = () => { UI.palI = 0; paletteRender(q.value); };
+}
+function paletteRender(q) { const L = paletteItems(q), R = document.getElementById('pal-r'); if (!R) return; UI.palL = L; R.innerHTML = L.map((x, i) => `<button class="pal-i${i === (UI.palI || 0) ? ' on' : ''}" ${x.attr}><b>${esc(x.t)}</b><span>${esc(x.d)}</span></button>`).join('') || '<p class="pal-h">Nothing matches.</p>'; }
+function paletteClose() { const el = typeof document !== 'undefined' && document.getElementById('ab-pal'); if (el) { el.className = ''; el.innerHTML = ''; } }
+if (typeof document !== 'undefined' && document.addEventListener) {
+  document.addEventListener('keydown', e => {
+    const open = document.getElementById('ab-pal') && document.getElementById('ab-pal').className === 'on';
+    if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !open && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || ''))) { if (!S.me) return; e.preventDefault(); open ? paletteClose() : paletteOpen(); return; }
+    if (!open) return;
+    if (e.key === 'Escape') { paletteClose(); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); UI.palI = clamp((UI.palI || 0) + (e.key === 'ArrowDown' ? 1 : -1), 0, Math.max(0, (UI.palL || []).length - 1)); paletteRender(document.getElementById('pal-q').value); return; }
+    if (e.key === 'Enter') { const b = document.querySelectorAll('#pal-r .pal-i')[UI.palI || 0]; if (b) { b.click(); } }
+  });
+  document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#ab-pal .pal-i'); if (b) setTimeout(paletteClose, 0); else if (e.target.id === 'ab-pal') paletteClose(); });
+}
+// </terminal>
+// <futures>
+// ---------------- Film futures, bankability and the waterfall ----------------
+// A box-office futures market, after the Hollywood Stock Exchange: every big film in post-production lists ten weeks
+// out at the market's forecast of its worldwide gross ($M). The forecast is built from comparable releases (same tier
+// and genre, last three years), the cast's bankability, the hook and the year's genre heat, and it wanders with
+// tracking noise that narrows as release gets close. Buy long or sell short; contracts settle on the real gross four
+// weeks after release ($100 per $1M per contract). Trading a film you worked on is insider trading: profitable, and
+// sometimes investigated.
+// Bankability (0–100) is how much a name moves money: the box office of their last five films relative to cost.
+// Every released film's page shows where its money went: gross → cinemas' share → rentals → P&A → cost → net.
+const FUT_K = 100;   // dollars per $1M per contract
+const FUT_SPREAD = .035;   // half the bid/ask spread
+const FUT_MAX = 30;   // contracts per film
+function bankability(p) {
+  if (!p) return 0; const L = (p.credits || []).map(i => S.films[i]).filter(f => f && f.rel !== null && f.cost > 0 && ((f.cast || []).slice(0, 2).includes(p.id) || f.dir === p.id)).slice(-5);
+  if (!L.length) return Math.round(clamp((p.fame || 0) * .3, 0, 30));
+  const r = L.reduce((t, f) => t + Math.log2(Math.max(.1, f.total / f.cost)), 0) / L.length;
+  return Math.round(clamp(22 + r * 14 + (p.fame || 0) * .35, 0, 99));
+}
+function futComps(f) {
+  const k = f.tier + ':' + f.genre + ':' + S.year, A = (FUT_C.k === S.week ? FUT_C : (FUT_C.k = S.week, FUT_C.m = {}, FUT_C)).m;
+  if (A[k] !== undefined) return A[k];
+  let L = S.films.filter(x => x.rel !== null && x.tier === f.tier && x.genre === f.genre && S.year - yearOf(x.rel) <= 3 && x.cost > 0);
+  if (L.length < 4) L = S.films.filter(x => x.rel !== null && x.tier === f.tier && S.year - yearOf(x.rel) <= 3 && x.cost > 0);
+  const ratio = L.length ? L.reduce((t, x) => t + x.total / x.cost, 0) / L.length : 2;
+  return (A[k] = ratio);
+}
+const FUT_C = { k: -1, m: {} };
+function futModel(f) {
+  const star = ((f.cast || []).slice(0, 2).map(id => bankability(P(id))).reduce((a, b) => a + b, 0) / Math.max(1, Math.min(2, (f.cast || []).length))) || 30;
+  const heat = typeof genreHeat === 'function' ? genreHeat(f.genre) : 1;
+  return Math.max(.05, f.cost * futComps(f) * Math.pow((f.hook || 50) / 60, .7) * (.75 + star / 200) * heat);
+}
+// tracking: audience appeal from the hook, the cast's fame, marketing muscle and the market's taste for the genre, scaled
+// by what similar appeal earned in that market lately. Better than comps (median miss ~22% vs ~55%), but it ignores
+// quality, legs, weather and timing, which only show on the night.
+function futW(f) {
+  const C = (f.cast || []).map(P), d = P(f.dir), pr = P(f.prod); if (!C[0] || !d || !pr) return 0;
+  const st = C[0].fame * .5 + (C[1] || C[0]).fame * .25 + (C[2] || C[0]).fame * .15 + d.fame * .1, mkt = clamp([0, 70, 45, 20][f.tier] + pr.sk.mkt, 0, 100);
+  const A = appetite(f.m, f.genre, f.rel !== null ? yearOf(f.rel) : S.year) * (.4 * (f.hook || 50) + .35 * st + .25 * mkt);
+  return Math.pow(A / 50, 2.4) * [0, 1, .6, .3][f.tier];
+}
+function futTrack(f) {
+  const w = futW(f); if (!w) return futModel(f);
+  const k = f.m + ':' + f.tier, A = (FUT_C.k === S.week ? FUT_C : (FUT_C.k = S.week, FUT_C.m = {}, FUT_C)).m;
+  if (A['t' + k] === undefined) { const R = S.films.filter(x => x.rel !== null && x.m === f.m && x.tier === f.tier && x.cost > 0 && S.year - yearOf(x.rel) <= 3).slice(-80).map(x => x.total / (futW(x) || 1e9)).filter(v => v > 0).sort((a, b) => a - b); A['t' + k] = R.length >= 5 ? R[R.length >> 1] : 0; }
+  const wob = 1 + (hashRand(f.id * 104729 + S.week * 17)() - .5) * .3;   // tracking surveys wobble ±15% week to week
+  return A['t' + k] ? Math.max(.05, A['t' + k] * w * wob) : futModel(f);
+}
+// the market's consensus: comps-heavy far out, tracking-heavy near release
+function futFair(f, w = S.week) { const left = clamp((f.stageEnd || w) - w, 0, 10), k = .97 - left * .03; return Math.exp((1 - k) * Math.log(futModel(f)) + k * Math.log(futTrack(f))); }
+function genreHeat(g) { const y = S.year, by = yy => { let a = 0, t = 0; for (const f of S.films) if (f.rel !== null && yearOf(f.rel) === yy) { t += f.total || 0; if (f.genre === g) a += f.total || 0; } return t ? a / t : 0; }; const a = by(y), b = by(y - 1); return b ? clamp(a / b, .7, 1.4) : 1; }
+function futList() {
+  return S.films.filter(f => f.rel === null && f.stage === 3 && f.tier <= 2 && (f.stageEnd || 0) - S.week <= 10 && (f.stageEnd || 0) >= S.week).sort((a, b) => b.cost - a.cost).slice(0, 16);
+}
+function futPrice(f, w = S.week) {
+  if (f.rel !== null && f.rel <= w) return f.total;
+  const base = futFair(f, w), left = Math.max(0, (f.stageEnd || w) - w), sig = .06 + left * .025;
+  let n = 0; for (let i = 0; i < 5; i++) n += (hashRand(f.id * 7919 + (w - i) * 31)() - .5) * sig * (1 - i / 6);
+  return Math.max(.05, base * (1 + n));
+}
+function futPos(fid) { return ((S.me.fut || {})[fid]) || null; }
+function futAct(a) {
+  const M = S.me, f = S.films[+a.film]; if (!f || f.rel !== null || !futList().includes(f)) return false;
+  const n = Math.round(+a.n); if (!n) return false; M.fut = M.fut || {};
+  const P0 = M.fut[f.id] || { n: 0, cost: 0, own: false }, nn = P0.n + n; if (Math.abs(nn) > FUT_MAX) return false;
+  const px = futPrice(f) * (n > 0 ? 1 + FUT_SPREAD : 1 - FUT_SPREAD), cash = n * px * FUT_K;   // you buy at the ask, sell at the bid
+  if (n > 0 && M.cash < cash) return false; if (n < 0 && M.cash < Math.abs(nn) * px * FUT_K * .5) return false;   // shorts need margin
+  M.cash -= cash; P0.n = nn; P0.cost += cash; P0.own = P0.own || (typeof crRolesFor === 'function' && crRolesFor(f).length > 0) || M.jobs.some(j => j.film === f.id);
+  if (P0.n === 0) { (M.futLog = M.futLog || []).push({ w: S.week, film: f.id, pnl: -P0.cost, early: 1 }); delete M.fut[f.id]; } else M.fut[f.id] = P0;
+  return true;
+}
+function futWeek() {
+  const M = S.me; if (!M || !M.fut) return;
+  for (const [fid, P0] of Object.entries(M.fut)) {
+    const f = S.films[+fid]; if (!f) { delete M.fut[fid]; continue; }
+    if (f.stage < 0) { M.cash += P0.cost; delete M.fut[fid]; inbox('note', `${f.title}: contracts voided`, `${f.title} collapsed before release. Your futures are refunded at cost.`); continue; }
+    if (f.rel === null || S.week < f.rel + 4) continue;
+    const pay = P0.n * f.total * FUT_K, pnl = pay - P0.cost; M.cash += pay; delete M.fut[fid];
+    (M.futLog = M.futLog || []).push({ w: S.week, film: f.id, pnl, n: P0.n, settle: f.total }); if (M.futLog.length > 40) M.futLog.shift();
+    let t = `${f.title} settles at ${fmtM(f.total)}. Your ${P0.n > 0 ? 'long' : 'short'} position of ${Math.abs(P0.n)} contract${Math.abs(P0.n) > 1 ? 's' : ''} ${pnl >= 0 ? 'makes' : 'loses'} ${fmtCash(Math.abs(pnl))}.`;
+    if (P0.own && pnl > 0 && prnd() < .3) { const fine = Math.round(pnl * .5); M.cash -= fine; ME().standing = clamp(ME().standing - 2.5, 0, 100); t += ` Then the letter arrives: a compliance inquiry into trading on a film you worked on. A ${fmtCash(fine)} settlement, and people talk.`; milestone(`Fined for trading futures on ${f.title}`, 'money'); }
+    inbox('note', `Futures: ${f.title}`, t);
+  }
+}
+function futPanel() {
+  const M = S.me, L = futList();
+  const row = f => { const px = futPrice(f), p1 = futPrice(f, S.week - 1), pos = futPos(f.id), mine = typeof crRolesFor === 'function' && crRolesFor(f).length > 0, wk = Math.max(0, (f.stageEnd || S.week) - S.week);
+    return `<tr${mine ? ' class="tk-mine"' : ''}><td>${fl(f.id)}${mine ? ' <span class="tk-mut">(yours)</span>' : ''}</td><td class="n">${px.toFixed(1)}</td><td class="n tk-mut">${futTrack(f).toFixed(1)}</td><td class="n ${px >= p1 ? 'up' : 'dn'}">${fmtPct((px / p1 - 1) * 100)}</td><td class="n tk-mut">±${Math.round((.06 + wk * .025) * 100)}%</td><td class="n">${wk}w</td><td class="n">${pos ? (pos.n > 0 ? '+' : '') + pos.n : ''}</td><td class="nowrap"><button class="tk-chip" data-fut="${f.id}:5">+5</button><button class="tk-chip" data-fut="${f.id}:-5">−5</button></td></tr>`; };
+  const log = (M.futLog || []).slice(-4).reverse();
+  return `<section class="tk-p tk-wide"><h4>FILM FUTURES <span class="tk-sub">forecast worldwide gross, $M · $${FUT_K} per $1M per contract · spread ±${+(FUT_SPREAD * 100).toFixed(1)}% · settles 4 weeks after release</span></h4>
+   <table class="tk-t"><thead><tr><th>Film</th><th class="n">Px</th><th class="n" title="Tracking: appeal-based forecast">Trk</th><th class="n">1w</th><th class="n">Band</th><th class="n">Out</th><th class="n">Pos</th><th></th></tr></thead><tbody>${L.map(row).join('') || '<tr><td colspan="8" class="tk-mut">Nothing listed this week.</td></tr>'}</tbody></table>
+   ${log.length ? `<p class="tk-foot">${log.map(x => `${esc((S.films[x.film] || {}).title || '?')} <span class="${x.pnl >= 0 ? 'up' : 'dn'}">${x.pnl >= 0 ? '+' : '−'}${fmtCash(Math.abs(x.pnl))}</span>`).join(' · ')}</p>` : '<p class="tk-foot">Px leans on comparable films far out and on tracking (Trk) near release: the gap between them is the trade. Reviews, legs and opening-weekend weather are what nobody can see. Trading your own films is insider trading.</p>'}</section>`;
+}
+function starPanel() {
+  const M = S.me, mkt = (HUBS[M.hub] || {}).m, L = S.people.filter(p => !p.dead && !p.retired && p.role === 'actor' && (HUBS[p.hub] || {}).m === mkt && (p.credits || []).length >= 2).map(p => [p, bankability(p)]).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const me = ME(), mine = bankability(me);
+  return `<section class="tk-p"><h4>BANKABILITY <span class="tk-sub">who moves money in ${esc(MARKETS[mkt] ? MARKETS[mkt].name : mkt)} · you: ${mine}</span></h4><div class="tk-bars">${L.map(([p, b]) => `<div class="tk-bar"><span><a href="#" class="lk" data-go="person:${p.id}">${esc(p.name.split(' ').slice(-1)[0])}</a></span><i style="width:${b}%"></i><b>${b}</b><span class="tk-mut">${(p.credits || []).length} cr</span></div>`).join('')}</div></section>`;
+}
+{ const _th = terminalHTML; terminalHTML = function () { const h = _th(); const i = h.lastIndexOf('</div></div>'); return i < 0 ? h : h.slice(0, i) + futPanel() + starPanel() + h.slice(i); }; }
+function futClick(t) { const d = t.dataset.fut; if (!d) return false; const [id, n] = d.split(':'); const ok = doAct({ t: 'fut', film: +id, n: +n }); if (!ok) inbox('note', 'Order rejected', `Not enough cash or margin, the position limit (${FUT_MAX}) is reached, or the film is no longer listed.`); render(true); return true; }
+// where the money went
+function waterfallSVG(f) {
+  if (f.rel === null || !f.total) return '';
+  const g = f.total, rent = f.rentals || g * .5, pa = f.pa || 0, cost = f.cost || 0, back = f.backend || 0, net = rent - pa - cost - back;
+  const steps = [['Gross', g, 'base'], ['Cinemas keep', -(g - rent), 'neg'], ['P&A', -pa, 'neg'], ['Budget', -cost, 'neg'], ['Talent back end', -back, 'neg'], ['Net', net, net >= 0 ? 'pos' : 'loss']];
+  const W = 520, rowH = 22, mx = Math.max(g, cost + pa, 1), X = v => 130 + v / mx * (W - 210); let run = 0;
+  const bars = steps.map(([l, v, k], i) => { let x0, x1; if (k === 'base') { x0 = 0; x1 = v; run = v; } else if (k === 'neg') { x1 = run; x0 = run + v; run = x0; } else { x0 = Math.min(0, v); x1 = Math.max(0, v); }
+    const y = 4 + i * rowH; return `<text x="0" y="${y + 14}" class="wf-l">${l}</text><rect x="${X(Math.min(x0, x1))}" y="${y + 3}" width="${Math.max(1, Math.abs(X(x1) - X(x0)))}" height="14" class="wf-${k}"/><text x="${W - 4}" y="${y + 14}" text-anchor="end" class="wf-v">${v < 0 ? '−' : ''}${fmtM(Math.abs(v))}</text>`; }).join('');
+  return `<section class="panel"><h3>Where the money went</h3><svg class="wf" viewBox="0 0 ${W} ${steps.length * rowH + 8}" width="${W}" style="width:${W}px;max-width:100%;height:auto">${bars}</svg><p class="small muted">Cinemas keep roughly half the gross; the distributor recoups prints and advertising first, then the budget, then any talent back end. What's left is profit.</p></section>`;
+}
+{ const _vf = viewFilm; viewFilm = function (id) { const h = _vf(id), f = S.films[id]; if (!f || f.rel === null) return h; return h + waterfallSVG(f); }; }
+// why it opened where it did: what tracking said the week before, and the inputs that drive audience appeal
+{ const _rl = release; release = function (f) {
+  if (S.me && f.tier <= 3) { try { const C = (f.cast || []).map(P), d = P(f.dir), pr = P(f.prod);
+    if (C[0] && d && pr) f.why = { trk: +futFair(f).toFixed(2), hook: f.hook || 50, st: Math.round(C[0].fame * .5 + (C[1] || C[0]).fame * .25 + (C[2] || C[0]).fame * .15 + d.fame * .1), mkt: Math.round(clamp([0, 70, 45, 20][f.tier] + pr.sk.mkt, 0, 100)), app: +appetite(f.m, f.genre, S.year).toFixed(2) }; } catch (e) { /* a breakdown is optional */ } }
+  return _rl.apply(this, arguments); }; }
+function whyPanel(f) {
+  const y = f.why; if (!y || !f.total) return '';
+  const d = f.total / Math.max(.01, y.trk) - 1, row = (l, v, max, note) => `<div class="rep"><span>${l}</span>${bar(v, max, 'data')}<b>${typeof v === 'number' && v % 1 ? v.toFixed(2) : Math.round(v)}</b><small class="muted">${note}</small></div>`;
+  const q = f.q || 50, legs = q >= 70 ? 'strong legs' : q >= 45 ? 'average legs' : 'front-loaded', rev = f.reviews != null ? `reviews ${f.reviews}` : '';
+  return `<section class="panel"><h3>Why it did that</h3><p><b>Tracked ${fmtM(y.trk)}</b> the week before release · <b>finished ${fmtM(f.total)}</b> · <span class="${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? 'beat' : 'missed'} tracking by ${Math.abs(Math.round(d * 100))}%</span></p>
+   ${row('Hook', y.hook, 100, '40% of appeal')}${row('Star power', y.st, 100, '35%: lead, second, third, director')}${row('Marketing', y.mkt, 100, '25%: tier and the producer’s reach')}${row('Genre appetite', y.app, 2, 'how much this market wants the genre this year')}
+   <p class="small muted">What tracking can’t see: quality (${Math.round(q)}, ${legs}${rev ? ', ' + rev : ''}), the opening-weekend weather and timing, and how far it travelled abroad (${fmtM(f.foreign || 0)} outside its home market). Appeal is raised to the power 2.4, so small edges in the inputs become big gaps in the gross.</p></section>`;
+}
+{ const _vf2 = viewFilm; viewFilm = function (id) { const h = _vf2(id), f = S.films[id]; if (!f || f.rel === null || !f.why) return h; return h + whyPanel(f); }; }
+// </futures>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -40638,6 +40965,8 @@ function careerClick(t) {
   const c = UI.cc;
   if (t.dataset.consort) { UI.consort = t.dataset.consort; render(true); return true; }
   if (typeof petClick === 'function' && petClick(t)) return true;
+  if (typeof termClick === 'function' && termClick(t)) return true;
+  if (typeof futClick === 'function' && futClick(t)) return true;
   if (typeof shorts2Click === 'function' && shorts2Click(t)) return true;
   if (typeof actor3Click === 'function' && actor3Click(t)) return true;
   if (typeof placesClick === 'function' && placesClick(t)) return true;
@@ -40769,7 +41098,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tk],[data-fut],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
