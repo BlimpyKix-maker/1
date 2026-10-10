@@ -43,7 +43,7 @@ function co2Week() {
 }
 function co2Pick(it, k) {
   if (it.kind !== 'copoach') return false; it.done = true; const c = myCo(), C = c && co2Of(c), id = it.person; if (!C || C.staff[it.post] !== id) { it.result = { t: 'It no longer matters.' }; return true; }
-  if (k === 'match') { C.raise = C.raise || {}; C.raise[id] = (C.raise[id] || 0) + .3; c.cash -= keySalary(id) * .3 * 26 / 1e6; it.result = { t: `You match it. ${P(id).name} stays, and knows what they're worth.` }; return true; }
+  if (k === 'match') { C.raise = C.raise || {}; C.raise[id] = (C.raise[id] || 0) + .3; it.result = { t: `You match it. ${P(id).name} stays, and knows what they're worth.` }; return true; }
   if (k === 'loyal') { const ok = roll('cha', 12); if (ok) { addTie(ME(), P(id), 5); it.result = { ok, roll: S.me.lastRoll, t: `${P(id).name} stays. "I want to see how this ends."` }; } else { delete C.staff[it.post]; it.result = { ok, roll: S.me.lastRoll, t: `${P(id).name} takes the job. It was always going to be the money.` }; } return true; }
   delete C.staff[it.post]; addTie(ME(), P(id), 4); it.result = { t: `${P(id).name} goes, and owes you one.` }; return true;
 }

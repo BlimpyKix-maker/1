@@ -90,9 +90,10 @@ function pjPick(it, k) {
   const M = S.me, me = ME(), f = S.films[it.film], C = PJ_CALLS.find(x => x.k === it.call); it.done = true;
   if (!f || !C || f.rel !== null) { it.result = { t: 'Too late: the film has moved on.' }; return true; }
   const o = C.opts.find(x => x.k === k) || C.opts[C.opts.length - 1], ok = o.check ? roll(o.check[0], o.check[1]) : true, r = o.check ? M.lastRoll : null, R = ok ? o.ok : (o.bad || o.ok), c = S.companies[f.co];
-  const spend = x => { if (!x) return; const v = f.budget * x; if (c) c.cash -= v; if (f.cost !== undefined) f.cost += v; };
+  // overruns and savings land on the film's cost; the company pays the difference when the film comes out
+  const spend = x => { if (!x) return; const v = f.budget * x; if (f.cost !== undefined) f.cost += v; else if (c) c.cash -= v; };
   if (ok || !o.bad) spend(o.cost); spend(R.cost);
-  if (R.saving && c) { const v = f.budget * R.saving; c.cash += v; if (f.cost !== undefined) f.cost -= v; }
+  if (R.saving && c) { const v = f.budget * R.saving; if (f.cost !== undefined) f.cost -= v; else c.cash += v; }
   if (R.q) { f.qBonus = (f.qBonus || 0) + R.q; f.you = (f.you || 0) + R.q; }
   if (R.hook) f.hook = clamp((f.hook || 50) + R.hook, 5, 99);
   if (R.weeks) f.stageEnd = (f.stageEnd || S.week) + R.weeks;

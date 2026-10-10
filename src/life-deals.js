@@ -298,7 +298,7 @@ POST_FAMILY.owndir = 'dir';
 function companyWeek() {
   const M = S.me, c = myCo();
   if (!c) return;
-  if (c.closed === null) c.cash -= usd([0, 12000, 5000, 1500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
+  if (c.closed === null) c.cash -= usd([0, 12000, 4000, 500][c.tier]) / 1e6;   // an office, an assistant, a lawyer on retainer
   if (c.closed === null) c.cash -= deptUpkeep(c);
   settleDistribution(c);
   // festivals-first films go to the festivals by themselves

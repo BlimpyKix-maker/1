@@ -757,6 +757,7 @@ function closeWeek(a) {
   if (typeof memWeek === 'function') memWeek();
   if (typeof petWeek === 'function') petWeek();
   if (typeof livingWeek === 'function') livingWeek();
+  if (typeof creditsWeek === 'function') creditsWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
