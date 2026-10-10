@@ -758,6 +758,7 @@ function closeWeek(a) {
   if (typeof petWeek === 'function') petWeek();
   if (typeof livingWeek === 'function') livingWeek();
   if (typeof creditsWeek === 'function') creditsWeek();
+  if (typeof actor3Week === 'function') actor3Week();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1083,6 +1084,7 @@ function resolvePick(it, k) {
   if (typeof awards4Pick === 'function' && awards4Pick(it, k)) return true;
   if (typeof petPick === 'function' && petPick(it, k)) return true;
   if (typeof ailPick === 'function' && ailPick(it, k)) return true;
+  if (typeof actor3Pick === 'function' && actor3Pick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -1187,6 +1189,7 @@ function applyAct(a) {
     case 'crew': return typeof crewSay === 'function' && crewSay(a);
     case 'co2': return typeof co2Act === 'function' && co2Act(a);
     case 'pet': return typeof petAct === 'function' && petAct(a);
+    case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
     case 'gigpitch': return typeof gigPitch === 'function' && gigPitch(a.id);
     case 'dream': return typeof setDream === 'function' && setDream(a.k);
