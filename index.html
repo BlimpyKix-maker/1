@@ -738,6 +738,8 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .pal-h { color: #7D8A99; font-size: 11px; margin: 6px 4px 2px; }
 @media (max-width: 600px) { .tk-grid { grid-template-columns: 1fr; } .tk-bar { grid-template-columns: 70px 1fr 40px 46px; } }
 .wf{display:block;max-width:560px;font:12px/1 var(--mono,ui-monospace,monospace)}.wf-l{fill:var(--muted,#888)}.wf-v{fill:currentColor;font-variant-numeric:tabular-nums}.wf-base{fill:#5b8def}.wf-neg{fill:#c9554a;opacity:.85}.wf-pos{fill:#3fa36b}.wf-loss{fill:#8b1e1e}
+.tk-warn{color:#e0b341}.tx-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0}.tx-order{display:block;margin:3px 0}
+.tx-grid line{stroke:rgba(255,255,255,.06);stroke-width:1}.tx-map{display:block;max-height:220px;background:rgba(255,255,255,.02);border-radius:4px}.tx-dot{fill:var(--tk-acc,#e0a030);fill-opacity:.55;stroke:var(--tk-acc,#e0a030);stroke-width:.8}.tx-none{fill-opacity:.12;stroke-opacity:.3}.tx-spent{fill:#777;stroke:#999}.tx-home{stroke:#fff;stroke-width:2}
 .placego { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; } .placemap { width: 100%; height: auto; display: block; margin: 8px 0; } .placemap .pm-sea { fill: color-mix(in srgb, var(--accent) 7%, var(--bg, #fff)); } .placemap .pm-grid line { stroke: var(--line); stroke-width: 1; opacity: .6; } .placemap .pm-dot { cursor: pointer; } .placemap .pm-dot circle:not([fill]) { fill: var(--muted); } .placemap .pm-dot.on circle:not([fill]), .placemap .pm-dot:hover circle:not([fill]) { fill: var(--accent); } .placemap .pm-dot.here circle:not([fill]) { fill: #E0505E; } .placemap .pm-labels text { font-size: 11.5px; fill: #F2EDE6; paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: 3px; pointer-events: none; } .placemap .pm-eubox { fill: none; stroke: #F2EDE6; stroke-opacity: .35; stroke-dasharray: 3 3; } .placemap .pm-eulink { stroke: #F2EDE6; stroke-opacity: .25; stroke-dasharray: 3 3; } .placemap .pm-inset rect { fill: #000; fill-opacity: .28; stroke: #F2EDE6; stroke-opacity: .25; } .placemap .pm-cap { font-size: 10px; letter-spacing: 1.5px; fill: #F2EDE6; fill-opacity: .6; font-weight: 700; } .placemap .pm-ping { fill: none !important; stroke: #FFB020; stroke-width: 3; animation: pmping 1.6s ease-out infinite; } @keyframes pmping { from { opacity: 1; } to { opacity: 0; } } .placecard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; } .placecard .reasons li { margin: 4px 0; }
 .home-scene .pets { pointer-events: none; } .home-scene .pet-roam { animation: petroam 18s ease-in-out infinite alternate; } @keyframes petroam { 0% { transform: translateX(-40px); } 45% { transform: translateX(60px); } 55% { transform: translateX(60px); } 100% { transform: translateX(-30px); } } .home-scene .pet-tail { animation: pettail .5s ease-in-out infinite alternate; } @keyframes pettail { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } } .home-scene .pet-sad .pet-tail { animation: none; } .pet-swim { animation: petswim 6s ease-in-out infinite alternate; } @keyframes petswim { from { transform: translateX(-8px); } to { transform: translateX(8px); } } .pet-hop { animation: pethop 2.4s ease-in-out infinite; } @keyframes pethop { 0%, 80%, 100% { transform: translateY(0); } 88% { transform: translateY(-3px); } }
 .petgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin: 8px 0; } .petcard { display: flex; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; align-items: flex-start; } .petcard p { margin: 3px 0; } .petcard.mine { border-color: var(--accent); } .petpic { flex: none; background: color-mix(in srgb, var(--accent) 6%, transparent); border-radius: 8px; }
@@ -11682,6 +11684,8 @@ function closeWeek(a) {
   if (typeof encounterWeek === 'function') encounterWeek();
   if (typeof termWeek === 'function') termWeek();
   if (typeof futWeek === 'function') futWeek();
+  if (typeof guildWeek === 'function') guildWeek();
+  if (typeof taxWeek === 'function') taxWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -12006,6 +12010,7 @@ function resolvePick(it, k) {
   if (typeof co2Pick === 'function' && co2Pick(it, k)) return true;
   if (typeof awards4Pick === 'function' && awards4Pick(it, k)) return true;
   if (typeof petPick === 'function' && petPick(it, k)) return true;
+  if (typeof guildPick === 'function' && guildPick(it, k)) return true;
   if (typeof ailPick === 'function' && ailPick(it, k)) return true;
   if (typeof actor3Pick === 'function' && actor3Pick(it, k)) return true;
   if (typeof scPick === 'function' && scPick(it, k)) return true;
@@ -15178,7 +15183,7 @@ function selfFund(a) {
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
   f.fin = { reb: plan.reb, ps: plan.ps, gap: plan.gap, bonded: plan.bonded, insured: 1, log: [], pend: null };
-  f.fin.log.push({ w: S.week, t: `Financing closes: ${plan.parts.map(x => x.k === 'rebate' ? 'the incentive' : x.k === 'presale' ? 'foreign pre-sales' : 'a gap loan').concat(share ? ['equity investors'] : []).concat(['the company']).join(', ')}.`, tone: 'good' });
+  f.fin.log.push({ w: S.week, t: `Financing closes: ${plan.parts.map(x => ({ rebate: 'the incentive', presale: 'foreign pre-sales', gap: 'a gap loan', mezz: 'a mezzanine loan', stream: 'a streamer' })[x.k] || 'other money').concat(share ? ['equity investors'] : []).concat(['the company']).join(', ')}.`, tone: 'good' });
   if (plan.ps > 0) { const b = S.companies.filter(x => x.closed === null && x.owner === undefined && x.tier <= 2 && HUBS[x.hub].m !== f.m).sort((x, y) => hashRand(x.id * 7 + f.id)() - hashRand(y.id * 7 + f.id)())[0]; if (b) { f.dist = f.dist || {}; f.dist.intl = { b: b.id, mg: plan.ps, share: .4, presale: 1 }; } }
   f.status = 'Development and financing';
   if (direct) takeJob(makePost(POST_BY.owndir, f));
@@ -40079,6 +40084,252 @@ function agentBook() {
   inbox('agentoffer', `${ag.name} calls`, `Someone at ${ag.name} has heard about you from people you've worked with and wants to represent you. They book their clients directly, without the applications; ten per cent of everything.`, { ag: ag.i, choices: [{ k: 'yes', label: 'Sign with them' }, { k: 'no', label: 'Not yet' }] });
 }; }
 // </agent2>
+// <guilds>
+// ---------------- Guilds, contracts and strikes ----------------
+// Every film market has three guild contracts, writers, performers and crew, each running about three years. Sixteen
+// weeks before a contract runs out, talks open and the trades start quoting the odds of a strike. The odds move with
+// how long since the last real raise, how militant that market's guilds are, streaming (residuals are what the
+// fights are about now) and week-to-week noise from the bargaining table. If talks fail, the guild walks out:
+//  - performers or crew: nothing shoots in that market (pre-production and shooting stop the clock), and the
+//    companies that own stalled films pay to keep them alive;
+//  - writers: development stops (no new scripts move, no rewrites), and writing jobs vanish from the board.
+// Strikes end with a better deal than talks would have got. Every settlement lifts that guild's pay index, which
+// every job board in the market pays from then on. Independents can sign an interim agreement and keep shooting.
+// All the randomness is hashed from the world seed, so it never disturbs the world's or your dice.
+const GUILD_KINDS = {
+  wri: { n: 'Writers', base: .07, len: [10, 22], stages: [0] },
+  act: { n: 'Performers', base: .05, len: [8, 18], stages: [1, 2] },
+  crew: { n: 'Crew', base: .035, len: [4, 12], stages: [1, 2] }
+};
+const GUILD_NAMES = { US: { wri: 'Screenwriters Guild', act: 'Screen Performers Union', crew: 'Crew Alliance' }, UK: { wri: 'Writers\' Guild of Britain', act: 'Equity Players', crew: 'Broadcasting and Film Union' } };
+function guildName(m, g) { return (GUILD_NAMES[m] || {})[g] || `${MARKETS[m].name} ${g === 'crew' ? 'Film Crew Union' : GUILD_KINDS[g].n + '\' Guild'}`; }
+function guildOfCraft(c) { return c === 'wri' ? 'wri' : c === 'act' ? 'act' : ['cam', 'edt', 'des', 'fx', 'mus'].includes(c) ? 'crew' : null; }
+function guildOfPost(p) { const t = tmplOf(p); return t && t.subs && t.subs.length ? guildOfCraft(SUB2C[t.subs[0]]) : null; }
+function myGuild() { return guildOfCraft(MAIN[ME().role]); }
+function gH(...k) { let h = (S.seed | 0) ^ 0x5bd1e995; for (const x of k) h = Math.imul(h ^ (typeof x === 'string' ? [...x].reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7) : x | 0), 2654435761); return hashRand(h >>> 0)(); }
+function gMarkets() { return Object.keys(MARKETS).filter(m => HUB_IDS.some(h => HUBS[h].m === m)); }
+function guildsInit() {
+  if (S.gld) return; S.gld = {};
+  for (const m of gMarkets()) { S.gld[m] = {}; for (const g in GUILD_KINDS) S.gld[m][g] = { exp: S.week + 6 + Math.floor(gH(m, g, 'exp') * 150), idx: 1, last: null, strike: null, mil: .6 + gH(m, 'mil') * .8 }; }
+}
+// the chance talks fail, as the trades would quote it this week
+function strikeOdds(m, g, w = S.week) {
+  const G = S.gld[m][g], K = GUILD_KINDS[g];
+  const lag = G.last ? (G.last.raise < .04 ? .06 : G.last.strike ? -.05 : 0) : .02;   // a thin last deal makes people angry; a recent strike makes them tired
+  const stream = S.year >= 2014 ? .04 : 0, wob = (gH(m, g, w) - .5) * .06;
+  return clamp((K.base + lag + stream) * G.mil + wob, .02, .6);
+}
+function strikeOn(m, g) { const G = S.gld && S.gld[m] && S.gld[m][g]; return !!(G && G.strike && G.strike.to > S.week && G.strike.from <= S.week); }
+function guildStatus(m, g) { const G = S.gld[m][g]; if (strikeOn(m, g)) return 'strike'; if (G.exp - S.week <= 16 && G.exp >= S.week) return 'talks'; return 'contract'; }
+function guildWeek() {
+  if (!S.me) return; guildsInit();
+  const M = S.me, myM = HUBS[M.hub].m;
+  for (const m in S.gld) for (const g in S.gld[m]) {
+    const G = S.gld[m][g], K = GUILD_KINDS[g], name = guildName(m, g), big = m === myM || m === 'US';
+    if (G.strike && G.strike.to === S.week) {   // the strike ends
+      const raise = .05 + gH(m, g, 'win', S.week) * .04; G.idx *= 1 + raise - .03; G.last = { w: S.week, raise, strike: G.strike.to - G.strike.from }; G.exp = S.week + 156; G.strike = null;
+      if (big) news('Industry', `The ${name} strike is over: a ${Math.round(raise * 100)}% raise and better residuals. Productions in ${MARKETS[m].name} restart.`);
+      if (m === myM && g === 'wri') inbox('note', `The ${name} strike is over`, `A deal is signed in the small hours: ${Math.round(raise * 100)}% more, and better residuals. ${g === 'wri' ? 'Development opens up again.' : 'Productions restart on Monday; the board fills up again.'}`);
+      continue;
+    }
+    if (G.strike) continue;
+    if (G.exp - S.week === 16 && big) news('Industry', `Talks open between the studios and the ${name}. The contract runs out in sixteen weeks; the trades put the chance of a strike at ${Math.round(strikeOdds(m, g) * 100)}%.`);
+    if (G.exp === S.week) {
+      if (gH(m, g, 'roll', G.exp) < strikeOdds(m, g)) {
+        const len = K.len[0] + Math.floor(gH(m, g, 'len', G.exp) * (K.len[1] - K.len[0] + 1));
+        G.strike = { from: S.week + 1, to: S.week + 1 + len };
+        if (big) news('Industry', `The ${name} goes on strike. ${g === 'wri' ? 'Writers\' rooms empty and development stops' : 'Sets go dark'} across ${MARKETS[m].name}.`);
+        if (m === myM) guildStrikeStarts(m, g, len);
+      } else {
+        const raise = .03 + gH(m, g, 'deal', G.exp) * .03; G.idx *= 1 + raise - .03; G.last = { w: S.week, raise, strike: 0 }; G.exp = S.week + 156;
+        if (big) news('Industry', `The ${name} reaches a deal without a strike: ${(raise * 100).toFixed(1)}% a year more for three years.`);
+      }
+    }
+  }
+  guildStall();
+}
+// what a strike does to productions, every week it lasts
+function guildStall() {
+  const M = S.me, halted = typeof worldFx === 'function' && worldFx().halt;
+  const stop = {}; for (const m in S.gld) for (const g in S.gld[m]) if (strikeOn(m, g)) for (const st of GUILD_KINDS[g].stages) (stop[m] = stop[m] || new Set()).add(st);
+  if (halted) for (const id of S.active) { const f = S.films[id]; if (f && f.interim && f.rel === null && f.hub === M.hub && f.stage >= 0 && f.stage < 4) f.stageEnd--; }   // signed the interim agreement: shoots on through the city's shutdown
+  if (!Object.keys(stop).length) return;
+  for (const id of S.active) {
+    const f = S.films[id]; if (!f || f.rel !== null || f.stage < 0 || f.interim || !stop[f.m] || !stop[f.m].has(f.stage)) continue;
+    if (halted && f.hub === M.hub) continue;   // already stopped by the city's strike
+    f.stageEnd++; for (const p of keyPeople(f)) if (p && p.busy >= S.week) p.busy++;
+    const c = f.co !== undefined && f.co !== null ? S.companies[f.co] : null; if (c && c.closed === null) c.cash -= f.budget * .004;   // keeping a stalled film alive
+  }
+}
+function guildStrikeStarts(m, g, len) {
+  const M = S.me, mine = myGuild() === g, film = g !== 'wri';
+  if (film) { const W = M.world = M.world || { ev: [] }; if (!W.ev.some(e => e.k === 'walkout' && e.to > S.week)) W.ev.push({ k: 'walkout', from: S.week + 1, to: S.week + 1 + len, guild: g }); }
+  const c = typeof myCo === 'function' ? myCo() : null, own = c ? c.films.map(i => S.films[i]).filter(f => f && f.rel === null && f.stage >= 0 && f.stage <= 2 && f.m === m) : [];
+  const fee = own.reduce((t, f) => t + f.budget * .04, 0), lv = careerLevel(), ch = [];
+  if (mine) ch.push({ k: 'g_picket', label: 'Walk the picket line' }, { k: 'g_abroad', label: 'Find work in another country until it\'s over', check: ['cha', 12] }, { k: 'g_scab', label: `Take a non-union job (about ${fmtCash(usd(1500 + 900 * lv))})` });
+  if (own.length) ch.push({ k: 'g_interim', label: `Sign the interim agreement for ${own.length > 1 ? 'your films' : own[0].title}: agree the guild's terms now (${fmtM(fee)}) and keep shooting` });
+  ch.push({ k: 'g_wait', label: mine || own.length ? 'Wait it out' : 'Noted' });
+  inbox('guild', `The ${guildName(m, g)} walks out`, `Talks have collapsed. ${g === 'wri' ? 'Writers put down their pens: development stops and nobody is rewriting anything.' : 'Sets go dark across the country: nothing in pre-production or shooting moves until there\'s a deal.'} The last strike of this kind ran for months; the trades think ${len > 12 ? 'this one could be long' : 'it could be over in weeks'}.${own.length ? ` ${own.length > 1 ? 'Your films are' : own[0].title + ' is'} stalled, and a stalled film costs money every week.` : ''}`, { guild: m + ':' + g, fee, choices: ch });
+}
+function guildPick(it, k) {
+  if (it.kind !== 'guild') return false;
+  const M = S.me, me = ME(), [m, g] = (it.guild || ':').split(':'); it.done = true;
+  if (k === 'g_picket') { me.standing = clamp(me.standing + 1.5, 0, 100); M.stress = clamp(M.stress + 3, 0, 100); M.picket = S.week;
+    const q = typeof bestIn === 'function' ? bestIn(M.hub, ROLES, p => -Math.abs(p.standing - me.standing) + prnd() * 30) : null; if (q) meet(q.id, 'On the picket line', 8);
+    it.result = { t: `Eight hours a day with a sign and a thermos. Nobody is paid, but everybody remembers who was there.${q ? ` You spend most of it talking to ${q.name}.` : ''}` }; return true; }
+  if (k === 'g_abroad') { const ok = roll('cha', 12);
+    if (ok) { const v = usd(1200 + 700 * careerLevel()); M.cash += v; it.result = { ok, roll: M.lastRoll, t: `A production abroad needs someone with your experience. ${fmtCash(v)} and a new city for a few weeks.` }; }
+    else { M.cash -= usd(600); it.result = { ok, roll: M.lastRoll, t: 'You fly out on a promise that evaporates when you land. The flight home costs more than the flight out.' }; }
+    return true; }
+  if (k === 'g_scab') { const v = usd(1500 + 900 * careerLevel()); M.cash += v; me.standing = clamp(me.standing - 4, 0, 100); M.scab = S.week;
+    for (const id of aliveKnown().filter(id => P(id) && guildOfCraft(MAIN[P(id).role]) === g).slice(0, 12)) addTie(me, P(id), -6);
+    it.result = { t: `The money's real: ${fmtCash(v)}. So are the photos of you walking past the line. Some people won't forget.` }; return true; }
+  if (k === 'g_interim') { const c = myCo(); if (!c) return true; const own = c.films.map(i => S.films[i]).filter(f => f && f.rel === null && f.stage >= 0 && f.stage <= 2 && f.m === m);
+    const fee = own.reduce((t, f) => t + f.budget * .04, 0); c.cash -= fee; for (const f of own) { f.interim = 1; if (f.fin) f.fin.log.push({ w: S.week, t: `Signed the ${guildName(m, g)} interim agreement (${fmtM(f.budget * .04)}): the film keeps shooting through the strike.`, tone: 'good' }); }
+    me.standing = clamp(me.standing + .8, 0, 100);
+    it.result = { t: `You sign the guild's terms before anyone else has. ${fmtM(fee)} more in pay and residuals, and your sets are the only ones working. Crews notice.` }; return true; }
+  it.result = { t: 'You wait.' }; return true;
+}
+// a settled guild's pay index lifts what every job in that market pays
+{ const _mp = makePost; makePost = function (t, f) {
+  const p = _mp(t, f); if (!S.gld || !S.me) return p;
+  const m = f ? f.m : HUBS[S.me.hub].m, g = guildOfPost(p), G = g && S.gld[m] && S.gld[m][g]; if (G && G.idx !== 1) p.rate = Math.round(p.rate * G.idx);
+  return p; }; }
+// the board loses writing jobs in a writers' strike, for everyone
+{ const _rb = refreshBoard; refreshBoard = function () {
+  const r = _rb.apply(this, arguments); const M = S.me; if (!M || !S.gld) return r;
+  M.board = M.board.filter(p => { const f = p.film !== null && p.film !== undefined ? S.films[p.film] : null, m = f ? f.m : HUBS[M.hub].m, g = guildOfPost(p); return !(g && strikeOn(m, g) && (g === 'wri' || f)); });
+  return r; }; }
+// the random city walkout gives way to the guild cycle
+{ const w = WORLD_EVENTS.find(e => e.k === 'walkout'); if (w) w.months = []; }
+// Terminal: the guild desk
+function guildPanel() {
+  if (!S.gld) return '';
+  const myM = HUBS[S.me.hub].m, L = gMarkets().sort((a, b) => (b === myM) - (a === myM) || MARKETS[b].size[2] - MARKETS[a].size[2]).slice(0, 6);
+  const rows = L.flatMap(m => Object.keys(GUILD_KINDS).map(g => { const G = S.gld[m][g], st = guildStatus(m, g), odds = strikeOdds(m, g), wk = G.exp - S.week;
+    return `<tr${m === myM ? ' class="tk-mine"' : ''}><td>${esc(MARKETS[m].name)}</td><td>${esc(guildName(m, g))}</td><td class="n">${st === 'strike' ? `<span class="dn">STRIKE wk ${S.week - G.strike.from + 1}</span>` : st === 'talks' ? `<span class="tk-warn">talks · ${wk}w</span>` : `${wk}w`}</td><td class="n ${odds > .3 && st !== 'contract' ? 'dn' : ''}">${st === 'strike' ? '' : st === 'talks' ? Math.round(odds * 100) + '%' : '<span class="tk-mut">' + Math.round(odds * 100) + '%</span>'}</td><td class="n">${G.idx.toFixed(3)}</td><td class="n tk-mut">${G.last ? (G.last.strike ? `strike ${G.last.strike}w, +${Math.round(G.last.raise * 100)}%` : `+${(G.last.raise * 100).toFixed(1)}%`) : ''}</td></tr>`; })).join('');
+  return `<section class="tk-p tk-wide"><h4>GUILDS <span class="tk-sub">contracts, talks and strike risk · pay index lifts every job in the market</span></h4><table class="tk-t"><thead><tr><th>Market</th><th>Guild</th><th class="n">Expires</th><th class="n">Strike risk</th><th class="n">Pay idx</th><th class="n">Last deal</th></tr></thead><tbody>${rows}</tbody></table>
+   <p class="tk-foot">A strike stops shooting (performers, crew) or development (writers) in that market, delays every release behind it, and costs the studios money each week: short their stock, long the films it pushes into a clear summer, or sign an interim deal and be the only set working.</p></section>`;
+}
+{ const _th = terminalHTML; terminalHTML = function () { const h = _th(); const i = h.lastIndexOf('</div></div>'); return i < 0 || !S.gld ? h : h.slice(0, i) + guildPanel() + h.slice(i); }; }
+// </guilds>
+// <taxstack>
+// ---------------- The tax map and a deeper capital stack ----------------
+// Where you shoot is a financing decision. Each city's production incentive refunds a share of the money spent
+// there, and the rates move: every January some cities raise theirs to lure productions, some cut, a few programmes
+// end and new ones open. Capped funds (Budapest, Prague, Wellington…) run dry partway through the year, and once
+// they do there's no rebate until January. Shooting away from home costs travel and a local service company, local
+// crews can be cheaper (or thinner), and every rebate is audited when the film comes out: a messy spend report means
+// the bank wants part of its advance back.
+// The stack gains two instruments:
+//  - a mezzanine loan (10% of the budget, for names the money trusts), repaid with 20% before equity sees a cent;
+//  - a streamer pre-buy (from 2012): a streamer buys the world outright for the budget plus a premium. No risk, no
+//    box office, no upside.
+// Everything random is hashed from the world seed (gH, guilds.js).
+const INC_CAP = { budapest: 1, prague: 1, wellington: 1, bogota: 1, manila: 1, istanbul: 1, johannesburg: 1, warsaw: 1, helsinki: 1 };
+FIN_COL.mezz = '#d0583a'; FIN_COL.stream = '#4fa3c7';
+let FIN_O = null, FIN_LOC = null, LAST_PLAN = null;
+{ const _io = incentiveOf; incentiveOf = function (hub, y = S.year) {
+  if (FIN_LOC && S.me && hub === S.me.hub) hub = FIN_LOC;
+  let r = _io(hub, y); const X = S.incX && S.incX[hub]; if (X) for (const [yy, v] of X) if (y >= yy) r = v; return r; }; }
+// a capped fund closes for the year once it's spent: the week of the year it runs out (52+ = it lasts the year)
+function capWeek(hub, y = S.year) { return INC_CAP[hub] ? 24 + Math.floor(gH(hub, 'cap', y) * 40) : 99; }
+function capOpen(hub) { return S.week - weekOfYear(S.year) < capWeek(hub); }
+function capLabel(hub) { if (!INC_CAP[hub]) return ''; const left = capWeek(hub) - (S.week - weekOfYear(S.year)); return left <= 0 ? 'fund spent until January' : left <= 8 ? 'fund nearly spent' : left > 40 ? 'capped fund' : 'capped fund, open'; }
+function travelPct(loc) { const h = S.me.hub; return !loc || loc === h ? 0 : HUBS[loc].m === HUBS[h].m ? .03 : .06; }
+function crewSave(loc) { if (!loc || loc === S.me.hub) return 0; const ci = h => (MARKETS[HUBS[h].m].cost || [1, 1, 1])[2] || 1; return clamp(.4 * (1 - ci(loc) / ci(S.me.hub)) * .5, 0, .06); }
+function thinCrews(loc) { if (!loc || loc === S.me.hub) return 0; return ((MARKETS[HUBS[loc].m].cost || [1, 1, 1])[2] < .3 ? 1.5 : 0) + (HUBS[loc].minor ? 1 : 0); }
+function mezzOK(lead) { return (lead !== undefined && lead !== null && P(lead) && typeof bankability === 'function' && bankability(P(lead)) >= 45) || ME().standing >= 50; }
+function streamPrem(src, lead) { return clamp(.06 + (((src && src.score) || 60) - 60) / 300 + (lead !== undefined && lead !== null && P(lead) ? (P(lead).fame || 0) / 1000 : 0), .03, .22); }
+{ const _fp = finPlan; finPlan = function (budget, o) {
+  const X = Object.assign({}, FIN_O || {}, o || {}), loc = X.loc && X.loc !== S.me.hub && HUBS[X.loc] ? X.loc : null;
+  FIN_LOC = loc; let plan; try { plan = _fp(budget, o); } finally { FIN_LOC = null; }
+  if (loc) {
+    const rb = plan.parts.find(p => p.k === 'rebate');
+    if (rb && !capOpen(loc)) { plan.parts = plan.parts.filter(p => p !== rb); plan.fees = plan.fees.filter(f => !/incentive/.test(f[0])); plan.reb = 0; plan.capped = 1; }
+    else if (rb) rb.label = `${hubName(loc)} production incentive (${Math.round(incentiveOf(loc) * 100)}% of local spend)`;
+    plan.fees.push(['Travel, per diems and a local service company', budget * travelPct(loc)]);
+    const sv = crewSave(loc); if (sv > 0) plan.fees.push(['Cheaper local crews', -budget * sv]);
+    plan.loc = loc;
+  }
+  if (X.sv && S.year >= 2012) {
+    const prem = X.prem || .08; plan.parts = [{ k: 'stream', label: `A streamer buys the world outright: the budget plus ${Math.round(prem * 100)}%`, amt: budget * (1 + prem) }];
+    plan.fees = plan.fees.filter(f => !/incentive|pre-sale|bond/i.test(f[0])); plan.reb = plan.ps = plan.gap = 0; plan.bonded = false; plan.sv = budget * (1 + prem);
+  } else if (X.mz) { plan.parts.push({ k: 'mezz', label: 'Mezzanine loan: repaid with 20% from the first money in, before any equity', amt: budget * .1 }); plan.mezz = budget * .1; }
+  plan.feeT = plan.fees.reduce((t, x) => t + x[1], 0);
+  plan.equity = Math.max(0, budget + plan.feeT - plan.parts.reduce((t, x) => t + x.amt, 0));
+  LAST_PLAN = plan; return plan; }; }
+{ const _sf = selfFund; selfFund = function (a) {
+  const M = S.me, src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id) : (M.holdings || []).find(x => x.id === a.id), before = src ? src.made : undefined;
+  FIN_O = { loc: a.loc && HUBS[a.loc] ? a.loc : null, mz: !!a.mz && mezzOK(a.lead), sv: !!a.sv && S.year >= 2012, prem: streamPrem(src, a.lead) }; LAST_PLAN = null;
+  let r; try { r = _sf(a); } finally { FIN_O = null; }
+  const plan = LAST_PLAN; if (!r || !src || src.made === undefined || src.made === before || !plan) return r;
+  const f = S.films[src.made]; if (!f || !f.fin) return r;
+  if (plan.loc) { f.shoot = plan.loc; f.fin.loc = plan.loc; const thin = thinCrews(plan.loc); if (thin) f.qBonus = (f.qBonus || 0) - thin;
+    f.fin.log.push({ w: S.week, t: `Shooting in ${hubName(plan.loc)}${plan.reb ? ` for the ${Math.round(incentiveOf(plan.loc) * 100)}% incentive` : plan.capped ? ', though its incentive fund is spent for the year' : ''}${thin ? '; the local crews are thinner than at home' : ''}.`, tone: plan.reb ? 'good' : '' }); }
+  if (plan.mezz) { f.fin.mezz = plan.mezz; f.fin.log.push({ w: S.week, t: `A mezzanine lender puts in ${fmtM(plan.mezz)}, to be repaid with 20% before the equity.` }); }
+  if (plan.sv) { f.streamSold = plan.sv; f.fin.sv = plan.sv; f.fin.log.push({ w: S.week, t: `Sold to a streamer outright for ${fmtM(plan.sv)}: no box office risk, and no box office.`, tone: 'good' }); milestone(`Sold ${f.title} to a streamer before a frame was shot`, 'money'); }
+  return r; }; }
+// at release: the incentive is audited, and the mezzanine lender is paid first
+{ const _rl = release; release = function (f) {
+  const out = _rl.apply(this, arguments);
+  const F = f.fin, c = f.co !== undefined && f.co !== null ? S.companies[f.co] : null; if (!F || !c) return out;
+  if (F.reb && !F.audited) { F.audited = 1; const share = clamp(.86 + gH(f.id, 'audit') * .16, .8, 1);
+    if (share < .985) { const back = F.reb * .9 * (1 - share); c.cash -= back; F.log.push({ w: S.week, t: `The incentive audit disallows ${Math.round((1 - share) * 100)}% of the claimed spend: ${fmtM(back)} goes back to the bank.`, tone: 'bad' }); }
+    else F.log.push({ w: S.week, t: 'The incentive audit clears the spend report in full.', tone: 'good' }); }
+  if (F.mezz && !F.mezzPaid) { F.mezzPaid = 1; c.cash -= F.mezz * 1.2; F.log.push({ w: S.week, t: `The mezzanine lender is repaid first: ${fmtM(F.mezz * 1.2)}.` }); }
+  return out; }; }
+// every January the map moves
+function taxWeek() {
+  if (!S.me || S.week !== weekOfYear(S.year) || S.incY === S.year) return; S.incY = S.year; S.incX = S.incX || {};
+  const moved = [];
+  for (const h of HUB_IDS) {
+    const cur = incentiveOf(h), r = gH(h, 'inc', S.year); let v = null;
+    if (cur > 0) { if (r < .06) v = Math.min(.45, cur + .05); else if (r < .11) v = Math.max(0, cur - .05); else if (r < .125) v = 0; }
+    else if (S.year >= 1995 && r < .025) v = .2;
+    if (v !== null && Math.abs(v - cur) > .001) { (S.incX[h] = S.incX[h] || []).push([S.year, +v.toFixed(3)]); moved.push([h, cur, v]); }
+  }
+  for (const [h, a, b] of moved) news('Industry', b === 0 ? `${hubName(h)} ends its production incentive.` : a === 0 ? `${hubName(h)} launches a ${Math.round(b * 100)}% production incentive to lure film shoots.` : `${hubName(h)} ${b > a ? 'raises' : 'cuts'} its production incentive to ${Math.round(b * 100)}%.`);
+  const mine = moved.find(x => x[0] === S.me.hub); if (mine) inbox('note', `${hubName(mine[0])}'s incentive changes`, `${mine[2] > mine[1] ? 'Good news for anyone producing here' : 'Bad news for local producers'}: the city's production incentive goes from ${Math.round(mine[1] * 100)}% to ${Math.round(mine[2] * 100)}% this year.`);
+}
+// the make-film form: where to shoot, and the new instruments
+{ const _mf = makeFilmForm; makeFilmForm = function (c, k, x) {
+  const key = k + ':' + x.id, F = (UI.mk = UI.mk || {})[key] = UI.mk[key] || { micro: 1, dir: '', lead: '', inv: 0, rb: 1, ps: 0, gap: 0 }, lead = F.lead === '' || F.lead === undefined ? undefined : +F.lead;
+  const loc = F.loc && HUBS[F.loc] && F.loc !== S.me.hub ? F.loc : null, mzOK = mezzOK(lead), svOK = S.year >= 2012, prem = streamPrem(x, lead);
+  FIN_O = { loc, mz: +F.mz && mzOK, sv: +F.sv && svOK, prem }; LAST_PLAN = null;
+  let h; try { h = _mf(c, k, x); } finally { FIN_O = null; }
+  const plan = LAST_PLAN || {};
+  const L = HUB_IDS.filter(hb => hb !== S.me.hub && incentiveOf(hb) > 0).sort((a, b) => incentiveOf(b) - incentiveOf(a)).slice(0, 16);
+  const opt = hb => [hb, `${HUBS[hb].name.split(' and ')[0]} · ${Math.round(incentiveOf(hb) * 100)}%${INC_CAP[hb] ? (capOpen(hb) ? ' (capped)' : ' (spent)') : ''} · travel +${Math.round(travelPct(hb) * 100)}%${crewSave(hb) > .005 ? ` · crews −${Math.round(crewSave(hb) * 100)}%` : ''}${thinCrews(hb) ? ' · thin crews' : ''}`];
+  const homeInc = Math.round(incentiveOf(S.me.hub) * 100);
+  const where = `<div class="tx-row"><label>Shoot in ${sel('mk-loc-' + key, [['', `${HUBS[S.me.hub].name.split(' and ')[0]} (home) · ${homeInc}%`]].concat(L.map(opt)), F.loc || '')}</label>${loc ? `<span class="muted">${esc(capLabel(loc) || 'open fund')}${thinCrews(loc) ? ' · quality −' + thinCrews(loc) : ''}</span>` : ''}</div>`;
+  const extra = `<label><input type="checkbox" data-mkfin="${key}:mz" ${+F.mz && mzOK ? 'checked' : ''} ${mzOK && !(+F.sv && svOK) ? '' : 'disabled'}> ${mzOK ? 'Mezzanine loan (10% of the budget; repaid with 20% before equity)' : 'Mezzanine loan: lenders want a bankable lead (45+) or standing 50+'}</label>
+   <label><input type="checkbox" data-mkfin="${key}:sv" ${+F.sv && svOK ? 'checked' : ''} ${svOK ? '' : 'disabled'}> ${svOK ? `Sell the world to a streamer up front: budget + ${Math.round(prem * 100)}%, no box office` : 'Streamer pre-buys arrive in the 2010s'}</label>`;
+  let H = h.replace('<div class="finplan small"><b>The money</b>', `$&${where}`);
+  if (loc) H = H.replace(new RegExp(`<label><input type="checkbox" data-mkfin="${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:rb"[\\s\\S]*?</label>`), `<label><input type="checkbox" data-mkfin="${key}:rb" ${+F.rb ? 'checked' : ''} ${incentiveOf(loc) && capOpen(loc) ? '' : 'disabled'}> ${incentiveOf(loc) && capOpen(loc) ? `Cash-flow the ${esc(hubName(loc))} incentive (${Math.round(incentiveOf(loc) * 100)}%)` : `No incentive to claim in ${esc(hubName(loc))} right now`}</label>`);
+  const order = plan.sv ? 'The streamer owns it: you keep the premium, minus fees and any overrun.' : `Who's paid back first: ${['the banks (incentive, pre-sales, gap)', plan.mezz ? 'the mezzanine lender (+20%)' : '', 'equity investors', 'then the company'].filter(Boolean).join(' → ')}.`;
+  H = H.replace(/(<span class="muted">Fees, bond and insurance:)/, `${extra}<span class="muted tx-order">${order}</span>$1`);
+  if (plan.fees) { const pos = plan.fees.filter(f => f[1] > 0).reduce((t, f) => t + f[1], 0), neg = -plan.fees.filter(f => f[1] < 0).reduce((t, f) => t + f[1], 0);
+    H = H.replace(/<span class="muted">Fees, bond and insurance: [^<.]*\./, `<span class="muted">Fees, bond, insurance and travel: ${fmtCash(Math.round(pos * 1e6))}${neg ? `; cheaper local crews save ${fmtCash(Math.round(neg * 1e6))}` : ''}.`); }
+  return H; }; }
+// Terminal: the incentive map
+function taxPanel() {
+  const W = 520, Ht = 220, X = lon => (lon + 170) / 350 * W, Y = lat => (68 - lat) / 115 * Ht, M = S.me;
+  const L = HUB_IDS.filter(h => HUB_XY[h]).map(h => [h, incentiveOf(h)]);
+  const dots = L.map(([h, r]) => { const [lon, lat] = HUB_XY[h], spent = INC_CAP[h] && !capOpen(h); return `<circle cx="${X(lon).toFixed(1)}" cy="${Y(lat).toFixed(1)}" r="${(2 + r * 22).toFixed(1)}" class="tx-dot${r ? '' : ' tx-none'}${spent ? ' tx-spent' : ''}${h === M.hub ? ' tx-home' : ''}"><title>${esc(HUBS[h].name)}: ${Math.round(r * 100)}%${INC_CAP[h] ? ' · ' + capLabel(h) : ''}</title></circle>`; }).join('');
+  const grid = [-120, -60, 0, 60, 120].map(lon => `<line x1="${X(lon)}" y1="0" x2="${X(lon)}" y2="${Ht}"/>`).join('') + [-30, 0, 30, 60].map(lat => `<line x1="0" y1="${Y(lat)}" x2="${W}" y2="${Y(lat)}"/>`).join('');
+  const top = L.filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const ch = h => { const X2 = (S.incX || {})[h]; const last = X2 && X2[X2.length - 1]; return last && last[0] === S.year ? (last[1] >= incentiveOf(h, S.year - 1) ? '<span class="up">new rate</span>' : '<span class="dn">cut</span>') : ''; };
+  return `<section class="tk-p"><h4>INCENTIVE MAP <span class="tk-sub">share of local spend refunded · dot size = rate</span></h4><svg class="tx-map" viewBox="0 0 ${W} ${Ht}" width="100%"><g class="tx-grid">${grid}</g>${dots}</svg>
+   <table class="tk-t"><thead><tr><th>City</th><th class="n">Rate</th><th>Fund</th><th></th></tr></thead><tbody>${top.map(([h, r]) => `<tr${h === M.hub ? ' class="tk-mine"' : ''}><td>${esc(HUBS[h].name.split(' and ')[0])}</td><td class="n">${Math.round(r * 100)}%</td><td class="tk-mut">${esc(capLabel(h) || 'open')}</td><td>${ch(h)}</td></tr>`).join('')}</tbody></table></section>`;
+}
+{ const _th = terminalHTML; terminalHTML = function () { const h = _th(); const i = h.lastIndexOf('</div></div>'); return i < 0 ? h : h.slice(0, i) + taxPanel() + h.slice(i); }; }
+// your films' stacks show the new money too
+{ const _fs = finStackOf; finStackOf = function (f) {
+  if (!f.fin || !(f.fin.mezz || f.fin.sv)) return _fs(f);
+  if (f.fin.sv) return [['Streamer pre-buy', f.fin.sv, 'stream']];
+  const L = _fs(f).filter(x => x[2] !== 'equity'); L.push(['Mezzanine loan', f.fin.mezz, 'mezz']); const rest = f.budget - L.reduce((s, x) => s + x[1], 0); if (rest > 0) L.push(['Your company', rest, 'equity']); return L; }; }
+// </taxstack>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -41102,7 +41353,7 @@ function careerClick(t) {
   if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
-  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; const done = doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps }); if (!done) { UI.mkErr = UI.mkErr || {}; UI.mkErr[key] = 'Not yet: the company needs at least a quarter of its share in the bank, and investors and sales agents won\'t take the same project twice in four weeks. Put more money in, go smaller, or wait.'; } else if (UI.mkErr) delete UI.mkErr[key]; render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; const done = doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps, loc: F.loc || undefined, mz: !!+F.mz, sv: !!+F.sv }); if (!done) { UI.mkErr = UI.mkErr || {}; UI.mkErr[key] = 'Not yet: the company needs at least a quarter of its share in the bank, and investors and sales agents won\'t take the same project twice in four weeks. Put more money in, go smaller, or wait.'; } else if (UI.mkErr) delete UI.mkErr[key]; render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.coinv && finClick(t)) return true;
   if (typeof cgClick === 'function' && cgClick(t)) return true;
   if (typeof fin2Click === 'function' && fin2Click(t)) return true;
@@ -41175,7 +41426,7 @@ function careerChange(e) {
   if (/^comp-sc-/.test(id)) { UI[id] = v; return true; }
   if (id === 'new-work') { UI.newWork = v; render(true); return true; }
   if (id === 'rel-promo') { UI.relPromo = v; return true; }
-  if (/^mk-(micro|dir|lead|dp|ed|mus|pd)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
+  if (/^mk-(micro|dir|lead|dp|ed|mus|pd|loc)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
   if (e.target.dataset.mkfin) { const [a, b, f] = e.target.dataset.mkfin.split(':'); UI.mk[a + ':' + b][f] = e.target.checked ? 1 : 0; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
   if (id === 'co-name') { (UI.co = UI.co || {}).name = v; return true; }
@@ -41203,7 +41454,7 @@ function makeFilmForm(c, k, x) {
     <label><input type="checkbox" data-mkfin="${key}:rb" ${+F.rb ? 'checked' : ''} ${inc ? '' : 'disabled'}> ${inc ? `Cash-flow the ${esc(hubName(S.me.hub))} incentive (${Math.round(inc * 100)}%)` : `No production incentive in ${esc(hubName(S.me.hub))} ${S.year < 2000 ? 'yet' : ''}`}</label>
     <label><input type="checkbox" data-mkfin="${key}:ps" ${+F.ps ? 'checked' : ''} ${psOK ? '' : 'disabled'}> ${psOK ? `Pre-sell the foreign rights (${Math.round(presaleShare(x.genre, leadId, dirId) * 100)}% of the budget) ${+F.ps ? oddsBar('pack', presaleDC(x.genre, leadId)) : ''}` : 'Pre-sales need a name: a lead with some fame, or a director people know'}</label>
     ${+F.ps && psOK ? `<label><input type="checkbox" data-mkfin="${key}:gap" ${+F.gap ? 'checked' : ''}> Gap loan against the home rights (15%)</label>` : ''}
-    ${stackBar(plan.parts.map(p => [p.k === 'rebate' ? 'Incentive' : p.k === 'presale' ? 'Pre-sales' : 'Gap loan', p.amt, p.k]).concat([['Company and investors', plan.equity, 'equity']]))}
+    ${stackBar(plan.parts.map(p => [({ rebate: 'Incentive', presale: 'Pre-sales', gap: 'Gap loan', mezz: 'Mezzanine', stream: 'Streamer' })[p.k] || 'Other', p.amt, p.k]).concat([['Company and investors', plan.equity, 'equity']]))}
     <span class="muted">Fees, bond and insurance: ${fmtCash(Math.round(plan.feeT * 1e6))}.${plan.bonded ? ' Bank money means a completion bond: run far over budget and the guarantor takes the film.' : ''}</span></div>`;
   const dirs = dirOptions(x.genre), leads = castOptions(x.genre), M = S.me;
   const tag = p => M.known[p.id] ? (M.known[p.id].tags.includes('Your regular') ? ' ♥' : ' ★') : '';

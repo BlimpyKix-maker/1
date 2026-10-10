@@ -274,7 +274,7 @@ function selfFund(a) {
   src.made = f.id; f.xc = f.xc || {}; f.xc[me.id] = direct ? 'Director' : a.src === 'script' ? 'Writer-producer' : 'Producer';
   if (share) { f.investors = { share, amount: invest }; }
   f.fin = { reb: plan.reb, ps: plan.ps, gap: plan.gap, bonded: plan.bonded, insured: 1, log: [], pend: null };
-  f.fin.log.push({ w: S.week, t: `Financing closes: ${plan.parts.map(x => x.k === 'rebate' ? 'the incentive' : x.k === 'presale' ? 'foreign pre-sales' : 'a gap loan').concat(share ? ['equity investors'] : []).concat(['the company']).join(', ')}.`, tone: 'good' });
+  f.fin.log.push({ w: S.week, t: `Financing closes: ${plan.parts.map(x => ({ rebate: 'the incentive', presale: 'foreign pre-sales', gap: 'a gap loan', mezz: 'a mezzanine loan', stream: 'a streamer' })[x.k] || 'other money').concat(share ? ['equity investors'] : []).concat(['the company']).join(', ')}.`, tone: 'good' });
   if (plan.ps > 0) { const b = S.companies.filter(x => x.closed === null && x.owner === undefined && x.tier <= 2 && HUBS[x.hub].m !== f.m).sort((x, y) => hashRand(x.id * 7 + f.id)() - hashRand(y.id * 7 + f.id)())[0]; if (b) { f.dist = f.dist || {}; f.dist.intl = { b: b.id, mg: plan.ps, share: .4, presale: 1 }; } }
   f.status = 'Development and financing';
   if (direct) takeJob(makePost(POST_BY.owndir, f));

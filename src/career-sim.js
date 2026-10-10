@@ -765,6 +765,8 @@ function closeWeek(a) {
   if (typeof encounterWeek === 'function') encounterWeek();
   if (typeof termWeek === 'function') termWeek();
   if (typeof futWeek === 'function') futWeek();
+  if (typeof guildWeek === 'function') guildWeek();
+  if (typeof taxWeek === 'function') taxWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1089,6 +1091,7 @@ function resolvePick(it, k) {
   if (typeof co2Pick === 'function' && co2Pick(it, k)) return true;
   if (typeof awards4Pick === 'function' && awards4Pick(it, k)) return true;
   if (typeof petPick === 'function' && petPick(it, k)) return true;
+  if (typeof guildPick === 'function' && guildPick(it, k)) return true;
   if (typeof ailPick === 'function' && ailPick(it, k)) return true;
   if (typeof actor3Pick === 'function' && actor3Pick(it, k)) return true;
   if (typeof scPick === 'function' && scPick(it, k)) return true;

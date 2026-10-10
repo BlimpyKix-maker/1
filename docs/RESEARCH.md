@@ -7,6 +7,9 @@ Collected in round 9 to find systems that add strategic depth. What has shipped 
 - **#5 Recoupment waterfall:** 'Where the money went' on every released film.
 - **#8 Tracking:** the futures 'Trk' column, plus 'Why it did that' on film pages, which compares tracking with the result.
 - **Design lesson (#25):** every outcome shows its inputs.
+- **#1 Capital stack:** mezzanine loans, streamer pre-buys, a recoupment order and incentive audits (src/taxstack.js), on top of the existing incentive, pre-sale and gap-loan plan.
+- **#3 Tax incentive map:** choose where to shoot. Rates move each January, capped funds run dry, and there's a Terminal map.
+- **#13 Guild cycle and strikes:** contracts per market, talks with visible odds, strikes that stall productions, pay indexes and interim agreements (src/guilds.js).
 
 Everything else below is a candidate for future rounds.
 

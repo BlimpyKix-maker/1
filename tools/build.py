@@ -207,6 +207,8 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('terminal', '// ================= Apple Box — World Core UI ================='),
                      ('futures', '// ================= Apple Box — World Core UI ================='),
                      ('agent2', '// ================= Apple Box — World Core UI ================='),
+                     ('guilds', '// ================= Apple Box — World Core UI ================='),
+                     ('taxstack', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

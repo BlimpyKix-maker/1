@@ -671,7 +671,7 @@ function careerClick(t) {
   if (t.dataset.dtab) { UI.dtab = t.dataset.dtab; UI.tab = 'you'; UI.stack = []; render(); const n = document.querySelector('.desknav'); if (n) n.scrollIntoView({ block: 'start' }); return true; }
   if (t.dataset.found) { doAct({ t: 'found', name: ($('#co-name') || {}).value || '' }); render(true); return true; }
   if (t.dataset.comoney) { const amt = +(($('#co-amt') || {}).value || 0); UI.co.amt = amt; doAct({ t: t.dataset.comoney, amount: amt }); render(true); return true; }
-  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; const done = doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps }); if (!done) { UI.mkErr = UI.mkErr || {}; UI.mkErr[key] = 'Not yet: the company needs at least a quarter of its share in the bank, and investors and sales agents won\'t take the same project twice in four weeks. Put more money in, go smaller, or wait.'; } else if (UI.mkErr) delete UI.mkErr[key]; render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
+  if (t.dataset.greenlight) { const key = t.dataset.greenlight, [src, id] = key.split(':'), F = UI.mk[key], n0 = S.me.rollN || 0; const done = doAct({ t: 'selffund', src, id: +id, direct: F.dir === 'me', dir: F.dir && F.dir !== 'me' ? +F.dir : undefined, lead: F.lead !== '' ? +F.lead : undefined, dp: F.dp ? +F.dp : undefined, ed: F.ed ? +F.ed : undefined, mus: F.mus ? +F.mus : undefined, pd: F.pd ? +F.pd : undefined, micro: !!+F.micro, inv: !!+F.inv, rb: !!+F.rb, ps: !!+F.ps, gap: !!+F.gap && !!+F.ps, loc: F.loc || undefined, mz: !!+F.mz, sv: !!+F.sv }); if (!done) { UI.mkErr = UI.mkErr || {}; UI.mkErr[key] = 'Not yet: the company needs at least a quarter of its share in the bank, and investors and sales agents won\'t take the same project twice in four weeks. Put more money in, go smaller, or wait.'; } else if (UI.mkErr) delete UI.mkErr[key]; render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
   if (t.dataset.coinv && finClick(t)) return true;
   if (typeof cgClick === 'function' && cgClick(t)) return true;
   if (typeof fin2Click === 'function' && fin2Click(t)) return true;
@@ -744,7 +744,7 @@ function careerChange(e) {
   if (/^comp-sc-/.test(id)) { UI[id] = v; return true; }
   if (id === 'new-work') { UI.newWork = v; render(true); return true; }
   if (id === 'rel-promo') { UI.relPromo = v; return true; }
-  if (/^mk-(micro|dir|lead|dp|ed|mus|pd)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
+  if (/^mk-(micro|dir|lead|dp|ed|mus|pd|loc)-/.test(id)) { const [, f, ...rest] = id.split('-'); UI.mk[rest.join('-')][f] = v; render(true); return true; }
   if (e.target.dataset.mkfin) { const [a, b, f] = e.target.dataset.mkfin.split(':'); UI.mk[a + ':' + b][f] = e.target.checked ? 1 : 0; render(true); return true; }
   if (e.target.dataset.mkinv) { UI.mk[e.target.dataset.mkinv].inv = e.target.checked ? 1 : 0; render(true); return true; }
   if (id === 'co-name') { (UI.co = UI.co || {}).name = v; return true; }
@@ -772,7 +772,7 @@ function makeFilmForm(c, k, x) {
     <label><input type="checkbox" data-mkfin="${key}:rb" ${+F.rb ? 'checked' : ''} ${inc ? '' : 'disabled'}> ${inc ? `Cash-flow the ${esc(hubName(S.me.hub))} incentive (${Math.round(inc * 100)}%)` : `No production incentive in ${esc(hubName(S.me.hub))} ${S.year < 2000 ? 'yet' : ''}`}</label>
     <label><input type="checkbox" data-mkfin="${key}:ps" ${+F.ps ? 'checked' : ''} ${psOK ? '' : 'disabled'}> ${psOK ? `Pre-sell the foreign rights (${Math.round(presaleShare(x.genre, leadId, dirId) * 100)}% of the budget) ${+F.ps ? oddsBar('pack', presaleDC(x.genre, leadId)) : ''}` : 'Pre-sales need a name: a lead with some fame, or a director people know'}</label>
     ${+F.ps && psOK ? `<label><input type="checkbox" data-mkfin="${key}:gap" ${+F.gap ? 'checked' : ''}> Gap loan against the home rights (15%)</label>` : ''}
-    ${stackBar(plan.parts.map(p => [p.k === 'rebate' ? 'Incentive' : p.k === 'presale' ? 'Pre-sales' : 'Gap loan', p.amt, p.k]).concat([['Company and investors', plan.equity, 'equity']]))}
+    ${stackBar(plan.parts.map(p => [({ rebate: 'Incentive', presale: 'Pre-sales', gap: 'Gap loan', mezz: 'Mezzanine', stream: 'Streamer' })[p.k] || 'Other', p.amt, p.k]).concat([['Company and investors', plan.equity, 'equity']]))}
     <span class="muted">Fees, bond and insurance: ${fmtCash(Math.round(plan.feeT * 1e6))}.${plan.bonded ? ' Bank money means a completion bond: run far over budget and the guarantor takes the film.' : ''}</span></div>`;
   const dirs = dirOptions(x.genre), leads = castOptions(x.genre), M = S.me;
   const tag = p => M.known[p.id] ? (M.known[p.id].tags.includes('Your regular') ? ' ♥' : ' ★') : '';
