@@ -186,7 +186,7 @@ function makeParty(c) {
   // a room full of different people: nobody shares a first name or a surname with another guest
   const pickG = (roles, score) => { const q = bestIn(hub, roles, x => score(x) - (toks(x).some(t => used.has(t)) ? 1e5 : 0) - (Object.values(g).includes(x) ? 1e6 : 0)); if (q) toks(q).forEach(t => used.add(t)); return q; };
   g.host = pickG(['producer'], q => -Math.abs(q.standing - 55) + q.fame * .1 + prnd() * 30);
-  g.star = pickG(['actor'], q => q.fame * .6 + prnd() * 45);
+  g.star = pickG(['actor'], q => Math.min(q.fame, 70) * .45 + prnd() * 60 - (q.fame > 88 ? 40 : 0));   // a recognisable face, not always the same megastar
   g.dir = pickG(['director'], q => -Math.abs(q.standing - 55) * .6 + prnd() * 45);
   g.vet = pickG(['dp', 'editor', 'designer', 'sound', 'costume', 'makeup', 'vfx', 'stunts'], q => q.standing * .6 + (S.year - q.born > 45 ? 15 : 0) + prnd() * 30);
   g.writer = pickG(['writer'], q => -Math.abs(q.standing - 45) + prnd() * 35);
