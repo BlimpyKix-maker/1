@@ -22,9 +22,11 @@ function curMap() { return S.me ? (S.me.cur = S.me.cur || {}) : {}; }
 function fieldKnown(f) { const K = curMap(); return (CURR[f] ? CURR[f].lessons : []).filter((_, i) => K[f + ':' + i]).length; }
 function currKnown(fam) { return (FAM_FIELDS[fam] || []).reduce((n, f) => n + fieldKnown(f), 0); }
 // Examples name this world's films and people: the same film for the same lesson, every time.
+const EXF = { S: null, w: -1, m: new Map() };
 function exampleFilm(f, i, genre) {
-  const pool = S.films.filter(x => x.rel !== null && (x.q || 0) >= 55 && x.cast && x.cast.length && x.dir !== undefined && (!genre || x.genre === genre));
-  const P0 = pool.length ? pool : S.films.filter(x => x.rel !== null && x.cast && x.cast.length);
+  if (EXF.S !== S || EXF.w !== S.week) { EXF.S = S; EXF.w = S.week; EXF.m = new Map(); }   // the pools only change week to week
+  let P0 = EXF.m.get(genre || '');
+  if (!P0) { const pool = S.films.filter(x => x.rel !== null && (x.q || 0) >= 55 && x.cast && x.cast.length && x.dir !== undefined && (!genre || x.genre === genre)); P0 = pool.length ? pool : S.films.filter(x => x.rel !== null && x.cast && x.cast.length); EXF.m.set(genre || '', P0); }
   if (!P0.length) return null;
   const h = [...f].reduce((a, c) => a * 31 + c.charCodeAt(0), 7) >>> 0;
   return P0[Math.floor(hashRand(h + i * 977)() * P0.length)];
