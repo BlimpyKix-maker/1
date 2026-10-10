@@ -61,7 +61,7 @@ const G_FRAME = ['so @a @w', '{did you hear|heard that|word is|apparently} @a @w
 (function moreGossip() { const seen = new Set(GOSSIP_LINES); for (let i = 0; i < 600 && seen.size < GOSSIP_LINES.length + 400; i++) { const w = gx(`{${G_WHAT.join('|')}}`, i * 3 + 1), f = gx(`{${G_FRAME.join('|')}}`, i * 7 + 2).replace('@w', w).replace(/@a/g, '{a}').replace(/@b/g, '{b}'); if (!seen.has(f)) { seen.add(f); GOSSIP_LINES.push(f); } } })();
 // ---- scene openers ----
 const BEAT = {
-  rain: ['Rain hammers the tarps.', 'Everyone smells of wet coats.', 'The car park is a lake.', 'Umbrellas everywhere, none of them yours.'],
+  rain: ['Rain hammers the windows.', 'Everyone smells of wet coats.', 'The streets are rivers.', 'Umbrellas everywhere, none of them yours.'],
   storm: ['Thunder somewhere over the lot.', 'The wind has opinions about the lighting rig.', 'Half the crew is watching the sky.'],
   snow: ['Snow on the windows.', 'Everyone\'s breath shows.', 'Someone has built a snowman in the unit base.'],
   heat: ['It\'s airless.', 'The fans just move hot air around.', 'Somebody\'s handing out ice lollies.', 'The tarmac shimmers.'],
@@ -69,10 +69,10 @@ const BEAT = {
   fog: ['Fog sits on everything.', 'You can\'t see the end of the street.'],
   wind: ['Doors keep banging.', 'The flags outside the stage snap all day.'],
   cloud: ['A flat grey sky.', 'Nobody can tell what time it is.'],
-  fair: ['A mild, forgettable day, so far.', 'Soft light, easy morning.'],
-  am: ['First coffee.', 'Seven-something in the morning.', 'Before most people are awake.', 'The urn is still heating up.'],
+  fair: ['A mild, forgettable day, so far.', 'Soft light, an easy sort of day.'],
+  am: ['First coffee.', 'Seven-something in the morning.', 'Before most people are awake.', 'The morning is still deciding what it is.'],
   pm: ['Mid-afternoon slump.', 'After lunch, everyone a bit slower.', 'Four o\'clock and the day is long.'],
-  eve: ['Late, and the building is emptying.', 'The cleaners have started.', 'Overtime, again.'],
+  eve: ['Late, and the streets are emptying.', 'The day is nearly over.', 'Evening, finally.'],
   tired: ['You are running on fumes.', 'Your eyes feel sandy.', 'You\'ve had three coffees and no food.'],
   tense: ['Your jaw has been clenched since breakfast.', 'You\'re not at your most patient.', 'Something small could tip you over today.'],
   good: ['You feel sharp today.', 'Things have been going your way.', 'You slept properly for once.'],
@@ -84,8 +84,8 @@ const BEAT = {
       const M = S.me, seed = (M.seq || 0) * 31 + S.week, r = hashRand(seed), bits = [];
       const wx = typeof wxDay === 'function' ? wxDay(M.hub, S.week, M.wk ? M.wk.day : 2) : null, blk = M.wk ? M.wk.block : 0;
       if (wx && BEAT[wx.k] && r() < .55) bits.push(gpick(BEAT[wx.k], seed + 1));
-      if (r() < .35) bits.push(gpick(BEAT[['am', 'pm', 'eve'][blk] || 'am'], seed + 2));
-      if (M.energy < 30 && r() < .6) bits.push(gpick(BEAT.tired, seed + 3)); else if (M.stress > 65 && r() < .6) bits.push(gpick(BEAT.tense, seed + 4)); else if (M.energy > 70 && M.stress < 30 && r() < .3) bits.push(gpick(BEAT.good, seed + 5));
+      if (!bits.length && r() < .35) bits.push(gpick(BEAT[['am', 'pm', 'eve'][blk] || 'am'], seed + 2));
+      if (extra.twist) { /* the twist sets the mood */ } else if (M.energy < 30 && r() < .6) bits.push(gpick(BEAT.tired, seed + 3)); else if (M.stress > 65 && r() < .6) bits.push(gpick(BEAT.tense, seed + 4)); else if (M.energy > 70 && M.stress < 30 && r() < .3) bits.push(gpick(BEAT.good, seed + 5));
       const mates = extra.ctx && (extra.ctx.mates || []).filter(id => P(id)); if (mates && mates.length && r() < .4) bits.push(gpick(BEAT.mate, seed + 6).replace('{m}', P(mates[0]).name.split(' ')[0]));
       if (bits.length) text = `${bits.slice(0, 2).join(' ')} ${text}`;
     }

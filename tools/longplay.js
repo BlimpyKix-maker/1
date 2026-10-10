@@ -31,7 +31,8 @@ const seed = 3000 + names.indexOf(kind) * 11;
 r(`newWorld(2027, ${seed}, 'quick'); while (archiving()) archiveStep(); while (warming()) tick(); finishWarm(); S.log = []; S.me = null; snapBaseline();`);
 // record everything shown to the player
 r(`globalThis.REC = []; globalThis.RECW = {};
-  const _inbox = inbox; inbox = function (kind, title, text, extra = {}) { REC.push({ w: S.week, ch: 'inbox:' + kind, key: extra.scene || '', t: String(title || '') + ' | ' + String(text || ''), dec: !!(extra.choices && extra.choices.length) }); return _inbox.apply(this, arguments); };
+  // record what the player is actually shown: the item after every wrapper has had its say
+  const _inbox = inbox; inbox = function (kind, title, text, extra = {}) { const it = _inbox.apply(this, arguments); REC.push({ w: S.week, ch: 'inbox:' + kind, key: extra.scene || '', t: String((it && it.title) || title || '') + ' | ' + String((it && it.text) || text || ''), dec: !!(extra.choices && extra.choices.length) }); return it; };
   const _sms = sms; sms = function (from, t, kind = 'text', extra = {}) { const n = (S.me.phone || []).length; const out = _sms.apply(this, arguments); const m = S.me.phone[S.me.phone.length - 1]; if (m && from !== null && from !== undefined && from !== S.me.id) REC.push({ w: S.week, ch: 'text:' + kind, key: '', t: m.t }); return out; };
   const _mail = mail; mail = function (folder, from, subj, body, act) { REC.push({ w: S.week, ch: 'mail:' + folder, key: '', t: String(subj || '') + ' | ' + String(body || '').slice(0, 300), dec: !!act }); return _mail.apply(this, arguments); };
   const _diary = diary; diary = function (t) { REC.push({ w: S.week, ch: 'diary', key: '', t: String(t) }); return _diary.apply(this, arguments); };`);
