@@ -42,23 +42,23 @@ function crewWeek() {
     if (G) { const lost = G.win !== b.t; const youWin = b.side === 'lose' ? lost : !lost; M.cash += youWin ? b.amt : -b.amt; addTie(ME(), P(b.who), youWin ? -1 : 2); crewPost(b.who, youWin ? `fine. FINE. ${fmtCash(b.amt)} sent. ${leagueTeams(L)[b.t].name} are dead to me` : `${leagueTeams(L)[b.t].name} ${G.win === b.t ? 'won' : 'lost'}. pay up 💸 ${fmtCash(b.amt)}`); } }
 }
 function crewAsk(C) {
-  const M = S.me, me = ME(), who = C[Math.floor(prnd() * C.length)], q = P(who), x = prnd();
+  const M = S.me, me = ME(), who = C[Math.floor(prnd() * C.length)], q = P(who), x = prnd(), G = (t, n) => typeof gx === 'function' ? gx(t, S.week * 7 + n) : t.replace(/\{([^|}]*)[^}]*\}/g, '$1');
   if (x < .25) {   // a friend's shoot
     const f = S.films.filter(f => f.rel === null && f.stage >= 1 && f.stage <= 2 && f.hub === M.hub).sort(() => prnd() - .5)[0]; if (!f) return;
-    crewPost(who, `my friend's shoot (${f.title}) is looking for people. want me to pass your name on?`);
-    inbox('crew', `${q.name.split(' ')[0]}: a shoot needs people`, `${q.name} offers to put your name forward on ${f.title}.`, { person: who, ca: 'lead', film: f.id, choices: [{ k: 'yes', label: 'Yes please' }, { k: 'no', label: 'I\'m all right, thanks' }] });
+    crewPost(who, G(`{my friend's shoot|a mate's film|this indie I know|the shoot I was on last year}{ (${f.title})| — ${f.title} —} {is looking for people|needs bodies|is short-handed|is crewing up}. {want me to pass your name on|shall I put you forward|you want in|interested}?`, who));
+    inbox('crew', G(`${q.name.split(' ')[0]}: {a shoot needs people|a way in|a job going|someone's crewing up}`, who + 1), G(`${q.name} {offers to put your name forward on|can get you in the door at|knows someone hiring on} ${f.title}.`, who + 2), { person: who, ca: 'lead', film: f.id, choices: [{ k: 'yes', label: 'Yes please' }, { k: 'no', label: 'I\'m all right, thanks' }] });
   } else if (x < .5) {   // settle an argument: which film was better
     const R = S.films.filter(f => f.rel !== null && S.week - f.rel <= 10 && f.rel < S.week && (f.hub === M.hub || (HUBS[f.hub] || {}).m === (HUBS[M.hub] || {}).m)).sort(() => prnd() - .5).slice(0, 2); if (R.length < 2) return;
     crewPost(who, `settle this. ${R[0].title} or ${R[1].title}. which is better. there is a right answer`);
-    inbox('crew', 'The group chat wants an answer', `${q.name.split(' ')[0]} wants to know: ${R[0].title} or ${R[1].title}? (The critics' scores are in Roger That, if you want to be right. Or you can just say what you think.)`, { person: who, ca: 'poll', films: [R[0].id, R[1].id], choices: [{ k: 'a', label: R[0].title }, { k: 'b', label: R[1].title }, { k: 'no', label: 'Haven\'t seen either' }] });
+    inbox('crew', G('{The group chat wants an answer|Settle an argument|Which is better?|A vote, apparently|You\'re the tiebreaker}', who + 7), `${q.name.split(' ')[0]} wants to know: ${R[0].title} or ${R[1].title}? (The critics' scores are in Roger That, if you want to be right. Or you can just say what you think.)`, { person: who, ca: 'poll', films: [R[0].id, R[1].id], choices: [{ k: 'a', label: R[0].title }, { k: 'b', label: R[1].title }, { k: 'no', label: 'Haven\'t seen either' }] });
   } else if (x < .75) {   // a night out
-    const place = pickLine(['the rooftop place', 'karaoke, the good one', 'that bar with the jukebox', 'a house party in the hills', 'the dumpling place, then wherever'], S.week);
-    crewPost(who, `${place} friday. everyone's coming. no excuses`);
-    inbox('crew', 'Friday night', `The group chat is going to ${place} on Friday.`, { person: who, ca: 'night', choices: [{ k: 'yes', label: 'I\'m in' }, { k: 'no', label: 'Can\'t this week' }] });
+    const place = G('{the rooftop place|karaoke, the good one|that bar with the jukebox|a house party in the hills|the dumpling place, then wherever|{a|the} {new|tiny|secret|awful|legendary} {ramen bar|tapas place|jazz cellar|roller disco|pub quiz|wine bar|taco truck|bowling alley|cinema club|beer garden} {by the river|near the studios|downtown|someone swears by|with the good chips}}', who);
+    crewPost(who, G(`${place} {friday|this friday|friday night}. {everyone's coming|no excuses|be there|bring people|first round's on me}`, who + 3));
+    inbox('crew', G('{Friday night|Plans for Friday|Out on Friday?|The weekend starts early|Group chat: Friday}', who + 5), `The group chat is going to ${place} on Friday.`, { person: who, ca: 'night', choices: [{ k: 'yes', label: 'I\'m in' }, { k: 'no', label: 'Can\'t this week' }] });
   } else if (typeof leaguesHere === 'function') {   // a bet on the weekend's game
     const L = leaguesHere().find(L => weekGames(L).length); if (!L || M.crewBet) return; const g = weekGames(L)[Math.floor(prnd() * weekGames(L).length)], T = leagueTeams(L), t = prnd() < .5 ? g.h : g.a, amt = Math.max(5, Math.round(usd(20) / 5) * 5);
-    crewPost(who, `${fmtCash(amt)} says ${T[t].name} win this weekend. anyone`);
-    inbox('crew', 'A bet in the group chat', `${q.name.split(' ')[0]} bets ${fmtCash(amt)} that ${T[t].name} win this weekend (${L.name}).`, { person: who, ca: 'bet', lk: L.k, team: t, amt, choices: [{ k: 'lose', label: `Take it: they'll lose` }, { k: 'no', label: 'Stay out of it' }] });
+    crewPost(who, G(`{${fmtCash(amt)} says ${T[t].name} win this weekend. anyone|who wants to lose ${fmtCash(amt)}? ${T[t].name} to win|${T[t].name} this weekend. ${fmtCash(amt)}. come on then|calling it: ${T[t].name}. ${fmtCash(amt)} to anyone brave}`, who + 4));
+    inbox('crew', G('{A bet in the group chat|Put your money where your mouth is|The weekend\'s game|A friendly wager|Fancy a flutter?}', who + 6), `${q.name.split(' ')[0]} bets ${fmtCash(amt)} that ${T[t].name} win this weekend (${L.name}).`, { person: who, ca: 'bet', lk: L.k, team: t, amt, choices: [{ k: 'lose', label: `Take it: they'll lose` }, { k: 'no', label: 'Stay out of it' }] });
   }
 }
 function crewPick(it, k) {

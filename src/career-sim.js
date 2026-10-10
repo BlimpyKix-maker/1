@@ -762,6 +762,7 @@ function closeWeek(a) {
   if (typeof placesWeek === 'function') placesWeek();
   if (typeof shorts2Week === 'function') shorts2Week();
   if (typeof tvSeasonWeek === 'function') tvSeasonWeek();
+  if (typeof encounterWeek === 'function') encounterWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1090,6 +1091,7 @@ function resolvePick(it, k) {
   if (typeof actor3Pick === 'function' && actor3Pick(it, k)) return true;
   if (typeof scPick === 'function' && scPick(it, k)) return true;
   if (typeof tvepPick === 'function' && tvepPick(it, k)) return true;
+  if (typeof encPick === 'function' && encPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
