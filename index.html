@@ -694,6 +694,8 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .wxscene { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/7; margin-bottom: 10px; } .wxscene .art { position: absolute; inset: 0; } .wxover { position: absolute; left: 16px; top: 10px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.45); } .wxover .wxbig { font-size: 44px; margin: 0; font-weight: 800; } .wxover .eyebrow { color: #fff; opacity: .9; }
 .wxcurve { width: 100%; height: 90px; } .wxworld { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; } .wxcity { display: grid; justify-items: center; gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; color: inherit; } .wxcity span { font-size: 22px; } .wxcity small { font-size: 11px; opacity: .75; } .wxbig.small { font-size: 20px; }
 #toasts { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: grid; gap: 6px; z-index: 9999; pointer-events: none; } .toast { background: #222; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.3); opacity: 1; transition: opacity .35s, transform .35s; max-width: 80vw; } .toast.good { background: #2e7d5b; } .toast.bad { background: #b23a33; } .toast.out { opacity: 0; transform: translateY(8px); }
+.thr2 .tb b { font: 700 14px/1.25 var(--f-body); text-transform: none; text-shadow: none; }
+.sms li .gsend { display: block; font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 1px; }
 .luck-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; } .luck-body { margin: 10px 0; display: grid; gap: 10px; }
 .luck-hero { padding: 14px 16px; border-radius: 14px; background: linear-gradient(135deg, #2b1055, #7597de); color: #fff; } .luck-hero p { margin: 2px 0; } .luck-big { font-size: 34px; font-weight: 800; letter-spacing: -.5px; }
 .balls { display: grid; gap: 4px; } .balls > div { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .ball { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: 12.5px; color: #111; background: radial-gradient(circle at 35% 30%, #fff, #ddd 60%); box-shadow: inset 0 -2px 3px rgba(0,0,0,.25); }
@@ -11574,6 +11576,7 @@ function closeWeek(a) {
   if (typeof school2Week === 'function') school2Week();
   if (typeof acting2Week === 'function') acting2Week();
   if (typeof sports2Week === 'function') sports2Week();
+  if (typeof crewWeek === 'function') crewWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -11893,6 +11896,7 @@ function resolvePick(it, k) {
   if (typeof school2Pick === 'function' && school2Pick(it, k)) return true;
   if (typeof bigScenePick === 'function' && bigScenePick(it, k)) return true;
   if (typeof sports2Pick === 'function' && sports2Pick(it, k)) return true;
+  if (typeof crewPick === 'function' && crewPick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -11994,6 +11998,7 @@ function applyAct(a) {
     case 'vent': return typeof ventAct === 'function' && ventAct(a);
     case 'luck': return typeof luckAct === 'function' && luckAct(a);
     case 'sport': return typeof sportAct === 'function' && sportAct(a);
+    case 'crew': return typeof crewSay === 'function' && crewSay(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
     case 'gigpitch': return typeof gigPitch === 'function' && gigPitch(a.id);
     case 'dream': return typeof setDream === 'function' && setDream(a.k);
@@ -15522,7 +15527,7 @@ const REPLIES = {
   brief: { label: '👍 Brief', mine: ['👍', 'ha, yeah', 'nice', 'ok!'] }
 };
 // Phone-like rendering helpers.
-function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
+function phoneAvatar(k, s = 30) { if (k === 'crew') return `<span class="pavatar home" style="width:${s}px;height:${s}px">👥</span>`; return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
 // </life-phone>
 // <computer>
 // ---------------- The computer on your desk ----------------
@@ -36806,6 +36811,99 @@ OS_VIEWS.sports = sportsApp;
 OS_EXTRA.sports = ['🏟️', 'The Sports Page', 'Leagues, fixtures, the table, the bookmaker, and your team'];
 { const G = OS_GROUPS.find(g => g[0] === 'Industry'); if (G && !G[1].includes('sports')) G[1].push('sports'); }
 // </sports>
+// <crew>
+// ---------------- The group chat ----------------
+// Once you have a couple of friends, you're in a group chat, and it's where the world comes to you: they react to
+// this week's news (a flop, a hit, who got fired, who's suddenly everywhere), people you know first. Most weeks
+// someone throws something at you that you can act on: a friend's shoot needs someone like you; settle a
+// which-film-was-better argument (the critics' scores are in Roger That, if you want to be right); drinks on
+// Friday; a bet on the weekend's game. You can post too, once a week: share good news, ask for help, or just send
+// something stupid. Nothing here is a chore: it's one thread, and the things worth doing come with a button.
+
+function chatCrew() {
+  const M = S.me, me = ME(), close = aliveKnown().filter(id => ['partner', 'close', 'friend'].includes(relOf(id)));
+  let C = (M.crew || []).filter(id => close.includes(id) || (P(id) && !P(id).dead && opinion(id) >= 15));
+  for (const id of close.sort((a, b) => opinion(b) - opinion(a))) { if (C.length >= 5) break; if (!C.includes(id) && relOf(id) !== 'partner') C.push(id); }
+  return C;
+}
+const CREW_SAY = {
+  Flop: ['oof. {t}', '{t} 💀', 'brutal week for some people. {t}', 'not to be dramatic but {t}'],
+  Hit: ['{t} 🔥', 'good for them honestly. {t}', 'ok {t}'],
+  Career: ['gossip: {t}', '{t} 👀', 'apparently {t}'],
+  Award: ['{t}! deserved', '{t}. robbed tbh', 'calling it now, {t}'],
+  Release: ['{t}', 'who\'s coming saturday? {t}'],
+  Cult: ['{t} — told you it was good', '{t}'], Legacy: ['{t} — told you it was good'],
+  Set: ['heard from set: {t}'], Trend: ['everyone\'s chasing this now: {t}']
+};
+function crewPost(from, t, extra = {}) { sms(from, t, 'gossip', Object.assign({ grp: 'crew', raw: 1, replyable: 0 }, extra)); }
+function crewWeek() {
+  const M = S.me; if (!M.party || !M.party.done) return;
+  const C = chatCrew(), was = M.crew || []; M.crew = C; if (C.length < 2) return;
+  for (const id of C.filter(x => !was.includes(x))) if (was.length) crewPost(C[0] === id ? C[1] : C[0], `added ${P(id).name.split(' ')[0]} 👋`);
+  if (!was.length) crewPost(C[0], `ok made a group chat. ${C.slice(1).map(id => P(id).name.split(' ')[0]).join(', ')}, meet ${ME().name.split(' ')[0]}. ${ME().name.split(' ')[0]}, meet chaos`);
+  // the week's news, people you know first
+  const known = new Set(Object.keys(M.known).map(Number)), mine = new Set(myFilms().map(f => f.id)), mkt = (HUBS[M.hub] || {}).m;
+  const seen = new Set(M.crewSeen || []);
+  const N = S.news.filter(n => n.w >= S.week - 1 && CREW_SAY[n.type] && !seen.has(n.text)).map(n => { const r = n.ref || {}; const f = r.film !== undefined ? S.films[r.film] : null; let s = known.has(r.person) ? 5 : 0; if (f && mine.has(f.id)) s += 6; if (f && (f.hub === M.hub || (HUBS[f.hub] || {}).m === mkt)) s += 2; if (f && f.cast && f.cast.some(id => known.has(id))) s += 3; return [n, s + prnd() * 2]; }).sort((a, b) => b[1] - a[1]);
+  const n = Math.min(N.length, 1 + Math.floor(prnd() * 3));
+  for (let i = 0; i < n; i++) { const [x] = N[i], f = x.ref && x.ref.film !== undefined ? S.films[x.ref.film] : null, local = f && f.hub === M.hub, L = x.type === 'Release' && !local ? ['{t}'] : CREW_SAY[x.type], line = L[Math.floor(prnd() * L.length)].replace('{t}', x.text.replace(/\.$/, '')); crewPost(C[Math.floor(prnd() * C.length)], line); (M.crewSeen = M.crewSeen || []).push(x.text); }
+  if (M.crewSeen && M.crewSeen.length > 40) M.crewSeen.splice(0, M.crewSeen.length - 40);
+  // something to do
+  if (prnd() < .6) crewAsk(C);
+  M.crewPosted = M.crewPosted === S.week ? M.crewPosted : null;
+  // settle last week's bet
+  if (M.crewBet && M.crewBet.w < S.week && typeof LEAGUE !== 'undefined') { const b = M.crewBet, L = LEAGUE[b.lk], G = L && weekGames(L, b.w).find(g => g.h === b.t || g.a === b.t); M.crewBet = null;
+    if (G) { const lost = G.win !== b.t; const youWin = b.side === 'lose' ? lost : !lost; M.cash += youWin ? b.amt : -b.amt; addTie(ME(), P(b.who), youWin ? -1 : 2); crewPost(b.who, youWin ? `fine. FINE. ${fmtCash(b.amt)} sent. ${leagueTeams(L)[b.t].name} are dead to me` : `${leagueTeams(L)[b.t].name} ${G.win === b.t ? 'won' : 'lost'}. pay up 💸 ${fmtCash(b.amt)}`); } }
+}
+function crewAsk(C) {
+  const M = S.me, me = ME(), who = C[Math.floor(prnd() * C.length)], q = P(who), x = prnd();
+  if (x < .25) {   // a friend's shoot
+    const f = S.films.filter(f => f.rel === null && f.stage >= 1 && f.stage <= 2 && f.hub === M.hub).sort(() => prnd() - .5)[0]; if (!f) return;
+    crewPost(who, `my friend's shoot (${f.title}) is looking for people. want me to pass your name on?`);
+    inbox('crew', `${q.name.split(' ')[0]}: a shoot needs people`, `${q.name} offers to put your name forward on ${f.title}.`, { person: who, ca: 'lead', film: f.id, choices: [{ k: 'yes', label: 'Yes please' }, { k: 'no', label: 'I\'m all right, thanks' }] });
+  } else if (x < .5) {   // settle an argument: which film was better
+    const R = S.films.filter(f => f.rel !== null && S.week - f.rel <= 10 && f.rel < S.week && (f.hub === M.hub || (HUBS[f.hub] || {}).m === (HUBS[M.hub] || {}).m)).sort(() => prnd() - .5).slice(0, 2); if (R.length < 2) return;
+    crewPost(who, `settle this. ${R[0].title} or ${R[1].title}. which is better. there is a right answer`);
+    inbox('crew', 'The group chat wants an answer', `${q.name.split(' ')[0]} wants to know: ${R[0].title} or ${R[1].title}? (The critics' scores are in Roger That, if you want to be right. Or you can just say what you think.)`, { person: who, ca: 'poll', films: [R[0].id, R[1].id], choices: [{ k: 'a', label: R[0].title }, { k: 'b', label: R[1].title }, { k: 'no', label: 'Haven\'t seen either' }] });
+  } else if (x < .75) {   // a night out
+    const place = pickLine(['the rooftop place', 'karaoke, the good one', 'that bar with the jukebox', 'a house party in the hills', 'the dumpling place, then wherever'], S.week);
+    crewPost(who, `${place} friday. everyone's coming. no excuses`);
+    inbox('crew', 'Friday night', `The group chat is going to ${place} on Friday.`, { person: who, ca: 'night', choices: [{ k: 'yes', label: 'I\'m in' }, { k: 'no', label: 'Can\'t this week' }] });
+  } else if (typeof leaguesHere === 'function') {   // a bet on the weekend's game
+    const L = leaguesHere().find(L => weekGames(L).length); if (!L || M.crewBet) return; const g = weekGames(L)[Math.floor(prnd() * weekGames(L).length)], T = leagueTeams(L), t = prnd() < .5 ? g.h : g.a, amt = Math.max(5, Math.round(usd(20) / 5) * 5);
+    crewPost(who, `${fmtCash(amt)} says ${T[t].name} win this weekend. anyone`);
+    inbox('crew', 'A bet in the group chat', `${q.name.split(' ')[0]} bets ${fmtCash(amt)} that ${T[t].name} win this weekend (${L.name}).`, { person: who, ca: 'bet', lk: L.k, team: t, amt, choices: [{ k: 'lose', label: `Take it: they'll lose` }, { k: 'no', label: 'Stay out of it' }] });
+  }
+}
+function crewPick(it, k) {
+  if (it.kind !== 'crew') return false;
+  const M = S.me, me = ME(), q = P(it.person); it.done = true; if (!q) return true;
+  let t = '';
+  switch (it.ca) {
+    case 'lead': if (k === 'yes') { const f = S.films[it.film], p = f && makeLead(it.person, f); t = p ? `${q.name.split(' ')[0]} passes your name on. It's on your board: ${p.t}.` : 'The shoot filled up before they could ask.'; crewPost(-1, 'yes please!! thank you'); } else t = 'You let it go.'; break;
+    case 'poll': { if (k === 'no') { t = 'You plead ignorance. They mock you for an hour.'; break; } const [a, b] = it.films.map(id => S.films[id]), pick = k === 'a' ? a : b, other = k === 'a' ? b : a, right = (pick.q || 0) >= (other.q || 0);
+      crewPost(-1, `${pick.title}. obviously`); if (right) { growSub(me, 'tas', .15); addTie(me, q, 2); t = `The critics agree with you. ${q.name.split(' ')[0]} concedes, grudgingly.`; crewPost(it.person, 'ugh. fine. you\'re right'); } else { addTie(me, q, -.5); t = `${q.name.split(' ')[0]} sends a link to the reviews. You were wrong. You stand by it.`; crewPost(it.person, `the reviews disagree but ok 🙃`); } break; }
+    case 'night': if (k === 'yes') { M.stress = clamp(M.stress - 5, 0, 100); M.energy = clamp(M.energy - 6, 0, 100); M.cash -= usd(30); for (const id of chatCrew()) addTie(me, P(id), 2); const n2 = prnd() < .35 ? bestIn(M.hub, ROLES, x => x.standing * .3 + prnd() * 40 - (M.known[x.id] ? 999 : 0)) : null; if (n2) meet(n2.id, 'A friend of a friend', 6); t = `A great night.${n2 ? ` Someone brings ${n2.name}, ${(n2.occ || occupationOf(n2)).toLowerCase()}; you swap numbers.` : ''}`; crewPost(-1, 'omw'); } else { t = 'You miss it. The photos look fun.'; } break;
+    case 'bet': if (k === 'lose') { M.crewBet = { lk: it.lk, t: it.team, amt: it.amt, w: S.week, who: it.person, side: 'lose' }; crewPost(-1, 'you\'re on'); t = 'You\'re on. Pay-up next week.'; } else t = 'You stay out of it.'; break;
+  }
+  it.result = { t }; return true;
+}
+// your turn: once a week
+function crewSay(a) {
+  const M = S.me, me = ME(), C = chatCrew(); if (C.length < 2 || M.crewPosted === S.week) return false; M.crewPosted = S.week;
+  const recent = (M.milestones || []).filter(m => S.week - m.w <= 2).slice(-1)[0];
+  if (a.k === 'news') { if (!recent) return false; crewPost(-1, `news: ${recent.t.toLowerCase()} 🎉`); for (const id of C) addTie(me, P(id), 1.5); const r = C[Math.floor(prnd() * C.length)]; crewPost(r, pickLine(['!!!!! drinks on you', 'SO proud of you', 'told you. TOLD you', 'ok who do I have to bribe to be in your next thing'], S.week)); return true; }
+  if (a.k === 'help') { crewPost(-1, 'anyone hear of work going? anything. I\'m not proud'); const r = C[Math.floor(prnd() * C.length)], f = S.films.filter(f => f.rel === null && f.stage >= 1 && f.stage <= 2 && f.hub === M.hub)[0], ok = prnd() < .35 + opinion(r) / 300;
+    if (ok && f) { const p = makeLead(r, f); crewPost(r, p ? `actually yes. sending you something` : 'I\'ll ask around'); } else crewPost(r, pickLine(['I\'ll ask around', 'nothing right now but I\'ll shout', 'same tbh'], S.week)); return true; }
+  crewPost(-1, pickLine(['[a picture of a cat in a director\'s chair]', 'me reading my own script at 2am: [skull]', 'industry update: I bought a plant', '[voice note, 0:04, just laughing]'], S.week)); for (const id of C) addTie(me, P(id), .8); crewPost(C[Math.floor(prnd() * C.length)], pickLine(['😂😂', 'why are you like this', 'this is the best thing that\'s happened all week', 'iconic'], S.week + 1)); return true;
+}
+function crewComposeHTML() {
+  const M = S.me, C = chatCrew(); if (C.length < 2) return '';
+  const recent = (M.milestones || []).filter(m => S.week - m.w <= 2).length;
+  return M.crewPosted === S.week ? '<p class="muted small">You\'ve posted this week.</p>' : `<div class="quick">${recent ? '<button class="qr" data-crewsay="news">🎉 Share your news</button>' : ''}<button class="qr" data-crewsay="help">🙏 Ask if anyone has work</button><button class="qr" data-crewsay="meme">😂 Send something stupid</button></div>`;
+}
+function crewClick(t) { if (t.dataset.crewsay) { doAct({ t: 'crew', k: t.dataset.crewsay }); render(true); return true; } return false; }
+// </crew>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -37444,7 +37542,7 @@ const CAL_PRESETS = {
   recover: [['rest', 'read', 'home'], ['rest', 'hunt', 'home'], ['rest', 'read', 'home'], ['rest', 'hunt', 'home'], ['rest', 'read', 'out'], ['rest', 'rest', 'home'], ['rest', 'home', 'home']]
 };
 // Your phone: conversations by person, a way to text anyone you know, your diary of appointments, and your people.
-function threadOf(m) { return m.from === -1 ? (m.to ?? 'home') : m.from === null || m.from === undefined ? 'home' : m.from; }
+function threadOf(m) { return m.grp ? m.grp : m.from === -1 ? (m.to ?? 'home') : m.from === null || m.from === undefined ? 'home' : m.from; }
 function phonePanel() {
   const M = S.me, all = M.phone || [], known = aliveKnown();
   UI.seen = typeof phoneSeen === 'function' ? phoneSeen() : (UI.seen || {});   // per thread: how many of its messages you've looked at (kept with the game)
@@ -37452,12 +37550,12 @@ function phonePanel() {
   all.forEach((m, i) => { const k = threadOf(m); threads.set(k, { k, last: m, i, n: ((threads.get(k) || {}).n || 0) + 1 }); });
   const list = [...threads.values()].sort((a, b) => (typeof threadUnread === 'function' ? (threadUnread(b.k) > 0) - (threadUnread(a.k) > 0) : 0) || b.i - a.i);
   const when = m => m.w === S.week ? `${DAYS7[m.d].slice(0, 3)} ${BLOCKS[m.b].toLowerCase()}` : `${S.week - m.w}w ago`;
-  const nameOf = k => k === 'home' ? 'Home & gossip' : P(k).name;
+  const nameOf = k => k === 'home' ? 'Home & gossip' : k === 'crew' ? 'The group chat' : P(k).name;
   const byRel = {};
   for (const id of known) { const r = relOf(id); (byRel[r] = byRel[r] || []).push(id); }
   const T = UI.txt = UI.txt || { id: '', kind: 'hi', slot: 0, msg: '' };
-  const open = UI.thread !== undefined && UI.thread !== null && (UI.thread === 'home' || M.known[UI.thread]) ? UI.thread : null;
-  if (open !== null && open !== 'home') T.id = String(open);
+  const open = UI.thread !== undefined && UI.thread !== null && (UI.thread === 'home' || UI.thread === 'crew' || M.known[UI.thread]) ? UI.thread : null;
+  if (open !== null && open !== 'home' && open !== 'crew') T.id = String(open);
   const tid = T.id === '' ? null : +T.id, trel = tid !== null && M.known[tid] ? relOf(tid) : null;
   const kinds = [['hi', 'A message'], ['coffee', 'Coffee'], ['drinks', 'Drinks']].concat(tid !== null && opinion(tid) < -5 ? [['sorry', 'Apologise']] : []).concat(trel === 'mentor' ? [['mentor', 'Mentor session']] : []).concat(tid !== null && (trel === 'partner' || canRomance(tid)) ? [['date', trel === 'partner' ? 'Date night' : 'Ask them out']] : []);
   if (tid !== null && typeof topicAvail === 'function') kinds.push(...topicAvail(tid).map(k => [k, TOPICS[k].l]));
@@ -37470,12 +37568,12 @@ function phonePanel() {
   if (open !== null) {
     UI.seen[open] = (threads.get(open) || {}).n || 0;
     const msgs = all.filter(m => threadOf(m) === open).slice(-30);
-    const q = open === 'home' ? null : P(open), rel = q ? relOf(open) : null;
+    const q = open === 'home' || open === 'crew' ? null : P(open), rel = q ? relOf(open) : null;
     const lastIn = msgs.slice().reverse().find(m => m.from !== -1);
     const canReply = q && lastIn && lastIn.replyable && !lastIn.replied && lastIn.id !== undefined;
-    left = `<div class="ph-bar"><button class="linkish" data-thread="">‹</button>${phoneAvatar(open, 28)}<div><b>${q ? esc(q.name) : 'Home & gossip'}</b>${q ? `<small>${REL[rel].icon} ${esc(REL[rel].label)} · texts ${esc(TEXT_STYLES[textStyle(q)].label)}</small>` : ''}</div>${q ? `<a href="#" class="lk small" data-go="person:${open}">Profile</a>` : ''}</div>
-     ${typeof bondHTML === 'function' && open !== 'home' ? bondHTML(open) : ''}<ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}${m.topic === 'stake' && !m.replied && !m.missed ? ' stake' : ''}"><p>${esc(m.t)}</p>${m.topic === 'stake' && !m.replied && !m.missed ? '<span class="stakechip">⏳ needs an answer this week</span>' : ''}<time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
-     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div><details class="newtopic"><summary class="small">Or change the subject…</summary>${compose(true)}</details>` : q ? compose(true) : ''}`;
+    left = `<div class="ph-bar"><button class="linkish" data-thread="">‹</button>${phoneAvatar(open, 28)}<div><b>${q ? esc(q.name) : open === 'crew' ? 'The group chat' : 'Home & gossip'}</b>${open === 'crew' && typeof chatCrew === 'function' ? `<small>${chatCrew().map(id => esc(P(id).name.split(' ')[0])).join(', ')} and you</small>` : ''}${q ? `<small>${REL[rel].icon} ${esc(REL[rel].label)} · texts ${esc(TEXT_STYLES[textStyle(q)].label)}</small>` : ''}</div>${q ? `<a href="#" class="lk small" data-go="person:${open}">Profile</a>` : ''}</div>
+     ${typeof bondHTML === 'function' && open !== 'home' && open !== 'crew' ? bondHTML(open) : ''}<ul class="sms thread">${msgs.map(m => `<li class="${m.from === -1 ? 'me' : ''} ${m.kind}${m.topic === 'stake' && !m.replied && !m.missed ? ' stake' : ''}">${m.grp && m.from >= 0 && P(m.from) ? `<span class="gsend">${esc(P(m.from).name.split(' ')[0])}</span>` : ''}<p>${esc(m.t)}</p>${m.topic === 'stake' && !m.replied && !m.missed ? '<span class="stakechip">⏳ needs an answer this week</span>' : ''}<time>${when(m)}</time></li>`).join('') || '<li class="muted">No messages yet. Say hello.</li>'}</ul>
+     ${canReply ? `<div class="quick">${replyOptions(lastIn).map(k => `<button class="qr" data-reply="${lastIn.id}:${k}">${replyLabel(lastIn, k)}</button>`).join('')}</div><div class="compose own"><input id="rp-text" maxlength="280" placeholder="Or write your own reply…"><button class="btn-s" data-reply="${lastIn.id}:own">Send</button></div><details class="newtopic"><summary class="small">Or change the subject…</summary>${compose(true)}</details>` : q ? compose(true) : open === 'crew' && typeof crewComposeHTML === 'function' ? crewComposeHTML() : ''}`;
   } else {
     left = `<div class="ph-bar"><b>Messages</b>${phoneUnread() ? ` <span class="muted small">${phoneUnread()} unread</span> <button class="linkish small" data-markread="1">Mark all read</button>` : ''}</div><ul class="threads">${list.slice(0, 14).map(t => { const unread = typeof threadUnread === 'function' ? threadUnread(t.k) : t.n - (UI.seen[t.k] || 0); return `<li><button class="thr2${unread > 0 ? ' unread' : ''}" data-thread="${t.k}">${phoneAvatar(t.k, 36)}<span class="tb"><span class="tt"><b>${esc(nameOf(t.k))}</b>${unread > 0 ? `<span class="dot">${unread}</span>` : ''}<time>${when(t.last)}</time></span><span class="prev">${t.last.from === -1 ? 'You: ' : ''}${esc(t.last.t.slice(0, 70))}</span></span></button></li>`; }).join('') || '<li class="muted">No messages yet. Text someone.</li>'}</ul>${compose(false)}`;
   }
@@ -37796,7 +37894,7 @@ function careerClick(t) {
   if (t.dataset.trip) { doAct({ t: 'trip', k: t.dataset.trip }); render(true); return true; }
   if (t.dataset.focus) { const [g, k] = t.dataset.focus.split(':'); doAct({ t: 'focus', [g]: k, auto: true }); render(true); return true; }
   if (t.dataset.reply) { const [mid, kind] = t.dataset.reply.split(':'); doAct({ t: 'reply', mid: +mid, kind, text: kind === 'own' ? ($('#rp-text-' + mid) || $('#rp-text') || {}).value || '' : undefined }); render(true); return true; }
-  if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' ? 'home' : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
+  if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' || t.dataset.thread === 'crew' ? t.dataset.thread : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home' && UI.thread !== 'crew') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' || (typeof TOPICS !== 'undefined' && TOPICS[T.kind]) ? T.msg : undefined }; if (T.kind !== 'hi' && !(typeof TOPICS !== 'undefined' && TOPICS[T.kind])) { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes') }); UI.newScript = null; render(true); return true; }
   if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
@@ -37819,6 +37917,7 @@ function careerClick(t) {
   if (typeof ventClick === 'function' && ventClick(t)) return true;
   if (typeof luckClick === 'function' && luckClick(t)) return true;
   if (typeof sportsClick === 'function' && sportsClick(t)) return true;
+  if (typeof crewClick === 'function' && crewClick(t)) return true;
   if (typeof bkTabClick === 'function' && bkTabClick(t)) return true;
   if (t.dataset.osg) { const c = UI.osc = UI.osc || { Play: 1 }; c[t.dataset.osg] = c[t.dataset.osg] ? 0 : 1; render(true); return true; }
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
@@ -37841,7 +37940,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

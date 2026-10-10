@@ -54,4 +54,4 @@ const REPLIES = {
   brief: { label: '👍 Brief', mine: ['👍', 'ha, yeah', 'nice', 'ok!'] }
 };
 // Phone-like rendering helpers.
-function phoneAvatar(k, s = 30) { return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
+function phoneAvatar(k, s = 30) { if (k === 'crew') return `<span class="pavatar home" style="width:${s}px;height:${s}px">👥</span>`; return k === 'home' ? `<span class="pavatar home" style="width:${s}px;height:${s}px">🏠</span>` : `<span class="pavatar" style="width:${s}px;height:${s}px">${portraitOf(P(k), s)}</span>`; }
