@@ -30,12 +30,12 @@ function livingWeek() {
     ['sprain', action ? .05 : .004],
     ['cut', .006],
     ['burn', hot && wx.k !== 'rain' ? .05 : 0],
-    ['hangover', outs >= 3 ? .25 : outs === 2 ? .06 : 0]
+    ['hangover', S.week - (M.hangW ?? -99) < 12 ? 0 : outs >= 4 ? .2 : outs === 3 ? .08 : 0]
   ];
   const r = prnd(); let acc = 0;
   for (const [k, p] of P0) { acc += p; if (r < acc) {
     const A = AILMENTS[k], w = A.weeks[0] + Math.floor(prnd() * (A.weeks[1] - A.weeks[0] + 1));
-    M.ail = { k, w: S.week, until: S.week + w };
+    M.ail = { k, w: S.week, until: S.week + w }; if (k === 'hangover') M.hangW = S.week;
     M.energy = clamp(M.energy + A.energy, 0, 100);
     const why = { cold: cold ? 'The weather got to you.' : 'Someone on the bus coughed at you.', flu: 'It came out of nowhere.', sprain: action ? `A bad landing on ${S.films[job.film].title}.` : 'You fell off a kerb looking at your phone.', cut: 'A kitchen knife and a moment of optimism.', burn: 'One long afternoon in the sun.', hangover: 'Three nights out in one week will do that.' }[k];
     if (k === 'flu' || k === 'sprain') inbox('ail', `${A.icon} ${A.label}`, `${why} ${A.d}`, { choices: [{ k: 'care', label: `Look after yourself: soup, early nights, the doctor (${fmtCash(usd(k === 'sprain' ? 120 : 40))})` }, { k: 'push', label: 'Push through it' }], ailK: k });

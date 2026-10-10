@@ -3,6 +3,7 @@
 // and an autosave comes when the schedule turns. The old one-log-per-browser save (SAVE_KEY) is only read now, to
 // bring an old career across.
 const SAVE_KEY = 'applebox-career-v1';
+const CARTOON_ONLY = ['eyeShape', 'mouth', 'cheeks', 'facePaint', 'sidekick', 'aura'];   // only mean something in the cartoon style
 function doAct(a) {
   const w0 = S.week;
   if (!applyAct(a)) return false;
@@ -33,7 +34,7 @@ function randomCC(all) {
   const c = UI.cc;
   c.g = pk(['X', 'F', 'M']); c.hub = pk(MAJOR_HUBS); { const d = pk(DREAMS); c.dream = d.k; c.role = d.role; c.field = d.field; } c.age = 18 + Math.floor(R0() * 15);
   c.name = suggestName(c.hub, c.g);
-  for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
+  for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); if (CARTOON_ONLY.includes(k) || k === 'style') { c.look[k] = 0; continue; } c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
   if (c.g === 'F') c.look.facial = 0;
   c.salt = Math.floor(R0() * 1e9);
   if (!all) return;
@@ -75,7 +76,7 @@ function randomFav(c) {
 }
 // owned: wardrobe pieces the player has bought; anything else from the shop stays off the list.
 function lookControls(c, owned = []) {
-  return `<div class="looks">${LOOK_KEYS.map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
+  return `<div class="looks">${LOOK_KEYS.filter(k => c.look.style === 1 || !CARTOON_ONLY.includes(k)).map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
     const ok = i => { const it = WARDROBE_AT[k + ':' + i]; return !it || owned.includes(it); };
     return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>`;
 }

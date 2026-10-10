@@ -96,7 +96,8 @@ function drunkText() {
   const M = S.me; if (M.party && !M.party.done) return;
   const ids = aliveKnown().filter(id => ['ex', 'rival', 'cold', 'partner', 'close'].includes(relOf(id)) || opinion(id) < -5 || opinion(id) > 35); if (!ids.length || prnd() > .25) return;
   const id = ids[Math.floor(prnd() * ids.length)], rel = relOf(id);
-  const t = rel === 'rival' || opinion(id) < -5 ? `you're overrated and everyone knows it` : rel === 'ex' ? `do you ever think about us` : rel === 'partner' ? `you're the best thing that ever happened to me. I mean it. also I lost my shoe` : `I LOVE YOU. you're my favourite person in this whole business`;
+  if (S.week - (M.drunkW ?? -99) < 10) return; M.drunkW = S.week;
+  const t = pickLine(rel === 'rival' || opinion(id) < -5 ? ['you\'re overrated and everyone knows it', 'I saw your last thing. I had notes. I have MORE notes', 'we should settle this. like adults. tomorrow. or now', 'everyone laughs at your jokes because they\'re scared of you'] : rel === 'ex' ? ['do you ever think about us', 'I drove past our old place tonight', 'I still have your jumper. it still smells like you. is that weird', 'we were good though. weren\'t we'] : rel === 'partner' ? ['you\'re the best thing that ever happened to me. I mean it. also I lost my shoe', 'come get me I\'m at a place with a neon fish', 'I told a stranger all about you for an hour. they cried'] : ['I LOVE YOU. you\'re my favourite person in this whole business', 'you\'re a genius and nobody says it enough', 'we should make a film together. a real one. I\'m serious. call me', 'remember that night? best night. let\'s do it again'], id + S.week);
   inbox('drunk', `2:14 a.m. A text to ${P(id).name}, unsent`, `"${t}"`, { person: id, txt: t, choices: [{ k: 'send', label: 'Send it. Chaos.', check: ['cha', 12] }, { k: 'delete', label: 'Delete it and go to sleep' }] });
 }
 function drunkPick(it, k) {

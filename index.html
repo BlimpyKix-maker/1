@@ -10646,9 +10646,11 @@ function release(f) {
   }
   if (co) { co.favors[f.dir] = (co.favors[f.dir] || 0) + (q > 55 ? 1 : .3); co.favors[f.prod] = (co.favors[f.prod] || 0) + 1; }
   const ratio = f.total / Math.max(.001, f.cost);
-  if (ratio > 3 && f.total > avgHome * 6) news('Hit', `${f.title} is a smash: ${fmtM(f.total)} worldwide on a ${fmtM(f.cost)} budget.`, { film: f.id });
-  else if (ratio < .5 && f.tier < 3 && f.cost > avgHome * .6) news('Flop', `${f.title} bombs, recouping only ${fmtM(f.total)} of its ${fmtM(f.cost)} cost.`, { film: f.id });
-  else if (f.reviews >= 85) news('Release', `Critics hail ${P(f.dir).name}'s ${f.title} (${f.reviews}/100).`, { film: f.id });
+  // several ways to say the same thing, picked by the film so a replay reads the same
+  const hv = L => L[Math.floor(hashRand(f.id * 7 + 3)() * L.length)], T = fmtM(f.total), C = fmtM(f.cost), D = P(f.dir).name;
+  if (ratio > 3 && f.total > avgHome * 6) news('Hit', hv([`${f.title} is a smash: ${T} worldwide on a ${C} budget.`, `${f.title} turns ${C} into ${T}.`, `Nobody saw ${f.title} coming: ${T} and counting, on ${C}.`, `${f.title} is the sleeper of the season: ${T} worldwide.`, `${D}'s ${f.title} pays back its ${C} budget several times over: ${T}.`]), { film: f.id });
+  else if (ratio < .5 && f.tier < 3 && f.cost > avgHome * .6) news('Flop', hv([`${f.title} bombs, recouping only ${T} of its ${C} cost.`, `${f.title} sinks: ${T} back on a ${C} budget.`, `${f.title} is the write-off of the year so far: ${T} from ${C}.`, `Audiences stay away from ${f.title} (${T} on ${C}).`, `Questions at the studio after ${f.title} makes ${T} on ${C}.`]), { film: f.id });
+  else if (f.reviews >= 85) news('Release', hv([`Critics hail ${D}'s ${f.title} (${f.reviews}/100).`, `${f.title} gets the reviews of ${D}'s life (${f.reviews}/100).`, `Raves for ${f.title}: ${f.reviews}/100.`, `"A masterpiece," say several critics of ${D}'s ${f.title} (${f.reviews}/100).`, `${f.title} is the best-reviewed film of the month (${f.reviews}/100).`]), { film: f.id });
   else if (f.tier === 1 && rnd() < .35) news('Release', `${f.title} opens in ${marketIn(f.m)} (${f.genre.toLowerCase()}, ${fmtM(f.cost)}).`, { film: f.id });
 }
 
@@ -13177,7 +13179,8 @@ function mistakeAtWork(j) {
 // The calendar date of a day in the current week (weeks are counted from their Monday).
 function dayDate(d) { const t = dateOf(S.week); const mon = new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5); return new Date(mon.getTime() + d * 864e5); }
 function fmtDay(d) { const x = dayDate(d); return `${DAYS7[d]} ${x.getUTCDate()} ${MON[x.getUTCMonth()]} ${x.getUTCFullYear()}`; }
-const pickLine = (L, i) => L[Math.abs(Math.floor(i * 7 + S.week * 3)) % L.length];
+// a stable pick that still moves week to week (the old i*7 + week*3 got stuck when i was the week and the list had 5 or 10 lines)
+const pickLine = (L, i) => L[Math.floor(hashRand((Math.floor(i) | 0) * 7919 + S.week * 104729 + L.length * 31)() * L.length)];
 const MORNING_FREE = ['A slow morning: coffee, the trades, the window.', 'You sleep in and feel human again.', 'Laundry, groceries, the small business of a life.', 'A run along the water before the heat.'];
 const HUNT_LINES = ['Emails, calls, a coffee with someone who knows someone.', 'You rewrite your cover note three times and send it anyway.', 'You trawl the trades and the crew lists for anything hiring.', 'You update your reel and send it to every name in your phone.'];
 const CLASS_LINES = ['The teacher is a working professional and it shows.', 'You practise until it stops feeling like practice.', 'A class full of people as hungry as you.', 'Notes, exercises, and one idea you\'ll use for years.'];
@@ -35163,7 +35166,8 @@ function drunkText() {
   const M = S.me; if (M.party && !M.party.done) return;
   const ids = aliveKnown().filter(id => ['ex', 'rival', 'cold', 'partner', 'close'].includes(relOf(id)) || opinion(id) < -5 || opinion(id) > 35); if (!ids.length || prnd() > .25) return;
   const id = ids[Math.floor(prnd() * ids.length)], rel = relOf(id);
-  const t = rel === 'rival' || opinion(id) < -5 ? `you're overrated and everyone knows it` : rel === 'ex' ? `do you ever think about us` : rel === 'partner' ? `you're the best thing that ever happened to me. I mean it. also I lost my shoe` : `I LOVE YOU. you're my favourite person in this whole business`;
+  if (S.week - (M.drunkW ?? -99) < 10) return; M.drunkW = S.week;
+  const t = pickLine(rel === 'rival' || opinion(id) < -5 ? ['you\'re overrated and everyone knows it', 'I saw your last thing. I had notes. I have MORE notes', 'we should settle this. like adults. tomorrow. or now', 'everyone laughs at your jokes because they\'re scared of you'] : rel === 'ex' ? ['do you ever think about us', 'I drove past our old place tonight', 'I still have your jumper. it still smells like you. is that weird', 'we were good though. weren\'t we'] : rel === 'partner' ? ['you\'re the best thing that ever happened to me. I mean it. also I lost my shoe', 'come get me I\'m at a place with a neon fish', 'I told a stranger all about you for an hour. they cried'] : ['I LOVE YOU. you\'re my favourite person in this whole business', 'you\'re a genius and nobody says it enough', 'we should make a film together. a real one. I\'m serious. call me', 'remember that night? best night. let\'s do it again'], id + S.week);
   inbox('drunk', `2:14 a.m. A text to ${P(id).name}, unsent`, `"${t}"`, { person: id, txt: t, choices: [{ k: 'send', label: 'Send it. Chaos.', check: ['cha', 12] }, { k: 'delete', label: 'Delete it and go to sleep' }] });
 }
 function drunkPick(it, k) {
@@ -37682,7 +37686,7 @@ function noteShort(n) { if (!n) return 'what happened'; const ti = n.t.replace(/
     const before = Object.assign({}, me.ties), r = memPick(it, k) || _rp(it, k);
     if (!r) return r;
     classifyChoice(it, c);
-    const l = memLabel(c.label), t = `${it.title.replace(/\.$/, '')}: you chose “${l}”`;
+    const l = memLabel(c.label), ti = it.kind === 'drunk' ? 'That late-night text' : it.kind === 'crew' ? 'The group chat' : it.title.replace(/\.$/, ''), t = `${ti}: you chose “${l}”`;
     let net = 0;
     for (const id in me.ties) { const d = me.ties[id] - (before[id] || 0); net += d; if (Math.abs(d) >= 2) remember(+id, d, t); }
     if (net >= 5) nudgeStyle('gen', .25, `${it.title}: people warmed to you`); else if (net <= -5) nudgeStyle('gen', -.25, `${it.title}: people cooled on you`);
@@ -37739,6 +37743,7 @@ function memWeek() {
       milestone('A backroom deal came out', 'work'); }
   }
   { const n = (M.secrets || []).length; if (n > (M.memSec || 0)) nudgeStyle('honest', -1.5 * (n - (M.memSec || 0)), 'Something to hide'); M.memSec = n; }
+  for (const L of (M.loans || []).filter(x => x.due <= S.week && !x.done)) { L.done = 1; if (P(L.who) && !P(L.who).dead) { M.cash += L.amt; sms(L.who, pickLine(['paid you back. with interest in the form of my eternal gratitude', 'money\'s in your account. thank you, really', 'all square. drinks on me next time'], L.who + S.week), 'text'); } }
   memJobsWeek();
   if (pending().some(it => /^mem/.test(it.kind))) return;
   if (prnd() < .12 && memCallback()) return;
@@ -37755,6 +37760,11 @@ function crossroads() {
   const fr = aliveKnown().filter(id => opinion(id) >= 25 && (typeof circleOf === 'function')).find(id => Object.entries(P(id).ties).some(([x, v]) => v < -20 && liveFilmOf(+x) && +x !== M.id));
   if (fr !== undefined) kinds.push('rival');
   if (j && M.cash > 0) kinds.push('bonus');
+  const pal = aliveKnown().filter(id => opinion(id) >= 15).sort((a, b) => opinion(b) - opinion(a))[0];
+  if (pal !== undefined && M.cash > usd(1500)) kinds.push('loan');
+  if (pal !== undefined) kinds.push('notes');
+  if (M.board.some(p => p.head !== null && p.head !== undefined) && pal !== undefined) kinds.push('rec');
+  if (S.active.some(i => S.films[i] && S.films[i].hub === M.hub && S.films[i].stage <= 2)) kinds.push('leak');
   M.xW = M.xW || {}; const ks = kinds.filter(x => S.week - (M.xW[x] || -99) >= 30);
   if (!ks.length) return;
   const k = ks[Math.floor(prnd() * ks.length)]; M.xW[k] = S.week;
@@ -37763,6 +37773,14 @@ function crossroads() {
   if (k === 'cv') { memCount('x_cv'); inbox('memx', 'Your CV, again', 'You\'re updating your CV. A couple of small jobs could be made to sound much bigger than they were. Everyone does it, apparently.', { x: k, choices: [{ k: 'pad', label: 'Polish it: exaggerate a little' }, { k: 'true', label: 'Keep it honest' }] }); return; }
   if (k === 'rival') { const foe = +Object.entries(P(fr).ties).find(([x, v]) => v < -20 && liveFilmOf(+x) && +x !== M.id)[0], f = liveFilmOf(foe); memCount('x_rival');
     inbox('memx', `${P(foe).name} wants you`, `${P(foe).name} has a job for you on ${f.title}. The catch: ${P(foe).name} and ${P(fr).name} can't stand each other, and ${P(fr).name.split(' ')[0]} has asked you, as a friend, not to.`, { x: k, person: fr, foe, film: f.id, choices: [{ k: 'take', label: 'Take it anyway: work is work' }, { k: 'stand', label: `Stand by ${P(fr).name.split(' ')[0]} and say no` }] }); return; }
+  if (k === 'loan') { const amt = usd(Math.round((800 + prnd() * 2200) / 100) * 100); memCount('x_loan');
+    inbox('memx', `${P(pal).name.split(' ')[0]} needs a loan`, `${P(pal).name} is between jobs and short on rent: ${fmtCash(amt)}, "back by the end of the month, promise".`, { x: k, person: pal, amt, choices: [{ k: 'lend', label: 'Lend it' }, { k: 'no', label: 'Say no, kindly: keep the money' }] }); return; }
+  if (k === 'notes') { memCount('x_notes');
+    inbox('memx', `${P(pal).name.split(' ')[0]}'s rough cut`, `${P(pal).name} shows you the rough cut of their short and asks what you really think. It isn't working, yet.`, { x: k, person: pal, choices: [{ k: 'honest', label: 'Tell them the truth, gently' }, { k: 'flatter', label: 'Flatter them: it\'s great' }] }); return; }
+  if (k === 'rec') { const post = M.board.find(p => p.head !== null && p.head !== undefined); memCount('x_rec');
+    inbox('memx', 'Who should they hire?', `${P(post.head).name} asks you to recommend someone for ${post.t.toLowerCase()}. You'd quite like it yourself. ${P(pal).name} would be good at it too.`, { x: k, person: pal, head: post.head, post: post.id, choices: [{ k: 'them', label: `Help ${P(pal).name.split(' ')[0]}: recommend them` }, { k: 'me', label: 'Pitch yourself instead' }] }); return; }
+  if (k === 'leak') { const f = S.active.map(i => S.films[i]).find(f => f && f.hub === M.hub && f.stage <= 2); memCount('x_leak');
+    inbox('memx', 'You heard something', `Someone on ${f.title} tells you, after two drinks, that the production is in real trouble. A trade reporter would love it.`, { x: k, film: f.id, choices: [{ k: 'keep', label: 'Keep it quiet: not your story' }, { k: 'leak', label: 'Tell the reporter, off the record' }] }); return; }
   if (k === 'bonus') { const amt = usd(150 + Math.round(prnd() * 4) * 50); memCount('x_bonus');
     inbox('memx', 'A bonus nobody expected', `The producers on ${S.films[j.film].title} send you ${fmtCash(amt)} for going beyond the job. Half your department went beyond it too.`, { x: k, amt, job: j.id, choices: [{ k: 'keep', label: 'Keep it: you earned it' }, { k: 'share', label: 'Share it with the department' }] }); }
 }
@@ -37775,6 +37793,18 @@ function crossPick(it, k) {
   if (it.x === 'rival') { const q = P(it.person), f = S.films[it.film];
     if (k === 'take') { const p = f && f.stage < 3 ? makeLead(it.foe, f) : null; addTie(me, q, -10); return R(`${p ? `The ${p.t.toLowerCase()} job is on your board.` : 'The job evaporates anyway.'} ${q.name} finds out within a day.`); }
     addTie(me, q, 10); addTie(me, P(it.foe), -4); return R(`${q.name} doesn't forget it. ${P(it.foe).name} does, eventually.`); }
+  if (it.x === 'loan') { const q = P(it.person);
+    if (k === 'lend') { M.cash -= it.amt; addTie(me, q, 8); if (prnd() < .7) { (M.loans = M.loans || []).push({ who: it.person, amt: it.amt, due: S.week + 5 }); return R(`${q.name} hugs you. "End of the month."`); } return R(`${q.name} hugs you. You have a feeling you won't see it again. You might be right.`); }
+    addTie(me, q, -3); return R(`${q.name} says they understand. They mostly do.`); }
+  if (it.x === 'notes') { const q = P(it.person);
+    if (k === 'honest') { const ok = roll('cha', 11); if (ok) { addTie(me, q, 5); trust(it.person, 8); it.result = { ok, roll: M.lastRoll, t: `${q.name} goes quiet, then nods. "You're right. I knew it." The next cut is much better.` }; return true; } addTie(me, q, -4); it.result = { ok, roll: M.lastRoll, t: `${q.name} takes it badly. "Thanks for the honesty." The tone says otherwise.` }; return true; }
+    addTie(me, q, 3); return R(`${q.name} beams. The short goes out as it is. It doesn't do well.`); }
+  if (it.x === 'rec') { const q = P(it.person), p = M.board.find(x => x.id === it.post);
+    if (k === 'them') { addTie(me, q, 8); if (P(it.head)) addTie(me, P(it.head), 2); if (p) M.board = M.board.filter(x => x !== p); return R(`${q.name} gets the job. They know exactly who to thank.`); }
+    if (p) p.ref = true; return R('You pitch yourself. Your name is at the top of their list now; your application will carry a word.'); }
+  if (it.x === 'leak') { const f = S.films[it.film];
+    if (k === 'leak') { me.standing = clamp(me.standing + .3, 0, 100); if (f && f.prod !== undefined && P(f.prod) && prnd() < .35) { addTie(me, P(f.prod), -10); remember(f.prod, -10, 'The leak about ' + f.title); return R(`The story runs. ${P(f.prod).name} works out where it came from.`); } return R('The story runs. The reporter owes you one.'); }
+    return R('You keep it to yourself. It comes out anyway, a month later, from someone else.'); }
   if (it.x === 'bonus') { const j = M.jobs.find(x => x.id === it.job), f = j && S.films[j.film];
     if (k === 'keep') { M.cash += it.amt; return R(`${fmtCash(it.amt)}, all yours.`); }
     M.cash += Math.round(it.amt * .2); if (f) for (const id of [...slotsOf(f).keys()].slice(0, 6)) if (M.known[id]) addTie(me, P(id), 3); return R('You split it. The department takes you out on Friday and won\'t let you pay.'); }
@@ -38445,12 +38475,12 @@ function livingWeek() {
     ['sprain', action ? .05 : .004],
     ['cut', .006],
     ['burn', hot && wx.k !== 'rain' ? .05 : 0],
-    ['hangover', outs >= 3 ? .25 : outs === 2 ? .06 : 0]
+    ['hangover', S.week - (M.hangW ?? -99) < 12 ? 0 : outs >= 4 ? .2 : outs === 3 ? .08 : 0]
   ];
   const r = prnd(); let acc = 0;
   for (const [k, p] of P0) { acc += p; if (r < acc) {
     const A = AILMENTS[k], w = A.weeks[0] + Math.floor(prnd() * (A.weeks[1] - A.weeks[0] + 1));
-    M.ail = { k, w: S.week, until: S.week + w };
+    M.ail = { k, w: S.week, until: S.week + w }; if (k === 'hangover') M.hangW = S.week;
     M.energy = clamp(M.energy + A.energy, 0, 100);
     const why = { cold: cold ? 'The weather got to you.' : 'Someone on the bus coughed at you.', flu: 'It came out of nowhere.', sprain: action ? `A bad landing on ${S.films[job.film].title}.` : 'You fell off a kerb looking at your phone.', cut: 'A kitchen knife and a moment of optimism.', burn: 'One long afternoon in the sun.', hangover: 'Three nights out in one week will do that.' }[k];
     if (k === 'flu' || k === 'sprain') inbox('ail', `${A.icon} ${A.label}`, `${why} ${A.d}`, { choices: [{ k: 'care', label: `Look after yourself: soup, early nights, the doctor (${fmtCash(usd(k === 'sprain' ? 120 : 40))})` }, { k: 'push', label: 'Push through it' }], ailK: k });
@@ -38978,6 +39008,28 @@ OS_EXTRA.places = ['🗺️', 'Places', 'A map of every film city: what\'s waiti
 OS_VIEWS.places = () => placesHTML();
 { const g = OS_GROUPS.find(x => x[0] === 'Today'); if (g && !g[1].includes('places')) g[1].push('places'); }
 // </places>
+// <variety2>
+// ---------------- Less of the same, round two ----------------
+// Long playthroughs showed the group chat repeating itself: the same reply from you ("omw") dozens of times, the same
+// line from friends, the same ask every week. Your replies now vary, a line nobody needs to hear twice is dropped if
+// it was said in the last ten weeks, and the group chat asks something every other week at most.
+const REPLY_VARIANTS = {
+  'yes please!! thank you': ['yes please!! thank you', 'you\'re a legend. yes', 'yes yes yes. owe you one', 'please do. thank you!!', 'that would be amazing'],
+  'omw': ['omw', 'on my way', 'leaving now', 'save me a seat', 'five minutes. ten. fifteen', 'getting a cab'],
+  'you\'re on': ['you\'re on', 'deal', 'easy money', 'bet', 'prepare to pay up'],
+  'ugh. fine. you\'re right': ['ugh. fine. you\'re right', 'fine. FINE.', 'I hate that you\'re right', 'ok the critics are with you this time'],
+  'the reviews disagree but ok 🙃': ['the reviews disagree but ok 🙃', 'bold of you', 'the critics would like a word', 'interesting choice. wrong, but interesting']
+};
+{ const _sms = sms;
+  sms = function (from, t, kind = 'text', extra = {}) {
+    const M = S.me;
+    if (M && typeof t === 'string' && REPLY_VARIANTS[t]) t = pickLine(REPLY_VARIANTS[t], (M.phoneN || 0) + (from || 0));
+    if (M && kind === 'gossip' && from !== -1 && typeof t === 'string') { const seen = (M.phone || []).some(m => m.kind === 'gossip' && m.t === t && S.week - m.w < 10); if (seen) return; }
+    return _sms(from, t, kind, extra);
+  };
+}
+{ const _ca = crewAsk; crewAsk = function (C) { const M = S.me; if (S.week - (M.crewAskW ?? -99) < 2) return; M.crewAskW = S.week; return _ca(C); }; }
+// </variety2>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -39333,6 +39385,7 @@ function viewCompany(id) {
 // and an autosave comes when the schedule turns. The old one-log-per-browser save (SAVE_KEY) is only read now, to
 // bring an old career across.
 const SAVE_KEY = 'applebox-career-v1';
+const CARTOON_ONLY = ['eyeShape', 'mouth', 'cheeks', 'facePaint', 'sidekick', 'aura'];   // only mean something in the cartoon style
 function doAct(a) {
   const w0 = S.week;
   if (!applyAct(a)) return false;
@@ -39363,7 +39416,7 @@ function randomCC(all) {
   const c = UI.cc;
   c.g = pk(['X', 'F', 'M']); c.hub = pk(MAJOR_HUBS); { const d = pk(DREAMS); c.dream = d.k; c.role = d.role; c.field = d.field; } c.age = 18 + Math.floor(R0() * 15);
   c.name = suggestName(c.hub, c.g);
-  for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
+  for (const k of LOOK_KEYS) { const opts = LOOK[k].opts.map((_, i) => i).filter(i => !WARDROBE_AT[k + ':' + i]); if (CARTOON_ONLY.includes(k) || k === 'style') { c.look[k] = 0; continue; } c.look[k] = k === 'head' || k === 'mark' || k === 'neck' || k === 'wrist' || k === 'ears' || k === 'glasses' ? (R0() < .7 ? 0 : pk(opts)) : pk(opts); }
   if (c.g === 'F') c.look.facial = 0;
   c.salt = Math.floor(R0() * 1e9);
   if (!all) return;
@@ -39405,7 +39458,7 @@ function randomFav(c) {
 }
 // owned: wardrobe pieces the player has bought; anything else from the shop stays off the list.
 function lookControls(c, owned = []) {
-  return `<div class="looks">${LOOK_KEYS.map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
+  return `<div class="looks">${LOOK_KEYS.filter(k => c.look.style === 1 || !CARTOON_ONLY.includes(k)).map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
     const ok = i => { const it = WARDROBE_AT[k + ':' + i]; return !it || owned.includes(it); };
     return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>`;
 }

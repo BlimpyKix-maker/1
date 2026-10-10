@@ -71,7 +71,7 @@ function noteShort(n) { if (!n) return 'what happened'; const ti = n.t.replace(/
     const before = Object.assign({}, me.ties), r = memPick(it, k) || _rp(it, k);
     if (!r) return r;
     classifyChoice(it, c);
-    const l = memLabel(c.label), t = `${it.title.replace(/\.$/, '')}: you chose “${l}”`;
+    const l = memLabel(c.label), ti = it.kind === 'drunk' ? 'That late-night text' : it.kind === 'crew' ? 'The group chat' : it.title.replace(/\.$/, ''), t = `${ti}: you chose “${l}”`;
     let net = 0;
     for (const id in me.ties) { const d = me.ties[id] - (before[id] || 0); net += d; if (Math.abs(d) >= 2) remember(+id, d, t); }
     if (net >= 5) nudgeStyle('gen', .25, `${it.title}: people warmed to you`); else if (net <= -5) nudgeStyle('gen', -.25, `${it.title}: people cooled on you`);
@@ -128,6 +128,7 @@ function memWeek() {
       milestone('A backroom deal came out', 'work'); }
   }
   { const n = (M.secrets || []).length; if (n > (M.memSec || 0)) nudgeStyle('honest', -1.5 * (n - (M.memSec || 0)), 'Something to hide'); M.memSec = n; }
+  for (const L of (M.loans || []).filter(x => x.due <= S.week && !x.done)) { L.done = 1; if (P(L.who) && !P(L.who).dead) { M.cash += L.amt; sms(L.who, pickLine(['paid you back. with interest in the form of my eternal gratitude', 'money\'s in your account. thank you, really', 'all square. drinks on me next time'], L.who + S.week), 'text'); } }
   memJobsWeek();
   if (pending().some(it => /^mem/.test(it.kind))) return;
   if (prnd() < .12 && memCallback()) return;
@@ -144,6 +145,11 @@ function crossroads() {
   const fr = aliveKnown().filter(id => opinion(id) >= 25 && (typeof circleOf === 'function')).find(id => Object.entries(P(id).ties).some(([x, v]) => v < -20 && liveFilmOf(+x) && +x !== M.id));
   if (fr !== undefined) kinds.push('rival');
   if (j && M.cash > 0) kinds.push('bonus');
+  const pal = aliveKnown().filter(id => opinion(id) >= 15).sort((a, b) => opinion(b) - opinion(a))[0];
+  if (pal !== undefined && M.cash > usd(1500)) kinds.push('loan');
+  if (pal !== undefined) kinds.push('notes');
+  if (M.board.some(p => p.head !== null && p.head !== undefined) && pal !== undefined) kinds.push('rec');
+  if (S.active.some(i => S.films[i] && S.films[i].hub === M.hub && S.films[i].stage <= 2)) kinds.push('leak');
   M.xW = M.xW || {}; const ks = kinds.filter(x => S.week - (M.xW[x] || -99) >= 30);
   if (!ks.length) return;
   const k = ks[Math.floor(prnd() * ks.length)]; M.xW[k] = S.week;
@@ -152,6 +158,14 @@ function crossroads() {
   if (k === 'cv') { memCount('x_cv'); inbox('memx', 'Your CV, again', 'You\'re updating your CV. A couple of small jobs could be made to sound much bigger than they were. Everyone does it, apparently.', { x: k, choices: [{ k: 'pad', label: 'Polish it: exaggerate a little' }, { k: 'true', label: 'Keep it honest' }] }); return; }
   if (k === 'rival') { const foe = +Object.entries(P(fr).ties).find(([x, v]) => v < -20 && liveFilmOf(+x) && +x !== M.id)[0], f = liveFilmOf(foe); memCount('x_rival');
     inbox('memx', `${P(foe).name} wants you`, `${P(foe).name} has a job for you on ${f.title}. The catch: ${P(foe).name} and ${P(fr).name} can't stand each other, and ${P(fr).name.split(' ')[0]} has asked you, as a friend, not to.`, { x: k, person: fr, foe, film: f.id, choices: [{ k: 'take', label: 'Take it anyway: work is work' }, { k: 'stand', label: `Stand by ${P(fr).name.split(' ')[0]} and say no` }] }); return; }
+  if (k === 'loan') { const amt = usd(Math.round((800 + prnd() * 2200) / 100) * 100); memCount('x_loan');
+    inbox('memx', `${P(pal).name.split(' ')[0]} needs a loan`, `${P(pal).name} is between jobs and short on rent: ${fmtCash(amt)}, "back by the end of the month, promise".`, { x: k, person: pal, amt, choices: [{ k: 'lend', label: 'Lend it' }, { k: 'no', label: 'Say no, kindly: keep the money' }] }); return; }
+  if (k === 'notes') { memCount('x_notes');
+    inbox('memx', `${P(pal).name.split(' ')[0]}'s rough cut`, `${P(pal).name} shows you the rough cut of their short and asks what you really think. It isn't working, yet.`, { x: k, person: pal, choices: [{ k: 'honest', label: 'Tell them the truth, gently' }, { k: 'flatter', label: 'Flatter them: it\'s great' }] }); return; }
+  if (k === 'rec') { const post = M.board.find(p => p.head !== null && p.head !== undefined); memCount('x_rec');
+    inbox('memx', 'Who should they hire?', `${P(post.head).name} asks you to recommend someone for ${post.t.toLowerCase()}. You'd quite like it yourself. ${P(pal).name} would be good at it too.`, { x: k, person: pal, head: post.head, post: post.id, choices: [{ k: 'them', label: `Help ${P(pal).name.split(' ')[0]}: recommend them` }, { k: 'me', label: 'Pitch yourself instead' }] }); return; }
+  if (k === 'leak') { const f = S.active.map(i => S.films[i]).find(f => f && f.hub === M.hub && f.stage <= 2); memCount('x_leak');
+    inbox('memx', 'You heard something', `Someone on ${f.title} tells you, after two drinks, that the production is in real trouble. A trade reporter would love it.`, { x: k, film: f.id, choices: [{ k: 'keep', label: 'Keep it quiet: not your story' }, { k: 'leak', label: 'Tell the reporter, off the record' }] }); return; }
   if (k === 'bonus') { const amt = usd(150 + Math.round(prnd() * 4) * 50); memCount('x_bonus');
     inbox('memx', 'A bonus nobody expected', `The producers on ${S.films[j.film].title} send you ${fmtCash(amt)} for going beyond the job. Half your department went beyond it too.`, { x: k, amt, job: j.id, choices: [{ k: 'keep', label: 'Keep it: you earned it' }, { k: 'share', label: 'Share it with the department' }] }); }
 }
@@ -164,6 +178,18 @@ function crossPick(it, k) {
   if (it.x === 'rival') { const q = P(it.person), f = S.films[it.film];
     if (k === 'take') { const p = f && f.stage < 3 ? makeLead(it.foe, f) : null; addTie(me, q, -10); return R(`${p ? `The ${p.t.toLowerCase()} job is on your board.` : 'The job evaporates anyway.'} ${q.name} finds out within a day.`); }
     addTie(me, q, 10); addTie(me, P(it.foe), -4); return R(`${q.name} doesn't forget it. ${P(it.foe).name} does, eventually.`); }
+  if (it.x === 'loan') { const q = P(it.person);
+    if (k === 'lend') { M.cash -= it.amt; addTie(me, q, 8); if (prnd() < .7) { (M.loans = M.loans || []).push({ who: it.person, amt: it.amt, due: S.week + 5 }); return R(`${q.name} hugs you. "End of the month."`); } return R(`${q.name} hugs you. You have a feeling you won't see it again. You might be right.`); }
+    addTie(me, q, -3); return R(`${q.name} says they understand. They mostly do.`); }
+  if (it.x === 'notes') { const q = P(it.person);
+    if (k === 'honest') { const ok = roll('cha', 11); if (ok) { addTie(me, q, 5); trust(it.person, 8); it.result = { ok, roll: M.lastRoll, t: `${q.name} goes quiet, then nods. "You're right. I knew it." The next cut is much better.` }; return true; } addTie(me, q, -4); it.result = { ok, roll: M.lastRoll, t: `${q.name} takes it badly. "Thanks for the honesty." The tone says otherwise.` }; return true; }
+    addTie(me, q, 3); return R(`${q.name} beams. The short goes out as it is. It doesn't do well.`); }
+  if (it.x === 'rec') { const q = P(it.person), p = M.board.find(x => x.id === it.post);
+    if (k === 'them') { addTie(me, q, 8); if (P(it.head)) addTie(me, P(it.head), 2); if (p) M.board = M.board.filter(x => x !== p); return R(`${q.name} gets the job. They know exactly who to thank.`); }
+    if (p) p.ref = true; return R('You pitch yourself. Your name is at the top of their list now; your application will carry a word.'); }
+  if (it.x === 'leak') { const f = S.films[it.film];
+    if (k === 'leak') { me.standing = clamp(me.standing + .3, 0, 100); if (f && f.prod !== undefined && P(f.prod) && prnd() < .35) { addTie(me, P(f.prod), -10); remember(f.prod, -10, 'The leak about ' + f.title); return R(`The story runs. ${P(f.prod).name} works out where it came from.`); } return R('The story runs. The reporter owes you one.'); }
+    return R('You keep it to yourself. It comes out anyway, a month later, from someone else.'); }
   if (it.x === 'bonus') { const j = M.jobs.find(x => x.id === it.job), f = j && S.films[j.film];
     if (k === 'keep') { M.cash += it.amt; return R(`${fmtCash(it.amt)}, all yours.`); }
     M.cash += Math.round(it.amt * .2); if (f) for (const id of [...slotsOf(f).keys()].slice(0, 6)) if (M.known[id]) addTie(me, P(id), 3); return R('You split it. The department takes you out on Friday and won\'t let you pay.'); }

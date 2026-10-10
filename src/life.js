@@ -236,7 +236,8 @@ function mistakeAtWork(j) {
 // The calendar date of a day in the current week (weeks are counted from their Monday).
 function dayDate(d) { const t = dateOf(S.week); const mon = new Date(t.getTime() - ((t.getUTCDay() + 6) % 7) * 864e5); return new Date(mon.getTime() + d * 864e5); }
 function fmtDay(d) { const x = dayDate(d); return `${DAYS7[d]} ${x.getUTCDate()} ${MON[x.getUTCMonth()]} ${x.getUTCFullYear()}`; }
-const pickLine = (L, i) => L[Math.abs(Math.floor(i * 7 + S.week * 3)) % L.length];
+// a stable pick that still moves week to week (the old i*7 + week*3 got stuck when i was the week and the list had 5 or 10 lines)
+const pickLine = (L, i) => L[Math.floor(hashRand((Math.floor(i) | 0) * 7919 + S.week * 104729 + L.length * 31)() * L.length)];
 const MORNING_FREE = ['A slow morning: coffee, the trades, the window.', 'You sleep in and feel human again.', 'Laundry, groceries, the small business of a life.', 'A run along the water before the heat.'];
 const HUNT_LINES = ['Emails, calls, a coffee with someone who knows someone.', 'You rewrite your cover note three times and send it anyway.', 'You trawl the trades and the crew lists for anything hiring.', 'You update your reel and send it to every name in your phone.'];
 const CLASS_LINES = ['The teacher is a working professional and it shows.', 'You practise until it stops feeling like practice.', 'A class full of people as hungry as you.', 'Notes, exercises, and one idea you\'ll use for years.'];

@@ -148,6 +148,7 @@ capability for "Read the pages"). Work branch: `claude/cool-sagan-4jiu5s`.
 | `src/credits2.js` | A `finishJob` wrapper credits any film job of a week or more (uncredited templates become `pj.minor`), keeps credit after leaving past halfway, records every title in `M.ftitles[film]`, and gives `pj.why` when no credit. `crRolesFor(f)` unions all sources (titles, dir/wri/prod, own company, `xc`, studio exec, pets); `creditLedger()`; `creditsWeek` adds released films to `me.credits` once with a note and warns when your company is overdrawn. App `credits` (Work) |
 | `src/actor3.js` | Actor deals. `M.quote` (best actor day rate, set in a `takeJob` wrapper); a `makePost` wrapper lifts real parts toward the quote and Buzz Index (capped at base × (2 + buzz/15)). An `inbox` wrapper adds `neg_*` choices to actor offers (money, pts, bill, epc at buzz ≥ 30, all, agent); `actor3Pick` rolls `cha` vs `negDC` (leverage from buzz, agent, credits, how much they want you), may walk, else re-offers; success re-enters `resolvePick(it,'yes')`. `actor3Week`: points paid on profit at release, billing fame, junket (`junket`), franchise (`franchise` → `M.fr`, sequels via `greenlight(..., {lead: me.id})`). Typecasting in hire factors. `actor3Act` (doAct `act3`, `star`) casts you as lead in your own company's film (no fee, 10 points). App `acting` (Work) |
 | `src/places.js` | Places app (Today): `placesMapSVG` (`HUB_XY` lon/lat), `placeReasons(h)` (films shooting, board jobs, festivals via `FEST_INFO.hub`, schools, contacts, tastes, `HUB_EDGE` skills learned 25% faster via a `growSub` wrapper, local pets, language). Weekend visit to any city (`doAct trip` with `any`, `PLACE_TRIP` in `tripsAvailable`), move by choice (doAct `place2`, fee by language; pets move too). `placesWeek` texts from contacts elsewhere (`M.placeTip` pings on the map). Clicks: `data-city`, `data-placeask/placemove/placecancel/placetrip` |
+| `src/variety2.js` | Your stock group-chat replies (`REPLY_VARIANTS`) get several wordings; identical gossip lines from others are dropped within 10 weeks; `crewAsk` runs at most every other week. (Not to be confused with the older `src/variety.js`, which holds venue and line pools.) |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -244,6 +245,14 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 - Style is read from the words of the choice you made (and a few actions), never from whether the roll succeeded. No axis is "good": each pole has its own path (the Operator and the Firebrand are as real as the Good Egg).
 - Personas describe public reputations, kept affectionate; no scandals. Real names never appear in the UI, only the catalogue's in-game names.
 - World randomness stays on `rnd()`; style and memory effects on the player use `prnd()`. Style signals hook `applyAct`, not `doAct`, so replays match.
+
+## Round 8 decisions
+
+- Realistic portraits are the default (`LOOK.style` 0 = Realistic, 1 = Cartoon, opt-in); cartoon-only look keys (`CARTOON_ONLY` in career-ui.js) are hidden unless Cartoon is chosen. Condition overlays draw on both styles (living.js wraps `portraitSVG`).
+- The room's needs HUD shows labels and numbers, not emoji; `toonSays` gives plain status lines.
+- `pickLine` now hashes (index, week, list length): the old formula returned the same line every week whenever the index was the week and the list had 5 or 10 items.
+- Release headlines (hit, flop, critics) have five wordings each, chosen by `hashRand(f.id)` so the world's RNG stream is unchanged.
+- Map labels are placed greedily without overlaps (`placeLabels`); Europe has a zoomed inset.
 
 ## Round 7 decisions
 
