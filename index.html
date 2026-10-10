@@ -694,6 +694,17 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .wxscene { position: relative; border-radius: 12px; overflow: hidden; aspect-ratio: 16/7; margin-bottom: 10px; } .wxscene .art { position: absolute; inset: 0; } .wxover { position: absolute; left: 16px; top: 10px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.45); } .wxover .wxbig { font-size: 44px; margin: 0; font-weight: 800; } .wxover .eyebrow { color: #fff; opacity: .9; }
 .wxcurve { width: 100%; height: 90px; } .wxworld { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; } .wxcity { display: grid; justify-items: center; gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; color: inherit; } .wxcity span { font-size: 22px; } .wxcity small { font-size: 11px; opacity: .75; } .wxbig.small { font-size: 20px; }
 #toasts { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: grid; gap: 6px; z-index: 9999; pointer-events: none; } .toast { background: #222; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.3); opacity: 1; transition: opacity .35s, transform .35s; max-width: 80vw; } .toast.good { background: #2e7d5b; } .toast.bad { background: #b23a33; } .toast.out { opacity: 0; transform: translateY(8px); }
+.luck-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; } .luck-body { margin: 10px 0; display: grid; gap: 10px; }
+.luck-hero { padding: 14px 16px; border-radius: 14px; background: linear-gradient(135deg, #2b1055, #7597de); color: #fff; } .luck-hero p { margin: 2px 0; } .luck-big { font-size: 34px; font-weight: 800; letter-spacing: -.5px; }
+.balls { display: grid; gap: 4px; } .balls > div { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; } .ball { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font-weight: 700; font-size: 12.5px; color: #111; background: radial-gradient(circle at 35% 30%, #fff, #ddd 60%); box-shadow: inset 0 -2px 3px rgba(0,0,0,.25); }
+.ball.b1 { background: radial-gradient(circle at 35% 30%, #fff, #FFE27A 55%); } .ball.b2 { background: radial-gradient(circle at 35% 30%, #fff, #6FC3FF 55%); } .ball.b3 { background: radial-gradient(circle at 35% 30%, #fff, #FF8FA3 55%); } .ball.b4 { background: radial-gradient(circle at 35% 30%, #fff, #9BE564 55%); } .ball.b5 { background: radial-gradient(circle at 35% 30%, #fff, #C9A0FF 55%); } .ball.bonus { background: radial-gradient(circle at 35% 30%, #fff, #F28C28 55%); outline: 2px dashed #F28C28; }
+.scratch-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; } .scard { all: unset; cursor: pointer; display: grid; gap: 2px; padding: 12px; border-radius: 12px; color: #fff; background: linear-gradient(140deg, var(--sc), color-mix(in srgb, var(--sc) 55%, #000)); box-shadow: 0 3px 10px rgba(0,0,0,.2); } .scard:hover { transform: translateY(-2px); } .scard[disabled] { opacity: .45; cursor: default; } .scard span { font-size: 20px; font-weight: 800; } .scard small { opacity: .85; }
+.scratched { padding: 12px; border-radius: 12px; background: linear-gradient(140deg, var(--sc), color-mix(in srgb, var(--sc) 50%, #000)); color: #fff; max-width: 320px; } .scratched p { margin: 8px 0 0; color: #fff; } .sgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; } .sgrid span { display: grid; place-items: center; height: 54px; border-radius: 8px; background: #fffbea; font-size: 28px; animation: scr .5s ease both; } @keyframes scr { from { background: #c9c9c9; color: transparent; } to { background: #fffbea; } }
+.roul { display: flex; align-items: center; gap: 14px; } .roul-ball { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #fff; border: 4px solid #D4AF37; animation: spinin .7s ease-out; } .roul-ball.red { background: #C8102E; } .roul-ball.black { background: #151515; } .roul-ball.green { background: #1E7A3C; } .roul-ball.idle { background: #444; } @keyframes spinin { from { transform: rotate(-540deg) scale(.6); } to { transform: none; } }
+.felt { padding: 14px; border-radius: 14px; background: radial-gradient(ellipse at 50% 0%, #2F8A55, #145A32); color: #fff; display: grid; gap: 10px; } .felt .muted { color: #cfe; } .pcard { display: inline-grid; place-items: center; width: 40px; height: 56px; margin-right: 5px; border-radius: 6px; background: #fff; color: #111; font-weight: 800; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,.35); animation: deal .3s ease both; } .pcard.red { color: #C8102E; } .pcard.back { background: repeating-linear-gradient(45deg, #2F5BD3 0 5px, #1E3A8A 5px 10px); } @keyframes deal { from { transform: translateY(-14px); opacity: 0; } } .bjres { margin: 0; color: #fff; }
+.slots { display: flex; gap: 8px; } .slots span { display: grid; place-items: center; width: 70px; height: 80px; font-size: 40px; border-radius: 10px; background: linear-gradient(#fff, #e9e9e9); box-shadow: inset 0 0 0 3px #D4AF37; animation: reel .6s cubic-bezier(.2,.8,.3,1) both; } @keyframes reel { from { transform: translateY(-30px); opacity: 0; } }
+.craps { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; } .die { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 6px; background: #fff; color: #C8102E; font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+.luck-stake { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .inv-head { display: flex; gap: 14px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: color-mix(in srgb, var(--gold) 8%, var(--panel)); margin-bottom: 12px; } .inv-head h3 { margin: 0; } .inv-head p { margin: 2px 0; }
 .inv-chip { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; font-size: 12.5px; font-weight: 600; }
 .vents { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 10px; } .vent { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); } .vent p { margin: 4px 0; } .v-top { display: flex; gap: 8px; align-items: center; }
@@ -11559,6 +11570,7 @@ function closeWeek(a) {
   if (typeof pathWeek === 'function') pathWeek();
   if (typeof bank2Week === 'function') bank2Week();
   if (typeof ventWeek === 'function') { ventWeek(); ventPerkWeek(); }
+  if (typeof luckWeek === 'function') luckWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -11974,6 +11986,7 @@ function applyAct(a) {
     case 'shortsubmit': return typeof shortSubmit === 'function' && shortSubmit(a);
     case 'bank2': return typeof bank2Act === 'function' && bank2Act(a);
     case 'vent': return typeof ventAct === 'function' && ventAct(a);
+    case 'luck': return typeof luckAct === 'function' && luckAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
     case 'gigpitch': return typeof gigPitch === 'function' && gigPitch(a.id);
     case 'dream': return typeof setDream === 'function' && setDream(a.k);
@@ -35748,6 +35761,238 @@ function ventClick(t) {
 }
 function bkTabClick(t) { if (t.dataset.bktab) { UI.bkTab = t.dataset.bktab; render(true); return true; } return false; }
 // </ventures>
+// <luck>
+// ---------------- The Lucky Corner: small money, real odds ----------------
+// Lotto twice a week, scratchcards from the corner shop, a card room and a casino floor, and the races on a
+// Saturday. Every game pays what its real counterpart pays and loses what it really loses: the lottery is 6 from
+// 49 (one in fourteen million for the jackpot, one in fifty-seven to get three), scratchcards give back a bit over
+// half, roulette is a single-zero wheel, blackjack pays three to two and the dealer stands on seventeen, craps is
+// the pass line, and the bookmaker builds in his margin. Early on, a lucky week can pay the rent. Later it's
+// small change, and the app says so. Your stats come in where they would in life: a head for figures shows you
+// the right blackjack play, and composure decides whether you walk away when you should.
+// Every draw is the player's dice (prnd) and every play is an action, so replays match.
+
+const LOTTO_PRIZE = { 3: 30, 4: 140, 5: 1750, 55: 1e5 };   // in today's money; the jackpot rolls
+function luckOf(M = S.me) { return M.luck || (M.luck = { spent: 0, won: 0, tickets: [], draws: [], jackpot: usd(2.5e6), hist: [], bj: null, nag: 0 }); }
+function luckStake(x) { return Math.max(1, Math.round(x * wageF(S.me.hub))); }   // small money isn't rounded to fives
+function luckLog(L, g, bet, win, t) { L.spent += bet; L.won += win; L.hist.push({ w: S.week, g, bet, win, t }); if (L.hist.length > 60) L.hist.shift(); S.me.cash += win - bet; if (win > bet * 20 && win >= luckStake(500)) milestone(`Won ${fmtCash(win)} on ${g}`, 'money'); const M = S.me; M.stress = clamp(M.stress + (win > bet ? -2 : win === 0 ? .6 : 0), 0, 100); }
+function luckSmall() { return typeof osNetWorth === 'function' && osNetWorth().total > usd(400000); }
+
+// ---- Lotto: pick six from forty-nine; draws on Wednesday and Saturday ----
+function lottoNums() { const s = new Set(); while (s.size < 6) s.add(1 + Math.floor(prnd() * 49)); return [...s].sort((a, b) => a - b); }
+function lottoBuy(a) {
+  const M = S.me, L = luckOf(), n = clamp(+a.n || 1, 1, 10), price = luckStake(2) * n; if (M.cash < price) return false;
+  for (let i = 0; i < n; i++) { const nums = a.nums && i === 0 && a.nums.length === 6 ? a.nums.map(Number).filter(x => x >= 1 && x <= 49) : lottoNums(); if (new Set(nums).size !== 6) return false; L.tickets.push({ nums: nums.sort((x, y) => x - y), w: S.week }); }
+  M.cash -= price; L.spent += price; L.hist.push({ w: S.week, g: 'Lotto', bet: price, win: 0, t: `${n} line${n > 1 ? 's' : ''} for the next draw` });
+  return true;
+}
+function lottoDraw() {
+  const L = luckOf(), drawn = lottoNums(); let bonus; do { bonus = 1 + Math.floor(prnd() * 49); } while (drawn.includes(bonus));
+  let total = 0, best = 0, jack = false; const lines = [];
+  for (const t of L.tickets) { const m = t.nums.filter(x => drawn.includes(x)).length, b = t.nums.includes(bonus);
+    const tier = m === 6 ? 6 : m === 5 && b ? 55 : m; let win = 0;
+    if (tier === 6) { win = L.jackpot; jack = true; } else if (LOTTO_PRIZE[tier]) win = Math.round(usd(LOTTO_PRIZE[tier]) * (tier === 3 ? 1 : .8 + prnd() * .4));
+    total += win; best = Math.max(best, tier === 55 ? 5.5 : tier); lines.push({ nums: t.nums, m, b, win }); }
+  // somebody somewhere wins it about one draw in six; otherwise it rolls over
+  const world = !jack && prnd() < .16;
+  const rec = { w: S.week, drawn, bonus, lines, total, jack: jack ? L.jackpot : 0, worldWin: world ? L.jackpot : 0 };
+  L.draws.push(rec); if (L.draws.length > 20) L.draws.shift();
+  if (L.tickets.length) {
+    S.me.cash += total; L.won += total; L.hist.push({ w: S.week, g: 'Lotto', bet: 0, win: total, t: `Draw ${drawn.join(' ')} + ${bonus}: ${total ? fmtCash(total) : 'nothing'}` });
+    if (jack) { milestone(`Won the lottery jackpot: ${fmtCash(L.jackpot)}`, 'money'); inbox('news', 'You won the lottery', `Six numbers. ${fmtCash(L.jackpot)}. You check the ticket eleven times. Then you call your mother.`); ME().fame = clamp((ME().fame || 0) + 4, 0, 100); }
+    else if (best >= 4) inbox('note', `Lotto: ${best === 5.5 ? 'five and the bonus ball' : best + ' numbers'}`, `The draw: ${drawn.join(', ')} and ${bonus}. You win ${fmtCash(total)}.`);
+  }
+  L.tickets = [];
+  L.jackpot = jack || world ? usd(2.5e6 + prnd() * 1.5e6) : Math.round(L.jackpot + usd(1.2e6 + prnd() * 1.4e6));
+}
+
+// ---- scratchcards: a bit more than half comes back, about one card in three and a half wins something ----
+const SCRATCH = { 1: { name: 'Lucky Reels', col: '#E0457B' }, 2: { name: 'Golden Ticket', col: '#D4AF37' }, 5: { name: 'Box Office Smash', col: '#2F7DD1' }, 10: { name: 'Red Carpet Millions', col: '#C8102E' } };
+const SCRATCH_TABLE = [[1, 1 / 6], [2, 1 / 12], [4, 1 / 40], [10, 1 / 150], [50, 1 / 2500], [500, 1 / 120000], [10000, 1 / 3000000]];
+function scratchPlay(a) {
+  const M = S.me, L = luckOf(), face = +a.p; if (!SCRATCH[face]) return false;
+  const price = luckStake(face); if (M.cash < price) return false;
+  const boost = { 1: 1, 2: 1.06, 5: 1.12, 10: 1.2 }[face];   // dearer cards give back a little more
+  let x = prnd(), mult = 0; for (const [m, p] of SCRATCH_TABLE.slice().reverse()) { if (x < p) { mult = m; break; } x -= p; }
+  const win = Math.round(price * mult * (mult ? boost : 0));
+  // the card: three of a kind somewhere if it won, near misses if it didn't
+  const SY = ['🍒', '⭐', '🎬', '💎', '🍿', '🎟️', '🏆', '7️⃣'], hit = SY[Math.floor(prnd() * SY.length)];
+  const pool = SY.filter(x => !mult || x !== hit).flatMap(x => [x, x]).sort(() => prnd() - .5);   // nothing else appears three times
+  const grid = mult ? [hit, hit, hit, ...pool.slice(0, 6)].sort(() => prnd() - .5) : pool.slice(0, 9);
+  L.last = { g: 'scratch', face, grid, win, mult };
+  luckLog(L, SCRATCH[face].name, price, win, win ? `Won ${fmtCash(win)}` : 'Nothing');
+  return true;
+}
+
+// ---- roulette: one zero, thirty-six numbers ----
+const RED = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+const ROUL_BETS = { red: ['Red', 1], black: ['Black', 1], odd: ['Odd', 1], even: ['Even', 1], low: ['1–18', 1], high: ['19–36', 1], d1: ['1st 12', 2], d2: ['2nd 12', 2], d3: ['3rd 12', 2], num: ['A single number', 35] };
+function roulWins(b, n, pick) { if (n === 0) return b === 'num' && pick === 0; return b === 'red' ? RED.has(n) : b === 'black' ? !RED.has(n) : b === 'odd' ? n % 2 === 1 : b === 'even' ? n % 2 === 0 : b === 'low' ? n <= 18 : b === 'high' ? n >= 19 : b === 'd1' ? n <= 12 : b === 'd2' ? n > 12 && n <= 24 : b === 'd3' ? n > 24 : b === 'num' ? n === pick : false; }
+function roulPlay(a) {
+  const M = S.me, L = luckOf(), B = ROUL_BETS[a.b], bet = clamp(Math.round(+a.amt || 0), 1, luckStake(500)); if (!B || M.cash < bet) return false;
+  const pick = clamp(Math.round(+a.pick || 0), 0, 36), n = Math.floor(prnd() * 37), ok = roulWins(a.b, n, pick), win = ok ? bet * (B[1] + 1) : 0;
+  L.last = { g: 'roul', n, b: a.b, pick, win, bet };
+  luckLog(L, 'Roulette', bet, win, `${n} ${n === 0 ? 'green' : RED.has(n) ? 'red' : 'black'}: ${ok ? 'won ' + fmtCash(win - bet) : 'lost'}`);
+  return true;
+}
+
+// ---- blackjack: dealer stands on all seventeens, blackjack pays 3:2, double on any two ----
+const CARD_R = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+function bjCard() { return { r: Math.floor(prnd() * 13), s: Math.floor(prnd() * 4) }; }
+function bjVal(h) { let t = 0, a = 0; for (const c of h) { const v = c.r === 0 ? 11 : Math.min(10, c.r + 1); t += v; if (c.r === 0) a++; } while (t > 21 && a) { t -= 10; a--; } return { t, soft: a > 0 }; }
+function bjBasic(h, up) {   // the textbook play
+  const { t, soft } = bjVal(h), d = up.r === 0 ? 11 : Math.min(10, up.r + 1), two = h.length === 2;
+  if (soft) { if (t >= 19) return 'stand'; if (t === 18) return d >= 9 ? 'hit' : two && d >= 3 && d <= 6 ? 'double' : 'stand'; return two && d >= (t >= 17 ? 3 : t >= 15 ? 4 : 5) && d <= 6 ? 'double' : 'hit'; }
+  if (t >= 17) return 'stand'; if (t >= 13) return d <= 6 ? 'stand' : 'hit'; if (t === 12) return d >= 4 && d <= 6 ? 'stand' : 'hit';
+  if (t === 11) return two ? 'double' : 'hit'; if (t === 10) return two && d <= 9 ? 'double' : 'hit'; if (t === 9) return two && d >= 3 && d <= 6 ? 'double' : 'hit'; return 'hit';
+}
+function bjAct(a) {
+  const M = S.me, L = luckOf();
+  if (a.k === 'deal') { if (L.bj && !L.bj.done) return false; const bet = clamp(Math.round(+a.amt || 0), 1, luckStake(500)); if (M.cash < bet) return false;
+    M.cash -= bet; L.bj = { bet, p: [bjCard(), bjCard()], d: [bjCard(), bjCard()], done: false };
+    if (bjVal(L.bj.p).t === 21) return bjSettle(L, bjVal(L.bj.d).t === 21 ? 'push' : 'bj');
+    if (bjVal(L.bj.d).t === 21) return bjSettle(L, 'lose');
+    return true; }
+  const H = L.bj; if (!H || H.done) return false;
+  if (a.k === 'hit') { H.p.push(bjCard()); if (bjVal(H.p).t > 21) return bjSettle(L, 'bust'); if (bjVal(H.p).t === 21) return bjDealer(L); return true; }
+  if (a.k === 'double') { if (H.p.length !== 2 || M.cash < H.bet) return false; M.cash -= H.bet; H.bet *= 2; H.dbl = 1; H.p.push(bjCard()); if (bjVal(H.p).t > 21) return bjSettle(L, 'bust'); return bjDealer(L); }
+  if (a.k === 'stand') return bjDealer(L);
+  return false;
+}
+function bjDealer(L) { const H = L.bj; while (bjVal(H.d).t < 17) H.d.push(bjCard()); const p = bjVal(H.p).t, d = bjVal(H.d).t; return bjSettle(L, d > 21 || p > d ? 'win' : p === d ? 'push' : 'lose'); }
+function bjSettle(L, res) {
+  const H = L.bj; H.done = true; H.res = res; const back = res === 'bj' ? Math.round(H.bet * 2.5) : res === 'win' ? H.bet * 2 : res === 'push' ? H.bet : 0;
+  S.me.cash += H.bet; luckLog(L, 'Blackjack', H.bet, back, { bj: 'Blackjack!', win: 'You win', push: 'Push', lose: 'Dealer wins', bust: 'Bust' }[res]);
+  return true;
+}
+
+// ---- slots: three reels; about nine in ten come back over a long night ----
+const SLOT_SYM = [['🍒', 30, 2], ['🍋', 26, 4], ['🔔', 18, 14], ['⭐', 12, 28], ['🎬', 8, 60], ['💎', 4, 120], ['7️⃣', 2, 600]];   // symbol, weight on a reel, three-of-a-kind pays
+function slotSpin() { const T = SLOT_SYM.reduce((t, s) => t + s[1], 0); let x = prnd() * T; for (const s of SLOT_SYM) { if (x < s[1]) return s[0]; x -= s[1]; } return SLOT_SYM[0][0]; }
+function slotPay(r) { if (r[0] === r[1] && r[1] === r[2]) return SLOT_SYM.find(s => s[0] === r[0])[2]; const ch = r.filter(x => x === '🍒').length; return ch === 2 ? 2 : ch === 1 ? .5 : 0; }
+function slotPlay(a) {
+  const M = S.me, L = luckOf(), bet = clamp(Math.round(+a.amt || 0), 1, luckStake(100)); if (M.cash < bet) return false;
+  const r = [slotSpin(), slotSpin(), slotSpin()], win = Math.round(bet * slotPay(r));
+  L.last = { g: 'slot', r, win, bet }; luckLog(L, 'Slots', bet, win, r.join(' ')); return true;
+}
+
+// ---- craps: the pass line ----
+function crapsPlay(a) {
+  const M = S.me, L = luckOf(), bet = clamp(Math.round(+a.amt || 0), 1, luckStake(500)); if (M.cash < bet) return false;
+  const d = () => 1 + Math.floor(prnd() * 6), rolls = []; let r = d() + d(), win; rolls.push(r);
+  if (r === 7 || r === 11) win = true; else if ([2, 3, 12].includes(r)) win = false;
+  else { const pt = r; for (let i = 0; i < 200; i++) { r = d() + d(); rolls.push(r); if (r === pt) { win = true; break; } if (r === 7) { win = false; break; } } }
+  L.last = { g: 'craps', rolls, win: win ? bet * 2 : 0, bet }; luckLog(L, 'Craps', bet, win ? bet * 2 : 0, rolls.join(' → ')); return true;
+}
+
+// ---- the races: eight runners, a bookmaker's margin ----
+const HORSE_A = ['Midnight', 'Silver', 'Lucky', 'Final', 'Golden', 'Rough', 'Director\'s', 'Velvet', 'Second', 'Wild', 'Box Office', 'Late', 'Northern', 'Cheeky'];
+const HORSE_B = ['Cut', 'Reel', 'Take', 'Premiere', 'Matinee', 'Encore', 'Montage', 'Spotlight', 'Dolly', 'Gaffer', 'Sequel', 'Rumour', 'Gamble', 'Applause'];
+function raceCard(w = S.week) {   // the same card all week; a stable hash, so looking at it never rolls
+  const r = hashRand(w * 7331 + 17), runners = [];
+  for (let i = 0; i < 8; i++) runners.push({ name: `${HORSE_A[Math.floor(r() * HORSE_A.length)]} ${HORSE_B[Math.floor(r() * HORSE_B.length)]}`, s: Math.pow(r() + .15, 2.2) });
+  const T = runners.reduce((t, x) => t + x.s, 0);
+  for (const x of runners) { x.p = x.s / T; const dec = 1 / (x.p * 1.17); x.odds = Math.max(1.2, Math.round(dec * 2) / 2); }
+  return runners.sort((a, b) => a.odds - b.odds);
+}
+function fracOdds(dec) { const f = dec - 1; if (f >= 1 && Math.abs(f - Math.round(f)) < .01) return `${Math.round(f)}/1`; if (f < 1) return `${Math.round(f * 4)}/4`; return `${Math.round(f * 2)}/2`; }
+function racePlay(a) {
+  const M = S.me, L = luckOf(), C = raceCard(), h = C[+a.h], bet = clamp(Math.round(+a.amt || 0), 1, luckStake(500)); if (!h || M.cash < bet) return false;
+  if ((L.raced || -1) === S.week) return false; L.raced = S.week;
+  let x = prnd(), win = null; for (const r of C) { if (x < r.p) { win = r; break; } x -= r.p; } win = win || C[C.length - 1];
+  const ok = win === h, pay = ok ? Math.round(bet * h.odds) : 0;
+  const order = [win, ...C.filter(r => r !== win).sort(() => prnd() - .5)].slice(0, 3).map(r => r.name);
+  L.last = { g: 'race', order, ok, pay, bet, mine: h.name };
+  luckLog(L, 'The races', bet, pay, `${win.name} wins${ok ? ' — yours!' : ''}`); return true;
+}
+
+function luckAct(a) {
+  switch (a.g) {
+    case 'lotto': return lottoBuy(a); case 'scratch': return scratchPlay(a); case 'roul': return roulPlay(a);
+    case 'bj': return bjAct(a); case 'slot': return slotPlay(a); case 'craps': return crapsPlay(a); case 'race': return racePlay(a);
+  }
+  return false;
+}
+// draws come on Wednesday and Saturday; and early on, somebody always mentions the jackpot
+function luckWeek() {
+  const M = S.me; if (!M || !M.party || !M.party.done) return; const L = luckOf();
+  lottoDraw(); lottoDraw();
+  if (!luckSmall() && L.nag < 6 && S.week % 5 === 2 && prnd() < .6) {
+    L.nag++; const who = (typeof aliveKnown === 'function' ? aliveKnown() : []).find(id => ['friend', 'close'].includes(relOf(id)));
+    inbox('note', `The jackpot is ${fmtCash(L.jackpot)}`, `${who !== undefined ? `${pl(who)} texts: "` : '"'}${pickLine(['Office syndicate this week, you in? Two dollars a line.', 'Rolled over again. Somebody has to win it.', 'Scratchcards at the corner shop: I got twenty dollars back yesterday.', 'Races on Saturday. I know a horse. I always know a horse.', 'Card room downtown on Friday, low stakes, good people.'], S.week)}" The Lucky Corner is in your computer, under Play.`, { app: 'luck' });
+  }
+}
+
+// ---- the page ----
+function cardFace(c) { const suit = ['♠', '♥', '♦', '♣'][c.s]; return `<span class="pcard${c.s === 1 || c.s === 2 ? ' red' : ''}">${CARD_R[c.r]}${suit}</span>`; }
+function luckApp() {
+  const M = S.me, L = luckOf(), tab = UI.luckT || 'lotto', amt = UI.luckAmt || luckStake(5), net = L.won - L.spent;
+  const tabs = [['lotto', '🎱 Lotto'], ['scratch', '🎟️ Scratchcards'], ['roul', '🎡 Roulette'], ['bj', '🃏 Blackjack'], ['slot', '🎰 Slots'], ['craps', '🎲 Craps'], ['race', '🐎 The races'], ['odds', '📊 The odds']];
+  const stake = (max) => `<div class="luck-stake"><span class="muted small">Stake</span>${[1, 5, 20, 100].map(x => luckStake(x)).filter(x => x <= max).map(x => `<button class="pill${amt === x ? ' on' : ''}" data-luckamt="${x}">${fmtCash(x)}</button>`).join('')}</div>`;
+  const last = L.last;
+  let body = '';
+  if (tab === 'lotto') {
+    const D = L.draws[L.draws.length - 1];
+    body = `<div class="luck-hero lotto"><p class="eyebrow">Next jackpot</p><p class="luck-big">${fmtCash(L.jackpot)}</p><p class="small">Draws on Wednesday and Saturday. Six numbers from 49 and a bonus ball. ${fmtCash(luckStake(2))} a line.</p></div>
+     <div class="bank-f"><button class="os-btn" data-luck="lotto:1">Lucky dip: 1 line</button><button class="os-btn" data-luck="lotto:5">5 lines</button><button class="os-btn" data-luck="lotto:10">10 lines</button></div>
+     ${L.tickets.length ? `<p class="small"><b>Your lines for the next draw:</b></p><div class="balls">${L.tickets.slice(0, 10).map(t => `<div>${t.nums.map(n => `<span class="ball b${Math.ceil(n / 10)}">${n}</span>`).join('')}</div>`).join('')}</div>` : '<p class="small muted">No lines for the next draw.</p>'}
+     ${D ? `<p class="small"><b>Last draw</b> (${fmtDate(D.w, true)}):</p><div class="balls"><div>${D.drawn.map(n => `<span class="ball b${Math.ceil(n / 10)}">${n}</span>`).join('')} <span class="ball bonus">${D.bonus}</span></div></div>${D.lines.length ? `<p class="small">You matched ${Math.max(...D.lines.map(l => l.m))} at best${D.total ? `: <b class="good">${fmtCash(D.total)}</b>` : '.'}</p>` : ''}${D.worldWin ? `<p class="small muted">Somebody in another town won ${fmtCash(D.worldWin)}.</p>` : ''}` : ''}
+     <p class="small muted">Odds per line: jackpot 1 in 13,983,816 · five and the bonus 1 in 2,330,636 · five 1 in 55,491 · four 1 in 1,032 · three 1 in 57. About half the money comes back as prizes.</p>`;
+  } else if (tab === 'scratch') {
+    body = `<div class="scratch-row">${Object.entries(SCRATCH).map(([p, C]) => `<button class="scard" style="--sc:${C.col}" data-luck="scratch:${p}"${M.cash < luckStake(+p) ? ' disabled' : ''}><b>${esc(C.name)}</b><span>${fmtCash(luckStake(+p))}</span><small>top prize ${fmtCash(luckStake(+p) * 10000)}</small></button>`).join('')}</div>
+     ${last && last.g === 'scratch' ? `<div class="scratched" style="--sc:${SCRATCH[last.face].col}"><div class="sgrid">${last.grid.map((s, i) => `<span style="animation-delay:${i * .08}s">${s}</span>`).join('')}</div><p class="${last.win ? 'good' : 'muted'}"><b>${last.win ? `Three of a kind: ${fmtCash(last.win)}!` : 'No match. Not even close. (Close.)'}</b></p></div>` : '<p class="muted small">Pick a card and scratch it.</p>'}
+     <p class="small muted">About one card in three and a half wins something, and most wins are your money back. Over time a little more than half of what you spend comes back.</p>`;
+  } else if (tab === 'roul') {
+    body = `<div class="roul">${last && last.g === 'roul' ? `<div class="roul-ball ${last.n === 0 ? 'green' : RED.has(last.n) ? 'red' : 'black'}">${last.n}</div><p class="${last.win ? 'good' : 'bad'}"><b>${last.win ? `You win ${fmtCash(last.win - last.bet)}` : 'The house takes it'}</b></p>` : '<div class="roul-ball idle">?</div>'}</div>
+     ${stake(luckStake(500))}<div class="bank-f">${Object.entries(ROUL_BETS).filter(([k]) => k !== 'num').map(([k, [l, p]]) => `<button class="os-btn" data-luck="roul:${k}">${l} <span class="muted">${p}:1</span></button>`).join('')}</div>
+     <div class="bank-f"><input id="roul-n" type="number" min="0" max="36" value="${UI.roulN ?? 17}" style="width:70px"><button class="os-btn" data-luck="roul:num">On that number <span class="muted">35:1</span></button></div>
+     <p class="small muted">A single-zero wheel: the zero is why the house wins, about 2.7% of everything bet over time.</p>`;
+  } else if (tab === 'bj') {
+    const H = L.bj, me = bjVal(H ? H.p : []), basic = H && !H.done ? bjBasic(H.p, H.d[0]) : null, fin = statVal('fin'), sees = fin >= 11 || statVal('com') >= 13;
+    body = `<div class="felt">${H ? `<div><span class="muted small">Dealer${H.done ? ` · ${bjVal(H.d).t}` : ''}</span><div>${H.done ? H.d.map(cardFace).join('') : cardFace(H.d[0]) + '<span class="pcard back"></span>'}</div></div><div><span class="muted small">You · ${me.t}${me.soft && me.t <= 21 ? ' (soft)' : ''}</span><div>${H.p.map(cardFace).join('')}</div></div>${H.done ? `<p class="bjres ${['win', 'bj'].includes(H.res) ? 'good' : H.res === 'push' ? '' : 'bad'}"><b>${{ bj: 'Blackjack! Paid 3 to 2.', win: 'You win.', push: 'Push: your stake back.', lose: 'Dealer wins.', bust: 'Bust.' }[H.res]}</b></p>` : ''}` : '<p class="muted">Place a bet to deal.</p>'}</div>
+     ${H && !H.done ? `<div class="bank-f"><button class="os-btn" data-luck="bj:hit">Hit</button><button class="os-btn" data-luck="bj:stand">Stand</button>${H.p.length === 2 && M.cash >= H.bet ? '<button class="os-btn" data-luck="bj:double">Double</button>' : ''}</div><p class="small ${sees ? '' : 'muted'}">${sees ? `Your head for numbers says: <b>${basic}</b>.` : 'You\'re not sure what the right play is. (Sharper finance or composure would tell you.)'}</p>` : `${stake(luckStake(500))}<div class="bank-f"><button class="os-btn" data-luck="bj:deal">Deal</button></div>`}
+     <p class="small muted">The dealer stands on all seventeens. Played by the book, the house keeps about one percent; played by feel, more like two to four.</p>`;
+  } else if (tab === 'slot') {
+    body = `<div class="slots">${(last && last.g === 'slot' ? last.r : ['❔', '❔', '❔']).map((s, i) => `<span style="animation-delay:${i * .15}s">${s}</span>`).join('')}</div>${last && last.g === 'slot' ? `<p class="${last.win > last.bet ? 'good' : last.win ? '' : 'muted'}"><b>${last.win ? `Pays ${fmtCash(last.win)}` : 'Nothing'}</b></p>` : ''}
+     ${stake(luckStake(100))}<div class="bank-f"><button class="os-btn" data-luck="slot">Pull</button></div>
+     <p class="small muted">Three 7s pay 600 to 1; a cherry gives half your stake back. Over a long night, about nine in ten come back. The machine has a long memory and no conscience.</p>`;
+  } else if (tab === 'craps') {
+    body = `${last && last.g === 'craps' ? `<p class="craps">${last.rolls.map((r, i) => `<span class="die">${r}</span>${i < last.rolls.length - 1 ? '→' : ''}`).join('')}</p><p class="${last.win ? 'good' : 'bad'}"><b>${last.win ? `Pass! You win ${fmtCash(last.bet)}` : 'Seven out.'}</b></p>` : ''}
+     ${stake(luckStake(500))}<div class="bank-f"><button class="os-btn" data-luck="craps">Bet the pass line and roll</button></div>
+     <p class="small muted">7 or 11 on the first roll wins; 2, 3 or 12 loses; anything else becomes the point, and you roll until the point (win) or a 7 (lose). The house keeps 1.4%.</p>`;
+  } else if (tab === 'race') {
+    const C = raceCard(), done = L.raced === S.week;
+    body = `<p class="small">Saturday's card at the track. ${done ? '<b>You\'ve had your bet this week.</b>' : 'One bet a week.'}</p>${stake(luckStake(500))}
+     <table class="os-table"><thead><tr><th>Runner</th><th>Odds</th><th></th></tr></thead><tbody>${C.map((h, i) => `<tr><td>${esc(h.name)}</td><td>${fracOdds(h.odds)}</td><td><button class="linkish" data-luck="race:${i}"${done ? ' disabled' : ''}>Back it</button></td></tr>`).join('')}</tbody></table>
+     ${last && last.g === 'race' ? `<p class="${last.ok ? 'good' : 'muted'}"><b>${last.ok ? `${esc(last.mine)} wins! You collect ${fmtCash(last.pay)}.` : `${esc(last.order[0])} wins; ${esc(last.mine)} is nowhere.`}</b> <span class="muted small">1st ${esc(last.order[0])}, 2nd ${esc(last.order[1])}, 3rd ${esc(last.order[2])}</span></p>` : ''}
+     <p class="small muted">The bookmaker's prices add up to about 117%: that's his margin, and why the favourite at evens still loses money over time.</p>`;
+  } else {
+    body = `<table class="os-table"><thead><tr><th>Game</th><th>Comes back, over time</th><th>Biggest win</th></tr></thead><tbody>${[['Lotto', '~50%', 'the jackpot (1 in 14 million)'], ['Scratchcards', '~55–65%', '10,000× the card'], ['Slots', '~90%', '600×'], ['The races', '~85%', 'the long shot\'s price'], ['Roulette', '97.3%', '35:1'], ['Craps (pass line)', '98.6%', 'even money'], ['Blackjack, played right', '~99.5%', '3:2 on a blackjack']].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="muted">${r[2]}</td></tr>`).join('')}</tbody></table>
+     <p class="small muted">Nothing here beats the house over time. Some of it is fun. Some of it is a long night with a short ending.</p>`;
+  }
+  return `<div class="luck-head"><div><b class="${net >= 0 ? 'good' : 'bad'}">${net >= 0 ? 'Up' : 'Down'} ${fmtCash(Math.abs(net))}</b> <span class="muted small">all time · spent ${fmtCash(L.spent)} · won ${fmtCash(L.won)}</span></div>${luckSmall() ? '<span class="chip">Small change now</span>' : '<span class="chip good">Every dollar counts</span>'}</div>
+   <div class="fchips">${tabs.map(([k, l]) => `<button class="fchip${tab === k ? ' on' : ''}" data-luckt="${k}">${l}</button>`).join('')}</div>
+   <div class="luck-body">${body}</div>
+   ${L.hist.length ? `<h5>Lately</h5><ul class="os-list">${L.hist.slice(-6).reverse().map(h => `<li><time class="muted">${fmtDate(h.w, true)}</time><span>${esc(h.g)}</span><span class="small">${esc(h.t)}</span><span class="${h.win > h.bet ? 'good' : h.bet ? 'bad' : ''}">${h.win - h.bet >= 0 ? '+' : '−'}${fmtCash(Math.abs(h.win - h.bet))}</span></li>`).join('')}</ul>` : ''}`;
+}
+function luckClick(t) {
+  const d = t.dataset;
+  if (d.luckt) { UI.luckT = d.luckt; render(true); return true; }
+  if (d.luckamt) { UI.luckAmt = +d.luckamt; render(true); return true; }
+  if (d.luck === undefined) return false;
+  const [g, v] = d.luck.split(':'), amt = UI.luckAmt || luckStake(5);
+  if (g === 'lotto') doAct({ t: 'luck', g, n: +v });
+  else if (g === 'scratch') doAct({ t: 'luck', g, p: +v });
+  else if (g === 'roul') { const n = +((document.getElementById('roul-n') || {}).value || 0); UI.roulN = n; doAct({ t: 'luck', g, b: v, amt, pick: n }); }
+  else if (g === 'bj') doAct({ t: 'luck', g, k: v, amt });
+  else if (g === 'race') doAct({ t: 'luck', g, h: +v, amt });
+  else doAct({ t: 'luck', g, amt });
+  render(true); return true;
+}
+OS_VIEWS.luck = luckApp;
+OS_EXTRA.luck = ['🍀', 'Lucky Corner', 'Lotto, scratchcards, the casino and the races: real odds, small money'];
+{ const G = OS_GROUPS.find(g => g[0] === 'Play'); if (G && !G[1].includes('luck')) G[1].unshift('luck'); }
+// </luck>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -36759,6 +37004,7 @@ function careerClick(t) {
   if (typeof cgClick === 'function' && cgClick(t)) return true;
   if (typeof fin2Click === 'function' && fin2Click(t)) return true;
   if (typeof ventClick === 'function' && ventClick(t)) return true;
+  if (typeof luckClick === 'function' && luckClick(t)) return true;
   if (typeof bkTabClick === 'function' && bkTabClick(t)) return true;
   if (t.dataset.osg) { const c = UI.osc = UI.osc || { Play: 1 }; c[t.dataset.osg] = c[t.dataset.osg] ? 0 : 1; render(true); return true; }
   if (t.dataset.selffund) { const [src, id, d, m] = t.dataset.selffund.split(':'); doAct({ t: 'selffund', src, id: +id, direct: d === '1', micro: m === '1' }); render(true); return true; }
@@ -36781,7 +37027,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
