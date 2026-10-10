@@ -38462,7 +38462,8 @@ function ailPick(it, k) {
 }
 // what the day is like where someone is
 let LIVING_CTX = null;   // { home: true, day } while the room is drawn
-function livingWx(hub) { if (typeof wxDay !== 'function' || !HUBS[hub]) return null; const d = LIVING_CTX ? LIVING_CTX.day : (S.me && S.me.wk ? S.me.wk.day : 2); return wxDay(hub, S.week, clamp(d || 0, 0, 6)); }
+const LWX = new Map();
+function livingWx(hub) { if (typeof wxDay !== 'function' || !HUBS[hub]) return null; const d = clamp((LIVING_CTX ? LIVING_CTX.day : (S.me && S.me.wk ? S.me.wk.day : 2)) || 0, 0, 6), key = hub + ':' + S.week + ':' + d; let v = LWX.get(key); if (v === undefined) { if (LWX.size > 400) LWX.clear(); v = wxDay(hub, S.week, d); LWX.set(key, v); } return v; }
 function playerCond(L) {
   const M = S.me, me = ME(), C = {}, a = ailNow(), wx = livingWx(M.hub), home = LIVING_CTX && LIVING_CTX.home, day = LIVING_CTX ? LIVING_CTX.day : 2;
   if (M.energy < 30 || M.burnout) C.bags = M.energy < 15 ? 2 : 1;
