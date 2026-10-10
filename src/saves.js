@@ -217,10 +217,13 @@ async function saveRun(kind, name, id) {
   finally { SAVING = false; saveProgress(null); saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
 }
 // a progress bar while saving: the screen is busy, not frozen, and nothing can change under the save
+let SAVE_T0 = 0;
 function saveProgress(f) {
   if (typeof document === 'undefined' || !document.body || !document.createElement) return;
   let el = document.getElementById('saveov');
-  if (f === null) { if (el) el.remove(); return; }
+  if (f === null) { SAVE_T0 = 0; if (el) el.remove(); return; }
+  if (!SAVE_T0) SAVE_T0 = Date.now();
+  if (!el && Date.now() - SAVE_T0 < 350) return;   // a quick save never shows the bar
   if (!el) { el = document.createElement('div'); el.id = 'saveov'; el.innerHTML = '<div class="sv-box"><b>Saving your career…</b><span class="sv-bar"><i></i></span><small></small></div>'; document.body.appendChild(el); }
   el.querySelector('i').style.width = Math.round(f * 100) + '%'; el.querySelector('small').textContent = Math.round(f * 100) + '%';
 }

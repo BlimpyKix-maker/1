@@ -748,6 +748,7 @@ function closeWeek(a) {
   if (typeof luckWeek === 'function') luckWeek();
   if (typeof school2Week === 'function') school2Week();
   if (typeof acting2Week === 'function') acting2Week();
+  if (typeof sports2Week === 'function') sports2Week();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1066,6 +1067,7 @@ function resolvePick(it, k) {
   if (typeof ventPick === 'function' && ventPick(it, k)) return true;
   if (typeof school2Pick === 'function' && school2Pick(it, k)) return true;
   if (typeof bigScenePick === 'function' && bigScenePick(it, k)) return true;
+  if (typeof sports2Pick === 'function' && sports2Pick(it, k)) return true;
   if (it.kind === 'agentoffer') {
     if (k === 'yes' && !M.agent) signAgent(agenciesIn(M.hub)[it.ag], 'You meet them for lunch and sign before dessert.');
     it.done = true; it.result = { t: k === 'yes' ? 'Signed.' : 'You tell them you\'ll think about it.' }; return true;
@@ -1166,6 +1168,7 @@ function applyAct(a) {
     case 'bank2': return typeof bank2Act === 'function' && bank2Act(a);
     case 'vent': return typeof ventAct === 'function' && ventAct(a);
     case 'luck': return typeof luckAct === 'function' && luckAct(a);
+    case 'sport': return typeof sportAct === 'function' && sportAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
     case 'gigpitch': return typeof gigPitch === 'function' && gigPitch(a.id);
     case 'dream': return typeof setDream === 'function' && setDream(a.k);

@@ -10,7 +10,7 @@
 
 const LOTTO_PRIZE = { 3: 30, 4: 140, 5: 1750, 55: 1e5 };   // in today's money; the jackpot rolls
 function luckOf(M = S.me) { return M.luck || (M.luck = { spent: 0, won: 0, tickets: [], draws: [], jackpot: usd(2.5e6), hist: [], bj: null, nag: 0 }); }
-function luckStake(x) { return Math.max(1, Math.round(x * wageF(S.me.hub))); }   // small money isn't rounded to fives
+function luckStake(x) { const v = x * wageF(S.me.hub); return v < 20 ? Math.max(1, Math.round(v)) : Math.round(v / 5) * 5; }   // small money isn't rounded to fives
 function luckLog(L, g, bet, win, t) { L.spent += bet; L.won += win; L.hist.push({ w: S.week, g, bet, win, t }); if (L.hist.length > 60) L.hist.shift(); S.me.cash += win - bet; if (win > bet * 20 && win >= luckStake(500)) milestone(`Won ${fmtCash(win)} on ${g}`, 'money'); const M = S.me; M.stress = clamp(M.stress + (win > bet ? -2 : win === 0 ? .6 : 0), 0, 100); }
 function luckSmall() { return typeof osNetWorth === 'function' && osNetWorth().total > usd(400000); }
 
