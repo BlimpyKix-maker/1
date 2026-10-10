@@ -65,7 +65,7 @@ function bookTrip(a) {
 }
 function goOnTrip(x, L) {
   const M = S.me, me = ME(), T = (x.trip || '').split(':'), hub = T[0] === 'h' ? T[1] : null, F = T[0] === 'f' && typeof FESTIVALS !== 'undefined' ? FESTIVALS.find(f => f.k === T[1]) : null;
-  const pool = hub || HUB_IDS[Math.floor(prnd() * HUB_IDS.length)], met = [];
+  const pool = hub || (F && typeof festHub === 'function' && festHub(F)) || HUB_IDS[Math.floor(prnd() * HUB_IDS.length)], met = [];
   for (let i = 0; i < (F ? 3 : 2); i++) { const q = bestIn(pool, ROLES, p => -Math.abs(p.standing - me.standing - (F ? 25 : 10)) + prnd() * 30); if (q) { meet(q.id, F ? `Met at ${F.name}` : `Met in ${hubName(pool)}`, 5); met.push(`${q.name} (${(q.occ || occupationOf(q)).toLowerCase()})`); } }
   M.grind = 0;
   weekGain('tas', F ? .12 : .06); me.standing = clamp(me.standing + (F ? .6 : .2), 0, 100);

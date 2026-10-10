@@ -759,6 +759,7 @@ function closeWeek(a) {
   if (typeof livingWeek === 'function') livingWeek();
   if (typeof creditsWeek === 'function') creditsWeek();
   if (typeof actor3Week === 'function') actor3Week();
+  if (typeof placesWeek === 'function') placesWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1190,6 +1191,7 @@ function applyAct(a) {
     case 'co2': return typeof co2Act === 'function' && co2Act(a);
     case 'pet': return typeof petAct === 'function' && petAct(a);
     case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
+    case 'place2': return typeof placeAct === 'function' && placeAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
     case 'gigpitch': return typeof gigPitch === 'function' && gigPitch(a.id);
     case 'dream': return typeof setDream === 'function' && setDream(a.k);
