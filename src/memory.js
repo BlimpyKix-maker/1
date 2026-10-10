@@ -82,7 +82,7 @@ function noteShort(n) { if (!n) return 'what happened'; const ti = n.t.replace(/
 
 // ---- paths only a style can reach ----
 const STYLE_PATHS = {
-  mensch: { name: 'The Mensch', icon: '🤲', need: 'Generous 8+', on: s => s.gen >= 8, keep: s => s.gen >= 4,
+  helper: { name: 'The Good Egg', icon: '🤲', need: 'Generous 8+', on: s => s.gen >= 8, keep: s => s.gen >= 4,
     d: 'Known as the one who helps. Crews vouch for you, and the people you helped send work back.', perk: 'Crews vouch for you on junior jobs (+), favours come back faster' },
   gambler: { name: 'The Wild Card', icon: '🎲', need: 'Bold 8+', on: s => s.bold >= 8, keep: s => s.bold >= 4,
     d: 'Known for nerve. Long-shot offers find you: jobs above your level, if you dare.', perk: 'Wild-card offers above your level' },
@@ -175,7 +175,7 @@ function anyLiveFilm() { const L = S.active.map(i => S.films[i]).filter(f => f &
 function memCallback() {
   const M = S.me, me = ME();
   const L = Object.keys(M.mem || {}).map(Number).filter(id => P(id) && !P(id).dead && !P(id).retired && S.week - (M.mem[id].cb || -99) > 26);
-  const good = L.filter(id => M.mem[id].v >= (pathActive('mensch') ? 3 : 4)).sort((a, b) => M.mem[b].v - M.mem[a].v);
+  const good = L.filter(id => M.mem[id].v >= (pathActive('helper') ? 3 : 4)).sort((a, b) => M.mem[b].v - M.mem[a].v);
   const bad = L.filter(id => M.mem[id].v <= -4).sort((a, b) => M.mem[a].v - M.mem[b].v);
   if (good.length && (!bad.length || prnd() < .65)) {
     const id = good[0], q = P(id), m = M.mem[id], n = memNote(id, 1), f = liveFilmOf(id); m.cb = S.week; memCount('favour');
@@ -218,7 +218,7 @@ function memJobsWeek() {
 }
 function pathEvent(k) {
   const M = S.me, me = ME(), p = M.paths[k]; p.n++; memCount('path_' + k);
-  if (k === 'mensch' || k === 'confidant' || k === 'loyalist') {
+  if (k === 'helper' || k === 'confidant' || k === 'loyalist') {
     const L = Object.keys(M.mem || {}).map(Number).filter(id => M.mem[id].v > 1 && P(id) && !P(id).dead && liveFilmOf(id));
     const id = L.length ? L[Math.floor(prnd() * L.length)] : null;
     if (id === null) { if (k === 'loyalist') { M.freeRef = (M.freeRef || 0) + 1; inbox('note', 'Someone puts their name behind you', 'An old colleague tells you to use them as a reference, any time, for anything. That\'s what staying gets you.'); } return; }
@@ -278,7 +278,7 @@ function memFactors(post) {
   }
   if ((M.cvPad || 0) > S.week) out.push(['A polished CV', .4]);
   if ((M.cvTrue || 0) > S.week && post.tier >= 2) out.push(['References check out', .2]);
-  if (pathActive('mensch') && post.tier <= 2) out.push(['Crews vouch for you (The Mensch)', .45]);
+  if (pathActive('helper') && post.tier <= 2) out.push(['Crews vouch for you (The Good Egg)', .45]);
   if (pathActive('climber') && post.tier >= 2) out.push(['You want it, and it shows (The Climber)', .35]);
   if (pathActive('loyalist') && post.head !== null && post.head !== undefined && (M.mem || {})[post.head] && M.mem[post.head].v > 0) out.push(['They know you stay (The Loyalist)', .6]);
   if (pathActive('operator')) out.push(['You know who to call (The Operator)', .45]);

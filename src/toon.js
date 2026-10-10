@@ -32,7 +32,8 @@ function toonSVG(L, age, size, bare, fig) {
   const mouth0 = L.mouth !== undefined ? L.mouth : [0, 0, 1, 2, 5, 0, 4, 6][Math.floor(pr() * 8)];
   const cheeks = L.cheeks !== undefined ? L.cheeks : [0, 1, 0, 2, 1, 3][Math.floor(pr() * 6)];
   const mood = toonMood(L);
-  const skin = LOOK.skin.opts[L.skin] || '#D19A72', skinD = mixHex(skin, '#000000', .16), skinL = mixHex(skin, '#FFFFFF', .2), line = mixHex(skin, '#000000', .5);
+  const C = L._cond || {};
+  const skin = (c0 => C.tan ? mixHex(c0, '#7A4A22', .14) : C.pale ? mixHex(c0, '#E8EFE4', .22) : c0)(LOOK.skin.opts[L.skin] || '#D19A72'), skinD = mixHex(skin, '#000000', .16), skinL = mixHex(skin, '#FFFFFF', .2), line = mixHex(skin, '#000000', .5);
   const grey = clamp((age - 46) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor] || '#3A2618', '#D9D6D0', grey), hcD = mixHex(hc, '#000000', .25);
   const cloth = LOOK.colour.opts[L.colour] || '#2C4F7C', clothD = mixHex(cloth, '#000000', .25), clothL = mixHex(cloth, '#FFFFFF', .2);
   const FT = L._fit || { mus: 0, mass: 0 };
@@ -96,13 +97,16 @@ function toonSVG(L, age, size, bare, fig) {
   if (L.mark === 4) o.push(`<circle cx="${cx + ex + 6}" cy="${ey + 13}" r=".9" fill="#3A2416"/>`);
   if (mood === 'stressed') o.push(`<path d="M${cx + rx - 4} ${cy - 10} q3 5 0 7 q-3-2 0-7z" fill="#9BE7FF"/>`);
   if (mood === 'tired') o.push(`<text x="${cx + rx}" y="${cy - ry + 4}" font-size="9" fill="#555" font-weight="700">z</text><text x="${cx + rx + 6}" y="${cy - ry - 3}" font-size="7" fill="#555" font-weight="700">z</text>`);
+  if (typeof toonCondFace === 'function' && (C.bags || C.nose || C.plaster || C.stubble || C.burn)) o.push(toonCondFace(C, cx, cy, ey, ex, rx, ry, skin, line, hc, !!L.facial));
   // facial hair
   if (L.facial) o.push(toonFacial(L.facial, cx, ey, rx, ry, cy, hc, hcD));
   // hair in front, then glasses, then hats
   o.push(hb[1]);
   if (L.glasses) o.push(toonGlasses(L.glasses, cx, ex, ey));
+  if (C.messy && !L.head && typeof toonCondHair === 'function') o.push(toonCondHair(C, cx, cy, ry, hc));
   if (L.head) o.push(toonHat(L.head, cx, cy, rx, ry, cloth, hc));
   o.push('</g>');
+  if (fig && (C.sling || C.wrap) && typeof toonCondBody === 'function') o.push(toonCondBody(C, cx, cy + ry, bw));
   // a neck piece on the bust
   if (!fig && L.neck) o.push(toonNeck(L.neck, cx, cy + ry + 2, cloth));
   // an investor's lapel pin

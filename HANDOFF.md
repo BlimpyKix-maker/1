@@ -236,7 +236,7 @@ NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SA
 ## Round 6 decisions
 
 - Memories come from tie changes, not from tagging every scene: any choice in any module that moves how someone feels about you is remembered with its title and your words, so new content gets memories for free.
-- Style is read from the words of the choice you made (and a few actions), never from whether the roll succeeded. No axis is "good": each pole has its own path (the Operator and the Firebrand are as real as the Mensch).
+- Style is read from the words of the choice you made (and a few actions), never from whether the roll succeeded. No axis is "good": each pole has its own path (the Operator and the Firebrand are as real as the Good Egg).
 - Personas describe public reputations, kept affectionate; no scandals. Real names never appear in the UI, only the catalogue's in-game names.
 - World randomness stays on `rnd()`; style and memory effects on the player use `prnd()`. Style signals hook `applyAct`, not `doAct`, so replays match.
 
