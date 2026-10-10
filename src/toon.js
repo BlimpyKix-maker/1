@@ -105,6 +105,8 @@ function toonSVG(L, age, size, bare, fig) {
   o.push('</g>');
   // a neck piece on the bust
   if (!fig && L.neck) o.push(toonNeck(L.neck, cx, cy + ry + 2, cloth));
+  // an investor's lapel pin
+  if (L._pin >= 3) { const C = ['', '', '', '#C9CCD6', '#D4AF37', '#E5E4E2', '#9BE7FF'][L._pin] || '#D4AF37', px = fig ? 73 : 84, py = fig ? 102 : 113; o.push(`<circle cx="${px}" cy="${py}" r="${fig ? 2.6 : 3.6}" fill="${C}" stroke="${mixHex(C, '#000000', .4)}" stroke-width=".7"/><circle cx="${px - .8}" cy="${py - .8}" r="${fig ? .7 : 1}" fill="#FFFFFF" opacity=".8"/>`); }
   // the sidekick
   if (L.sidekick) o.push(toonPet(L.sidekick, fig ? 96 : 98, fig ? 214 : 108));
   return `<svg class="portrait toon${fig ? ' figure' : ''}" viewBox="0 0 120 ${H}" width="${fig ? Math.round(size / 2) : size}" height="${size}" role="img" aria-label="${fig ? 'Full-length portrait' : 'Portrait'}">${o.join('')}</svg>`;
@@ -299,7 +301,7 @@ function toonBody(L, uid, cx, neckY, bw, skin, skinD, cloth, clothD, pat, line) 
 { const _lookOf = lookOf;
   lookOf = function (p) {
     const L = _lookOf(p);
-    if (p && p.player && S.me) { const M = S.me; L._mood = M.stress > 70 ? 'stressed' : M.energy < 22 ? 'tired' : (M.milestones || []).some(m => S.week - m.w <= 1 && ['prize', 'credit'].includes(m.kind)) ? 'buzzing' : 'calm'; }
+    if (p && p.player && S.me) { const M = S.me; if (M.vent && typeof investorTier === 'function') L._pin = investorTier().t; L._mood = M.stress > 70 ? 'stressed' : M.energy < 22 ? 'tired' : (M.milestones || []).some(m => S.week - m.w <= 1 && ['prize', 'credit'].includes(m.kind)) ? 'buzzing' : 'calm'; }
     return L;
   };
 }

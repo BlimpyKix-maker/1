@@ -46,7 +46,7 @@ function moneyHistoryHTML() {
    <p class="small">Sweep ${['0', '10', '20', '30', '50'].map(p => `<button class="pill${(M.autoSave || 0) === +p ? ' on' : ''}" data-autosave="${p}">${p === '0' ? 'off' : p + '%'}</button>`).join(' ')} of every good week into savings, automatically. <span class="muted">Savings earn interest; cash in your pocket doesn't.</span></p>
    ${bzDiscount() ? `<p class="small">🏷️ Trade prices: as a working professional you get ${Math.round(bzDiscount() * 100)}% off gear, books and courses in the Bazaar, and good tools do more for someone at your level (×${bzBang().toFixed(2)}).</p>` : `<p class="small muted">🏷️ Trade prices on gear and courses start when you're a working professional (level 3).</p>`}</section>`;
 }
-{ const _bank = bankHTML; bankHTML = function () { return moneyHistoryHTML() + _bank(); }; }
+{ const _bank = bankHTML; bankHTML = function () { return (UI.bkSplit ? '' : moneyHistoryHTML()) + _bank(); }; }
 function bank2Click(t) {
   const d = t.dataset;
   if (d.ledspan) { UI.ledSpan = +d.ledspan; render(true); return true; }

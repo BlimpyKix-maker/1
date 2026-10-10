@@ -230,7 +230,7 @@ function bankHTML() {
    ${osCard('Borrowing', `<p class="small">Credit score <b>${B.score}</b> · limit ${fmtCash(lim)} · rate ${loanRate(M).toFixed(1)}%</p>${B.loan > 0 ? `<p>You owe <b class="bad">${fmtCash(Math.round(B.loan))}</b> at ${B.lrate.toFixed(1)}%. Payments come out weekly.</p>` : ''}<div class="bank-f"><button class="os-btn" data-bank="borrow">Borrow</button>${B.loan > 0 ? '<button class="os-btn" data-bank="repay">Repay</button>' : ''}</div><p class="small muted">Use loans to fund a film, a home or a bet on the market. Miss payments and the score falls, the rate rises and the limit shrinks.</p>`)}
    ${osCard('Credit score', `<p class="os-big">${B.score}</p><p class="small muted">${B.score >= 740 ? 'Excellent: the best rates and limits.' : B.score >= 670 ? 'Good.' : B.score >= 580 ? 'Fair: rates are higher.' : 'Poor: borrowing is expensive and limited.'} It rises with on-time payments and repaying early; it falls with missed payments.</p>`)}
    ${osCard('Statement', (B.hist || []).length ? `<ul class="os-list">${B.hist.slice(-8).reverse().map(h => `<li><span class="muted">${fmtDate(h.w, true)}</span><span>${esc(h.t)}</span></li>`).join('')}</ul>` : '<p class="small muted">Nothing unusual on the account.</p>')}</div>
-   ${typeof privateBankHTML === 'function' ? '<h4>Private banking</h4>' + privateBankHTML() : ''}`;
+   ${typeof privateBankHTML === 'function' && !UI.bkSplit ? '<h4>Private banking</h4>' + privateBankHTML() : ''}`;
 }
 function bankClick(t) {
   const d = t.dataset;

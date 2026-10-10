@@ -7,25 +7,28 @@
 // you did since is kept too, so closing the tab loses nothing.
 const SNAP_V = 1, BUILD_ID = 'b67', MAX_MANUAL = 50, MAX_AUTO = 5, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
 const AUTO_EVERY = { week: 'Every week', month: 'Every month', half: 'Every six months', year: 'Every year', five: 'Every five years', off: 'Never' };
-let BASE = null;   // what the world looked like as it was built, before you arrived: hashes, field by field
+let BASE = null;
+const PRIM_NO = Symbol('object');   // marks a baseline field that was an object (compared by hash, not value)   // what the world looked like as it was built, before you arrived: hashes, field by field
 function fnv(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 // numbers to four decimals: one fast pass over the finished text (an exact save skips it, for the tests)
 function snapRoundText(str) { return str.replace(/(\d\.\d{4})\d+/g, '$1'); }
+// one number, truncated exactly as snapRoundText would truncate its text
+function snapRoundNum(v) { const s = '' + v, d = s.indexOf('.'); if (d < 0 || s.length - d <= 5) return v; if (s.indexOf('e') >= 0) return +snapRoundText(s); return +s.slice(0, d + 5); }
 const SNAP_SETS = ['people', 'films', 'companies'];
 const KEYIDX = new Map(), KEYS = [];
 function keyId(k) { let i = KEYIDX.get(k); if (i === undefined) { i = KEYS.length; KEYS.push(k); KEYIDX.set(k, i); } return i; }
 // called once the world is built (new game or before a load)
 function snapBaseline() {
-  const b = { n: {}, h: {}, fk: {}, fh: {}, tk: [], tv: [], sig: 0 };
+  const b = { n: {}, h: {}, fk: {}, fh: {}, fv: {}, fs: {}, tk: [], tv: [], sk: [], sig: 0 };
   for (const set of SNAP_SETS) {
-    const L = S[set], n = L.length, H = new Uint32Array(n), FK = new Array(n), FH = new Array(n);
+    const L = S[set], n = L.length, H = new Uint32Array(n), FK = new Array(n), FH = new Array(n), FV = new Array(n), FS = new Array(n), SO = SK_ORDER();
     for (let i = 0; i < n; i++) {
-      const e = L[i], ks = Object.keys(e), fk = new Uint16Array(ks.length), fh = new Uint32Array(ks.length); let h = 0;
-      for (let j = 0; j < ks.length; j++) { const k = ks[j]; fk[j] = keyId(k); fh[j] = fnv(JSON.stringify(e[k]) || 'u'); h = (Math.imul(h, 31) + fh[j] + fk[j]) >>> 0; }
-      H[i] = h; FK[i] = fk; FH[i] = fh; b.sig = (b.sig + h) >>> 0;
-      if (set === 'people') { const t = e.ties || {}, tk = Object.keys(t); b.tk[i] = Int32Array.from(tk, Number); b.tv[i] = Float32Array.from(tk, x => t[x]); }
+      const e = L[i], ks = Object.keys(e), fk = new Uint16Array(ks.length), fh = new Uint32Array(ks.length), fv = new Array(ks.length), fs = new Array(ks.length); let h = 0;
+      for (let j = 0; j < ks.length; j++) { const k = ks[j], v = e[k]; fk[j] = keyId(k); const js = JSON.stringify(v); fh[j] = fnv(js || 'u'); if (v === null || typeof v !== 'object') fv[j] = v; else { fv[j] = PRIM_NO; if (!(set === 'people' && (k === 'ties' || k === 'sk'))) fs[j] = js; } h = (Math.imul(h, 31) + fh[j] + fk[j]) >>> 0; }
+      H[i] = h; FK[i] = fk; FH[i] = fh; FV[i] = fv; FS[i] = fs; b.sig = (b.sig + h) >>> 0;
+      if (set === 'people') { const t = e.ties || {}, tk = Object.keys(t); b.tk[i] = Int32Array.from(tk, Number); b.tv[i] = Float32Array.from(tk, x => t[x]); if (e.sk) b.sk[i] = Float64Array.from(SO, x => e.sk[x] ?? NaN); }
     }
-    b.n[set] = n; b.h[set] = H; b.fk[set] = FK; b.fh[set] = FH;
+    b.n[set] = n; b.h[set] = H; b.fk[set] = FK; b.fh[set] = FH; b.fv[set] = FV; b.fs[set] = FS;
   }
   BASE = b; return b;
 }
@@ -34,21 +37,28 @@ let SKO = null;
 function SK_ORDER() { if (!SKO) { SKO = []; for (const c in CRAFTS) for (const k in CRAFTS[c].subs) SKO.push(k); } return SKO; }
 // one entity against its baseline: the fields that changed (ties entry by entry), or null if none did
 function entDiff(set, i, e) {
-  const fk = BASE.fk[set][i], fh = BASE.fh[set][i], out = {}; let any = false;
-  const ks = Object.keys(e), seen = new Set();
+  const fk = BASE.fk[set][i], fh = BASE.fh[set][i], fv = BASE.fv[set][i], fs = BASE.fs[set][i], out = {}; let any = false;
+  const ks = Object.keys(e), seen = new Set(), P = set === 'people';
   for (const k of ks) {
-    const id = keyId(k); seen.add(id);
-    if (set === 'people' && k === 'c') continue;   // derived from the skills: recomputed on load
-    const j = fk.indexOf(id), js = JSON.stringify(e[k]);
-    if (j >= 0 && fnv(js || 'u') === fh[j]) continue;
-    if (set === 'people' && k === 'ties' && j >= 0) {
-      const t = e.ties, d = {}, bk = BASE.tk[i], bv = BASE.tv[i], had = new Set();
-      for (let q = 0; q < bk.length; q++) { const x = bk[q]; had.add(x); if (!(x in t)) d[x] = null; else if (Math.fround(t[x]) !== bv[q]) d[x] = t[x]; }
-      for (const x in t) if (!had.has(+x)) d[x] = t[x];
-      out['~ties'] = d; any = true; continue;
+    const id = keyId(k), v = e[k]; seen.add(id);
+    if (P && k === 'c') continue;   // derived from the skills: recomputed on load
+    const j = fk.indexOf(id);
+    // plain values compare directly; objects by hash (people's skills and ties field by field, below)
+    if (j >= 0 && fv[j] !== PRIM_NO) { if (v === fv[j] || (v !== v && fv[j] !== fv[j])) continue; if (v === null || typeof v !== 'object') { out[k] = v === undefined ? null : v; any = true; continue; } }
+    if (P && k === 'ties' && j >= 0 && v) {
+      const t = v, d = {}, bk = BASE.tk[i], bv = BASE.tv[i], had = new Set(); let ch = false;
+      for (let q = 0; q < bk.length; q++) { const x = bk[q]; had.add(x); if (!(x in t)) { d[x] = null; ch = true; } else if (Math.fround(t[x]) !== bv[q]) { d[x] = t[x]; ch = true; } }
+      for (const x in t) if (!had.has(+x)) { d[x] = t[x]; ch = true; }
+      if (ch) { out['~ties'] = d; any = true; }
+      continue;
     }
-    if (set === 'people' && k === 'sk' && e.sk && SK_ORDER().every(x => x in e.sk) && Object.keys(e.sk).length === SK_ORDER().length) { out['~sk'] = SK_ORDER().map(x => +snapRoundText(String(e.sk[x]))); any = true; continue; }
-    out[k] = e[k] === undefined ? null : e[k]; any = true;
+    if (P && k === 'sk' && v && j >= 0) {
+      const SO = SK_ORDER(), b = BASE.sk[i]; let full = Object.keys(v).length === SO.length, same = !!b;
+      for (let q = 0; q < SO.length; q++) { const x = v[SO[q]]; if (x === undefined) { full = false; break; } if (same && x !== b[q]) same = false; }
+      if (full) { if (!same) { out['~sk'] = SO.map(x => snapRoundNum(v[x])); any = true; } continue; }
+    }
+    if (j >= 0) { const js = JSON.stringify(v); if (fs[j] !== undefined ? js === fs[j] : fnv(js || 'u') === fh[j]) continue; }
+    out[k] = v === undefined ? null : v; any = true;
   }
   const gone = []; for (let j = 0; j < fk.length; j++) if (!seen.has(fk[j])) gone.push(KEYS[fk[j]]);
   if (gone.length) { out['~gone'] = gone; any = true; }
