@@ -12,6 +12,7 @@ Collected in round 9 to find systems that add strategic depth. What has shipped 
 - **#7 Release-date chicken:** seasons, crowded weekends, studios blinking and a release calendar (src/release2.js).
 - **#16 Traits and stress:** choices that clash with your traits cost stress, coping habits, and traits that change (src/stress2.js).
 - **#24 Legends:** almanac, records, lineage and search (src/legends.js).
+- **#10 Test screenings and recuts, #12 FYC awards campaigns, #2 pre-sales at the markets:** the Film Desk (src/filmdesk.js).
 - **#13 Guild cycle and strikes:** contracts per market, talks with visible odds, strikes that stall productions, pay indexes and interim agreements (src/guilds.js).
 
 Everything else below is a candidate for future rounds.
