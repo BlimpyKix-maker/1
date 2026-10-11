@@ -743,6 +743,7 @@ table.deal select { max-width: 100%; } table.wf td.n { white-space: nowrap; } tr
 .rl-bar{display:inline-block;width:70px;height:7px;background:rgba(255,255,255,.07);border-radius:2px;vertical-align:middle;overflow:hidden}.rl-bar i{display:block;height:100%;background:var(--tk-acc,#e0a030)}.tk-hi{color:var(--tk-acc,#e0a030);font-weight:700}
 .ms-gauge{position:relative;height:10px;background:rgba(255,255,255,.07);border-radius:3px;margin:4px 0 2px}.ms-gauge>i:first-child{position:absolute;left:0;top:0;bottom:0;border-radius:3px}.ms-0{background:#3fa36b}.ms-1{background:#c9a227}.ms-2{background:#d0703a}.ms-3{background:#c9454a}.ms-tick{position:absolute;top:-2px;bottom:-2px;width:1px;background:rgba(255,255,255,.35)}.ms-log li{margin:2px 0}
 .lg-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 8px}.lg-yr{font:700 22px/1 var(--mono,ui-monospace,monospace);color:var(--tk-acc,#e0a030);padding:0 6px}.lg-q{flex:1;min-width:220px;background:rgba(255,255,255,.05);border:1px solid var(--tk-line,#333);color:inherit;padding:6px 8px;border-radius:4px;font:inherit}.lg .tk-chip.on{background:var(--tk-acc,#e0a030);color:#111}
+.att.fog{opacity:.75;font-style:italic;letter-spacing:-.02em}.chip.trait.fog{opacity:.6;border-style:dashed}.bar.fog i{opacity:.45}.fogbar{margin:4px 0 6px}
 .pkg-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}.pkg-row .tk-chip{border:1px solid var(--line,#555);border-radius:4px;padding:3px 8px;background:transparent;color:inherit;cursor:pointer;font:inherit;text-transform:none;letter-spacing:0}.pkg-row .tk-chip.on{background:var(--accent,#c9a227);color:#111;border-color:transparent}
 .placego { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; } .placemap { width: 100%; height: auto; display: block; margin: 8px 0; } .placemap .pm-sea { fill: color-mix(in srgb, var(--accent) 7%, var(--bg, #fff)); } .placemap .pm-grid line { stroke: var(--line); stroke-width: 1; opacity: .6; } .placemap .pm-dot { cursor: pointer; } .placemap .pm-dot circle:not([fill]) { fill: var(--muted); } .placemap .pm-dot.on circle:not([fill]), .placemap .pm-dot:hover circle:not([fill]) { fill: var(--accent); } .placemap .pm-dot.here circle:not([fill]) { fill: #E0505E; } .placemap .pm-labels text { font-size: 11.5px; fill: #F2EDE6; paint-order: stroke; stroke: rgba(0,0,0,.75); stroke-width: 3px; pointer-events: none; } .placemap .pm-eubox { fill: none; stroke: #F2EDE6; stroke-opacity: .35; stroke-dasharray: 3 3; } .placemap .pm-eulink { stroke: #F2EDE6; stroke-opacity: .25; stroke-dasharray: 3 3; } .placemap .pm-inset rect { fill: #000; fill-opacity: .28; stroke: #F2EDE6; stroke-opacity: .25; } .placemap .pm-cap { font-size: 10px; letter-spacing: 1.5px; fill: #F2EDE6; fill-opacity: .6; font-weight: 700; } .placemap .pm-ping { fill: none !important; stroke: #FFB020; stroke-width: 3; animation: pmping 1.6s ease-out infinite; } @keyframes pmping { from { opacity: 1; } to { opacity: 0; } } .placecard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; } .placecard .reasons li { margin: 4px 0; }
 .home-scene .pets { pointer-events: none; } .home-scene .pet-roam { animation: petroam 18s ease-in-out infinite alternate; } @keyframes petroam { 0% { transform: translateX(-40px); } 45% { transform: translateX(60px); } 55% { transform: translateX(60px); } 100% { transform: translateX(-30px); } } .home-scene .pet-tail { animation: pettail .5s ease-in-out infinite alternate; } @keyframes pettail { from { transform: rotate(-12deg); } to { transform: rotate(14deg); } } .home-scene .pet-sad .pet-tail { animation: none; } .pet-swim { animation: petswim 6s ease-in-out infinite alternate; } @keyframes petswim { from { transform: translateX(-8px); } to { transform: translateX(8px); } } .pet-hop { animation: pethop 2.4s ease-in-out infinite; } @keyframes pethop { 0%, 80%, 100% { transform: translateY(0); } 88% { transform: translateY(-3px); } }
@@ -11697,6 +11698,8 @@ function closeWeek(a) {
   if (typeof pkgWeek === 'function') pkgWeek();
   if (typeof tellerWeek === 'function') tellerWeek();
   if (typeof slWeek === 'function') slWeek();
+  if (typeof talWeek === 'function') talWeek();
+  if (typeof schemesWeek === 'function') schemesWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -12144,6 +12147,8 @@ function applyAct(a) {
     case 'camp2': return typeof fdCamp === 'function' && fdCamp(a);
     case 'dist': return typeof distAct === 'function' && distAct(a);
     case 'teller': return typeof tellerAct === 'function' && tellerAct(a);
+    case 'scout': return typeof scoutAct === 'function' && scoutAct(a);
+    case 'scheme': return a.stop ? typeof schemeStop === 'function' && schemeStop(a) : typeof schemeAct === 'function' && schemeAct(a);
     case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
     case 'place2': return typeof placeAct === 'function' && placeAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
@@ -41233,6 +41238,171 @@ function slatePanel() {
   const t = _fc(f, why, god); if (owe > 0) { c.cash -= owe; F.npPaid = F.mezzPaid = 1; F.log.push({ w: S.week, t: `The pickup and mezzanine lenders are repaid ${fmtM(owe)}.`, tone: 'bad' }); return t + ` The pickup and mezzanine lenders take back ${fmtM(owe)}.`; }
   return t; }; }
 // </slate>
+// <fog>
+// ---------------- Scouting fog ----------------
+// After Football Manager: you don't know how good someone is until you find out. Skills show as a range whose width
+// depends on what you know about them (level 0–3):
+//  0 stranger ±6 · 1 a contact ±4 · 2 worked with them, or scouted ±2 · 3 scouted thoroughly: exact.
+// The range isn't centred on the truth (a hashed offset per person and skill), so the middle of the range is a guess,
+// not the answer. Negative traits (Difficult, Volatile, Lazy, Party animal…) stay hidden below level 2.
+// Scouting (doAct `scout`) raises a person one level: asking around and watching their reel costs a little money and
+// energy, three a week; a good agent makes it cheaper. The make-film form, crew pickers and person pages all show
+// the fogged numbers; the simulation itself always uses the truth.
+const FOG_U = [6, 4, 2, 0], FOG_HIDE = ['Difficult', 'Volatile', 'Lazy', 'Party animal', 'Showboat', 'Stubborn', 'Reckless', 'Gossip', 'Ruthless'];
+function scoutLv(id) {
+  const M = S.me; if (!M || id === M.id) return 3; const p = P(id); if (!p) return 0;
+  let lv = (M.scout || {})[id] || 0; const k = M.known[id];
+  if (k) lv = Math.max(lv, 1);
+  if (k && ((k.tags || []).some(t => /Worked together|Your regular|Hired for your film|Cast in your film|Directing your film|crew/i.test(t)))) lv = Math.max(lv, 2);
+  if ((ME().credits || []).some(i => (p.credits || []).includes(i))) lv = Math.max(lv, 2);
+  return Math.min(3, lv);
+}
+function fogRange(id, v, key = '') {
+  const u = FOG_U[scoutLv(id)]; if (!u) return [Math.round(v), Math.round(v)];
+  const off = (gH(id, key, 'fog') - .5) * u;   // the truth sits somewhere inside, not in the middle
+  return [Math.max(1, Math.round(v - u / 2 + off)), Math.min(20, Math.round(v + u / 2 + off))];
+}
+function fogNum(p, v, key = '') { const [lo, hi] = fogRange(p.id, v, key); return lo === hi ? String(lo) : `${lo}–${hi}`; }
+// person pages: fog the skill cells and bars while a page renders
+let FOG_P = null;
+{ const _sc = skillCell; skillCell = function (v) { if (FOG_P === null || scoutLv(FOG_P) >= 3) return _sc(v); const [lo, hi] = fogRange(FOG_P, v, 'c' + Math.round(v * 7)); return `<span class="att fog" title="An estimate: scout them to narrow it">${lo}–${hi}</span>`; }; }
+{ const _vp = viewPerson; viewPerson = function (id) {
+  const p = P(id); if (!S.me || !p || id === S.me.id) return _vp(id);
+  FOG_P = id; let h; try { h = _vp(id); } finally { FOG_P = null; }
+  const lv = scoutLv(id);
+  if (lv < 2) for (const t of FOG_HIDE) if (p.traits.includes(t)) h = h.replace(new RegExp(`<span class="chip trait" title="[^"]*">${t}</span>`), '<span class="chip trait fog" title="Something you\'d only learn by working with them, or scouting">?</span>');
+  if (lv < 2) h = h.replace(/(Reputation in the business: )([^<.]*)/, (m, a, b) => { const L = b.split(/,\s*/).filter(w => !FOG_HIDE.some(t => t.toLowerCase() === w.trim().toLowerCase())); return a + (L.length ? L.join(', ') : 'hard to read'); });   // the trivia line mustn't give away what the chips hide
+  if (lv < 3) h = h.replace(/(<div class="traits">)/, `<p class="small fogbar">Scouting: <b>${['a stranger', 'a contact', 'known', 'scouted'][lv]}</b> · skills shown as ranges (±${FOG_U[lv]}). <button class="btn-s" data-scout="${id}">Scout them (${fmtCash(scoutCost())})</button></p>$1`);
+  return h; }; }
+function scoutCost() { const M = S.me, t = M.agent ? M.agent.tier : 0; return usd(Math.max(80, 400 - t * 80)); }
+function scoutAct(a) {
+  const M = S.me, id = +a.id, p = P(id); if (!p || id === M.id || scoutLv(id) >= 3) return false;
+  const wk = M.scoutW === S.week ? (M.scoutN || 0) : 0; if (wk >= 3 || M.cash < scoutCost()) return false;
+  M.cash -= scoutCost(); M.energy = clamp(M.energy - 3, 0, 100); M.scoutW = S.week; M.scoutN = wk + 1;
+  (M.scout = M.scout || {})[id] = scoutLv(id) + 1; return true;
+}
+function scoutClick(t) { const id = t.dataset.scout; if (id === undefined) return false; if (!doAct({ t: 'scout', id: +id })) inbox('note', 'Can\'t scout now', 'Three a week at most, and it costs a little. Some people you already know as well as you can.'); render(true); return true; }
+{ const _b = bar; bar = function (v, max = 100, cls = '') { if (FOG_P === null || max !== 20 || scoutLv(FOG_P) >= 3) return _b(v, max, cls); const [lo, hi] = fogRange(FOG_P, v, 'c' + Math.round(v * 7)); return _b((lo + hi) / 2, max, cls + ' fog'); }; }
+// </fog>
+// <talent>
+// ---------------- The talent market: prices that move ----------------
+// After Offworld Trading Company: talent is priced by supply and demand. Each week, for every market and main role,
+// demand is the work in the pipeline (films in development, pre-production and shooting) and supply is the people
+// free to take it. The price index is that ratio against its own long-run average, square-rooted and kept between
+// ×0.75 and ×1.5: a boom makes everyone dearer, a strike or a slump makes them cheap. On top, each person carries
+// heat from their bankability: a star off two hits costs more than one off two flops.
+// Effects: the lead's fee on your films (leadFee), and what jobs pay you (makePost). The Terminal's TALENT MARKET shows
+// the index by role with its trend, the hottest names and the bargains (good, cold, cheap), so you can hire on the dip.
+const TAL_ROLES = ['actor', 'director', 'writer', 'dp', 'editor', 'composer', 'designer'];
+const TAL_NEED = { actor: 3, director: 1, writer: 1, dp: 1, editor: 1, composer: 1, designer: 1 };
+const TAL_CRAFT_ROLE = { act: 'actor', dir: 'director', wri: 'writer', cam: 'dp', edt: 'editor', mus: 'composer', des: 'designer' };
+function tal() { return S.tal = S.tal || { ema: {}, idx: {}, h: {} }; }
+function talIdx(role, m) { const T = S.tal; return T && T.idx[m] && T.idx[m][role] ? T.idx[m][role] : 1; }
+function heat(p) { return p && typeof bankability === 'function' ? clamp(.75 + bankability(p) / 160, .8, 1.4) : 1; }
+function talWeek() {
+  if (!S.me) return; const T = tal(), mk = HUBS[S.me.hub].m, watch = new Set([mk, 'US', 'UK', 'IN', 'FR']);
+  const films = {}; for (const id of S.active) { const f = S.films[id]; if (f && f.rel === null && f.stage >= 0 && f.stage <= 2 && watch.has(f.m)) films[f.m] = (films[f.m] || 0) + 1; }
+  for (const m of watch) {
+    const hubs = HUB_IDS.filter(h => HUBS[h].m === m && S.pool[h]); if (!hubs.length) continue;
+    T.ema[m] = T.ema[m] || {}; T.idx[m] = T.idx[m] || {}; T.h[m] = T.h[m] || {};
+    for (const r of TAL_ROLES) {
+      let free = 0; for (const h of hubs) for (const id of S.pool[h][r] || []) if (available(id)) free++;
+      const ratio = (films[m] || 0) * TAL_NEED[r] / Math.max(3, free), e = T.ema[m][r] === undefined ? ratio : T.ema[m][r] * .97 + ratio * .03;
+      T.ema[m][r] = e; T.idx[m][r] = +clamp(Math.sqrt(e > 0 ? ratio / e : 1), .75, 1.5).toFixed(3);
+      (T.h[m][r] = T.h[m][r] || []).push(T.idx[m][r]); if (T.h[m][r].length > 26) T.h[m][r].shift();
+    }
+  }
+}
+{ const _lf = leadFee; leadFee = function (id, genre, micro) { const v = _lf(id, genre, micro); return S.me ? v * talIdx('actor', HUBS[S.me.hub].m) * heat(P(id)) : v; }; }
+{ const _mp = makePost; makePost = function (t, f) { const p = _mp(t, f); if (!S.me || !S.tal) return p; const sub = t && t.subs && t.subs[0], r = sub ? TAL_CRAFT_ROLE[SUB2C[sub]] : null; if (r) p.rate = Math.round(p.rate * talIdx(r, f ? f.m : HUBS[S.me.hub].m)); return p; }; }
+function talPanel() {
+  const T = S.tal; if (!T) return ''; const m = HUBS[S.me.hub].m; if (!T.idx[m]) return '';
+  const rows = TAL_ROLES.map(r => { const v = T.idx[m][r] || 1, H = (T.h[m] || {})[r] || [], d = H.length > 4 ? v / H[Math.max(0, H.length - 13)] - 1 : 0;
+    return `<tr><td>${esc(ROLE_LABEL[r] || r)}</td><td class="n ${v > 1.05 ? 'dn' : v < .95 ? 'up' : ''}">×${v.toFixed(2)}</td><td class="n ${d > 0 ? 'dn' : 'up'}">${H.length > 4 ? fmtPct(d * 100) : ''}</td><td>${H.length > 2 && typeof tSpark === 'function' ? tSpark(H, 90, 16) : ''}</td></tr>`; }).join('');
+  const pool = HUB_IDS.filter(h => HUBS[h].m === m && S.pool[h]).flatMap(h => (S.pool[h].actor || [])).map(P).filter(p => p && !p.dead && (p.fame || 0) >= 20);
+  const fee = p => leadFee(p.id, 'Drama', false);
+  const hot = pool.slice().sort((a, b) => heat(b) * (b.fame || 0) - heat(a) * (a.fame || 0)).slice(0, 5);
+  const cheap = pool.filter(p => available(p.id)).map(p => [p, gcraft(p, 'act', 'Drama') / Math.max(.01, fee(p))]).sort((a, b) => b[1] - a[1]).slice(0, 5).map(x => x[0]);
+  const li = p => `<li><a href="#" class="lk" data-go="person:${p.id}">${esc(p.name)}</a> <span class="tk-mut">acting ${fogNum(p, gcraft(p, 'act', 'Drama'), 'act')} · heat ×${heat(p).toFixed(2)}</span> <b>${fmtM(fee(p))}</b></li>`;
+  return `<section class="tk-p tk-wide"><h4>TALENT MARKET <span class="tk-sub">${esc(MARKETS[m].name)} · price index = work in the pipeline ÷ people free, against its own average</span></h4>
+   <div class="tk-grid"><div><table class="tk-t"><thead><tr><th>Role</th><th class="n">Index</th><th class="n">13w</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+   <div><p class="small"><b>Hottest</b></p><ul class="plain small">${hot.map(li).join('')}</ul><p class="small"><b>Bargains</b> <span class="tk-mut">acting per dollar, free now</span></p><ul class="plain small">${cheap.map(li).join('')}</ul></div></div>
+   <p class="tk-foot">A lead's fee follows the actor index and their heat (bankability). What jobs pay you follows your role's index. Strikes and slumps make talent cheap; booms make it dear. Acting is shown as your scouting allows.</p></section>`;
+}
+{ const _th = terminalHTML; terminalHTML = function () { const h = _th(); const i = h.lastIndexOf('</div></div>'); return i < 0 ? h : h.slice(0, i) + talPanel() + h.slice(i); }; }
+// </talent>
+// <schemes>
+// ---------------- Schemes and secrets ----------------
+// After Crusader Kings 3: schemes advance week by week on your skill against the target's resistance, and every week
+// they might be discovered. Secrets are leverage.
+//  - Some notable people have a secret (fixed by the world seed): a buried plagiarism, a tax dodge, an affair, cruelty
+//    on set, a habit, a credit they didn't earn. Digging finds it.
+//  - Schemes: dig for dirt; poach (they'll take your next offer at a discount); befriend a power broker; sabotage a
+//    film they're making (its hook drops); blackmail, once you hold their secret (money, or a favour).
+//  - Power is your relevant skill against their standing and discretion; a Discreet target resists more, a Gossip
+//    less. Discovery costs standing and makes an enemy, and a discovered blackmail is a scandal.
+// At most two schemes at once. They run on your dice (prnd), so replays match.
+const SECRET_KINDS = ['plagiarised an early script', 'hides money offshore', 'is having an affair with a co-star', 'is cruel to crews when the cameras stop', 'has a habit everyone covers for', 'took a credit they didn\'t earn', 'paid off a journalist', 'faked a festival selection'];
+function secretOf(p) { if (!p || p.dead || (p.fame || 0) + p.standing < 60) return null; return gH(p.id, 'secret') < .3 ? SECRET_KINDS[Math.floor(gH(p.id, 'sk') * SECRET_KINDS.length)] : null; }
+function knowsSecret(id) { return !!((S.me.dirt || {})[id]); }
+const SCHEME = {
+  dig: { n: 'Dig for dirt', stat: 'cha', risk: .025, need: p => !knowsSecret(p.id), d: 'Ask around, buy drinks, read old contracts. If there\'s something, you\'ll find it.' },
+  poach: { n: 'Poach them', stat: 'cha', risk: .02, need: p => ['actor', 'director', 'writer', 'dp', 'editor', 'composer', 'designer'].includes(p.role), d: 'Make them feel undervalued where they are. Success: they take your next offer at 20% off.' },
+  befriend: { n: 'Befriend them', stat: 'cha', risk: 0, need: p => p.standing >= 45, d: 'Lunches, favours, the right introductions. Success: a powerful friend.' },
+  sabotage: { n: 'Sabotage their film', stat: 'pack', risk: .06, need: p => !!schFilm(p), d: 'Leaks, a rival release date, a whisper to the buyers. Success: their film\'s hook drops.' },
+  blackmail: { n: 'Blackmail them', stat: 'com', risk: .08, need: p => knowsSecret(p.id), d: 'You know what they did. Success: money or a favour. Discovery: a scandal.' }
+};
+function schFilm(p) { for (const i of (p.credits || []).slice(-6)) { const f = S.films[i]; if (f && f.rel === null && f.stage >= 0 && f.stage <= 3 && (f.dir === p.id || (f.cast || [])[0] === p.id || f.prod === p.id)) return f; } return null; }
+function schPower(k) { const s = SCHEME[k]; try { return (checkInfo(s.stat, 10).mod || 0); } catch (e) { return 0; } }
+function schResist(p) { return p.standing / 12 + (has(p, 'Discreet') ? 3 : 0) - (has(p, 'Gossip') ? 2 : 0) + (opinion(p.id) > 30 ? -2 : 0); }
+function schWeekly(k, p) { return clamp(12 + schPower(k) * 2 - schResist(p) * 1.5, 3, 30); }   // progress points a week, roughly
+function schemeAct(a) {
+  const M = S.me, p = P(+a.id), s = SCHEME[a.k]; if (!p || p.dead || p.id === M.id || !s || !s.need(p)) return false;
+  M.schemes = M.schemes || []; if (M.schemes.length >= 2 || M.schemes.some(x => x.id === p.id)) return false;
+  M.schemes.push({ k: a.k, id: p.id, prog: 0, w: S.week }); return true;
+}
+function schemeStop(a) { const M = S.me; M.schemes = (M.schemes || []).filter(x => !(x.id === +a.id && x.k === a.k)); return true; }
+function schemesWeek() {
+  if (!S.me || !(S.me.schemes || []).length) return; const M = S.me, me = ME();
+  for (const x of M.schemes.slice()) {
+    const p = P(x.id), s = SCHEME[x.k]; if (!p || p.dead || !s.need(p) && x.k !== 'dig') { M.schemes = M.schemes.filter(y => y !== x); continue; }
+    x.prog += schWeekly(x.k, p) * (.6 + prnd() * .8);
+    if (s.risk && prnd() < s.risk * (1 + schResist(p) / 10)) { M.schemes = M.schemes.filter(y => y !== x); schCaught(x, p); continue; }
+    if (x.prog >= 100) { M.schemes = M.schemes.filter(y => y !== x); schDone(x, p); }
+  }
+}
+function schLog(x, p, how) { const M = S.me; (M.schLog = M.schLog || []).push({ w: S.week, k: x.k, id: p.id, how }); if (M.schLog.length > 20) M.schLog.shift(); }
+function schCaught(x, p) {
+  const me = ME(), M = S.me; schLog(x, p, 'caught'); addTie(me, p, -25); me.standing = clamp(me.standing - (x.k === 'blackmail' ? 6 : x.k === 'sabotage' ? 4 : 2), 0, 100);
+  if (x.k === 'blackmail') { (M.secrets = M.secrets || []).push({ w: S.week, risk: 8, what: `blackmailing ${p.name}` }); news('People', `${me.name} accused of trying to blackmail ${p.name}.`, { person: me.id }); }
+  inbox('note', `${p.name} finds out`, `Your ${({ dig: 'digging', poach: 'attempt to poach them', befriend: 'charm offensive', sabotage: 'sabotage', blackmail: 'blackmail' })[x.k]} is discovered. ${p.name} knows exactly who was behind it${x.k === 'blackmail' ? ', and so, soon, will everyone' : ''}.`, { person: p.id });
+}
+function schDone(x, p) {
+  const M = S.me, me = ME(); let t = ''; schLog(x, p, x.k === 'dig' && !secretOf(p) ? 'clean' : 'done');
+  if (x.k === 'dig') { const s = secretOf(p); if (s) { (M.dirt = M.dirt || {})[p.id] = s; t = `You find it: ${p.name} ${s}. You could use this.`; } else t = `Weeks of digging, and ${p.name} is clean. Annoyingly clean.`; }
+  if (x.k === 'poach') { (M.poached = M.poached || {})[p.id] = S.week; addTie(me, p, 10); t = `${p.name} is ready to work with you: their next fee from you is 20% lower.`; }
+  if (x.k === 'befriend') { addTie(me, p, 20); meet(p.id, 'A powerful friend', 10); if (typeof trust === 'function') trust(p.id, 10); me.standing = clamp(me.standing + 1, 0, 100); t = `${p.name} is a friend now, the kind whose calls get returned.`; }
+  if (x.k === 'sabotage') { const f = schFilm(p); if (f) { f.hook = clamp((f.hook || 50) - 8, 5, 99); t = `Bad buzz follows ${f.title} everywhere. Nobody can say where it started.`; } else t = 'By the time it\'s ready, there\'s nothing left to sabotage.'; }
+  if (x.k === 'blackmail') { const v = usd(10000 + (p.fame || 0) * 600 + p.standing * 300); M.cash += v; addTie(me, p, -30); delete (M.dirt || {})[p.id]; t = `${p.name} pays ${fmtCash(v)} to keep it quiet, and will never forgive you.`; }
+  inbox('note', `Scheme complete: ${SCHEME[x.k].n.toLowerCase()} (${p.name})`, t, { person: p.id });
+}
+// poached talent comes cheaper
+{ const _lf = leadFee; leadFee = function (id, genre, micro) { const v = _lf(id, genre, micro), w = S.me && (S.me.poached || {})[id]; return w !== undefined && S.week - w < 52 ? v * .8 : v; }; }
+// person pages: the scheme buttons
+{ const _vp = viewPerson; viewPerson = function (id) {
+  const h = _vp(id), p = P(id); if (!S.me || !p || id === S.me.id || p.dead) return h; const M = S.me, run = (M.schemes || []).find(x => x.id === id);
+  const opts = Object.entries(SCHEME).filter(([k, s]) => s.need(p)).map(([k, s]) => `<button class="btn-s" data-scheme="${k}:${id}" title="${esc(s.d)}">${esc(s.n)} · ~${Math.ceil(100 / schWeekly(k, p))} wks${s.risk ? `, ${Math.round(s.risk * (1 + schResist(p) / 10) * 100)}%/wk risk` : ''}</button>`).join(' ');
+  const box = `<section class="panel scheme"><h3>Schemes</h3>${knowsSecret(id) ? `<p class="bad small">You know: ${esc(p.name)} ${esc(M.dirt[id])}.</p>` : ''}${run ? `<p class="small">Running: <b>${esc(SCHEME[run.k].n)}</b>, ${Math.round(run.prog)}% · <button class="btn-s" data-scheme="stop:${run.k}:${id}">Call it off</button></p>` : (M.schemes || []).length >= 2 ? '<p class="small muted">Two schemes already running.</p>' : `<p class="crow">${opts}</p><p class="small muted">Your skill against their standing and discretion; every week there's a chance of being found out.</p>`}</section>`;
+  return h + box; }; }
+function schemeClick(t) { const d = t.dataset.scheme; if (!d) return false; const p = d.split(':'); const ok = p[0] === 'stop' ? doAct({ t: 'scheme', stop: 1, k: p[1], id: +p[2] }) : doAct({ t: 'scheme', k: p[0], id: +p[1] }); if (!ok) inbox('note', 'Not now', 'Two schemes at most, one per person.'); render(true); return true; }
+function schemePanel() {
+  const M = S.me, L = M.schemes || [], G = (M.schLog || []).slice(-4).reverse(); if (!L.length && !Object.keys(M.dirt || {}).length && !G.length) return '';
+  return `<section class="tk-p"><h4>SCHEMES <span class="tk-sub">${L.length}/2 running</span></h4><table class="tk-t"><tbody>${L.map(x => { const p = P(x.id); return `<tr><td>${esc(SCHEME[x.k].n)}</td><td><a href="#" class="lk" data-go="person:${x.id}">${esc(p.name)}</a></td><td class="n">${Math.round(x.prog)}%</td><td class="n tk-mut">+${Math.round(schWeekly(x.k, p))}/wk</td></tr>`; }).join('')}</tbody></table>
+   ${G.length ? `<ul class="plain small">${G.map(g => `<li><span class="${g.how === 'caught' ? 'dn' : 'up'}">${g.how}</span> ${esc(SCHEME[g.k].n.toLowerCase())} · ${esc(P(g.id).name)} <span class="tk-mut">${esc(fmtDate(g.w, true))}</span></li>`).join('')}</ul>` : ''}
+   ${Object.keys(M.dirt || {}).length ? `<p class="tk-foot">You hold: ${Object.entries(M.dirt).map(([id, s]) => `<a href="#" class="lk" data-go="person:${id}">${esc(P(+id).name)}</a>`).join(', ')}</p>` : ''}</section>`;
+}
+{ const _th = terminalHTML; terminalHTML = function () { const h = _th(); const i = h.lastIndexOf('</div></div>'); return i < 0 ? h : h.slice(0, i) + schemePanel() + h.slice(i); }; }
+// </schemes>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -42163,6 +42333,8 @@ function careerClick(t) {
   if (typeof fdClick === 'function' && fdClick(t)) return true;
   if (typeof pkgClick === 'function' && pkgClick(t)) return true;
   if (typeof tellerClick === 'function' && tellerClick(t)) return true;
+  if (typeof scoutClick === 'function' && scoutClick(t)) return true;
+  if (typeof schemeClick === 'function' && schemeClick(t)) return true;
   if (typeof shorts2Click === 'function' && shorts2Click(t)) return true;
   if (typeof actor3Click === 'function' && actor3Click(t)) return true;
   if (typeof placesClick === 'function' && placesClick(t)) return true;
@@ -42294,7 +42466,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tk],[data-fut],[data-rel],[data-lg],[data-fd],[data-pkg],[data-teller],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-tk],[data-fut],[data-rel],[data-lg],[data-fd],[data-pkg],[data-teller],[data-scout],[data-scheme],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -42366,10 +42538,10 @@ function makeFilmForm(c, k, x) {
     <span class="muted">Fees, bond and insurance: ${fmtCash(Math.round(plan.feeT * 1e6))}.${plan.bonded ? ' Bank money means a completion bond: run far over budget and the guarantor takes the film.' : ''}</span></div>`;
   const dirs = dirOptions(x.genre), leads = castOptions(x.genre), M = S.me;
   const tag = p => M.known[p.id] ? (M.known[p.id].tags.includes('Your regular') ? ' ♥' : ' ★') : '';
-  const crewSel = (f, role, craft, lab) => `<label>${lab} ${sel('mk-' + f + '-' + key, [['', 'Their choice']].concat(crewOptions(role, craft, x.genre).map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, craft, x.genre))}`])), F[f] || '')}</label>`;
+  const crewSel = (f, role, craft, lab) => `<label>${lab} ${sel('mk-' + f + '-' + key, [['', 'Their choice']].concat(crewOptions(role, craft, x.genre).map(p => [String(p.id), `${p.name}${tag(p)} · ${(typeof fogNum === 'function' ? fogNum(p, gcraft(p, craft, x.genre), craft) : Math.round(gcraft(p, craft, x.genre)))}`])), F[f] || '')}</label>`;
   return `<div class="mkfilm"><b>${esc(x.title)}</b> <span class="chip" title="How audiences in your market feel about ${esc(x.genre.toLowerCase())} right now">${HEAT_LABEL[heatOf(HUBS[S.me.hub].m, x.genre)]}</span> <span class="muted">${esc(x.genre)} · ${k === 'script' ? 'your script' : 'by ' + esc(P(x.writer).name)}</span>
    <div class="mkrow"><label>Size ${sel('mk-micro-' + key, [['1', 'Micro-budget'], ['0', 'Full budget']], String(F.micro))}</label>
-    <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${Math.round(gcraft(p, 'dir', x.genre))}`])), F.dir)}</label>
+    <label>Director ${sel('mk-dir-' + key, [['', 'Let the producer choose'], ['me', 'You direct']].concat(dirs.map(p => [String(p.id), `${p.name}${tag(p)} · ${(typeof fogNum === 'function' ? fogNum(p, gcraft(p, 'dir', x.genre), 'dir') : Math.round(gcraft(p, 'dir', x.genre)))}`])), F.dir)}</label>
     <label>Lead ${sel('mk-lead-' + key, [['', 'Let the director cast']].concat(leads.map(p => [String(p.id), `${p.name}${tag(p)} · fame ${Math.round(p.fame || 0)} · +${fmtCash(Math.round(leadFee(p.id, x.genre, micro) * 1e6))}`])), F.lead)}</label>${crewSel('dp', 'dp', 'cam', 'Cinematographer')}${crewSel('ed', 'editor', 'edt', 'Editor')}${crewSel('mus', 'composer', 'mus', 'Composer')}${crewSel('pd', 'designer', 'des', 'Production designer')}</div><p class="muted small">★ someone you know · ♥ one of your regulars · the number is their craft for this genre.</p>
    ${fin}<p class="small">Budget about <b>${fmtCash(Math.round(total * 1e6))}</b> · the company's part <b>${fmtCash(Math.round(plan.equity * 1e6))}</b> · it has ${fmtCash(Math.round(cash * 1e6))}${short ? (canInv ? ` · <label><input type="checkbox" data-mkinv="${key}" ${+F.inv ? 'checked' : ''}> Bring in investors for the rest</label> ${+F.inv ? oddsBar('fin', investDC(x)) : ''}` : (wait ? ' · <span class="muted">the investors want a few weeks before you ask again</span>' : ' · <span class="bad">put in at least a quarter of the cost first</span>')) : ''}</p>
    <button class="btn-s" data-greenlight="${key}" ${short && !(canInv && +F.inv) ? 'disabled' : ''}>Greenlight it</button>${(UI.mkErr || {})[key] ? `<p class="small muted">${esc(UI.mkErr[key])}</p>` : ''}</div>`;
