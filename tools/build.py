@@ -214,6 +214,9 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('legends', '// ================= Apple Box — World Core UI ================='),
                      ('filmdesk', '// ================= Apple Box — World Core UI ================='),
                      ('distrib', '// ================= Apple Box — World Core UI ================='),
+                     ('packaging', '// ================= Apple Box — World Core UI ================='),
+                     ('teller', '// ================= Apple Box — World Core UI ================='),
+                     ('slate', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

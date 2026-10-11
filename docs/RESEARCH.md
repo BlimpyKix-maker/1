@@ -14,6 +14,7 @@ Collected in round 9 to find systems that add strategic depth. What has shipped 
 - **#24 Legends:** almanac, records, lineage and search (src/legends.js).
 - **#10 Test screenings and recuts, #12 FYC awards campaigns, #2 pre-sales at the markets:** the Film Desk (src/filmdesk.js).
 - **#9 P&A planner, #11 windows strategy, #21 streaming views and licensing:** the Film Desk's Release plan and Streaming tabs (src/distrib.js).
+- **#14 Agencies and packaging, #23 storyteller, #6 slate deals and negative pickups:** src/packaging.js, src/teller.js, src/slate.js.
 - **#13 Guild cycle and strikes:** contracts per market, talks with visible odds, strikes that stall productions, pay indexes and interim agreements (src/guilds.js).
 
 Everything else below is a candidate for future rounds.

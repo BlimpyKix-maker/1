@@ -771,6 +771,9 @@ function closeWeek(a) {
   if (typeof stressWeek === 'function') stressWeek();
   if (typeof fdWeek === 'function') fdWeek();
   if (typeof distWeek === 'function') distWeek();
+  if (typeof pkgWeek === 'function') pkgWeek();
+  if (typeof tellerWeek === 'function') tellerWeek();
+  if (typeof slWeek === 'function') slWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1099,6 +1102,9 @@ function resolvePick(it, k) {
   if (typeof relPick === 'function' && relPick(it, k)) return true;
   if (typeof copePick === 'function' && copePick(it, k)) return true;
   if (typeof licPick === 'function' && licPick(it, k)) return true;
+  if (typeof pkgPick === 'function' && pkgPick(it, k)) return true;
+  if (typeof tellerPick === 'function' && tellerPick(it, k)) return true;
+  if (typeof slPick === 'function' && slPick(it, k)) return true;
   if (typeof ailPick === 'function' && ailPick(it, k)) return true;
   if (typeof actor3Pick === 'function' && actor3Pick(it, k)) return true;
   if (typeof scPick === 'function' && scPick(it, k)) return true;
@@ -1214,6 +1220,7 @@ function applyAct(a) {
     case 'mkt': return typeof fdMkt === 'function' && fdMkt(a);
     case 'camp2': return typeof fdCamp === 'function' && fdCamp(a);
     case 'dist': return typeof distAct === 'function' && distAct(a);
+    case 'teller': return typeof tellerAct === 'function' && tellerAct(a);
     case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
     case 'place2': return typeof placeAct === 'function' && placeAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
