@@ -201,3 +201,13 @@ The general design lesson from Hollywood Animal's criticism: for every outcome, 
 10. Gifts, birthdays and drift — Stardew Valley
 
 Then: playing age (The Movies), convictions (Disco Elysium's Thought Cabinet), post-mortems and sequel fatigue (Game Dev Tycoon), inner voices (Disco Elysium), the advisor ring (King of Dragon Pass), family bills (Papers, Please), dependency (The Movies), collaborator chemistry, life verdicts, running a cinema (Big Ambitions), confidants (Persona 5), the scandal room, mood-shaped learning, a Reigns-style desk, fame quirks, and decaying neglect (Cultist Simulator).
+
+## Round 18: checking Round 17's figures (web search, summaries checked against two or more sources where possible)
+
+- **Champion titles.** AKC: 15 points with two majors (3+ points) under different judges, and points from at least three judges (AKC "counting points"; Bulldog Club of America). UK: three Challenge Certificates from three different judges, the rule since 1904 (Kennel Club timeline). *Fixed in the game.*
+- **Westminster.** The top five of each breed (ranked by dogs defeated, October–September) are invited, plus national specialty winners; entrants must be champions. Before about 2000 the places were drawn from mailed entries (Westminster FAQ; Canine Chronicle; Philadelphia Inquirer 2015; Brownielocks for the date). First show 8 May 1877. *Fixed.*
+- **Pet insurance.** Claes Virgin's 1890 Swedish policies covered horses and livestock; the first dog policy was 1924. UK 1947; US 1982 (VPI; the "Lassie" story comes from insurers' blogs). *Fixed (Sweden 1924).*
+- **Confirmed:** Canine Good Citizen 1989, 10 items. The Seeing Eye incorporated 29 Jan 1929 in Nashville. Therapy Dogs International 1976 (Elaine Smith). PATSY from 1951 (ended 1986 per Wikipedia; the film category may have ended in 1974). Palm Dog from 2001. Golden Collar first held 13 Feb 2012 (its last year is unconfirmed). UK six-month quarantine ended 28 Feb 2000 (SI 1999/3443). Crufts 1891 at the Royal Agricultural Hall. Alam Ara 14 Mar 1931. The Jazz Singer 1927. Blacklist 1947, broken in 1960 (Exodus, Spartacus).
+- **Animal actors.** About $500 a day (Washington Post 2023); handlers $40–70 an hour under Teamsters contracts; no residuals. Matches the game's $450.
+- **Cinema rentals.** A DOJ example: 70% for the first two weeks, then 60%, 50%, 40%, with a 35% holdover floor; a 2026 vendor summary gives 70–75% / 55–60% / 40–50%. Guarantees are paid upfront. *Used: 70/60/50.* Repertory terms weren't found; the game uses 35% or a minimum.
+- **Concessions.** Cinemark 2024: $5.65 a patron, average ticket $7.30–7.62 (worldwide). The game uses about $5.50, counted after the cost of goods.

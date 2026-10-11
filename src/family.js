@@ -11,7 +11,7 @@ function famKids() { return (S.me.kids = S.me.kids || []); }
 function famSpouse() { const id = S.me.spouse; return id !== undefined && id !== null && P(id) && !P(id).dead && partnerOf() === id ? id : null; }
 function kidAge(k) { return (S.week - k.born) / 52; }
 function famSurname() { const n = ME().name.trim().split(/\s+/), hub = S.me.hub; return typeof EAST !== 'undefined' && EAST[HUBS[hub].lang] ? n[0] : n[n.length - 1]; }
-function famName(g) { const N = (typeof NAMES !== 'undefined' && (NAMES[HUBS[S.me.hub].lang] || NAMES.en)) || { M: ['Sam'], F: ['Alex'] }, L = g === 'X' ? N.M.concat(N.F) : N[g] || N.M, f = L[Math.floor(prnd() * L.length)], s = famSurname();
+function famName(g) { const N = (typeof NAMES !== 'undefined' && (NAMES[HUBS[S.me.hub].lang] || NAMES.en)) || { M: ['Sam'], F: ['Alex'] }, L0 = g === 'X' ? N.M.concat(N.F) : N[g] || N.M, taken = new Set([ME().name].concat(famKids().map(k => k.name)).flatMap(n => n.split(/\s+/))), L = L0.filter(x => !taken.has(x)).length ? L0.filter(x => !taken.has(x)) : L0, f = L[Math.floor(prnd() * L.length)], s = famSurname();   // not your own name, nor a brother's or sister's
   return typeof EAST !== 'undefined' && EAST[HUBS[S.me.hub].lang] ? `${s} ${f}` : `${f} ${s}`; }
 function famBirth(adopt) {
   const M = S.me, g = ['F', 'M', 'X'][Math.floor(prnd() * 2.1)], k = { name: famName(g), g, born: S.week - (adopt ? Math.round(52 * (1 + prnd() * 4)) : 0), other: famSpouse(), adopted: adopt ? 1 : 0 };
@@ -73,6 +73,7 @@ function heirAct(a) {
   startCareer(c); if (typeof legacyGreet === 'function') legacyGreet(); k.played = 1;
   const M = S.me, me = ME(); M.cash += Math.round(share); M.heir = { of: L.id, w: S.week }; me.fame = Math.max(me.fame || 0, F.fame * .15); me.standing = clamp(me.standing + F.standing * .1, 0, 100);
   const co = F.company !== undefined && S.companies[F.company] && S.companies[F.company].closed === null ? S.companies[F.company] : null; if (co) { M.company = co.id; co.owner = me.id; }
+  for (const x of F.kids) if (x !== k && x.pid !== undefined && P(x.pid) && !P(x.pid).dead) { meet(x.pid, 'Your sibling', 30); addTie(me, P(x.pid), 40); }   // brothers and sisters already in the business
   diary(`You inherit ${fmtCash(Math.round(share))}${co ? ` and ${co.name}` : ''}, a famous surname, and a phone full of people who knew your parent.`); milestone(`Took over the family name${co ? ` and ${co.name}` : ''}`, 'life');
   return true;
 }
@@ -86,7 +87,9 @@ LATE_BY.fam_nepo = LATE[LATE.length - 1];
 // the epilogue: play on as family
 { const _ep = typeof epilogueHTML === 'function' ? epilogueHTML : null; if (_ep) epilogueHTML = function () {
   const h = _ep(), H = famHeirs(); if (!H.length) return h;
-  return h.replace('<button class="btn primary" data-nextgen="1">', `${H.map(([k, i]) => `<button class="btn primary" data-heir="${i}">Play on as ${esc(k.name)} (${Math.round(kidAge(k))})</button> `).join('')}<button class="btn primary" data-nextgen="1">`);
+  const M = S.me, n = Math.max(1, famKids().filter(x => !x.pid).length), est = famEstate(), co = M.company !== undefined && S.companies[M.company] && S.companies[M.company].closed === null ? S.companies[M.company] : null;
+  const what = `<p class="small">Whoever plays on inherits ${fmtCash(Math.round(est / n))} (your estate of ${fmtCash(Math.round(est))}${S.year < 1916 ? '' : ', after 40% tax above the first ' + fmtCash(usd(1000000))}, split ${n} way${n > 1 ? 's' : ''})${co ? `, ${esc(co.name)}` : ''}${M.cin ? `, ${esc(M.cin.name)}` : ''}, and a surname that opens doors for about three years.</p>`;
+  return h.replace('<button class="btn primary" data-nextgen="1">', `${what}${H.map(([k, i]) => `<button class="btn primary" data-heir="${i}">Play on as ${esc(k.name)} (${Math.round(kidAge(k))})</button> `).join('')}<button class="btn primary" data-nextgen="1">`);
 }; }
 function heirClick(t) { const d = t.dataset && t.dataset.heir; if (d === undefined) return false; doAct({ t: 'nextgen' }); doAct({ t: 'heir', i: +d, salt: Math.floor(Math.random() * 1e9) }); if (S.me && typeof partyAuto === 'function' && !S.me.party) {} UI.dtab = 'today'; UI.tab = 'you'; UI.stack = []; render(); return true; }
 // family on the Life tab

@@ -5,8 +5,10 @@
 //  · Training: puppy class, the Good Citizen test (from 1989; an obedience certificate before), trick titles and a
 //    screen-ready course. A private trainer halves the time.
 //  · Shows, for papered dogs and pedigree cats: weekend shows win points by beating the field (bigger fields, more
-//    points; 3+ is a "major"). Fifteen points with two majors makes a champion; champions campaign for season points,
-//    October to September, and the top of the season is invited to the big one (Westminster in February from 1877,
+//    points; 3+ is a "major"). Fifteen points with two majors under different judges, from three judges in all, makes
+//    an American champion; in Britain and Europe it's three Challenge Certificates (a big-field win) from three judges.
+//    Champions campaign for season points, October to September, and the top five of the season are invited to
+//    Westminster (from 2000; before that champions mailed an entry and places were drawn) in February (from 1877),
 //    Crufts in March from 1891, a national show elsewhere): breed, group, Best in Show. No prize money; the people
 //    in the ringside seats are the prize.
 //  · Working lives: a therapy team (from 1976), raising a guide-dog puppy (from 1929), two years of search-and-rescue
@@ -14,7 +16,7 @@
 //  · The screen: a Screen-Ready rating, an animal agency (15%), bookings from print to features, the stand-in who
 //    gets the lead when the star dog walks off, the animal awards (the PATSY 1951–86, the Palm Dog from 2001, the
 //    Golden Collar 2012–18), and a breed boom when a film with your dog in it is a hit.
-//  · Insurance (Sweden 1890, the UK 1947, the US 1982) pays 80% of vet bills. Flat-faced breeds can need breathing
+//  · Insurance (dogs in Sweden from 1924, the UK 1947, the US 1982) pays 80% of vet bills. Flat-faced breeds can need breathing
 //    surgery, big dogs their hips.
 //  · From 2010 a pet can have its own following, and brands pay for posts. Too many shoots and it gets fed up.
 //  · Moving abroad with animals means quarantine where the rules say so (the UK until 2000, Australia and New Zealand).
@@ -52,6 +54,10 @@ function petShowKind(p) { const x = PET_BY[p.kind]; return x.body === 'dog' && p
 function petShowScore(p, pro) { const t = petTemp(p), cond = (p.health + p.mood) / 2, tr = Math.min(100, (p.titles || []).length * 20); return t.looks * .55 + cond * .15 + tr * .1 + (pro ? 80 : 30 + petBond(p) * 6) * .2; }
 function petField(p, w = S.week) { return 3 + Math.floor(hashRand((p.kind.length * 977 + w * 31) >>> 0)() * 14); }
 function petWinP(p, pro) { const s = petShowScore(p, pro), N = petField(p); return clamp(1 / (1 + Math.exp(-(s - 56) / 7)) * 3 / (2 + N / 4), .02, .85); }
+function petCC() { return bigShow().n === 'Crufts'; }   // British-style titles: Challenge Certificates, not points
+function petJudge(w = S.week) { return 1 + Math.floor(hashRand((w * 7907 + HUB_IDS.indexOf(S.me.hub) * 13) >>> 0)() * 18); }   // who's judging this weekend
+function petChampOK(S2) { const J = new Set(S2.jd || []), MJ = new Set(S2.mj || []); return petCC() ? MJ.size >= 3 : S2.pts >= 15 && MJ.size >= 2 && J.size >= 3; }
+function petChampLine(S2) { const J = new Set(S2.jd || []).size, MJ = new Set(S2.mj || []).size; return petCC() ? `${MJ}/3 Challenge Certificates (each from a different judge)` : `${S2.pts}/15 points, ${MJ}/2 majors from different judges, ${J}/3 judges`; }
 function petPts(N) { return N >= 15 ? 5 : N >= 10 ? 4 : N >= 7 ? 3 : N >= 4 ? 2 : 1; }
 function petSeasonY(w = S.week) { return woy(w) >= 39 ? yearOf(w) + 1 : yearOf(w); }   // the show year ends on 30 September
 function bigShow() { const m = HUBS[S.me.hub].m; return m === 'US' || m === 'CA' ? { n: 'Westminster', where: 'New York', wk: 6, from: 1877 } : ['UK', 'FR', 'IT', 'DE', 'ES', 'SE', 'DK', 'PL', 'CS', 'HU', 'FI'].includes(m) ? { n: 'Crufts', where: 'London', wk: 10, from: 1891 } : { n: 'the National Championship Show', where: HUBS[S.me.hub].name, wk: 15, from: 1900 }; }
@@ -61,7 +67,7 @@ function petRating(p) { const t = petTemp(p), T = p.titles || []; return Math.ro
 function petOnSetP(p) { const t = petTemp(p); return clamp(.45 + t.nerve / 200 + petBond(p) * .05 + (p.titles || []).length * .03, .2, .95); }
 function petDayRate(p) { const b = PET_BY[p.kind].body; return usd(b === 'dog' ? 450 : b === 'cat' ? 350 : 250) * (1 + (p.fame || 0) / 20); }
 // ---- money and health ----
-function petInsFrom() { const m = HUBS[S.me.hub].m; return m === 'SE' ? 1890 : m === 'UK' ? 1947 : 1982; }
+function petInsFrom() { const m = HUBS[S.me.hub].m; return m === 'SE' ? 1924 : m === 'UK' ? 1947 : 1982; }
 function petInsCost() { return petsOf().reduce((t, p) => t + usd({ dog: 14, cat: 7 }[PET_BY[p.kind].body] || 4), 0); }
 function petBill(c) { const M = S.me; return M.petIns ? Math.round(c * .2) : c; }
 function petQuarantine(h) { return h === 'london' ? (S.year < 2000 ? 26 : 0) : ['sydney', 'wellington'].includes(h) ? (S.year < 1990 ? 26 : 4) : 0; }
@@ -81,8 +87,9 @@ function pet2Act(a) {
     const N = petField(p), pw = petWinP(p, pro); M.cash -= c; M.energy = clamp(M.energy - 6, 0, 100); M.stress = clamp(M.stress - 2, 0, 100); p.showW = S.week; const S2 = p.show = p.show || { pts: 0, majors: 0, n: 0, wins: 0, season: {} }; S2.n++;
     const won = prnd() < pw; let t;
     if (!won) t = `${p.name} is shown against ${N - 1} others and doesn't place.`;
-    else if (!S2.ch) { const pts = petPts(N); S2.wins++; S2.pts += pts; if (pts >= 3) S2.majors++; t = `${p.name} wins the breed over ${N - 1} others: ${pts} point${pts > 1 ? 's' : ''}${pts >= 3 ? ', a major' : ''}.`;
-      if (S2.pts >= 15 && S2.majors >= 2) { S2.ch = S.week; (p.titles = p.titles || []).push('ch'); t += ` That makes ${p.name} a champion.`; milestone(`${p.name} became a show champion`, 'life'); me.standing = clamp(me.standing + .5, 0, 100); } }
+    else if (!S2.ch) { const pts = petPts(N); S2.wins++; S2.pts += pts; if (pts >= 3) S2.majors++; const jd = petJudge(); (S2.jd = S2.jd || []).push(jd); if (pts >= 3) (S2.mj = S2.mj || []).push(jd);
+      t = petCC() ? `${p.name} wins the breed over ${N - 1} others under judge no. ${jd}${pts >= 3 ? `: a Challenge Certificate${(S2.mj || []).filter(x => x === jd).length > 1 ? ', but from a judge who has given one before, so it doesn\'t count twice' : ''}` : ', but the field is too small for a Challenge Certificate'}.` : `${p.name} wins the breed over ${N - 1} others under judge no. ${jd}: ${pts} point${pts > 1 ? 's' : ''}${pts >= 3 ? ', a major' : ''}.`;
+      if (petChampOK(S2)) { S2.ch = S.week; (p.titles = p.titles || []).push('ch'); t += ` That makes ${p.name} a champion.`; milestone(`${p.name} became a show champion`, 'life'); me.standing = clamp(me.standing + .5, 0, 100); } }
     else { S2.wins++; const y = petSeasonY(); let sp = N - 1; const gp = clamp(.08 + (petShowScore(p, pro) - 65) / 120, .02, .4), g = prnd() < gp; if (g) sp += 40; S2.season[y] = (S2.season[y] || 0) + sp; t = `${p.name} wins the breed${g ? ' and then the group' : ''}: ${sp} season points.`; }
     (p.log = p.log || []).push({ w: S.week, t }); diary(t); M.lastPetShow = { w: S.week, t, ok: won, p: pw }; return true; }
   if (a.k === 'therapy') { if (S.year < 1976 || x.body !== 'dog' || petAge(p) < 1 || S.week - p.w < 26 || petBond(p) < 2) return false; const W = p.work = p.work || {};
@@ -139,9 +146,9 @@ function pet2Week() {
   }
   // the big show: invitations go to the top of the season
   const B = bigShow();
-  if (S.year >= B.from && woy() === B.wk - 2) for (const p of L.filter(q => q.show && q.show.ch && petShowKind(q) === 'dog')) { const y = petSeasonY(S.week - 20), pts = (p.show.season || {})[y] || 0; if (pts >= petInviteLine(p) && p.show.invited !== S.year) { p.show.invited = S.year;
+  if (S.year >= B.from && woy() === B.wk - 2) for (const p of L.filter(q => q.show && q.show.ch && petShowKind(q) === 'dog')) { const y = petSeasonY(S.week - 20), pts = (p.show.season || {})[y] || 0; const drawn = B.n === 'Westminster' && S.year < 2000; if ((drawn ? hashRand((p.id * 977 + S.year) >>> 0)() < .55 : pts >= petInviteLine(p)) && p.show.invited !== S.year) { p.show.invited = S.year;
     const pro = usd(750), s = petShowScore(p, true), pB = clamp(1 / (1 + Math.exp(-(s - 62) / 6)) * .55, .05, .8), pG = clamp(.12 + (s - 70) / 100, .03, .45), pS = clamp(.14 + (s - 75) / 100, .02, .4);
-    inbox('pet2ev', `${p.name} is invited to ${B.n}`, `${p.name} finished the season with ${pts} points, inside the line. ${B.n} is in two weeks in ${B.where}. A professional handler: ${fmtCash(pro)}. The odds, honestly: best of breed ${Math.round(pB * 100)}%, then the group ${Math.round(pG * 100)}%, then Best in Show ${Math.round(pS * 100)}%.`, { pet: p.id, big: 1, fee: pro, pB, pG, pS, choices: [{ k: 'big_go', label: `Go (${fmtCash(pro)})` }, { k: 'big_no', label: 'Skip it this year' }] }); } }
+    inbox('pet2ev', `${p.name} is invited to ${B.n}`, `${drawn ? `Your mailed entry for ${p.name} came up in the draw for places.` : `${p.name} finished the season with ${pts} points, inside the top five of the breed.`} ${B.n} is in two weeks in ${B.where}. A professional handler: ${fmtCash(pro)}. The odds, honestly: best of breed ${Math.round(pB * 100)}%, then the group ${Math.round(pG * 100)}%, then Best in Show ${Math.round(pS * 100)}%.`, { pet: p.id, big: 1, fee: pro, pB, pG, pS, choices: [{ k: 'big_go', label: `Go (${fmtCash(pro)})` }, { k: 'big_no', label: 'Skip it this year' }] }); } }
   // the animal awards
   for (const A of PET_AWARDS) if (S.year >= A.from && S.year <= A.to && woy() === A.wk) for (const p of L.filter(q => (q.credits || []).some(f => S.films[f] && S.films[f].ry === S.year - 1 && (S.films[f].q || 0) >= 60))) if (prnd() < (A.n === 'the Palm Dog' ? .15 : .25)) {
     p.fame = (p.fame || 0) + 3; me.fame = (me.fame || 0) + .5; (p.awards = p.awards || []).push(`${A.n} ${S.year}`); news('Award', `${p.name} wins ${A.n}.`); diary(`${p.name} wins ${A.n}. The acceptance speech is a bark.`); milestone(`${p.name} won ${A.n}`, 'awards'); }
@@ -202,7 +209,7 @@ function pet2Card(p) {
   const stats = TEMP_KEYS.map(([k, l]) => stat(l, petKnown(p, k) ? t[k] : null)).join('') + stat('Bond', Math.min(100, (p.bondP || 0) / 56 * 100), BOND_NAME[b]);
   const row = (l, body) => body ? `<div class="pt-row"><span>${l}</span><div>${body}</div></div>` : '';
   const trains = Object.keys(PET_TRAIN).filter(k => petTrainOK(p, k) && !(PET_TRAIN[k].from && S.year < PET_TRAIN[k].from && !PET_TRAIN[k].alt)).map(k => { const P0 = PET_TRAIN[k], c = usd(P0.fee) * P0.wk; return `${btn('train', `${petTrainName(k)} · ${P0.wk} wk · ${fmtCash(c)} · ${Math.round(petPass(p, k) * 100)}% pass`, M.cash < c, ':' + k)}${btn('train', `with a trainer · ${Math.ceil(P0.wk / 2)} wk · ${Math.round(petPass(p, k, true) * 100)}%`, M.cash < c + usd(150) * Math.ceil(P0.wk / 2), ':' + k + ':pro')}`; }).join('');
-  const showB = sk ? `<p class="pt-n">${S2 ? `${S2.ch ? `Champion · season ${(S2.season || {})[petSeasonY()] || 0} pts (invite line about ${petInviteLine(p)})` : `${S2.pts}/15 points, ${S2.majors}/2 majors`} · ${S2.wins} wins in ${S2.n}` : 'Never shown.'}${p.showW === S.week ? ' · shown this week' : ''}</p>${btn('show', `Weekend show, ${petField(p)} entered · ${fmtCash(usd(40))} · ${Math.round(petWinP(p) * 100)}% to win`, p.showW === S.week || age < .5 || M.energy < 6)}${btn('show', `with a handler · +${fmtCash(usd(125))} · ${Math.round(petWinP(p, true) * 100)}%`, p.showW === S.week || age < .5 || M.energy < 6, ':pro')}` : '';
+  const showB = sk ? `<p class="pt-n">${S2 ? `${S2.ch ? `Champion · season ${(S2.season || {})[petSeasonY()] || 0} pts (${bigShow().n === 'Westminster' && S.year < 2000 ? 'entries are drawn' : `top-five line about ${petInviteLine(p)}`})` : petChampLine(S2)} · ${S2.wins} wins in ${S2.n}` : 'Never shown.'}${p.showW === S.week ? ' · shown this week' : ''}</p>${btn('show', `Weekend show, ${petField(p)} entered · ${fmtCash(usd(40))} · ${Math.round(petWinP(p) * 100)}% to win`, p.showW === S.week || age < .5 || M.energy < 6)}${btn('show', `with a handler · +${fmtCash(usd(125))} · ${Math.round(petWinP(p, true) * 100)}%`, p.showW === S.week || age < .5 || M.energy < 6, ':pro')}` : '';
   const work = X.body === 'dog' && p.kind !== 'guidepup' ? `${W.therapy === 'cert' ? btn('therapy', 'Therapy visits this morning', W.visitW && S.week - W.visitW < 4) : S.year >= 1976 ? btn('therapy', `Therapy-team evaluation · ${Math.round(petTherapyP(p) * 100)}%`, age < 1 || S.week - p.w < 26 || b < 2 || (W.therapyW && S.week - W.therapyW < 8)) + (age < 1 || S.week - p.w < 26 || b < 2 ? '<span class="pt-n">needs a year old, six months with you, an attached bond</span>' : '') : ''}${S.year >= 1970 && !W.sar ? btn('sar', 'Search-and-rescue training (2 years)', age < 1 || t.drive < 55 || t.nerve < 55 || !petKnown(p, 'drive')) : ''}${age >= 1.5 && age <= 3 && !X.small && !PET_BRACHY.has(p.kind) && W.police !== 'no' ? btn('police', 'Offer to the police K9 unit', false) : ''}` : '';
   const screen = ['dog', 'cat', 'bird'].includes(X.body) ? `<p class="pt-n">Screen-Ready ${petRating(p)}/100${(p.credits || []).length ? ` · ${p.credits.length} credit${p.credits.length > 1 ? 's' : ''}` : ''}${p.fame ? ` · fame ${p.fame.toFixed(1)}` : ''}${(p.awards || []).length ? ` · 🏆 ${p.awards.join(', ')}` : ''}${p.agency ? ' · with an animal agency' : petRating(p) < 45 ? ' · agencies want 45+: train for it' : ''}</p>${p.agency ? '' : btn('agency', 'Sign with an animal agency (15%)', petRating(p) < 45)}` : '';
   const social = S.year >= 2010 && ['dog', 'cat', 'bird', 'small', 'reptile'].includes(X.body) ? `<p class="pt-n">@${esc(p.name.toLowerCase().replace(/[^a-z0-9]/g, ''))}${X.k}: ${Math.round(p.follow || 0).toLocaleString()} followers${(p.shots || []).filter(w => S.week - w < 4).length >= 2 ? ' · one more shoot this month and they\'ll be fed up' : ''}</p>${btn('shoot', 'Photo shoot', p.shootW === S.week || M.energy < 3)}` : '';
