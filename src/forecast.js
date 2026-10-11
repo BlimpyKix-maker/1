@@ -6,10 +6,12 @@
 // inputs and the gross the film needs to break even, and the desk keeps score: its median miss on last year's
 // releases in your market, so you know how far to trust it. A Film Desk tab; works on your films, your unmade
 // scripts, and the industry's biggest upcoming releases.
+function fcPool(m, genre) { if (FC_P.w !== S.week) { FC_P.w = S.week; FC_P.c = {}; } const k = m + '|' + genre; return FC_P.c[k] || (FC_P.c[k] = S.films.filter(x => x.rel !== null && x.total > 0 && x.cost > 0 && x.m === m && x.genre === genre && S.year - yearOf(x.rel) <= 8)); }
+const FC_P = { w: -1, c: {} };
 function fcComps(o) {
-  const lo = o.budget * .5, hi = o.budget * 1.5, y = S.year;
-  let L = S.films.filter(x => x.rel !== null && x.total > 0 && x.cost > 0 && x.m === o.m && x.genre === o.genre && Math.abs((x.tier || 3) - o.tier) <= 1 && x.budget >= lo && x.budget <= hi && y - yearOf(x.rel) <= 5 && x.id !== o.id);
-  if (L.length < 4) L = S.films.filter(x => x.rel !== null && x.total > 0 && x.cost > 0 && x.m === o.m && x.genre === o.genre && y - yearOf(x.rel) <= 8 && x.id !== o.id);
+  const lo = o.budget * .5, hi = o.budget * 1.5, y = S.year, pool = fcPool(o.m, o.genre);
+  let L = pool.filter(x => Math.abs((x.tier || 3) - o.tier) <= 1 && x.budget >= lo && x.budget <= hi && y - yearOf(x.rel) <= 5 && x.id !== o.id);
+  if (L.length < 4) L = pool.filter(x => x.id !== o.id);
   const sim = x => Math.abs(Math.log(x.budget / o.budget)) + (x.tier !== o.tier ? .5 : 0) + (y - yearOf(x.rel)) * .08;
   return L.sort((a, b) => sim(a) - sim(b)).slice(0, 8);
 }
@@ -18,6 +20,9 @@ function fcRun(o) {
   const C = fcComps(o), mult = C.map(x => x.total / x.cost), med = fcQ(mult, .5) || 1.5, p10 = fcQ(mult, .1) || med * .4, p90 = fcQ(mult, .9) || med * 2;
   const base = o.budget * med, adj = [];
   let k = 1;
+  // comps reach back five years, and a market can run hot or cold since: scale by how this year's films are doing
+  { const asOf = o.asOf ?? S.week, R = fcRecent(o.m, asOf).filter(x => Math.abs(x.t - o.tier) <= 1 && x.id !== o.id).map(x => x.x);
+    if (R.length >= 5 && C.length) { const tr = clamp(fcQ(R, .5) / med, .5, 2.5); k *= tr; adj.push(['Market now', tr]); } }
   if (o.f && o.f.rel === null && o.f.stage === 3 && o.f.tier <= 2 && typeof futTrack === 'function') { const tr = futTrack(o.f), w = .6; k *= Math.pow(tr / base, w); adj.push(['Tracking', Math.pow(tr / base, w)]); }
   else if (o.f && o.f.stage === 3 && typeof relMul === 'function') { const r = relMul(o.f, o.f.stageEnd); k *= Math.pow(r, .62); adj.push(['Release date', Math.pow(r, .62)]); }
   if (o.f && o.f.dplan && typeof dMul === 'function') { const d = Math.pow(dMul(o.f), .62); k *= d; adj.push(['Your P&A and window', d]); }
@@ -25,11 +30,14 @@ function fcRun(o) {
   const pa = o.budget * [0, .55, .4, .2][o.tier || 3] * (o.f && o.f.paMul || 1), cost = (o.f ? o.f.cost : o.budget) || o.budget, be = (cost + pa) / (.62 * .5 + .38 * .4);
   return { C, mult, med, lo: o.budget * p10 * k, mid: base * k, hi: o.budget * p90 * k, adj, be, pa, cost };
 }
+// the last twelve months of releases in a market, as gross ÷ cost multiples (cached by week)
+function fcRecent(m, asOf) { const key = m + ':' + asOf; if (FC_R.w !== S.week) { FC_R.w = S.week; FC_R.c = {}; } return FC_R.c[key] || (FC_R.c[key] = S.films.filter(x => x.rel !== null && x.m === m && x.total > 0 && x.cost > 0 && x.rel < asOf && x.rel >= asOf - 52).map(x => ({ id: x.id, t: x.tier || 3, x: x.total / x.cost }))); }
+const FC_R = { w: -1, c: {} };
 // how good is the desk? last year's releases in your market, forecast from the comps available before each opened
 function fcScore() {
   const C = FC_C.w === S.week ? FC_C : (FC_C.w = S.week, FC_C.v = null, FC_C); if (C.v) return C.v;
   const m = HUBS[S.me.hub].m, L = S.films.filter(f => f.rel !== null && f.m === m && f.total > 0 && f.cost > 0 && f.rel > S.week - 52 && (f.tier || 3) <= 3).slice(-40);
-  const err = L.map(f => { const R = fcRun({ id: f.id, m: f.m, genre: f.genre, tier: f.tier || 3, budget: f.budget }); return Math.abs(Math.log(Math.max(.01, R.mid) / f.total)); });
+  const err = L.map(f => { const R = fcRun({ id: f.id, m: f.m, genre: f.genre, tier: f.tier || 3, budget: f.budget, asOf: f.rel }); return Math.abs(Math.log(Math.max(.01, R.mid) / f.total)); });
   return (C.v = { n: err.length, med: err.length ? Math.exp(fcQ(err, .5)) - 1 : null, hit: err.length ? err.filter(e => e < Math.log(1.5)).length / err.length : null });
 }
 const FC_C = { w: -1, v: null };

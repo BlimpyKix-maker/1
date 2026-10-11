@@ -221,6 +221,13 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('talent', '// ================= Apple Box — World Core UI ================='),
                      ('schemes', '// ================= Apple Box — World Core UI ================='),
                      ('forecast', '// ================= Apple Box — World Core UI ================='),
+                     ('worldland', '// ================= Apple Box — World Core UI ================='),
+                     ('places2', '// ================= Apple Box — World Core UI ================='),
+                     ('home2', '// ================= Apple Box — World Core UI ================='),
+                     ('filmdesk2', '// ================= Apple Box — World Core UI ================='),
+                     ('appguide', '// ================= Apple Box — World Core UI ================='),
+                     ('bazaar2', '// ================= Apple Box — World Core UI ================='),
+                     ('pets2', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'

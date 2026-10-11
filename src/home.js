@@ -284,6 +284,7 @@ function roomStyleHTML() {
 if (typeof window !== 'undefined' && typeof document !== 'undefined' && window.setInterval && document.querySelector) {
   let roomT = 0;
   window.setInterval(() => {
+    if (window.AV2) return;   // home2.js drives the toon now
     const g = document.querySelector('svg.home-scene .me-walk'); if (!g || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
     roomT++; if (!(roomT === 2 || (roomT % 6 === 0 && Math.random() < .7))) return;   // soon after you arrive, then every quarter minute or so
     let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (A.length < 2) return;
