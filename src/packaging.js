@@ -2,8 +2,8 @@
 // The big agencies represent most of the names that matter (each notable person's agency is fixed by the world seed,
 // `agencyOf`), and they sell them in bundles. When your company makes a film, an agency can offer a package: one of
 // its directors and one of its stars, together. Packages open doors (investors and foreign buyers trust a package:
-// the investor roll is 3 easier and pre-sales run 8 points higher), but they cost a packaging fee (3% of the budget
-// at closing) and 10% of the film's profit, and the agency's star asks 10% more because the agency is on both sides
+// the investor roll is 3 easier and pre-sales run 8 points higher), but they cost a packaging fee (4% of the budget
+// at closing) and 12% of the film's profit, and the agency's star asks 15% more because the agency is on both sides
 // of the table. From 2019 the writers' guild goes to war over it: writers represented by a packaging agency are told
 // to fire their agents.
 function agencyOf(p) {
@@ -26,23 +26,23 @@ function pkgOffers(genre) {
 let PKG_CTX = null;
 { const _id = investDC; investDC = function (src) { return _id(src) - (PKG_CTX ? 3 : 0); }; }
 { const _ps = presaleShare; presaleShare = function (genre, lead, dir) { const v = _ps(genre, lead, dir); return PKG_CTX && v > 0 ? v + .08 : PKG_CTX ? .08 : v; }; }
-{ const _lf = leadFee; leadFee = function (id, genre, micro) { const v = _lf(id, genre, micro); return PKG_CTX && PKG_CTX.lead === id ? v * 1.1 : v; }; }
+{ const _lf = leadFee; leadFee = function (id, genre, micro) { const v = _lf(id, genre, micro); return PKG_CTX && PKG_CTX.lead === id ? v * 1.15 : v; }; }
 function pkgFor(a) { if (a.pkg === undefined || a.pkg === null) return null; const o = pkgOffers((((S.me.scripts || []).find(x => x.id === a.id)) || ((S.me.holdings || []).find(x => x.id === a.id)) || {}).genre || 'Drama').find(x => x.ag === +a.pkg); return o && o.dir === a.dir && o.lead === a.lead ? o : null; }
 { const _sf = selfFund; selfFund = function (a) {
   const o = pkgFor(a), M = S.me, src = a.src === 'script' ? (M.scripts || []).find(x => x.id === a.id) : (M.holdings || []).find(x => x.id === a.id), before = src ? src.made : undefined;
   PKG_CTX = o; let r; try { r = _sf(a); } finally { PKG_CTX = null; }
-  if (r && o && src && src.made !== undefined && src.made !== before) { const f = S.films[src.made], c = myCo(), fee = f.budget * .03; c.cash -= fee; f.pkg = { ag: o.name, fee }; f.hook = clamp((f.hook || 50) + 4, 5, 99);
-    if (f.fin && f.fin.log) f.fin.log.push({ w: S.week, t: `Packaged by ${o.name}: ${P(o.dir).name} directs, ${P(o.lead).name} stars. Packaging fee ${fmtM(fee)} and 10% of the profit.` }); }
+  if (r && o && src && src.made !== undefined && src.made !== before) { const f = S.films[src.made], c = myCo(), fee = f.budget * .04; c.cash -= fee; f.pkg = { ag: o.name, fee }; f.hook = clamp((f.hook || 50) + 3, 5, 99);
+    if (f.fin && f.fin.log) f.fin.log.push({ w: S.week, t: `Packaged by ${o.name}: ${P(o.dir).name} directs, ${P(o.lead).name} stars. Packaging fee ${fmtM(fee)} and 12% of the profit.` }); }
   return r; }; }
 { const _rl = release; release = function (f) {
   const out = _rl.apply(this, arguments); if (!f.pkg || f.pkg.paid) return out; f.pkg.paid = 1;
   const c = f.co !== null && f.co !== undefined ? S.companies[f.co] : null, net = (f.rentals || 0) - (f.pa || 0) - (f.cost || 0);
-  if (c && net > 0) { c.cash -= net * .1; f.pkg.back = net * .1; if (f.fin && f.fin.log) f.fin.log.push({ w: S.week, t: `${f.pkg.ag} takes its 10% of the profit: ${fmtM(net * .1)}.` }); }
+  if (c && net > 0) { c.cash -= net * .12; f.pkg.back = net * .12; if (f.fin && f.fin.log) f.fin.log.push({ w: S.week, t: `${f.pkg.ag} takes its 12% of the profit: ${fmtM(net * .12)}.` }); }
   return out; }; }
 // the make-film form: package offers
 { const _mf = makeFilmForm; makeFilmForm = function (c, k, x) {
   const h = _mf(c, k, x), key = k + ':' + x.id, F = (UI.mk || {})[key] || {}, O = pkgOffers(x.genre); if (!O.length) return h;
-  const row = `<div class="pkg-row small"><b>Packages</b> ${O.map(o => `<button class="tk-chip${+F.pkg === o.ag && F.dir === String(o.dir) && F.lead === String(o.lead) ? ' on' : ''}" data-pkg="${key}|${o.ag}|${o.dir}|${o.lead}" title="Investors 3 easier, pre-sales +8 points, hook +4; fee 3% of budget + 10% of profit; the star asks 10% more">${esc(o.name)}: ${esc(P(o.dir).name)} + ${esc(P(o.lead).name)} (fame ${Math.round(P(o.lead).fame || 0)})</button>`).join(' ')} <span class="muted">fee 3% + 10% of profit</span></div>`;
+  const row = `<div class="pkg-row small"><b>Packages</b> ${O.map(o => `<button class="tk-chip${+F.pkg === o.ag && F.dir === String(o.dir) && F.lead === String(o.lead) ? ' on' : ''}" data-pkg="${key}|${o.ag}|${o.dir}|${o.lead}" title="Investors 3 easier, pre-sales +8 points, hook +4; fee 4% of budget + 12% of profit; the star asks 15% more">${esc(o.name)}: ${esc(P(o.dir).name)} + ${esc(P(o.lead).name)} (fame ${Math.round(P(o.lead).fame || 0)})</button>`).join(' ')} <span class="muted">fee 4% + 12% of profit</span></div>`;
   return h.replace('<div class="finplan small">', row + '<div class="finplan small">'); }; }
 function pkgClick(t) { const d = t.dataset.pkg; if (!d) return false; const [key, ag, dir, lead] = d.split('|'), F = (UI.mk = UI.mk || {})[key] = UI.mk[key] || {};
   if (+F.pkg === +ag && F.dir === dir && F.lead === lead) { delete F.pkg; } else { F.pkg = +ag; F.dir = dir; F.lead = lead; } render(true); return true; }

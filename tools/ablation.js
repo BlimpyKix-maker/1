@@ -1,6 +1,6 @@
 // Competitive testing: does a feature actually change how a career goes? A minimal bot plays a career; each variant
 // adds one optional behaviour on top. Same seeds, same roles, so differences are the feature's.
-// Features: net neg shorts pets move invest agent school bold gx futures all.
+// Features: net neg shorts pets move invest agent school bold gx futures tabloid prestige schemes scout all.
 // Usage: node tools/ablation.js <feature|base|all> <seedIndex> [years]  → prints one JSON line of outcomes.
 const [FEAT = 'base', SI = '0', YEARS = 5] = process.argv.slice(2);
 const ROLES3 = ['dp', 'actor', 'writer'], role = ROLES3[+SI % 3], seed = 4100 + (+SI) * 37;
@@ -29,6 +29,10 @@ for (let w = 0; w < YEARS * 52; w++) {
     if (on('move') && w === 20) r(`doAct({ t: 'place2', k: 'relocate', hub: 'hollywood' })`);
     if (on('invest') && w % 8 === 0) r(`(() => { if (S.me.cash > 15000) { const L = S.companies.filter(c => c.closed === null && c.owner === undefined && c.tier <= 2).sort((a, b) => b.cash - a.cash); if (L[0]) doAct({ t: 'trade', co: L[0].id, n: 20 }); } })()`);
     if (on('futures') && w % 3 === 0) r(`(() => { if (S.me.cash < 40000) return; for (const f of futList().slice(0, 6)) { const px = futPrice(f), tr = futTrack(f); if (tr > px * 1.15 || tr < px / 1.15) doAct({ t: 'fut', film: f.id, n: tr > px ? 3 : -3 }); } })()`);
+    if (w === 0 && on('tabloid')) r(`doAct({ t: 'teller', v: 'tabloid' })`);
+    if (w === 0 && on('prestige')) r(`doAct({ t: 'teller', v: 'prestige' })`);
+    if (on('schemes') && w % 4 === 0) r(`(() => { if ((S.me.schemes || []).length >= 1) return; const id = aliveKnown().map(P).filter(p => p && p.standing >= 45 && opinion(p.id) < 40).sort((a, b) => b.standing - a.standing).map(p => p.id)[0]; if (id !== undefined) doAct({ t: 'scheme', k: 'befriend', id }); })()`);
+    if (on('scout') && w % 2 === 0) r(`(() => { for (const id of aliveKnown().filter(id => scoutLv(id) < 3).slice(0, 3)) doAct({ t: 'scout', id }); })()`);
     const w0 = r('S.week');
     for (let g = 0; g < 40 && r('S.week') === w0 && !r('S.me.over'); g++) { answer(); r(`(() => { const w0 = S.week; for (let g = 0; g < 60 && S.week === w0 && !S.me.over; g++) { autoBeforeStep(); if (pending().length) return; doAct(endWeekAct('next')); } })()`); }
   } catch (e) { console.error('ERR', w, e.message); break; }
