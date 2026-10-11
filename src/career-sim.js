@@ -1,3 +1,5 @@
+// Hook lists for later modules: a weekly step, a decision handler, and named actions (deterministic: use prnd()).
+const WEEK_HOOKS = [], PICK_HOOKS = [], ACT_HOOKS = {}, CLICK_HOOKS = {};   // CLICK_HOOKS: keyed by the first part of data-hk="name:arg"
 // ================= Apple Box — Career (phase 2) =================
 // The player is one more person in S.people, living by the same rules as everyone else: the same skill
 // sheet, the same ties, the same monthly growth. On top of that sheet sits a life: cash, energy, stress,
@@ -790,6 +792,7 @@ function closeWeek(a) {
   if (typeof cinWeek === 'function') cinWeek();
   if (typeof cfdWeek === 'function') cfdWeek();
   if (typeof quirkWeek === 'function') quirkWeek();
+  for (const h of WEEK_HOOKS) h();   // modules register their weekly step here
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1121,6 +1124,7 @@ function resolvePick(it, k) {
   if (typeof confPick === 'function' && confPick(it, k)) return true;
   if (typeof crisisPick === 'function' && crisisPick(it, k)) return true;
   if (typeof cfdPick === 'function' && cfdPick(it, k)) return true;
+  for (const h of PICK_HOOKS) if (h(it, k)) return true;   // modules register their decisions here
   if (typeof guildPick === 'function' && guildPick(it, k)) return true;
   if (typeof relPick === 'function' && relPick(it, k)) return true;
   if (typeof copePick === 'function' && copePick(it, k)) return true;
@@ -1303,5 +1307,5 @@ function applyAct(a) {
     case 'query': return queryAgency(a);
     case 'fireagent': if (!S.me.agent) return false; inbox('note', 'You leave your agent', `You and ${S.me.agent.name} part ways.`); if (S.me.known[S.me.agent.id]) addTie(ME(), P(S.me.agent.id), -10); S.me.agent = null; S.me.board = S.me.board.filter(p => !p.agent); return true;
   }
-  return false;
+  return ACT_HOOKS[a.t] ? !!ACT_HOOKS[a.t](a) : false;   // modules register their actions here
 }

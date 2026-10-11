@@ -52,7 +52,7 @@ function famWeek() {
   { const sp = famSpouse(); if (sp !== null && M.cohab === sp && M.rel && M.rel[sp]) { M.rel[sp].last = S.week; if (M.known[sp]) M.known[sp].seen = S.week; } }   // married and under one roof: you see each other every day
   const K = famKids();
   for (const k of K) { if (k.out) continue; const a = kidAge(k);
-    M.cash -= usd(a < 5 ? 250 : a < 18 ? 150 : 0); if (a < 3) M.energy = clamp(M.energy - 3, 0, 100); if (a < 18) M.stress = clamp(M.stress - 1, 0, 100);
+    M.cash -= Math.round(usd(a < 5 ? 250 : a < 18 ? 150 : 0) * (typeof billMul === 'function' ? billMul() : 1)); if (a < 3) M.energy = clamp(M.energy - 3, 0, 100); if (a < 18) M.stress = clamp(M.stress - 1, 0, 100);
     if (a >= 18 && !k.grown) { k.grown = S.week;
       if (['film', 'music'].includes(k.focus) || (k.fame || 0) >= 2) { const role = k.focus === 'music' ? 'composer' : ['director', 'writer', 'actor'][Math.floor(prnd() * 3)], q = makePerson(M.hub, role, { young: true });
         q.name = k.name; q.g = k.g; q.born = S.year - 18; q.debut = S.week; q.standing = clamp(q.standing + me.standing * .15, 0, 100); q.fame = (q.fame || 0) + (k.fame || 0) + (me.fame || 0) * .1; k.pid = q.id;
