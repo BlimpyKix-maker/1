@@ -1248,6 +1248,11 @@ abbr.gl:focus { outline: 1px dotted currentColor; }
 .pt-rows { display: grid; gap: 6px; } .pt-row { display: grid; grid-template-columns: 74px 1fr; gap: 8px; align-items: start; } .pt-row > span { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 5px; } .pt-row > div { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .pt-b { all: unset; cursor: pointer; font-size: 12px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); } .pt-b:hover { border-color: var(--accent); } .pt-b:disabled { opacity: .45; cursor: default; } .pt-b:focus-visible { outline: 2px solid var(--accent); }
 .pt-n { width: 100%; margin: 0; font-size: 12px; color: var(--muted); } .pt-head .pt-n { width: auto; }
+.scrap-y { margin: 14px 0 6px; } .scrap { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px; padding: 4px; }
+.scrap-p { margin: 0; background: #FBF8F0; color: #2B2620; padding: 8px 8px 10px; border-radius: 2px; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+.scrap-i { aspect-ratio: 16 / 10; overflow: hidden; background: #222; } .scrap-i svg { width: 100%; height: 100%; display: block; }
+.scrap-e { display: grid; place-items: center; font-size: 34px; } .scrap-work { background: #2C4F7C; } .scrap-love { background: #A8325E; } .scrap-life { background: #3E6B4A; } .scrap-money { background: #8C6A2E; } .scrap-prize, .scrap-awards { background: #6B4E1E; }
+.scrap-p figcaption { font: 12.5px/1.35 var(--f-body); margin-top: 6px; } .scrap-p figcaption b { display: block; font-size: 11px; opacity: .6; }
 </style>
 
 <header class="slate"><div class="slate-in">
@@ -11798,6 +11803,15 @@ function closeWeek(a) {
   if (typeof schemesWeek === 'function') schemesWeek();
   if (typeof fdCallsWeek === 'function') fdCallsWeek();
   if (typeof pet2Week === 'function') pet2Week();
+  if (typeof eraWeek === 'function') eraWeek();
+  if (typeof famWeek === 'function') famWeek();
+  if (typeof innerWeek === 'function') innerWeek();
+  if (typeof bdayWeek === 'function') bdayWeek();
+  if (typeof depth3Week === 'function') depth3Week();
+  if (typeof depWeek === 'function') depWeek();
+  if (typeof confWeek === 'function') confWeek();
+  if (typeof fanWeek === 'function') fanWeek();
+  if (typeof crisisWeek === 'function') crisisWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -12123,6 +12137,11 @@ function resolvePick(it, k) {
   if (typeof awards4Pick === 'function' && awards4Pick(it, k)) return true;
   if (typeof petPick === 'function' && petPick(it, k)) return true;
   if (typeof pet2Pick === 'function' && pet2Pick(it, k)) return true;
+  if (typeof bdayPick === 'function' && bdayPick(it, k)) return true;
+  if (typeof junketPick === 'function' && junketPick(it, k)) return true;
+  if (typeof beliefPick === 'function' && beliefPick(it, k)) return true;
+  if (typeof confPick === 'function' && confPick(it, k)) return true;
+  if (typeof crisisPick === 'function' && crisisPick(it, k)) return true;
   if (typeof guildPick === 'function' && guildPick(it, k)) return true;
   if (typeof relPick === 'function' && relPick(it, k)) return true;
   if (typeof copePick === 'function' && copePick(it, k)) return true;
@@ -12249,6 +12268,7 @@ function applyAct(a) {
     case 'dist': return typeof distAct === 'function' && distAct(a);
     case 'call': return typeof fdCallAct === 'function' && fdCallAct(a);
     case 'gift': return typeof giftAct === 'function' && giftAct(a);
+    case 'heir': return typeof heirAct === 'function' && heirAct(a);
     case 'teller': return typeof tellerAct === 'function' && tellerAct(a);
     case 'scout': return typeof scoutAct === 'function' && scoutAct(a);
     case 'scheme': return a.stop ? typeof schemeStop === 'function' && schemeStop(a) : typeof schemeAct === 'function' && schemeAct(a);
@@ -42376,7 +42396,7 @@ function petField(p, w = S.week) { return 3 + Math.floor(hashRand((p.kind.length
 function petWinP(p, pro) { const s = petShowScore(p, pro), N = petField(p); return clamp(1 / (1 + Math.exp(-(s - 56) / 7)) * 3 / (2 + N / 4), .02, .85); }
 function petPts(N) { return N >= 15 ? 5 : N >= 10 ? 4 : N >= 7 ? 3 : N >= 4 ? 2 : 1; }
 function petSeasonY(w = S.week) { return woy(w) >= 39 ? yearOf(w) + 1 : yearOf(w); }   // the show year ends on 30 September
-function bigShow() { const m = HUBS[S.me.hub].m; return m === 'US' || m === 'CA' ? { n: 'Westminster', where: 'New York', wk: 6, from: 1877 } : ['UK', 'FR', 'IT', 'DE', 'ES', 'SE', 'DK', 'NL', 'PL', 'CZ', 'HU', 'FI'].includes(m) ? { n: 'Crufts', where: 'London', wk: 10, from: 1891 } : { n: 'the National Championship Show', where: HUBS[S.me.hub].name, wk: 15, from: 1900 }; }
+function bigShow() { const m = HUBS[S.me.hub].m; return m === 'US' || m === 'CA' ? { n: 'Westminster', where: 'New York', wk: 6, from: 1877 } : ['UK', 'FR', 'IT', 'DE', 'ES', 'SE', 'DK', 'PL', 'CS', 'HU', 'FI'].includes(m) ? { n: 'Crufts', where: 'London', wk: 10, from: 1891 } : { n: 'the National Championship Show', where: HUBS[S.me.hub].name, wk: 15, from: 1900 }; }
 function petInviteLine(p) { return 120 + Math.round(hashRand((p.kind.length * 131 + petSeasonY()) >>> 0)() * 120); }
 // ---- the screen ----
 function petRating(p) { const t = petTemp(p), T = p.titles || []; return Math.round(clamp(t.nerve * .3 + t.brains * .25 + t.looks * .15 + petBond(p) * 6 + T.length * 6 + (T.includes('screen') ? 15 : 0) - 20, 0, 100)); }
@@ -42545,6 +42565,628 @@ function pet2Click(t) { const d = t.dataset && t.dataset.pet2; if (!d) return fa
   if (!ok) inbox('note', 'Not now', 'That isn\'t possible right now: check the money, your energy, or whether it\'s been done this week.');
   render(true); if (ok && k === 'show' && S.me.lastPetShow && typeof showRollOverlay !== 'function') {} return true; }
 // </pets2>
+// <eras>
+// ---------------- When the business changes under you ----------------
+// The industry's history arrives as it happened, market by market, and some of it lands on you. Sound comes to
+// Hollywood in 1927 and to Bombay in 1931; the Production Code is enforced from 1934 to 1968; war drafts the young;
+// the blacklist runs from 1947 to 1960; the studios lose their cinemas in 1948; television empties the theatres in
+// the fifties; home video and then digital change who can make a film and where the money comes from.
+// Each card is news for everyone and a decision for the people it touches (a voice test for silent actors, the
+// censor's notes for writers and directors, a subpoena for people with a name). What you choose can follow you for
+// years: a failed voice test or a blacklisting shows up as its own line in your odds on every job.
+const ERA_NEWS = [
+  { y: 1927, wk: 40, m: ['US', 'CA'], t: 'A feature with synchronised songs and dialogue opens in New York. The audience stands up and cheers. Every studio orders sound stages.' },
+  { y: 1929, wk: 14, m: ['UK', 'FR', 'DE', 'IT', 'SE', 'DK', 'ES'], t: 'The first home-grown talkies open. The silent picture business has perhaps a year left.' },
+  { y: 1931, wk: 10, m: ['IN', 'JP', 'CN', 'HK', 'MX', 'BR', 'AR', 'EG'], t: 'Sound reaches the local studios: the first talkie in the national language sells out for months.' },
+  { y: 1934, wk: 27, m: ['US'], t: 'The Production Code is now enforced: no film opens without a certificate. Kisses are timed, crime never pays, and married couples sleep in twin beds.' },
+  { y: 1939, wk: 36, m: ['UK', 'FR', 'DE', 'PL', 'CZ'], t: 'War in Europe. Studios are requisitioned, film stock is rationed, and the newsreels become the most important films being made.' },
+  { y: 1941, wk: 50, m: ['US', 'CA'], t: 'War. The studios lose their young men to the draft, raw stock goes on ration, and Washington asks Hollywood for training films and morale.' },
+  { y: 1945, wk: 33, m: null, t: 'The war is over. Directors come home from the service film units with new habits: real locations, real faces, handheld cameras.' },
+  { y: 1947, wk: 43, m: ['US'], t: 'A congressional committee calls Hollywood writers and directors to testify about communism. Ten refuse to answer and are cited for contempt.' },
+  { y: 1948, wk: 18, m: ['US'], t: 'The Supreme Court orders the studios to sell their cinema chains. Contract lists are cut; the studio system starts coming apart.' },
+  { y: 1953, wk: 38, m: ['US', 'CA', 'UK'], t: 'Television is in half of all homes and cinema attendance is falling fast. The studios answer with widescreen, colour and spectacle.' },
+  { y: 1960, wk: 3, m: ['US'], t: 'A blacklisted writer\'s real name goes back on a big studio picture. The blacklist doesn\'t end in a day, but it breaks.' },
+  { y: 1968, wk: 44, m: ['US'], t: 'The Production Code is replaced by a ratings system. Films can now be made for adults, and say so on the poster.' },
+  { y: 1975, wk: 25, m: ['US', 'CA'], t: 'A shark film opens on hundreds of screens at once, backed by television advertising, and becomes the biggest film ever made. Summer will never be the same.' },
+  { y: 1980, wk: 10, m: null, t: 'Video recorders are selling in the millions. A new business is renting films for the weekend, and old films suddenly earn again.' },
+  { y: 1999, wk: 30, m: null, t: 'A feature shot on cheap digital video becomes a sensation. Anyone with a camcorder and a laptop can make a film now, and many do.' },
+  { y: 2009, wk: 50, m: null, t: 'The cinemas are converting to digital projection: no more prints, no more reels. Distribution costs collapse; the projectionist\'s job goes with them.' }
+];
+function eraMarket() { return S.me && HUBS[S.me.hub] ? HUBS[S.me.hub].m : 'US'; }
+function eraHere(L) { return !L || L.includes(eraMarket()); }
+function eraMods() { return (S.me.eraMods = S.me.eraMods || {}); }
+function eraActive(k) { const v = eraMods()[k]; return v !== undefined && S.year <= v; }
+const eraRole = (...R) => () => R.includes(ME().role);
+const eraYears = (a, b, L) => () => S.year >= a && S.year <= b && eraHere(L);
+LATE.push(
+  { id: 'era_voice', pool: 'era', once: 1, need: () => eraRole('actor')() && S.year <= 1933 && S.year >= ({ US: 1928, CA: 1928, UK: 1929, FR: 1929, DE: 1929, IT: 1930, SE: 1929, DK: 1929, ES: 1930 }[eraMarket()] || 1931), title: 'The voice test', text: () => 'Every actor under contract has to make a sound test this month. A microphone hangs over a table; a man in headphones listens behind glass. Stars have been finished by a single reel.',
+    opts: [
+      { k: 'lessons', label: () => 'Elocution lessons first, then the test', cost: () => usd(600), check: ['voice', 12], go: (c, ok) => { lateFx(ok ? { stand: 2, xp: { voice: .4 } } : { stress: 6, xp: { voice: .4 } }); if (!ok) eraMods().silent = S.year + 2; return ok ? 'Six weeks of vowels pay off. The man behind the glass gives a thumbs up.' : 'Better, but not enough. The studio quietly moves you down the call sheet.'; } },
+      { k: 'asis', label: () => 'Take it as you are', check: ['voice', 14], go: (c, ok) => { lateFx(ok ? { stand: 3, fame: 2 } : { stand: -4, stress: 10 }); if (!ok) eraMods().silent = S.year + 3; return ok ? 'Your voice records beautifully. You have a talking-picture career, and some of your old co-stars don\'t.' : 'The playback is high and thin. The trades call you "a silent star". It isn\'t a compliment any more.'; } },
+      { k: 'stage', label: () => 'Go back to the stage for a season and learn to speak', go: c => { lateFx({ stress: 4, xp: { voice: .8, pres: .3 } }); return 'Eight shows a week, no microphone. You come back with a voice that fills a room.'; } }] },
+  { id: 'era_code', pool: 'era', cool: 156, need: () => eraRole('writer', 'director', 'producer')() && eraYears(1934, 1967, ['US'])() && ((S.me.scripts || []).length || ME().credits.length), title: 'The censor\'s notes', text: () => 'The Production Code office has read your script. Fourteen notes: the kiss is too long, the wife is too knowing, the crook gets away with it, and a word on page 40 is "unacceptable in any context".',
+    opts: [
+      { k: 'comply', label: () => 'Make every change', go: c => { lateFx({ stress: 3, stand: .5 }); return 'You make the changes. The film gets its certificate. Something in it has gone quiet.'; } },
+      { k: 'fight', label: () => 'Go and argue the big ones', check: ['cha', 14], go: (c, ok) => { lateFx(ok ? { stand: 1, stress: 2 } : { stress: 8, stand: -1 }); return ok ? 'You keep the ending and lose the kiss. The man at the Code office says you\'re "persuasive, for a writer".' : 'They dig in. The studio sides with them, and wonders aloud whether you\'re worth the trouble.'; } },
+      { k: 'subtext', label: () => 'Say it all in subtext instead', check: ['orig', 13], go: (c, ok) => { lateFx(ok ? { xp: { orig: .3, tone: .3 }, stand: 1 } : { stand: -1, stress: 5 }); return ok ? 'A glance, a cigarette, a cut to the fireworks. The censor passes it; every critic in town understands exactly what happened.' : 'They spot it. A stern letter goes to the studio, with your name underlined.'; } }] },
+  { id: 'era_war', pool: 'era', once: 1, need: () => S.year >= 1942 && S.year <= 1944 && eraHere(['US', 'CA', 'UK']) && ageOf(ME()) >= 18 && ageOf(ME()) <= 40, title: 'The war wants you', text: () => `${ME().g === 'F' ? 'The women\'s services are recruiting, and the army\'s film unit needs editors and writers.' : 'Your draft notice arrives. A friend says the army\'s film unit needs people who know which end of a camera is which.'}`,
+    opts: [
+      { k: 'unit', label: () => 'Join the service film unit', go: c => { lateFx({ stand: 3, xp: { comp: .6, vstory: .6, setm: .4 }, stress: 8, meet: 'director', meetTag: 'Served with you in the film unit', mile: 'Made training films in the war' }); return 'Two years of training films, newsreels and one documentary that wins a prize. You come home knowing how to shoot anything, anywhere, fast.'; } },
+      { k: 'defer', label: () => 'Ask for a deferment: essential industry', check: ['cha', 13], go: (c, ok) => { lateFx(ok ? { stress: 4 } : { stand: -2, stress: 10, xp: { comp: .3 } }); return ok ? 'Morale films count as essential. You keep working, and don\'t talk about it at parties.' : 'Denied. You end up in the film unit anyway, a few months late and without the friends who signed up first.'; } },
+      { k: 'front', label: () => 'Enlist for the front', go: c => { lateFx({ stand: 4, stress: 20, energy: -20, mile: 'Served in the war' }); return 'You come back two years later. You don\'t talk about it. You make very different films.'; } }] },
+  { id: 'era_huac', pool: 'era', once: 1, need: () => eraRole('writer', 'director', 'actor', 'producer')() && eraYears(1947, 1953, ['US'])() && ME().standing >= 15, mk: c => { c.who = lateWho('known'); }, title: 'A subpoena', text: c => `A man in a grey suit hands you an envelope at the studio gate: you're to appear before the committee. Your lawyer says they'll ask you to name people you've seen at meetings${c.who !== null ? `, and that ${lname(c.who)}'s name is already on their list` : ''}.`,
+    opts: [
+      { k: 'names', label: () => 'Name names', go: c => { lateFx({ stand: 1, stress: 18, mile: 'Named names to the committee' }); const L = Object.keys(S.me.known).map(Number).filter(id => P(id) && !P(id).dead && ['writer', 'director', 'actor'].includes(P(id).role)).slice(0, 6); for (const id of L) { addTie(ME(), P(id), -15); if (typeof remember === 'function') remember(id, -6, 'Named names to the committee'); } return 'You keep working. Some people cross the street when they see you, for the rest of your life.'; } },
+      { k: 'refuse', label: () => 'Refuse to answer', go: c => { eraMods().blacklist = 1960; lateFx({ stand: -6, fame: 3, stress: 15, mile: 'Refused to testify; blacklisted' }); if (c.who !== null) addTie(ME(), P(c.who), 15); return 'You\'re cited for contempt. The studio lets you go the same week. Nobody in town will hire you under your own name until the blacklist breaks.'; } },
+      { k: 'abroad', label: () => 'Take the next boat to Europe', go: c => { eraMods().blacklist = 1960; lateFx({ stress: 10, intl: 5, mile: 'Left for Europe ahead of the blacklist' }); return 'London, then Rome. The work is smaller and freer. Hollywood won\'t hire you until the blacklist breaks, but Europe doesn\'t care. (Places is how you\'d move.)'; } }] },
+  { id: 'era_front', pool: 'era', cool: 26, need: () => eraActive('blacklist') && S.year < 1960 && ME().role === 'writer', mk: c => { c.who = lateWho('friend'); }, needC: c => c.who !== null, title: 'A front', text: c => `${lname(c.who)} has an offer: they'll put their name on your script and pass you the money, less a cut. It's done all over town.`,
+    opts: [
+      { k: 'yes', label: () => 'Write it under their name', go: c => { lateFx({ cash: usd(3000), xp: { struc: .2, dial: .2 }, tie: 6, mile: 'Wrote under a front\'s name' }, c); return 'The film does well. Someone else collects the credit and, one day, an award. You keep the cheque and the draft with your real name on it.'; } },
+      { k: 'no', label: () => 'Not like that', go: c => { lateFx({ stress: 4 }); return 'You say no. Pride is expensive this decade.'; } }] },
+  { id: 'era_decree', pool: 'era', once: 1, need: () => eraRole('actor', 'director', 'writer')() && eraYears(1948, 1950, ['US'])(), title: 'The contract list', text: () => 'With the cinemas sold off, the studio is cutting its contract list. Your agent says you can stay on at a smaller salary, or go freelance and take your chances film by film.',
+    opts: [
+      { k: 'free', label: () => 'Go freelance', check: ['com', 12], go: (c, ok) => { eraMods().freelance = S.year + 4; lateFx(ok ? { stand: 1, stress: 4 } : { stress: 10, cash: -usd(500) }); return ok ? 'Picture by picture, at your price. The independents are hiring.' : 'A thin year. Then the independents start calling.'; } },
+      { k: 'stay', label: () => 'Take the smaller salary', go: c => { lateFx({ cash: usd(1500), stress: -2 }); return 'Security, for now. You watch friends who left get the interesting parts.'; } }] },
+  { id: 'era_tv', pool: 'era', once: 1, need: () => eraYears(1953, 1958, ['US', 'CA', 'UK'])() && ME().standing >= 8, title: 'The small screen', text: () => 'A television producer wants you for a live weekly drama. In the film business, people still say "television" the way they say "a rash".',
+    opts: [
+      { k: 'tv', label: () => 'Take it: live, every week', check: ['com', 12], go: (c, ok) => { lateFx(ok ? { fame: 4, cash: usd(4000), xp: { pace: .3, setm: .3 } } : { stress: 10, cash: usd(2000) }); return ok ? 'Live television is terrifying and wonderful. Twenty million people know your name by the spring.' : 'A camera fails on air. You improvise for six minutes. The money is good; the nerves are shot.'; } },
+      { k: 'wide', label: () => 'Stay with pictures: bet on widescreen', go: c => { lateFx({ stand: .5, xp: { comp: .3 } }); return 'You learn to fill a screen twice as wide. It\'s the right bet, for a while.'; } }] },
+  { id: 'era_video', pool: 'era', once: 1, need: () => S.year >= 1980 && S.year <= 1985 && ME().credits.length >= 2, title: 'Your old films, on tape', text: () => 'A video label wants your old films for the rental shops. The contracts from back then never mentioned videotape; your lawyer thinks you\'re owed something.',
+    opts: [
+      { k: 'push', label: () => 'Push for a royalty', check: ['cha', 13], go: (c, ok) => { lateFx(ok ? { cash: usd(6000) } : { cash: usd(1500), stress: 4 }); return ok ? 'A royalty on every tape. Old work pays the rent, for the first time.' : 'A one-off fee and a handshake. Better than nothing.'; } },
+      { k: 'sign', label: () => 'Sign what they offer', go: c => { lateFx({ cash: usd(2500) }); return 'A cheque arrives. Then your face turns up on a shelf in every corner shop.'; } }] },
+  { id: 'era_digital', pool: 'era', once: 1, need: () => S.year >= 1999 && S.year <= 2004, title: 'A camera that costs less than a car', text: () => 'A friend shows you a feature they shot on a borrowed digital camcorder and cut on a laptop. It\'s rough, and it\'s in a festival.',
+    opts: [
+      { k: 'learn', label: () => 'Learn to shoot and cut digital', go: c => { lateFx({ xp: { comp: .3, rhythm: .3, digi: .3 }, stress: 2 }); return 'Weekends with a camcorder. The old rules about who gets to make films are breaking, and you know how.'; } },
+      { k: 'film', label: () => 'Stick with film: it looks better', go: c => { lateFx({ xp: { light: .2 } }); return 'It does look better. For now.'; } }] }
+);
+for (const t of LATE) LATE_BY[t.id] = t;
+function eraWeek() {
+  const M = S.me; if (!M) return; const k = woy();
+  for (const e of ERA_NEWS) if (e.y === S.year && e.wk === k && eraHere(e.m)) news('Industry', e.t);
+  if (!pending().some(it => it.kind === 'late') && prnd() < .2) lateOffer('era');
+}
+// what an era did to you, in your odds
+{ const _hf = hireFactors; hireFactors = function (post) {
+  const F = _hf(post); if (!S.me) return F; const hub = post.away || (post.film !== null && post.film !== undefined && S.films[post.film] ? S.films[post.film].hub : S.me.hub), us = HUBS[hub] && HUBS[hub].m === 'US', t = tmplOf(post) || {};
+  if (eraActive('blacklist') && S.year < 1960 && us) F.push(['Blacklisted', -2.4]);
+  if (eraActive('silent') && ME().role === 'actor' && /act|cast|role|part/i.test((post.t || '') + (t.cat || ''))) F.push(['A silent-era voice', -.9]);
+  if (eraActive('freelance')) F.push(['Freelance, film by film', .25]);
+  return F; }; }
+// </eras>
+// <family>
+// ---------------- Family: marriage, children, and the family name ----------------
+// A partner can become a spouse (a proposal, then a wedding that's as big as you can pay for). Children change
+// the weeks: they cost money, they cost sleep while they're small, and they take the edge off everything else.
+// They have moments of their own (a school play on a shoot day, wanting to be in your film, a teenage verdict on
+// your work), and around eleven you see what they're into. At eighteen a child who loves film or music enters the
+// business as a person in the world, with your name and your contacts behind them (and the press ready to say so);
+// the others go their own way. When you retire, you can play on as one of them: they inherit what's left after
+// estate tax, the family company if there is one, and a famous name, which opens doors and invites a backlash.
+const FAM_FOCUS = { film: ['Film', 'They make films on your phone and storyboard the dog.'], music: ['Music', 'There is always an instrument being played badly, and then well.'], science: ['Science', 'Volcanoes, then space, then chemistry sets that worry the neighbours.'], sport: ['Sport', 'Training at six, matches every weekend, a trophy shelf of their own.'], books: ['Books', 'Torch under the duvet, three library cards.'] };
+function famKids() { return (S.me.kids = S.me.kids || []); }
+function famSpouse() { const id = S.me.spouse; return id !== undefined && id !== null && P(id) && !P(id).dead && partnerOf() === id ? id : null; }
+function kidAge(k) { return (S.week - k.born) / 52; }
+function famSurname() { const n = ME().name.trim().split(/\s+/), hub = S.me.hub; return typeof EAST !== 'undefined' && EAST[HUBS[hub].lang] ? n[0] : n[n.length - 1]; }
+function famName(g) { const N = (typeof NAMES !== 'undefined' && (NAMES[HUBS[S.me.hub].lang] || NAMES.en)) || { M: ['Sam'], F: ['Alex'] }, L = g === 'X' ? N.M.concat(N.F) : N[g] || N.M, f = L[Math.floor(prnd() * L.length)], s = famSurname();
+  return typeof EAST !== 'undefined' && EAST[HUBS[S.me.hub].lang] ? `${s} ${f}` : `${f} ${s}`; }
+function famBirth(adopt) {
+  const M = S.me, g = ['F', 'M', 'X'][Math.floor(prnd() * 2.1)], k = { name: famName(g), g, born: S.week - (adopt ? Math.round(52 * (1 + prnd() * 4)) : 0), other: famSpouse(), adopted: adopt ? 1 : 0 };
+  famKids().push(k); M.stress = clamp(M.stress + 6, 0, 100); milestone(`${adopt ? 'Adopted' : 'Became a parent to'} ${k.name.split(' ')[0]}`, 'love');
+  diary(adopt ? `${k.name.split(' ')[0]} comes home with you, ${Math.round(kidAge(k))} years old, holding a backpack with everything they own.` : `${k.name.split(' ')[0]} is born. You hold them and forget, for a whole day, that you work in film.`);
+  return k;
+}
+LATE.push(
+  { id: 'fam_propose', pool: 'family', cool: 26, need: () => { const pid = partnerOf(); return pid !== null && S.me.spouse !== pid && S.me.cohab === pid && ageOf(ME()) >= 21 && (ME().ties[pid] || 0) >= 50; }, mk: c => { c.who = partnerOf(); }, title: 'A question', text: c => `A quiet night in. ${lname(c.who)} is reading; you're pretending to. You've been together long enough that the question has been in the room for months.`,
+    opts: [
+      { k: 'ask', label: c => `Ask ${lname(c.who).split(' ')[0]} to marry you`, check: ['cha', 8], go: (c, ok) => { if (ok) { S.me.spouse = c.who; S.me.wedPending = 1; lateFx({ stress: -10, tie: 10, mile: `Engaged to ${lname(c.who)}` }, c); return 'Yes. Then laughing, then phoning everyone. A wedding to plan.'; } lateFx({ stress: 6, tie: -2 }, c); return '"Not yet," gently. It isn\'t a no. It is a long week.'; } },
+      { k: 'wait', label: () => 'Not yet', go: c => 'You let the moment pass. It will come round again.' }] },
+  { id: 'fam_wedding', pool: 'family', once: 1, need: () => S.me.wedPending && famSpouse() !== null, mk: c => { c.who = famSpouse(); }, title: 'The wedding', text: c => `You and ${lname(c.who)} have a date. The question is how big.`,
+    opts: [
+      { k: 'big', label: () => 'A big wedding: everyone you know', cost: () => usd(30000), go: c => { S.me.wedPending = 0; lateFx({ stand: 1, stress: 8, tie: 12, meet: 'known', mile: `Married ${lname(c.who)}` }, c); for (const id of Object.keys(S.me.known).map(Number).filter(id => P(id) && !P(id).dead && opinion(id) > 15).slice(0, 8)) addTie(ME(), P(id), 3); return 'Three hundred people, one band, a speech that makes your oldest friend cry. Half your contacts were there; all of them heard about it.'; } },
+      { k: 'small', label: () => 'A small one: family and close friends', cost: () => usd(6000), go: c => { S.me.wedPending = 0; lateFx({ stress: -6, tie: 14, mile: `Married ${lname(c.who)}` }, c); return 'Forty people in a garden. The best day either of you can remember.'; } },
+      { k: 'elope', label: () => 'Elope', go: c => { S.me.wedPending = 0; lateFx({ stress: -10, tie: 16, mile: `Eloped with ${lname(c.who)}` }, c); return 'A registry office on a Tuesday, two strangers as witnesses, chips on the way home.'; } }] },
+  { id: 'fam_kids', pool: 'family', cool: 104, need: () => (famSpouse() !== null || (partnerOf() !== null && S.me.cohab === partnerOf())) && ageOf(ME()) >= 24 && ageOf(ME()) <= 48 && famKids().length < 3 && !S.me.babyDue, mk: c => { c.who = partnerOf(); }, title: 'Talking about children', text: c => `${lname(c.who)} asks, carefully, whether you've thought about children. With your hours, your money and your career, there is no good time. People do it anyway.`,
+    opts: [
+      { k: 'try', label: () => 'Yes. Let\'s try', go: c => { const p = clamp(.9 - Math.max(0, ageOf(ME()) - 34) * .05, .3, .9); if (prnd() < p) { S.me.babyDue = S.week + 30 + Math.floor(prnd() * 12); return 'Months later, two lines on a test. You both sit on the bathroom floor and laugh.'; } return 'It doesn\'t happen, not this year. You\'re gentle with each other about it.'; } },
+      { k: 'adopt', label: () => 'Adopt', cost: () => usd(8000), go: c => { famBirth(true); lateFx({ tie: 6 }, c); return 'Forms, interviews, a home visit, and then one afternoon a small person in your doorway.'; } },
+      { k: 'notnow', label: () => 'Not now', go: c => { lateFx({ tie: -2 }, c); return 'Not now. You both know that\'s an answer that has to be given again.'; } }] },
+  { id: 'fam_play', pool: 'family', cool: 52, need: () => famKids().some(k => kidAge(k) >= 5 && kidAge(k) < 12) && S.me.jobs.length > 0, mk: c => { const L = famKids().filter(k => kidAge(k) >= 5 && kidAge(k) < 12); c.kid = famKids().indexOf(L[Math.floor(prnd() * L.length)]); }, title: 'The school play', text: c => `${famKids()[c.kid].name.split(' ')[0]} is a tree in the school play on Thursday afternoon. It's a shoot day.`,
+    opts: [
+      { k: 'go', label: () => 'Leave set early and go', check: ['cha', 12], go: (c, ok) => { lateFx(ok ? { stress: -8 } : { stress: -6, stand: -1 }); famKids()[c.kid].bond = (famKids()[c.kid].bond || 0) + 2; return ok ? 'The first AD covers for you. The tree is magnificent.' : 'You make it, and the producer makes a point of mentioning it on Friday. The tree was worth it.'; } },
+      { k: 'work', label: () => 'Stay on set and watch the video later', go: c => { lateFx({ stress: 6 }); famKids()[c.kid].bond = (famKids()[c.kid].bond || 0) - 1; return 'The video is shaky. You watch it four times in your trailer.'; } }] },
+  { id: 'fam_focus', pool: 'family', once: 0, cool: 1, need: () => famKids().some(k => kidAge(k) >= 11 && !k.focus), mk: c => { c.kid = famKids().findIndex(k => kidAge(k) >= 11 && !k.focus); }, title: 'What are they into?', text: c => `${famKids()[c.kid].name.split(' ')[0]} is eleven, and has opinions. Where do you nudge them?`,
+    opts: Object.entries(FAM_FOCUS).map(([k, [l]]) => ({ k, label: () => k === 'film' ? 'Film, like you (a camera for their birthday)' : `${l}`, go: c => { const K = famKids()[c.kid]; K.focus = k; return `${FAM_FOCUS[k][1]}`; } })) },
+  { id: 'fam_cast', pool: 'family', cool: 104, need: () => famKids().some(k => kidAge(k) >= 7 && kidAge(k) < 17) && typeof myCo === 'function' && myCo() && myCo().films.some(i => S.films[i] && S.films[i].stage >= 0 && S.films[i].stage <= 2), mk: c => { const L = famKids().filter(k => kidAge(k) >= 7 && kidAge(k) < 17); c.kid = famKids().indexOf(L[0]); }, title: 'They want to be in your film', text: c => `${famKids()[c.kid].name.split(' ')[0]} has read your script and wants the part of the kid. They're not bad, either.`,
+    opts: [
+      { k: 'cast', label: () => 'Cast them', go: c => { const K = famKids()[c.kid]; K.fame = (K.fame || 0) + 2; K.bond = (K.bond || 0) + 2; lateFx({ stand: -1, stress: 3 }); return 'They\'re good. The trades are less kind about it than the audience: the word "nepotism" appears in every review.'; } },
+      { k: 'no', label: () => 'Tell them to earn it like everyone else', go: c => { famKids()[c.kid].bond = (famKids()[c.kid].bond || 0) - 1; return 'They sulk for a week, then sign up for the drama club. Fair enough.'; } }] }
+);
+for (const t of LATE) LATE_BY[t.id] = t;
+function famWeek() {
+  const M = S.me, me = ME(); if (!M) return;
+  if (M.babyDue && S.week >= M.babyDue) { delete M.babyDue; famBirth(false); }
+  { const sp = famSpouse(); if (sp !== null && M.cohab === sp && M.rel && M.rel[sp]) { M.rel[sp].last = S.week; if (M.known[sp]) M.known[sp].seen = S.week; } }   // married and under one roof: you see each other every day
+  const K = famKids();
+  for (const k of K) { if (k.out) continue; const a = kidAge(k);
+    M.cash -= usd(a < 5 ? 250 : a < 18 ? 150 : 0); if (a < 3) M.energy = clamp(M.energy - 3, 0, 100); if (a < 18) M.stress = clamp(M.stress - 1, 0, 100);
+    if (a >= 18 && !k.grown) { k.grown = S.week;
+      if (['film', 'music'].includes(k.focus) || (k.fame || 0) >= 2) { const role = k.focus === 'music' ? 'composer' : ['director', 'writer', 'actor'][Math.floor(prnd() * 3)], q = makePerson(M.hub, role, { young: true });
+        q.name = k.name; q.g = k.g; q.born = S.year - 18; q.debut = S.week; q.standing = clamp(q.standing + me.standing * .15, 0, 100); q.fame = (q.fame || 0) + (k.fame || 0) + (me.fame || 0) * .1; k.pid = q.id;
+        meet(q.id, 'Your child', 40); addTie(me, q, 50 + (k.bond || 0) * 3); news('People', `${me.name}'s child ${k.name} starts out as a ${(ROLE_LABEL[role] || role).toLowerCase()}. The surname opens doors; the trades are already sharpening their knives.`); diary(`${k.name.split(' ')[0]} leaves home to try the business. You give them three phone numbers and one piece of advice they won't take.`); }
+      else { k.out = 1; diary(`${k.name.split(' ')[0]} leaves for university, ${({ science: 'to study physics', sport: 'on a sports scholarship', books: 'to read literature', music: 'to study music', film: 'to study film' })[k.focus] || 'to find out what they want'}. The house is too quiet.`); } } }
+  if (!pending().some(it => it.kind === 'late') && prnd() < .06) lateOffer('family');
+}
+// ---- the family name: after you retire, play on as one of your children ----
+function famHeirs() { const K = (S.me && S.me.kids) || []; return K.map((k, i) => [k, i]).filter(([k]) => !k.pid && kidAge(k) >= 16 && kidAge(k) <= 45); }
+function famEstate() { const nw = typeof osNetWorth === 'function' ? osNetWorth().total : S.me.cash, ex = usd(1000000), tax = S.year < 1916 ? 0 : .4; return Math.max(0, nw <= ex ? nw : ex + (nw - ex) * (1 - tax)); }
+{ const _ng = nextGenAct; nextGenAct = function () {
+  const M = S.me, keep = M ? { kids: (M.kids || []).map(k => Object.assign({}, k)), estate: famEstate(), company: M.company, role: ME().role, hub: M.hub, look: Object.assign({}, M.look || {}), fame: ME().fame || 0, standing: ME().standing, love: (M.love || []).slice(), surname: famSurname() } : null;
+  const ok = _ng(); if (ok && keep && S.legacy && S.legacy.length) S.legacy[S.legacy.length - 1].fam = keep; return ok; }; }
+function heirAct(a) {
+  const L = S.legacy && S.legacy[S.legacy.length - 1], F = L && L.fam; if (S.me || !F) return false; const k = F.kids[a.i]; if (!k || k.pid || k.played) return false;
+  const age = clamp(Math.round((S.week - k.born) / 52), 18, 45), n = Math.max(1, F.kids.filter(x => !x.pid).length), share = F.estate / n, c = Object.assign(ccDefaults(), { name: k.name, g: k.g, age, hub: F.hub, role: F.role, dream: F.role, wealth: share >= usd(200000, F.hub) ? 'trust' : share >= usd(20000, F.hub) ? 'comfortable' : 'gettingby', look: Object.assign(defaultLook(), { skin: F.look.skin || 0, hairColor: F.look.hairColor || 0, eyes: F.look.eyes || 0, face: F.look.face || 0 }), love: F.love, salt: a.salt });
+  if (!ORIGIN.wealth[c.wealth]) c.wealth = 'gettingby';
+  startCareer(c); if (typeof legacyGreet === 'function') legacyGreet(); k.played = 1;
+  const M = S.me, me = ME(); M.cash += Math.round(share); M.heir = { of: L.id, w: S.week }; me.fame = Math.max(me.fame || 0, F.fame * .15); me.standing = clamp(me.standing + F.standing * .1, 0, 100);
+  const co = F.company !== undefined && S.companies[F.company] && S.companies[F.company].closed === null ? S.companies[F.company] : null; if (co) { M.company = co.id; co.owner = me.id; }
+  diary(`You inherit ${fmtCash(Math.round(share))}${co ? ` and ${co.name}` : ''}, a famous surname, and a phone full of people who knew your parent.`); milestone(`Took over the family name${co ? ` and ${co.name}` : ''}`, 'life');
+  return true;
+}
+// the name opens doors for a while, and the trades never quite let it go
+{ const _hf = hireFactors; hireFactors = function (post) { const F = _hf(post); const H = S.me && S.me.heir; if (H && S.week - H.w < 156) F.push(['A famous family name', .5 * (1 - (S.week - H.w) / 156)]); return F; }; }
+LATE.push({ id: 'fam_nepo', pool: 'family', once: 1, need: () => S.me.heir && S.week - S.me.heir.w > 8 && S.week - S.me.heir.w < 104, title: 'Nepo baby', text: () => 'A trade columnist runs a list of "industry kids who got the job because of their surname". You\'re fourth. There is a photograph.',
+  opts: [
+    { k: 'own', label: () => 'Own it, with a joke', check: ['cha', 13], go: (c, ok) => { lateFx(ok ? { fame: 3, stand: 1 } : { stand: -2, stress: 8 }); return ok ? 'You post the list with "only fourth?". It goes further than the column did.' : 'The joke lands badly. A second column runs about the first.'; } },
+    { k: 'work', label: () => 'Say nothing and outwork them', go: c => { lateFx({ stress: 6, xp: { [Object.keys(CRAFTS[MAIN[ME().role]].subs)[0]]: .3 } }); return 'You stop reading the trades for a month and work twice as hard. It shows.'; } }] });
+LATE_BY.fam_nepo = LATE[LATE.length - 1];
+// the epilogue: play on as family
+{ const _ep = typeof epilogueHTML === 'function' ? epilogueHTML : null; if (_ep) epilogueHTML = function () {
+  const h = _ep(), H = famHeirs(); if (!H.length) return h;
+  return h.replace('<button class="btn primary" data-nextgen="1">', `${H.map(([k, i]) => `<button class="btn primary" data-heir="${i}">Play on as ${esc(k.name)} (${Math.round(kidAge(k))})</button> `).join('')}<button class="btn primary" data-nextgen="1">`);
+}; }
+function heirClick(t) { const d = t.dataset && t.dataset.heir; if (d === undefined) return false; doAct({ t: 'nextgen' }); doAct({ t: 'heir', i: +d, salt: Math.floor(Math.random() * 1e9) }); if (S.me && typeof partyAuto === 'function' && !S.me.party) {} UI.dtab = 'today'; UI.tab = 'you'; UI.stack = []; render(); return true; }
+// family on the Life tab
+function famHTML() {
+  const M = S.me, K = famKids(), sp = famSpouse(); if (!K.length && sp === null) return '';
+  return `<section class="panel"><h3>Family</h3>${sp !== null ? `<p>Married to ${pl(sp)}.</p>` : ''}${K.length ? `<ul class="plain">${K.map(k => `<li><b>${esc(k.name)}</b> <span class="muted">${Math.floor(kidAge(k))}${k.adopted ? ', adopted' : ''}${k.focus ? ' · into ' + FAM_FOCUS[k.focus][0].toLowerCase() : ''}${k.pid !== undefined ? ' · in the business' : k.out ? ' · gone their own way' : ''}</span>${k.pid !== undefined ? ` ${pl(k.pid)}` : ''}</li>`).join('')}</ul><p class="small muted">Children cost about ${fmtCash(usd(250))} a week while small and ${fmtCash(usd(150))} at school; the little ones cost sleep too.</p>` : ''}</section>`;
+}
+{ const _lv = OS_VIEWS.life; if (_lv) OS_VIEWS.life = () => famHTML() + _lv(); }
+// </family>
+// <pj2>
+// ---------------- On your set: morale, promises, and the censor ----------------
+// More of what only the person whose name is on the company decides, on top of the production journey:
+//  · Morale. How you handle people on set (the lead who calls in "sick", the crew asked for a sixth day, the fight
+//    between two actors) moves the set's morale, and a happy set makes a better film: at release, morale adds to or
+//    takes from the film's quality.
+//  · Promises. Actors and crews ask for them: the big scene stays, top billing, no overtime. Each one goes in a
+//    ledger. When the cut comes, you find out what a promise costs: keep it and lose a little film, or break it and
+//    lose the person (and the rest of the set hears about it).
+//  · The censor. In post, the film goes to whoever classifies films where you are: the Production Code office
+//    (1934–67), the ratings board after it, the British censors, a national board. Cut for the wider certificate,
+//    appeal, or take the restricted rating.
+const PJ2_NEW = [
+  { k: 'promise_scene', st: [1, 2], title: 'A promise about a scene', text: '{lead} pulls you aside: their big scene in {film} is why they took the part. They want your word it stays in the cut.', opts: [
+    { k: 'promise', label: 'Give your word', ok: { morale: 2, promise: 'scene', t: 'They hug you. Word gets round the set that you look after actors.' } },
+    { k: 'hedge', label: '"I\'ll fight for it"', check: ['cha', 12], ok: { morale: 1, t: 'They take it as a yes without you having said one.' }, bad: { morale: -2, t: 'They hear the hedge. A cooler week on set.' } },
+    { k: 'no', label: 'No promises: the cut decides', ok: { morale: -1, t: 'They respect it, mostly.' } }] },
+  { k: 'promise_billing', st: [0, 1], title: 'Billing', text: 'Two of the cast of {film} both believe they should be billed first. Their agents are on the phone, separately.', opts: [
+    { k: 'lead', label: 'Promise {lead} top billing', ok: { morale: -1, promise: 'billing', t: '{lead} is delighted. The other one is professional about it, in a way that\'s worse.' } },
+    { k: 'alpha', label: 'Bill them alphabetically', check: ['pack', 12], ok: { morale: 1, t: 'Everyone pretends to be satisfied. That\'s a win.' }, bad: { morale: -2, t: 'Both agents are unhappy now.' } }] },
+  { k: 'promise_ot', st: [2], title: 'The crew asks for a promise', text: 'The crew on {film} has worked four sixty-hour weeks. The heads of department ask you to promise no more sixth days.', opts: [
+    { k: 'promise', label: 'Promise: no more sixth days', ok: { morale: 3, promise: 'overtime', t: 'The atmosphere changes in an afternoon. People start bringing cakes.' } },
+    { k: 'pay', label: 'Pay them double for any sixth day instead', cost: .01, ok: { morale: 2, t: 'Money isn\'t sleep, but it helps.' } },
+    { k: 'no', label: 'The schedule is the schedule', ok: { morale: -4, t: 'Nobody says anything. The work gets slower.' } }] },
+  { k: 'callin', st: [2], title: 'The call-in', text: '{lead} calls in sick on the day of the big scene. The rumour on set is that it\'s a hangover.', opts: [
+    { k: 'around', label: 'Shoot around them today', check: ['setm', 12], ok: { morale: 1, t: 'You rejig the day and shoot inserts. Nobody loses a minute.' }, bad: { weeks: 1, morale: -1, t: 'You lose the day, then the next one.' } },
+    { k: 'confront', label: 'Go to their trailer', check: ['cha', 13], ok: { morale: 2, q: 1, t: 'Twenty minutes, a coffee, a straight conversation. They\'re on set by noon and they\'re brilliant.' }, bad: { morale: -3, t: 'It turns into a row the whole set can hear.' } },
+    { k: 'ignore', label: 'Say nothing, reschedule', ok: { weeks: 1, morale: -1, t: 'The crew notices that some people get away with things.' } }] },
+  { k: 'feud', st: [2], title: 'A feud on set', text: 'Two of the cast of {film} have stopped speaking to each other. Their scenes together are next week.', opts: [
+    { k: 'mediate', label: 'Sit them down together', check: ['cha', 13], ok: { morale: 3, q: 1, t: 'It was about a parking space. It\'s always about a parking space. They\'re friends by Friday.' }, bad: { morale: -2, t: 'It gets worse. You shoot their scenes in separate takes.' } },
+    { k: 'separate', label: 'Shoot them separately', check: ['shape', 12], ok: { morale: 0, t: 'Over-the-shoulders with a stand-in. Nobody will ever know.' }, bad: { q: -1, t: 'You can see they\'re not in the same room.' } }] },
+  { k: 'cut_promise', st: [3], need: f => (f.promises || []).some(p => p.k === 'scene' && !p.done), title: 'The promised scene', text: 'In the cutting room, the scene you promised {lead} would stay is slowing {film} down. The editor wants it gone.', opts: [
+    { k: 'keep', label: 'Keep your word: the scene stays', ok: { q: -1, keep: 'scene', t: 'The scene stays. The film is a little longer. {lead} sends flowers to the edit suite.' } },
+    { k: 'trim', label: 'Trim it hard, but keep it', check: ['rhythm', 13], ok: { q: 1, keep: 'scene', t: 'Half the length, all of the feeling. {lead} doesn\'t notice what\'s gone.' }, bad: { q: 0, keep: 'scene', t: 'It\'s shorter and still slow.' } },
+    { k: 'cut', label: 'Cut it', ok: { q: 2, breaks: 'scene', t: 'The film is better. {lead} finds out at the premiere.' } }] },
+  { k: 'censor', st: [3], need: f => !f.censored, title: 'The censor', text: '{board} has seen {film}. {issue}', opts: [
+    { k: 'cut', label: 'Make the cuts for the wider certificate', ok: { q: -2, hook: 3, censor: 'cut', t: 'Two scenes trimmed. A certificate everyone can see.' } },
+    { k: 'appeal', label: 'Appeal', check: ['cha', 13], ok: { censor: 'won', hook: 1, t: 'The appeal board sides with you. The film opens as made, for everyone.' }, bad: { hook: -3, censor: 'lost', t: 'Appeal refused, and the restricted certificate stands.' } },
+    { k: 'take', label: 'Take the restricted certificate', ok: { q: 1, hook: -4, censor: 'restricted', t: 'Adults only. Critics respect it; families stay home.' } }] }
+];
+function pj2Board(f) { const m = HUBS[f.hub] ? HUBS[f.hub].m : 'US', y = S.year;
+  if (m === 'US') return y < 1934 ? null : y < 1968 ? 'The Production Code office' : 'The ratings board';
+  if (m === 'UK') return y < 1913 ? null : 'The British censors'; if (m === 'IN') return y < 1952 ? null : 'The Censor Board'; return y < 1920 ? null : 'The national censors'; }
+function pj2Issue(f) { const g = f.genre;
+  return ['Horror', 'Crime', 'Thriller', 'War', 'Action', 'Martial arts', 'Superhero'].includes(g) ? 'The violence goes too far for a general certificate, they say: three shots, and one sound effect.'
+    : ['Romance', 'Drama', 'Musical'].includes(g) ? 'One love scene is "too frank" for a general certificate.' : 'The language, mostly: eleven words, listed.'; }
+// the new calls slot into the production journey; some only make sense under conditions
+for (const c of PJ2_NEW) PJ_CALLS.push(c);
+{ const _pw = pjWeek; pjWeek = function () {
+  const n0 = (S.me.inbox || []).length, skip = PJ_CALLS.filter(c => c.need);
+  // calls whose conditions aren't met for a film are hidden from the draw by marking them used for that film, then restored
+  const hidden = []; for (const f of pjOwnFilms()) for (const c of skip) if (!(f.pj || []).includes(c.k) && (!c.need(f) || (c.k === 'censor' && !pj2Board(f)))) { (f.pj = f.pj || []).push(c.k); hidden.push([f, c.k]); }
+  _pw();
+  for (const [f, k] of hidden) { const i = (f.pj || []).indexOf(k); if (i >= 0) f.pj.splice(i, 1); }
+  for (const it of (S.me.inbox || []).slice(n0)) { if (it.kind !== 'pj') continue; const f = S.films[it.film]; if (!f) continue; const lead = (f.cast || []).find(id => P(id) && id !== ME().id), L = lead !== undefined ? P(lead).name : 'Your lead';
+    const sub = t => String(t).replace(/\{lead\}/g, L).replace(/\{board\}/g, pj2Board(f) || 'The censors').replace(/\{issue\}/g, pj2Issue(f)); it.text = sub(it.text); it.title = sub(it.title); for (const c of it.choices || []) c.label = sub(c.label); it.lead = lead; }
+}; }
+{ const _pp = pjPick; pjPick = function (it, k) {
+  if (it.kind !== 'pj') return _pp(it, k);
+  const C = PJ_CALLS.find(x => x.k === it.call), f = S.films[it.film], me = ME(); const r = _pp(it, k); if (!C || !f || !PJ2_NEW.includes(C)) return r;
+  const o = C.opts.find(x => x.k === k) || C.opts[C.opts.length - 1], ok = it.result && it.result.ok !== false, R = ok ? o.ok : (o.bad || o.ok), lead = it.lead, L = lead !== undefined && P(lead) ? P(lead).name : 'Your lead';
+  if (it.result && it.result.t) it.result.t = it.result.t.replace(/\{lead\}/g, L);
+  if (R.morale) f.morale = clamp((f.morale || 0) + R.morale, -10, 10);
+  if (R.promise && lead !== undefined) { (f.promises = f.promises || []).push({ k: R.promise, who: lead, w: S.week }); if (P(lead)) addTie(me, P(lead), 4); }
+  if (R.keep) { const p = (f.promises || []).find(x => x.k === R.keep && !x.done); if (p) { p.done = 'kept'; if (P(p.who)) { addTie(me, P(p.who), 5); if (typeof remember === 'function') remember(p.who, 4, 'Kept a promise about the cut'); } } }
+  if (R.breaks) { const p = (f.promises || []).find(x => x.k === R.breaks && !x.done); if (p) { p.done = 'broken'; f.morale = clamp((f.morale || 0) - 3, -10, 10); me.standing = clamp(me.standing - .5, 0, 100);
+    if (P(p.who)) { addTie(me, P(p.who), -15); if (typeof remember === 'function') remember(p.who, -8, 'Broke a promise about the cut'); }
+    for (const id of (f.cast || []).filter(id => id !== p.who && id !== me.id && P(id)).slice(0, 4)) addTie(me, P(id), -3); } }
+  if (R.censor) f.censored = R.censor;
+  return r;
+}; }
+// a broken overtime promise: if the film runs over after you promised the crew, they remember
+{ const _sp = typeof slatePick === 'function' ? slatePick : null; if (_sp) slatePick = function (it, k) { const f = S.films[it.film], r = _sp(it, k); if (f && it.call === 'over' && (f.promises || []).some(p => p.k === 'overtime' && !p.done)) { const p = f.promises.find(p => p.k === 'overtime' && !p.done); p.done = 'broken'; f.morale = clamp((f.morale || 0) - 4, -10, 10); if (it.result) it.result.t += ' The overrun means sixth days after all; the crew remembers who promised.'; } return r; }; }
+// morale lands in the film when it comes out
+{ const _rl = release; release = function (f) {
+  if (f && f.promises) for (const p of f.promises.filter(p => !p.done)) { p.done = 'kept'; if (P(p.who) && S.me && f.co === S.me.company) addTie(ME(), P(p.who), 3); }   // promises nobody had to test were kept
+  if (f && f.morale && !f.moraleIn) { f.moraleIn = 1; f.qBonus = (f.qBonus || 0) + f.morale * .3; (f.events = f.events || []).push({ w: S.week, t: `A ${f.morale > 0 ? 'happy' : 'miserable'} set (morale ${f.morale > 0 ? '+' : ''}${f.morale}) ${f.morale > 0 ? 'shows on screen' : 'shows too'}.`, q: f.morale * .3 }); } return _rl.apply(this, arguments); }; }
+// </pj2>
+// <inner>
+// ---------------- Inner weather: inspiration, slumps, obsessions and fears ----------------
+// Creative work comes in surges and droughts, and the dice now know it.
+//  · Inspired: when you're rested and calm, an idea sometimes takes hold. For three weeks you have advantage on the
+//    creative crafts and learn faster.
+//  · A slump: after a flop with your name on it, or a long run of rejections, the work goes flat for a while.
+//    Disadvantage on the creative crafts until it lifts, sooner if you take a real break or have a win.
+//  · An obsession: once in a career, at the height of an inspired spell, a film demands something specific of you (an
+//    actor, a city, a piece of kit) within six months. Make that film and it's the best thing you'll ever do. Let it
+//    go and the drought afterwards is long.
+//  · Fears: a premiere that goes wrong, a public flop or a brutal review can leave a fear behind (stage fright, fear
+//    of failure, dread of critics) that costs you on the rolls it touches until you face it.
+// All of these show up with your other conditions, so you can see exactly which rolls they touch.
+const INNER_CRAFT = ['struc', 'dial', 'char', 'orig', 'vstory', 'tone', 'pace', 'comp', 'light', 'theme', 'score', 'song', 'range', 'impro'];
+const FEARS = { stage: { label: 'Stage fright', dis: ['pres', 'cha'], d: 'Since that night, a room full of people makes your hands shake. Disadvantage on Presence and Charisma until you face it.' },
+  failure: { label: 'Fear of failure', dis: ['orig', 'vis'], d: 'You keep choosing the safe version. Disadvantage on Originality and Vision until you face it.' },
+  critics: { label: 'Dread of critics', dis: ['tas', 'com'], d: 'You read every review and believe the bad ones. Disadvantage on Taste and Composure until you face it.' } };
+function innerOf() { const M = S.me; return (M.inner = M.inner || { fears: [] }); }
+{ const _co = conditionsOf; conditionsOf = function () {
+  const C = _co(), M = S.me; if (!M || !M.party || !M.party.done) return C; const I = innerOf();
+  if (I.insp && S.week < I.insp) C.push({ k: 'inspired', label: '✨ Inspired', adv: INNER_CRAFT, d: `An idea has hold of you. Advantage on the creative crafts and faster learning, until ${fmtDate(I.insp, true)}.` });
+  if (I.slump && S.week < I.slump) C.push({ k: 'slump', label: '🌧️ In a slump', dis: INNER_CRAFT, d: `Everything you make feels flat. Disadvantage on the creative crafts until ${fmtDate(I.slump, true)}, sooner with a real break or a win.` });
+  if (I.obs && !I.obs.done && S.week < I.obs.until) C.push({ k: 'obsessed', label: '🔥 Obsessed', adv: ['orig', 'vis'], d: `${I.obs.text} Until ${fmtDate(I.obs.until, true)}.` });
+  for (const f of I.fears || []) { const F = FEARS[f.k]; if (F) C.push({ k: 'fear_' + f.k, label: `😨 ${F.label}`, dis: F.dis, d: F.d }); }
+  return C; }; }
+{ const _cm = condMul; condMul = function () { const v = _cm(), I = S.me && S.me.inner; return I && I.insp && S.week < I.insp ? v * 1.15 : I && I.slump && S.week < I.slump ? v * .85 : v; }; }
+function innerWeek() {
+  const M = S.me, me = ME(); if (!M || !M.party || !M.party.done) return; const I = innerOf();
+  if (I.insp && S.week >= I.insp) { delete I.insp; diary('The idea that had hold of you lets go. You have pages to show for it.'); }
+  if (I.slump && S.week >= I.slump) { delete I.slump; diary('The slump lifts, the way they do: one morning the work is just work again.'); }
+  if (I.slump && M.stress < 20 && M.energy > 80 && prnd() < .25) { delete I.slump; diary('A proper rest breaks the slump early.'); }
+  // inspiration comes to the rested and the calm
+  if (!I.insp && !I.slump && M.energy >= 60 && M.stress < 40 && prnd() < .015 + (40 - M.stress) / 1600) { I.insp = S.week + 3; diary('An idea arrives in the shower and won\'t leave. You\'re inspired.'); }
+  // once in a career, at the height of it, an obsession
+  if (I.insp && !I.obs && careerLevel() >= 2 && ['writer', 'director', 'producer'].includes(me.role) && prnd() < .04) innerObsess();
+  if (I.obs && !I.obs.done && S.week >= I.obs.until) { I.obs.done = 'lost'; I.slump = S.week + 12; M.stress = clamp(M.stress + 12, 0, 100); diary('The film you were obsessed with never happened. Something goes quiet in you for a long time.'); milestone('Let an obsession go', 'life'); }
+  // a fear can be faced after a while
+  if ((I.fears || []).some(f => S.week - f.w >= 4) && !pending().some(it => it.kind === 'late') && prnd() < .15) lateOffer('inner');
+}
+function innerObsess() {
+  const M = S.me, me = ME(), I = innerOf(), r = prnd();
+  if (r < .45) { const q = typeof bestIn === 'function' ? bestIn(M.hub, ['actor'], q => (q.fame || 0) * .6 + q.standing * .4 + prnd() * 20) : null; if (q) { I.obs = { k: 'actor', v: q.id, until: S.week + 26, text: `A film that only works with ${q.name} in it.` }; } }
+  else if (r < .75) { const L = HUB_IDS.filter(h => h !== M.hub), h = L[Math.floor(prnd() * L.length)]; I.obs = { k: 'place', v: h, until: S.week + 26, text: `A film that has to be shot in ${HUBS[h].name}.` }; }
+  else { I.obs = { k: 'budget', v: 0, until: S.week + 26, text: 'A film made fast and cheap, before the feeling goes: under the money anyone would give you.' }; }
+  if (I.obs) { inbox('note', 'An obsession', `${I.obs.text} You can see every frame of it. Make it within six months, through your own company, and it will be the best thing you ever do. If you don't, it will haunt you.`); milestone('Became obsessed with a film', 'life'); }
+}
+// the obsession is answered when your company makes the film it asked for
+{ const _sf = selfFund; selfFund = function (a) {
+  const M = S.me, I = M && M.inner, n0 = S.films.length, r = _sf(a); if (!r || !I || !I.obs || I.obs.done || S.week >= I.obs.until) return r;
+  const f = S.films.slice(n0).find(x => x.co === M.company); if (!f) return r;
+  const O = I.obs, hit = O.k === 'actor' ? (f.cast || []).includes(O.v) : O.k === 'place' ? f.hub === O.v || a.loc === O.v : O.k === 'budget' ? f.budget <= estBudget(f.genre) * .6 : false;
+  if (hit) { O.done = 'made'; f.qBonus = (f.qBonus || 0) + 8; f.obsession = 1; (f.events = f.events || []).push({ w: S.week, t: 'The film you were obsessed with: every frame of it was already in your head.', q: 8 }); milestone(`Made the film you were obsessed with: ${f.title}`, 'work'); diary(`You're making it: ${f.title}, exactly as you saw it.`); }
+  return r; }; }
+// flops and bad nights leave marks
+{ const _rl = release; release = function (f) {
+  const out = _rl.apply(this, arguments); const M = S.me; if (!M || !f || !M.party || !M.party.done) return out; const me = ME(), mine = (M.company !== undefined && f.co === M.company) || (me.credits || []).includes(f.id) || f.dir === me.id; if (!mine || f.innerSeen) return out; f.innerSeen = 1;
+  const I = innerOf(), flop = f.total < (f.cost || f.budget) * .8, hit = f.total > (f.cost || f.budget) * 2.5;
+  if (hit && I.slump) { delete I.slump; diary(`${f.title} is a hit, and the slump goes with it.`); }
+  if (flop && prnd() < .45) { I.slump = Math.max(I.slump || 0, S.week + 6); diary(`${f.title} flops. You stop answering your phone for a bit.`); }
+  if (flop && prnd() < .25 && !(I.fears || []).some(x => x.k === 'failure')) { (I.fears = I.fears || []).push({ k: 'failure', w: S.week }); }
+  if ((f.reviews || 50) < 40 && prnd() < .3 && !(I.fears || []).some(x => x.k === 'critics')) { (I.fears = I.fears || []).push({ k: 'critics', w: S.week }); }
+  if ((f.reviews || 50) < 35 && (f.dir === me.id || (f.cast || [])[0] === me.id) && prnd() < .3 && !(I.fears || []).some(x => x.k === 'stage')) { (I.fears = I.fears || []).push({ k: 'stage', w: S.week }); }
+  return out; }; }
+LATE.push(
+  { id: 'inner_stage', pool: 'inner', cool: 8, need: () => (innerOf().fears || []).some(f => f.k === 'stage'), title: 'Facing the room', text: () => 'A festival has asked you to do a Q&A after a screening. Two hundred people, a microphone, no script. Since that night, the thought of it makes you feel sick.',
+    opts: [{ k: 'face', label: () => 'Do it', check: ['com', 12], go: (c, ok) => { if (ok) innerCure('stage'); lateFx(ok ? { stand: .5, stress: -6 } : { stress: 8 }); return ok ? 'Your voice shakes for the first answer and then it doesn\'t. Afterwards someone says it was the best Q&A of the festival.' : 'You freeze on the second question. It\'ll take another try.'; } },
+      { k: 'no', label: () => 'Say you\'re busy', go: c => 'They find someone else. The fear stays where it is.' }] },
+  { id: 'inner_failure', pool: 'inner', cool: 8, need: () => (innerOf().fears || []).some(f => f.k === 'failure'), title: 'The risky version', text: () => 'You have two drafts of the same idea: the safe one everyone will like, and the strange one you actually believe in. Since the flop, you keep reaching for the safe one.',
+    opts: [{ k: 'face', label: () => 'Send the strange one out', check: ['orig', 12], go: (c, ok) => { if (ok) innerCure('failure'); lateFx(ok ? { xp: { orig: .3 }, stress: -4 } : { stress: 6 }); return ok ? 'Two people hate it and one loves it, and the one who loves it has money. You remember why you do this.' : 'It comes back with a polite no. You\'ll try again.'; } },
+      { k: 'no', label: () => 'Send the safe one', go: c => 'It does fine. You feel nothing about it.' }] },
+  { id: 'inner_critics', pool: 'inner', cool: 8, need: () => (innerOf().fears || []).some(f => f.k === 'critics'), title: 'The reviews', text: () => 'You have a new piece of work out, and the reviews are in a tab you haven\'t opened. You know you\'ll read the worst one twenty times.',
+    opts: [{ k: 'face', label: () => 'Read them once, all of them, and close the tab', check: ['com', 12], go: (c, ok) => { if (ok) innerCure('critics'); lateFx(ok ? { stress: -6 } : { stress: 6 }); return ok ? 'Some are kind, some aren\'t, none of them are about you. You close the tab and go for a walk.' : 'You read the worst one twenty times. Next time.'; } },
+      { k: 'no', label: () => 'Don\'t read them at all', go: c => { lateFx({ stress: -2 }); return 'Bliss, until a friend mentions one.'; } }] }
+);
+for (const t of LATE.slice(-3)) LATE_BY[t.id] = t;
+function innerCure(k) { const I = innerOf(); I.fears = (I.fears || []).filter(f => f.k !== k); milestone(`Faced it: ${FEARS[k].label.toLowerCase()}`, 'life'); }
+// </inner>
+// <bdays>
+// ---------------- Birthdays ----------------
+// Everyone has one. The people closest to you notice whether you remembered: a text is the minimum, a gift on the
+// day counts double, and forgetting someone in your inner circle is noticed. Upcoming birthdays show in Up next.
+function bday(id) { return Math.floor(gH(id, 'bday') * 52); }
+function bdayPeople() { const M = S.me, IC = typeof innerCircle === 'function' ? innerCircle().filter(x => x[1] >= 2).map(x => x[0]) : []; return IC.concat(aliveKnown().filter(id => !IC.includes(id) && opinion(id) >= 60)).filter(id => P(id) && !P(id).dead && id !== ME().id).slice(0, 8); }
+function bdayWeek() {
+  const M = S.me, me = ME(); if (!M || !M.party || !M.party.done) return; const k = woy(), IC = new Set(typeof innerCircle === 'function' ? innerCircle().filter(x => x[1] >= 2).map(x => x[0]) : []);
+  // last week's birthdays: did you remember?
+  for (const id of Object.keys(M.bdayDue || {}).map(Number)) { const d = M.bdayDue[id]; if (S.week - d.w >= 1) { if (!d.done && IC.has(id) && P(id)) { addTie(me, P(id), -3); if (typeof remember === 'function') remember(id, -2, 'Forgot their birthday'); } delete M.bdayDue[id]; } }
+  for (const id of bdayPeople()) if (bday(id) === k && !(M.bdayDue || {})[id]) { (M.bdayDue = M.bdayDue || {})[id] = { w: S.week };
+    inbox('bday', `${P(id).name.split(' ')[0]}'s birthday`, `It's ${P(id).name}'s birthday this week.${IC.has(id) ? ' They\'re in your inner circle: they\'ll notice either way.' : ''}${(M.bz || []).some(x => !x.sold && !x.used && (BZ_BY[x.k] || {}).gift) ? ' You have a gift you could give (Bazaar → Yours): this week it counts double.' : ''}`, { person: id, choices: [{ k: 'bd_text', label: 'Send a birthday text' }, { k: 'bd_call', label: 'Call them' }, { k: 'bd_skip', label: 'Let it pass' }] }); }
+}
+function bdayPick(it, k) {
+  if (it.kind !== 'bday') return false; it.done = true; const M = S.me, me = ME(), id = it.person, q = P(id); if (!q) return true; const d = (M.bdayDue || {})[id];
+  if (k === 'bd_skip') { it.result = { t: 'The week goes by.' }; return true; }
+  if (d) d.done = 1; addTie(me, q, k === 'bd_call' ? 3 : 2); if (k === 'bd_call') M.energy = clamp(M.energy - 2, 0, 100); (M.known[id] || {}).seen = S.week;
+  if (typeof sms === 'function') sms(id, k === 'bd_call' ? 'that call made my day. thank you' : pickLine(['thank you!! you remembered', 'aw thanks. drinks soon?', 'thank you ♥'], id + S.week));
+  it.result = { t: k === 'bd_call' ? `Twenty minutes on the phone. ${q.name.split(' ')[0]} sounds genuinely pleased.` : 'A text, a heart back. Small things.' }; return true;
+}
+// a gift in the birthday week counts double
+{ const _ga = giftAct; giftAct = function (a) { const M = S.me, me = ME(), q = P(a.to), before = q ? (me.ties[a.to] || 0) : 0, ok = _ga(a); if (ok && q && (M.bdayDue || {})[a.to] && S.week - M.bdayDue[a.to].w < 1) { const gain = (me.ties[a.to] || 0) - before; if (gain > 0) addTie(me, q, gain); M.bdayDue[a.to].done = 1; diary(`On ${q.name.split(' ')[0]}'s birthday, too.`); } return ok; }; }
+// birthdays coming up go in the strip under your name
+{ const _hn = typeof hpNext === 'function' ? hpNext : null; if (_hn) hpNext = function () { const L = _hn(), k = woy(); const b = bdayPeople().map(id => [id, (bday(id) - k + 52) % 52]).filter(x => x[1] <= 1).sort((a, b) => a[1] - b[1])[0]; if (b && L.length < 5) L.splice(Math.min(2, L.length), 0, { i: '🎂', t: `${P(b[0]).name.split(' ')[0]}'s birthday ${b[1] ? 'next week' : 'this week'}`, go: 'computer:bazaar' }); return L.slice(0, 4); }; }
+// </bdays>
+// <depth3>
+// ---------------- Convictions, junkets, post-mortems and a scrapbook ----------------
+//  · Convictions. Mentors and hard weeks hand you beliefs about the work ("fix it in post", "never work with friends",
+//    "prep is everything"). Take one to heart and it costs you a little while you internalise it (eight weeks), then
+//    it's part of you for good: advantage on the rolls it sharpens, disadvantage on the ones it blinds you to. You
+//    have room for two, and one more for every two levels; to take a new one when you're full, you let an old one go.
+//  · The junket. When a film you made or star in opens, the press wants you: one question, live. Charm, candour or
+//    deflection, and a Charisma or Composure roll.
+//  · Post-mortems. Every film your company releases is set against what the desk forecast, and you write down the
+//    reason it beat or missed. Each one teaches you a little about selling films. They're on the Forecast tab.
+//  · The scrapbook: your milestones as photographs, film by film, year by year.
+const BELIEFS = {
+  fixpost: ['Fix it in post', ['rhythm', 'shape'], ['setm'], 'Anything can be saved in the cutting room. (Advantage: rhythm, shaping a cut. Disadvantage: running a set.)'],
+  friends: ['Never work with friends', ['com'], ['col'], 'Business is business. (Advantage: composure. Disadvantage: collaboration.)'],
+  prototype: ['Every film is a prototype', ['orig'], ['bud'], 'Never make the same film twice. (Advantage: originality. Disadvantage: budgeting.)'],
+  audience: ['The audience is never wrong', ['mkt'], ['orig'], 'If they didn\'t come, you didn\'t make it for them. (Advantage: marketing. Disadvantage: originality.)'],
+  actors: ['Protect the actors, always', ['dact', 'cha'], ['bud'], 'The performance is the film. (Advantage: directing actors, charisma. Disadvantage: budgeting.)'],
+  fuel: ['Money is just fuel', ['pack', 'fin'], ['tas'], 'Spend it to make the thing. (Advantage: packaging, finance. Disadvantage: taste.)'],
+  prep: ['Prep is everything', ['setm', 'stag'], ['impro'], 'The day goes how the plan goes. (Advantage: set management, staging. Disadvantage: improvisation.)'],
+  instinct: ['Trust your first instinct', ['impro', 'vis'], ['struc'], 'The first idea is the true one. (Advantage: improvisation, vision. Disadvantage: structure.)'],
+  everyjob: ['Learn every job on the set', ['col'], ['pack'], 'Respect is knowing what the grip does. (Advantage: collaboration. Disadvantage: packaging.)'],
+  sayyes: ['Say yes to everything for ten years', ['eth'], ['com'], 'Work begets work. (Advantage: work ethic. Disadvantage: composure.)']
+};
+function beliefsOf() { return (S.me.beliefs = S.me.beliefs || []); }
+function beliefSlots() { return Math.min(5, 2 + Math.floor(careerLevel() / 2)); }
+{ const _co = conditionsOf; conditionsOf = function () {
+  const C = _co(), M = S.me; if (!M || !M.party || !M.party.done) return C;
+  for (const b of beliefsOf()) { const B = BELIEFS[b.k]; if (!B) continue; const set = S.week >= b.set;
+    C.push(set ? { k: 'bel_' + b.k, label: `💭 "${B[0]}"`, adv: B[1], dis: B[2], d: `A conviction. ${B[3]}` } : { k: 'bel_' + b.k, label: `💭 Taking in "${B[0]}"`, dis: B[1], d: `You're still making this belief your own, and it gets in the way for now: disadvantage on ${B[1].join(' and ')} until ${fmtDate(b.set, true)}.` }); }
+  return C; }; }
+function beliefOffer() {
+  const M = S.me, have = new Set(beliefsOf().map(b => b.k)), L = Object.keys(BELIEFS).filter(k => !have.has(k)); if (!L.length) return;
+  const k = L[Math.floor(prnd() * L.length)], B = BELIEFS[k], from = typeof lateWho === 'function' ? lateWho(prnd() < .5 ? 'friend' : 'known') : null, full = beliefsOf().length >= beliefSlots();
+  const ch = full ? beliefsOf().map(b => ({ k: 'bel_swap_' + b.k, label: `Take it, and let go of "${BELIEFS[b.k][0]}"` })) : [{ k: 'bel_take', label: 'Take it to heart' }];
+  inbox('belief', `"${B[0]}"`, `${from !== null && from !== undefined ? `${P(from).name} says it over a late dinner` : 'You hear it from someone who has been doing this for forty years'}: "${B[0].toLowerCase()}." ${B[3]} It would take a couple of months to really believe it.${full ? ` You already hold ${beliefsOf().length} convictions, all you have room for at your level.` : ''}`, { bel: k, person: from, choices: ch.concat([{ k: 'bel_no', label: 'Nod, and forget it' }]) });
+}
+function beliefPick(it, k) {
+  if (it.kind !== 'belief') return false; it.done = true; const M = S.me, B = BELIEFS[it.bel];
+  if (k === 'bel_no' || !B) { it.result = { t: 'You nod. It doesn\'t stick.' }; return true; }
+  if (k.startsWith('bel_swap_')) { const old = k.slice(9); M.beliefs = beliefsOf().filter(b => b.k !== old); diary(`You stop believing "${BELIEFS[old][0].toLowerCase()}". It feels like moving out.`); }
+  if (beliefsOf().length >= beliefSlots()) { it.result = { t: 'There isn\'t room in you for another conviction right now.' }; return true; }
+  beliefsOf().push({ k: it.bel, w: S.week, set: S.week + 8 }); it.result = { t: `"${B[0]}." You write it on a card and pin it above your desk.` }; return true;
+}
+// ---- the junket ----
+const OUTLETS2 = [['The Daily Slate', 'trade'], ['Silver Screen Weekly', 'fan'], ['The Spotlight', 'tabloid'], ['Cinéaste Review', 'highbrow'], ['Morning Television', 'tv']];
+function junketQ(f) { const r = prnd(), lead = (f.cast || []).find(id => P(id) && id !== ME().id);
+  return r < .3 ? [`There are reports of a fight on set. Is it true?`, 'feud', lead] : r < .55 ? [`The film went over budget, by most accounts. What happened?`, 'budget', null] : r < .8 ? [`What do you want audiences to take away from ${f.title}?`, 'meaning', null] : [`${lead !== undefined && P(lead) ? P(lead).name : 'Your lead'} is getting talked about for awards. Fair?`, 'praise', lead]; }
+{ const _rl = release; release = function (f) {
+  const out = _rl.apply(this, arguments); const M = S.me; if (!M || !f || !M.party || !M.party.done || f.junket) return out; const me = ME();
+  const mine = (M.company !== undefined && f.co === M.company) || f.dir === me.id || (f.cast || [])[0] === me.id; if (!mine || (me.fame || 0) < 3 && me.standing < 20) return out; f.junket = 1;
+  const [q, k, who] = junketQ(f), O = OUTLETS2[Math.floor(prnd() * OUTLETS2.length)];
+  inbox('junket', `${O[0]} on ${f.title}`, `The junket for ${f.title}: twelve interviews, four minutes each. ${O[0]} asks: "${q}"`, { film: f.id, jq: k, who, outlet: O[0], choices: [{ k: 'j_charm', label: `Charm them · ${checkLabel('cha', 12)}`, check: ['cha', 12] }, { k: 'j_candid', label: `Answer candidly · ${checkLabel('com', 13)}`, check: ['com', 13] }, { k: 'j_deflect', label: 'Deflect, politely' }] });
+  // and the film's lessons
+  if (M.company !== undefined && f.co === M.company && typeof fcRun === 'function') { const R = fcRun({ id: f.id, m: f.m, genre: f.genre, tier: f.tier || 3, budget: f.budget, asOf: f.rel }), x = f.total / Math.max(.01, R.mid);
+    const why = x >= 1.5 ? ((f.reviews || 0) >= 70 ? 'the reviews: word of mouth carried it' : (f.hook || 50) >= 65 ? 'the hook: it sold itself' : (P(f.cast[0]) && (P(f.cast[0]).fame || 0) >= 50) ? 'the star' : 'timing and luck, mostly; don\'t bank on it twice')
+      : x <= .67 ? ((f.reviews || 50) < 45 ? 'the reviews: nothing survives bad word of mouth' : (f.hook || 50) < 40 ? 'a hard sell: nobody knew what it was from the poster' : 'the date and the competition that week') : 'nothing in particular: the desk was right';
+    (M.lessons = M.lessons || []).push({ w: S.week, f: f.id, x: Math.round(x * 100) / 100, t: `${f.title}: ${x >= 1.5 ? `beat the desk ×${x.toFixed(1)}` : x <= .67 ? `missed the desk (×${x.toFixed(2)})` : 'landed near the desk'}. Why: ${why}.` });
+    growSub(me, 'mkt', .12); growSub(me, 'dist', .08); }
+  return out; }; }
+function junketPick(it, k) {
+  if (it.kind !== 'junket') return false; it.done = true; const M = S.me, me = ME(), f = S.films[it.film], who = it.who;
+  if (k === 'j_deflect') { it.result = { t: 'You talk about the weather in the film. They print a nice paragraph nobody reads.' }; return true; }
+  const ok = k === 'j_charm' ? roll('cha', 12) : roll('com', 13), r = M.lastRoll;
+  if (k === 'j_charm') { if (ok) { me.fame = (me.fame || 0) + .6; it.result = { ok, roll: r, t: `The clip goes round: you, laughing, saying the right thing. ${it.outlet} calls you "the most likeable person in the business this week".` }; } else { it.result = { ok, roll: r, t: 'You try a joke. It reads badly in print.' }; me.standing = clamp(me.standing - .3, 0, 100); } return true; }
+  if (ok) { me.standing = clamp(me.standing + .6, 0, 100); if (who !== null && who !== undefined && P(who)) { addTie(me, P(who), it.jq === 'feud' ? 3 : 5); if (typeof remember === 'function') remember(who, 3, 'Spoke well of them in the press'); } it.result = { ok, roll: r, t: it.jq === 'feud' ? 'You tell the truth, kindly. The story dies because there\'s nothing left to dig up.' : it.jq === 'budget' ? 'You explain exactly where the money went. Producers quote you for years.' : 'You say something true about the work. The interview is the one people share.' }; }
+  else { me.fame = (me.fame || 0) + .4; me.standing = clamp(me.standing - .6, 0, 100); if (who !== null && who !== undefined && P(who) && it.jq === 'feud') { addTie(me, P(who), -6); if (typeof remember === 'function') remember(who, -4, 'Said too much to the press'); } it.result = { ok, roll: r, t: 'Too candid. The headline is a quote you\'d give anything to have back.' }; }
+  return true;
+}
+// lessons on the Forecast tab
+{ const _fh = fcHTML; fcHTML = function () { const h = _fh(), L = (S.me.lessons || []).slice(-8).reverse(); if (!L.length) return h; return h.replace(/<\/div>$/, '') + `<section class="tk-p tk-wide"><h4>YOUR POST-MORTEMS <span class="tk-sub">every film your company released, against the desk</span></h4><ul class="plain small">${L.map(l => `<li><span class="tk-mut">${esc(fmtDate(l.w, true))}</span> ${esc(l.t)}</li>`).join('')}</ul></section></div>`; }; }
+function depth3Week() { const M = S.me; if (!M || !M.party || !M.party.done) return; if (!pending().some(it => it.kind === 'belief') && (!M.belW || S.week - M.belW >= 26) && prnd() < .06) { M.belW = S.week; beliefOffer(); } }
+// ---- the scrapbook ----
+const SCRAP_IC = { work: '🎬', love: '❤️', life: '🌱', money: '💵', prize: '🏆', awards: '🏆', fame: '⭐' };
+function scrapHTML() {
+  const M = S.me, L = (M.milestones || []).slice().reverse(); if (!L.length) return '<p class="muted">Nothing yet. The first page is waiting.</p>';
+  const by = {}; for (const m of L) (by[yearOf(m.w)] = by[yearOf(m.w)] || []).push(m);
+  const filmFor = m => { const T = m.t; return S.films.length && (ME().credits || []).map(id => S.films[id]).find(f => f && T.includes(f.title)) || null; };
+  return Object.entries(by).sort((a, b) => b[0] - a[0]).map(([y, ms]) => `<h4 class="scrap-y">${y}</h4><div class="scrap">${ms.slice(0, 24).map((m, i) => { const f = filmFor(m), rot = ((m.w * 7 + i * 13) % 7) - 3;
+    return `<figure class="scrap-p" style="transform:rotate(${rot}deg)">${f && typeof stillSVG === 'function' ? `<div class="scrap-i">${stillSVG(f, m.w % 6, 180)}</div>` : `<div class="scrap-i scrap-e scrap-${m.kind || 'life'}"><span>${SCRAP_IC[m.kind] || '📌'}</span></div>`}<figcaption><b>${esc(fmtDate(m.w, true))}</b> ${esc(m.t)}</figcaption></figure>`; }).join('')}</div>`).join('');
+}
+OS_EXTRA.scrapbook = ['📔', 'Scrapbook', 'Your milestones, as photographs'];
+OS_VIEWS.scrapbook = () => scrapHTML();
+{ const g = OS_GROUPS.find(x => x[0] === 'You'); if (g && !g[1].includes('scrapbook')) g[1].push('scrapbook'); }
+// </depth3>
+// <depth4>
+// ---------------- Playing age, and the slide from coping to dependency ----------------
+//  · Every acting part has an age range, shown on the listing. Your playing age is your age, give or take what your
+//    fitness and your face let you get away with. Outside the range, every year counts against you; before the 1990s
+//    the business was harder still on anyone older than the part. Character parts are where long careers go.
+//  · Coping has a cost. If drinking is how you deal with it and the stress stays high, it can become a dependency:
+//    disadvantage on Composure and Work ethic, energy draining week by week, and a bad day on set waiting to happen.
+//    Someone close will eventually sit you down. Rehab takes a month and works if you let it; recovery is a trait you
+//    keep, with the odd week that tests it.
+const PART_AGES = { 'the best friend who gets all the good lines': [20, 40], 'a detective who has seen everything': [35, 60], 'the villain\'s right hand': [25, 50], 'the love interest': [20, 38], 'a night-shift nurse': [22, 50], 'the bartender who knows everyone\'s secrets': [25, 60], 'a diplomat from somewhere else': [35, 65], 'the singer at the club': [20, 45], 'a boxer on the way down': [22, 40], 'the ghost in the house': [18, 80], 'identical twins (both of them)': [18, 50], 'the mother who holds it together': [30, 55], 'a con artist': [25, 55], 'the narrator': [30, 80], 'the comic relief': [18, 60], 'a professor who lectures in riddles': [45, 75], 'a soldier home from war': [20, 40], 'a dancer with one last chance': [18, 35], 'the grandmother who speaks no English': [60, 85], 'the rival': [20, 45], 'a wedding singer': [25, 60], 'the getaway driver': [20, 45], 'a stand-up comedian falling apart': [25, 55], 'a priest with doubts': [35, 70], 'a farmer at the end of the world': [30, 70], 'an alien learning to be human': [18, 60], 'the mayor': [40, 70], 'a child prodigy, grown up': [22, 32], 'the stuntman who wants to act': [22, 45] };
+{ const _mp = makePart; makePart = function (p) { const r = _mp(p), A = PART_AGES[r.arch] || [20, 60], j = Math.round((hashRand(p.id * 131 + 7)() - .5) * 6); r.ages = [Math.max(16, A[0] + j), A[1] + j]; return r; }; }
+{ const _cb = castingBoard; castingBoard = function (films) { const out = _cb(films); for (const p of out) if (p.part && p.part.ages && !/\(plays /.test(p.t)) p.t += ` (plays ${p.part.ages[0]}–${p.part.ages[1]})`; return out; }; }
+function playAge() { const me = ME(), M = S.me; return ageOf(me) - clamp((skillOf(me, 'phys') - 10) * .3, -2, 3) - (M.youth || 0); }
+{ const _hf = hireFactors; hireFactors = function (post) { const F = _hf(post); if (!post.part || !post.part.ages || !S.me) return F;
+  const a = playAge(), [lo, hi] = post.part.ages, d = a < lo - 3 ? lo - 3 - a : a > hi + 3 ? (a - hi - 3) * (S.year < 1990 ? 1.3 : 1) : 0;
+  if (d > 0) F.push([`Playing age (${Math.round(a)} for a ${lo}–${hi} part)`, -Math.min(1.4, d * .08)]); else if (a >= lo && a <= hi) F.push([`Right age for the part (${lo}–${hi})`, .1]);
+  return F; }; }
+// looking younger can be bought, a little
+for (const [k, y] of [['s_veneers', 2], ['s_stylist', 1], ['h_trainer', 1]]) if (BZ_BY[k]) BZ_BY[k].youth = y;
+{ const _ba = bazaarAct; bazaarAct = function (a) { const n = (S.me.bz || []).length, ok = _ba(a); if (ok && a.k === 'buy' && S.me.bz.length > n) { const B = BZ_BY[S.me.bz[S.me.bz.length - 1].k]; if (B && B.youth) S.me.youth = Math.min(4, (S.me.youth || 0) + B.youth); } return ok; }; }
+// ---- dependency ----
+TRAITS.Dependent = { stress: .95, energy: -3, dis: ['com', 'eth'], d: 'Drinking isn\'t coping any more; it\'s the day. Energy drains every week.' };
+TRAITS['In recovery'] = { stress: 1.02, adv: ['com'], d: 'Sober, one day at a time. Clearer than you\'ve been in years.' };
+function depWeek() {
+  const M = S.me, me = ME(); if (!M || !M.party || !M.party.done) return;
+  if (me.traits.includes('In recovery') && me.traits.includes('Drinks')) { me.traits = me.traits.filter(t => t !== 'In recovery'); diary('You\'re drinking again. The recovery chip goes in a drawer.'); }
+  if (me.traits.includes('Drinks') && !me.traits.includes('Dependent') && !me.traits.includes('In recovery')) { M.hiStress = M.stress >= 60 ? (M.hiStress || 0) + 1 : Math.max(0, (M.hiStress || 0) - 1);
+    if (M.hiStress >= 6 && prnd() < .08) { me.traits.push('Dependent'); M.depW = S.week; diary('You notice you\'ve stopped counting the drinks. Then you notice you\'re hiding the bottles.'); } }
+  if (me.traits.includes('Dependent')) {
+    if (M.jobs.length && prnd() < .05) { const j = M.jobs[0], h = j.head !== null && j.head !== undefined && P(j.head) ? P(j.head) : null; if (h) addTie(me, h, -6); me.standing = clamp(me.standing - .8, 0, 100); diary(`You turn up late and wrecked to ${j.t.toLowerCase()}. ${h ? h.name + ' covers for you, once.' : 'People cover for you, once.'}`); }
+    if (S.week - (M.depW || S.week) >= 10 && !pending().some(it => it.kind === 'late') && prnd() < .2) lateOffer('dep');
+  }
+  if (me.traits.includes('In recovery') && M.stress >= 75 && prnd() < .04 && !pending().some(it => it.kind === 'late')) lateOffer('dep');
+}
+LATE.push(
+  { id: 'dep_intervene', pool: 'dep', cool: 12, need: () => ME().traits.includes('Dependent'), mk: c => { c.who = partnerOf() !== null ? partnerOf() : lateWho('friend'); }, needC: c => c.who !== null, title: 'An intervention', text: c => `${lname(c.who)} is at your door, and so are two other people you love. Nobody is angry. That's the worst part. They've found a place: four weeks, and they'll hold your life together while you're gone.`,
+    opts: [
+      { k: 'rehab', label: () => 'Go', cost: () => usd(9000), go: c => { const me = ME(); me.traits = me.traits.filter(t => t !== 'Dependent' && t !== 'Drinks'); me.traits.push('In recovery'); S.me.hiStress = 0; lateFx({ stress: -30, energy: 40, tie: 12, mile: 'Went to rehab' }, c); return 'Four weeks of early mornings, honest rooms and a garden. You come home thinner and clearer, with a phone number you can call at 3 a.m.'; } },
+      { k: 'refuse', label: () => 'Tell them they\'re overreacting', check: ['cha', 15], go: (c, ok) => { lateFx(ok ? { tie: -4, stress: 4 } : { tie: -12, stress: 10, stand: -2 }, c); return ok ? 'They leave, unconvinced. You prove them wrong for a fortnight.' : 'It turns ugly. They leave. You drink.'; } }] },
+  { id: 'dep_test', pool: 'dep', cool: 26, need: () => ME().traits.includes('In recovery'), title: 'A bad week', text: () => 'The kind of week that used to end with a bottle. There\'s a bar on the way home, and you know exactly where the stool is.',
+    opts: [
+      { k: 'call', label: () => 'Call your sponsor', check: ['com', 11], go: (c, ok) => { lateFx(ok ? { stress: -8 } : { stress: 4 }); if (!ok && prnd() < .4) { const me = ME(); me.traits = me.traits.filter(t => t !== 'In recovery'); me.traits.push('Drinks'); return 'They don\'t pick up in time. You have one. Then the rest of them. Back to the start.'; } return ok ? 'An hour on the phone. You walk past the bar.' : 'You walk past the bar, just. A long night.'; } },
+      { k: 'run', label: () => 'Walk it off, all the way home', go: c => { lateFx({ stress: -4, energy: -6 }); return 'Six miles in the rain. You get home soaked and sober.'; } }] }
+);
+for (const t of LATE.slice(-2)) LATE_BY[t.id] = t;
+// </depth4>
+// <depth5>
+// ---------------- The board's confidence ----------------
+// From head of a division up, a company job comes with a verdict that runs all the time: the board's confidence in
+// you. It's built from what you can see: what the company's films have earned against what they cost this year, its
+// hits, what your boss thinks of you, and whether the company's money is growing or shrinking. Every quarter there's a
+// review: you can spend confidence (ask for a bigger budget for the slate, or protect a film you believe in), or bank
+// it. Let it fall far enough and you're asked to clear your desk, with a parachute if you negotiated one on the way in.
+function confJob() { const j = typeof corpJob === 'function' ? corpJob() : null; return j && jobRung(j) >= 4 ? j : null; }
+function confParts(j) {
+  const M = S.me, c = S.companies[j.co], L = c ? S.films.filter(f => f.co === c.id && f.rel !== null && f.rel > S.week - 52 && f.cost > 0) : [];
+  const cost = L.reduce((t, f) => t + f.cost, 0), gross = L.reduce((t, f) => t + (f.total || 0), 0), R = cost > 0 ? gross / cost : null, hits = L.filter(f => f.total >= f.cost * 2.5).length;
+  const boss = j.head !== null && j.head !== undefined && P(j.head) ? opinion(j.head) : 0, cash0 = (M.conf && M.conf.cash0) || (c ? c.cash : 0), trend = c && cash0 ? (c.cash - cash0) / Math.max(1, Math.abs(cash0)) : 0;
+  return [['Results', R === null ? 0 : clamp((R - 1.5) * 25, -25, 25), R === null ? 'nothing released yet this year' : `the slate earned ×${R.toFixed(2)} its cost`], ['Hits', Math.min(15, hits * 6), `${hits} hit${hits === 1 ? '' : 's'}`], ['Your boss', clamp(boss / 4, -12, 12), `opinion ${Math.round(boss)}`], ['The money', clamp(trend * 30, -12, 12), `company cash ${trend >= 0 ? 'up' : 'down'} ${Math.abs(Math.round(trend * 100))}% since you started`], ['Credit you\'ve spent', -((M.conf && M.conf.spent) || 0), 'asks granted']];
+}
+function confScore(j) { return clamp(55 + confParts(j).reduce((t, p) => t + p[1], 0), 0, 100); }
+function confWeek() {
+  const M = S.me, j = confJob(); if (!M) return;
+  if (!j) { if (M.conf && !M.jobs.some(x => x.id === M.conf.job)) M.conf = null; return; }
+  if (!M.conf || M.conf.job !== j.id) { const c = S.companies[j.co]; M.conf = { job: j.id, w: S.week, cash0: c ? c.cash : 0, spent: 0, next: S.week + 13, para: 0 };
+    inbox('conf', `The board's expectations at ${c ? c.name : 'the company'}`, `The chair takes you to lunch. The board wants the slate to earn well over what it costs, a hit or two, and no surprises. "We'll review every quarter." Your lawyer says now is the moment to ask for a golden parachute, before you need one.`, { job: j.id, choices: [{ k: 'cf_para', label: `Negotiate a parachute · ${checkLabel('pack', 13)}`, check: ['pack', 13] }, { k: 'cf_none', label: 'Don\'t ask: it looks like you expect to fail' }] }); return; }
+  if (S.week < M.conf.next || pending().some(it => it.kind === 'conf')) return;
+  M.conf.next = S.week + 13; const sc = confScore(j), P0 = confParts(j), c = S.companies[j.co];
+  const rep = P0.map(([l, v, d]) => `${l}: ${v >= 0 ? '+' : ''}${Math.round(v)} (${d})`).join(' · ');
+  if (sc < 20) { inbox('conf', 'The board has lost confidence', `Confidence ${Math.round(sc)}/100. ${rep}. The chair asks you to come in on Monday. Everyone knows what that means.`, { job: j.id, low: 1, choices: [{ k: 'cf_case', label: `Make your case · ${checkLabel('cha', 15)}`, check: ['cha', 15] }, { k: 'cf_go', label: 'Resign before they ask' }] }); return; }
+  inbox('conf', `Quarterly review: confidence ${Math.round(sc)}/100`, `${rep}.${sc < 35 ? ' The chair says "we need to see a turnaround". It is a warning.' : sc > 75 ? ' The board is delighted. This is the time to ask for something.' : ''}`, { job: j.id, choices: [{ k: 'cf_budget', label: 'Ask for a bigger budget for the slate (spends 10)', dis: sc < 30 ? 'Not with confidence this low' : undefined }, { k: 'cf_protect', label: 'Protect a film you believe in (spends 8)', dis: sc < 25 ? 'Not with confidence this low' : undefined }, { k: 'cf_bank', label: 'Ask for nothing; keep your head down' }] });
+}
+function confPick(it, k) {
+  if (it.kind !== 'conf') return false; it.done = true; const M = S.me, me = ME(), j = M.jobs.find(x => x.id === it.job), C = M.conf; if (!j || !C) { it.result = { t: 'It no longer matters.' }; return true; }
+  const c = S.companies[j.co];
+  if (k === 'cf_para') { const ok = roll('pack', 13); if (ok) C.para = 26; it.result = { ok, roll: M.lastRoll, t: ok ? 'Six months\' salary if they ever let you go. The chair smiles thinly: "Of course."' : 'They decline, politely. You\'ve shown them you\'re thinking about leaving.' }; if (!ok && j.head != null && P(j.head)) addTie(me, P(j.head), -2); return true; }
+  if (k === 'cf_none') { it.result = { t: 'You shake hands. No safety net.' }; return true; }
+  if (k === 'cf_budget') { C.spent += 10; if (c) c.cash += Math.max(5, slateOf(c).reduce((t, f) => t + f.budget, 0) * .1); it.result = { t: 'Granted: ten per cent more for the slate. They\'ll remember they gave it.' }; return true; }
+  if (k === 'cf_protect') { C.spent += 8; const f = c ? slateOf(c)[0] : null; if (f) { f.qBonus = (f.qBonus || 0) + 2; f.hook = clamp((f.hook || 50) + 3, 5, 99); } it.result = { t: f ? `${f.title} gets its full schedule and its marketing. If it works, you look like a genius.` : 'Nothing on the slate to protect right now.' }; return true; }
+  if (k === 'cf_bank') { C.spent = Math.max(0, C.spent - 4); it.result = { t: 'You keep your head down. The board likes executives who don\'t ask for things, for a while.' }; return true; }
+  if (k === 'cf_case') { const ok = roll('cha', 15); if (ok) { C.spent = Math.max(0, C.spent - 10); C.next = S.week + 13; it.result = { ok, roll: M.lastRoll, t: 'You walk them through the next twelve months, film by film. They give you two more quarters.' }; return true; } }
+  // out
+  const sev = C.para ? j.rate * 5 * C.para : 0; finishJob(j, null, true); M.cash += sev; me.standing = clamp(me.standing - 3, 0, 100); M.stress = clamp(M.stress + 15, 0, 100); M.conf = null;
+  milestone(`Pushed out at ${c ? c.name : 'the company'}`, 'work'); news('Industry', `${me.name} is out at ${c ? c.name : 'their company'} after a difficult year.`);
+  it.result = { t: `You clear your desk on a Friday.${sev ? ` The parachute opens: ${fmtCash(sev)}.` : ' No parachute.'} Your phone is very quiet for a week, and then it isn't.` }; return true;
+}
+// the confidence panel sits with your company job
+function confHTML() { const j = confJob(); if (!j || !S.me.conf) return ''; const sc = confScore(j), P0 = confParts(j);
+  return `<section class="panel"><h3>The board's confidence <span class="${sc < 35 ? 'bad' : sc > 70 ? 'good' : ''}">${Math.round(sc)}/100</span></h3><div class="tk-bars">${P0.map(([l, v, d]) => `<div class="ambrow"><span class="small">${esc(l)}</span><span class="tbar"><i style="width:${clamp(50 + v * 2, 0, 100)}%"></i></span><b class="small ${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '+' : ''}${Math.round(v)}</b><span class="small muted">${esc(d)}</span></div>`).join('')}</div><p class="small muted">Reviewed every quarter (next ${fmtDate(S.me.conf.next, true)}). Below 20 at a review, you're out${S.me.conf.para ? `, with a ${S.me.conf.para}-week parachute` : ', with nothing'}.</p></section>`; }
+{ const _wk = OS_VIEWS.work; if (_wk) OS_VIEWS.work = () => confHTML() + _wk(); }
+// </depth5>
+// <depth6>
+// ---------------- Your audience, and the crisis room ----------------
+//  · An audience of your own. Every film with your name high on it (as director, lead, writer or through your
+//    company) wins you fans of its genre, more the bigger it was; a film the critics loved wins cinephiles; family
+//    films win families. Fans drift away slowly if you don't feed them. When your next film is in a genre your fans
+//    love, they turn up on opening weekend (the film's hook goes up); switch genres and only some of them follow.
+//    It's on the Standing page.
+//  · The crisis room. When a secret of yours comes out, you get to answer it: deny it, apologise, lawyer up, hire a
+//    fixer, or bury it under bigger news. What you choose decides how much of the damage sticks, and a bad answer
+//    keeps the story alive for another week or three.
+function fansOf() { return (S.me.fans = S.me.fans || {}); }
+function fanTotal() { return Object.values(fansOf()).reduce((t, v) => t + v, 0); }
+function fanMine(f) { const M = S.me, me = ME(); return (M.company !== undefined && f.co === M.company) || f.dir === me.id || (f.cast || [])[0] === me.id || (f.wri || []).includes(me.id); }
+{ const _rl = release; release = function (f) {
+  const out = _rl.apply(this, arguments); const M = S.me; if (!M || !f || !M.party || !M.party.done || f.fanIn || !fanMine(f)) return out; f.fanIn = 1;
+  const F = fansOf(), n = Math.round(Math.max(0, f.total || 0) * 2500 * (f.dir === ME().id || (f.cast || [])[0] === ME().id ? 1 : .5));   // a few thousand people per million of gross remember your name
+  F[f.genre] = (F[f.genre] || 0) + n; if ((f.reviews || 0) >= 75) F.Cinephiles = (F.Cinephiles || 0) + Math.round(n * .3); if (['Family', 'Animation'].includes(f.genre)) F.Families = (F.Families || 0) + Math.round(n * .4);
+  return out; }; }
+function fanWeek() { const F = S.me && S.me.fans; if (!F) return; for (const k in F) { F[k] = Math.round(F[k] * .996); if (F[k] < 50) delete F[k]; } }
+// your fans open your films: a bonus on the hook of the next one you make, by how many love that genre
+function fanHook(genre) { const F = fansOf(), same = F[genre] || 0, rest = fanTotal() - same; const n = same + rest * .2; return n > 0 ? clamp(Math.log10(1 + n / 5000) * 4, 0, 10) : 0; }
+{ const _sf = selfFund; selfFund = function (a) { const n0 = S.films.length, r = _sf(a); if (!r) return r; const f = S.films.slice(n0).find(x => x.co === S.me.company); if (f && !f.fanHook) { const b = fanHook(f.genre); if (b >= .5) { f.fanHook = b; f.hook = clamp((f.hook || 50) + b, 5, 99); (f.events = f.events || []).push({ w: S.week, t: `Your fans of ${f.genre.toLowerCase()} are waiting for it: hook +${b.toFixed(1)}.`, q: 0 }); } } return r; }; }
+function fansHTML() { const F = fansOf(), L = Object.entries(F).sort((a, b) => b[1] - a[1]); if (!L.length) return ''; const mx = L[0][1];
+  return `<section class="panel"><h3>Your audience <span class="muted small">${Math.round(fanTotal()).toLocaleString()} people who'd go to a film because your name is on it</span></h3><div class="tk-bars">${L.slice(0, 8).map(([g, v]) => `<div class="ambrow"><span class="small">${esc(g)}</span><span class="tbar"><i style="width:${(v / mx * 100).toFixed(0)}%"></i></span><b class="small">${Math.round(v).toLocaleString()}</b><span class="small muted">${GENRES.includes(g) ? `+${fanHook(g).toFixed(1)} hook on your next ${g.toLowerCase()} film` : ''}</span></div>`).join('')}</div><p class="small muted">Fans of a genre follow you into it; switch genres and only about a fifth of them come along. They drift away slowly between films.</p></section>`; }
+{ const _st = OS_VIEWS.standing; if (_st) OS_VIEWS.standing = () => fansHTML() + _st(); }
+// ---- the crisis room ----
+function crisisWeek() {
+  const M = S.me; if (!M || !M.secrets) return;
+  for (const x of M.secrets) if (x.out && !x.crisis) { x.crisis = S.week; const fixer = usd(40000), law = usd(15000), big = (M.company !== undefined && S.films.some(f => f.co === M.company && f.rel === null && f.stage === 3)) || M.jobs.some(j => j.film !== null && j.film !== undefined && S.films[j.film] && S.films[j.film].stage === 3);
+    inbox('crisis', 'The story breaks', `The story is everywhere by lunchtime: ${x.what}. Your phone has 140 missed calls. Your publicist wants an answer in an hour.`, { sec: M.secrets.indexOf(x), choices: [
+      { k: 'cr_deny', label: `Deny it · ${checkLabel('cha', 15)}`, check: ['cha', 15] },
+      { k: 'cr_sorry', label: 'Apologise, properly' },
+      { k: 'cr_law', label: `Lawyer up and say nothing (${fmtCash(law)})`, dis: M.cash < law ? 'Not enough in the bank' : undefined },
+      { k: 'cr_fixer', label: `Hire a fixer (${fmtCash(fixer)}) · ${checkLabel('pack', 13)}`, check: ['pack', 13], dis: M.cash < fixer ? 'Not enough in the bank' : undefined },
+      { k: 'cr_bury', label: 'Bury it under bigger news: announce your next film', dis: big ? undefined : 'Nothing big enough to announce' }] }); }
+  for (const x of M.secrets) if (x.alive && S.week >= x.alive && !pending().some(it => it.kind === 'crisis')) { delete x.alive; inbox('crisis', 'The story won\'t die', `A second wave: a former colleague goes on the record about ${x.what}. Sponsors are asking questions.`, { sec: M.secrets.indexOf(x), wave: 2, choices: [{ k: 'cr_sorry', label: 'Apologise now, fully' }, { k: 'cr_ride', label: `Ride it out · ${checkLabel('com', 14)}`, check: ['com', 14] }] }); }
+}
+function crisisPick(it, k) {
+  if (it.kind !== 'crisis') return false; it.done = true; const M = S.me, me = ME(), x = (M.secrets || [])[it.sec]; if (!x) return true;
+  const back = v => { me.standing = clamp(me.standing + v, 0, 100); };
+  if (k === 'cr_deny') { const ok = roll('cha', 15); if (ok) { back(5); it.result = { ok, roll: M.lastRoll, t: 'You deny it flatly, on camera, and it holds. The story fades by the weekend.' }; } else { back(-3); x.alive = S.week + 2; it.result = { ok, roll: M.lastRoll, t: 'The denial doesn\'t survive the afternoon: someone has a document. Now it\'s two stories.' }; } return true; }
+  if (k === 'cr_sorry') { back(it.wave ? 2 : 4); M.stress = clamp(M.stress - 6, 0, 100); me.fame = (me.fame || 0) + .3; it.result = { t: 'You say sorry, without a "but". Some people never forgive it. Most people move on faster than you expected.' }; return true; }
+  if (k === 'cr_law') { M.cash -= usd(15000); back(3); it.result = { t: '"No comment," on legal advice. The story starves for lack of new facts.' }; return true; }
+  if (k === 'cr_fixer') { M.cash -= usd(40000); const ok = roll('pack', 13); if (ok) { back(7); it.result = { ok, roll: M.lastRoll, t: 'A man you never meet makes some calls. The source recants. By Thursday the story is about someone else.' }; } else { back(1); x.alive = S.week + 3; it.result = { ok, roll: M.lastRoll, t: 'The fixer\'s involvement leaks. That becomes the story.' }; } return true; }
+  if (k === 'cr_bury') { back(4); me.fame = (me.fame || 0) + .5; it.result = { t: 'You announce the release date and the first image the same morning. The trades lead with that.' }; return true; }
+  if (k === 'cr_ride') { const ok = roll('com', 14); if (ok) { back(2); it.result = { ok, roll: M.lastRoll, t: 'You keep working and say nothing. It burns out.' }; } else { back(-3); M.stress = clamp(M.stress + 10, 0, 100); it.result = { ok, roll: M.lastRoll, t: 'A sponsor pulls out publicly. You have a very bad month.' }; } return true; }
+  return true;
+}
+// </depth6>
+// <depth7>
+// ---------------- Voices: your own, and the people you ask ----------------
+//  · Your skills talk. When a decision turns on something you're very good at, or hopeless at, a line in your head
+//    says so before you choose (it's the same odds the button shows, in the voice of the skill).
+//  · The advisor ring. On the big calls about your own films, the people around you weigh in: your agent thinks about
+//    money and heat, your mentor about the work, your partner about you. They don't always agree, they each have an
+//    angle, and the desk keeps their record: how often the option each one backed went well when you took it.
+const VOICE = { hi: ['You\'ve done this a hundred times.', 'Easy. Don\'t overthink it.', 'This is the part you\'re good at.'], lo: ['This isn\'t your thing. You know that.', 'Careful. You\'re out of your depth here.', 'Somebody else should probably do this.'] };
+const SK_NAME = k => (typeof SUB_LABEL !== 'undefined' && SUB_LABEL[k]) || (typeof MINDS !== 'undefined' && MINDS[k] && (MINDS[k].label || MINDS[k])) || k;
+function voiceLine(it) {
+  const C = (it.choices || []).filter(c => c.check && !c.dis); if (!C.length) return '';
+  const me = ME(), L = C.map(c => [c, skillOf(me, c.check[0])]), hi = L.filter(x => x[1] >= 16).sort((a, b) => b[1] - a[1])[0], lo = L.filter(x => x[1] <= 6).sort((a, b) => a[1] - b[1])[0];
+  const pick = hi || lo; if (!pick) return ''; const [c, v] = pick, s = String(SK_NAME(c.check[0])), L2 = hi ? VOICE.hi : VOICE.lo;
+  return `💭 ${s[0].toUpperCase() + s.slice(1)} (${Math.round(v)}), about "${c.label.split(' · ')[0]}": ${L2[(it.id || 0) % L2.length]}`;
+}
+const ADVISORS = [['agent', 'Your agent', o => (o.hook || 0) * 1.2 + (o.sell ? 3 : 0) - (o.cost || 0) * 20], ['mentor', 'Your mentor', o => (o.q || 0) * 1.5 - (o.hook || 0) * .2], ['partner', 'Your partner', o => -(o.stress || 0) - (o.weeks || 0) * .5 + (o.q || 0) * .3]];
+function advWho(k) { const M = S.me; if (k === 'agent') return M.agent ? M.agent.name : null; if (k === 'partner') { const p = partnerOf(); return p !== null ? P(p).name : null; } if (k === 'mentor') { const id = Object.keys(M.rel || {}).map(Number).find(id => M.rel[id].s === 'mentor' && P(id) && !P(id).dead); return id !== undefined ? P(id).name : null; } return null; }
+function advRec(it) {
+  const C = typeof PJ_CALLS !== 'undefined' ? PJ_CALLS.find(x => x.k === it.call) : null; if (!C) return [];
+  return ADVISORS.map(([k, l, score]) => { const who = advWho(k); if (!who) return null; const best = C.opts.map(o => [o, score(Object.assign({}, o.ok, { cost: o.cost || 0 }))]).sort((a, b) => b[1] - a[1])[0]; return best ? { k, l, who, opt: best[0].k, label: best[0].label } : null; }).filter(Boolean);
+}
+{ const _ib = inbox; inbox = function (kind, title, text, extra = {}) {
+  const it = _ib(kind, title, text, extra); if (!it || !S.me || !it.choices) return it;
+  const v = voiceLine(it); if (v) it.text = `${it.text} ${v}`;
+  if (kind === 'pj') { const R = advRec(it); if (R.length) { it.adv = R.map(r => ({ k: r.k, opt: r.opt })); const T = S.me.advRec || {};
+    it.text += ' ' + R.map(r => { const t = T[r.k]; return `🗣️ ${r.l} (${r.who}): "${r.label.split(' (')[0]}."${t && t.n >= 3 ? ` Right ${Math.round(t.ok / t.n * 100)}% of the time you listened.` : ''}`; }).join(' '); } }
+  return it; }; }
+// keep score: when you take an advisor's pick, did it go well?
+{ const _pp = pjPick; pjPick = function (it, k) { const r = _pp(it, k); if (it.kind === 'pj' && it.adv && it.result) { const T = S.me.advRec = S.me.advRec || {}; const good = it.result.ok !== false && !/\b(worse|break|wrong|fails?|leaks?|collapse|walks|can see)\b/i.test(it.result.t || ''); for (const a of it.adv) if (a.opt === k) { const x = T[a.k] = T[a.k] || { n: 0, ok: 0 }; x.n++; if (good) x.ok++; } } return r; }; }
+// </depth7>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -43476,6 +44118,7 @@ function careerClick(t) {
   if (typeof primerClick === 'function' && primerClick(t)) return true;
   if (typeof giftClick === 'function' && giftClick(t)) return true;
   if (typeof pet2Click === 'function' && pet2Click(t)) return true;
+  if (typeof heirClick === 'function' && heirClick(t)) return true;
   if (typeof pkgClick === 'function' && pkgClick(t)) return true;
   if (typeof tellerClick === 'function' && tellerClick(t)) return true;
   if (typeof scoutClick === 'function' && scoutClick(t)) return true;
@@ -43611,7 +44254,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-primer],[data-gift],[data-pet2],[data-tk],[data-fut],[data-rel],[data-lg],[data-fd],[data-pkg],[data-teller],[data-scout],[data-scheme],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-primer],[data-gift],[data-pet2],[data-heir],[data-tk],[data-fut],[data-rel],[data-lg],[data-fd],[data-pkg],[data-teller],[data-scout],[data-scheme],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }

@@ -170,3 +170,34 @@ Everything else below is a candidate for future rounds.
 8. **#24 Legends Archive:** turns the already-rich simulation into a readable story the player can follow, with very little new simulation.
 
 The general design lesson from Hollywood Animal's criticism: for every outcome, show the inputs that drove it (a "why it opened at $42M" breakdown).
+
+
+## Round 17 research (summaries; the proxy blocked direct page reads, so figures come from search summaries)
+
+**Teaching dense systems.** NN/g says empty states should report status, teach, and offer a direct path. Civ VI's Eureka bars and Two Point's objective lists informed the unlock checklists. CK3/Victoria 3's nested tooltips informed the underlined terms. Into the Breach, Slay the Spire and Frostpunk preview outcomes before you act. FM shows scouting ranges and has advisors in the inbox. RimWorld's learning helper only teaches when a concept comes up. Tufte's sparklines and Bloomberg's colour conventions shaped the tables. Applied: seats, the desk log, desk notes, world-first empty states, the glossary, Call it, and app primers.
+
+**Pets.**
+- Costs: dogs run $1.4k–5.3k a year, horses $6k–25k. Insurance averages $749 a year for a dog and $386 for a cat (2024). Sweden has had pet insurance since 1890 and the US since 1982.
+- Training: CGC is a 10-item test; Trick Dog titles; agility runs to MACH (20 double-Qs plus 750 speed points).
+- Shows:
+  - US champion: 15 points with 2 majors under 3 judges; Westminster since 1877 invites the top 5 per breed.
+  - UK champion: 3 CCs. Crufts since 1891.
+  - Cat shows since 1871; CFA Grand Champion needs 200 points.
+  - Handlers charge $100–125 a show and $500–1,000 at Westminster.
+- Working dogs: about 2 in 1,000 candidates become police dogs. The Seeing Eye opened in 1929. Therapy-team evaluation requires the dog to be a year old and to have lived with you for six months.
+- Animal actors: about $400–500 a day, with no residuals. Pal went from stand-in to Lassie. PATSY awards 1951–86, Palm Dog from 2001, Golden Collar from 2012. Films drive breed booms (collies +40% after Lassie).
+- Quarantine: the UK required six months until 2000.
+
+**Comparable games, ranked (Interest × Need × Depth × Believability).**
+1. Era shifts — Hollywood Animal, The Movies, Game Dev Tycoon
+2. Family and dynasty — BitLife, CK3
+3. Set dynamics and promises — FM, Hollywood Animal
+4. Board confidence — FM
+5. Censorship — Hays Code
+6. Inspiration, obsession, slumps — RimWorld, Dwarf Fortress
+7. Audience segments — Democracy 4, Game Dev Story
+8. Press conferences — FM, Suzerain
+9. Wants and fears — The Sims 4
+10. Gifts, birthdays and drift — Stardew Valley
+
+Then: playing age (The Movies), convictions (Disco Elysium's Thought Cabinet), post-mortems and sequel fatigue (Game Dev Tycoon), inner voices (Disco Elysium), the advisor ring (King of Dragon Pass), family bills (Papers, Please), dependency (The Movies), collaborator chemistry, life verdicts, running a cinema (Big Ambitions), confidants (Persona 5), the scandal room, mood-shaped learning, a Reigns-style desk, fame quirks, and decaying neglect (Cultist Simulator).

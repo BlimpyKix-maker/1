@@ -778,6 +778,15 @@ function closeWeek(a) {
   if (typeof schemesWeek === 'function') schemesWeek();
   if (typeof fdCallsWeek === 'function') fdCallsWeek();
   if (typeof pet2Week === 'function') pet2Week();
+  if (typeof eraWeek === 'function') eraWeek();
+  if (typeof famWeek === 'function') famWeek();
+  if (typeof innerWeek === 'function') innerWeek();
+  if (typeof bdayWeek === 'function') bdayWeek();
+  if (typeof depth3Week === 'function') depth3Week();
+  if (typeof depWeek === 'function') depWeek();
+  if (typeof confWeek === 'function') confWeek();
+  if (typeof fanWeek === 'function') fanWeek();
+  if (typeof crisisWeek === 'function') crisisWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1103,6 +1112,11 @@ function resolvePick(it, k) {
   if (typeof awards4Pick === 'function' && awards4Pick(it, k)) return true;
   if (typeof petPick === 'function' && petPick(it, k)) return true;
   if (typeof pet2Pick === 'function' && pet2Pick(it, k)) return true;
+  if (typeof bdayPick === 'function' && bdayPick(it, k)) return true;
+  if (typeof junketPick === 'function' && junketPick(it, k)) return true;
+  if (typeof beliefPick === 'function' && beliefPick(it, k)) return true;
+  if (typeof confPick === 'function' && confPick(it, k)) return true;
+  if (typeof crisisPick === 'function' && crisisPick(it, k)) return true;
   if (typeof guildPick === 'function' && guildPick(it, k)) return true;
   if (typeof relPick === 'function' && relPick(it, k)) return true;
   if (typeof copePick === 'function' && copePick(it, k)) return true;
@@ -1229,6 +1243,7 @@ function applyAct(a) {
     case 'dist': return typeof distAct === 'function' && distAct(a);
     case 'call': return typeof fdCallAct === 'function' && fdCallAct(a);
     case 'gift': return typeof giftAct === 'function' && giftAct(a);
+    case 'heir': return typeof heirAct === 'function' && heirAct(a);
     case 'teller': return typeof tellerAct === 'function' && tellerAct(a);
     case 'scout': return typeof scoutAct === 'function' && scoutAct(a);
     case 'scheme': return a.stop ? typeof schemeStop === 'function' && schemeStop(a) : typeof schemeAct === 'function' && schemeAct(a);

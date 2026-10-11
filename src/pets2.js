@@ -54,7 +54,7 @@ function petField(p, w = S.week) { return 3 + Math.floor(hashRand((p.kind.length
 function petWinP(p, pro) { const s = petShowScore(p, pro), N = petField(p); return clamp(1 / (1 + Math.exp(-(s - 56) / 7)) * 3 / (2 + N / 4), .02, .85); }
 function petPts(N) { return N >= 15 ? 5 : N >= 10 ? 4 : N >= 7 ? 3 : N >= 4 ? 2 : 1; }
 function petSeasonY(w = S.week) { return woy(w) >= 39 ? yearOf(w) + 1 : yearOf(w); }   // the show year ends on 30 September
-function bigShow() { const m = HUBS[S.me.hub].m; return m === 'US' || m === 'CA' ? { n: 'Westminster', where: 'New York', wk: 6, from: 1877 } : ['UK', 'FR', 'IT', 'DE', 'ES', 'SE', 'DK', 'NL', 'PL', 'CZ', 'HU', 'FI'].includes(m) ? { n: 'Crufts', where: 'London', wk: 10, from: 1891 } : { n: 'the National Championship Show', where: HUBS[S.me.hub].name, wk: 15, from: 1900 }; }
+function bigShow() { const m = HUBS[S.me.hub].m; return m === 'US' || m === 'CA' ? { n: 'Westminster', where: 'New York', wk: 6, from: 1877 } : ['UK', 'FR', 'IT', 'DE', 'ES', 'SE', 'DK', 'PL', 'CS', 'HU', 'FI'].includes(m) ? { n: 'Crufts', where: 'London', wk: 10, from: 1891 } : { n: 'the National Championship Show', where: HUBS[S.me.hub].name, wk: 15, from: 1900 }; }
 function petInviteLine(p) { return 120 + Math.round(hashRand((p.kind.length * 131 + petSeasonY()) >>> 0)() * 120); }
 // ---- the screen ----
 function petRating(p) { const t = petTemp(p), T = p.titles || []; return Math.round(clamp(t.nerve * .3 + t.brains * .25 + t.looks * .15 + petBond(p) * 6 + T.length * 6 + (T.includes('screen') ? 15 : 0) - 20, 0, 100)); }
