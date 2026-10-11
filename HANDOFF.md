@@ -1,7 +1,7 @@
 # Apple Box — handoff notes
 
 A film-industry life sim (Football Manager / Persona / Crusader Kings feel). One self-contained page, `index.html`,
-published as a claude.ai artifact: https://claude.ai/artifact/8siqt3XdWb4DhTz4su2cMZ (declares the `sample`
+published as a claude.ai artifact: https://claude.ai/artifact/LYwbMRqFNuQ3eMLJLh1qTt (v21; the older link 8siqt3XdWb4DhTz4su2cMZ belongs to the original account) (declares the `sample`
 capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-2eiy6a`.
 
 ## How it's built
