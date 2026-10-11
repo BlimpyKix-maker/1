@@ -13,7 +13,7 @@
 //  3. The awards race. Live odds for each category in your market, critics' circles in December (precursors that
 //     voters notice), a publicist (paid per nomination), weekly trade-ad buys with diminishing returns, and which
 //     category you push. Ceremonies now announce nominations, and a nomination or a win brings a re-release bump.
-OS_EXTRA.filmdesk = ['🎞️', 'Film Desk', 'Test screenings, the film markets, the awards race'];
+OS_EXTRA.filmdesk = ['🎞️', 'Film Desk', 'Test screenings, the film markets, the awards race, the release plan and streaming'];
 OS_VIEWS.filmdesk = () => fdHTML();
 { const g = OS_GROUPS.find(x => x[0] === 'Make'); if (g && !g[1].includes('filmdesk')) g[1].push('filmdesk'); }
 function fdMyCo() { return typeof myCo === 'function' ? myCo() : null; }
