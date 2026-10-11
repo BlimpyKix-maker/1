@@ -767,6 +767,8 @@ function closeWeek(a) {
   if (typeof futWeek === 'function') futWeek();
   if (typeof guildWeek === 'function') guildWeek();
   if (typeof taxWeek === 'function') taxWeek();
+  if (typeof relWeek === 'function') relWeek();
+  if (typeof stressWeek === 'function') stressWeek();
   if (typeof bondWeek === 'function') bondWeek();
   const taxW = typeof taxOn === 'function' ? taxOn(wages) : 0; cashOut += taxW;
   if (fee > 0) cashOut += usd(fee); else cashIn += usd(-fee);
@@ -1092,6 +1094,8 @@ function resolvePick(it, k) {
   if (typeof awards4Pick === 'function' && awards4Pick(it, k)) return true;
   if (typeof petPick === 'function' && petPick(it, k)) return true;
   if (typeof guildPick === 'function' && guildPick(it, k)) return true;
+  if (typeof relPick === 'function' && relPick(it, k)) return true;
+  if (typeof copePick === 'function' && copePick(it, k)) return true;
   if (typeof ailPick === 'function' && ailPick(it, k)) return true;
   if (typeof actor3Pick === 'function' && actor3Pick(it, k)) return true;
   if (typeof scPick === 'function' && scPick(it, k)) return true;
@@ -1202,6 +1206,7 @@ function applyAct(a) {
     case 'co2': return typeof co2Act === 'function' && co2Act(a);
     case 'pet': return typeof petAct === 'function' && petAct(a);
     case 'fut': return typeof futAct === 'function' && futAct(a);
+    case 'reldate': return typeof relAct === 'function' && relAct(a);
     case 'act3': return typeof actor3Act === 'function' && actor3Act(a);
     case 'place2': return typeof placeAct === 'function' && placeAct(a);
     case 'labapply': return typeof labApply === 'function' && labApply(a.k);
