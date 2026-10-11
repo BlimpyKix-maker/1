@@ -15176,7 +15176,7 @@ function crewOptions(role, craft, genre) {
 }
 function pickable(id, role) { return id !== undefined && id !== null && P(id) && P(id).role === role && available(id) ? id : undefined; }
 // A name costs money: a lead's fee grows with their fame.
-function leadFee(id, genre, micro) { const q = P(id); return estBudget(genre) * (micro ? .25 : 1) * (.04 + Math.pow((q.fame || 0) / 100, 2) * .9); }
+function leadFee(id, genre, micro) { const q = P(id); return estBudget(genre) * (micro ? .25 : 1) * (.04 + Math.pow((q.fame || 0) / 100, 2) * 1.2); }
 // Investors put up what your company can't, for a share of what the film brings back. Convincing them is a roll.
 function investDC(src) { const c = myCo(), me = ME(); return Math.round(clamp(16 - me.standing / 20 - (c ? c.hits * 2 : 0) - (src.score - 60) / 10, 6, 19)); }
 // Finance a film yourself: your own finished script or one you've optioned. Choose the size, the director (or

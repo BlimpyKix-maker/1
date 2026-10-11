@@ -288,6 +288,7 @@ The player should feel like an executive with a trading desk: a lot of informati
   - slate deals $34M → $44M after cold studios had to sweeten their deals (slate P&L −$10.6M → −$3.3M);
   - packaging $109M, but the `star` control (same people, no package) made $118M. The lever is star power, not the package; the package is a net cost unless you need its access (investors, pre-sales). Terms settled at a 4% fee + 12% of profit, star +15%.
 - Career sweep, 6 seeds × 3 years, worth vs base $206k: agent $335k, school $337k (stress ×5), futures $304k, moving $300k, invest $279k, shorts $275k, prestige storyteller $263k, tabloid $175k. Scouting costs money and energy, and a bot doesn't use the information (expected). Schemes look negative on average, but per seed it's chaos (better on half the seeds); befriending has no downside of its own.
+- Star fees raised (`leadFee` fame² factor 0.9 → 1.2: a fame-60 lead +30%). Re-test, 6 seeds × 4 years: base $50M → $46M, star $118M → $100M (2.35× → 2.16× base), package $105M → $95M. Stars stay the biggest lever; the next tuning step, if needed, is 1.5.
 - Lesson: careers are chaotic; any change to dice consumption reshuffles the luck of a whole career, so judge features by mechanism plus several seeds, never one run.
 
 ## Round 15 decisions
