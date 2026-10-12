@@ -241,6 +241,8 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('cinema2', '// ================= Apple Box — World Core UI ================='),
                      ('confid', '// ================= Apple Box — World Core UI ================='),
                      ('depth8', '// ================= Apple Box — World Core UI ================='),
+                     ('safety', '// ================= Apple Box — World Core UI ================='),
+                     ('streams', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
     body = (root / 'src' / f'{name}.js').read_text().rstrip() + '\n'
     block = f'// <{name}>\n{body}// </{name}>\n'
@@ -250,5 +252,9 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
     else:
         assert anchor in html, anchor
         html = html.replace(anchor, block + anchor, 1)
+# the three typefaces travel inside the page (no outside requests); see assets/fonts.css and assets/FONT-LICENSES.txt
+fonts = (root / 'assets' / 'fonts.css').read_text().strip()
+html = re.sub(r'<style id="ab-fonts">.*?</style>', lambda m: f'<style id="ab-fonts">{fonts}</style>', html, count=1, flags=re.S)
+assert 'fonts.googleapis.com' not in html and 'fonts.gstatic.com' not in html
 (root / 'index.html').write_text(html)
 print('built', len(html), 'bytes')

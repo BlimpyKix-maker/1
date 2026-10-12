@@ -1,0 +1,34 @@
+const fs=require('fs');
+const files=process.argv.slice(2);
+for(const f of files){ if(!fs.existsSync(f)) continue; const d=JSON.parse(fs.readFileSync(f)); const W=d.W, c=d.cfg, n=W.length;
+  const last=W[n-1]||{};
+  const scenes=W.flatMap(w=>w.scenes); const uniq=new Set(scenes);
+  // repeat gap
+  const lastSeen={}; let rep26=0, rep52=0; const gaps=[]; W.forEach((w,i)=>w.scenes.forEach(s=>{ if(lastSeen[s]!==undefined){const g=i-lastSeen[s]; gaps.push(g); if(g<26) rep26++; if(g<52) rep52++;} lastSeen[s]=i;}));
+  const texts=W.flatMap(w=>w.texts.map(t=>t[2])); const norm=t=>String(t).toLowerCase().replace(/[^a-z ]/g,'').replace(/\s+/g,' ').trim(); const tset={}; texts.forEach(t=>{const k=norm(t); tset[k]=(tset[k]||0)+1;});
+  const tu=Object.keys(tset).length; const topT=Object.entries(tset).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const mails=W.flatMap(w=>w.mails); const mset={}; mails.forEach(m=>mset[m]=(mset[m]||0)+1);
+  const titles=W.flatMap(w=>w.titles); const tiset={}; titles.forEach(m=>tiset[m]=(tiset[m]||0)+1);
+  const kinds={}; W.forEach(w=>Object.entries(w.kinds).forEach(([k,v])=>kinds[k]=(kinds[k]||0)+v));
+  const dec=W.map(w=>w.dec); const quiet=dec.filter(x=>x===0).length; const avgDec=(dec.reduce((s,x)=>s+x,0)/n).toFixed(1);
+  const en=W.map(w=>w.en), st=W.map(w=>w.st); const pct=(a,p)=>a.slice().sort((x,y)=>x-y)[Math.floor(a.length*p)];
+  const rolls=W.flatMap(w=>w.rolls); const succ=rolls.length?(rolls.reduce((s,x)=>s+x,0)/rolls.length).toFixed(2):'-';
+  const lvlAt=k=>{const i=W.findIndex(w=>w.lvl>=k); return i<0?'-':i;};
+  const firstFilmJob=W.findIndex(w=>w.credits>0);
+  const ms=W.map(w=>w.ms); const q=Math.floor(n/4)||1; const msQ=[0,1,2,3].map(i=>Math.round(ms.slice(i*q,(i+1)*q).reduce((s,x)=>s+x,0)/q));
+  const jobsSet=new Set(W.flatMap(w=>w.jobs));
+  const yearly=[]; for(let i=51;i<n;i+=52) yearly.push(`y${(i+1)/52}: L${W[i].lvl} $${W[i].cash} st${W[i].stand} cr${W[i].credits} kn${W[i].known}`);
+  console.log(`\n=== ${f} seed ${c.seed} ${c.policy} ${c.role}/${c.field}@${c.hub} wealth ${c.wealth} focus ${c.focus} — ${n} weeks${d.err?' ERR '+d.err.msg:''}${d.end.over?' (GAME OVER)':''}`);
+  console.log(' final: lvl',last.lvl,'cash',last.cash,'standing',last.stand,'fame',last.fame,'credits',last.credits,'known',last.known,'hub',last.hub,'agent',last.agent);
+  console.log(' weeks to level 1/2/3/4/5:',[1,2,3,4,5].map(lvlAt).join('/'),' first credit wk',firstFilmJob);
+  console.log(' '+yearly.join(' | '));
+  console.log(' decisions/wk avg',avgDec,'quiet weeks (0 decisions)',quiet,'max',Math.max(...dec),' dice checks passed',succ,'of',rolls.length);
+  console.log(' energy p10/p50/p90',pct(en,.1),pct(en,.5),pct(en,.9),' stress p10/p50/p90',pct(st,.1),pct(st,.5),pct(st,.9));
+  console.log(' scenes',scenes.length,'unique',uniq.size,'repeats<26wk',rep26,'repeats<52wk',rep52,' median repeat gap',gaps.length?pct(gaps,.5):'-');
+  console.log(' texts in',texts.length,'unique',tu,'('+(100*tu/Math.max(1,texts.length)).toFixed(0)+'%) top:',topT.map(([t,k])=>k+'x "'+t.slice(0,50)+'"').join(' ; '));
+  console.log(' mails',mails.length,'unique subjects',Object.keys(mset).length,' other inbox titles',titles.length,'unique',Object.keys(tiset).length);
+  console.log(' inbox kinds',JSON.stringify(kinds));
+  console.log(' distinct jobs held',jobsSet.size,':',[...jobsSet].slice(0,14).join('; '));
+  console.log(' ms/week by quarter',msQ.join(','),' world events',d.end.world.length,' relationships',JSON.stringify(d.end.rel));
+  console.log(' milestones',d.end.milestones.length,':',d.end.milestones.slice(-8).join(' | '));
+}

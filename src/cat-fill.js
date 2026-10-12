@@ -166,7 +166,7 @@ people: [
   { id: "ohara_mar", real: "Mario O'Hara", n: "Mario Godless", b: 1946, r: "director", hub: "manila", lv: 2, d: 2012, note: "A Filipino writer-director and actor of dark, humane films." },
   { id: "romanek_mar", real: "Mark Romanek", n: "Mark Onehour", b: 1959, r: "director", hub: "hollywood", lv: 1, note: "A music-video director of a few features." },
   { id: "short_mar", real: "Martin Short", n: "Martin Tallman", b: 1950, r: "actor", hub: "hollywood", lv: 2, note: "A Canadian sketch comic of manic characters." },
-  { id: "suo_mas", real: "Masayuki Suo", n: "Masayuki Sumo", b: 1956, r: "director", hub: "tokyo", lv: 2, note: "A director of Japanese comedies about ballroom dance and sumo wrestling." },
+  { id: "suo_mas", real: "Masayuki Suo", n: "Masayuki Dohyo", b: 1956, r: "director", hub: "tokyo", lv: 2, note: "A director of Japanese comedies about ballroom dance and sumo wrestling." },
   { id: "frank_mel", real: "Melvin Frank", n: "Melvin Classy", b: 1913, r: "director", hub: "hollywood", lv: 1, d: 1988, note: "A comedy writer and director with a long partnership." },
   { id: "apted_mic", real: "Michael Apted", n: "Michael Seven-Up", b: 1941, r: "director", hub: "london", lv: 2, d: 2021, note: "Directed a documentary series revisiting the same children every seven years for half a century." },
   { id: "cacoyannis_mic", real: "Michael Cacoyannis", n: "Michael Zorbakis", b: 1922, r: "director", hub: "london", lv: 2, d: 2011, note: "A Cypriot director who brought Greek tragedy and a dancing Cretan to the world." },

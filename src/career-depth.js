@@ -309,7 +309,7 @@ function maybeEvent() {
   const known = Object.keys(M.known).map(Number).filter(id => !P(id).dead);
   const best = known.slice().sort((a, b) => opinion(b) - opinion(a));
   const ctx = { head: null, film: null, mates: [], friend: best[0] ?? null, contact: known.length ? ppick(known) : null,
-    rival: known.find(id => M.known[id].tags.includes('Rival')) ?? null };
+    rival: known.find(id => M.known[id].tags.includes('Rival') && !(typeof realLiving === 'function' && realLiving(P(id)))) ?? null };
   if (/\{star\}/.test(ev.text + JSON.stringify(ev.opts))) { const s = bestIn(M.hub, ['actor', 'director'], q => q.fame + prnd() * 20); ctx.star = s ? s.id : null; }
   for (const k of ['star', 'contact', 'friend', 'rival']) if ((ev.text + JSON.stringify(ev.opts)).includes('{' + k + '}') && ctx[k] === null) return;
   inbox('scene', ev.title, fillScene(ev.text, ctx), { scene: ev.id, ctx, ev: ev.kind, choices: ev.opts.map(o => ({ k: o.k, label: fillScene(o.label, ctx), check: o.check })) });

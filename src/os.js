@@ -1,4 +1,4 @@
-// ---------------- ApplOS: the computer, rebuilt ----------------
+// ---------------- SlateOS: the computer, rebuilt ----------------
 // One dark, readable workspace instead of a toy desktop: a sidebar of apps grouped by what they're for, a header,
 // and a body. Home is a working dashboard (what needs you, best jobs with apply boxes, mail, diary, money, news,
 // your rank). CrewList plans your applications; Calendar shows the week and what's booked; Contacts is a little
@@ -36,7 +36,7 @@ function osPanel() {
   if (stackB) body = stackB; else try { body = typeof OS_VIEWS !== 'undefined' && OS_VIEWS[k] ? OS_VIEWS[k]() : k === 'home' ? osHome() : k === 'cal' ? osCal() : k === 'contacts' ? osContacts() : k === 'jobs' ? osJobs() : k === 'bank' ? osBank() : k === 'library' && typeof libraryHTML === 'function' ? libraryHTML() : k === 'trades' && typeof paperHTML === 'function' ? paperHTML() : appWindow(k); }
   catch (e) { body = `<p class="muted">This app crashed: ${esc(String(e.message || e))}</p>`; }
   return `<section class="panel os-wrap"><div class="os${UI.wmax ? ' max' : ''}">
-   <aside class="os-side"><div class="os-brand"><b>ApplOS</b><span>${W ? DAYS7[W.day].slice(0, 3) : ''} ${time}</span></div><div class="os-stat"><span title="Energy">🔋 ${Math.round(M.energy)}%</span><span title="Cash">💵 ${fmtCash(M.cash)}</span></div>${side}</aside>
+   <aside class="os-side"><div class="os-brand"><b>SlateOS</b><span>${W ? DAYS7[W.day].slice(0, 3) : ''} ${time}</span></div><div class="os-stat"><span title="Energy">🔋 ${Math.round(M.energy)}%</span><span title="Cash">💵 ${fmtCash(M.cash)}</span></div>${side}</aside>
    <div class="os-main"><header class="os-head"><div><h3>${A[1]} ${esc(A[2])}</h3><p>${esc(A[3] || '')}</p></div><div class="os-act">${k !== 'home' ? '<button class="os-btn" data-app="home">🏠 Home</button>' : ''}<button class="os-btn" data-wmax="1">${UI.wmax ? '⤡ Exit full screen' : '⤢ Full screen'}</button></div></header><div class="os-body os-${k}">${body}</div></div></div></section>`;
 }
 function osCard(title, inner, cls = '') { return `<div class="os-card ${cls}"><h5>${title}</h5>${inner}</div>`; }

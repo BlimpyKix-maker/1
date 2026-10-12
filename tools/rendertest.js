@@ -60,3 +60,7 @@ console.log('milestones:', r(`(S.me.milestones || []).map(m => m.t).join(' | ')`
 console.log('world:', r(`JSON.stringify((S.me.world || {}).ev || [])`), 'npc lives:', r(`aliveKnown().flatMap(id => (P(id).life || []).map(e => P(id).name + ' ' + e.t)).slice(-6).join(' | ')`));
 
 console.log('render error:', h.run('globalThis.__e || null'));
+// the built page must not reach outside itself: no remote scripts, styles, fonts or images
+{ const html = require('fs').readFileSync(process.env.APPLEBOX_HTML || path.join(__dirname, '..', 'index.html'), 'utf8');
+  const ext = [...html.matchAll(/(?:src|href)\s*=\s*["'](https?:)?\/\/[^"']+|url\(\s*["']?https?:\/\/[^)"']+|@import\s+["']?https?:/gi)].map(m => m[0].slice(0, 90));
+  console.log('outside requests:', ext.length ? ext.slice(0, 8) : 'none'); if (ext.length) process.exitCode = 1; }

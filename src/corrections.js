@@ -15,7 +15,7 @@ const DUOS = {
   adilbilall: [['elarbi', 'Adil El Arbi', 'Adil El Amrani', 1988], ['fallah', 'Bilall Fallah', 'Bilall Fahmi', 1986]],
   boden_fleck: [['boden', 'Anna Boden', 'Anna Halfnelson', 1979, null, 'F'], ['fleck', 'Ryan Fleck', 'Ryan Sugarman', 1976]],
   chan_andrew: [['chan_jeff', 'Jeff Chan', 'Jeff Cheung', 1985], ['rhymer', 'Andrew Rhymer', 'Andrew Rhodes', 1985]],
-  daniels: [['kwan_d', 'Daniel Kwan', 'Daniel Kwong', 1988], ['scheinert', 'Daniel Scheinert', 'Daniel Schoenfeld', 1987]],
+  daniels: [['kwan_d', 'Daniel Kwan', 'Daniel Everywhere', 1988], ['scheinert', 'Daniel Scheinert', 'Daniel Schoenfeld', 1987]],
   nakache_toledano: [['nakache', 'Olivier Nakache', 'Olivier Benhamou', 1973], ['toledano', 'Éric Toledano', 'Éric Intouchy', 1971]],
   nee_brothers: [['nee_aa', 'Aaron Nee', 'Aaron Lostcity', 1981], ['nee_ad', 'Adam Nee', 'Adam Lostcity', 1981]],
   philippous: [['philippou_d', 'Danny Philippou', 'Danny Philippakis', 1992], ['philippou_m', 'Michael Philippou', 'Michael Philippakis', 1992]],
