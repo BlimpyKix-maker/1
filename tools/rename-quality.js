@@ -14,7 +14,15 @@ for (const c of C) for (const p of c.people || []) {
   const rs = r.split(/[ ]+/).pop().replace(/-/g, ''), words = n.split(/[ -]+/).filter(w => w.length > 2);
   const ns = n.split(/[ ]+/).pop().replace(/-/g, '');
   const padded = rs.length >= 3 && ns !== rs && (ns.startsWith(rs) || ns.endsWith(rs) || (rs.length >= 5 && ns.length > rs.length && ns.startsWith(rs.slice(0, -1))));
-  const bad = padded || lev(r, n) <= 2 || words.some(w => w.length >= 4 && rs.length >= 4 && lev(w, rs) <= (rs.length <= 5 ? 1 : 2));
+  // the living (no death year) get a stricter test: no game-name word may share the real surname's first four
+  // letters or contain it (Hoffman → Hoffner, Crystal → Crystalline), and a family-name-first name may not keep
+  // both the family name and the first syllable of the given name (Park Chan-wook → Park Chan-yeol)
+  const given = new Set(r.split(/[ ]+/).slice(0, -1)), rsw = rs.length >= 4 ? [rs, ...r.split(/[ ]+/).pop().split('-').filter(x => x.length >= 4)] : [];
+  const pre4 = (a, b) => a.length >= 4 && b.length >= 4 && a.slice(0, 4) === b.slice(0, 4);
+  const R = p.real.split(' '), N = p.n.split(' ');
+  const living = !p.d && !p.real.includes('–') && (rsw.some(a => n.split(/[ -]+/).some(w => !given.has(w) && (pre4(a, w) || (w !== a && w.includes(a))))) ||
+    (R.length === 2 && N.length === 2 && R[0] === N[0] && /^[A-Z][^-]*-/.test(R[1]) && R[R.length - 1].split('-')[0] === (N[N.length - 1].split('-')[0])));
+  const bad = padded || living || lev(r, n) <= 2 || words.some(w => w.length >= 4 && rs.length >= 4 && lev(w, rs) <= (rs.length <= 5 ? 1 : 2));
   if (bad && !kept.has(p.id)) out.push([p.id, p.real, p.n].join('\t'));
 }
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'rename', 'quality-people.tsv'), out.join('\n') + '\n');

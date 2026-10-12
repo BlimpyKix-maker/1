@@ -38,12 +38,12 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (bag === 6) o.push(`<g transform="rotate(14 ${cx + 6} 120)"><path d="M${cx + 2} 70 Q${cx + 14} 66 ${cx + 16} 80 L${cx + 20} 150 Q${cx + 26} 172 ${cx + 10} 178 Q${cx - 6} 172 ${cx} 150 Z" fill="#2B2B2B"/><path d="M${cx + 8} 76 L${cx + 10} 170" stroke="#555" stroke-width="1"/></g>`);
   if (bag === 2) o.push(`<rect x="${cx - sw + 2}" y="${sy + 2}" width="${(sw - 2) * 2}" height="40" rx="8" fill="${mixHex(bc, '#fff', .2)}"/>`);
   // legs: skin first, then whatever covers them
-  for (const x of [lx, rx]) o.push(`<rect x="${x - lw}" y="${hy}" width="${lw * 2}" height="${legLen}" rx="${lw}" fill="${skin}"/>`);
+  for (const x of [lx, rx]) o.push(`<path d="M${x - lw} ${hy} L${x + lw} ${hy} Q${x + lw - .5} ${hy + legLen * .55} ${x + lw * .6} ${fy} L${x - lw * .6} ${fy} Q${x - lw + .5} ${hy + legLen * .55} ${x - lw} ${hy} Z" fill="${skin}"/>`);
   const longLeg = [0, 1, 2, 6, 7, 8, 9].includes(bot) || top === 19;
   const legC = top === 19 ? cloth : bc, legD = top === 19 ? dkc : dkb;
   if (longLeg) {
     const flare = bot === 8 && top !== 19 ? 5 : 0, slim = (bot === 1 || bot === 9) && top !== 19 ? -1.2 : 0;
-    for (const x of [lx, rx]) o.push(`<path d="M${x - lw - 1.5} ${hy - 2} L${x + lw + 1.5} ${hy - 2} L${x + lw + slim + flare} ${fy - 1} L${x - lw - slim - flare} ${fy - 1} Z" fill="${legC}" stroke="${legD}" stroke-width=".7"/><path d="M${x} ${hy + 6} L${x} ${fy - 3}" stroke="${legD}" stroke-width=".8" opacity=".6"/>`);
+    for (const x of [lx, rx]) o.push(`<path d="M${x - lw - 1.5} ${hy - 2} L${x + lw + 1.5} ${hy - 2} Q${x + lw + .5} ${(hy + fy) / 2} ${x + lw - 1.2 + slim + flare} ${fy - 1} L${x - lw + 1.2 - slim - flare} ${fy - 1} Q${x - lw - .5} ${(hy + fy) / 2} ${x - lw - 1.5} ${hy - 2} Z" fill="${legC}" stroke="${legD}" stroke-width=".7"/><path d="M${x} ${hy + 6} L${x} ${fy - 3}" stroke="${legD}" stroke-width=".8" opacity=".6"/>`);
     if (bot === 0 && top !== 19) for (const x of [lx, rx]) o.push(`<path d="M${x - lw + 1} ${hy + 2} L${x - lw + 1} ${fy - 3}" stroke="${mixHex(bc, '#fff', .45)}" stroke-width=".6" stroke-dasharray="1.5 1.5"/>`);
     if (bot === 7) for (const x of [lx, rx]) o.push(`<rect x="${x - lw - 1}" y="${hy + 26}" width="${lw + 1}" height="10" rx="1.5" fill="${legD}"/>`);
     if (bot === 6) for (const x of [lx, rx]) o.push(`<path d="M${x} ${hy + 4} L${x} ${fy - 2}" stroke="${mixHex(bc, '#fff', .3)}" stroke-width=".9"/>`);
@@ -57,14 +57,15 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   for (const [x, dir] of [[lx, -1], [rx, 1]]) {
     const h = [5, 8, 12, 4, 5, 3, 4, 14, 13, 6][shoe];
     if (h > 6) o.push(`<rect x="${x - lw - .5}" y="${fy - h}" width="${lw * 2 + 1}" height="${h}" fill="${SH[0]}"/>`);
-    o.push(`<path d="M${x - lw - 1 + (dir < 0 ? -4 : 0)} ${fy + 5} Q${x - lw - 1 + (dir < 0 ? -4 : 0)} ${fy - 3} ${x} ${fy - 3} Q${x + lw + 1 + (dir > 0 ? 4 : 0)} ${fy - 2} ${x + lw + 1 + (dir > 0 ? 4 : 0)} ${fy + 5} Z" fill="${SH[0]}"/><rect x="${x - lw - 1 + (dir < 0 ? -4 : 0)}" y="${fy + 3.5}" width="${lw * 2 + 6}" height="${shoe === 7 ? 4 : 2}" fill="${SH[1]}"/>`);
+    o.push(`<path d="M${x - lw - 1 + (dir < 0 ? -7 : 0)} ${fy + 5} Q${x - lw - 1 + (dir < 0 ? -7 : 0)} ${fy - 2} ${x} ${fy - 3} Q${x + lw + 1 + (dir > 0 ? 7 : 0)} ${fy - 2} ${x + lw + 1 + (dir > 0 ? 7 : 0)} ${fy + 5} Z" fill="${SH[0]}"/><rect x="${x - lw - 1 + (dir < 0 ? -4 : 0)}" y="${fy + 3.5}" width="${lw * 2 + 6}" height="${shoe === 7 ? 4 : 2}" fill="${SH[1]}"/>`);
     if (shoe === 4) o.push(`<rect x="${x + dir * (lw - 1) - 1}" y="${fy + 3}" width="2" height="5" fill="${SH[0]}"/>`);
     if (shoe === 5) o.push(`<path d="M${x - lw} ${fy - 1} L${x + lw} ${fy + 2}" stroke="${SH[0]}" stroke-width="1.5"/>`);
     if (shoe === 9) o.push(`<ellipse cx="${x}" cy="${fy + 1}" rx="${lw + 4}" ry="5" fill="#FFFFFF" opacity=".6"/>`);
   }
   // the top: a torso, longer for dresses and coats
   const long = top === 10 ? hy + 40 : top === 18 ? hy + 34 : hy + 4, lowW = top === 10 ? hp + 12 : top === 18 ? hp + 7 : hp + 1;
-  const body = `M${cx - sw} ${sy + 3} Q${cx - sw - 1} ${sy - 3} ${cx - sw + 9} ${sy - 4} L${cx - 9} 84 Q${cx} 89 ${cx + 9} 84 L${cx + sw - 9} ${sy - 4} Q${cx + sw + 1} ${sy - 3} ${cx + sw} ${sy + 3} L${cx + ww + 1} ${wy} L${cx + lowW} ${long} L${cx - lowW} ${long} L${cx - ww - 1} ${wy} Z`;
+  const wz = Math.min(ww, sw * .84);   // a waist narrower than the shoulders, so nobody is a box
+  const body = `M${cx - sw} ${sy + 4} Q${cx - sw - .5} ${sy - 3} ${cx - sw + 8} ${sy - 4} L${cx - 9} 84 Q${cx} 89 ${cx + 9} 84 L${cx + sw - 8} ${sy - 4} Q${cx + sw + .5} ${sy - 3} ${cx + sw} ${sy + 4} Q${cx + sw - .5} ${sy + 22} ${cx + wz + 1} ${wy} Q${cx + lowW + 1} ${(wy + long) / 2} ${cx + lowW} ${long} L${cx - lowW} ${long} Q${cx - lowW - 1} ${(wy + long) / 2} ${cx - wz - 1} ${wy} Q${cx - sw + .5} ${sy + 22} ${cx - sw} ${sy + 4} Z`;
   const tc = top === 19 ? '#F4F2EE' : cloth;
   o.push(`<path d="${body}" fill="${tc}" stroke="${mixHex(tc, '#000', .35)}" stroke-width=".9"/>`);
   const shadeTop = `<defs><linearGradient id="${uid}ts" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".14"/><stop offset=".45" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".2"/></linearGradient></defs><path d="${body}" fill="url(#${uid}ts)"/>`;
@@ -94,8 +95,8 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   // arms: sleeves in the top's colour, short sleeves showing skin
   const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : top === 11 ? cloth : cloth, aw = [5, 5.5, 6, 6.5, 7, 7.5, 4.8, 5, 7.5, 6.3][b] + FT.mus * .22 + Math.max(0, FT.mass) * .12, wide = top === 12 ? 4 : top === 17 ? 2 : 0;
   const arm = (pts, side) => {
-    const [s, e, h] = pts, path = `M${s[0]} ${s[1]} Q${e[0]} ${e[1]} ${h[0]} ${h[1]}`;
-    o.push(`<path d="${path}" stroke="${mixHex(short ? skin : sleeve, '#000', .35)}" stroke-width="${aw * 2 + 1.6}" stroke-linecap="round" fill="none"/><path d="${path}" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/>`);
+    const [s, e, h] = pts, path = `M${s[0]} ${s[1]} L${e[0]} ${e[1]} L${h[0]} ${h[1]}`, up = `M${s[0]} ${s[1]} L${e[0]} ${e[1]}`, fore = `M${e[0]} ${e[1]} L${h[0]} ${h[1]}`, c = short ? skin : sleeve, cd = mixHex(c, '#000', .35);
+    o.push(`<path d="${up}" stroke="${cd}" stroke-width="${aw * 2 + 1.4}" stroke-linecap="round" fill="none"/><path d="${fore}" stroke="${cd}" stroke-width="${aw * 1.6 + 1.4}" stroke-linecap="round" fill="none"/><path d="${up}" stroke="${c}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="${fore}" stroke="${c}" stroke-width="${aw * 1.6}" stroke-linecap="round" fill="none"/>`);
     if (short) o.push(`<path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${mixHex(sleeve, '#000', .35)}" stroke-width="${aw * 2 + 2.6}" stroke-linecap="round"/><path d="M${s[0]} ${s[1]} L${s[0] + (e[0] - s[0]) * .45} ${s[1] + (e[1] - s[1]) * .45}" stroke="${sleeve}" stroke-width="${aw * 2 + 1}" stroke-linecap="round"/>`);
     else if (wide) o.push(`<path d="M${(s[0] + e[0]) / 2} ${(s[1] + e[1]) / 2} Q${e[0]} ${e[1]} ${h[0] + (side < 0 ? -1 : 1) * 1} ${h[1] - 6}" stroke="${sleeve}" stroke-width="${aw * 2 + wide * 2}" stroke-linecap="round" fill="none"/>`);
     if (top === 11) o.push(`<path d="${path}" stroke="#FFFFFF" stroke-width="1.2" fill="none" transform="translate(${side * (aw - 1.5)} 0)"/>`);
@@ -106,12 +107,12 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
     if (L.wrist && side < 0) { const band = ['', '#3B3226', '#C9A646', '#8C6A2E', '#1E1E1E'][L.wrist]; o.push(`<rect x="${h[0] - aw}" y="${h[1] - 4}" width="${aw * 2}" height="${L.wrist === 2 ? 2 : 3}" fill="${band}"/>${L.wrist !== 2 ? `<rect x="${h[0] - 2.2}" y="${h[1] - 5}" width="4.4" height="4.4" rx="${L.wrist === 4 ? 1 : 2.2}" fill="${L.wrist === 4 ? '#2C4F7C' : '#F3EFF8'}" stroke="${band}" stroke-width=".8"/>` : ''}`); }
   };
   const lS = [cx - sw + 3, sy + 3], rS = [cx + sw - 3, sy + 3];
-  const down = side => [side < 0 ? lS : rS, [cx + side * (sw + 4), 118], [cx + side * (sw + 4), 146]];
+  const down = side => [side < 0 ? lS : rS, [cx + side * (sw + 1.5), sy + 30], [cx + side * (sw - .5), hy - 3]];
   if (pose === 3) {   // arms crossed
     o.push(`<path d="M${cx - sw + 2} 112 Q${cx} 106 ${cx + sw - 2} 116" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${cx + sw - 2} 110 Q${cx} 116 ${cx - sw + 2} 120" stroke="${short ? skin : sleeve}" stroke-width="${aw * 2}" stroke-linecap="round" fill="none"/><path d="M${lS[0]} ${lS[1]} L${cx - sw + 1} 112 M${rS[0]} ${rS[1]} L${cx + sw - 1} 110" stroke="${sleeve}" stroke-width="${aw * 2}" stroke-linecap="round"/>${figHand(cx + sw - 1, 116, aw, 1, skin)}${figHand(cx - sw + 1, 120, aw, -1, skin)}`);
   } else {
-    arm(pose === 4 ? [lS, [cx - sw - 3, 118], [cx - hp + 3, 138]] : down(-1), -1);
-    arm(pose === 1 ? [rS, [cx + sw + 12, 116], [cx + ww + 3, 132]] : pose === 2 ? [rS, [cx + sw + 12, 72], [cx + sw + 6, 50]] : pose === 4 ? [rS, [cx + sw + 3, 118], [cx + hp - 3, 138]] : down(1), 1);
+    arm(pose === 4 ? [lS, [cx - sw - 2, sy + 28], [cx - hp + 3, hy - 6]] : down(-1), -1);
+    arm(pose === 1 ? [rS, [cx + sw + 11, sy + 24], [cx + Math.min(ww, sw * .84) + 3, wy + 2]] : pose === 2 ? [rS, [cx + sw + 13, sy + 12], [cx + sw + 11, sy - 18]] : pose === 4 ? [rS, [cx + sw + 2, sy + 28], [cx + hp - 3, hy - 6]] : down(1), 1);
   }
   // what you're carrying, in front
   const hx = cx + sw + 4, hyy = 148;
@@ -125,8 +126,8 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
 }
 // a hand: palm, a thumb towards the body, a hint of knuckles
 function figHand(x, y, aw, side, skin) {
-  const d = mixHex(skin, '#000', .22);
-  return `<ellipse cx="${x}" cy="${y}" rx="${(aw * .72).toFixed(2)}" ry="${(aw * .95).toFixed(2)}" fill="${skin}" stroke="${d}" stroke-width=".5"/><ellipse cx="${(x - side * aw * .62).toFixed(2)}" cy="${(y - aw * .2).toFixed(2)}" rx="${(aw * .26).toFixed(2)}" ry="${(aw * .5).toFixed(2)}" transform="rotate(${side * 25} ${(x - side * aw * .62).toFixed(2)} ${(y - aw * .2).toFixed(2)})" fill="${skin}" stroke="${d}" stroke-width=".4"/><path d="M${(x - aw * .4).toFixed(2)} ${(y + aw * .55).toFixed(2)} Q${x} ${(y + aw * .8).toFixed(2)} ${(x + aw * .4).toFixed(2)} ${(y + aw * .55).toFixed(2)}" stroke="${d}" stroke-width=".4" fill="none" opacity=".7"/>`;
+  const d = mixHex(skin, '#000', .25), w = aw * .78, l = aw * 1.55;
+  return `<path d="M${(x - w).toFixed(2)} ${(y - l * .45).toFixed(2)} Q${(x - w - .4).toFixed(2)} ${(y + l * .35).toFixed(2)} ${(x - w * .35).toFixed(2)} ${(y + l * .6).toFixed(2)} Q${x.toFixed(2)} ${(y + l * .72).toFixed(2)} ${(x + w * .4).toFixed(2)} ${(y + l * .58).toFixed(2)} Q${(x + w + .4).toFixed(2)} ${(y + l * .3).toFixed(2)} ${(x + w).toFixed(2)} ${(y - l * .45).toFixed(2)} Z" fill="${skin}" stroke="${d}" stroke-width=".5"/><path d="M${(x - side * w * .55).toFixed(2)} ${(y - l * .25).toFixed(2)} q${(-side * w * .35).toFixed(2)} ${(l * .35).toFixed(2)} 0 ${(l * .55).toFixed(2)}" stroke="${d}" stroke-width=".45" fill="none" opacity=".7"/>`;
 }
 // head-to-toe, for the places with room
 function figureOf(p, h) { const age = (p.dead ? yearOf(p.deathW || S.week) : S.year) - p.born; return portraitSVG(lookOf(p), p.dead ? Math.min(age, 50) : age, h, false, true); }

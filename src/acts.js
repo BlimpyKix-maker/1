@@ -16,18 +16,25 @@ const ACT_GROUP = new Set(['band', 'duo', 'choir', 'troupe', 'show']);
 const ACT_RATE = { music: .22, creator: .85, podcast: .45, stage: .06 };   // chance of a release at each four-weekly look
 const ACT_ENG = { music: 1.4, creator: 2.2, podcast: .5, stage: .02 }, ACT_CONV = { music: .05, creator: .04, podcast: .08, stage: .3 };
 const ACT_DECAY = { music: .82, creator: .6, podcast: .9, stage: .93 };
+// audiences drift away a little every four weeks, and growth slows as an act nears the size its field can hold
+const ACT_CHURN = { music: .005, creator: .05, podcast: .005, stage: .001 }, ACT_CAP = { music: 2e7, creator: 1.5e7, podcast: 8e6, stage: 3e6 }, ACT_QUIET = { music: 26, creator: 13, podcast: 26, stage: 156 };
 const ACT_KIND = { music: ['single', 'single', 'single', 'album'], creator: ['video'], podcast: ['season'], stage: ['production'] };
 const ACT_SUBS = { composer: ['song', 'theme', 'score', 'orch'], editor: ['rhythm', 'shape', 'cont'], writer: ['struc', 'dial', 'char'], actor: ['range', 'pres', 'comic'] };
 function actsOn() { return !!S.actsOn; }
 function actSkill(p) { const L = ACT_SUBS[p.role] || []; return L.length ? L.reduce((t, k) => t + (p.sk[k] || 8), 0) / L.length : 10; }
 function actFame(fans) { return clamp(Math.log10(Math.max(10, fans)) * 15 - 40, 0, 95); }
 // one act, as a person
+// one person per act: a star listed in two cities of the same market is the same star, and two different acts
+// that happen to share a name are told apart by their home city, as real bands with the same name do
+let ACT_SEEN = null;
+function actSeen() { if (!ACT_SEEN) { ACT_SEEN = { id: new Map(), nm: new Set() }; for (const p of S.people) if (p && p.ind) { ACT_SEEN.nm.add(p.name); if (p.akey) ACT_SEEN.id.set(p.akey, p.id); } } return ACT_SEEN; }
 function actMake(x, hub, i) {
+  const key = x.name + '|' + x.kind + '|' + x.from, A0 = actSeen(); if (A0.id.has(key)) { x.pid = A0.id.get(key); return P(x.pid); }
   const prev = R; R = mulberry((hashRand(HUB_IDS.indexOf(hub) * 7919 + i * 104729 + x.name.length * 31 + (S.seed | 0))() * 4294967296) >>> 0);
   try {
     const role = ACT_ROLE[x.kind] || 'composer', age = clamp(20 + Math.floor(rnd() * 8) + (S.year - x.from), 18, 104);
     const p = makePerson(hub, role, { age, noPool: true }); if (ACT_GROUP.has(x.kind)) p.g = 'X';
-    p.name = x.name; p.ind = x.field; p.act = x.kind; p.fans = x.fans; p.mfrom = x.from; if (x.to) p.mto = x.to; p.debut = weekOfYear(Math.max(S.y0, x.from));
+    p.name = A0.nm.has(x.name) ? `${x.name} (${HUBS[hub].name})` : x.name; p.akey = key; p.ahub = hub; A0.nm.add(p.name); A0.id.set(key, p.id); p.ind = x.field; p.act = x.kind; p.fans = x.fans; p.mfrom = x.from; if (x.to) p.mto = x.to; p.debut = weekOfYear(Math.max(S.y0, x.from));
     if (x.legend) p.legend = 1;
     const boost = Math.log10(Math.max(10, x.fans)) - 3; for (const k of ACT_SUBS[role] || []) { p.sk[k] = clamp(p.sk[k] + boost * 1.6, 1, 20); p.pot[k] = Math.max(p.pot[k], p.sk[k]); } recalc(p);
     p.fame = actFame(x.fans); p.standing = clamp(p.fame * .8 + rnd() * 10, 1, 95);
@@ -48,32 +55,33 @@ function actRelease(p, w, x) {
   const r = { t: String(t).replace(/^"([^"]+)".*$/, '$1').replace(/ \([^)]*\)$/, ''), w, q, v0, kind };
   p.rel.push(r); if (p.rel.length > 12) p.rel.shift(); p.discN = (p.discN || 0) + 1;
   p.units = (p.units || 0) + v0 / (1 - ACT_DECAY[f]);
-  p.fans = Math.max(50, p.fans + v0 * ACT_CONV[f] * (q / 70));
+  p.fans = Math.max(50, p.fans + v0 * ACT_CONV[f] * (q / 70) / (1 + p.fans / ACT_CAP[f]));
   p.fame = actFame(p.fans); p.lastWork = w;
   return r;
 }
 function actUnits(p, r, w) { return w < r.w ? 0 : r.v0 * Math.pow(ACT_DECAY[p.ind] + (r.q - 60) / 2000, w - r.w); }
 // ---- the world builds them ----
 function actsInit() {
-  if (S.actsOn || typeof mediaFigures !== 'function') return;
+  ACT_SEEN = null; if (S.actsOn || typeof mediaFigures !== 'function') return;
   for (const h of HUB_IDS) { const L = mediaFigures(h); L.forEach((x, i) => { if (!x.pid && x.from <= S.year) actMake(x, h, i); }); }
   // a few recent releases each, so the charts have something on the first day
   const prevR = R; R = wstream('acts', 'seed', S.week);
-  for (const h of HUB_IDS) for (const x of mediaFigures(h)) { const p = x.pid != null && P(x.pid); if (!p || p.retired || p.dead) continue; const n = p.ind === 'creator' ? 4 : p.ind === 'stage' ? 1 : 2; for (let k = n; k >= 1; k--) actRelease(p, S.week - Math.floor(k * (p.ind === 'creator' ? 3 : 10) * (.6 + rnd() * .8)), x); }
+  for (const h of HUB_IDS) for (const x of mediaFigures(h)) { const p = x.pid != null && P(x.pid); if (!p || p.retired || p.dead || (p.ahub || p.hub) !== h) continue; const n = p.ind === 'creator' ? 4 : p.ind === 'stage' ? 1 : 2; for (let k = n; k >= 1; k--) actRelease(p, S.week - Math.floor(k * (p.ind === 'creator' ? 3 : 10) * (.6 + rnd() * .8)), x); }
   S.actsOn = 1; S.actsW0 = S.week; R = prevR;
 }
 { const _fw = finishWarm; finishWarm = function () { const r = _fw.apply(this, arguments); actsInit(); return r; }; }
 // every week: a quarter of the acts take stock and maybe put something out
 function actsWeek() {
   if (!S.actsOn) return; R = wstream('acts', S.week);
-  for (const h of HUB_IDS) for (const x of mediaFigures(h)) { const p = x.pid != null ? P(x.pid) : null; if (!p || p.dead || p.retired || (p.id + S.week) % 4) continue;
+  for (const h of HUB_IDS) for (const x of mediaFigures(h)) { const p = x.pid != null ? P(x.pid) : null; if (!p || p.dead || p.retired || (p.ahub || p.hub) !== h || (p.id + S.week) % 4) continue;
+    p.fans = Math.max(50, p.fans * (1 - ACT_CHURN[p.ind]));
     if (rnd() < ACT_RATE[p.ind] * (p.legend ? .6 : 1)) { const r = actRelease(p, S.week, x); if (r.v0 > 2e6 && p.ind === 'music') news('Music', `${p.name} release "${r.t}"; it is everywhere within a week.`, { person: p.id }); }
-    else if (S.week - (p.lastWork || 0) > 26) p.fans *= .985; }
+    else if (S.week - (p.lastWork || 0) > ACT_QUIET[p.ind]) p.fans *= .985; }
 }
 { const _t = tick; tick = function () { const r = _t.apply(this, arguments); if (S.actsOn && !S.archiving) actsWeek(); return r; }; }
 // every year: new acts arrive, some stop
 function actsYear() {
-  if (!S.actsOn) return; R = wstream('acts', 'year', S.year);
+  ACT_SEEN = null; if (!S.actsOn) return; R = wstream('acts', 'year', S.year);
   for (const h of HUB_IDS) { const L = mediaFigures(h); L.forEach((x, i) => { if (x.pid == null && x.from <= S.year) { const p = actMake(x, h, i); if (p.fans > 2e5) news('Music', `${p.name} arrive${ACT_GROUP.has(p.act) ? '' : 's'}: the ${(KIND_LABEL[p.act] || p.act).toLowerCase()} everyone in ${HUBS[h].name} is suddenly talking about.`, { person: p.id }); } });
     for (const x of L) { const p = x.pid != null ? P(x.pid) : null; if (p && !p.retired && x.to && x.to < S.year) { p.retired = true; p.retY = S.year; if (p.fans > 1e6) news('Music', `${p.name} ${ACT_GROUP.has(p.act) ? 'split up' : 'stop'} after ${S.year - p.mfrom} years.`, { person: p.id }); } } }
 }

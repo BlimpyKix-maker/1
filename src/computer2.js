@@ -39,7 +39,7 @@ function mailWeek() {
   if (bigF.length && r() < .5) { const N = NAMES[HUBS[M.hub].lang] || NAMES.en; mail('fans', `${N.F[Math.floor(r() * N.F.length)]} ${N.L[Math.floor(r() * N.L.length)]}`, 'a message from a fan', FANS[Math.floor(r() * FANS.length)].replace(/\{work\}/g, () => { const w = (M.works || []).filter(w => w.rel !== undefined).slice(-1)[0]; return w ? w.title : 'your last thing'; })); }
   const songs = (M.works || []).filter(w => w.type === 'song'), streams = songs.reduce((t, w) => t + w.units, 0);
   if (!M.deal && streams > 15000 && S.week % 6 === 0 && !(M.mail || []).some(m => m.act && m.act.k === 'label' && !m.done && S.week - m.w < 12)) {
-    const L = MEDIA_COS.filter(c => c.type === 'label' && c.f <= S.year), lab = L[Math.floor(r() * L.length)], adv = Math.round(usd(streams > 200000 ? 60000 : streams > 60000 ? 20000 : 6000) / 500) * 500;
+    const L = MEDIA_COS.filter((c, i) => c.type === 'label' && c.f <= S.year && (typeof mhOpen !== 'function' || mhOpen(i))), lab = L[Math.floor(r() * L.length)], adv = Math.round(usd(streams > 200000 ? 60000 : streams > 60000 ? 20000 : 6000) / 500) * 500;
     mail('offers', `A&R, ${lab.n}`, 'We\'d like to sign you', `We've been listening. We'd like to offer a record deal: an advance of ${fmtCash(adv)}, recoupable against your royalties, and our promotion behind your next releases. Your share per stream drops, but far more people will hear you. Think about it.`, { k: 'label', lab: lab.n, adv });
   }
   if (fol('spinly') >= 500 && r() < .3) { const fee = Math.round(usd(clamp(fol('spinly') / 20, 120, 4000)) / 10) * 10; mail('offers', 'Bookings, The Velvet Room', 'Can you play a show?', `We have a slot on a Friday. ${fmtCash(fee)} guarantee, you keep your merch money.`, { k: 'gig', fee }); }

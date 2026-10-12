@@ -63,7 +63,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   const grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
   const fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][L.face] + ((L._fit || {}).mass || 0) * .35, fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][L.face];
   const jaw = [0, 4, -3, 0, 6, 3, 4, -4, 0, 1][L.face];
-  const FT = L._fit || { mus: 0, mass: 0 }, bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build] + FT.mus * .9 + FT.mass * .7, neck = 9 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build] + FT.mus * .35 + Math.max(0, FT.mass) * .15;
+  const FT = L._fit || { mus: 0, mass: 0 }, bw = [40, 42, 46, 50, 54, 56, 38, 40, 52, 48][L.build] + FT.mus * .9 + FT.mass * .7, neck = 10.5 + [0, 0, 1, 2, 3, 4, 0, -1, 3, 1][L.build] + FT.mus * .35 + Math.max(0, FT.mass) * .15;
   const recede = L.hairline === 1 ? clamp((age - 32) / 30, 0, 1) : 0;
   const cx = 60, cy = 52, top = cy - fh / 2;
   const o = [];

@@ -665,3 +665,747 @@ I ran 16 searches. Below, [U] means the figure is unverified, came secondhand, o
 - Theatre: an actor or director joins a non-profit board through give-or-get, then sits on the artistic director search committee or becomes a candidate.
 
 Main gaps: no confirmed figures for committee count, media-specific CEO tenure, media merger failure rates, or a budget threshold for greenlight escalation.
+
+## Round 20: streaming in depth, and improv
+
+Two research passes (October 2026). Firm, theatre and union names are replaced by generic terms in the prose and kept only in source URLs; real people are left out. **[U]** marks a figure the researcher could not verify. What was built is in HANDOFF.md (Round 20).
+
+### Streaming: the business, the work, the teaching, the exploits (research for the film-industry life-sim)
+
+Compiled 2026-10-12. Every figure carries its source URL. **[U]** = unverified (single weak source, press estimate the parties never confirmed, or the author's own arithmetic/memory). "Secondary" = a news write-up of someone else's data. Wikipedia's API rate-limited this session, so most figures come from trade/press pages found via search; where a primary filing was visible in search, it is cited.
+
+Note for the designers: the game already models streamers as `TV_NETS` entries with `kind: 'streaming'`, pay-window bidding, weekly views (hours ÷ runtime), a twice-yearly engagement report and a "top fifth in first 90 days" bonus (`src/distrib.js`, `src/dealroom.js`). The rules in section 8 are written to extend that, not replace it.
+
+---
+
+#### 0. Timeline at a glance
+
+| Year | Event | Source |
+|---|---|---|
+| 1997 | Market leader founded as DVD-by-mail [U: founding year from general knowledge] | — |
+| 1998 | First disc shipped, 10 Mar 1998 | https://whats-on-netflix.com/news/netflix-dvd-to-close-in-september-2023-after-25-years |
+| 2007 | Streaming added to the DVD subscription | https://www.techhive.com/article/1790249/netflix-closing-dvd-business.html |
+| 2011 | "a spun-off DVD unit" split and price rise of up to 60%; ~800k US subscribers lost in a quarter; stock fell 35% in one day, >75% from peak | https://www.washingtontimes.com/news/2011/oct/25/netflix-shares-tank-amid-backlash-and-defections/ ; https://cases.som.yale.edu/netflix-and-qwikster |
+| 2013 | First flagship original: ~$100M for two 13-episode seasons, no pilot, chosen partly from viewing data | https://www.hollywoodreporter.com/lifestyle/arts/how-netflix-conquered-hollywood-broke-it-pandoras-box-book-excerpt-1235637957/ ; https://investorplace.com/?p=300981 |
+| 2019 | Studio-owned services arrive (a studio-owned service at $6.99, Nov 2019); bidding war for library sitcoms | https://www.sherwood.news/tech/disney-has-gone-from-one-of-the-cheapest-to-one-of-the-most-expensive |
+| 2020 | a studio–a cinema chain deal cuts exclusive window from ~90 to 17 days (for premium VOD only) | https://pastemagazine.com/movies/amc-theatres/amc-theatres-universal-ban-theatrical-window |
+| 2020 (Dec) | a legacy studio puts its whole 17-film 2021 slate on a studio-owned service day-and-date for one month | https://www.rollingstone.com/movies/movie-news/warner-bros-hbo-max-dune-matrix-4-godzilla-kong-1098343/ |
+| 2021 | the market leader says it no longer needs outside financing | https://www.cnbc.com/2021/01/19/netflix-says-cash-flow-positive-after-2021-no-more-external-financing.html |
+| 2022 (Apr) | First subscriber loss in a decade (−200k); shares −35% in a day, ~$54B wiped | https://www.bnnbloomberg.ca/netflix-shares-plunge-35-after-massive-subscriber-loss-1.1754275 |
+| 2022 (Nov) | Ad tier launches at $6.99 | https://www.tomsguide.com/news/netflix-pricing |
+| 2023 | Password-sharing crackdown (May); the writers' guild and the actors' union strikes; a studio group $2.4B content impairment; first engagement report (Dec); DVD service ends 29 Sep | see sections below |
+| 2024 | a retailer-owned service makes ads the default; the market leader ends year at 301.6M paid members | https://www.nbcwashington.com/news/national-international/amazon-to-run-ads-on-prime-video-and-charge-2-99-more-a-month-to-avoid-them/3428749/ ; https://www.storyboard18.com/television/netflix-to-boost-content-spending-to-18-billion-in-2025-54392.htm |
+| 2025 | the market leader stops quarterly subscriber reporting; streaming passes broadcast+cable combined in US TV time (May); the market leader agrees ~$82B deal for a legacy studio (Dec) | https://www.businesstoday.in/amp/technology/news/story/netflix-to-stop-reporting-subscriber-tally-as-streaming-wars-cool-426042-2024-04-19 ; https://www.thewrap.com/streaming-cable-broadcast-tv-ratings-nielsen-the-gauge-may-2025/ |
+| 2026 | the market leader walks away (Feb) after a rival studio raises to $31/share (~$108B); deal reported closed 6 Oct 2026 [single secondary source]; the writers' guild ratifies a four-year contract (Apr) | https://filmstories.co.uk/news/netflix-drops-warner-bros-bid-paramount-on-course-to-acquire-the-studio/ ; https://www.sortiraparis.com/en/what-to-do-in-paris/cinema-series/articles/353398-warner-and-paramount-officially-reunite-skydance-becomes-a-hollywood-giant ; https://www.wga.org/news-events/news/press/wga-ratifies-2026-minimum-basic-agreement-with-amptp |
+
+---
+
+#### 1. Business models and their economics
+
+### 1.1 Subscriber growth curve of the market leader
+
+| Year-end | Paid memberships | Source |
+|---|---|---|
+| 2011 | ~21.5M (streaming) [U, secondary blog] | https://entertainmentstrategyguy.com/2019/10/03/why-most-netflix-charts-start-in-2012-a-history-of-netflix-subscribers/ |
+| 2014 | ~47.9M [U, same blog] | same |
+| 2019 | 167.1M | https://www.sec.gov/Archives/edgar/data/1065280/000106528020000035/ex991q419.htm |
+| 2020 | 203.7M (passed 200M) | https://www.cnbc.com/2021/01/19/netflix-says-cash-flow-positive-after-2021-no-more-external-financing.html |
+| 2021 | 221.8M [secondary compilation] | https://businesstats.com/?p=431 |
+| 2022 | 230.75M (lost subscribers in H1, recovered with ads + crackdown) | https://au.variety.com/?p=8312 |
+| 2023 | 260.28M (+13.1M in Q4 alone; UCAN 80.1M, EMEA 88.8M, LATAM 46.0M, APAC 45.3M) | https://www.thewrap.com/netflix-earnings-q4-2023/ |
+| 2024 | 301.6M; "over 700M people" watching | https://www.storyboard18.com/television/netflix-to-boost-content-spending-to-18-billion-in-2025-54392.htm |
+| 2025+ | No longer reported quarterly (announced Apr 2024; only milestones) | https://www.businesstoday.in/amp/technology/news/story/netflix-to-stop-reporting-subscriber-tally-as-streaming-wars-cool-426042-2024-04-19 |
+
+Competitors (mixed dates): a rival studio+ 79M, another service 44M paid, WBD ~132M across services, a studio-owned service ~124.6M; a retailer group does not disclose ( https://www.thewrap.com/media-platforms/streaming/netflix-disney-warner-bros-paramount-peacock-subscribers-revenue-profits-march-2026-update/ ; https://digitaltrends.com/home-theater/most-popular-streaming-services-by-subscribers ). another service ~45M ( https://techcrunch.com/2025/03/20/apple-is-reportedly-losing-1b-per-year-on-its-streaming-service ).
+
+### 1.2 Revenue, margin, cash and debt: losses-then-profit
+
+Revenue (secondary compilation, consistent with filings): 2015 $6.8B, 2017 $11.7B, 2019 $20.2B, 2020 $25.0B, 2021 $29.7B, 2022 $31.6B, 2023 $33.7B, 2024 $39.0B ( https://businesstats.com/?p=431 ). 2025: $45.2B (+16%), operating income $13.3B, operating margin 29.5% (26.7% in 2024); 2026 guidance $50.7–51.7B, ~31.5% margin ( https://thedesk.net/2026/01/netflix-q4-2025-earnings-report/ ; https://www.csimagazine.com/csi/netflix-fullyear-results.php ).
+
+Cash: the leader was profitable on paper for years while burning cash, because content is capitalised and amortised. Free cash flow was −$1.6B in the first nine months of 2019, then +$2.2B year-to-date by Q3 2020 ( https://www.sec.gov/Archives/edgar/data/1065280/000106528020000448/ex991q320.htm ). The 2019 10-K warned of "negative free cash flows for many years" ( https://www.sec.gov/Archives/edgar/data/1065280/000106528020000040/form10kq419.htm ). Full-year 2019 FCF ≈ −$3.3B [U]. In Jan 2021 it said it no longer needed external financing and would hold $10–15B gross debt ( https://www.cnbc.com/2021/01/19/netflix-says-cash-flow-positive-after-2021-no-more-external-financing.html ); bonds outstanding then ~$16.4B ( https://www.spglobal.com/marketintelligence/en/news-insights/latest-news-headlines/netflix-euro-bonds-rally-as-company-steps-back-from-debt-raising-62192680 ). By Dec 2025 it was rated A (S&P) / A3 (Moody's) and lined up $59B of bridge debt for the Warner deal ( https://fortune.com/2025/12/11/netflix-looks-to-become-debtflix-again-to-fund-warner-bros-acquisition/ ).
+
+Accounting rule worth modelling: >90% of a title's capitalised cost is amortised within four years of release, on an accelerated schedule (films faster than series) ( https://www.sec.gov/Archives/edgar/data/1065280/000106528026000034/nflx-20251231.htm ).
+
+Content cash spend: $16.2B (2024), ~$18B planned (2025) ( https://www.storyboard18.com/television/netflix-to-boost-content-spending-to-18-billion-in-2025-54392.htm ). Industry: global content spend ~$245B in 2025, streamers $95B (39%), passing commercial broadcasters for the first time; $255B forecast for 2026 with streamers at $101B ( https://senalnews.com/en/data/streamers-to-spend-95-billion-on-content-in-2025-surpassing-broadcasters ; https://www.contentasia.tv/news/global-content-investment-hit-us255bn-2026-streamers-cement-market-leadership-ampere-analysis ).
+
+### 1.3 Late entrants' loss curves
+
+| Service | Losses | Source |
+|---|---|---|
+| a studio group DTC | ~$11.4B cumulative through 2023; first profit $47M in the quarter to 30 Mar 2024 (entertainment DTC) | https://informitv.com/2024/02/07/disney-pulls-closer-to-profit/ ; https://www.cityam.com/?p=2169078 |
+| another service | −$914M (2020), −$1.7B (2021), −$2.5B (2022), ~−$2.8B (2023, called the peak), Q4 2025 −$552M | https://tvtechnology.com/news/peacock-lost-dollar914m-in-2020 ; https://filmstories.co.uk/?p=30228 ; https://www.thewrap.com/peacock-losses-peak-3-billion-comcast ; https://www.hollywoodreporter.com/business/business-news/peacock-loss-subscribers-44-million-1236488224/ |
+| another service | >$1B/year; ~$5B/yr content, cut to $4.5B in 2024; business plan foresaw $15–20B losses over first 10 years | https://au.variety.com/2025/digital/news/apple-tv-plus-streaming-losses-1-billion-per-year-21094/ |
+
+Design point: a studio-owned service typically loses money for **4–5 years** before breaking even; the market leader took ~**13 years** of streaming (2007–2020) to become free-cash-flow positive.
+
+### 1.4 Prices over time (US)
+
+| Service / tier | Path | Source |
+|---|---|---|
+| Market leader, Standard | $7.99 (2013) → $9.99 (2015) → $15.49 (2022) → $17.99 (Jan 2025) → $19.99 (Mar 2026) | https://www.tomsguide.com/news/netflix-pricing ; https://keepingupwithinflation.com/tracker/netflix/ ; https://www.wlox.com/2026/03/26/netflix-raising-prices-all-streaming-plans-2nd-time-just-over-year/ |
+| Market leader, with ads | $6.99 (Nov 2022) → $7.99 → $8.99 (Mar 2026) | same |
+| Extra member outside household | $7.99/month (2023) | https://cordcuttersnews.com/netflix-announces-what-it-will-cost-you-to-share-your-netflix-password/ |
+| a studio-owned service ad-free | $6.99 (2019) → $7.99 (Mar 2021) → +38% (Dec 2022) → $18.99 (Oct 2025); reportedly $21.49 (2026) [U] | https://www.sherwood.news/tech/disney-has-gone-from-one-of-the-cheapest-to-one-of-the-most-expensive ; https://www.tomsguide.com/entertainment/disney-plus/disney-plus-is-getting-another-price-hike-heres-how-much-youll-pay |
+| a retailer-owned service | Ads made default early 2024; +$2.99/month to remove | https://www.nbcwashington.com/news/national-international/amazon-to-run-ads-on-prime-video-and-charge-2-99-more-a-month-to-avoid-them/3428749/ |
+| Sports DTC (ESPN) | $29.99 unlimited / $11.99 select; bundle with two entertainment services $35.99 (ads) / $44.99 (no ads) | https://espnpressroom.com/us/press-releases/2025/05/new-direct-to-consumer-offering-to-be-singularly-branded-espn/ ; https://fast.laughingplace.com/disney-entertainment/espn-direct-to-consumer-details-and-pricing |
+
+Studio-owned launch price was ~45% of the leader's at the time, then rose ~170% in six years: launch cheap to grab share, then "streamflation".
+
+### 1.5 ARPU by region (market leader, average monthly revenue per paid membership)
+
+UCAN ~$17.20 (2024) vs $16.28 (2023) ( https://www.statista.com/statistics/1090143/netflix-annual-global-arpu-by-region ); EMEA $10.96 (2024) ( https://www.sec.gov/Archives/edgar/data/1065280/000119312525084431/d914423dars.pdf ); LATAM ~$8 [U: own arithmetic from $4.84B revenue and 46→53M members, 10-K data https://www.sec.gov/Archives/edgar/data/1065280/000106528025000044/nflx-20241231.htm ]; APAC ~$7 [U]. Worldwide ~$11.70 [U, secondary]. Rough ratio for the game: **North America 1.0 : Europe 0.65 : Latin America 0.45 : Asia-Pacific 0.4**.
+
+### 1.6 Advertising (AVOD / ad tiers / FAST)
+
+- Share of new US premium SVOD sign-ups choosing an ad tier: 32% (mid-2023) → 51% (Nov 2023) → 56% (Q3 2024); 43% of all subscriptions on ad tiers by Q3 2024 ( https://www.mediapost.com/publications/article/386848/25-of-svod-subs-and-one-third-of-new-sign-ups-are.html ; https://www.thewrap.com/ad-supported-streaming-record-high-2024 ).
+- Leader's ad tier: 70M monthly active users (Nov 2024) ( https://www.nbcnews.com/business/business-news/netflix-ad-supported-tier-70-million-monthly-users-two-years-launch-rcna179754 ); 94M MAU later, plus a "monthly active viewers" metric of 190M that multiplies households by people ( https://www.emarketer.com/content/netflix-releases-ad-viewership-metric-streaming-landscape-changes-again ). Ad revenue >$1.5B in 2025 (2.5× 2024), expected to double in 2026 ( https://www.adnews.com.au/news/netflix-ad-revenue-hits-1-5-billion ).
+- CPMs: launched as high as $65; by summer 2024 $20–30 as a retailer-owned service flooded supply ( https://www.mediapost.com/publications/article/401045/netflix-ad-option-has-positive-momentum-two-year.html ; https://www.adexchanger.com/daily-news-roundup/wednesday-07082024 ).
+- FAST: US free ad-supported services ~$4.9B revenue (2024) → ~$9B by 2029 (PwC) ( https://cordcuttersnews.com/free-streaming-services-revenue-surge-to-4-9-billion-in-2024-as-the-roku-channel-tubi-pluto-tv-more-grow/ ); Tubi 97M MAU end-2024 and near $1B revenue ( https://www.streamtvinsider.com/video/tubi-touts-97-million-monthly-active-users ); Pluto 80M MAU (May 2023); Samsung TV Plus 88M. Combined FAST ~4.6% of US TV time (Dec 2024) ( https://www.hollywoodreporter.com/business/business-news/tubi-monthly-active-users-1236102252/ ).
+- Transactional (TVOD/PVOD/EST): the 2020 17-day window applied to ~$20 premium rentals ( https://pastemagazine.com/movies/amc-theatres/amc-theatres-universal-ban-theatrical-window ); a studio group charged $30 for a day-and-date streaming rental in 2021 ( https://abcnews4.com/news/entertainment/scarlett-johansson-disney-settle-lawsuit-over-black-widow ).
+
+### 1.7 Churn, and how it is fought
+
+Antenna (US, Sept 2024): weighted average gross churn 5.3%/month, net 3.1%; market leader 1.8% gross / 1.0% net; worst (another service) 7.4% gross. End-2023 average 5.5% ( https://www.antenna.live/insights/antennas-2024-top-subscription-insights-serial-churn ; https://www.antenna.live/post/antennas-2024-top-subscription-insights-net-churn ). "Serial churners" (3+ cancellations in 2 years): 29.5M people, 23% of subscribers, but 41% of gross adds and 42% of cancels; after 3 months only 38% of heavy serial churners still subscribed vs 61% of others ( same Antenna page ).
+
+Weapons against churn: ad tiers (cheaper entry), bundles, annual plans, weekly episode drops instead of full-season dumps, live events and sports, password-sharing enforcement, recommendations (the leader's own estimate: personalisation and recommendations save >$1B a year by cutting churn "several percentage points" — https://www.tubefilter.com/?p=81965 , Gomez-Uribe & Hunt 2015, ACM TMIS).
+
+Password crackdown: >100M households were borrowing passwords; after the US rollout in May 2023 the leader had its four biggest US sign-up days in Antenna's history (~100,000/day on 26–27 May); net adds 6M (Q2), 8.8M (Q3), 13.1M (Q4 2023) ( https://www.mprnews.org/story/2023/05/24/npr-netflix-password-sharing ; https://www.mactrast.com/2023/12/netflix-completely-satisfied-with-progress-of-password-sharing-crackdown-program/amp/ ; https://www.thewrap.com/netflix-earnings-q4-2023/ ).
+
+### 1.8 Market valuation swings
+
+- Oct 2011: −35% in one day; >75% from peak during a spun-off DVD unit ( https://www.washingtontimes.com/news/2011/oct/25/netflix-shares-tank-amid-backlash-and-defections/ ; https://cases.som.yale.edu/netflix-and-qwikster ).
+- 20 Apr 2022: −35% in one day, ~$54B market value erased after −200k subs and guidance of −2M; analysts expected +2.5M ( https://www.bnnbloomberg.ca/netflix-shares-plunge-35-after-massive-subscriber-loss-1.1754275 ).
+- Jan 2024: +8–9% after +13.1M subs vs ~8.7–8.9M expected ( https://www.bloomberg.com/news/articles/2024-01-23/netflix-posts-best-customer-gain-since-surge-during-pandemic ).
+- Nov 2025: 10-for-1 split near all-time highs; market cap ~$471B around the split ( https://www.tikr.com/blog/netflix-surges-on-10-for-1-stock-split-announcement ); ~$437B by Dec 2025 ( https://capital.com/en-gb/analysis/netflix-stock-split ).
+- The shift from growth-at-all-costs to profit: subscriber counts dropped as the headline metric (2025), replaced by revenue, operating margin and engagement.
+
+---
+
+#### 2. Content decisions
+
+### 2.1 Licensed library vs originals
+
+Library was the leader's early product; studios priced it up and then took it back. 2019 bidding: *Seinfeld* to the leader for $500M+ (global, 5 years); *Friends* to a studio service for ~$425M; *The Office* to a studio service for ~$500M (domestic) ( https://www.hollywoodreporter.com/live-feed/netflix-lands-seinfeld-rights-losing-friends-office-1239934 ; https://www.cnbc.com/2019/12/31/friends-is-leaving-netflix-wont-be-available-to-stream-until-may.html ). Then, needing cash, studios licensed back: HBO series to the leader from July 2023, first time in a decade HBO licensed to a US rival ( https://www.thewrap.com/insecure-streaming-netflix-hbo-deal ).
+
+The "streamer bump": *Suits* (an old cable show) hit 3.88B minutes in one week (Jul 2023) and 57.7B minutes in 2023, a a ratings firm record, after landing on the leader ( https://www.hollywoodreporter.com/tv/tv-news/suits-year-end-streaming-record-2023-1235808594/ ).
+
+### 2.2 How greenlights work at a streamer
+
+- Leaked internal metrics (Bloomberg, Oct 2021): **Adjusted View Share (AVS)** weights viewers by value (new or infrequent members count more); **impact value** = projected lifetime AVS; **efficiency** = AVS relative to cost. *Squid Game*: cost $21.4M (~$2.4M/episode vs ~$8M for *Stranger Things*, ~$10M for *The Crown*), impact value $891.1M (41.7×), AVS 353 when 9–10 counts as "high" ( https://www.axios.com/netflix-spending-streaming-film-tv-9c2e619c-08b9-4be6-92ae-dd7d9fea38d5.html ; https://nairametrics.com/2021/10/17/netflix-estimates-squid-game-will-rake-in-891-million-dollars ; https://view.asiae.co.kr/en/article/2021101716255386727 ).
+- Renewal metrics described to a UK Lords committee: **starters** (watched one episode), **completers** (finished the season), **watchers** (regular viewers), with early-month viewing weighted most ( https://www.thelist.com/288590/netflix-reveals-why-they-cancel-so-many-shows/?mode=gn ). A content chief: "are we getting enough viewership to justify the cost of the series?" (same).
+- Completion benchmarks (reported, not disclosed): a 50% completion rate is "solid but not spectacular"; a ~$1B-scale fantasy series got 37% in the US (45% abroad); a Korean hit ~87%, a teen hit ~73%, a cancelled teen show 44% ( https://avclub.com/prime-video-rings-of-power-bad-viewership-numbers-1850299648 ; https://nofilmschool.com/rings-of-power-viewership ).
+- Gut vs data: the content chief has been quoted both ways, "70% data, 30% judgment" (2015) and "70% gut, 30% data" (2018) ( https://www.xataka.com/cine-y-tv/2015-decisiones-para-producir-serie-netflix-eran-70-datos-30-intuicion-ahora-se-ha-invertido-proporcion ; https://www.slashfilm.com/netflix-behind-the-scenes-data ).
+- Third-party cost-per-hour benchmark: *Squid Game* S1 ≈ $9,700 per million hours viewed [U, outside estimate] ( https://www.vodprofessional.com/?p=16817 ).
+
+### 2.3 Cost-plus vs backend
+
+The streamer pays the full budget plus a premium and owns the hit outright; producers give up syndication, international and long-tail upside. Premium reported variously as 10–20% ( https://www.hollywoodreporter.com/news/tvs-new-math-what-100m-netflix-deals-actually-shortchange-creators-1203846 ), ~30% standard ( https://www.cnbc.com/2018/08/15/netflix-cost-plus-model-tv-shows-revenue-upside.html ), and 15–40% depending on leverage ( https://digiday.com/future-of-tv/video-briefing-netflix-continues-reshape-economics-tv-producers/ ). The leader's position: "We like our model and talent likes our model" ( https://www.broadcastnow.co.uk/netflix/netflix-co-chief-not-looking-to-change-talent-compensation-model/5198300.article ). Because the premium is renegotiated each season and cast fees escalate, each renewal costs more; analysts link this to the season-2/3 cliff ( https://www.thelist.com/288590/netflix-reveals-why-they-cancel-so-many-shows/?mode=gn ).
+
+### 2.4 Cancellation patterns
+
+Ampere (2019, 61 cancelled shows): streaming originals averaged ~2 seasons vs 4 on cable and 6.5 on broadcast; the leader made 68% of VOD cancellations, and 12 of its 13 recent cancellations had ≤3 seasons ( https://businessinsider.nl/netflix-cancels-many-tv-shows-after-2-or-3-seasons-report-2019-4 ). A 2019 Bloomberg check found its overall cancellation rate in line with networks ( https://www.thelist.com/288590/netflix-reveals-why-they-cancel-so-many-shows/?mode=gn ). For 2021 originals: 11 cancelled after one season, 7 after two [U, fan tally] ( https://www.whats-on-netflix.com/news/does-netflix-really-cancel-everything/ ).
+
+### 2.5 Windows, output deals, day-and-date
+
+- Theatrical exclusivity: ~90 days pre-2020 → 17 days for PVOD (a studio–a cinema chain, 2020) → 45 days (WB–a cinema chain for 2022 films) ( https://theplaylist.net/amc-theatres-warner-bros-theatrical-window-deal-20210810/ ); wide-release average ~32 days in 2024 ( https://tombrueggemann.substack.com/p/theatrical-windows-remain-unchanged ). Oct 2026: a studio reportedly moved to a slate-wide 45-day minimum, with the industry drifting toward 45 days for PVOD and ~90 for streaming [single secondary source] ( https://dnyuz.com/2026/10/02/donna-langley-on-universal-ditching-short-theatrical-windows-were-trying-to-undo-the-training-weve-done-to-the-audience/ ).
+- Day-and-date: WB's 2021 slate (17 films) on a studio-owned service same day for one month ( https://www.rollingstone.com/movies/movie-news/warner-bros-hbo-max-dune-matrix-4-godzilla-kong-1098343/ ). A star sued over lost box-office bonuses from a day-and-date release; settled on undisclosed terms ( https://abcnews4.com/news/entertainment/scarlett-johansson-disney-settle-lawsuit-over-black-widow ); reported value ~$40M [U].
+- Pay-1: first subscription window after theatrical and home entertainment. The leader had a US pay-1 deal with Sony from 2021, made global in Jan 2026, rolling out by territory through early 2029; value reported at $7B+ [U] ( https://lamag.com/arts-and-entertainment/netflix-secures-global-pay-1-rights-in-major-multi-year-deal-with-sony-pictures/ ; https://senalnews.com/en/content/netflix-and-sony-pictures-closed-global-first-window-deal ). Typical holdback 6–9 months after release [U] ( https://vitrina.ai/blog/netflix-sony-global-pay-1-deal/ ).
+- Streamer-made films in cinemas: the leader paid $469M for two sequels to a mystery franchise; one got a one-week run in just under 700 cinemas and grossed ~$15M, then streamed a month later ( https://www.thewrap.com/glass-onion-box-office-netflix-knives-out ; https://popculturology.substack.com/p/pulling-a-hit-movie-from-theaters ).
+
+### 2.6 International / local-language originals and dubbing
+
+- Non-English titles were 30% of all viewing on the leader in H1 2023 ( https://tubefilter.com/2023/12/13/netflix-what-we-watched-viewership-data-january-june-2023-night-agent/ ).
+- Korea: ~$700M invested 2016–2021, then $2.5B committed over 4 years (2023); "over 60% of members" watched Korean titles; 4 of the 10 most-watched non-English series are Korean ( https://www.cnbc.com/2023/05/12/netflixs-2point5-billion-investment-in-korean-content-targets-global-audience.html ).
+- A Spanish heist drama with fading broadcast ratings (premiere 25.1% share, later <12.1%) was picked up, re-cut and expanded, then became the leader's most-watched non-English series; 34M accounts for part 3 by the leader's own count ( https://en.ara.cat/media/money-heist-the-antena-3-series-that-only-netflix-knew-how-to-transform-into-global-phenomenon_1_5825203.html ; https://remezcla.com/film/money-heist-part-3-netflix-casa-papel/ ).
+- Dubbing vs subtitles: Germany, France, Italy, Spain, Russia prefer dubs; Scandinavia, Netherlands, Korea, China prefer subtitles ( https://pro.morningconsult.com/trend-setters/subtitles-dubbing-streaming ). In dub-preferring markets only ~60% of the leader's catalogue had local-language audio (2021) ( https://www.advanced-television.com/?p=166524 ). US viewers say they prefer subtitles but finish dubbed series more often [U] ( https://tech.slator.com/?p=70039 ).
+
+### 2.7 Write-downs, removals and shelving
+
+- a studio group: $2.4B impairment (FQ3 2023) for pulling titles from its services, of which $2.0B produced content and $0.4B for ending third-party licences ( https://www.sec.gov/Archives/edgar/data/1744489/000174448923000171/dis-20230701.htm ).
+- WBD: content impairment and development write-offs raised to $2.8–3.5B (Dec 2022); cancelled *Westworld* and moved it to FAST services ( https://digitaltveurope.com/2022/12/15/content-write-offs-add-another-billion-dollars-to-wbd-restructuring-costs ; https://www.mediapost.com/publications/article/380696/warner-bros-discovery-content-write-offs-may-go.html ).
+- Shelved finished films: *Batgirl* (~$90M) in 2022; *Coyote vs. Acme* (~$70M cost per NPR) written off for ~$30M in Nov 2023, then sold to an indie distributor for ~$50M [reported, not closed in source] ( https://whyy.org/npr-story/coyote-acme-warner-bros-movie-studios-mothball-films ; https://variety.com/2025/film/news/coyote-vs-acme-rescued-warner-bros-axed-finished-film-1236342588 ).
+- Also removing a show cuts residual obligations to talent [U, widely asserted].
+
+### 2.8 Volume vs fewer, bigger titles
+
+H1 2023: 18,214 titles each with ≥50,000 hours, ~100B hours total; top title 812M hours; >60% of titles released in the half appeared in the weekly Top 10 ( https://tubefilter.com/2023/12/13/netflix-what-we-watched-viewership-data-january-june-2023-night-agent/ ). Studio services moved the other way after 2022: fewer titles, write-downs (2.7), price rises.
+
+### 2.9 Algorithms, artwork, Top-10
+
+- Artwork personalisation: one image chosen per member per title via contextual bandits; expressive faces win; a romance fan sees the couple, a comedy fan the comic actor ( https://www.looper.com/274997/the-secret-behind-netflixs-personalized-thumbnails/ ; https://emerj.com/artificial-intelligence-at-netflix/ ; primary: the market leader Tech Blog "Artwork Personalization at the market leader", 2017 [U: URL not opened]).
+- Personalised rows had 3–4× the take rate of a plain "most popular" list ( https://foxbusiness.com/markets/how-netflixs-ai-saves-it-1-billion-every-year ).
+- Top-10: public website from Nov 2021 ranked by hours ( https://www.axios.com/2021/11/16/netflix-debuts-new-streaming-metrics ); from 20 Jun 2023 ranked by **views = hours ÷ runtime**, all-time list window extended from 28 to 91 days ( https://about.netflix.com/en/news/top-10-things-about-netflix-top-10 ).
+- Gaming the metrics: hours favour long series, views favour short runtimes; a 6.8-hour season scored 252.1M "views" ( https://tvline.com/ratings/netflix-viewership-changes-wednesday-squid-game-most-popular-1235003018 ); ad-tier "viewers" counted at one minute of viewing multiplied by people in the household ( https://www.emarketer.com/content/netflix-releases-ad-viewership-metric-streaming-landscape-changes-again ); a rival touted "25 million streams in 24 hours" for a show only 37% finished ( https://www.fortune.com/2023/04/05/rings-of-power-viewership-amazon-bullish-despite-season-1-completion-report ).
+
+### 2.10 Live and sports
+
+- Wrestling: 10 years, >$5B, ~4× the prior cable deal ( https://www.nbcnews.com/business/business-news/netflix-stream-wwes-raw-starting-year-biggest-jump-live-entertainment-rcna135218 ).
+- Boxing event (Nov 2024): 65M concurrent streams peak (38M US), 108M viewers, with widespread buffering ( https://www.si.com/fannation/boxing/netflix-claims-record-breaking-viewership-for-jake-paul-vs-mike-tyson-fight-01jd1k2crnqa ).
+- Football: a retailer group's exclusive Thursday package ~ $1B/year ( https://www.mediapost.com/publications/article/361561/nfl-strikes-100b-media-rights-deal-amazon-gets.html ). Basketball: 11 years ~$76B from 2025-26 split between ESPN (~$2.6B/yr), NBC (~$2.5B/yr), a retailer group (~$1.8B/yr); incumbent cable network lost its rights ( https://www.wionews.com/sports/nba/news-nba-signs-11-year-media-deals-worth-whopping-amount-reports-743928/amp ).
+- Losing sports costs subscribers: losing Indian cricket rights cost a studio-owned service Hotstar ~20M+ subscribers ( https://www.techradar.com/news/ipl-out-of-its-hand-disney-plus-hotstar-feels-the-pinch-on-subscriber-front ; https://www.outlookindia.com/art-entertainment/loss-of-ipl-rights-weighs-heavy-on-disney-hotstar-loses-4-6-million-subscribers-news-285670 ).
+
+---
+
+#### 3. The ecosystem
+
+**Studios become streamers, then retreat.** Studios pulled licences to stock their own services (2019 sitcom bidding, 2.1), lost billions (1.3), then licensed back to the leader (2023) and wrote down content (2.7). Consolidation followed: the leader agreed to buy a legacy studio (~$82B, Dec 2025), a rival bid ~$108B, and the leader walked away in Feb 2026 calling the deal "no longer financially attractive" ( https://filmstories.co.uk/news/netflix-drops-warner-bros-bid-paramount-on-course-to-acquire-the-studio/ ; https://www.boston.com/news/entertainment/2026/02/26/netflix-walks-away-from-warner-bros-deal-clearing-the-path-for-paramount/ ). Expected close 6 Oct 2026 at $31/share cash after EU clearance in July 2026 ( https://s201.q4cdn.com/336605034/files/doc_news/Paramount-Skydance-and-Warner-Bros--Discovery-Announce-Anticipated-Closing-Date-of-Paramount-Merger-2026.pdf ; https://www.sec.gov/Archives/edgar/data/0002041610/000204161026000054/psky-20260630.htm ); completion reported 7 Oct [single secondary source].
+
+**Talent: overall deals.** Showrunner megadeals: up to $300M (2018) for one prolific producer; $100–150M (2017, later extended) for another; ~$100M over 3 years for a sitcom creator who left halfway ( https://ca.news.yahoo.com/netflix-spent-big-bucks-hit-130000610.html ; https://www.hollywoodreporter.com/live-feed/kenya-barris-inks-eight-figure-netflix-tv-deal-1130574 ). Celebrity overall deals: a royal couple's ~$100M streaming deal (5 shows) ran on while their ~$20M audio deal ended after one 12-episode podcast for missing "productivity benchmarks" ( https://www.foxbusiness.com/entertainment/prince-harry-meghan-markle-rival-streamer-says-values-partnership-couple-after-spotify-deal-ends ). The leader's content chief's allocatable pay rose from $25M to $30M (2019) ( https://www.sec.gov/Archives/edgar/data/1065280/000119312520114206/d721989ddef14a.htm ).
+
+**2023 strikes: what was won.**
+- the writers' guild viewership bonus: high-budget streaming titles watched by ≥20% of the service's domestic subscribers in the first 90 days (views = domestic hours ÷ runtime) get a bonus of 50% of the fixed residual: ~$9,031 per half-hour episode, $16,415 per hour, $40,500 for a >$30M film ( https://www.nbclosangeles.com/news/business/money-report/hollywood-writers-strike-to-end-on-wednesday-as-wga-amptp-finalize-labor-contract/3232240/ ).
+- Foreign streaming residuals tied to foreign subscriber counts: +76% over 3 years for the biggest services, e.g. one-hour episode $18,684 → $32,830 ( https://wdwnt.com/2023/10/breaking-wga-members-ratify-three-year-deal-with-studios/ ; https://www.hollywoodreporter.com/business/business-news/streaming-bonuses-wga-dga-hollywood-unions-1236122481/ ).
+- Data transparency: total hours streamed (domestic and international) of self-produced high-budget shows given to the guild under confidentiality, shareable only in aggregate ( https://www.dlapiper.com/en/insights/publications/2023/10/inside-the-wga-and-amptp-collective-bargaining-agreement ; https://www.denofgeek.com/tv/the-one-troubling-detail-in-the-writers-guilds-new-deal ).
+- Room minimums (vs mini-rooms): ≤6 episodes → 3 writers + 3 writer-producers; 7–12 → 5 + 3; 13+ → 6 + 3; development rooms ≥10 consecutive weeks, post-greenlight rooms ≥20 weeks ( https://www.today.com/today/amp/rcna117534 ; https://www.hollywoodreporter.com/business/business-news/writers-guild-tentative-agreement-details-released-1235601184/ ).
+- the actors' union: success bonus = 100% of the fixed residual at the same 20%/90-day trigger, paid into a fund split 75% to the show's performers, 25% to a shared distribution fund ( https://www.dlapiper.com/en/insights/publications/2023/12/inside-the-sag-aftra-collective-bargaining-agreement ); fund reported ~$120M over the contract ( https://www.fortune.com/2023/11/13/actors-union-contract-studios-streaming-residuals-netflix-viewership-data-120-million-fund ).
+- 2026 the writers' guild contract: four years (May 2026–May 2030), ratified 90.38%, ~$280M new health funding; streaming/AI terms reported but not confirmed [U] ( https://www.wga.org/news-events/news/press/wga-ratifies-2026-minimum-basic-agreement-with-amptp ; https://www.hollywoodreporter.com/business/business-news/writers-guild-tentative-four-year-deal-studios-1236555949/ ).
+
+**Exhibitors.** North American box office $11.4B (2019) vs ~$8.74B (2024) and $8.87B (2025), still ~22% below 2019 ( https://www.screendaily.com/news/north-american-box-office-hits-887bn-for-2025-up-15-on-disappointing-2024/5212390.article ; https://www.axios.com/2026/01/02/domestic-box-office-2025-movie-theaters ). The world's #2 chain filed for bankruptcy in 2022 with ~$5B debt ( https://www.cbsnews.com/news/cineworld-bankruptcy-chapter-11-regal-cinemas-theater ).
+
+**Festivals.** Streamers drove the record Sundance 2020 sale (~$17.5M+ worldwide, a streamer + indie distributor) and ~$80M total spend that festival ( https://screendaily.com/news/streamers-dictate-the-play-as-sundance-2020-buyers-spend-80m/5146800.article ); one tech streamer paid ~$25M for a 2021 Sundance winner [U]. By 2026 only about a dozen of 90+ Sundance titles arrived with distribution already set ( https://feedbagel.com/post/sundance-2026-movies-sold-so-far-world-cinema-prize-winner-how-to-divorce-during ).
+
+**Creators and YouTube.** May 2025: streaming 44.8% of US TV time vs broadcast 20.1% + cable 24.1%; YouTube alone 12.5%, the largest single platform; streaming +71% since May 2021 ( https://www.thewrap.com/streaming-cable-broadcast-tv-ratings-nielsen-the-gauge-may-2025/ ). YouTube ad revenue ~$36.2B (2024); ads + subscriptions >$50B over four quarters ( https://www.hollywoodreporter.com/business/business-news/youtube-ad-revenue-alphabet-earnings-1236048205/ ). Top YouTuber's competition show for a retailer group: ~$100M budget, the creator says he lost "tens of millions", a retailer group reportedly made ≥$100M ( https://fortune.com/2025/03/30/mrbeast-lost-millions-beast-games-inspiration-winner ).
+
+**Re-bundling.** Sports + entertainment bundles at $35.99–44.99 recreate the cable bundle (1.4); FAST recreates linear channels (1.6); studios license old shows to FAST after pulling them from SVOD (2.7).
+
+---
+
+#### 4. Day-to-day jobs inside and around a streamer
+
+| Role | What the week looks like | Ladder | Pay [mostly U] |
+|---|---|---|---|
+| Creative / development executive (scripted, unscripted, docs, animation, film) | Read pitches and scripts, write notes, take "generals" with writers, defend projects in greenlight meetings, sit on cuts, manage producers. a retailer group doc posting: "reading pitches, giving notes on cuts and outlines, tracking projects across stages" ( https://filmlocal.com/?p=1450926 ); a studio group animation: feedback between milestone meetings, writer database ( https://www.entertainmentcareers.net/walt-disney-animation-studios/animation-creative-executive/job/523747/ ) | Assistant → coordinator → creative exec → manager → director → VP → head of region/genre | Assistant $55–75k; CE $100–160k; director $250–450k; VP $500k–1.5M+ [U]. One leader posting: Director, creative $380k–825k ( https://www.influencermarketingsociety.com/jobs/369904797-director-of-creative-experiences-at-netflix ) |
+| Acquisitions (film, licensed series, festivals) | Festival screenings, market meetings, valuation models, bid sheets, territory/window carve-outs | Coordinator → manager → director → head of acquisitions | $90k–400k [U] |
+| Content strategy & analysis / data science | Pre-greenlight forecasts (comps, AVS/efficiency), post-launch dashboards (starters, completers), artwork and trailer tests; job ads cite causal inference and predictive models for promo assets ( https://builtin.com/job/data-scientist-l5-promotional-media-measurement-science/7292594 ) | Analyst → DS L4/L5 → manager → director | $150k–500k+ at the leader [U] |
+| Programming / homepage "merchandising" | Decide what launches when, rows and billboards, Top-10 timing, weekly vs full-season release, regional calendars | Coordinator → manager → director of programming | $80k–300k [U] |
+| Localisation / dubbing | Commission dubs/subtitles for 30+ languages, cast dub actors, QC, deadlines for global day-one release | Coordinator → manager → head of localisation; outside vendors | $70k–250k [U]; dub actors per session |
+| Marketing, creative and artwork | Key art in dozens of versions for personalisation, trailers, social, talent press, awards campaigns | Coordinator → manager → director → CMO | $80k–400k [U] |
+| Product / engineering | Recommendation models, playback and CDN for live events, ad tech, A/B tests | Engineer L3–L7 | $150k–700k+ [U] |
+| Business & legal affairs / licensing | Negotiate cost-plus premiums, overall deals, backend buyouts, pay-1 and library licences, guild compliance | Attorney → director → SVP | $150k–800k [U] |
+| International originals | Local commissioning teams per country, co-productions, government relations (quotas, levies) | Local CE → director → regional VP | Local scale [U] |
+| Ad sales (new since 2022) | Upfronts, CPM negotiation, measurement partners | AE → director | $100k–400k + commission [U] |
+
+A sample week for a mid-level series creative executive [U, composite]: Monday greenlight/slate meeting with the analytics partner's forecast; Tuesday two pitches and a writers' room visit; Wednesday notes on a cut and a budget overage call with business affairs; Thursday launch-week dashboard (day-3 starters, day-28 completers) and an artwork review; Friday renewal memo for a season-2 show whose completion rate is 52% and cost is up 18%.
+
+---
+
+#### 5. How it is taught
+
+- **MBA electives:** Columbia Business School B8637 "The Business of Television and Streaming" (ran Fall 2024 and 2025) ( https://doc.sis.columbia.edu/subj/MRKT/B8637-20253-001 ).
+- **Degrees and certificates:** IIMC MA in Media Business Studies (from 2024-25) ( https://iimc.gov.in/files/academic-courses-document/MA-MBS-SYLLABUS-2024-25.pdf ); University of Miami Media Management Graduate Certificate ( https://com.miami.edu/gcmm/ ); University of Glasgow MSc Media Management (12 months, ~12,000-word dissertation) ( https://universitydb.io/courses/media-management-25c25755 ).
+- **Trade training:** Royal Television Society "Mini MBA" in TV and streaming, ~80 hours online: industry context, programme making, business functions, future outlook ( https://www.sportsvideo.org/2024/09/24/rts-launches-mini-mba-to-supercharge-understanding-of-tv-and-streaming/ ).
+- **Case studies (topics):** IMD's the market leader series A–E: business model innovation; the 2011 fiasco; the race to video streaming; streaming wars (scale economies as content costs rise); capturing value ( https://www.imd.org/research-knowledge/case-studies/netflix-d-streaming-wars-cartoon-case ). Yale SOM "the market leader and a spun-off DVD unit" (pricing, customer backlash, reversal within two weeks) ( https://cases.som.yale.edu/netflix-and-qwikster ). Common case themes [U, typical syllabus]: subscription pricing and churn; disruption of the cable bundle; data-driven greenlighting; launching a studio-owned service (cannibalising licence revenue); ad-tier launch; password sharing; sports rights valuation; M&A.
+- **Certifications:** no recognised industry-wide "streaming" certification found; nearest are ad-tech/measurement certifications and guild/producer training [U].
+
+---
+
+#### 6. Exploited for better and for worse
+
+**For better**
+- Low-cost international hits: a $21.4M Korean series produced ~$891M of internal value ( 2.2 ); a fading Spanish broadcast drama became a global franchise ( 2.6 ).
+- Documentaries: a true-crime docuseries reached 34.3M US viewers in 10 days, growing by word of mouth from 280k average-minute viewers on day 1 to 4M by day 9 ( https://tvline.com/2020/04/08/tiger-king-ratings-34-million-viewers-netflix/ ; https://www.denofgeek.com/tv/tiger-king-34-million-viewers-netflix/ ).
+- Back catalogues revived: the *Suits* bump (2.1); a 1985 song rose 8,700% globally on a music streamer in four days after a series placement, later passing 1B streams ( https://www.digitalmusicnews.com/2022/07/28/running-up-that-hill-stats-spotify-plays/ ; https://www.netflix.com/tudum/articles/this-is-the-stranger-things-song-everyone-is-talking-about ).
+- Podcasts to series: true-crime/fiction podcasts became streaming and premium-cable series (*Dirty John*, *Homecoming*, *Dr. Death*), with podcast companies pitching shows as "serialised character-driven dramas" ( https://escapeartists.com/2018/10/dr-death-tv-series-based-on-podcast-in-works-at-universal-cable-productions/ ; https://www.thewrap.com/wondery-eyes-tv-deal-for-hit-podcast-over-my-dead-body/ ).
+- Creators to streamers: YouTube-scale stars now get $100M budgets (3).
+
+**For worse**
+- Megadeals with thin output (3), celebrity deals judged on "productivity benchmarks".
+- Shows killed before value builds: ~2-season average; cost-plus premiums and cast raises make season 3 the danger zone (2.3–2.4).
+- Shelving finished films and pulling shows for write-offs (2.7).
+- Smaller rooms: mini-rooms forced the 2023 room minimums (3).
+- Price rises after dominance: +$12 on the leader's Standard plan since 2013, a studio-owned service +170% in six years (1.4).
+- Data secrecy vs talent: completion rates leak only via press; the guild gets hours under NDA, aggregate only (3).
+- Metric gaming: hours vs views, 1-minute "viewers", "streams in 24 hours" (2.9). Bot fraud on music streaming: one man used AI-generated songs and 1,000–10,000 bot accounts to collect >$10M in royalties; indicted Sept 2024, sentenced to 18 months ( https://bleepingcomputer.com/news/security/musician-gets-18-months-in-prison-for-10-million-streaming-fraud-using-ai-bots ).
+- Day-and-date undercutting star backend (the 2021 lawsuit, 2.5).
+
+---
+
+#### 7. Generic "moments" a player could experience
+
+1. **The cost-plus offer**: the market leader offers budget +25% up front and buys out your backend; a studio offers a lower fee plus 5% of profits.
+2. **Season-2 cliff**: your show's completion rate is 48%; renewal will cost 20% more; the call comes on a Friday.
+3. **The leak**: a press story publishes your show's internal efficiency score.
+4. **Top-10 week**: your film enters the chart at #3 in 61 countries; your agent calls with three meetings.
+5. **The streamer bump**: an old series you wrote 12 years ago lands on the leader and becomes the most-streamed show of the summer; residuals arrive, but small.
+6. **Shelved**: your finished film is written off for tax; you have 30 days to find another buyer.
+7. **Festival bidding war**: three streamers and an indie distributor bid at midnight; global rights vs a theatrical guarantee.
+8. **Overall deal**: $20M over three years to make shows exclusively for one service; the first year produces nothing that gets greenlit.
+9. **Password crackdown quarter**: your streamer's stock jumps 9% and greenlights reopen.
+10. **Subscriber miss**: the stock drops 35% overnight; every project without a start date is frozen.
+11. **Localisation**: your local-language series gets dubbed into 30 languages and travels.
+12. **Artwork test**: marketing shows you seven key-art versions; the one without your lead actor wins.
+13. **The bonus threshold**: your show hits 20% of domestic subscribers in 90 days and earns a guild success bonus.
+14. **Pulled for FAST**: your cancelled series vanishes from the subscription service and reappears on a free channel with ads.
+15. **Merger day**: your studio's parent is acquired; your overall deal is "under review".
+16. **Day-and-date**: your film goes to streaming the same day as cinemas; your box-office bonus evaporates.
+17. **Creator crossover**: a YouTuber with 50M subscribers wants you to direct their streaming competition show.
+18. **Sports pre-emption**: your premiere is moved because the service won a live sports package.
+
+Bridges to other fields: music sync (a placement lifts an old song's streams by thousands of percent, with a sync fee and back-catalogue royalties); podcasts to series (option a hit podcast, adapt it); creators to streamers (audience-guaranteed deals); boards and investors (approve content budgets, price rises, sports bids, M&A); exhibition (window negotiations); labour (strike votes, bonus claims).
+
+---
+
+#### 8. Proposed game rules (generic, numeric)
+
+No real companies, people, shows or brands. "The market leader" = first mover; "studio-owned service" = launched by a studio.
+
+**World and company lifecycle**
+
+1. **Founding eras.** DVD-by-mail entrant appears in 1997 with 0.1M subscribers. It adds streaming in 2007 (at no extra price) and its first original series in 2013. Studio-owned services launch from 2019; at most one new service per year, up to 5 majors by 2022. Free ad-supported (FAST) services appear from 2014 and grow from 2019.
+2. **Subscriber growth curve.** Each service tracks subs `N`. Quarterly gross adds = `N_addressable × reach × appeal`, where appeal = 0.4 × catalogue score + 0.4 × hit score (last 2 quarters) + 0.2 × price competitiveness. Market leader target path: 20M (2011) → 50M (2014) → 170M (2019) → 230M (2022) → 300M (2024). Studio-owned services start at 10–30M in year 1 if parent has a famous library (up to ~100M within about 16 months for a big one [U]).
+3. **Churn.** Monthly gross churn base: leader 2%, mid-size 5%, weakest 7.5%. −1 point with an annual plan or bundle; +1.5 points in a quarter with no title in the Top 10; +2 points in the month after a price rise (decays over 3 months). 25% of players' "audience" are serial churners who leave within 3 months 60% of the time.
+4. **Prices.** Ad-free price starts at $8 (2007) and rises $1–2 roughly every 18–24 months, faster once market share >30%. Studio-owned services launch at 45–60% of the leader's price, then rise ~15%/year until parity. Each rise: +revenue `ΔP × N`, then churn penalty (rule 3).
+5. **ARPU by region.** Monthly revenue per subscriber: North America 1.0× the US price; Europe 0.65×; Latin America 0.45×; Asia-Pacific 0.4×. International subs are cheaper to win but earn less.
+6. **Ad tiers.** Available from 2022. Ad-tier price = 45% of ad-free; ad revenue per ad-tier sub starts at $2/month and grows 30%/year to $6. 50–55% of new sign-ups choose the ad tier once it exists. CPM starts at $60 and falls $10/year until it hits $25 if two or more services sell ads.
+7. **Password crackdown.** A one-time board decision available once subs > 200M: −1% subs in month 1, then +4% over 3 quarters; ages "goodwill" −5.
+8. **Losses then profit.** Content cost is amortised 60/25/10/5% over 4 years. A service is cash-negative while content spend > 0.9 × revenue. Leader: cash-negative from 2013 to ~2020, then positive. Studio-owned services: losses of $1–4B a year for 4–5 years, break-even if subs reach 60% of the leader's ARPU-weighted scale.
+9. **Debt.** A cash-negative service borrows; debt cap = 4× annual revenue. Above 3×, interest 8%; the board forces a "profit pivot" (rule 21) when debt hits the cap.
+
+**Greenlight logic**
+
+10. **Forecast.** Each pitch gets a forecast `AVS_pred` (value-weighted viewing) = genre demand × talent heat × IP strength × local-market bonus (+30% if the language region is under-served on that service) × noise (±40%). Efficiency = `AVS_pred / budget`. Greenlight if efficiency ≥ the service's bar; the bar rises 25% in a year with a stock drop >20% and falls 15% in a land-grab year (growth > 15%).
+11. **"Gut" factor.** 30% of each greenlight decision is executive taste (a random draw seeded by the exec's track record); 70% is the forecast. A player with a hit in the last 2 years gets +15% on the gut part.
+12. **Launch metrics.** After release: starters (people who watched ep 1), completers (finished season; 30–90%, median 50%), and views (= hours ÷ runtime, same as the existing game). A title enters the Top 10 if views in week 1 rank top-10 among that service's titles that week.
+13. **Renewal.** Renew if `completion ≥ 50%` AND `efficiency ≥ bar`, where season n+1 cost = season n × (1.15 + 0.05 if cast renegotiation that season). Season 3 always has the renegotiation. Probability of a 3rd season ≈ 35%, 4th ≈ 20%.
+14. **Release style.** All-at-once: peak week views ×1.4, but tail drops 60% after week 3. Weekly: peak ×0.8, tail lasts 3× longer, −0.5 point churn during the run.
+
+**Deals with the player**
+
+15. **Cost-plus offer (streamer).** Budget + premium of 10–40% (leverage: 10% for new creators, 30% standard, 40% for top talent) paid up front; player keeps no backend; the streamer owns the hit forever. Player gets a guild success bonus only if the title passes 20% of domestic subs in 90 days (from 2023): 50% of fixed residual for writers, 100% for performers.
+16. **Traditional backend (studio/indie).** Lower fee (budget + 0–10%) plus 5–15% of net profits from licensing, international sales and syndication, paid from year 2 on. A hit pays 3–10× a cost-plus premium over 10 years; a flop pays nothing.
+17. **Overall deals.** Annual guarantee $1–30M for 2–5 years, exclusive to one service. Requires ≥1 greenlit project per year or after 2 dry years the deal is "under review" (50% chance of buyout at 50% of the remaining value). Megadeals (≥$20M/yr) have a 40% chance of producing fewer than one title a year.
+18. **Shelving / write-off.** After a merger or a profit pivot, each unreleased finished film has a 5% chance per quarter of being shelved for a tax write-off worth 30–40% of its cost to the owner; the player has 1 quarter to find a buyer at 50–70% of cost.
+19. **Library licences and the bump.** A studio licenses an old series to the leader for $1–5M per season-year (big sitcoms up to $100M/yr). When an old series lands on the leader, its views jump ×5–×20 for 3 months; creators get fixed residuals, not a share.
+
+**Pressure on studios and cinemas**
+
+20. **Windows.** Exclusive theatrical window: 90 days to 2019; 45 days from 2020 (17 for premium rental if a studio-cinema deal is struck); streaming pay-1 starts 4–9 months after release. Day-and-date releases cut box office by 30–45% and cut stars' box-office bonuses to zero (lawsuit risk 20%). From 2026, a trend back toward 45 days is possible.
+21. **Profit pivot.** When a studio-owned service's parent sees 2 years of losses >$2B, it pivots: −30% volume, +15% price, 10–20% of library pulled and written off, licensing back to the leader allowed.
+22. **Cinema health.** Each 10 days cut from the average window reduces the cinema-going index by 3%; at <80% of the 2019 level a chain has a 10%/year chance of bankruptcy.
+23. **Sports.** Services may bid for sports packages ($0.5–3B/year). Winning one: +5% gross adds per season, −1 point churn in season; losing a held package: −8% subs over 2 quarters.
+
+**Markets**
+
+24. **Share price driven by subscriber adds.** Each quarter: `return = 2.5 × (actual adds − expected adds)/expected adds`, capped at ±35% in a day. Expected adds = trailing 4-quarter average. If the company stops reporting subscribers (allowed once revenue > $30B), switch to `return = 1.5 × revenue surprise + 1.0 × margin surprise`.
+25. **Market cap and greenlights.** If the share price drops >20% in a quarter, the greenlight bar (rule 10) rises 25% and new overall deals stop for 2 quarters; if it rises >20%, greenlight volume +15%.
+26. **Consolidation.** When two studio-owned services are both below 40% of the leader's subs for 3 years, a merger event fires (bid premium 30–60%); the leader may bid but walks away 50% of the time if a rival bids ≥25% more.
+
+**Labour and ecosystem**
+
+27. **Room size.** Before 2023, streamers use mini-rooms of 2–4 writers for 8–10 weeks. After a strike event (≈2023), minimum rooms are 3/5/6 writers + 3 writer-producers by episode count, development rooms ≥10 weeks, post-greenlight ≥20 weeks.
+28. **Data secrecy.** Until a strike win, the player never sees their own title's completion rate. After it, the guild receives aggregate hours each quarter; the player sees whether they crossed the 20% bonus line, not the exact number.
+29. **Creator crossovers.** A creator with ≥10M followers can be offered a streaming show with a $50–100M budget; 50% chance the creator loses money personally, 70% chance the service profits.
+30. **Free channels.** Titles pulled from subscription services can be licensed to FAST channels at $0.05–0.2M per season-year, keeping them visible (small residuals, +fan goodwill).
+
+### Improv, and the careers the game is missing
+
+Research for the film-industry life-sim in /home/user/1. Written 2026-10-12. No project files were edited.
+
+**About the sources.** WebFetch could not resolve any host in this session (DNS errors on every domain), so every figure below comes from WebSearch results, with the URL of the page the figure came from. **[U]** marks a figure that is unverified: it comes from a single anecdote, an aggregator or marketing page, an undated page, or my own arithmetic. Treat [U] numbers as tuning ranges, not facts. Real names appear only in the research sections. The game rules (A6) use generic names only.
+
+---
+
+#### 0. What the code has today
+
+### Improv: almost nothing, as the owner says
+
+`grep -i improv src/*.js` finds 45 lines in 32 files. Nearly all of them are flavour text: trivia, director personas who "improvise on set", and curriculum cards about improvising on camera. The playable pieces are:
+
+| Where | What it is |
+|---|---|
+| `depth.js:45` / `life-city.js` VENUES `improv` | An evening out: "Improv class", $25, grows `impro` by .06 and `comic` by .03 |
+| `life-city.js:66` VENUES `openmic` | Comedy open mic. Free, Charisma check 12, grows `comic` and `impro` |
+| `shop2.js:51` `c_improv` | "Improv level one, two and three": a one-off purchase for $750 that gives `impro` +.6 and `comic` +.3. This is cheap: the real price is about $395–$500 **per level** (see A1) |
+| `competitions.js:50` `improvwars`, `media-industry.js:281` `improvfest`, `contests2.js:29` `sketchfest` | Three yearly contests that roll on `impro` |
+| `acting2.js` NEED_LABEL `impro` | Improvisation is a skill some acting parts need |
+| `gigs.js` `club` (comedy showcase, $150–900), `taping`, `multicam`, `webser`, `soap` | Gigs that use `impro` as one of the skills behind quality |
+| `careers.js` | Two real-person bios mention improv: an Amsterdam comedy theatre, and a famous double act |
+
+There is no improv dream in DREAMS. The game has no training theatre, level ladder, house team, audition, indie team, jam, Harold, festival circuit, coaching, teaching income, corporate work, backer role or improv fan base. **The owner is right: improv has no real presence.**
+
+### How dreams work, and why most of them are "token"
+
+`dreams.js` has 57 DREAMS. Each dream is only a pairing of:
+- an existing `role`, which decides the craft you train;
+- a `field` (film, music, creator, podcast or stage);
+- a `core` regex over the job catalogue (546 jobs in `JOBS` in index.html), which picks the work that counts;
+- optionally a `first` project type;
+- a list of favoured gig types in `gigs.js` `DREAM_GIGS`.
+
+Field ladders live in `paths.js` `PATHS` and exist only per field (film, music, creator, podcast, stage). Outside dreams.js, dream keys are read in only a few places: the creator, autopilot, `gigs.js:158` (favoured gigs), `depth8.js` and `paths.js`.
+
+So a dream such as Magician, Puppeteer, Casting director or Stunt performer has no ladder, events, economics or people of its own. It is a label that steers the job board and gig offers. In Part B, "token" means exactly this.
+
+---
+
+#### PART A: IMPROV
+
+### A1. How an improv career works
+
+**The training ladder (pay to learn).**
+- Big training theatres sell numbered levels. A level is usually about 8 weekly 3-hour classes.
+  - One a big New York and LA theatre-affiliated theatre lists a big New York and LA theatre classes at $450 ([ColdTowne](https://coldtownetheater.com/ucb/)).
+  - Backstage gives "eight three-hour classes" at about $350–$375 per level, undated [U] ([Backstage](https://www.backstage.com/magazine/article/upright-citizens-brigade-54882/)).
+  - A 2024 report says a big New York and LA theatre Improv 101 "can be more than $500" ([pulse.ug, reporting on a big New York and LA theatre layoffs](https://www.pulse.ug/story/upright-citizens-brigade-facing-financial-struggles-announces-layoffs-2024082308343913983)).
+- a big Chicago theatre prices:
+  - Chicago Improv 1 is $395 ([secondcity.com Chicago class finder](https://www.secondcity.com/find-a-class/chicago)). New York Improv 1 was $440 in 2025 and Toronto's was $395 ([same search, secondcity.com/find-a-class/new-york](https://www.secondcity.com/find-a-class/new-york)). Smaller schools charge less: a Chicago Level 1 at another theatre was $175–$225 ([active.com listing](https://www.active.com/chicago-il/theater/classes/level-1-with-tbd-2025-107167600)).
+  - a big Chicago theatre's adult ladder is Improv Levels 1–5, then an auditioned **Conservatory** of 6 levels. Each Conservatory level is seven weekly 3-hour classes, about 12 months in total ([oldwp.secondcity.com](https://oldwp.secondcity.com/courses/con-program/)). A Conservatory level costs $415 ([secondcity.com](https://www.secondcity.com/classes/chicago/conservatory-2)). The Conservatory audition is free ([secondcity.com](https://www.secondcity.com/classes/chicago-conservatory-auditions)).
+- The a big Los Angeles theatre use five levels: Basic, Intermediate, Advanced, Writing Lab and Advanced Writing Lab. Admission is by audition, and repeating levels is common. The full programme takes "roughly five years". From the Writing Lab on, the Main Company votes on who advances ([Wikipedia: The a big Los Angeles theatre](https://en.wikipedia.org/wiki/The_Groundlings)).
+- **Rough total cost:** 5 levels × about $400–$500 = **$2,000–$2,500** before any conservatory or advanced study. This is my arithmetic from the prices above [U].
+- **Drop-ins and jams** are the free or cheap rung: open sessions with no instructor, often weekly, capped around 16 people ([What If Theatre drop-in listing](https://whatif.corsizio.com/event/689161d4023816d0e2211048); [Hart House](https://harthouse.ca/classes/improv-drop-in)).
+
+**House teams and auditions.**
+- Big theatres cast **house teams** (Harold teams) from students and graduates. Teams rehearse weekly with an assigned coach, and members with poor attendance are removed. Auditions run in groups of 6, seen every 20 minutes. Eligibility is Improv 301 or higher, with one theatre raising the bar to 401 ([ColdTowne Harold Night](https://coldtownetheater.com/ucb-harold-night/)).
+- Teams get "cycled out" and members replaced at each audition round ([WIT FAQ](https://witdc.org/news/faq-harold-teams-audition-process/)). One round cast 17 new players ([WIT](https://witdc.org/news/wit-casts-17-new-harold-team-players/)).
+- **Scale of competition:** a big New York and LA theatre's artistic director reported more than **400 audition submissions** for one house-team round ([The Comic's Comic, 2011](https://thecomicscomic.com/2011/12/21/upright-citizens-brigade-the-pit-announce-new-house-teams-for-sketch-and-improv-in-2012/)).
+- A New York theatre's ensemble night requires core Levels 1–3 plus Advanced Level 2 to audition. Its musical improv teams require Musical Level 3 ([Magnet Theater FAQ](https://magnettheater.com/?p=4676)).
+- a big Los Angeles theatre: graduates of Advanced Writing Lab can be voted into the Sunday Company, for 6-month terms with a maximum of 3 terms. From there they can be voted into the Main Company, which has about 30 members, and **Main Company members perform without pay** ([search summary of Wikipedia/LA Mag](https://en.wikipedia.org/wiki/The_Groundlings)).
+
+**Indie teams.** People who are not on a house team form their own teams. They usually rent a room and keep the door, or take a door split.
+- Common deals: a flat rental (the team keeps the whole door), a split (the venue keeps **20–30%**), or a free room (the venue keeps the bar) ([TickPick organiser guide](https://www.tickpick.com/blog/organizer/how-to-run-a-profitable-comedy-show)).
+- Some theatres class indie and student troupes as "practice" with no box-office share ([ColdTowne submissions](https://coldtownetheater.com/submissions-auditions/)).
+
+**Forms.**
+- **Long-form**, the Harold: first performed by The Committee in 1967, then codified at ImprovOlympic in the 1980s. It runs opening → three beats of three scenes, with group games between beats. Scenes converge at the end, and a Harold lasts **25–40 minutes** ([Wikipedia: Harold](https://en.wikipedia.org/wiki/Harold_(improvisation))). Other long forms include the Armando (monologue-driven), the montage and the "Lloyd" (named in ColdTowne listings).
+- **Short-form:** games scored by a host. Theatresports came from Keith Johnstone's Loose Moose, Calgary, 1977/78: two teams, judges, and a horn for boring scenes ([Alberta Views / impro.global](https://impro.global/about-us/keith-johnstone)). ComedySportz began in Milwaukee in 1984 and is a licensed franchise. A match has 2 teams of 3, a referee, 7–12 games and family-friendly rules, in 20–25 cities ([Wikipedia: ComedySportz](https://en.wikipedia.org/wiki/ComedySportz); [CityBeat](https://www.citybeat.com/arts/comedysportz-is-the-latest-of-the-citys-growing-improving-collection-of-improv-troupes-12182949)). TV short-form: *Whose Line Is It Anyway?* ran on UK radio from 1987 and TV from 1988–1999, and in the US from 1998 with 21 seasons and 431 episodes ([Wikipedia US](https://en.wikipedia.org/wiki/Whose_Line_Is_It_Anyway%3F_(American_TV_series)); [Wikipedia UK](https://en.wikipedia.org/wiki/Whose_Line_Is_It_Anyway%3F_(British_TV_series))).
+- **Musical improv:** improvised musicals with an accompanist. One long-running UK company had 19 actors rotating through 25 Fringe performances ([Playbill](https://mobile.playbill.com/article/playbill-pick-showstopper-the-improvised-musical-at-edinburgh-festival-fringe)). Small theatres "can't pay much, but there is some pay" for accompanists ([Berkshire on Stage](https://berkshireonstage.blog/2025/12/15/mopco-improv-theatre-seeks-additional-accompanists-for-improv-shows/)).
+
+**Festivals.**
+- The flagship improv marathon (Del Close Marathon) had **750+ shows on 11 stages** in its final NYC year, 2018, and moved to LA in 2019 ([Time Out LA](https://www.timeout.com/los-angeles/news/ucbs-annual-improv-marathon-is-moving-from-new-york-to-l-a-060618)). About 500 teams were chosen from 1,500 submissions, year undated [U] ([Funny Women](https://magazine.funnywomen.com/2018/06/01/the-del-close-marathon/)).
+- Small festivals charge a troupe application fee: $35 ($25 early) ([Improv Festivus](https://cszrichmond.corsizio.com/event/68bb99bb6b01149ad39f8be4)), $25 ([Bay Area Musical Improv Fest](https://crowdwork.com/festivals/bay-area-musical-improv-festival)), or $20 plus an optional $30 support fee ([Ottawa, via search](https://improvembassy.corsizio.com/event/6796965b9c18182d25b38fb6) [U]). Some charge nothing ([Hideout Theatre](https://www.hideouttheatre.com/?p=4592)).
+- **Edinburgh Fringe**, for a team going big:
+  - Total cost: about £6,000 for a three-week run, and a one-person show rose from £10k to £15k in five years ([Scotsman](https://www.scotsman.com/whats-on/arts-and-entertainment/how-costs-for-edinburgh-festival-fringe-performers-and-venues-have-gone-absolutely-mad-as-accommodation-bills-soar-300-per-cent-4715919)).
+  - Registration is about £295–£300 ([Spotlight](https://www.spotlight.com/news-and-advice/the-essentials/budgeting-for-edinburgh-festival-fringe/)).
+  - "Lots of people end up £10,000 down" ([Playbill](https://web.playbill.com/article/how-to-take-a-show-to-the-edinburgh-festival-fringe-venues-and-budgets)).
+  - One venue's balance sheet showed £70,000 in ticket sales of which £7,000 went to the performer ([Scotsman](https://www.scotsman.com/whats-on/arts-and-entertainment/dont-ask-about-dosh-the-true-cost-of-staging-a-fringe-show-1611540)).
+
+**Touring companies and resident stages.**
+- a big Chicago theatre hires by competitive audition: "a handful out of hundreds". Hires then go through an understudy programme, then touring groups, then the smaller e.t.c. stage, then the mainstage. Mainstage revues play **8 shows in 6 days** and are built from material tested on audiences ([search summary: Backstage / Eye Opener / CBS](https://www.backstage.com/magazine/article/tips-launch-comedy-improv-career-second-city-69848/)).
+- Pay (Actors' Equity contract):
+  - Touring home-show fee about $165–$168 per performer, and a mainstage weekly minimum of **$968.25 (2019)** ([Law Insider clause](https://www.lawinsider.com/clause/mainstage-minimum/_1) [U, an old contract excerpt]).
+  - An understudy notice gave $128.10 per show in 2024 ([BroadwayWorld](https://direct.broadwayworld.com/equity-audition/Second-City-Chicago-Second-City-Inc--2024-42396)).
+  - **2025 contract:** strike authorised, then a 5-year deal with raises compounding to **40.5% by 2030** ([Actors' Equity](https://actorsequity.org/news/PR/SecondCityStrikeAverted2025); [WBEZ](https://www.wbez.org/theater-stages/2025/05/05/second-city-workers-union-strike-pay-actors-equity)).
+
+**Cruise ships and theme parks.**
+- A a big Chicago theatre troupe performed on Norwegian Cruise Line ships from 2005 until the partnership ended. Contracts were about 4 months aboard ([AV Club](https://avclub.com/you-can-no-longer-cruise-your-way-to-comedy-stardom-1798263725)). One line employs 25–35 comedians a week across 20 ships ([Frommer's](https://www.frommers.com/tips/cruise/a-cruise-ships-walks-into-a-bar-says-to-the-bartender/)). Guest entertainer pay is "$1,500–2,500/week" [U] ([Citizen Daily Post](https://www.citizendailypost.com/faq/how-much-do-guest-entertainers-make-on-cruise-ships/)). MSC runs improv on board ([Seatrade](https://www.seatrade-cruise.com/ship-operations/seaside-has-msc-s-first-comedy-improv-new-shows-zip-lines)).
+- Theme-park street improv: a troupe of improvisers worked a studio group's Hollywood Studios' boulevards from 1989 to 2020. They were laid off in the pandemic and had not returned as of 2023 ([WDWNT](https://wdwnt.com/2020/10/breaking-legendary-citizens-of-hollywood-at-disneys-hollywood-studios-let-go-as-entertainment-layoffs-continue-at-walt-disney-world/)). Those performers were under an Actors' Equity agreement ([WDWInfo](https://www.wdwinfo.com/news-stories/walt-disney-world-sends-out-casting-call-for-new-citizens-of-hollywood/)). Park performer floors are **$21.30–$23/hour** ([CNN via ABC17](https://abc17news.com/money/cnn-business-consumer/2024/04/17/mickey-minnie-donald-and-goofy-file-for-union-vote-at-disneyland/)), and an Equity seasonal notice posted $23/hour ([Playbill](https://m.playbill.com/job/mickeys-not-so-scary-halloween-party-equity-video-submissions-deadline-05-08-24/43ff5b08-e496-496a-bb01-440a02369939)).
+
+**Corporate / applied improv.**
+- This is the real money. a big Chicago theatre's corporate arm was **about a third of the business, about $20M a year (2016)** ([Fortune](https://dc.fortune.com/2016/06/03/second-city-diversity/)). It has 600+ clients, including 25% of the Fortune 500 [U, undated] ([Chicago Innovation](https://chicagoinnovation.com/winners/second-city-works/)).
+- Published rates:
+  - **$200/hour** with a 2-hour minimum, a **$1,000 half day** or **$2,000 full day** per trainer, and **$350** for a 30-minute performance ([Florida Studio Theatre](https://www.floridastudiotheatre.org/corporate-training)).
+  - $100–$150 per participant ([Soulpepper](https://soulpepper.ca/corporate-training/)).
+  - From $3,000 for 2–4 hours ([Change Through Play](https://www.changethroughplay.com/our-services)).
+
+**Teaching improv as income.** Typical pay is $45–$60/hour: $45–$60 for a nonprofit residency ([Philadelphia Cultural Fund portal](https://portal.philaculture.org/node/75042)), $50–$100 for contract after-school work ([GoHire](https://jobs.gohire.io/concorde-education-3npbmhal/part-time-after-school-improv-and-theater-instructor-279361)), $50 at a DC theatre in 2021 ([WIT](https://witdc.org/news/washington-improv-theater-seeks-teaching-artist-for-youth/)), and as low as $20 per class hour ([Lexy's](https://careers.ecampus.oregonstate.edu/jobs/lexys-comedy-club-improv-instructor/)). House-team **coaches** at a big New York and LA theatre went unpaid for years. A 2018 plan to pay them was postponed, and payment began only recently ([Paste](https://www.pastemagazine.com/comedy/ucb/ucb-to-start-paying-house-team-coaches)).
+
+**Performer pay.**
+- **Usually nothing.** a big New York and LA theatre's no-pay policy was criticised in 2012–13. Its defence was cheap tickets and "if you pay, you have to assign worth to shows". As of 2024, a big New York and LA theatre improv and sketch performers typically still don't get paid ([search summary: Createquity / Paste / Substack](https://createquity.com/2013/06/what-am-i-worth-to-you/)). "We pay our performers, just not in money" ([MetaFilter](https://metafilter.com/161976/We-pay-our-performers-just-not-in-money)).
+- An improviser says one could "count on two hands" the theatres that pay ([Dallas Observer](https://www.dallasobserver.com/arts/stomping-ground-comedy-theater-will-pay-its-performers-11546733)).
+- **Where pay exists:** a Minneapolis theatre pays **$150 or $75** depending on time slot when a show sells more than **70 seats** ([Paste](https://pastemagazine.com/article/how-one-twin-cities-improv-theater-pays-performers)). A Philadelphia theatre gives show-runners a percentage of tickets plus 100% of post-show donations ([Paste, "6 theaters that pay"](https://pastemagazine.com/comedy/labor/6-improv-and-sketch-theaters-that-pay-performers)). Austin resident shows get a door percentage scaled by frequency and slot ([ColdTowne](https://coldtownetheater.com/submissions-auditions/)).
+
+**The pipeline out.**
+- **Sketch / late night / SNL:** SNL has scouted a big Chicago theatre since 1975, and the a big Los Angeles theatre supplied several cast members ([Yahoo/a big Los Angeles theatre list](https://uk.news.yahoo.com/32-snl-stars-other-comic-143250509.html); [museum.tv](https://www.museum.tv/snlchicago)). There is no measured share.
+- SNL pay: first-year featured players earn about $7,000 per episode, about $147k for 21 episodes, from a 2018 Variety report [U] ([celebritynetworth](https://www.celebritynetworth.com/articles/entertainment-articles/how-much-money-do-saturday-night-live-cast-members-make/)). One cast member said "about $3,000", which is an anecdote [U] ([Sportskeeda](https://www.sportskeeda.com/us/shows/news-how-cast-members-afford-live-nyc-netizens-react-pete-davidson-jokingly-says-snl-cast-members-get-paid-3k-per-episode)).
+- **Writers' rooms:** late-night staffs keep improvising on stage. One late-night writer called improv "unrefined writing" ([Village Voice](https://www.villagevoice.com/?p=399900)). One writer went through **35 rejected packets** before being hired ([Inside Late Night](https://latenighter.com/podcasts/inside-late-night-with-mark-malkoff-ep-58-jenny-hagel/)). A network late-night workshop picked from **1,000 applicants** ([The Comic's Comic](https://thecomicscomic.com/?p=33517)). The the writers' guild staff-writer 20-week rate was **$4,940/week** for 2024–25 [U, slide excerpt] ([the writers' guild 2023 MBA summary](https://wgacontract2023.org/the-campaign/summary-of-the-2023-wga-mba)).
+- **Commercials:** many commercial auditions have no dialogue, so agents prefer actors who studied improv. the actors' union does not allow improvised dialogue at auditions, so in practice this means ad-libbing around copy ([Backstage](https://www.backstage.com/magazine/article/improvisation-training-commercial-audition-necessity-12178/)). One theatre sells a "commercial auditions" improv intensive ([Dad's Garage](https://dads-garage.coursestorm.com/course/improv-for-commercial-auditions-intensive)).
+- **TV and streaming improv:** three hour-long long-form specials on the market leader on 21 April 2020 ([Flow Journal](https://www.flowjournal.org/2020/07/middleditch-and-schwartz/)). An online improv game show premiered June 2022, and its clips drove a young online fan base ([Wikipedia: Make Some Noise](https://en.wikipedia.org/wiki/Make_Some_Noise_(TV_series)); [AOL](https://www.aol.com/news/dropout-part-internet-part-studio-100000140.html)). The platform claims 1.5B organic social views [U, marketer portfolio] ([format.com](https://markcatangui.format.com/dropout)). The cast became a live touring troupe in 2024 (same sources).
+- **Podcasts:** an improvised fantasy podcast, about 90% improvised, ran 10 years. It does live tours with tickets from $34 and is funded by Patreon ([Blumenthal](https://www.blumenthalarts.org/events/detail/hello-from-the-magic-tavern-1); [AllAccess](https://www.allaccess.com/podcast/broadcaster-meets-podcaster/archive/25291/hello-from-the-magic-tavern-interview-with-arnie)).
+- **Voice work:** no source links improv training to voice-over directly [U]. VO rates are in Part B.
+
+### A2. Theatre economics
+
+- **Classes pay the bills; shows are the shop window.**
+  - Ticket price rises at a big New York and LA theatre are a "nominal" revenue source compared with class fees ([pulse.ug](https://www.pulse.ug/story/upright-citizens-brigade-facing-financial-struggles-announces-layoffs-2024082308343913983)).
+  - An insider estimate: about 12,000 students a year, about $5M ([ArtsJournal: "How a big New York and LA theatre Turned Improv Into Big Business"](https://artsjournal.org/?p=100888) [U, secondhand]).
+  - A nonprofit DC improv theatre had revenue of **$1.02M against expenses of $1.18M (2024)** ([ProPublica 990](https://projects.propublica.org/nonprofits/organizations/521543346)). It taught 1,700+ adult students in FY2019 ([Daffy](https://daffy.org/charities/521543346-washington-improvisational-theater-co-washington-dc)) and 1,028 in FY23 ([WIT FY23 report](https://witdc.org/wp-content/uploads/2023/12/WIT-FY23-Annual-Report-Final.pdf)).
+- **Tickets and rooms:** improv in a professional black box costs $10–$13 ([a big Chicago theatre NY](https://www.secondcity.com/shows/new-york/improv-4-show-nyc-nyc)). One ticket can buy a whole night of house teams ([NYC Tourism listing](https://www.nyctourism.com/events/megawatt-improv-comedy/)). Black boxes seat about 60–180 ([search summary](https://wqad.com/article/news/local/as-seen-on-tv/improv-black-box-theatre-returns/526-d9e6d54c-0c1a-4f41-80bf-2deb119cc924) [U]). Bars are part of the model ([Magnet FAQ](https://magnettheater.com/?p=4676)).
+- **Rent, property and closures:**
+  - In June 2020 a Chicago long-form theatre closed for good. Its owner cited lost class income and a **$100,000 property-tax bill**. The building was sold in 2021 and the theatre reopened in November 2022 under new owners ([Block Club Chicago](https://blockclubchicago.org/2020/06/19/io-theater-closing-for-good-because-of-financial-strain-from-coronavirus-pandemic/); [Wikipedia: a long-form theatre](https://en.wikipedia.org/wiki/IO_Theater)).
+  - a big New York and LA theatre closed its last NYC theatre and training centre in April 2020 ([NY1](https://ny1.com/nyc/all-boroughs/news/2020/04/21/upright-citizens-brigade-closes-new-york-theater-and-training-center-due-to-coronavirus)). In December 2020 it sold its Sunset Blvd complex after missing mortgage payments ([ArtsJournal](https://www.artsjournal.org/2020/12/24/upright-citizens-brigade-closes-yet-another-theater/)). The founders sold the company around March 2022 to a group including a talent manager and venture capitalists ([Substack](https://piffany.substack.com/p/can-ucb-in-your-future) [U, paywalled]). It later reopened in NYC on East 14th St ([NBC NY](https://nbcnewyork.com/entertainment/the-scene/the-upright-citizens-brigade-is-coming-back-to-new-york-after-3-years/4486749)).
+  - a big New York and LA theatre's development deal with a streamer had "masked two years of deficits" ([MetaFilter](https://Metafilter.com/178391/UCBs-development-deal-with-Seeso-had-masked-two-years-of-deficits)). a big Chicago theatre was bought by a private-equity firm in 2021 ([Equity/aflcio summary](https://aflcio.org/node/9442)).
+- **Nonprofit vs for-profit:**
+  - The DC theatre above is a 501(c)(3) that gets grants, including its "largest-ever NEA grant" ([WIT FY23](https://witdc.org/news/annual-report-fy23/)).
+  - The big brands are for-profit businesses whose corporate training and classes fund the stage.
+  - ComedySportz is a licence: a city needs "a sound business plan and strict adherence to branding" ([CityBeat](https://www.citybeat.com/arts/comedysportz-is-the-latest-of-the-citys-growing-improving-collection-of-improv-troupes-12182949)).
+- **Labour:** a big Chicago theatre performers and stage managers struck a deal in 2025 after a unanimous strike authorisation ([Equity](https://actorsequity.org/news/PR/SecondCityStrikeAuthorized2025/)). a big Chicago theatre's non-performing staff unionised with UE ([In These Times](https://inthesetimes.com/article/second-city-union-democratic-socialists-america-comedy-labor)). a big New York and LA theatre performers have pushed publicly for pay and transparency ([LA Mag](https://www.lamag.com/culturefiles/ucb-performers-union/)).
+- **Diversity programmes:** a big Chicago theatre's fellowship for performers of colour is **tuition-free**. It was 15 weeks with up to 12 fellows. The 2026 version is 20 weeks with up to 10 fellows. Over ten years, **more than 50%** of fellows were hired by a big Chicago theatre divisions ([a big Chicago theatre](https://www.secondcity.com/network/the-second-city-announces-recipients-of-its-tenth-annual-bob-curry-fellowship); [audition page](https://www.secondcity.com/auditions/bob-curry-fellowship-audition)). It also lists other fellowships and an SNL scholarship ([oldwp.secondcity.com](https://oldwp.secondcity.com/?p=39790)). The 2020 closure of the Chicago theatre came during a racial-justice petition, though the owner said the reasons were financial ([Wikipedia: a long-form theatre](https://en.wikipedia.org/wiki/IO_Theater)).
+
+### A3. Backers and supporters (roles a player could take)
+
+| Role | What they really do | Real anchors |
+|---|---|---|
+| **Theatre owner / artistic director** | Owns the lease and the class funnel. Sets class prices, casts house teams, assigns coaches, decides who gets paid, and lives or dies on rent and property tax | Property-tax closure, mortgage-driven sale, ownership changes (A2) |
+| **Training-centre director** | Runs the curriculum and teachers. Classes are the main revenue | Class prices in A1 |
+| **Producer of indie shows** | Rents a room, books teams, splits the door 70/30 or keeps the bar | [TickPick](https://www.tickpick.com/blog/organizer/how-to-run-a-profitable-comedy-show) |
+| **Festival organiser** | Charges $20–$35 application fees, selects ~1 team in 3 (marathon: 500 of 1,500 [U]), runs many stages | A1 festivals |
+| **Corporate-training seller** | Sells $1k–$3k workshops and needs improvisers to deliver them | A1 corporate |
+| **Scout / agent / manager** | Watches showcases and house-team nights. Industry nights are full of agents, managers, casting directors and bookers | [JFL New Faces, NPR](https://www.npr.org/2019/07/30/746330491/new-faces-shine-at-the-worlds-biggest-comedy-festival); [State of Comedy](https://stateofcomedy.substack.com/p/guest-column-how-to-get-industry) (invite the assistants, not just the senior agent) |
+| **Patron / donor** | Funds a nonprofit theatre, a scholarship or a fellowship. Grants (NEA) | WIT 990 and annual report |
+| **Licensor / franchisor** | Licenses a short-form brand city by city | ComedySportz |
+| **Streamer / online platform** | Turns the scene into clip content and touring live shows | A1 pipeline |
+
+### A4. Fans
+
+- **Students as the audience.** The audience of an improv theatre is largely its own students and their friends. The closest sources are college troupes courting student crowds with low prices ([Tufts Daily](https://www.tuftsdaily.com/article/2003/01/local-improv-troupe-seeks-college-audiences); [Daily Bruin](https://ssh.dailybruin.com/2002/09/30/whose-class-is-it-anyway/)). The "mostly improvisers in the room" problem is widely discussed, but I found no figure [U].
+- **Regulars and superfans:** cheap all-night tickets ([NYC Tourism](https://www.nyctourism.com/events/megawatt-improv-comedy/)) and late-night marathon shows build a core who see every Harold night.
+- **Festival-goers:** "thousands over 56 hours and 600 shows" [U, undated] ([Rolling Stone / search summary](https://www.rollingstone.com/culture/culture-news/comedy-all-stars-honor-del-close-87498/)).
+- **Family audiences:** clean short-form matches with an audience-judged winner ([ComedySportz](https://www.comedysportz.com/the-match-experience)).
+- **Online clip audiences:** short-form clips of improv game shows on TikTok and Reels made the format a hit with a "young and chronically-online" crowd ([Exist Yesterday](https://buttondown.com/jonathanbogart/archive/going-out-june-2025)). Patreon fans fund improvised podcasts (A1).
+
+### A5. Distinctive moments (generic, for events)
+
+1. **The click.** In Level 2, a scene where you stop trying to be funny and just listen, and the room roars. +impro, and a teacher remembers your name.
+2. **The cast list goes up.** The house-team audition results are posted on a corkboard or in an email at 11:58 p.m. You scroll for your name among 400 hopefuls.
+3. **The set dies.** A 30-minute Harold with no game, and the third beat goes nowhere. Twelve people in the audience, nine of them classmates.
+4. **A scout in row C.** Someone from an agency is in. Everyone overplays, except the one person who doesn't.
+5. **The price rise.** The theatre raises Level 1 by $50 and the mailing list revolts. Do you defend the owner or sign the open letter?
+6. **The legendary jam.** A 1 a.m. Tuesday jam where a stranger, a famous alum and you build something the whole scene talks about for years.
+7. **The team gets cut.** Your house team is "cycled out" after a season. The coach says it isn't personal.
+8. **Pay-to-play maths.** Your indie team rents the room for the night, and nine tickets sell.
+9. **The coach you love leaves** for an LA writing job. You realise there is a ladder out.
+10. **The sketch packet.** A late-night show opens submissions. Your sketch team writes all weekend.
+11. **The corporate gig.** You teach "Yes, and" to a bank's sales team for $1,000 and feel strange about it, then pay rent with it.
+12. **Strike vote.** The resident cast votes on a strike authorisation. Do you cross, march or mediate?
+13. **The theatre goes dark.** The landlord, the tax bill, a pandemic. Classes go online. The owner announces the theatre will not reopen.
+14. **The festival acceptance.** Your team is accepted to a marathon festival, 1 of 3 taken. Your slot is at 3:40 a.m.
+15. **A clip escapes.** A 40-second bit from a show posted online gets two million views. Strangers quote your line at you.
+16. **Musical night.** The accompanist plays a key change you didn't expect and you sing the 11 o'clock number of a musical that has never existed.
+17. **The cruise contract.** Four months at sea, eight shows a week, the same 30 games. You save every dollar and lose your edge.
+18. **The audition partner.** At the touring-company audition you're paired with a weak scene partner. You carry the scene, and that's what gets you hired ([Backstage anecdote](https://www.backstage.com/magazine/article/tips-launch-comedy-improv-career-second-city-69848/)).
+19. **The fellowship letter.** A free 20-week fellowship acceptance arrives the same day as your landlord's rent increase.
+20. **Theatre politics.** The artistic director casts their own students on the best night. Do you say something?
+
+### A6. Game rules (numeric, generic names)
+
+All money is in today's dollars and passes through the existing `usd()` scaling. Skills refer to existing keys: `impro`, `comic`, `pres`, `dial`, `orig`, `struc`, `cha`, `voice`, `song`, `eth`. "Week" means an S.week tick.
+
+**Performer: the ladder**
+1. **New dream** `improv` ("Improviser"): `role: 'actor'`, `field: 'stage'`, `grp: 'Stage'`. Its core regex is `/\b(improv\w*|sketch|harold|ensemble|house team|comedy theat\w*)\b/i`. Add a `sketch` dream ("Sketch comedian", `role: 'writer'`, field stage, favoured gigs `club`, `webser`, `multicam`, `taping`).
+2. **Training theatre levels 1–5:** each level takes 8 weeks at one evening a week and costs **$400–$500** (big brand) or **$175–$250** (small theatre). Each level gives `impro` +.25 and `comic` +.1, and **meets 2 classmates**. Finishing Level 3 unlocks the house-team audition; Level 5 unlocks the conservatory audition (free, 1 in 4 accepted). The conservatory is 6 levels × 7 weeks × $415. Replace the $750 shop bundle with "Level 1" at $450.
+3. **Repeat chance:** at a big Los Angeles theatre-style schools, 30% of students are asked to repeat a level (repeating is common per the source; the 30% is a tuning guess [U]).
+4. **Jams:** free and weekly. Each jam is a d20 + `impro` roll: 10% chance of a "legendary jam" (+2 standing in the improv scene, +1 meet with an alum), 15% chance of a "dead jam" (+3 stress).
+5. **House-team audition** twice a year: about **400 applicants for 12–20 spots**, a base 4% chance. Add +1% per `impro` point above 10, +3% per previous audition (the "known face" bonus), and +5% if your coach is a contact. Selection lasts 1 season (26 weeks). At the end of each season, 25% of teams are cycled out.
+6. **House-team life:** rehearse 1 evening and play 1 show a week. Pay is **$0**. Each show is a quality roll: a mean of `impro`×4 + team chemistry, with sd 15. Shows above 75 add +1 scene standing. Missing 2 rehearsals means removal.
+7. **Indie team:** form one with 3–8 contacts. Room rental is **$100–$300** a night, or a 70/30 door split at a partner theatre. Tickets are **$10**, in a 60-seat room. Without a following, attendance is about 8 + (scene fans × 0.1). Team chemistry drifts by ±2 a show.
+8. **Paid performance:** at theatres that pay, a show earns **$75** in a late slot or **$150** in a prime slot when it sells more than 70 seats. Make this 1 theatre in 5 per city.
+9. **Resident company path:** pass the auditioned understudy programme (1 in 30 of those who try), then go touring, then the second stage, then the mainstage. Touring pays **$165 per show**; the mainstage pays **$970/week** (2019 minimum), raised by **+7% a year** after a strike year. The mainstage plays 8 shows a week. Each revue takes 12 weeks to write in front of audiences and then runs 26 weeks.
+10. **Musical improv** is a separate track (Musical Levels 1–3). It needs `song` ≥ 8 and auditions separately. A musical team is 2× more likely to get festival slots and pays the accompanist (a `composer` NPC) $50 a show.
+
+**Performer: income on the side**
+11. **Teaching:** after 3 years and Level 5 (or the conservatory), you can teach. **$50/hour** at 3 hours a class gives $150 a week per class, up to 3 classes. Each class adds +1 to students-as-audience (rule 22). Coaching a house team pays $0–$100/week depending on the theatre (pay began only recently).
+12. **Corporate gigs:** offers arrive at a rate of 0.3 a month once `impro` ≥ 12. They pay **$1,000 a half day** or **$2,000 a full day**, cost 4 stress, and add `pres` +.02. They don't count as art: the scene loses 1 standing if you do more than 6 a year.
+13. **Cruise contract:** a 16-week offer at **$1,500–$2,500/week** [U]. Living costs are zero while on board. You perform 8 shows a week of short-form, and `impro` decays by .02 a week (the same 30 games). Your city contacts' ties decay at 2× the normal rate.
+14. **Theme-park street improv:** **$21–$23/hour**, 5 days a week, union. Gives `phys` and `comic` +.01 a week. It makes 12% of `cha` rolls with strangers easier, and teaches nothing about long-form.
+
+**Performer: bridges out**
+15. **Sketch team → late-night packet:** each packet takes 4 weeks of `dial` + `orig` work. The base hire chance is **3%** (about 35 rejections before a hire), plus 1% per `orig` point above 12. A hire lands you a staff-writer job at about **$4,900/week** on 20-week cycles (showrunner field, film).
+16. **Network sketch show:** a scout watches 1 show a month at each big-brand house-team night. The chance a given scout notices you is (show quality − 70) × 1%. Being noticed leads to a screen test, then a cast offer of about **$7,000 per episode for 21 episodes** [U].
+17. **Commercials:** each improv level adds +4% to the booking roll for the `spot` gig (no-dialogue auditions), capped at +20%.
+18. **Acting:** `impro` counts double for parts with NEED `impro` or `comic`. Each house-team season adds +1 to the casting "seen around town" stat.
+19. **Podcasts:** with 2 or more scene friends you can start an "improvised podcast" work type (field podcast). It earns `fol` like the existing podcast type, with ×1.3 engagement if team chemistry is above 70. At 5,000 followers you unlock a live tour at $34 a ticket.
+20. **Online clips:** any show of quality 85 or more has a 5% chance of producing a clip. A clip gives creator followers of 2,000–200,000 on a log-uniform roll, and gets you invited to an online improv game show (a `webser` gig with a high fame value).
+21. **Voice:** improv levels add +2% each to `dub` and `audio` gig quality. The source support for this is weak [U].
+
+**Fans**
+22. **Students as audience:** each theatre's audience = 0.6 × current students + 0.3 × regulars + walk-ins. Raising class prices 10% cuts enrolment 6% and the audience accordingly.
+23. **Regulars and superfans:** each show of quality 80 or more converts 2% of walk-ins to regulars. Regulars convert to superfans at 1% a month. A superfan follows your team to festivals and buys merch ($15 a head a year).
+24. **Festival-goers:** a festival slot puts you in front of 50–400 people. 0.5% of them become online followers, and 1 in 20 festival slots puts a scout in the room.
+25. **Online clip fans** decay at 8% a month unless you post again within 6 weeks.
+
+**Backers**
+26. **Owning a training theatre:**
+    - Start-up costs **$60k–$150k** [U]. Rent is **$6k–$20k a month** depending on city [U, my estimate; no source found].
+    - Revenue: classes at 12–16 students × $450 per 8 weeks, plus shows at $10 × fill × 70 seats, with a bar at +40% of the door.
+    - Classes should make up 60–80% of revenue; this follows the "tickets are nominal" report.
+    - Every January there's a property-tax event of 5–10% of yearly revenue.
+27. **Pay policy choice:** pay performers $0, $75/$150 or a door share. Paying cuts margin and gives staff and cast +10 loyalty. Not paying raises the chance of an open letter by 5%/year and of a union drive by 2%/year.
+28. **Union drive / strike:** once a union exists, the contract renews every 5 years. If wages lag the city's other theatres, there's a 30% strike-vote chance; settling costs +35–40% on wages over 5 years.
+29. **Pandemic or landlord shock:** 1% a year (or the scripted 2020 era). Shows stop, and classes go online at 40% of revenue. With less than 6 months of cash, the theatre closes or sells to an investor at 0.3–0.6× its value.
+30. **Corporate arm:** an owner can open a corporate-training arm. It needs 6 trained teachers and then grows 15% a year up to a third of revenue.
+31. **Diversity fellowship:** costs about $40k a year [U] (20 weeks, 10 fellows, free tuition). Half of the fellows join your casts, and it adds +2 to the theatre's standing with funders and the press.
+32. **Festival organiser:** charges a $25–$35 application fee. Takes 1 team in 3 of applicants, runs 1–11 stages, and pays performers $0 or an honorarium. A good festival year (quality 75 or more) grows next year's applications by 15%.
+33. **Indie producer:** rents rooms at $100–$300 and books 3 teams a night at $10 a ticket. Margin depends on the bar deal (TickPick's three models).
+34. **Patron:** a donation of $1k–$100k gets your name on a scholarship or a room. That adds standing with the scene, and a 10% chance a year that a beneficiary later names you in a speech (fame).
+35. **Scout/agent watching showcases:** an agent player can attend 1 showcase a week. Each attendance reveals the hidden potential of 1–3 performers (a `fog.js` hook). Signing an improviser costs 0 and pays 10% of their later work.
+
+### A7. Suggested integration (brief)
+
+- New file `src/improv.js`. It would hold the theatres generated per hub (a big brand, a long-form shop, a short-form franchise, a nonprofit, and 1–3 indie rooms), class enrolment, auditions, teams, shows and festivals. It adds a `PATHS.improv` ladder (Student → Graduate → House team → Resident/paid → Known in the scene → TV/room), or adds rungs to `stage`.
+- Reuse `GIG_TYPES.club`, `taping`, `multicam`, `spot` and `webser` for the bridges. Add gig types `corpimprov` and `cruise`.
+- The contests `improvwars`, `improvfest` and `sketchfest` become calendar events on the improv path.
+- Add a `teaching` income stream through `M.streams`.
+
+---
+
+#### PART B: OTHER CAREERS WORTH ADDING
+
+**Status key:** **Missing** = no dream and no system. **Token** = a dream (or job titles) exists, but it is only role + regex + favoured gigs, with no ladder, economics or events of its own. **Partial** = some real system exists (a gig type, NPCs or a page). **Moderate** = a playable system exists.
+
+| # | Career | Status in code | Priority |
+|---|---|---|---|
+| 1 | Sketch comedian / sketch writer | Missing (only a `sketchfest` contest and "sketch" in the shortform regex) | High: pairs with improv |
+| 2 | Stand-up comedian | Token (dream `standup`; gigs `club` $150–900 and `special`; open-mic venue) | High |
+| 3 | Late-night / comedy TV writer | Partial (`showrunner` dream; `multicam` punch-up gig; no packets or room) | High |
+| 4 | Talent agent / manager | Token as a player (dream `agent`; agencies exist as NPC systems in packaging.js) | High |
+| 5 | Casting director | Token (dream `casting`; 11 catalogue jobs) | High |
+| 6 | Drag performer | Missing | High |
+| 7 | Live-event / comedy producer and promoter | Missing (only a `live` gig for crew) | High |
+| 8 | Theme-park / live character entertainer | Missing (one actor odd-job "Theme park character"; `ride` film gig) | Medium |
+| 9 | Cruise-ship entertainer | Missing | Medium |
+| 10 | Esports caster / gaming host | Missing (zero hits) | Medium |
+| 11 | Voice actor | Partial (dream `voice`; gigs `dub`, `audio`, `game`; actor odd-jobs audiobook, trailer VO) | Medium |
+| 12 | Dubbing / localisation (actor, director, adapter) | Partial (gig `dub`; 5 catalogue jobs; no dream) | Medium |
+| 13 | Stunt performer | Token to partial (dream `stunts`; 7 catalogue jobs; `unit2` gig) | Medium |
+| 14 | Festival programmer | Token as a player (festivals.js generates programmers as NPCs) | Medium |
+| 15 | Magician | Token (dream; `club`/`special`/`live` gigs; contest) | Medium |
+| 16 | Puppeteer | Token (dream; 4 catalogue jobs; `kids` gig) | Medium |
+| 17 | Location scout / manager | Token (dream `locations`; 7 catalogue jobs) | Low–medium |
+| 18 | Radio presenter | Token (dream; 5 catalogue jobs; `taping`/`jingle`) | Low–medium |
+| 19 | Trailer editor | Partial (gig `trailer`; catalogue job; no dream) | Medium |
+| 20 | Game writer / narrative designer | Token (folded into `gamedev`) | Medium |
+| 21 | VFX artist / animator | Moderate (dreams `vfx` and `animator`; 21+17+6 catalogue jobs; gigs) | Low |
+| 22 | Studio-audience warm-up comic | Missing (flavour text in tv2.js:69) | Low, but a perfect side-hustle |
+| 23 | Film critic | Moderate (critics.js has "the critic's career": freelance, staff, blog) | Low |
+
+### 1. Sketch comedian / sketch writer (Missing)
+**How it works:** teams of 4–8 write and perform short scenes. They come up through a theatre's sketch house teams (a big New York and LA theatre had 400+ applicants for one round of sketch and improv teams, [Comic's Comic](https://thecomicscomic.com/2011/12/21/upright-citizens-brigade-the-pit-announce-new-house-teams-for-sketch-and-improv-in-2012/)), sketch festivals, online sketch channels, packets to late-night shows, and the network sketch show.
+**Ladder:** class → sketch team → festival → online channel → packet / staff writer → network sketch cast → own show.
+**Pay:** usually $0 at theatres. A network sketch cast member earns about $7k per episode in the first year [U] ([celebritynetworth](https://www.celebritynetworth.com/articles/entertainment-articles/how-much-money-do-saturday-night-live-cast-members-make/)). Staff writers earn about $4.9k/week [U] ([the writers' guild](https://wgacontract2023.org/the-campaign/summary-of-the-2023-wga-mba)).
+**Why fun:** you write with a group whose chemistry matters, the packet is a lottery, and a viral sketch is a jackpot. It fits the existing `video`/`blip` creator works.
+
+### 2. Stand-up comedian (Token)
+**How it works:** open mics (free; you pay with a bar tab or a "bringer" of friends) → hosting → feature → headliner → tape/special → festival showcase → TV set/special.
+**Pay:**
+- Open mic $0; local host $25–$100; regional feature $75–$300; local headliner $150–$600 or a door %; touring headliners in the low four figures ([TickPick](https://www.tickpick.com/blog/organizer/how-to-book-comedians-for-your-show)).
+- Feature spots of 20–30 minutes pay $50–$200+ ([OpenComedy](https://opencomedy.com/news/comedy-career-progression-from-open-mic/) [U]). Many LA rooms pay $0–$20 ([Chron](https://work.chron.com/salaries-comedy-headliners-27983.html)).
+- At the festival showcase, the industry watches six-minute sets ([NPR](https://www.npr.org/2019/07/30/746330491/new-faces-shine-at-the-worlds-biggest-comedy-festival)).
+- The club model: the ticket pays the comics, and the two-drink minimum pays the bills ([MEL](https://melmagazine.com/en-us/story/the-lubricated-economics-of-two-drink-minimums)).
+
+**Today:** a dream plus `club` and `special` gigs. There's no set-length ladder, no "minutes of material" resource and no road.
+**Why fun:** material is a resource you build, test and burn on a special. Bombing versus killing. The road trip. One festival set can change a life.
+
+### 3. Late-night / comedy TV writer (Partial)
+**How it works:** submit a packet (sketches plus monologue jokes). Late-night writers' workshops pick from about 1,000 applicants ([Comic's Comic](https://thecomicscomic.com/?p=33517)). A hire leads to a 13–20-week cycle in a room. One writer had 35 rejections before her hire ([Inside Late Night](https://latenighter.com/podcasts/inside-late-night-with-mark-malkoff-ep-58-jenny-hagel/)).
+**Pay:** the the writers' guild staff-writer minimum is about $4,940/week (2024–25) [U] ([the writers' guild](https://wgacontract2023.org/the-campaign/summary-of-the-2023-wga-mba)).
+**Why fun:** a daily joke quota, the head writer's red pen, topical news as the game's input, and a host who might be cancelled.
+
+### 4. Talent agent / manager (Token as a player)
+**How it works:**
+- The mailroom/assistant path is about a year as an assistant, then 3 months in the mailroom at one big agency. Another starts people as 6–8-week floaters ([search: entertainmentcareers / LA Business Journal](https://labusinessjournal.com/media/talent-agencies-got-mail-entertainment/)).
+- Assistant pay is $17.50–$20/hour ([Hollywood Reporter](https://www.hollywoodreporter.com/news/caa-raises-pay-rate-assistants-hourly-employees-1269942)).
+- Agents take 10% of client deals ([search summary](https://ratings.koha-community.org/en/creative-artists-agency-salary.html) [U]). Managers usually take 15% (no source found [U]). Junior agent base pay of $70k–$150k [U, low-quality site].
+
+**Why fun:** your success is your clients' success. You balance a roster, poach and get poached, and package deals. packaging.js and fog.js (scouting) already exist to plug into.
+
+### 5. Casting director (Token)
+**How it works:** casting assistant → associate → casting director. You run sessions, build lists, negotiate offers and scout showcases.
+**Pay:** the first union minimums for casting directors (2024–27) are **$7,000/week for pilots, rising to $7,535**, and $4,500/week for later episodes. Associates get **$1,820/week**. Assistants were added to the union at about $21/hour ([TheWrap](https://thewrap.com/teamsters-ratify-casting-professionals-studio-contract)). Non-union associates get $400–$800/day (game catalogue).
+**Why fun:** you are the gatekeeper the actor path fights through. Choices are taste bets: unknown versus star, chemistry reads, and the director overriding you.
+
+### 6. Drag performer (Missing)
+**How it works:** amateur nights → bar shows → hosting brunches and bingo → producing your own show → touring/TV competition. Bookings are mostly by DM with no contract.
+**Pay:** a $40-per-show floor was proposed in the SF Bay Area. Actual offers range from $0–$60 at bars up to $500 for one number at an event. Typical group shows pay $30–$60 flat. Tips run $25–$200 a show. TV-competition alumni command thousands ([Coworker petition](https://home.coworker.org/resources/5-things-you-need-to-know-about-the-sf-campaign-for-drag-equity/); [The Stranger](https://www.thestranger.com/?p=250591); [Out](https://www.out.com/print/2020/2/29/it-time-drag-queens-unionize)). Costume and make-up costs are significant ([Refinery29](https://www.refinery29.com/nyc-drag-queen-beauty-costs)).
+**Why fun:** persona-building (name, look, signature number), drag families/houses as a social system, high costume upkeep against tips, and the TV-competition casting jackpot. It reuses the `costume` and `makeup` crafts.
+
+### 7. Live-event / comedy producer and promoter (Missing)
+**How it works:** rent rooms, book acts, sell tickets, take the risk. Room deals are a flat rental, a 20–30% door split, or a free room with the venue keeping the bar ([TickPick](https://www.tickpick.com/blog/organizer/how-to-run-a-profitable-comedy-show)).
+**Pay:** concert promoters earn a median of about $48k–$78k, and top promoters up to $1M. Booking agents take 10–20% ([Shmoop](https://www.shmoop.com/careers/concert-event-promoter/salary.html) [U]; [Chron](https://www.w.work.chron.com/much-concert-promoter-make-22994.html) [U]).
+**Why fun:** this is a tycoon loop: the risk of an empty room, overbooking, a headliner who no-shows, and building a brand night that becomes a scene. It is also the natural home for the improv "backer" role.
+
+### 8. Theme-park / live character entertainer (Missing)
+**How it works:** audition → character or "face" performer → parade/show → street improv → lead/trainer → entertainment manager or ride-show director.
+**Pay:** union floors are $21.30–$23/hour ([ABC17/CNN](https://abc17news.com/money/cnn-business-consumer/2024/04/17/mickey-minnie-donald-and-goofy-file-for-union-vote-at-disneyland/)). Character performers moved to unionise in 2024 (same source).
+**Why fun:** heat, costumes, never breaking character, guests who test you, the union vote, and the jump from park to screen. It shares mechanics with improv (street improv).
+
+### 9. Cruise-ship entertainer (Missing)
+**How it works:** contracts of 4–8 months at sea ([Backstage](https://www.backstage.com/magazine/article/cruise-clues-56614/); [AV Club](https://avclub.com/you-can-no-longer-cruise-your-way-to-comedy-stardom-1798263725)). Fly-on comics do short stints. One line uses 25–35 comics a week ([Frommer's](https://www.frommers.com/tips/cruise/a-cruise-ships-walks-into-a-bar-says-to-the-bartender/)).
+**Pay:** about $1,500–$2,500/week [U].
+**Why fun:** a "money versus momentum" choice. You save cash and lose your city network. Ports are a travel montage. One mechanic serves singers, magicians, comics and improvisers.
+
+### 10. Esports caster / gaming host (Missing)
+**How it works:** amateur streams → small tournaments → freelance caster → league desk → publisher staff.
+**Pay:** small organisers pay £150–£200 per day per caster. Top freelancers get about €1,000/day. Salaries run £20k up to €55–60k+ ([Louth College caster profile](https://www.loucoll.ac.uk/sites/default/files/esports/006948_CasterHost_AWK.pdf) [U]). An 11-day event once paid about $12,000 ([MCV](https://mcvuk.com/?p=60127) [U]).
+**Why fun:** live pressure, game-knowledge stats, hype calls going viral, and publisher politics. It links the `streamer` dream with the `live` gig.
+
+### 11. Voice actor (Partial)
+**How it works:** demo reel → non-union jobs → union → animation, games, audiobooks, commercials, dubbing.
+**Pay:**
+- Union video-game session: **$1,134.95 for 4 hours and up to 3 voices (2025)**, with vocally stressful sessions capped at 2 hours ([VoxBooster](https://voxbooster.com/blog/video-game-voice-acting-statistics-2026) [U]; [the actors' union](https://sagaftra.org/industry-resources/rates-agreements/independent-interactive-localization)).
+- Audiobooks: $100–$325 per finished hour, or a 50/50 royalty share for 7 years. Beginners get $10–$100 PFH ([SFWA](https://sfwa.org/2022/05/04/indie-files-listen-up-self-producing-audiobooks/); [Backstage](https://www.backstage.com/magazine/article/how-much-do-audiobook-narrators-make-76704/)).
+
+**Today:** a dream and gigs, but no demo reel, booth or royalty-share choice.
+**Why fun:** the royalty-share gamble, vocal-health stress, AI-voice disputes, and stacking many small gigs.
+
+### 12. Dubbing / localisation (Partial)
+**How it works:** dubbing actor, director, script adapter (lip-sync writing) and mixer. Work is per session.
+**Pay:** non-union anime dubbing pays $75–$125/hour with a 2-hour minimum. A film role may pay $150–$600 in total ([Anime News Network](https://cdn02.animenewsnetwork.com/feature/2022-03-28/the-battle-for-union-anime-dubs/.183842)).
+**Why fun:** a lip-sync puzzle mini-game, fan backlash at changed lines, and a bridge for players in non-English hubs (the game has multilingual hubs).
+
+### 13. Stunt performer (Token to partial)
+**How it works:** martial arts, gymnastics and driving skills → stunt double → fight coordinator → stunt coordinator → second-unit director.
+**Pay:** union minimums are **$1,246/day and $4,646/week (2025–26)**, plus negotiated stunt adjustments ([wage table PDF](https://www.agentassociation.com/clientuploads/2026_Theatrical_Wage_Table.pdf)).
+**Why fun:** body as a resource, injury risk, a skill-badge collection, and the jump to directing action.
+
+### 14. Festival programmer (Token as a player)
+**How it works:** volunteer screener → paid temp screener → programmer → senior programmer → artistic director. Contract work is common.
+**Pay:** temp screeners earn $20.32–$24.50/hour and must watch **1,250–1,450 shorts** in one season ([EntertainmentCareers](https://www.entertainmentcareers.net/sundance-film-festival/short-film-programmer/job/527366/)). Programmers average about $63k ($44k–$102k) ([CareersInFilm](https://www.careersinfilm.com/?p=12035) [U]).
+**Why fun:** you are the gatekeeper for other players' films. The game already generates festivals, juries and programmers. You'd balance taste, sponsors and premieres versus discoveries.
+
+### 15. Magician (Token)
+**How it works:** kids' parties → restaurants and strolling → corporate → theatre show / residency → TV special.
+**Pay:** kids' parties pay $250–$400 an hour. Corporate shows pay $400–$900 an hour, $1,500–$3,500 for strolling, and $2,000–$5,000+ for stage shows ([GigSalad](https://www.gigsalad.com/blog/how-much-does-it-cost-to-hire-a-magician); [Thumbtack](https://www.Thumbtack.Com/p/magician-prices) [U]).
+**Why fun:** you invent effects (a craft tree), the secret-keeping and exposure drama, and a Vegas residency as the endgame.
+
+### 16. Puppeteer (Token)
+**How it works:** puppet builder → performer on kids' TV, creature effects or theatre → lead puppeteer → puppet designer or company owner.
+**Pay:** I found no puppeteer-specific rate. Union TV work falls under the actors' union performer scales [U]. The game catalogue already lists 4 puppetry jobs.
+**Why fun:** building and performing are both crafts. There's the kids'-TV franchise and the practical-effects revival.
+
+### 17. Location scout / manager (Token)
+**How it works:** locations PA → scout → assistant/key assistant LM → location manager. The work is permits, neighbours and police.
+**Pay:** non-union PAs earn $175–$400/day (catalogue). Key assistant LMs earn **$2,525/week (2024), rising to $2,700**. Commercial scouts/managers earn **$957.58/day (2026)**, rising to $1,020.83 by 2028 ([Teamsters 399 MOA](https://ht399.org/app/uploads/2024/08/Local-399-Location-Managers-MOA-7-29-24-00319860xBE9D797.pdf); [AICP/399 2026 MOA](https://www.ht399.org/app/uploads/2026/06/2026-05-31-MOA-2026-2029-AICP-and-Teamsters-Local-399-Location-package.pdf)).
+**Why fun:** an exploration mini-game in the city layer. It fits `places.js` and the tax-incentive map.
+
+### 18. Radio presenter (Token)
+**How it works:** board operator → overnight shift → show producer → drive-time host → syndication / podcast crossover.
+**Pay:** the median is **$21.69–$21.96/hour (May 2024)**, and employment is forecast to fall 2% by 2034 ([BLS OOH](https://www.bls.gov/OOH/media-and-communication/announcers.htm)).
+**Why fun:** ratings books, a shrinking industry, the shock-jock temptation, and a pivot to podcasting (which exists).
+
+### 19. Trailer editor (Partial)
+**How it works:** assistant at a trailer house → editor → senior / creative director. Work is pitch-based against other trailer houses.
+**Pay:** a studio staff role pays $57.02/hour ([EntertainmentCareers](https://cs.entertainmentcareers.net/the-walt-disney-studios/trailer-editor/job/463840/)). The median is about $130k ([PayScale](https://www.payscale.com/research/US/Job=Trailer_Editor/Salary) [U]). The range is $60k–$150k [U].
+**Why fun:** you shape other players' films' box office. The game already has tracking and release systems for the trailer to feed into.
+
+### 20. Game writer / narrative designer (Token)
+**How it works:** QA / junior writer → narrative designer → lead writer. Often merged with game design.
+**Pay:** in a 2024 survey of 1,000+ developers, 40% earn under $40k, and the US average is $101,392 ([80 Level via Game Industry Library](https://gameindustrylibrary.com/writers/80-level-research)). Writer-specific data is thin ([GamesMarkt](https://www.gamesmarket.global/gamesmarkt-survey-2024-how-much-money-can-i-make-in-games-607df649c2c4b7dd30c79ebbebb3eaa1/)).
+**Why fun:** branching-dialogue craft, crunch, layoffs and the IP-adaptation bridge back to film.
+
+### 21. VFX artist / animator (Moderate; lower priority)
+**Pay:** Animation Guild journey animators earned $2,255.20/week through July 2024, with +7%, +4% and +3.5% raises in 2024–27 ([Animation Guild](https://animationguild.org/wp-content/uploads/2022/10/2021-24-Local-839-WAGES-v02.pdf); [Hollywood Reporter](https://www.hollywoodreporter.com/business/business-news/animation-guild-ratifies-three-year-contract-1235174906/)). In an IATSE VFX survey, 70% reported unpaid overtime and 12% had health insurance ([IATSE](https://iatse.net/iatse-launches-2024-vfx-return-to-work-survey-amid-significant-momentum/)).
+**What's missing:** the vendor bid-war and unionisation-drive events.
+
+### 22. Studio-audience warm-up comic (Missing)
+**How it works:** a stand-up who keeps a sitcom or talk-show audience laughing through 3+ hour tapings.
+**Pay:** up to $4,000 a night ([Awardsline](https://awardsline.com/2013/06/21/chuck-lorres-go-to-warmup-comic-mark-sweet/)), and $4,000–$6,000 a day for the best ([ArtsJournal](https://www.artsjournal.org/?p=173863) [U]). It was once $50 a night (same source).
+**Why fun:** a perfect side-hustle node between stand-up, improv and the `multicam` gig. tv2.js already has a scene with a flagging warm-up comic.
+
+### 23. Film critic (Moderate; included for completeness)
+critics.js already has the freelance/staff/blog career.
+**Pay:** freelance reviews pay $10–$50 at small outlets and $75–$200 on paid-review platforms for approved critics ([search summary](https://www.metaintro.com/blog/movie-critics-salary) [U]). The BLS writers' median is $76,910 (May 2025, same source [U]).
+**Gap:** the shrinking-staff-jobs and newsletter events.
+
+---
+
+#### Sources (Part A, consolidated)
+Every number in Part A has its own inline link above. The main pages are:
+- coldtownetheater.com/ucb/ · secondcity.com/find-a-class/chicago · oldwp.secondcity.com/courses/con-program/ · en.wikipedia.org/wiki/The_Groundlings · en.wikipedia.org/wiki/Harold_(improvisation) · en.wikipedia.org/wiki/ComedySportz
+- thecomicscomic.com/2011/12/21/... (400+ applicants) · witdc.org FAQ, FY23 report · projects.propublica.org/nonprofits/organizations/521543346
+- actorsequity.org/news/PR/SecondCityStrikeAverted2025 · wbez.org/theater-stages/2025/05/05/... · lawinsider.com/clause/mainstage-minimum/_1
+- blockclubchicago.org/2020/06/19/... · ny1.com/.../2020/04/21/... · artsjournal.org/2020/12/24/...
+- pastemagazine.com (coaches; theatres that pay; Twin Cities) · tickpick.com organiser guide · dallasobserver.com Stomping Ground
+- floridastudiotheatre.org/corporate-training · soulpepper.ca/corporate-training · dc.fortune.com/2016/06/03/second-city-diversity/
+- secondcity.com Bob Curry fellowship pages · timeout.com DCM move · scotsman.com Fringe costs · playbill.com Fringe budgets
+- avclub.com cruise · frommers.com cruise comics · wdwnt.com / wdwinfo.com park improv · abc17news.com park pay
+- backstage.com improv for commercials · villagevoice.com · latenighter.com · flowjournal.org · en.wikipedia.org/wiki/Make_Some_Noise_(TV_series)

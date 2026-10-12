@@ -198,6 +198,11 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/sides.js` | Round 19 side industries: syncs priced by use (`SYNC_FEE`), score commissions, royalty statements, session calls, door deals, the podcast episode-seven wall, demonetisation weeks (`demonWindow`), creator burnout, stage runs with closing notices, transfers and film options, TV script fees and created-by royalties, say-on-pay and activists (`sidePick`). |
 | `src/about.js` | The About app: credits, font licences, sources, the fiction notice and the AI note (`aboutHTML`). |
 | `src/safety.js` | Real people still alive: no negative traits or events, no simulated death, no lookalike portrait (`realLiving`, `NEG_TRAITS`, `NEG_EVENTS`). |
+| `src/streaming.js` | Round 20 streaming business: services with subscribers, price, ad tier, spend, debt and a share price (`SVC_META`, `SVC_PATH`, `SVC_PRICE`); `svcQuarter` (adds from the growth path × appeal, price rises, ad tiers from 2022, the password crackdown, moods land grab / steady / profit pivot, sports rights, mergers and folds); licence bids scale with mood (`svcBidMul`, `svcLicMul` in `afterlife`); the cinema window and index (`cinemaWindow`, `cinemaIndex`); nine `sv_` jobs, the fortnightly desk (`SV_DESK`, `svDeskPick`), cost-plus buyouts, overall deals, bought streams that get caught (`svDealsWeek`); the Streamboard app. Probe: `tools/probe-streaming.js`. |
+| `src/acts.js` | Musicians, creators, podcasters and stage acts as real people (~2,100, `actMake` via `makePerson`, hashed): fans, releases (`actRelease`, `actUnits`), weekly output (`ACT_RATE`), churn and a field ceiling on growth (`ACT_CHURN`, `ACT_CAP`), new acts and retirements yearly; charts read real releases; release pages (`mrel:`), person pages with discography (`actSection`); merit awards; `worldTally` for the loading line. |
+| `src/improv.js` | The improv and sketch life: theatres per city (`impTheatres`), classes, jams, house-team auditions, indie teams, festivals, teaching, corporate and cruise gigs, the late-night packet, scouts, fans, owning a theatre (`impOwnMonth`: pay policy, the open letter, closing); dreams `improv`, `sketch`, `drag`, `promoter`, `themepark`, `warmup`, `caster`; the Improv app. |
+| `src/houses.js` | Labels, podcast networks, creator studios and theatres keep books (`S.mh`): revenue from the roster's units (`MH_RATE`), royalties and recoupment (`MH_ROY`, `p.deal`), quarterly signings by momentum (richest first, `MH_CAP` roster caps), re-sign / poach / drop at deal end, cuts, sales, closures, private-equity rescues for majors, relaunches of closed names; overhead adapts yearly; the player's own record deal follows its label (`mhPlayer`); company pages show the books and the roster. |
+| `src/tvlive.js` | Television from the first year of play: quality from the show's people (`tvlQ`), yearly renewals from audience against the channel bar, reviews, age and the streamer's mood (`TVL_RENEW`, `S.tvl`), merit Emmets for live years that move winners' standing and fame (`tvlAwards`). |
 | `src/streams.js` | Built last: the world's dice per system and week (`wstream`), the player's own dice for actions, so two careers on one seed share the world. |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
@@ -314,6 +319,32 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 20: saves, streaming, acts as people, improv, houses with books, live TV
+
+- Asked for: saves that are smaller and more of them (50 slots, with a clear notice when full); the deepest pass yet
+  on streaming (business, day-to-day work, teaching, exploits) shown through play; why the wiki pages were denied;
+  side industries closer to film in content and systems; a loading line counting every kind of work; more jobs and
+  dreams, with improv as a real life for performers, backers and fans; cleaner avatars (hands, neck, limbs, body);
+  a naming once-over for music and the other fields; title options beyond film; creators and musicians as full,
+  clickable people.
+- Network: Wikipedia and Wikidata were blocked by the environment's earlier network setting; they return 200 now.
+  Research is in `docs/RESEARCH.md` (Round 20), names only in source URLs.
+- Saves (`src/saves.js`, `BUILD_ID b70`): rounding by field (`SNAP_PREC`), skills stored as differences from the
+  baseline, unchanged world fields skipped; ~9.4 MB → ~6 MB compressed at year one. `MAX_MANUAL = 50`; a full
+  slot list refuses with a 12-second notice and the Saves page warns when 5 or fewer remain. `tools/savetest.js`.
+- Acts as people (`src/acts.js`): fan growth now churns and saturates (it had grown without bound for creators); a star
+  listed in two cities is one person (`p.akey`, released from its home city `p.ahub` only), and two different acts
+  with one name are told apart by city, "Electric Lanterns (Berlin)".
+- Houses (`src/houses.js`) and live TV (`src/tvlive.js`): see the source map. Probe targets: over 6 years about
+  7–8 of 37 houses close (tier 2–3 only; majors are rescued), live TV quality averages ~58–63 with renewals near
+  70% on broadcast and 50–60% on streaming.
+- Naming: 197 names in the media fields (`data/rename/industries.tsv`) and a second catalogue pass of 674 living
+  people whose names sat too close to the real ones (`data/rename/catalogue-pass2.tsv`; `tools/rename-quality.js`
+  now checks shared surname prefixes and family-name-first names). Korean names sharing only a common family name
+  (Kim, Park, Lee) were left as they are.
+- Avatars (`src/figure.js`, `src/portrait.js`): one-piece hands with a thumb line, two-segment arms that hang close,
+  tapered torso and legs, a wider neck; head bob and blink animations removed.
 
 ## Round 19: the audit, the legal pass, and the side industries from sources
 
