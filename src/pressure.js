@@ -18,3 +18,9 @@ function pressureParts() {
 }
 WEEK_HOOKS.push(() => { const M = S.me; if (!M || !M.party || !M.party.done) return; const P0 = pressureParts(); const add = P0.reduce((t, x) => t + x[1], 0); if (add) M.stress = clamp(M.stress + add * traitMul(ME(), 'stress'), 0, 100); M.pressure = P0; });
 { const _co = conditionsOf; conditionsOf = function () { const C = _co(), M = S.me; if (!M || !M.pressure || !M.pressure.length) return C; C.push({ k: 'pressure', label: '⏱️ Under pressure', d: `Stress building each week from ${M.pressure.map(([l, v]) => `${l} (+${v})`).join(', ')}.` }); return C; }; }
+// Relief from one scene or story beat is real but short. In the probes a single choice took 14 to 19 points off
+// stress, more than a week of work put on, so pressure never built at all. Only half of any relief now lands.
+for (const [get, set] of [[() => sceneResolve, f => { sceneResolve = f; }], [() => lateFx, f => { lateFx = f; }]]) {
+  let _f; try { _f = get(); } catch (e) { continue; } if (typeof _f !== 'function') continue;
+  set(function () { const s0 = S.me ? S.me.stress : 0, r = _f.apply(this, arguments); if (S.me && S.me.stress < s0) S.me.stress = s0 - (s0 - S.me.stress) * .5; return r; });
+}

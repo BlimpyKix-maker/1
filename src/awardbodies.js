@@ -13,7 +13,7 @@ const CEREMONY = {
   BR: ['Grand Othello Prize', 2000, 'The Brazilian Film Academy\'s awards.'], AR: ['Platinum Condor Awards', 1943, 'Argentina\'s film critics\' prizes, the oldest in Latin America.'], SU: ['Nike Awards', 1988, 'Russia\'s national film academy awards.'],
   SE: ['Golden Beetle Awards', 1964, 'Sweden\'s national film awards.'], DK: ['Bodilia Awards', 1948, 'Denmark\'s critics\' prize, one of Europe\'s oldest.'], CS: ['Czech Lynx Awards', 1993, 'The Czech film academy\'s prizes.'],
   PL: ['Polish Falcons', 1999, 'The Polish Film Academy\'s awards.'], HU: ['Hungarian Film Week Prize', 1965, 'Hungary\'s national film festival awards.'], FI: ['Jussila Awards', 1944, 'Finland\'s film awards, a statuette of a farmhand.'],
-  TR: ['Golden Tangerine Awards', 1964, 'Turkey\'s oldest film festival prizes, in Antalya.'], IR: ['Crystal Phoenix of Tehran', 1982, 'Iran\'s national film festival prizes.'], SN: ['Golden Stallion of Yennenga', 1969, 'The pan-African film festival\'s top prize.'],
+  TR: ['Golden Tangerine Awards', 1964, 'Turkey\'s oldest film festival prizes, in Antalya.'], IR: ['Crystal Phoenix of Tehran', 1982, 'Iran\'s national film festival prizes.'], SN: ['Golden Horseman of Yennenga', 1969, 'The pan-African film festival\'s top prize.'],
   PH: ['Manila Gawad Awards', 1952, 'The Philippines\' oldest film awards.'], TH: ['Golden Swan Awards', 1955, 'Thailand\'s national film awards.'], VN: ['Silver Kite Awards', 2003, 'Vietnam\'s cinema association awards.'],
   CO: ['Macondo Prize', 2010, 'Colombia\'s film academy awards.'], ID: ['Citra-Jaya Awards', 1955, 'Indonesia\'s national film festival awards.'], ZA: ['Silver Horn Awards', 2006, 'South Africa\'s film and television awards.']
 };

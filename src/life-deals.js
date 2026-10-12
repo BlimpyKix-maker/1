@@ -313,7 +313,7 @@ function companyWeek() {
 const FESTIVALS = [
   { k: 'mountain', name: 'the Mountain Film Festival', month: 0, bar: 62, fee: 60, prize: 'Grand Jury Prize', d: 'Snow, independents, buyers in parkas.' },
   { k: 'cote', name: 'the Festival de la Côte', month: 4, bar: 80, fee: 120, prize: 'Grand Prix', d: 'The most prestigious festival in the world. Red carpet, black tie.' },
-  { k: 'lagoon', name: 'the Lagoon Film Festival', month: 8, bar: 74, fee: 100, prize: 'Golden Lion of the Lagoon', d: 'Old palazzos, new auteurs.' },
+  { k: 'lagoon', name: 'the Lagoon Film Festival', month: 8, bar: 74, fee: 100, prize: 'Golden Gondola', d: 'Old palazzos, new auteurs.' },
   { k: 'north', name: 'the Northern Lights Festival', month: 8, bar: 58, fee: 70, prize: 'Audience Award', d: 'A big public festival. The audience award has launched careers.' },
   { k: 'shorts', name: 'the Harbour Festival', month: 2, bar: 50, fee: 40, prize: 'Discovery Prize', d: 'Small, friendly, full of first films.' }
 ];

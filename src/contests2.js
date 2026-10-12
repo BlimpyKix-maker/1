@@ -66,7 +66,7 @@ const MORE_SHORT_FESTS = [
   ['torontoshorts', 'Toronto Shorts International', 'toronto', 2009, 2, 'all', 8, 1, 'Best Short'],
   ['hotdocsshort', 'Hot Docs Shorts', 'toronto', 1993, 2, 'doc', 3, 1, 'Best Short Documentary'],
   ['fantasia', 'Fantasia Genre Shorts', 'toronto', 1996, 2, 'genre', 6, 0, 'Golden Raven'],
-  ['sitges', 'Sitges Midnight Shorts', 'madrid', 1968, 2, 'genre', 9, 0, 'Méliès d\'Argent'],
+  ['sitges', 'Seaside Midnight Shorts', 'madrid', 1968, 2, 'genre', 9, 0, 'Silver Magician'],
   ['zagrebanim', 'Animafest Zagreb', 'budapest', 1972, 1, 'anim', 5, 1, 'Grand Prix'],
   ['ottawaanim', 'Ottawa Animation Festival', 'toronto', 1976, 2, 'anim', 8, 1, 'Grand Prize'],
   ['hiroshima', 'Hiroshima Animation Days', 'tokyo', 1985, 2, 'anim', 7, 0, 'Hiroshima Prize'],

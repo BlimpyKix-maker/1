@@ -252,7 +252,7 @@ const SEAT_STAKE = [0, .07, .05, .03];
 function boardWeek() {
   const M = S.me, me = ME(), B = myBoards();
   // fees, quarterly
-  if (S.week % 13 === 0) { let fee = 0; for (const id in B) { const c = S.companies[+id]; if (c && c.closed === null) fee += usd(BOARD_FEE[c.tier] / 4); } if (fee) { M.cash += fee; diary(`Money: director's fees, ${fmtCash(fee)}.`); } }
+  if (S.week % 13 === 0) { let fee = 0; for (const id in B) { const c = S.companies[+id]; if (c && c.closed === null) fee += usd(BOARD_FEE[c.tier] / 4); } if (fee) { M.cash += fee - taxOn(fee); diary(`Money: director's fees, ${fmtCash(fee)} before tax.`); } }
   // seats lapse when the company goes; control lapses when the stake drops
   for (const id in B) { const c = S.companies[+id]; if (!c || c.closed !== null) delete B[id]; }
   for (const id in myCtrl()) { const c = S.companies[+id]; if (!c || c.closed !== null || stakeOf(c) < .5) { delete myCtrl()[id]; if (c && c.closed === null) diary(`You no longer control ${c.name}.`); } }

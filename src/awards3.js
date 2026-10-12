@@ -94,7 +94,7 @@ const FEST_LORE = {
   leopard: ['A lakeside festival founded in 1946, showing films to eight thousand people in an open-air square at night. Its leopard goes to bold, formally adventurous work.', 'The respect of cinephiles and festival programmers worldwide.'],
   shell: ['A seaside festival founded in 1953, the most important in the Spanish-speaking world. Its golden shell is a scallop.', 'The Spanish-speaking world opens up.'],
   springs: ['Founded in 1946 in a spa town, it gives a crystal globe and stars descend on its colonnades for a week each summer.', 'Central and Eastern European distribution.'],
-  haeundae: ['Founded in 1996, it quickly became Asia\'s most important festival, with a market for the whole continent. Its New Currents award goes to first and second films.', 'Asian distribution and the attention of the world\'s programmers.'],
+  haeundae: ['Founded in 1996, it quickly became Asia\'s most important festival, with a market for the whole continent. Its Fresh Tides award goes to first and second films.', 'Asian distribution and the attention of the world\'s programmers.'],
   tokyo: ['Founded in 1985, Japan\'s biggest international festival.', 'Japanese distribution.'],
   southbound: ['A music, film and tech festival in a Texas college town, founded in 1987.', 'American indie distributors and tech money.'],
   manhattan: ['A festival founded in 2002 to revive downtown after disaster.', 'New York\'s independent scene.'],

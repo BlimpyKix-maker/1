@@ -50,7 +50,7 @@ function fdScreen(a) {
   return false;
 }
 // ---- 2. the film markets ----
-const FILM_MKTS = [{ k: 'efm', n: 'the European Film Market (Berlin)', wk: [5, 6] }, { k: 'cannes', n: 'the Marché du Film (Cannes)', wk: [19, 20] }, { k: 'tiff', n: 'the Toronto sales market', wk: [36, 37] }, { k: 'afm', n: 'the American Film Market', wk: [44, 45] }];
+const FILM_MKTS = [{ k: 'efm', n: 'the winter market in Berlin', wk: [5, 6] }, { k: 'cannes', n: 'the market at the Côte festival', wk: [19, 20] }, { k: 'tiff', n: 'the Toronto sales market', wk: [36, 37] }, { k: 'afm', n: 'the Santa Monica market', wk: [44, 45] }];
 function mktNow(w = S.week) { const k = woy(w); return FILM_MKTS.find(m => k >= m.wk[0] && k <= m.wk[1]) || null; }
 function mktNext() { const k = woy(); const L = FILM_MKTS.map(m => [m, (m.wk[0] - k + 52) % 52]).sort((a, b) => a[1] - b[1]); return L[0]; }
 function salesTerrs(f) { const y = S.year; return Object.keys(MARKETS).filter(m => m !== f.m && HUB_IDS.some(h => HUBS[h].m === m)).map(m => [m, marketSize(m, y) * era(MARKETS[m].imp, y)]).sort((a, b) => b[1] - a[1]).slice(0, 8); }

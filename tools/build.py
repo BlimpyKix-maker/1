@@ -246,6 +246,7 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('pressure', '// ================= Apple Box — World Core UI ================='),
                      ('social2', '// ================= Apple Box — World Core UI ================='),
                      ('scenes3', '// ================= Apple Box — World Core UI ================='),
+                     ('sides', '// ================= Apple Box — World Core UI ================='),
                      ('safety', '// ================= Apple Box — World Core UI ================='),
                      ('streams', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
@@ -261,5 +262,14 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
 fonts = (root / 'assets' / 'fonts.css').read_text().strip()
 html = re.sub(r'<style id="ab-fonts">.*?</style>', lambda m: f'<style id="ab-fonts">{fonts}</style>', html, count=1, flags=re.S)
 assert 'fonts.googleapis.com' not in html and 'fonts.gstatic.com' not in html
+# store builds: python3 tools/build.py --no-ai  (the AI-written pages are switched off and never requested; audit L11)
+import sys
+if '--no-ai' in sys.argv:
+    assert 'const AI_PAGES = true;' in html
+    html = html.replace('const AI_PAGES = true;', 'const AI_PAGES = false;', 1)
 (root / 'index.html').write_text(html)
 print('built', len(html), 'bytes')
+# real names in anything the page can show (audit L10): a warning here, a failure in the test suite
+import subprocess
+r = subprocess.run(['node', str(root / 'tools' / 'blocklist.js'), str(root / 'index.html')], capture_output=True, text=True)
+if r.returncode: print('BLOCKLIST:', r.stdout.strip())

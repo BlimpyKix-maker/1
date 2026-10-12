@@ -11,6 +11,7 @@ function industryMonth() {
   for (const c of S.companies) {
     if (c.closed !== null || c.owner !== undefined) continue;
     const m = HUBS[c.hub].m;
+    if (typeof companyTaste === 'function') { companyTaste(c, recent, m); continue; }   // leaders, followers, contrarians, specialists (src/world2.js)
     for (const g in c.taste) c.taste[g] = 1 + (c.taste[g] - 1) * .97;
     for (const f of recent) if (f.m === m && f.hitRatio > 2 && f.co !== c.id) c.taste[f.genre] = Math.min(2.6, (c.taste[f.genre] || 1) + .12);
   }
@@ -28,7 +29,8 @@ function industryMonth() {
   // mergers: a company heading for the rocks can be bought by a healthy rival in the same market
   const scale = y => budgetScale(y) * era(MARKETS.US.cost, y);
   for (const c of S.companies) {
-    if (c.closed !== null || c.owner !== undefined || c.cash > -[0, 20, 6, 1.5][c.tier] * scale(S.year) * .35) continue;
+    if (c.closed !== null || c.owner !== undefined || c.cash > -[0, 20, 6, 1.5][c.tier] * scale(S.year) * .75) continue;
+    if (hashRand(c.id * 7919 + S.week * 31 + (S.seed | 0))() > .2) continue;   // a deal takes finding: most months nobody bites
     const buyer = S.companies.filter(b => b !== c && b.closed === null && b.owner === undefined && HUBS[b.hub].m === HUBS[c.hub].m && b.tier <= c.tier && b.cash > -c.cash).sort((a, b) => b.cash - a.cash)[0];
     if (!buyer) continue;
     buyer.cash += c.cash * .5;

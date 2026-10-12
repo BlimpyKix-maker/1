@@ -120,7 +120,7 @@ function mediaWeek() {
 function sponsorPick(it, k) {
   if (it.kind !== 'sponsor') return false;
   it.done = true; it.picked = k;
-  if (k === 'yes') { S.me.cash += it.fee; S.me.fol[it.plat] *= .99; it.result = { t: `Done. ${fmtCash(it.fee)} lands; a few followers roll their eyes.` }; }
+  if (k === 'yes') { S.me.cash += it.fee - taxOn(it.fee); S.me.fol[it.plat] *= .99; it.result = { t: `Done. ${fmtCash(it.fee)} lands; a few followers roll their eyes.` }; }
   else it.result = { t: 'You keep the channel clean. This time.' };
   return true;
 }

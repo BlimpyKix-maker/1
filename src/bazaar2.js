@@ -72,10 +72,10 @@ bzAdd('gifts', '🎁 Gifts', {
   g_gadget: { name: 'The gadget everyone wants this year', price: 600, from: 1980, gift: 'tech', d: 'A gift to give: for someone who reads the reviews.' }
 });
 bzAdd('exp', '🎟️ Experiences', {
-  x_cannes: { name: 'A Cannes market badge', price: 1800, from: 1959, meet: 3, standing: .5, energy: -10, d: 'Ten days of breakfasts, screenings and yachts you aren\'t invited onto. Three new people.' },
-  x_berlin: { name: 'A Berlinale accreditation', price: 700, from: 1951, meet: 2, energy: -8, d: 'Snow, arthouse and the European money. Two new people.' },
+  x_cannes: { name: 'A Côte market badge', price: 1800, from: 1959, meet: 3, standing: .5, energy: -10, d: 'Ten days of breakfasts, screenings and yachts you aren\'t invited onto. Three new people.' },
+  x_berlin: { name: 'A Bruin festival accreditation', price: 700, from: 1951, meet: 2, energy: -8, d: 'Snow, arthouse and the European money. Two new people.' },
   x_tiff: { name: 'A Toronto festival pass', price: 900, from: 1976, meet: 2, energy: -8, d: 'Where the awards season starts. Two new people.' },
-  x_sundance: { name: 'A Sundance pass', price: 1500, from: 1985, meet: 2, energy: -10, d: 'Independent film in the mountains, in puffer jackets. Two new people.' },
+  x_sundance: { name: 'A Mountain festival pass', price: 1500, from: 1985, meet: 2, energy: -10, d: 'Independent film in the mountains, in puffer jackets. Two new people.' },
   x_premiere: { name: 'A ticket to a charity premiere', price: 1200, meet: 1, standing: .3, d: 'Black tie, a red carpet, and someone who funds films at your table.' },
   x_master: { name: 'A masterclass with a living legend', price: 800, once: { _main: .6 }, d: 'Three hours, one legend, every question answered. A real step in your main craft.' },
   x_retro: { name: 'A retrospective season pass', price: 200, once: { tas: .3 }, d: 'Thirty films by one director, in order. Taste, once.' },

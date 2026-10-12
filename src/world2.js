@@ -60,7 +60,7 @@ function companyTaste(c, recent, m) {
 function coFail(c, y, scale) {
   R = wstream('rescue', c.id, y); const base = [0, 40, 12, 3][c.tier] * scale;
   const buyer = S.companies.filter(b => b !== c && b.closed === null && b.owner === undefined && b.tier <= Math.max(1, c.tier) && b.cash > -c.cash * .5 + base * .2 && (c.tier === 1 || HUBS[b.hub].m === HUBS[c.hub].m)).sort((a, b) => b.cash - a.cash)[0];
-  const pBuy = [0, .6, .35, .1][c.tier], pRescue = [0, .7, .3, .05][c.tier];
+  const pBuy = [0, .35, .3, .1][c.tier], pRescue = [0, .75, .35, .05][c.tier];
   if (buyer && rnd() < pBuy) {
     buyer.cash += c.cash * .5;
     for (const f of S.films) { if (f.owner === c.id) f.owner = buyer.id; if (f.co === c.id && f.rel === null) { f.co = buyer.id; buyer.films.push(f.id); } }

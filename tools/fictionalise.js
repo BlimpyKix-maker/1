@@ -1,15 +1,20 @@
-// Rewrites every catalogue note and trivia line so it only names the game's fictional films, people and studios.
+// Rewrites every catalogue note (the originals are in data/catalogue-notes.json) and trivia line so it only names the game's fictional films, people and studios.
 // Real titles and names are swapped for their in-game versions; a line that still names something real we can't
 // map (an outside film, a band, a book) is dropped. Output: src/fiction.js (FICTION.note / FICTION.fact).
 // Usage: node tools/fictionalise.js   (then python3 tools/build.py)
 const fs = require('fs'), path = require('path');
 const h = require('./harness.js');
 const data = JSON.parse(h.run(`JSON.stringify({ C: CATALOGUES.map(C => ({ films: C.films || [], people: C.people || [], studios: C.studios || [], facts: C.facts || {} })), hubs: Object.values(HUBS).map(x => x.name) })`));
+// the original notes are kept out of the shipped page (audit L10): they live in data/catalogue-notes.json
+{ const RAW = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'catalogue-notes.json'), 'utf8'));
+  const DUOS = JSON.parse(h.run('JSON.stringify(typeof DUOS === "undefined" ? {} : DUOS)'));   // a duo's halves share its note (src/corrections.js)
+  for (const d in DUOS) if (RAW['p:' + d]) for (const [id] of DUOS[d]) RAW['p:' + id] = RAW['p:' + id] || RAW['p:' + d].replace(/^(Brothers|Twin brothers|Two [A-Za-z ]+ siblings|A [A-Za-z-]+ duo|The indie pair|Belgian brothers)/, m => 'One of ' + m.toLowerCase());
+  for (const C of data.C) { for (const f of C.films) if (RAW['f:' + f.id]) f.note = RAW['f:' + f.id]; for (const p of C.people) if (RAW['p:' + p.id]) p.note = RAW['p:' + p.id]; } }
 const swaps = new Map(), keepWords = new Set();
 // phrases that are real titles but mostly mean something else here
 const DENY = new Set(['Grand Prix', 'César', 'Oscar', 'Emmy', 'Broadway', 'Hollywood', 'Paris', 'London', 'Rome', 'Berlin', 'Tokyo', 'Venice', 'Cannes', 'Christmas', 'America', 'Texas', 'Chicago', 'Casino', 'Network', 'Cabaret']);
 // real awards and festivals become the game's own
-const AWARDS = [[/\bAcademy Awards?\b/g, m => m.endsWith('s') ? 'Academy Oswalds' : 'Academy Oswald'], [/\bOscars\b/g, 'Oswalds'], [/\bOscar\b/g, 'Oswald'], [/\bBAFTAs?\b/g, 'British Film Award'], [/\bGolden Globes?\b/g, m => m.endsWith('s') ? 'Golden Orbs' : 'Golden Orb'], [/\bEmmys?\b/g, 'television award'], [/\bPalme d['’]Or\b/g, 'Grand Prix'], [/\bCésars?\b/g, 'French Film Award'], [/\bat Cannes\b/g, 'at the Côte'], [/\bCannes\b/g, 'the Côte festival'], [/\bSundance\b/g, 'the Mountain festival']];
+const AWARDS = [[/\bAcademy Awards?\b/g, m => m.endsWith('s') ? 'Academy Oswalds' : 'Academy Oswald'], [/\bOscars\b/g, 'Oswalds'], [/\bOscar\b/g, 'Oswald'], [/\bBAFTAs?\b/g, 'British Film Award'], [/\bGolden Globes?\b/g, m => m.endsWith('s') ? 'Golden Orbs' : 'Golden Orb'], [/\bEmmys?\b/g, 'television award'], [/\bPalme d['’]Or\b/g, 'Grand Prix'], [/\bCésars?\b/g, 'French Film Award'], [/\bat Cannes\b/g, 'at the Côte'], [/\bCannes\b/g, 'the Côte festival'], [/\bSundance\b/g, 'the Mountain festival'], [/\bMGM\b/g, 'Metro-Goldmine-Mayhem'], [/\bGrammys?\b/g, 'Gramophone'], [/\bTony Awards?\b/g, 'top stage award'], [/\bGolden Bear\b/g, 'Golden Bruin'], [/\bSilver Bear\b/g, 'Silver Bruin'], [/\bGolden Lion\b/g, 'Golden Gondola'], [/\bSilver Lion\b/g, 'Silver Gondola'], [/\bVolpi Cup\b/g, 'Fox Cup'], [/\bCam[ée]ra d['’]Or\b/g, 'Caméra Dorée'], [/\bBerlinale\b/g, 'the Bruin festival']];
 // words the corpus uses in lower case are ordinary words: never swap them as surnames
 const lower = new Set(); for (const C of data.C) { for (const x of C.films.concat(C.people)) for (const w of (x.note || '').split(/\W+/)) if (/^[a-z]+$/.test(w)) lower.add(w); for (const k in C.facts) for (const [, t] of C.facts[k]) for (const w of t.split(/\W+/)) if (/^[a-z]+$/.test(w)) lower.add(w); }
 const add = (real, fic) => { if (!real || !fic || real === fic) return; if (real.length >= 4) swaps.set(real, fic); };
