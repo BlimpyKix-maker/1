@@ -1288,7 +1288,7 @@ abbr.gl:focus { outline: 1px dotted currentColor; }
   <button data-tab="saves">💾 Saves</button>
 </div></nav>
 <div class="pulse" id="pulse"></div>
-<main id="main"><div class="loading"><p class="eyebrow">Building the world</p><h2>Writing film history</h2><p class="lede">Studios, careers and releases from 1888 to today across thirty-four hubs, so the world has a past when you arrive.</p></div></main>
+<main id="main"><div class="loading"><p class="eyebrow">Building the world</p><h2>Writing entertainment history</h2><p class="lede">Films, records, shows, podcasts and plays; the studios, labels, networks and theatres behind them; and the people who made them, from 1888 to today across thirty-four cities, so the world has a past when you arrive.</p></div></main>
 <script>
 // Apple Box catalogue — batch 1: the birth of cinema to 1929.
 // Real history, reimagined: studio names stay close, people and titles are altered more.
@@ -10877,7 +10877,7 @@ function afterlife(y) {
     }
     if (y >= 1985 && (!f.cab || y - f.cab >= 7) && rnd() < .5) { f.cab = y; add('Cable & pay TV', V * .06 * qf); }
     if (y >= 2012) add('Streaming', V * .01 * (f.q / 60 + cf * 1.5 + (age <= 3 ? 1 : 0)));
-    if (y >= 2013 && !f.svod && age >= 1) { f.svod = y; add('Streaming & TV licence', V * .32 * qf); }   // the first licence to a streamer or broadcaster, a year or so after release
+    if (y >= 2013 && !f.svod && age >= 1) { f.svod = y; add('Streaming & TV licence', V * .32 * qf * (typeof svcLicMul === 'function' ? svcLicMul() : 1)); }   // the first licence to a streamer or broadcaster, a year or so after release
     if (y >= 2012 && age >= 1 && age <= 5) add('Digital sales & rental', V * (age === 1 ? .16 : .025) * qf);   // buy and rent at home: studios' biggest line after the cinema (the audit found theatrical alone loses on most films)
     if (age >= 10 && rnd() < .004 * (f.q / 60 + cf * 2) * Math.min(3, f.total / Math.max(.001, f.cost))) {
       add('Remake & sequel rights', V * .04);
@@ -11606,7 +11606,7 @@ function refreshBoard() {
   const heard = 3 + careerLevel() * 2 + Math.floor(Object.keys(M.known).length / 8) + (M.agent ? 2 : 0) + (M.school ? 1 : 0);
   const per = {}, film = out.filter(p => (per[p.k] = (per[p.k] || 0) + 1) <= 2).slice(0, Math.round(Math.min(30, heard + 8) * (typeof worldFx === 'function' ? worldFx().jobs : 1)));
   const m = dateOf(S.week).getUTCMonth();
-  const odd = ODD_JOBS.filter(t => !t.cat && !t.tv && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
+  const odd = ODD_JOBS.filter(t => !t.cat && !t.tv && !t.sv && !/^corp_/.test(t.k) && (t.k !== 'screener' || (m >= 7 && m <= 10)) && !M.jobs.some(j => j.k === t.k)).filter(() => prnd() < .7).map(t => makePost(t, null));
   M.board = agentBoard(films).concat(film, depthBoard(films), typeof castingBoard === 'function' ? castingBoard(films) : [], awayBoard(), odd);
   if (typeof gigPosts === 'function') M.board = M.board.concat(gigPosts());
   // you hear about work near your level, a tier or two either way; referrals and your agent's pitches still reach you
@@ -17425,16 +17425,16 @@ function mediaCoFor(field, hub, salt) {
 }
 // ---- the famous: parodies of real figures, active in their real years ----
 const MEDIA_LEGENDS = [
-  ['Johnny Cache', 'music', 'singer', 'hollywood', 1955, 2003], ['Bob Dillon', 'music', 'singer', 'newyork', 1961, 2030], ['Aretha Franklean', 'music', 'singer', 'newyork', 1960, 2018], ['The Beadles', 'music', 'band', 'london', 1962, 1970], ['The Rolling Scones', 'music', 'band', 'london', 1962, 2030], ['Dolly Partin', 'music', 'singer', 'hollywood', 1967, 2030],
-  ['David Bowey', 'music', 'singer', 'london', 1969, 2016], ['Queeen', 'music', 'band', 'london', 1973, 1991], ['Michael Jaxon', 'music', 'singer', 'hollywood', 1971, 2009], ['Prints', 'music', 'singer', 'hollywood', 1978, 2016], ['Madonnah', 'music', 'singer', 'newyork', 1983, 2030], ['Whitney Houseton', 'music', 'singer', 'newyork', 1985, 2012],
-  ['Nirvanna', 'music', 'band', 'hollywood', 1988, 1994], ['Radiohed', 'music', 'band', 'london', 1993, 2030], ['Jay-Zed', 'music', 'rapper', 'newyork', 1996, 2030], ['Beyonsay', 'music', 'singer', 'hollywood', 1997, 2030], ['Amy Winemouse', 'music', 'singer', 'london', 2003, 2011], ['Tay Swiftwater', 'music', 'singer', 'hollywood', 2006, 2030],
-  ['Adelle', 'music', 'singer', 'london', 2008, 2030], ['Kendrik Lamarr', 'music', 'rapper', 'hollywood', 2011, 2030], ['Billie Eyelash', 'music', 'singer', 'hollywood', 2016, 2030], ['Bangtan Boyz', 'music', 'band', 'seoul', 2013, 2030], ['BLACKPINQ', 'music', 'band', 'seoul', 2016, 2030], ['Sigh', 'music', 'singer', 'seoul', 2001, 2030],
-  ['Fela Kootie', 'music', 'singer', 'lagos', 1970, 1997], ['Burna Bwoy', 'music', 'singer', 'lagos', 2012, 2030], ['Wizkidd', 'music', 'singer', 'lagos', 2010, 2030], ['Temz', 'music', 'singer', 'lagos', 2019, 2030], ['Lata Mangeskar', 'music', 'singer', 'mumbai', 1945, 2022], ['Kishore Kumarr', 'music', 'singer', 'mumbai', 1950, 1987],
-  ['A.R. Rahmaan', 'music', 'composer', 'chennai', 1992, 2030], ['Arijit Singhh', 'music', 'singer', 'mumbai', 2011, 2030], ['Utada Hikaro', 'music', 'singer', 'tokyo', 1998, 2030], ['Yellow Magic Orchestrata', 'music', 'band', 'tokyo', 1978, 1993], ['Edith Piaff', 'music', 'singer', 'paris', 1935, 1963], ['Serge Gainsborrow', 'music', 'singer', 'paris', 1958, 1991],
-  ['Daft Punque', 'music', 'band', 'paris', 1993, 2021], ['Juan Gabriell', 'music', 'singer', 'mexico', 1971, 2016], ['Antonio Carlos Jobeam', 'music', 'composer', 'rio', 1958, 1994], ['Anitah', 'music', 'singer', 'rio', 2012, 2030], ['ABBBA', 'music', 'band', 'stockholm', 1972, 1982], ['Robbyn', 'music', 'singer', 'stockholm', 1995, 2030],
-  ['Andrew Lloyd Weaver', 'stage', 'composer', 'london', 1971, 2030], ['Stephen Sondheimer', 'stage', 'composer', 'newyork', 1957, 2021], ['Lin-Manuel Marinara', 'stage', 'composer', 'newyork', 2008, 2030], ['Caryl Churchyard', 'stage', 'playwright', 'london', 1972, 2030], ['August Wilsen', 'stage', 'playwright', 'newyork', 1982, 2005], ['Tom Stoppered', 'stage', 'playwright', 'london', 1966, 2030],
-  ['MrBeest', 'creator', 'creator', 'newyork', 2012, 2030], ['PewDieGuy', 'creator', 'creator', 'stockholm', 2010, 2030], ['Lilly Single', 'creator', 'creator', 'toronto', 2010, 2030], ['Khaby Lamed', 'creator', 'blipper', 'rome', 2020, 2030], ['Charli D\'Amore', 'creator', 'blipper', 'hollywood', 2019, 2030], ['Mark Robber', 'creator', 'creator', 'hollywood', 2011, 2030],
-  ['This Nation\'s Life', 'podcast', 'show', 'newyork', 1995, 2030], ['Cereal', 'podcast', 'show', 'newyork', 2014, 2030], ['The Joe Brogan Experience', 'podcast', 'show', 'hollywood', 2009, 2030], ['Call Her Mummy', 'podcast', 'show', 'newyork', 2018, 2030], ['My Dad Wrote a Thriller', 'podcast', 'show', 'london', 2015, 2030], ['Stuff You Oughta Know', 'podcast', 'show', 'newyork', 2008, 2030]
+  ['Johnny Tender', 'music', 'singer', 'hollywood', 1955, 2003], ['Bob Seaborne', 'music', 'singer', 'newyork', 1961, 2030], ['Aretha Freeholder', 'music', 'singer', 'newyork', 1960, 2018], ['The Scarabs', 'music', 'band', 'london', 1962, 1970], ['The Tumbling Boulders', 'music', 'band', 'london', 1962, 2030], ['Dolly Fraction', 'music', 'singer', 'hollywood', 1967, 2030],
+  ['David Stardust', 'music', 'singer', 'london', 1969, 2016], ['Sovereign', 'music', 'band', 'london', 1973, 1991], ['Michael Hoistson', 'music', 'singer', 'hollywood', 1971, 2009], ['Dauphin', 'music', 'singer', 'hollywood', 1978, 2016], ['Madrigal', 'music', 'singer', 'newyork', 1983, 2030], ['Whitney Hightower', 'music', 'singer', 'newyork', 1985, 2012],
+  ['Satori', 'music', 'band', 'hollywood', 1988, 1994], ['Signalhead', 'music', 'band', 'london', 1993, 2030], ['Jay-Omega', 'music', 'rapper', 'newyork', 1996, 2030], ['Yonder', 'music', 'singer', 'hollywood', 1997, 2030], ['Amy Bodega', 'music', 'singer', 'london', 2003, 2011], ['Taylor Quickly', 'music', 'singer', 'hollywood', 2006, 2030],
+  ['Noblesse', 'music', 'singer', 'london', 2008, 2030], ['Kendrik Seaway', 'music', 'rapper', 'hollywood', 2011, 2030], ['Billie Oath', 'music', 'singer', 'hollywood', 2016, 2030], ['Armorplate Boys', 'music', 'band', 'seoul', 2013, 2030], ['NOIRBLUSH', 'music', 'band', 'seoul', 2016, 2030], ['Synapse', 'music', 'singer', 'seoul', 2001, 2030],
+  ['Fela Drumfire', 'music', 'singer', 'lagos', 1970, 1997], ['Blaze Lad', 'music', 'singer', 'lagos', 2012, 2030], ['Conjure Kid', 'music', 'singer', 'lagos', 2010, 2030], ['Gratia', 'music', 'singer', 'lagos', 2019, 2030], ['Lata Kokila', 'music', 'singer', 'mumbai', 1945, 2022], ['Kishore Yodeller', 'music', 'singer', 'mumbai', 1950, 1987],
+  ['A. R. Mozartmadras', 'music', 'composer', 'chennai', 1992, 2030], ['Arijit Sher', 'music', 'singer', 'mumbai', 2011, 2030], ['Hoshi Akari', 'music', 'singer', 'tokyo', 1998, 2030], ['Amber Sorcery Orchestra', 'music', 'band', 'tokyo', 1978, 1993], ['Edith Moineau', 'music', 'singer', 'paris', 1935, 1963], ['Serge Gagneville', 'music', 'singer', 'paris', 1958, 1991],
+  ['Dizzy Rebels', 'music', 'band', 'paris', 1993, 2021], ['Juan Serafín', 'music', 'singer', 'mexico', 1971, 2016], ['Antônio Carlos Ipanema', 'music', 'composer', 'rio', 1958, 1994], ['Gracinha', 'music', 'singer', 'rio', 2012, 2030], ['PATER', 'music', 'band', 'stockholm', 1972, 1982], ['Redbreast', 'music', 'singer', 'stockholm', 1995, 2030],
+  ['Andrew Lloyd Weaver', 'stage', 'composer', 'london', 1971, 2030], ['Stephen Hearthsong', 'stage', 'composer', 'newyork', 1957, 2021], ['Lin-Manuel Maravilla', 'stage', 'composer', 'newyork', 2008, 2030], ['Caryl Chapelmount', 'stage', 'playwright', 'london', 1972, 2030], ['August Wishart', 'stage', 'playwright', 'newyork', 1982, 2005], ['Tom Stopwatch', 'stage', 'playwright', 'london', 1966, 2030],
+  ['MrCritter', 'creator', 'creator', 'newyork', 2012, 2030], ['BlamBlamTart', 'creator', 'creator', 'stockholm', 2010, 2030], ['Lilly Sherni', 'creator', 'creator', 'toronto', 2010, 2030], ['Khaby Shrug', 'creator', 'blipper', 'rome', 2020, 2030], ['Charli D\'Industria', 'creator', 'blipper', 'hollywood', 2019, 2030], ['Mark Contraption', 'creator', 'creator', 'hollywood', 2011, 2030],
+  ['This Nation\'s Life', 'podcast', 'show', 'newyork', 1995, 2030], ['Cereal', 'podcast', 'show', 'newyork', 2014, 2030], ['The Joe Dojo Experience', 'podcast', 'show', 'hollywood', 2009, 2030], ['Call Her Mummy', 'podcast', 'show', 'newyork', 2018, 2030], ['My Dad Wrote a Thriller', 'podcast', 'show', 'london', 2015, 2030], ['Stuff You Oughta Know', 'podcast', 'show', 'newyork', 2008, 2030]
 ];
 // ---- everyone else: generated per city by hash ----
 const BAND_A = ['The', 'Glass', 'Velvet', 'Paper', 'Silver', 'Night', 'Neon', 'Electric', 'Little', 'Golden', 'Wild', 'Static'], BAND_B = ['Animals', 'Lanterns', 'Ghosts', 'Machines', 'Daughters', 'Kings', 'Signals', 'Mirrors', 'Rivers', 'Strangers', 'Hearts', 'Moons'];
@@ -18119,43 +18119,43 @@ const DUO_FILMS = [
 })();
 // ---- who ran the studios: [from, to, catalogue person or null, real name (never shown), name in this world, title] ----
 const STUDIO_HEADS = {
-  disney: [[1923, 1966, 'disney', 'Walt Disney', null, 'Founder and chief'], [1966, 1971, null, 'Roy O. Disney', 'Roy O. Dizzley', 'Chief executive'], [1984, 2005, null, 'Michael Eisner', 'Michael Eisenberg', 'Chief executive'], [1984, 1994, null, 'Jeffrey Katzenberg', 'Jeffrey Katzenburg', 'Studio chairman'], [2005, 2020, null, 'Bob Iger', 'Bob Eiger', 'Chief executive'], [2020, 2022, null, 'Bob Chapek', 'Bob Chapman', 'Chief executive'], [2022, null, null, 'Bob Iger', 'Bob Eiger', 'Chief executive']],
-  marvelstudios: [[1996, 2007, null, 'Avi Arad', 'Avi Arcade', 'Chief executive'], [2007, null, null, 'Kevin Feige', 'Kevin Endgame', 'President']],
-  warner: [[1923, 1956, null, 'Harry Warner', 'Harry Warden', 'President'], [1923, 1969, 'jwarner', 'Jack L. Warner', null, 'Head of production'], [1969, 1981, null, 'Ted Ashley', 'Ted Ashford', 'Chairman'], [1981, 1999, null, 'Bob Daly', 'Bob Daley', 'Chairman'], [1999, 2013, null, 'Barry Meyer', 'Barry Meyers', 'Chairman'], [2013, 2018, null, 'Kevin Tsujihara', 'Kevin Tsujimura', 'Chief executive'], [2022, null, null, 'Michael De Luca', 'Michael De Lucca', 'Co-chairman']],
-  paramount: [[1916, 1964, 'zukor', 'Adolph Zukor', null, 'Chairman'], [1966, 1974, 'evans', 'Robert Evans', null, 'Head of production'], [1974, 1984, null, 'Barry Diller', 'Barry Dillon', 'Chairman'], [1992, 2004, null, 'Sherry Lansing', 'Sherry Lansdowne', 'Chairman'], [2005, 2017, null, 'Brad Grey', 'Brad Gray', 'Chairman'], [2025, null, null, 'David Ellison', 'David Ellerson', 'Chief executive']],
-  mgm: [[1924, 1951, 'lbmayer', 'Louis B. Mayer', null, 'Studio chief'], [1924, 1936, null, 'Irving Thalberg', 'Irving Thalbert', 'Head of production'], [1951, 1956, null, 'Dore Schary', 'Dore Scharf', 'Studio chief'], [1969, 2010, null, 'Kirk Kerkorian', 'Kirk Kirkland', 'Owner']],
-  universal: [[1912, 1936, 'laemmle', 'Carl Laemmle', null, 'Founder and president'], [1962, 1995, null, 'Lew Wasserman', 'Lew Waterman', 'Chairman'], [2013, null, null, 'Donna Langley', 'Donna Langdon', 'Chairman']],
-  columbia: [[1924, 1958, 'cohn', 'Harry Cohn', null, 'President'], [1987, 1989, null, 'David Puttnam', 'David Puttenham', 'Chairman'], [2006, 2015, null, 'Amy Pascal', 'Amy Paschal', 'Chairman'], [2016, null, null, 'Tom Rothman', 'Tom Rothmere', 'Chairman']],
-  fox20: [[1935, 1956, 'zanuck', 'Darryl F. Zanuck', null, 'Head of production'], [1962, 1971, 'zanuck', 'Darryl F. Zanuck', null, 'President'], [1976, 1979, null, 'Alan Ladd Jr.', 'Alan Ladder Jr.', 'President'], [2000, 2012, null, 'Tom Rothman', 'Tom Rothmere', 'Co-chairman'], [2012, 2019, null, 'Stacey Snider', 'Stacey Snyderman', 'Chairman']],
-  ua: [[1951, 1978, null, 'Arthur Krim', 'Arthur Krimson', 'Chairman']],
-  orion: [[1978, 1992, null, 'Arthur Krim', 'Arthur Krimson', 'Chairman']],
-  lucasfilm: [[1971, 2012, 'lucas', 'George Lucas', null, 'Founder and chairman'], [2012, null, null, 'Kathleen Kennedy', 'Kathleen Kennerly', 'President']],
-  pixar: [[1986, 2019, null, 'Ed Catmull', 'Ed Catmill', 'President'], [1986, 2018, 'lasseter', 'John Lasseter', null, 'Chief creative officer'], [2018, null, 'docter', 'Pete Docter', null, 'Chief creative officer']],
+  disney: [[1923, 1966, 'disney', 'Walt Disney', null, 'Founder and chief'], [1966, 1971, null, 'Roy O. Disney', 'Roy O. Dizzley', 'Chief executive'], [1984, 2005, null, 'Michael Eisner', 'Michael Ironmonger', 'Chief executive'], [1984, 1994, null, 'Jeffrey Katzenberg', 'Jeffrey Cathill', 'Studio chairman'], [2005, 2020, null, 'Bob Iger', 'Bob Keenly', 'Chief executive'], [2020, 2022, null, 'Bob Chapek', 'Bob Storkling', 'Chief executive'], [2022, null, null, 'Bob Iger', 'Bob Keenly', 'Chief executive']],
+  marvelstudios: [[1996, 2007, null, 'Avi Arad', 'Avi Negev', 'Chief executive'], [2007, null, null, 'Kevin Feige', 'Kevin Endgame', 'President']],
+  warner: [[1923, 1956, null, 'Harry Warner', 'Harry Warden', 'President'], [1923, 1969, 'jwarner', 'Jack L. Warner', null, 'Head of production'], [1969, 1981, null, 'Ted Ashley', 'Ted Cinderfield', 'Chairman'], [1981, 1999, null, 'Bob Daly', 'Bob Weekday', 'Chairman'], [1999, 2013, null, 'Barry Meyer', 'Barry Steward', 'Chairman'], [2013, 2018, null, 'Kevin Tsujihara', 'Kevin Crossfield', 'Chief executive'], [2022, null, null, 'Michael De Luca', 'Michael De Lumen', 'Co-chairman']],
+  paramount: [[1916, 1964, 'zukor', 'Adolph Zukor', null, 'Chairman'], [1966, 1974, 'evans', 'Robert Evans', null, 'Head of production'], [1974, 1984, null, 'Barry Diller', 'Barry Pickler', 'Chairman'], [1992, 2004, null, 'Sherry Lansing', 'Sherry Lancewood', 'Chairman'], [2005, 2017, null, 'Brad Grey', 'Brad Pewter', 'Chairman'], [2025, null, null, 'David Ellison', 'David Prophetson', 'Chief executive']],
+  mgm: [[1924, 1951, 'lbmayer', 'Louis B. Mayer', null, 'Studio chief'], [1924, 1936, null, 'Irving Thalberg', 'Irving Thalheimer', 'Head of production'], [1951, 1956, null, 'Dore Schary', 'Dore Plowman', 'Studio chief'], [1969, 2010, null, 'Kirk Kerkorian', 'Kirk Highroller', 'Owner']],
+  universal: [[1912, 1936, 'laemmle', 'Carl Laemmle', null, 'Founder and president'], [1962, 1995, null, 'Lew Wasserman', 'Lew Waterman', 'Chairman'], [2013, null, null, 'Donna Langley', 'Donna Longmeadow', 'Chairman']],
+  columbia: [[1924, 1958, 'cohn', 'Harry Cohn', null, 'President'], [1987, 1989, null, 'David Puttnam', 'David Pitstead', 'Chairman'], [2006, 2015, null, 'Amy Pascal', 'Amy Easterly', 'Chairman'], [2016, null, null, 'Tom Rothman', 'Tom Redman', 'Chairman']],
+  fox20: [[1935, 1956, 'zanuck', 'Darryl F. Zanuck', null, 'Head of production'], [1962, 1971, 'zanuck', 'Darryl F. Zanuck', null, 'President'], [1976, 1979, null, 'Alan Ladd Jr.', 'Alan Stripling Jr.', 'President'], [2000, 2012, null, 'Tom Rothman', 'Tom Redman', 'Co-chairman'], [2012, 2019, null, 'Stacey Snider', 'Stacey Tailor', 'Chairman']],
+  ua: [[1951, 1978, null, 'Arthur Krim', 'Arthur Blacksea', 'Chairman']],
+  orion: [[1978, 1992, null, 'Arthur Krim', 'Arthur Blacksea', 'Chairman']],
+  lucasfilm: [[1971, 2012, 'lucas', 'George Lucas', null, 'Founder and chairman'], [2012, null, null, 'Kathleen Kennedy', 'Kathleen Helmsworth', 'President']],
+  pixar: [[1986, 2019, null, 'Ed Catmull', 'Ed Whiskerson', 'President'], [1986, 2018, 'lasseter', 'John Lasseter', null, 'Chief creative officer'], [2018, null, 'docter', 'Pete Docter', null, 'Chief creative officer']],
   miramax: [[1979, 2005, null, 'Harvey Weinstein', 'Harvey Wainwright', 'Co-chairman']],
   weinsteinco: [[2005, 2017, null, 'Harvey Weinstein', 'Harvey Wainwright', 'Co-chairman']],
   dreamworks: [[1994, 2016, 'spielberg', 'Steven Spielberg', null, 'Co-founder']],
-  dwanim: [[2004, 2016, null, 'Jeffrey Katzenberg', 'Jeffrey Katzenburg', 'Chief executive']],
+  dwanim: [[2004, 2016, null, 'Jeffrey Katzenberg', 'Jeffrey Cathill', 'Chief executive']],
   amblin: [[1981, null, 'spielberg', 'Steven Spielberg', null, 'Founder']],
-  newline: [[1967, 2008, null, 'Bob Shaye', 'Bob Shea', 'Founder and chairman']],
+  newline: [[1967, 2008, null, 'Bob Shaye', 'Bob Lanefield', 'Founder and chairman']],
   ealing: [[1938, 1959, 'balcon', 'Michael Balcon', null, 'Head of studio']],
   shaw: [[1958, 2011, 'shaw_rr', 'Run Run Shaw', null, 'Chairman']],
-  goldenharvest: [[1970, 2007, null, 'Raymond Chow', 'Raymond Chau', 'Founder and chairman']],
-  ghibli: [[1985, null, null, 'Toshio Suzuki', 'Toshio Suzuka', 'Producer and president']],
+  goldenharvest: [[1970, 2007, null, 'Raymond Chow', 'Raymond Tsang', 'Founder and chairman']],
+  ghibli: [[1985, null, null, 'Toshio Suzuki', 'Toshio Bellwood', 'Producer and president']],
   yashraj: [[1970, 2012, 'chopra_y', 'Yash Chopra', null, 'Founder'], [2012, null, 'chopra_a', 'Aditya Chopra', null, 'Chairman']],
-  workingtitle: [[1983, null, null, 'Tim Bevan', 'Tim Bevin', 'Co-chairman']],
-  legendary: [[2000, 2017, null, 'Thomas Tull', 'Thomas Tully', 'Founder and chief executive']],
+  workingtitle: [[1983, null, null, 'Tim Bevan', 'Tim Evanson', 'Co-chairman']],
+  legendary: [[2000, 2017, null, 'Thomas Tull', 'Thomas Seeddrill', 'Founder and chief executive']],
   jerrybruckheimer: [[1995, null, 'bruckheimer', 'Jerry Bruckheimer', null, 'Founder']],
   europacorp: [[1999, null, 'besson', 'Luc Besson', null, 'Founder']],
-  carolco: [[1976, 1995, null, 'Mario Kassar', 'Mario Kassab', 'Co-founder']],
-  cannon: [[1979, 1994, null, 'Menahem Golan', 'Menahem Golanski', 'Co-chairman']],
-  lionsgate: [[2000, null, null, 'Jon Feltheimer', 'Jon Feldheimer', 'Chief executive']],
+  carolco: [[1976, 1995, null, 'Mario Kassar', 'Mario Cassaforte', 'Co-founder']],
+  cannon: [[1979, 1994, null, 'Menahem Golan', 'Menahem Heights', 'Co-chairman']],
+  lionsgate: [[2000, null, null, 'Jon Feltheimer', 'Jon Fieldhome', 'Chief executive']],
   imagine: [[1986, null, 'howard_r', 'Ron Howard', null, 'Co-founder']],
   planb: [[2001, null, 'pitt', 'Brad Pitt', null, 'Founder']],
   zoetrope: [[1969, null, 'coppola', 'Francis Ford Coppola', null, 'Founder']],
-  blumhouse: [[2000, null, null, 'Jason Blum', 'Jason Bloom', 'Founder and chief executive']],
-  netflix: [[1997, 2023, null, 'Reed Hastings', 'Reed Hastings-Streamer', 'Co-founder and chief executive'], [2011, null, null, 'Ted Sarandos', 'Ted Saranwrap', 'Chief content officer, then co-CEO']],
-  a24: [[2012, null, null, 'Daniel Katz', 'Daniel Kaplan', 'Co-founder']],
-  neon: [[2017, null, null, 'Tom Quinn', 'Tom Quill', 'Founder and chief executive']]
+  blumhouse: [[2000, null, null, 'Jason Blum', 'Jason Blossom', 'Founder and chief executive']],
+  netflix: [[1997, 2023, null, 'Reed Hastings', 'Reed Battlefield', 'Co-founder and chief executive'], [2011, null, null, 'Ted Sarandos', 'Ted Clingfilm', 'Chief content officer, then co-CEO']],
+  a24: [[2012, null, null, 'Daniel Katz', 'Daniel Feline', 'Co-founder']],
+  neon: [[2017, null, null, 'Tom Quinn', 'Tom Fifthson', 'Founder and chief executive']]
 };
 function headsOf(c, y = S.year) { return (STUDIO_HEADS[c.catId] || []).filter(h => h[0] <= y && (h[1] === null || h[1] >= y)); }
 function headName(h) { return h[2] && S.cat.src.people[h[2]] ? S.cat.src.people[h[2]].n : h[4]; }
@@ -23145,45 +23145,45 @@ const CAREERS = {
 delete CAREERS.gerwig_;
 // Executives who are not in the film record, keyed by the name they go by in this world.
 const EXEC_CAREERS = {
-  'Peter Saffron': [[1990, 1995, 'Entertainment lawyer', 'Los Angeles'], [1995, 2005, 'Talent manager', 'a comedy management firm'], [2005, 2022, 'Founder and producer of horror and superhero hits', 'The Saffron Company'], [2022, null, 'Co-chairman and chief executive', 'Daring Comics Studios, at Warden Brothers']],
+  'Peter Crocus': [[1990, 1995, 'Entertainment lawyer', 'Los Angeles'], [1995, 2005, 'Talent manager', 'a comedy management firm'], [2005, 2022, 'Founder and producer of horror and superhero hits', 'The Saffron Company'], [2022, null, 'Co-chairman and chief executive', 'Daring Comics Studios, at Warden Brothers']],
   'Kevin Endgame': [[1994, 2000, 'Assistant to a producer', 'the mutant films'], [2000, 2007, 'Producer', 'Marvelous Studios'], [2007, null, 'President', 'Marvelous Studios'], [2019, null, 'Chief creative officer', 'the Mouse House\'s entertainment arm']],
-  'Kathleen Kennerly': [[1975, 1979, 'Camera operator and secretary', 'a San Diego TV station, then a screenwriter\'s office'], [1979, 1981, 'Assistant to Steven Spielmann', 'a war comedy'], [1981, 1992, 'Co-founder', 'Ambling Entertainment'], [2012, 2026, 'President', 'Lukewarm Films']],
-  'Dave Filonius': [[2005, 2008, 'Animator and director', 'an animated series'], [2008, 2020, 'Supervising director', 'Lukewarm Films\' animated wars'], [2020, 2026, 'Executive creative director', 'Lukewarm Films'], [2026, null, 'President and chief creative officer', 'Lukewarm Films']],
-  'Bob Eiger': [[1974, 1976, 'Studio supervisor and weatherman', 'a network\'s local station'], [1994, 1995, 'President', 'a broadcast network'], [2000, 2005, 'Chief operating officer', 'Dizzy Brothers'], [2005, 2020, 'Chief executive', 'Dizzy Brothers'], [2022, 2026, 'Chief executive, again', 'Dizzy Brothers']],
-  "Josh D'Amore": [[1998, 2020, 'Theme park executive, from the theme parks\' finance team to president', 'Dizzy Brothers\' parks'], [2020, 2026, 'Chairman', 'Dizzy Brothers\' parks and products'], [2026, null, 'Chief executive', 'Dizzy Brothers']],
-  'David Zaslow': [[1989, 2006, 'Lawyer, then cable executive', 'a broadcast network'], [2007, 2022, 'Chief executive', 'a factual cable company'], [2022, null, 'Chief executive', 'Warden Brothers Discovery']],
-  'Michael De Lucca': [[1985, 2001, 'Intern, story editor, then president of production', 'New Lane Cinema'], [2001, 2004, 'Head of production', 'DreamWeavers SKG'], [2019, 2022, 'Chairman of the film group', 'Metro-Goldmine-Mayhem'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
-  'Pam Abbey': [[1995, 2010, 'Producer and executive', 'independent production companies'], [2020, 2022, 'President', 'Metro-Goldmine-Mayhem\'s film group'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
-  'Ted Saranwrap': [[1983, 1989, 'Video store clerk, then manager', 'an Arizona video chain'], [2000, 2020, 'Chief content officer', 'Netflux'], [2020, null, 'Co-chief executive', 'Netflux']],
-  'Donna Langdon': [[1990, 1999, 'Development executive', 'New Lane Cinema and independents'], [1999, 2013, 'Executive, then co-chairman', 'Omniversal Pictures'], [2013, null, 'Chairman, later chief content officer of the parent', 'Omniversal Pictures']],
-  'Tom Rothmere': [[1980, 1987, 'Entertainment lawyer', 'New York'], [1994, 2012, 'Founder of a specialty label, then co-chairman', '20th Century-Vixen'], [2015, null, 'Chairman', 'Colombina Pictures']],
-  'David Ellerson': [[2006, 2025, 'Founder', 'Skyward Dance Media'], [2025, null, 'Chief executive after the merger', 'Paramountain Pictures']],
-  'Jeffrey Katzenburg': [[1969, 1973, 'Aide', 'the mayor of New York'], [1975, 1984, 'Assistant to the chairman, then head of production', 'Paramountain Pictures'], [1984, 1994, 'Studio chairman', 'Dizzy Brothers'], [1994, 2016, 'Co-founder', 'DreamWeavers SKG'], [2018, 2020, 'Founder', 'a short-form streaming service that folded in six months']],
-  'Sherry Lansdowne': [[1966, 1969, 'Mathematics teacher', 'Los Angeles schools'], [1970, 1977, 'Script reader, then story editor', 'Metro-Goldmine-Mayhem'], [1980, 1983, 'President of production, the first woman to run a studio', '20th Century-Vixen'], [1992, 2004, 'Chairman', 'Paramountain Pictures']],
-  'Barry Dillon': [[1961, 1964, 'Mailroom clerk', 'a talent agency'], [1964, 1974, 'Programming executive who invented the TV movie of the week', 'a broadcast network'], [1974, 1984, 'Chairman', 'Paramountain Pictures'], [1984, 1992, 'Chairman, who built a fourth network', '20th Century-Vixen']],
+  'Kathleen Helmsworth': [[1975, 1979, 'Camera operator and secretary', 'a San Diego TV station, then a screenwriter\'s office'], [1979, 1981, 'Assistant to Steven Spielmann', 'a war comedy'], [1981, 1992, 'Co-founder', 'Ambling Entertainment'], [2012, 2026, 'President', 'Lukewarm Films']],
+  'Dave Threadwell': [[2005, 2008, 'Animator and director', 'an animated series'], [2008, 2020, 'Supervising director', 'Lukewarm Films\' animated wars'], [2020, 2026, 'Executive creative director', 'Lukewarm Films'], [2026, null, 'President and chief creative officer', 'Lukewarm Films']],
+  'Bob Keenly': [[1974, 1976, 'Studio supervisor and weatherman', 'a network\'s local station'], [1994, 1995, 'President', 'a broadcast network'], [2000, 2005, 'Chief operating officer', 'Dizzy Brothers'], [2005, 2020, 'Chief executive', 'Dizzy Brothers'], [2022, 2026, 'Chief executive, again', 'Dizzy Brothers']],
+  "Josh Bittersweet": [[1998, 2020, 'Theme park executive, from the theme parks\' finance team to president', 'Dizzy Brothers\' parks'], [2020, 2026, 'Chairman', 'Dizzy Brothers\' parks and products'], [2026, null, 'Chief executive', 'Dizzy Brothers']],
+  'David Gloryfield': [[1989, 2006, 'Lawyer, then cable executive', 'a broadcast network'], [2007, 2022, 'Chief executive', 'a factual cable company'], [2022, null, 'Chief executive', 'Warden Brothers Discovery']],
+  'Michael De Lumen': [[1985, 2001, 'Intern, story editor, then president of production', 'New Lane Cinema'], [2001, 2004, 'Head of production', 'DreamWeavers SKG'], [2019, 2022, 'Chairman of the film group', 'Metro-Goldmine-Mayhem'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
+  'Pam Cloister': [[1995, 2010, 'Producer and executive', 'independent production companies'], [2020, 2022, 'President', 'Metro-Goldmine-Mayhem\'s film group'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
+  'Ted Clingfilm': [[1983, 1989, 'Video store clerk, then manager', 'an Arizona video chain'], [2000, 2020, 'Chief content officer', 'Netflux'], [2020, null, 'Co-chief executive', 'Netflux']],
+  'Donna Longmeadow': [[1990, 1999, 'Development executive', 'New Lane Cinema and independents'], [1999, 2013, 'Executive, then co-chairman', 'Omniversal Pictures'], [2013, null, 'Chairman, later chief content officer of the parent', 'Omniversal Pictures']],
+  'Tom Redman': [[1980, 1987, 'Entertainment lawyer', 'New York'], [1994, 2012, 'Founder of a specialty label, then co-chairman', '20th Century-Vixen'], [2015, null, 'Chairman', 'Colombina Pictures']],
+  'David Prophetson': [[2006, 2025, 'Founder', 'Skyward Dance Media'], [2025, null, 'Chief executive after the merger', 'Paramountain Pictures']],
+  'Jeffrey Cathill': [[1969, 1973, 'Aide', 'the mayor of New York'], [1975, 1984, 'Assistant to the chairman, then head of production', 'Paramountain Pictures'], [1984, 1994, 'Studio chairman', 'Dizzy Brothers'], [1994, 2016, 'Co-founder', 'DreamWeavers SKG'], [2018, 2020, 'Founder', 'a short-form streaming service that folded in six months']],
+  'Sherry Lancewood': [[1966, 1969, 'Mathematics teacher', 'Los Angeles schools'], [1970, 1977, 'Script reader, then story editor', 'Metro-Goldmine-Mayhem'], [1980, 1983, 'President of production, the first woman to run a studio', '20th Century-Vixen'], [1992, 2004, 'Chairman', 'Paramountain Pictures']],
+  'Barry Pickler': [[1961, 1964, 'Mailroom clerk', 'a talent agency'], [1964, 1974, 'Programming executive who invented the TV movie of the week', 'a broadcast network'], [1974, 1984, 'Chairman', 'Paramountain Pictures'], [1984, 1992, 'Chairman, who built a fourth network', '20th Century-Vixen']],
   'Lew Waterman': [[1933, 1936, 'Cinema usher and publicist', 'Cleveland'], [1936, 1946, 'Band booker, then agent', 'MCA'], [1946, 1962, 'President', 'MCA'], [1962, 1995, 'Chairman', 'Omniversal Pictures']],
-  'Irving Thalbert': [[1918, 1919, 'Secretary', 'Omniversal Pictures\' New York office'], [1919, 1923, 'General manager at twenty', 'Omniversal Pictures'], [1924, 1936, 'Head of production', 'Metro-Goldmine-Mayhem']],
-  'Ed Catmill': [[1974, 1979, 'Computer graphics researcher', 'the University of Utah, then NYIT'], [1979, 1986, 'Head of the computer division', 'Lukewarm Films'], [1986, 2019, 'Co-founder and president', 'Pixelar Animation Studios']],
-  'Jason Bloom': [[1991, 1995, 'Assistant', 'an indie director, then an acquisitions team at Mirabelle'], [2000, null, 'Founder and chief executive', 'Bloomhouse Productions']],
-  'Reed Hastings-Streamer': [[1991, 1997, 'Founder', 'a software company'], [1997, 2023, 'Co-founder and chief executive', 'Netflux'], [2023, null, 'Executive chairman', 'Netflux']]
+  'Irving Thalheimer': [[1918, 1919, 'Secretary', 'Omniversal Pictures\' New York office'], [1919, 1923, 'General manager at twenty', 'Omniversal Pictures'], [1924, 1936, 'Head of production', 'Metro-Goldmine-Mayhem']],
+  'Ed Whiskerson': [[1974, 1979, 'Computer graphics researcher', 'the University of Utah, then NYIT'], [1979, 1986, 'Head of the computer division', 'Lukewarm Films'], [1986, 2019, 'Co-founder and president', 'Pixelar Animation Studios']],
+  'Jason Blossom': [[1991, 1995, 'Assistant', 'an indie director, then an acquisitions team at Mirabelle'], [2000, null, 'Founder and chief executive', 'Bloomhouse Productions']],
+  'Reed Battlefield': [[1991, 1997, 'Founder', 'a software company'], [1997, 2023, 'Co-founder and chief executive', 'Netflux'], [2023, null, 'Executive chairman', 'Netflux']]
 };
 // Current posts the old head list didn't know about.
 (function freshHeads() {
   const H = STUDIO_HEADS, add = (k, row) => { if (H[k] && !H[k].some(r => r[3] === row[3] && r[0] === row[0])) H[k].push(row); };
-  if (H.disney) { const r = H.disney.find(x => x[3] === 'Bob Iger' && x[0] === 2022); if (r) r[1] = 2026; add('disney', [2026, null, null, "Josh D'Amaro", "Josh D'Amore", 'Chief executive']); }
-  add('warner', [2022, null, null, 'Pam Abdy', 'Pam Abbey', 'Co-chairman']);
+  if (H.disney) { const r = H.disney.find(x => x[3] === 'Bob Iger' && x[0] === 2022); if (r) r[1] = 2026; add('disney', [2026, null, null, "Josh D'Amaro", "Josh Bittersweet", 'Chief executive']); }
+  add('warner', [2022, null, null, 'Pam Abdy', 'Pam Cloister', 'Co-chairman']);
   add('warner', [2022, null, 'gunn', 'James Gunn', null, 'Co-chairman and CEO, Daring Comics Studios']);
-  add('warner', [2022, null, null, 'Peter Safran', 'Peter Saffron', 'Co-chairman and CEO, Daring Comics Studios']);
-  add('warner', [2022, null, null, 'David Zaslav', 'David Zaslow', 'Chief executive of the parent, Warden Brothers Discovery']);
-  if (H.lucasfilm) { const r = H.lucasfilm.find(x => x[3] === 'Kathleen Kennedy'); if (r) r[1] = 2026; add('lucasfilm', [2026, null, null, 'Dave Filoni', 'Dave Filonius', 'President and chief creative officer']); }
+  add('warner', [2022, null, null, 'Peter Safran', 'Peter Crocus', 'Co-chairman and CEO, Daring Comics Studios']);
+  add('warner', [2022, null, null, 'David Zaslav', 'David Gloryfield', 'Chief executive of the parent, Warden Brothers Discovery']);
+  if (H.lucasfilm) { const r = H.lucasfilm.find(x => x[3] === 'Kathleen Kennedy'); if (r) r[1] = 2026; add('lucasfilm', [2026, null, null, 'Dave Filoni', 'Dave Threadwell', 'President and chief creative officer']); }
   if (H.marvelstudios) { const r = H.marvelstudios.find(x => x[3] === 'Kevin Feige'); if (r) r[5] = 'President; chief creative officer of the parent\'s entertainment arm'; }
-  add('netflix', [2023, null, null, 'Greg Peters', 'Greg Petersen', 'Co-chief executive']);
+  add('netflix', [2023, null, null, 'Greg Peters', 'Greg Stoneman', 'Co-chief executive']);
   if (H.netflix) { const r = H.netflix.find(x => x[3] === 'Reed Hastings'); if (r) r[5] = 'Co-founder, chief executive, then executive chairman'; }
-  H.amazonmgm = H.amazonmgm || [[2022, null, null, 'Mike Hopkins', 'Mike Hopwood', 'Head of the streaming service and the studio'], [2023, null, null, 'Courtenay Valenti', 'Courtenay Valentine', 'Head of film']];
-  H.appleorig = H.appleorig || [[2017, null, null, 'Zack Van Amburg', 'Zack Van Amberley', 'Co-head of worldwide video'], [2017, null, null, 'Jamie Erlicht', 'Jamie Ehrlich', 'Co-head of worldwide video']];
-  add('a24', [2012, null, null, 'David Fenkel', 'David Finkle', 'Co-founder']);
-  add('a24', [2012, null, null, 'John Hodges', 'John Hodgkins', 'Co-founder']);
-  add('universal', [2023, null, null, 'Donna Langley', 'Donna Langdon', 'Chairman and chief content officer of the parent']);
+  H.amazonmgm = H.amazonmgm || [[2022, null, null, 'Mike Hopkins', 'Mike Robinette', 'Head of the streaming service and the studio'], [2023, null, null, 'Courtenay Valenti', 'Courtenay Strongwell', 'Head of film']];
+  H.appleorig = H.appleorig || [[2017, null, null, 'Zack Van Amburg', 'Zack Van Barnstead', 'Co-head of worldwide video'], [2017, null, null, 'Jamie Erlicht', 'Jamie Brightling', 'Co-head of worldwide video']];
+  add('a24', [2012, null, null, 'David Fenkel', 'David Aniseed', 'Co-founder']);
+  add('a24', [2012, null, null, 'John Hodges', 'John Rogerson', 'Co-founder']);
+  add('universal', [2023, null, null, 'Donna Langley', 'Donna Longmeadow', 'Chairman and chief content officer of the parent']);
 })();
 // The post someone holds now, from the head lists and from their career path.
 function currentPost(p) {
@@ -23223,26 +23223,26 @@ const OUTLETS = [
 const OUTLET = Object.fromEntries(OUTLETS.map(o => [o[0], { k: o[0], name: o[1], kind: o[2], from: o[3], to: o[4], tier: o[5] }]));
 // [name in this world, outlet, from, to, temperament, genre tastes]
 const CRITICS = [
-  ['Roger Everett', 'suntrib', 1967, 2013, 'warm', { Documentary: 6, Drama: 4, Horror: -3 }], ['Gene Sizzle', 'tribulation', 1969, 1999, 'tough', { Drama: 3, Comedy: -2 }],
-  ['Pauline Kale', 'newyorkish', 1968, 1991, 'acid', { Crime: 8, Action: 3, Musical: -8, Period: -5 }], ['Bosley Crowfoot', 'clarion', 1940, 1967, 'fusty', { Crime: -8, Horror: -10, Period: 5, War: 4 }],
-  ['Andrew Sarrus', 'vox', 1960, 1989, 'auteurist', { Western: 6, Crime: 3 }], ['Molly Haskel', 'vox', 1969, 1990, 'sharp', { Romance: 4, Drama: 3 }],
-  ['Vincent Candy', 'clarion', 1969, 1993, 'urbane', { Comedy: 4 }], ['Janet Muslin', 'clarion', 1977, 1999, 'urbane', { Drama: 3 }],
-  ['A. O. Scotch', 'clarion', 2000, 2023, 'scholarly', { Drama: 3, Superhero: -6 }], ['Manola Dargiss', 'clarion', 2004, null, 'scholarly', { Drama: 4, Superhero: -8, Documentary: 4 }],
-  ['Peter Bradshore', 'guardsman', 1999, null, 'witty', { Comedy: 2 }], ['Mark Kermudgeon', 'observant', 2013, null, 'enthusiast', { Horror: 8, Animation: 3 }],
-  ['Leonard Malted', 'timely', 1969, 2025, 'guidebook', {}], ['Richard Rooper', 'suntrib', 2000, null, 'populist', { Action: 4 }],
-  ['Anthony Laine', 'newyorkish', 1993, null, 'witty', { Action: -3, Period: 3 }], ['David Denbie', 'newyorkish', 1998, 2014, 'scholarly', { Drama: 3 }],
-  ['Wesley Morrow', 'clarion', 2000, null, 'sharp', { Comedy: 3, Romance: 3 }], ['Justin Chung', 'timeline', 2016, null, 'scholarly', { Drama: 3 }],
-  ['Kenneth Turran', 'timeline', 1991, 2020, 'warm', { Documentary: 5 }], ['James Agley', 'timely', 1941, 1948, 'poetic', { Drama: 5, War: 4 }],
-  ['Dilys Pole', 'thamestimes', 1939, 1976, 'fusty', { Period: 4 }], ['C. A. Lejeunesse', 'observant', 1928, 1960, 'fusty', { Comedy: 2 }],
-  ['André Bazaine', 'cahiers', 1951, 1958, 'theorist', { Drama: 5 }], ['François Trufaux', 'cahiers', 1953, 1959, 'polemic', { Crime: 4, Period: -10 }],
-  ['Owen Gleibermeyer', 'varietal', 1990, null, 'populist', { Action: 3 }], ['Peter Travis', 'scone', 1989, 2020, 'enthusiast', { Action: 5 }],
-  ['Kim Newmann', 'empyre', 1989, null, 'enthusiast', { Horror: 8, 'Sci-fi': 5 }], ['Alison Wilmor', 'vulturine', 2019, null, 'sharp', {}],
-  ['David Ehrlichson', 'indiewired', 2014, null, 'witty', { Drama: 2 }], ['Stephanie Zachary', 'timely', 2013, null, 'warm', {}],
-  ['Armond Whitish', 'poster', 1997, null, 'contrarian', {}], ['Rex Reedy', 'poster', 1968, null, 'acid', { Musical: 4 }],
-  ['Gene Shallot', 'balcony', 1973, 2010, 'pun', { Comedy: 4 }], ['Judith Crisp', 'timely', 1963, 1995, 'tough', {}],
-  ['Stanley Kauffmannson', 'notion', 1958, 2013, 'scholarly', { Drama: 3 }], ['Akiko Hasumi', 'junpo', 1960, null, 'theorist', {}],
-  ['Anupama Chopray', 'filmfair', 1990, null, 'warm', { Musical: 5 }], ['Jean-Michel Frodo', 'mondain', 1990, null, 'scholarly', {}],
-  ['Mick LaSalle-Street', 'clubhouse', 1993, null, 'populist', {}], ['@cinephile_kate', 'letterbox', 2011, null, 'snark', {}]
+  ['Roger Boarhart', 'suntrib', 1967, 2013, 'warm', { Documentary: 6, Drama: 4, Horror: -3 }], ['Gene Marquette', 'tribulation', 1969, 1999, 'tough', { Drama: 3, Comedy: -2 }],
+  ['Pauline Chard', 'newyorkish', 1968, 1991, 'acid', { Crime: 8, Action: 3, Musical: -8, Period: -5 }], ['Bosley Ravensworth', 'clarion', 1940, 1967, 'fusty', { Crime: -8, Horror: -10, Period: 5, War: 4 }],
+  ['Andrew Pantheon', 'vox', 1960, 1989, 'auteurist', { Western: 6, Crime: 3 }], ['Molly Hazelton', 'vox', 1969, 1990, 'sharp', { Romance: 4, Drama: 3 }],
+  ['Vincent Toffee', 'clarion', 1969, 1993, 'urbane', { Comedy: 4 }], ['Janet Calico', 'clarion', 1977, 1999, 'urbane', { Drama: 3 }],
+  ['A. O. Highland', 'clarion', 2000, 2023, 'scholarly', { Drama: 3, Superhero: -6 }], ['Manola Dartmoor', 'clarion', 2004, null, 'scholarly', { Drama: 4, Superhero: -8, Documentary: 4 }],
+  ['Peter Broadwood', 'guardsman', 1999, null, 'witty', { Comedy: 2 }], ['Mark Crankshaw', 'observant', 2013, null, 'enthusiast', { Horror: 8, Animation: 3 }],
+  ['Leonard Barley', 'timely', 1969, 2025, 'guidebook', {}], ['Richard Lasso', 'suntrib', 2000, null, 'populist', { Action: 4 }],
+  ['Anthony Alleyway', 'newyorkish', 1993, null, 'witty', { Action: -3, Period: 3 }], ['David Lairby', 'newyorkish', 1998, 2014, 'scholarly', { Drama: 3 }],
+  ['Wesley Maypole', 'clarion', 2000, null, 'sharp', { Comedy: 3, Romance: 3 }], ['Justin Everlong', 'timeline', 2016, null, 'scholarly', { Drama: 3 }],
+  ['Kenneth Steppe', 'timeline', 1991, 2020, 'warm', { Documentary: 5 }], ['James Vintage', 'timely', 1941, 1948, 'poetic', { Drama: 5, War: 4 }],
+  ['Dilys Eminence', 'thamestimes', 1939, 1976, 'fusty', { Period: 4 }], ['C. A. Lenouveau', 'observant', 1928, 1960, 'fusty', { Comedy: 2 }],
+  ['André Fondateur', 'cahiers', 1951, 1958, 'theorist', { Drama: 5 }], ['François Truffle', 'cahiers', 1953, 1959, 'polemic', { Crime: 4, Period: -10 }],
+  ['Owen Gladfield', 'varietal', 1990, null, 'populist', { Action: 3 }], ['Peter Fordwell', 'scone', 1989, 2020, 'enthusiast', { Action: 5 }],
+  ['Kim Neophyte', 'empyre', 1989, null, 'enthusiast', { Horror: 8, 'Sci-fi': 5 }], ['Alison Plentiful', 'vulturine', 2019, null, 'sharp', {}],
+  ['David Truthwell', 'indiewired', 2014, null, 'witty', { Drama: 2 }], ['Stephanie Memoria', 'timely', 2013, null, 'warm', {}],
+  ['Armond Ivory', 'poster', 1997, null, 'contrarian', {}], ['Rex Bulrush', 'poster', 1968, null, 'acid', { Musical: 4 }],
+  ['Gene Scallion', 'balcony', 1973, 2010, 'pun', { Comedy: 4 }], ['Judith Wafer', 'timely', 1963, 1995, 'tough', {}],
+  ['Stanley Tradesman', 'notion', 1958, 2013, 'scholarly', { Drama: 3 }], ['Akiko Renge', 'junpo', 1960, null, 'theorist', {}],
+  ['Anupama Cinemawala', 'filmfair', 1990, null, 'warm', { Musical: 5 }], ['Jean-Michel Fronde', 'mondain', 1990, null, 'scholarly', {}],
+  ['Mick Lachambre', 'clubhouse', 1993, null, 'populist', {}], ['@cinephile_kate', 'letterbox', 2011, null, 'snark', {}]
 ];
 const CRITIC = Object.fromEntries(CRITICS.map(c => [c[0], { name: c[0], out: c[1], from: c[2], to: c[3], style: c[4], taste: c[5] }]));
 // What each temperament sounds like, by verdict. {T} title, {D} director, {A} lead, {G} genre, {S} a scene, {Y} year.
@@ -23330,34 +23330,34 @@ const RV_LINES = {
 };
 // Fun takes on the famous real reviews of the classics.
 const CLASSIC_TAKES = {
-  bonnieclyde: [['Bosley Crowfoot', 22, 'A cheap piece of bald-faced slapstick that treats the hideous depredations of that sleazy, moronic pair as though they were as full of fun and frolic as the jazz-age cut-ups.'], ['Pauline Kale', 98, 'The most excitingly American American movie since the war. Audiences will laugh and then gasp, which is exactly the point.'], ['Roger Everett', 100, 'A milestone in the history of American movies, a work of truth and brilliance.']],
-  citizenkane: [['The Hurst Press', null, 'No review. The publisher forbade any mention of the film in his papers.'], ['Bosley Crowfoot', 90, 'Close to being the most sensational film ever made in Hollywood.']],
-  spaceodyssey: [['Pauline Kale', 35, 'A monumentally unimaginative movie: a big, expensive, ornate head-trip.'], ['Andrew Sarrus', 40, 'A disaster. (He later changed his mind, on a second viewing, under the influence.)'], ['Roger Everett', 100, 'The film succeeds magnificently on a cosmic scale.']],
-  vertigo: [['Bosley Crowfoot', 55, 'Devilishly far-fetched.'], ['Varietal', 58, 'Too long and too slow.'], ['Sight & Soundings poll, 2012', 100, 'The greatest film ever made, dethroning the newspaper baron after fifty years.']],
-  psycho: [['Bosley Crowfoot', 45, 'A blot on an honourable career.'], ['C. A. Lejeunesse', 30, 'She walked out before the end and refused to go back.'], ['Andrew Sarrus', 95, 'The first American movie since the newspaper baron to be worthy of a European director.']],
-  shining: [['Varietal', 45, 'The crowning blow is the performance of Jack Nickelodeon.'], ['Gene Sizzle', 40, 'A huge disappointment.'], ['The Razzberry Awards', 10, 'Nominated: Worst Director and Worst Actress.']],
-  bladerunner: [['Roger Everett', 65, 'Special effects in search of a story.'], ['Pauline Kale', 40, 'It has nothing to give the audience, not even a little zing.'], ['Kim Newmann', 100, '(Years later:) The most influential science fiction film since the space odyssey.']],
-  wonderfullife: [['Bosley Crowfoot', 50, 'The weaknesses of this picture are its illusory concept of life.'], ['The FBI', 0, 'A memo flags it for attacking bankers. Really.']],
-  godfather: [['Vincent Candy', 95, 'One of the most brutal and moving chronicles of American life ever designed within the limits of popular entertainment.'], ['Andrew Sarrus', 70, 'Too long, too obvious, and somehow wonderful.']],
-  jaws: [['Pauline Kale', 80, 'It may be the most cheerfully perverse scare movie ever made.'], ['Gene Sizzle', 85, 'A rare film that delivers on its advertising.']],
-  starwars: [['Pauline Kale', 40, 'An assemblage of spare parts; it has no breather, no lyricism.'], ['Roger Everett', 100, 'An out-of-body experience.'], ['Vincent Candy', 80, 'The most elaborate, most expensive, most beautiful movie serial ever made.']],
-  et: [['Roger Everett', 100, 'This is not merely a good movie. It\'s one of those movies that brush away our cautions and win our hearts.']],
-  pulpfiction: [['Anthony Laine', 85, 'Pure cinema; impure everything else.'], ['Janet Muslin', 90, 'A wildly entertaining wade through a lurid landscape.']],
-  shawshank: [['Varietal', 60, 'Leisurely, likeable, too long.'], ['Peter Travis', 85, 'A movie about hope, which flopped and became beloved.']],
-  sunsetblvd: [['Bosley Crowfoot', 95, 'A great motion picture, mordant and pitiless.'], ['A studio boss', 0, '(At the premiere, to the director:) You have disgraced the industry that made you.']],
-  casablanca: [['Bosley Crowfoot', 90, 'A picture which makes the spine tingle and the heart take a leap.'], ['James Agley', 85, 'Romantic, hokey and irresistible.']],
-  rulesgame: [['Le Mondain', 20, 'Booed at its premiere; one patron set fire to his newspaper to burn down the cinema.'], ['André Bazaine', 100, '(Restored, twenty years later:) The masterpiece of French cinema.']],
-  peepingtom: [['C. A. Lejeunesse', 5, 'It\'s a long time since a film disgusted me as much.']],
-  heavensgate: [['Vincent Candy', 5, 'An unqualified disaster.']],
-  sevensamurai: [['Bosley Crowfoot', 85, 'A rich and rewarding film.'], ['Varietal', 75, 'Long, but the action is first-rate.']],
+  bonnieclyde: [['Bosley Ravensworth', 22, 'A cheap piece of bald-faced slapstick that treats the hideous depredations of that sleazy, moronic pair as though they were as full of fun and frolic as the jazz-age cut-ups.'], ['Pauline Chard', 98, 'The most excitingly American American movie since the war. Audiences will laugh and then gasp, which is exactly the point.'], ['Roger Boarhart', 100, 'A milestone in the history of American movies, a work of truth and brilliance.']],
+  citizenkane: [['The Hurst Press', null, 'No review. The publisher forbade any mention of the film in his papers.'], ['Bosley Ravensworth', 90, 'Close to being the most sensational film ever made in Hollywood.']],
+  spaceodyssey: [['Pauline Chard', 35, 'A monumentally unimaginative movie: a big, expensive, ornate head-trip.'], ['Andrew Pantheon', 40, 'A disaster. (He later changed his mind, on a second viewing, under the influence.)'], ['Roger Boarhart', 100, 'The film succeeds magnificently on a cosmic scale.']],
+  vertigo: [['Bosley Ravensworth', 55, 'Devilishly far-fetched.'], ['Varietal', 58, 'Too long and too slow.'], ['Sight & Soundings poll, 2012', 100, 'The greatest film ever made, dethroning the newspaper baron after fifty years.']],
+  psycho: [['Bosley Ravensworth', 45, 'A blot on an honourable career.'], ['C. A. Lenouveau', 30, 'She walked out before the end and refused to go back.'], ['Andrew Pantheon', 95, 'The first American movie since the newspaper baron to be worthy of a European director.']],
+  shining: [['Varietal', 45, 'The crowning blow is the performance of Jack Nickelodeon.'], ['Gene Marquette', 40, 'A huge disappointment.'], ['The Razzberry Awards', 10, 'Nominated: Worst Director and Worst Actress.']],
+  bladerunner: [['Roger Boarhart', 65, 'Special effects in search of a story.'], ['Pauline Chard', 40, 'It has nothing to give the audience, not even a little zing.'], ['Kim Neophyte', 100, '(Years later:) The most influential science fiction film since the space odyssey.']],
+  wonderfullife: [['Bosley Ravensworth', 50, 'The weaknesses of this picture are its illusory concept of life.'], ['The FBI', 0, 'A memo flags it for attacking bankers. Really.']],
+  godfather: [['Vincent Toffee', 95, 'One of the most brutal and moving chronicles of American life ever designed within the limits of popular entertainment.'], ['Andrew Pantheon', 70, 'Too long, too obvious, and somehow wonderful.']],
+  jaws: [['Pauline Chard', 80, 'It may be the most cheerfully perverse scare movie ever made.'], ['Gene Marquette', 85, 'A rare film that delivers on its advertising.']],
+  starwars: [['Pauline Chard', 40, 'An assemblage of spare parts; it has no breather, no lyricism.'], ['Roger Boarhart', 100, 'An out-of-body experience.'], ['Vincent Toffee', 80, 'The most elaborate, most expensive, most beautiful movie serial ever made.']],
+  et: [['Roger Boarhart', 100, 'This is not merely a good movie. It\'s one of those movies that brush away our cautions and win our hearts.']],
+  pulpfiction: [['Anthony Alleyway', 85, 'Pure cinema; impure everything else.'], ['Janet Calico', 90, 'A wildly entertaining wade through a lurid landscape.']],
+  shawshank: [['Varietal', 60, 'Leisurely, likeable, too long.'], ['Peter Fordwell', 85, 'A movie about hope, which flopped and became beloved.']],
+  sunsetblvd: [['Bosley Ravensworth', 95, 'A great motion picture, mordant and pitiless.'], ['A studio boss', 0, '(At the premiere, to the director:) You have disgraced the industry that made you.']],
+  casablanca: [['Bosley Ravensworth', 90, 'A picture which makes the spine tingle and the heart take a leap.'], ['James Vintage', 85, 'Romantic, hokey and irresistible.']],
+  rulesgame: [['Le Mondain', 20, 'Booed at its premiere; one patron set fire to his newspaper to burn down the cinema.'], ['André Fondateur', 100, '(Restored, twenty years later:) The masterpiece of French cinema.']],
+  peepingtom: [['C. A. Lenouveau', 5, 'It\'s a long time since a film disgusted me as much.']],
+  heavensgate: [['Vincent Toffee', 5, 'An unqualified disaster.']],
+  sevensamurai: [['Bosley Ravensworth', 85, 'A rich and rewarding film.'], ['Varietal', 75, 'Long, but the action is first-rate.']],
   m31: [['Varietal', 70, 'A strange and disturbing picture.']],
-  thingthe: [['Vincent Candy', 30, 'Instant junk.'], ['Kim Newmann', 100, '(A cult rescue, decades later:) The greatest monster movie of them all.']],
-  clockwork: [['Pauline Kale', 30, 'Pornographic, and dull.'], ['Vincent Candy', 90, 'Brilliant, a tour de force.']],
-  network: [['Vincent Candy', 85, 'Outrageous, very funny, and quite possibly prophetic.']],
-  apocalypsenow: [['Andrew Sarrus', 50, 'A ten-ton turkey.'], ['Roger Everett', 100, 'A dreamy, beautiful, unsettling film.']],
-  parasite: [['Manola Dargiss', 95, 'A delirious, despairing comedy of class.'], ['Mark Kermudgeon', 100, 'A film of perfect pitch.']],
-  barbie: [['Peter Bradshore', 80, 'A gloriously silly, smart and pink blast.']],
-  oppenheimer: [['Anthony Laine', 75, 'Loud, long and brilliant, if exhausting.']]
+  thingthe: [['Vincent Toffee', 30, 'Instant junk.'], ['Kim Neophyte', 100, '(A cult rescue, decades later:) The greatest monster movie of them all.']],
+  clockwork: [['Pauline Chard', 30, 'Pornographic, and dull.'], ['Vincent Toffee', 90, 'Brilliant, a tour de force.']],
+  network: [['Vincent Toffee', 85, 'Outrageous, very funny, and quite possibly prophetic.']],
+  apocalypsenow: [['Andrew Pantheon', 50, 'A ten-ton turkey.'], ['Roger Boarhart', 100, 'A dreamy, beautiful, unsettling film.']],
+  parasite: [['Manola Dartmoor', 95, 'A delirious, despairing comedy of class.'], ['Mark Crankshaw', 100, 'A film of perfect pitch.']],
+  barbie: [['Peter Broadwood', 80, 'A gloriously silly, smart and pink blast.']],
+  oppenheimer: [['Anthony Alleyway', 75, 'Loud, long and brilliant, if exhausting.']]
 };
 const RV_BAND = s => s >= 85 ? 'rave' : s >= 60 ? 'good' : s >= 40 ? 'mixed' : 'pan';
 const THUMB_LABEL = p => p >= 90 ? 'Two Thumbs Way Up' : p >= 70 ? 'Thumbs Up' : p >= 45 ? 'Thumbs Sideways' : p >= 25 ? 'Thumbs Down' : 'Thumbs Buried';
@@ -24260,8 +24260,8 @@ function numberOnes(field, hub, y) {
   for (let w = w0; w < w1; w++) { const c = chartAt(field, hub, w, 1)[0]; if (!c) continue; const last = out[out.length - 1]; if (last && last.c.name === c.name && last.c.title === c.title) last.n++; else out.push({ w, c, n: 1 }); }
   return A[k] = out;
 }
-const chLink = (field, c) => c.mine ? `<a href="#" class="lk" data-go="work:${c.wid}">${esc(c.title)}</a>` : `<a href="#" class="lk" data-go="${field === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(field === 'podcast' ? c.name : c.title)}</a>`;
-const chBy = (field, c) => field === 'podcast' ? (c.mine ? 'your show' : esc(KIND_LABEL[c.by] || 'podcast')) : c.mine ? `${esc(c.name)} (you)` : `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>`;
+const chLink = (field, c) => c.pid != null && typeof relLink === 'function' ? (field === 'podcast' ? pl(c.pid) : relLink(c)) : c.mine ? `<a href="#" class="lk" data-go="work:${c.wid}">${esc(c.title)}</a>` : `<a href="#" class="lk" data-go="${field === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(field === 'podcast' ? c.name : c.title)}</a>`;
+const chBy = (field, c) => c.pid != null ? (field === 'podcast' ? esc(KIND_LABEL[c.by] || 'podcast') : pl(c.pid)) : field === 'podcast' ? (c.mine ? 'your show' : esc(KIND_LABEL[c.by] || 'podcast')) : c.mine ? `${esc(c.name)} (you)` : `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>`;
 function chartPage(id) {
   const [field, hub0] = String(id).split('~');
   if (!UI.ch || UI.ch.id !== id) UI.ch = { id, field, hub: HUBS[hub0] ? hub0 : (S.me ? S.me.hub : 'hollywood'), tab: 'week', y: S.year, w: S.week };
@@ -25769,56 +25769,56 @@ function tvTitle(g, r, N) {
 // ---- the landmark series (parody names), with real dates and channels ----
 // [title, net, first year, last year (0 = still running), genre, creator, logline]
 const TV_LEGENDS = [
-  ['I Love Lucie', 'cbn', 1951, 1957, 'sitcom', 'Jess Oppenheimer-Ross', 'A bandleader\'s wife schemes her way into show business, every week, and is caught every week.'],
-  ['The Honeymoaners', 'cbn', 1955, 1956, 'sitcom', 'Jack Gleason', 'A bus driver with big plans and a small flat. To the moon, every episode.'],
-  ['The Twilit Zone', 'cbn', 1959, 1964, 'scifi', 'Rod Sterling', 'An anthology of the uncanny, introduced by a man in a suit who knows how it ends.'],
-  ['Star Track', 'nbs', 1966, 1969, 'scifi', 'Gene Rodenbury', 'A starship, a five-year mission and a very calm first officer with pointed ears.'],
-  ['All in the Familia', 'cbn', 1971, 1979, 'sitcom', 'Norman Leer', 'A bigot in an armchair argues with his whole family, and loses.'],
-  ['M*E*S*H', 'cbn', 1972, 1983, 'sitcom', 'Larry Gelbard', 'Army surgeons in a war they can\'t fix, joking because the alternative is worse.'],
-  ['Saturday Night Lively', 'nbs', 1975, 0, 'variety', 'Lorne Michaelson', 'Live sketch comedy from New York, the launchpad for half of film comedy.'],
-  ['Dalles', 'cbn', 1978, 1991, 'soap', 'David Jacobsen', 'An oil family in Texas, and the question the whole world asked one summer: who shot him?'],
-  ['Hill Street Blueses', 'nbs', 1981, 1987, 'procedural', 'Steven Bochko', 'A city precinct, every storyline overlapping, every morning briefing ending "be careful out there".'],
-  ['Cheerio', 'nbs', 1982, 1993, 'sitcom', 'the Charles-Burrows trio', 'A Boston bar where everybody knows your name, and nobody leaves.'],
-  ['The Golden Gals', 'nbs', 1985, 1992, 'sitcom', 'Susan Harrison', 'Four women in Miami, cheesecake at midnight, no regrets worth mentioning.'],
-  ['The Simpletons', 'vix', 1989, 0, 'animation', 'Matt Groaning', 'A yellow family in a town called Springfield-ish, going on four decades.'],
-  ['Steinfield', 'nbs', 1989, 1998, 'sitcom', 'Larry Davidson & Jerry Steinfield', 'A show about nothing: four New Yorkers, soup, and the rules of everything.'],
-  ['Law & Disorder', 'nbs', 1990, 2010, 'procedural', 'Dick Wolfson', 'The police who investigate crime and the lawyers who prosecute it. Dun dun.'],
-  ['Twin Pines', 'abn', 1990, 1991, 'drama', 'David Lunch & Mark Frosty', 'A homecoming queen wrapped in plastic, and a coffee-loving FBI agent in the woods.'],
-  ['The Y-Files', 'vix', 1993, 2002, 'scifi', 'Chris Carterson', 'Two agents, one believer, one sceptic, and the truth somewhere out there.'],
-  ['Friendz', 'nbs', 1994, 2004, 'sitcom', 'Kauffman & Crane-Bright', 'Six friends in a city where nobody seems to work much, and a fountain.'],
-  ['E.R. (Emergency Rooms)', 'nbs', 1994, 2009, 'drama', 'Michael Crichtonson', 'A Chicago emergency room in real time, the camera running down corridors.'],
-  ['The Larry Sanders Shown', 'hbx', 1992, 1998, 'sitcom', 'Garry Shandlin', 'Behind the scenes of a talk show, where everything on air is a lie.'],
-  ['Sex and the Citi', 'hbx', 1998, 2004, 'sitcom', 'Darren Starr', 'A columnist and her three friends, and the question she types every episode.'],
-  ['The Sopranis', 'hbx', 1999, 2007, 'prestige', 'David Chaser', 'A mob boss in therapy, and the series that made television the new cinema.'],
-  ['The West Wingspan', 'nbs', 1999, 2006, 'drama', 'Aaron Sorkind', 'The president\'s staff, walking and talking down very long corridors.'],
-  ['Curb Your Optimism', 'hbx', 2000, 2024, 'sitcom', 'Larry Davidson', 'A rich man breaks every unwritten social rule and argues about each one.'],
-  ['Survivorman Island', 'cbn', 2000, 0, 'reality', 'Mark Burnet-Hall', 'Strangers on an island vote each other off, for money and immortality.'],
-  ['The Wiring', 'hbx', 2002, 2008, 'prestige', 'David Simone', 'A city seen through its drug trade, its police, its docks, its schools and its newspaper.'],
-  ['American Idle', 'vix', 2002, 2016, 'reality', 'Simon Fuller-Cowl', 'A nation votes for its next pop star, and a judge says what everyone is thinking.'],
-  ['Misplaced', 'abn', 2004, 2010, 'scifi', 'J.J. Abramsky & Damon Lindelhof', 'Plane crash survivors on an island with polar bears, a hatch and flashbacks.'],
-  ['The Offices', 'nbs', 2005, 2013, 'sitcom', 'Greg Danielson', 'A paper company, a documentary crew, and the worst boss in Pennsylvania.'],
-  ['Ad Men', 'amx', 2007, 2015, 'prestige', 'Matthew Wiener', 'An advertising man in the 1960s who sells everyone a dream and lives in none of them.'],
-  ['Breaking Mad', 'amx', 2008, 2013, 'prestige', 'Vince Gilligham', 'A chemistry teacher with cancer becomes the drug lord of the south-west.'],
-  ['Game of Crowns', 'hbx', 2011, 2019, 'scifi', 'Benioff & Weisz', 'Seven kingdoms, three dragons, and winter coming for eight seasons.'],
-  ['Stranger Thingamajigs', 'netflicks', 2016, 2025, 'scifi', 'the Duffy brothers', 'Kids on bikes in the 1980s, a girl with powers, and a world upside down.'],
-  ['The Crowne', 'netflicks', 2016, 2023, 'prestige', 'Peter Morganz', 'The reign of a queen, decade by decade, recast every two seasons.'],
-  ['Succession Planning', 'hbx', 2018, 2023, 'prestige', 'Jesse Armstrongarm', 'A media dynasty\'s children fight for the throne, each worse than the last.'],
-  ['Squid Gamble', 'netflicks', 2021, 2025, 'prestige', 'Hwang Dong-hyuck', 'The desperate compete in children\'s games for a fortune; losing is fatal.'],
-  ['The Bearer', 'hula', 2022, 0, 'prestige', 'Christopher Storey', 'A fine-dining chef inherits his brother\'s sandwich shop and his brother\'s debts. Yes, chef.'],
+  ['I Love Lucie', 'cbn', 1951, 1957, 'sitcom', 'Jess Openhouse', 'A bandleader\'s wife schemes her way into show business, every week, and is caught every week.'],
+  ['The Honeymoaners', 'cbn', 1955, 1956, 'sitcom', 'Jack Sheaf', 'A bus driver with big plans and a small flat. To the moon, every episode.'],
+  ['The Twilit Zone', 'cbn', 1959, 1964, 'scifi', 'Rod Bullion', 'An anthology of the uncanny, introduced by a man in a suit who knows how it ends.'],
+  ['Star Track', 'nbs', 1966, 1969, 'scifi', 'Gene Caneberry', 'A starship, a five-year mission and a very calm first officer with pointed ears.'],
+  ['All in the Familia', 'cbn', 1971, 1979, 'sitcom', 'Norman Kingsley', 'A bigot in an armchair argues with his whole family, and loses.'],
+  ['M*E*S*H', 'cbn', 1972, 1983, 'sitcom', 'Larry Goldbeard', 'Army surgeons in a war they can\'t fix, joking because the alternative is worse.'],
+  ['Saturday Night Lively', 'nbs', 1975, 0, 'variety', 'Lorne Gabrielson', 'Live sketch comedy from New York, the launchpad for half of film comedy.'],
+  ['Dalles', 'cbn', 1978, 1991, 'soap', 'David Ladderson', 'An oil family in Texas, and the question the whole world asked one summer: who shot him?'],
+  ['Hill Street Blueses', 'nbs', 1981, 1987, 'procedural', 'Steven Beatwell', 'A city precinct, every storyline overlapping, every morning briefing ending "be careful out there".'],
+  ['Cheerio', 'nbs', 1982, 1993, 'sitcom', 'the Carlos-Warren trio', 'A Boston bar where everybody knows your name, and nobody leaves.'],
+  ['The Golden Gals', 'nbs', 1985, 1992, 'sitcom', 'Susan Tweedwell', 'Four women in Miami, cheesecake at midnight, no regrets worth mentioning.'],
+  ['The Simpletons', 'vix', 1989, 0, 'animation', 'Matt Verdant', 'A yellow family in a town called Springfield-ish, going on four decades.'],
+  ['Meadows', 'nbs', 1989, 1998, 'sitcom', 'Larry Slingsby & Jerry Meadows', 'A show about nothing: four New Yorkers, soup, and the rules of everything.'],
+  ['Law & Disorder', 'nbs', 1990, 2010, 'procedural', 'Dick Howler', 'The police who investigate crime and the lawyers who prosecute it. Dun dun.'],
+  ['Twin Pines', 'abn', 1990, 1991, 'drama', 'David Lynchburg & Mark Hoarfield', 'A homecoming queen wrapped in plastic, and a coffee-loving FBI agent in the woods.'],
+  ['The Y-Files', 'vix', 1993, 2002, 'scifi', 'Chris Drayman', 'Two agents, one believer, one sceptic, and the truth somewhere out there.'],
+  ['Friendz', 'nbs', 1994, 2004, 'sitcom', 'Merchant & Heron-Shine', 'Six friends in a city where nobody seems to work much, and a fountain.'],
+  ['E.R. (Emergency Rooms)', 'nbs', 1994, 2009, 'drama', 'Michael Raptorson', 'A Chicago emergency room in real time, the camera running down corridors.'],
+  ['The Larry Sanders Shown', 'hbx', 1992, 1998, 'sitcom', 'Garry Lampwick', 'Behind the scenes of a talk show, where everything on air is a lie.'],
+  ['Sex and the Citi', 'hbx', 1998, 2004, 'sitcom', 'Darren Comet', 'A columnist and her three friends, and the question she types every episode.'],
+  ['The Sopranis', 'hbx', 1999, 2007, 'prestige', 'David Pursuit', 'A mob boss in therapy, and the series that made television the new cinema.'],
+  ['The West Wingspan', 'nbs', 1999, 2006, 'drama', 'Aaron Walkandtalk', 'The president\'s staff, walking and talking down very long corridors.'],
+  ['Curb Your Optimism', 'hbx', 2000, 2024, 'sitcom', 'Larry Slingsby', 'A rich man breaks every unwritten social rule and argues about each one.'],
+  ['Survivorman Island', 'cbn', 2000, 0, 'reality', 'Mark Scorchwell', 'Strangers on an island vote each other off, for money and immortality.'],
+  ['The Wiring', 'hbx', 2002, 2008, 'prestige', 'David Hearwell', 'A city seen through its drug trade, its police, its docks, its schools and its newspaper.'],
+  ['American Idle', 'vix', 2002, 2016, 'reality', 'Simon Tucker-Hood', 'A nation votes for its next pop star, and a judge says what everyone is thinking.'],
+  ['Misplaced', 'abn', 2004, 2010, 'scifi', 'J. J. Lensflare & Damon Limetree', 'Plane crash survivors on an island with polar bears, a hatch and flashbacks.'],
+  ['The Offices', 'nbs', 2005, 2013, 'sitcom', 'Greg Lionsden', 'A paper company, a documentary crew, and the worst boss in Pennsylvania.'],
+  ['Ad Men', 'amx', 2007, 2015, 'prestige', 'Matthew Danube', 'An advertising man in the 1960s who sells everyone a dream and lives in none of them.'],
+  ['Breaking Mad', 'amx', 2008, 2013, 'prestige', 'Vince Castaway', 'A chemistry teacher with cancer becomes the drug lord of the south-west.'],
+  ['Game of Crowns', 'hbx', 2011, 2019, 'scifi', 'Bennison & Blanc', 'Seven kingdoms, three dragons, and winter coming for eight seasons.'],
+  ['Stranger Thingamajigs', 'netflicks', 2016, 2025, 'scifi', 'the Rookie brothers', 'Kids on bikes in the 1980s, a girl with powers, and a world upside down.'],
+  ['The Crowne', 'netflicks', 2016, 2023, 'prestige', 'Peter Crownley', 'The reign of a queen, decade by decade, recast every two seasons.'],
+  ['Succession Planning', 'hbx', 2018, 2023, 'prestige', 'Jesse Stoutarm', 'A media dynasty\'s children fight for the throne, each worse than the last.'],
+  ['Squid Gamble', 'netflicks', 2021, 2025, 'prestige', 'Hwang Squidgame', 'The desperate compete in children\'s games for a fortune; losing is fatal.'],
+  ['The Bearer', 'hula', 2022, 0, 'prestige', 'Christopher Pantry', 'A fine-dining chef inherits his brother\'s sandwich shop and his brother\'s debts. Yes, chef.'],
   ['Monty Pythagoras\'s Flying Circus', 'bbx', 1969, 1974, 'variety', 'the Pythagoras team', 'Six men, a lot of dead parrots, and comedy that didn\'t bother with endings.'],
-  ['Fawlty Towels', 'bbx', 1975, 1979, 'sitcom', 'John Cleaves & Connie Booth-Hall', 'The worst hotel in Torquay, and its furious owner. Twelve episodes. Perfect.'],
-  ['Doctor When', 'bbx', 1963, 0, 'scifi', 'Sydney Newmann', 'A time traveller in a police box, regenerating whenever the actor leaves.'],
-  ['Coronation Lane', 'itvee', 1960, 0, 'soap', 'Tony Warrender', 'A cobbled northern street, its pub, and sixty years of the same families.'],
-  ['The Office Block', 'bbx', 2001, 2003, 'sitcom', 'Ricky Gervaise & Stephen Merchantman', 'A paper merchant\'s in Slough and its manager, who thinks he\'s a friend first.'],
-  ['Sherlocke', 'bbx', 2010, 2017, 'crime', 'Moffitt & Gattiss-Hall', 'The great detective with a smartphone and a blog-writing doctor.'],
-  ['Downtown Abbey', 'itvee', 2010, 2015, 'period', 'Julian Fellowes-Wright', 'An earl\'s family upstairs, their servants downstairs, and the twentieth century at the door.'],
-  ['Fleabagg', 'bbx', 2016, 2019, 'sitcom', 'Phoebe Waller-Bridges', 'A woman in London talks to the camera about everything except the thing that matters.'],
-  ['Oshi', 'nkh', 1983, 1984, 'asadora', 'Sugako Hashimotto', 'A girl sold into service grows into a woman who builds a business, across a whole century.'],
-  ['Winter Sonnet', 'kbx', 2002, 2002, 'kdrama', 'Yoon Seok-hoe', 'First love, amnesia and snow; the drama that started the Korean wave abroad.'],
-  ['Ramayana Katha', 'dooradarshan', 1987, 1988, 'serial', 'Ramanand Sagar-Rao', 'The epic retold on Sunday mornings; the streets of India emptied to watch.'],
-  ['Betty the Plain', 'televista', 1999, 2001, 'telenovela', 'Fernando Gaitán-Ruiz', 'A brilliant, unfashionable secretary saves a fashion house. Remade in twenty countries.'],
-  ['Avenida Brasilia', 'globus', 2012, 2012, 'telenovela', 'João Emanuel Carneiro-Lima', 'A girl raised in a rubbish tip returns to take revenge on the woman who put her there.'],
-  ['Sesame Lane', 'pbn', 1970, 0, 'kids', 'Joan Ganz Cooney-Hart', 'A city street of puppets and people, teaching the alphabet to the world.']
+  ['Fawlty Towels', 'bbx', 1975, 1979, 'sitcom', 'John Cleaves & Connie Stallworth', 'The worst hotel in Torquay, and its furious owner. Twelve episodes. Perfect.'],
+  ['Doctor When', 'bbx', 1963, 0, 'scifi', 'Sydney Freshman', 'A time traveller in a police box, regenerating whenever the actor leaves.'],
+  ['Coronation Lane', 'itvee', 1960, 0, 'soap', 'Tony Burrowes', 'A cobbled northern street, its pub, and sixty years of the same families.'],
+  ['The Office Block', 'bbx', 2001, 2003, 'sitcom', 'Ricky Spearman & Stephen Trader', 'A paper merchant\'s in Slough and its manager, who thinks he\'s a friend first.'],
+  ['Sherlocke', 'bbx', 2010, 2017, 'crime', 'Steadman & Gatehouse', 'The great detective with a smartphone and a blog-writing doctor.'],
+  ['Downtown Abbey', 'itvee', 2010, 2015, 'period', 'Julian Fairhurst', 'An earl\'s family upstairs, their servants downstairs, and the twentieth century at the door.'],
+  ['Fleabagg', 'bbx', 2016, 2019, 'sitcom', 'Phoebe Fleabag', 'A woman in London talks to the camera about everything except the thing that matters.'],
+  ['Oshi', 'nkh', 1983, 1984, 'asadora', 'Sugako Hashizume', 'A girl sold into service grows into a woman who builds a business, across a whole century.'],
+  ['Winter Sonnet', 'kbx', 2002, 2002, 'kdrama', 'Baek Seok-jin', 'First love, amnesia and snow; the drama that started the Korean wave abroad.'],
+  ['Ramayana Katha', 'dooradarshan', 1987, 1988, 'serial', 'Ramanand Samudra', 'The epic retold on Sunday mornings; the streets of India emptied to watch.'],
+  ['Betty the Plain', 'televista', 1999, 2001, 'telenovela', 'Fernando Dulzaina', 'A brilliant, unfashionable secretary saves a fashion house. Remade in twenty countries.'],
+  ['Avenida Brasilia', 'globus', 2012, 2012, 'telenovela', 'João Emanuel Pastor', 'A girl raised in a rubbish tip returns to take revenge on the woman who put her there.'],
+  ['Sesame Lane', 'pbn', 1970, 0, 'kids', 'Joan Gander Hareton', 'A city street of puppets and people, teaching the alphabet to the world.']
 ];
 // ---- generation ----
 function netBaseViewers(kind, y) {   // average viewers (millions) for a solid show on that kind of channel, that year
@@ -30098,7 +30098,7 @@ function finClick(t) { if (t.dataset.coinv) { const [f, p] = t.dataset.coinv.spl
 // on a newer one. Saves live in this browser (IndexedDB), compressed. Autosaves come on a schedule you choose and
 // the five most recent are kept; up to fifty manual saves sit beside them. Between saves, a short journal of what
 // you did since is kept too, so closing the tab loses nothing.
-const SNAP_V = 2, BUILD_ID = 'b69', MAX_MANUAL = 20, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
+const SNAP_V = 2, BUILD_ID = 'b70', MAX_MANUAL = 50, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
 const AUTO_EVERY = { week: 'Every week', month: 'Every month', half: 'Every six months', year: 'Every year', five: 'Every five years', off: 'Never' };
 let BASE = null;
 const PRIM_NO = Symbol('object');   // marks a baseline field that was an object (compared by hash, not value)   // what the world looked like as it was built, before you arrived: hashes, field by field
@@ -30123,11 +30123,30 @@ function snapBaseline() {
     }
     b.n[set] = n; b.h[set] = H; b.fk[set] = FK; b.fh[set] = FH; b.fv[set] = FV; b.fs[set] = FS;
   }
+  b.restH = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') b.restH[k] = fnv(JSON.stringify(S[k]) || 'u');   // rebuilt from the seed on load: unchanged ones needn't be saved
   BASE = b; return b;
 }
 // skills travel as a compact array in this fixed order (and the craft averages are rebuilt from them)
 let SKO = null;
 function SK_ORDER() { if (!SKO) { SKO = []; for (const c in CRAFTS) for (const k in CRAFTS[c].subs) SKO.push(k); } return SKO; }
+// Precision for the world's slow numbers in a normal save (an exact save, for the tests, keeps everything): skills to
+// 2 decimals, ties to 1, fame-like scores to 2, money (the world's millions) to the thousand. The world's long tail of
+// 4-decimal noise was most of a save's size; nobody can see the difference.
+let SNAP_PREC = true;
+const SNAP_R2 = new Set(['standing', 'fame', 'intl', 'heat']), SNAP_R3 = new Set(['afterTotal', 'theatrical', 'rentals', 'pa', 'backend', 'total', 'libInc', 'cash']), SNAP_O3 = new Set(['after', 'gross']);
+const rnd2 = v => Math.round(v * 100) / 100, rnd3 = v => Math.round(v * 1000) / 1000;
+function snapPrec(set, k, v) {
+  if (!SNAP_PREC || typeof v !== 'number' && (v === null || typeof v !== 'object')) return v;
+  if (typeof v === 'number') return set === 'people' && SNAP_R2.has(k) ? rnd2(v) : set !== 'people' && SNAP_R3.has(k) ? rnd3(v) : v;
+  if (set === 'films' && SNAP_O3.has(k) && !Array.isArray(v)) { const o = {}; for (const x in v) o[x] = typeof v[x] === 'number' ? rnd3(v[x]) : v[x]; return o; }
+  return v;
+}
+// the world's other fields: only the ones that changed since it was built
+function snapRest(d) {
+  const rest = {}, same = [];
+  for (const k in S) { if (SNAP_SETS.includes(k) || k === 'log' || k === 'me') continue; const h = BASE.restH && BASE.restH[k]; if (h !== undefined && fnv(JSON.stringify(S[k]) || 'u') === h) same.push(k); else rest[k] = S[k]; }
+  d.rest = rest; d.same = same;
+}
 // one entity against its baseline: the fields that changed (ties entry by entry), or null if none did
 function entDiff(set, i, e) {
   const fk = BASE.fk[set][i], fh = BASE.fh[set][i], fv = BASE.fv[set][i], fs = BASE.fs[set][i], out = {}; let any = false;
@@ -30137,21 +30156,21 @@ function entDiff(set, i, e) {
     if (P && k === 'c') continue;   // derived from the skills: recomputed on load
     const j = fk.indexOf(id);
     // plain values compare directly; objects by hash (people's skills and ties field by field, below)
-    if (j >= 0 && fv[j] !== PRIM_NO) { if (v === fv[j] || (v !== v && fv[j] !== fv[j])) continue; if (v === null || typeof v !== 'object') { out[k] = v === undefined ? null : v; any = true; continue; } }
+    if (j >= 0 && fv[j] !== PRIM_NO) { if (v === fv[j] || (v !== v && fv[j] !== fv[j])) continue; if (v === null || typeof v !== 'object') { out[k] = v === undefined ? null : snapPrec(set, k, v); any = true; continue; } }
     if (P && k === 'ties' && j >= 0 && v) {
       const t = v, d = {}, bk = BASE.tk[i], bv = BASE.tv[i], had = new Set(); let ch = false;
       for (let q = 0; q < bk.length; q++) { const x = bk[q]; had.add(x); if (!(x in t)) { d[x] = null; ch = true; } else if (Math.fround(t[x]) !== bv[q]) { d[x] = t[x]; ch = true; } }
       for (const x in t) if (!had.has(+x)) { d[x] = t[x]; ch = true; }
-      if (ch) { out['~ties'] = d; any = true; }
+      if (ch) { if (SNAP_PREC) for (const x in d) if (d[x] !== null) d[x] = Math.round(d[x] * 10) / 10; out['~ties'] = d; any = true; }
       continue;
     }
     if (P && k === 'sk' && v && j >= 0) {
       const SO = SK_ORDER(), b = BASE.sk[i]; let full = Object.keys(v).length === SO.length, same = !!b;
       for (let q = 0; q < SO.length; q++) { const x = v[SO[q]]; if (x === undefined) { full = false; break; } if (same && x !== b[q]) same = false; }
-      if (full) { if (!same) { out['~sk'] = SO.map(x => snapRoundNum(v[x])); any = true; } continue; }
+      if (full) { if (!same) { if (SNAP_PREC && b && SO.every((x, q) => b[q] === b[q])) out['~sd'] = SO.map((x, q) => rnd2(v[x] - b[q]) || 0); else out['~sk'] = SO.map(x => SNAP_PREC ? rnd2(v[x]) : snapRoundNum(v[x])); any = true; } continue; }
     }
     if (j >= 0) { const js = JSON.stringify(v); if (fs[j] !== undefined ? js === fs[j] : fnv(js || 'u') === fh[j]) continue; }
-    out[k] = v === undefined ? null : v; any = true;
+    out[k] = v === undefined ? null : snapPrec(set, k, v); any = true;
   }
   const gone = []; for (let j = 0; j < fk.length; j++) if (!seen.has(fk[j])) gone.push(KEYS[fk[j]]);
   if (gone.length) { out['~gone'] = gone; any = true; }
@@ -30160,6 +30179,7 @@ function entDiff(set, i, e) {
 // the save, built a slice at a time so the page keeps breathing and a progress bar can move
 async function snapDataAsync(onProg) {
   if (!BASE) throw new Error('no baseline');
+  SNAP_PREC = true;
   const d = { v: SNAP_V, build: BUILD_ID, seed: S.seed, year: S.startYear, depth: S.depth, sig: BASE.sig, base: BASE.n, n: {}, ch: {}, r: R.s, pr: S.me && S.me.rng ? S.me.rng.s : null };
   const total = SNAP_SETS.reduce((t, set) => t + S[set].length, 0); let done = 0, t0 = performance.now();
   for (const set of SNAP_SETS) {
@@ -30170,8 +30190,7 @@ async function snapDataAsync(onProg) {
     }
     d.ch[set] = out;
   }
-  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
-  d.rest = rest;
+  snapRest(d);
   if (onProg) onProg(.88); await new Promise(r => setTimeout(r, 0));
   const str = JSON.stringify(d);
   const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
@@ -30181,6 +30200,7 @@ async function snapDataAsync(onProg) {
 // the save itself, as a string
 function snapData(exact) {
   if (!BASE) throw new Error('no baseline');
+  SNAP_PREC = !exact;
   const d = { v: SNAP_V, build: BUILD_ID, seed: S.seed, year: S.startYear, depth: S.depth, sig: BASE.sig, base: BASE.n, n: {}, ch: {}, r: R.s, pr: S.me && S.me.rng ? S.me.rng.s : null };
   for (const set of SNAP_SETS) {
     const L = S[set], nb = BASE.n[set], out = []; d.n[set] = L.length;
@@ -30190,8 +30210,7 @@ function snapData(exact) {
     }
     d.ch[set] = out;
   }
-  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
-  d.rest = rest;
+  snapRest(d);
   const str = JSON.stringify(d);
   // your own life is small and kept exact, so the journal replays onto exactly the numbers you left
   const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
@@ -30211,6 +30230,7 @@ function snapApply(str) {
       const e = L[i];
       for (const k in x) {
         if (k === '~gone') { for (const g of x[k]) delete e[g]; continue; }
+        if (k === '~sd') { const o = {}, K = SK_ORDER(), b = BASE.sk[i]; for (let z = 0; z < K.length; z++) o[K[z]] = rnd2(b[z] + x[k][z]); e.sk = o; recalc(e); continue; }
         if (k === '~sk') { const o = {}, K = SK_ORDER(); for (let z = 0; z < K.length; z++) o[K[z]] = x[k][z]; e.sk = o; recalc(e); continue; }
         if (k === '~ties') { const t = e.ties = e.ties || {}; for (const id in x[k]) { if (x[k][id] === null) delete t[id]; else t[id] = x[k][id]; } continue; }
         e[k] = x[k];
@@ -30218,6 +30238,7 @@ function snapApply(str) {
     }
     L.length = d.n[set];
   }
+  for (const k of d.same || []) if (k in S) rest[k] = S[k];   // unchanged since the world was built: the rebuilt copy is the same
   if (d.mep && rest.me && S.people[rest.me.id]) S.people[rest.me.id] = d.mep;   // your own record, exact
   const keep = { people: S.people, films: S.films, companies: S.companies };
   S = Object.assign({}, rest, keep, { log: [] });   // a new object: every cache keyed on the old world lets go
@@ -30305,6 +30326,9 @@ async function saveRun(kind, name, id) {
   await new Promise(r => setTimeout(r, 30));
   // building a snapshot takes a moment of the page's attention: never while the dice are rolling
   for (let i = 0; i < 200 && typeof document !== 'undefined' && document.getElementById('rollov'); i++) await new Promise(r => setTimeout(r, 250));
+  // the manual slots are full: say so plainly, rather than quietly not saving
+  if (kind === 'manual' && !id) { const n = (await saveList()).filter(x => x.kind === 'manual').length;
+    if (n >= MAX_MANUAL) { UI.saveMsg = `Not saved: all ${MAX_MANUAL} save slots are full. Overwrite or delete one on the Saves page.`; UI.saveFull = 1; SAVING = false; saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 12000); return null; } }
   try { const m = await writeSlot(kind, name, id); AUTO_AT = autoPeriod(); UI.saveMsg = `${kind === 'auto' ? 'Autosaved' : 'Saved'} · ${fmtDate(m.week, true)}`; UI.saveList = null; return m; }
   catch (e) { UI.saveMsg = 'Couldn\'t save: ' + ((e && e.name) || 'storage unavailable'); return null; }
   finally { SAVING = false; saveProgress(null); saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
@@ -30348,6 +30372,7 @@ function savesHTML() {
   const row = x => `<tr${x.seed !== S.seed || x.year !== S.startYear || x.depth !== S.depth ? ' class="muted"' : ''}><td><b>${esc(x.name || (x.kind === 'auto' ? 'Autosave' : 'Save'))}</b><br><span class="small muted">${esc(x.label)}</span></td><td class="small">${new Date(x.when).toLocaleString()}</td><td class="n small">${(x.size / 1e6).toFixed(1)} MB</td><td>${sBtn('sload', x.id, 'Load', 'Click again to load', '')} ${x.kind === 'manual' ? sBtn('sover', x.id, 'Overwrite', 'Click again to overwrite', ' ghost') + ' ' : ''}${sBtn('sdel', x.id, 'Delete', 'Click again to delete', ' ghost')} <button class="btn-s ghost" data-sexp="${x.id}" title="Download this save as a file, to keep or to open in another browser">Export</button></td></tr>`;
   return `<section class="panel"><h3>Save your life</h3>
    <div class="ccrow"><label>Name <input id="save-name" maxlength="40" placeholder="${esc(snapLabel())}" value="${esc(UI.saveName || '')}"></label> <button class="btn-s" data-snew="1" ${man.length >= MAX_MANUAL ? 'disabled' : ''}>Save now</button> <span class="muted small">${man.length} of ${MAX_MANUAL} manual saves${man.length >= MAX_MANUAL ? ': delete or overwrite one to save again' : ''}</span></div>
+   ${man.length >= MAX_MANUAL ? `<p class="bad"><b>All ${MAX_MANUAL} save slots are full.</b> The game can't make a new save until you free one: use <b>Overwrite</b> on a save you no longer need, or <b>Delete</b> one below. Autosaves still work (the ${MAX_AUTO} newest are kept).</p>` : man.length >= MAX_MANUAL - 5 ? `<p class="small"><b>${MAX_MANUAL - man.length} save slot${MAX_MANUAL - man.length === 1 ? '' : 's'} left</b> of ${MAX_MANUAL}. After that, overwrite or delete an old save to make a new one.</p>` : ''}
    <div class="ccrow"><label>Autosave ${sel('save-auto', Object.entries(AUTO_EVERY), autoPref())}</label> <span class="muted small">The ${MAX_AUTO} most recent autosaves are kept. ${autoPref() === 'week' ? 'Weekly autosaves take a moment each week.' : ''}</span></div>
    <div class="ccrow"><label class="btn-s ghost" style="cursor:pointer">Import a save file <input type="file" id="save-import" accept=".applebox,.json,application/gzip,application/json" hidden></label> <span class="muted small">${esc(UI.saveIO || 'Export a save to keep a copy, or to carry your career to another browser or computer.')}</span></div>
    <p class="small muted">${UI.saveQuota ? `Using ${(UI.saveQuota[0] / 1e6).toFixed(0)} MB of the ${(UI.saveQuota[1] / 1e9).toFixed(1)} GB this browser allows. ` : ''}Saves live in this browser. A save made on an older version of the game loads on a newer one. Between saves, what you do is journalled, so closing the tab loses nothing.</p></section>
@@ -44259,6 +44284,461 @@ OS_EXTRA.about = ['ℹ️', 'About', 'Credits, licences and sources'];
 OS_VIEWS.about = () => aboutHTML();
 { const g = OS_GROUPS.find(x => x[0] === 'Learn'); if (g && !g[1].includes('about')) g[1].push('about'); }
 // </about>
+// <streaming>
+// ---------------- Streaming: the business behind the services ----------------
+// The services used to be a subscriber curve and a list of shows. Now each one is a business, calibrated against the
+// research in docs/RESEARCH.md (Round 20): a DVD-by-mail company that adds streaming in 2007 and originals in 2013 and
+// becomes the biggest channel in the world; shopping and phone companies that bundle a service with something else;
+// studio-owned services from 2019 that spend billions to catch up, lose money for years and pivot to profit.
+//  · Every quarter each service adds and loses subscribers. Adds follow the real growth path, scaled by its appeal:
+//    the quality of what it has on (its shows and the films it licensed), its price against the others, and its
+//    mood (a land grab spends; a profit pivot cuts). Price rises cost a quarter of adds; a password crackdown, once a
+//    service is huge, brings a surge. Ad tiers arrive in 2022.
+//  · Money: subscribers × revenue per subscriber, content spend by mood, years of losses paid for with debt.
+//  · The share price moves on the surprise in subscriber adds (2.5× the miss, capped at ±35% a day), and a fall of a
+//    fifth raises the bar for greenlights across the service; a land grab lowers it.
+//  · Studios feel it: what the services pay for films rises in a land grab and falls in a pivot (licences in
+//    afterlife, the pay-window bids in distrib.js). Cinemas feel the shrinking window.
+//  · You can work inside one (eight jobs with their own decisions every fortnight), sell to one (cost-plus offers
+//    that buy your backend, overall deals that want a show a year), be bumped by one (an old show found by millions)
+//    and be tempted by the worst of it (bought streams). The Streamboard app shows the whole market.
+// World numbers run on the world's dice (wstream, per quarter); your decisions on yours.
+const SVC_META = {
+  netflicks: { on: 2007, dvd: 1997, lead: 1, who: 'independent', p0: 7.99 },
+  hula: { on: 2008, who: 'network joint venture', p0: 7.99 },
+  prime: { on: 2011, who: 'shopping company (bundled)', p0: 8.99, bundle: 1 },
+  dizplus: { on: 2019.85, who: 'studio-owned', p0: 6.99, studio: 1 },
+  peartv: { on: 2019.85, who: 'tech company', p0: 4.99, tech: 1 },
+  lantern: { on: 2020.4, who: 'studio-owned', p0: 4.99, studio: 1 },
+  summit: { on: 2021.2, who: 'studio-and-network', p0: 4.99, studio: 1 }
+};
+// two more studio-owned services, as networks so they commission shows and bid for films like the others
+if (typeof TV_NETS !== 'undefined') {
+  TV_NETS.lantern = TV_NETS.lantern || { k: 'lantern', name: 'Lantern+', kind: 'streaming', hub: 'hollywood', founded: 2020, orig: 2020, per: 2, d: 'A studio\'s own service, built on a century of its films and the shows it stopped licensing to everyone else.' };
+  TV_NETS.summit = TV_NETS.summit || { k: 'summit', name: 'Summit+', kind: 'streaming', hub: 'newyork', founded: 2021, orig: 2021, per: 1, d: 'A studio and a network merged their services: sport, reality and a deep library.' };
+}
+// the real growth paths (global subscribers, millions) the adds follow when appeal is average
+const SVC_PATH = {
+  netflicks: [[1999, .1], [2002, .8], [2005, 4], [2007, 7.5], [2009, 12], [2011, 24], [2014, 57], [2017, 117], [2019, 167], [2022, 231], [2024, 302], [2027, 360], [2035, 430]],
+  hula: [[2008, .2], [2012, 3], [2015, 9], [2019, 28], [2022, 46], [2024, 51], [2030, 60]],
+  prime: [[2011, 3], [2014, 25], [2016, 60], [2020, 150], [2024, 200], [2030, 230]],
+  dizplus: [[2019.85, 1], [2020, 26], [2020.5, 57], [2021, 95], [2022, 150], [2024, 150], [2030, 180]],
+  peartv: [[2019.85, 1], [2020.5, 10], [2022, 20], [2024, 45], [2030, 60]],
+  lantern: [[2020.4, 1], [2021, 25], [2022, 70], [2024, 110], [2030, 140]],
+  summit: [[2021.2, 1], [2022, 40], [2023, 60], [2024, 70], [2030, 85]]
+};
+const SVC_PRICE = { netflicks: [[2007, 8.99], [2011, 7.99], [2014, 8.99], [2017, 10.99], [2019, 12.99], [2022, 15.49], [2025, 17.99], [2026, 19.99]] };
+const svcYear = w => 2000 + (w - weekOfYear(2000)) / 52;
+function svcInterp(P, y) { if (y <= P[0][0]) return P[0][1] * Math.max(0, (y - (P[0][0] - 1))); for (let i = 1; i < P.length; i++) if (y <= P[i][0]) { const [a, va] = P[i - 1], [b, vb] = P[i]; return va + (vb - va) * (y - a) / (b - a); } const [a, va] = P[P.length - 2], [b, vb] = P[P.length - 1]; return vb + (vb - va) * Math.min(1, (y - b) / 10) * .5; }
+function svcAll() { return S.svc = S.svc || {}; }
+function svcOf(k) { return svcAll()[k] || null; }
+function svcLive(y = svcYear(S.week)) { return Object.keys(SVC_META).filter(k => SVC_META[k].on <= y && TV_NETS[k] && !(svcOf(k) || {}).closed); }
+
+// ---- the state when the world first needs it (history before the simulated years is the real path) ----
+function svcBirth(k, y) {
+  const m = SVC_META[k], subs = Math.max(.1, svcInterp(SVC_PATH[k], y)), price = SVC_PRICE[k] ? svcInterp(SVC_PRICE[k], y) : Math.min(svcPriceLead(y) * .85, m.p0 * Math.pow(1.12, Math.max(0, y - m.on)));
+  const rev = subs * price * .72 * 12;
+  return { k, subs, price, adOn: 0, ad: 0, churn: m.lead ? .022 : .05, cash: rev * .1, debt: m.lead ? Math.max(0, (y - 2012) * 1800 - Math.max(0, y - 2019) * 4000) : m.studio ? 2000 * Math.max(0, y - m.on) : 0,
+    spend: rev * (y - m.on < 4 ? (m.studio ? 1 : .75) : .5), amort: rev * (y - m.on < 4 ? (m.studio ? .95 : .7) : .48), stock: 100, mood: y - m.on < (m.lead ? 9 : 4) ? 'land grab' : 'steady', bar: 1, lossY: 0, lastRise: S.week - 40, crack: 0,
+    adds: [], exp: 0, boost: 0, sport: 0, h: [{ w: S.week, subs: +subs.toFixed(1), price: +price.toFixed(2), rev: Math.round(rev), op: 0, stock: 100 }] };
+}
+function svcPriceLead(y) { return svcInterp(SVC_PRICE.netflicks, y); }
+// appeal 0..1: what's on, the price against the others, and the mood
+function svcAppeal(k, s) {
+  const net = TV_NETS[k], y = S.year, shows = typeof tvAll === 'function' ? tvAll().filter(x => x.net === k && x.y >= y - 2) : [];
+  const showQ = shows.length ? shows.reduce((t, x) => t + x.q, 0) / shows.length / 100 : .5;
+  const T = typeof strm === 'function' ? strm().t.filter(t => t.sv === k && S.week - t.w0 < 52) : [], lib = Math.min(1, T.length / 40);
+  const L = svcLive().map(svcOf).filter(Boolean), avgP = L.reduce((t, x) => t + x.price, 0) / Math.max(1, L.length), priceComp = clamp(1 - (s.price - avgP) / Math.max(1, avgP), .3, 1.3) / 1.3;
+  return clamp(.35 * showQ + .25 * lib + .2 * priceComp + .2 * (s.mood === 'land grab' ? .8 : s.mood === 'profit pivot' ? .35 : .55) + s.boost + (rnd() - .5) * .12, .05, 1);
+}
+// ---- every quarter ----
+function svcQuarter() {
+  const y = svcYear(S.week), A = svcAll(); R = wstream('svc', S.week);
+  for (const k of Object.keys(SVC_META)) if (SVC_META[k].on <= y && !A[k] && TV_NETS[k]) { A[k] = svcBirth(k, y); if (S.year >= S.startYear) svcNews(`${TV_NETS[k].name} launches at $${A[k].price.toFixed(2)} a month. ${SVC_META[k].studio ? 'Its parent stops licensing films to everyone else.' : SVC_META[k].lead ? 'The DVD-by-mail company now streams too, at no extra cost.' : ''}`); }
+  const live = svcLive(y).map(svcOf).filter(Boolean); if (!live.length) return;
+  const lead = A.netflicks;
+  for (const s of live) {
+    const m = SVC_META[s.k], path = SVC_PATH[s.k], pathAdds = svcInterp(path, y + .25) - svcInterp(path, y), ap = svcAppeal(s.k, s);
+    let mul = clamp(ap / .5, .3, 1.8);
+    if (S.week - s.lastRise < 13) mul *= .6;   // the month after a price rise
+    if (s.crack && S.week - s.crack < 39) mul *= 2.2;   // the crackdown surge
+    if (s.sport && S.week - s.sport < 52) mul *= 1.05;
+    const adds = pathAdds * mul + (pathAdds < .5 ? 0 : (rnd() - .5) * pathAdds * .2);
+    const exp = pathAdds * (s.expMul || 1);   // the market knows the growth path; it prices the surprise against it
+    s.subs = Math.max(.1, s.subs + adds); s.adds.push(+adds.toFixed(2)); if (s.adds.length > 8) s.adds.shift();
+    // price: a rise every year and a half or two, sooner once dominant or in a pivot
+    const share = s.subs / live.reduce((t, x) => t + x.subs, 0);
+    if (S.week - s.lastRise >= 78 && y >= 2011 && rnd() < (share > .3 || s.mood === 'profit pivot' ? .5 : .25)) { const d = rnd() < .5 ? 1 : 2; s.price += d; s.lastRise = S.week; svcNews(`${TV_NETS[s.k].name} raises its price by $${d} to $${s.price.toFixed(2)} a month.`); }
+    if (y >= 2022.75 && !s.adOn && !m.bundle && (m.lead || m.studio)) { s.adOn = S.week; svcNews(`${TV_NETS[s.k].name} launches a cheaper plan with ads at $${(s.price * .45).toFixed(2)}.`); }
+    if (s.adOn) s.ad = Math.min(.45, s.ad + .05);
+    if (m.lead && !s.crack && y >= 2023 && s.subs >= 200) { s.crack = S.week; s.boost -= .02; svcNews(`${TV_NETS[s.k].name} ends password sharing outside the household. Sign-ups hit a record within days.`); }
+    // money ($ millions, real scale)
+    const arpu = s.price * .72 * (1 - s.ad) + s.ad * (s.price * .45 * .72 + Math.min(6, 2 + Math.max(0, y - 2023) * 1.2)), rev = s.subs * arpu * 3;
+    const rate = s.mood === 'land grab' ? (m.studio ? 1.0 : m.lead && y < 2016 ? .8 : .75) : s.mood === 'profit pivot' ? .4 : .5;
+    const spend = rev * rate * (s.sport && S.week - s.sport < 52 ? 1.1 : 1);
+    s.amort = s.amort * .75 + spend * .25; const other = rev * .22, op = rev - s.amort - other;
+    s.cash += rev - spend - other - s.debt * .015; if (s.cash < 0) { s.debt += -s.cash; s.cash = 0; }
+    s.debt = Math.max(0, s.debt - Math.max(0, s.cash - rev) * .5); if (s.cash > rev) s.cash = rev;
+    s.rev = rev; s.op = op; s.spend = spend;
+    // the market: the surprise in adds (or, once a giant stops reporting them, in revenue)
+    const surprise = m.lead && y >= 2025 ? (rev / Math.max(1, s.prevRev || rev) - 1.015) * 3 : (adds - exp) / Math.max(.5, Math.abs(exp)); s.expMul = (s.expMul || 1) * .6 + mul * .4;
+    const ret = clamp(2.5 * surprise * .4, -.35, .35) + .015 + (s.op > 0 ? .005 : -.005) + (rnd() - .5) * .06; s.prevRev = rev;
+    const before = s.stock; s.stock = Math.max(3, s.stock * (1 + ret));
+    if (ret <= -.2) { s.bar *= 1.25; svcNews(`${TV_NETS[s.k].name} misses its subscriber forecast. The shares fall ${Math.round(-ret * 100)}% and every project without a start date is frozen.`); }
+    else if (ret >= .15) svcNews(`${TV_NETS[s.k].name} beats forecasts by ${Math.abs(adds - exp).toFixed(1)}M subscribers; shares jump ${Math.round(ret * 100)}%.`);
+    if (s.mood === 'land grab' && adds > s.subs * .04) s.bar *= .92;
+    s.bar = 1 + (s.bar - 1) * .85;
+    // moods: a land grab for the first years, then steady; years of losses force a pivot
+    if (Math.floor(y) !== Math.floor(y - .25)) { s.lossY = s.op * 4 < 0 ? s.lossY + 1 : 0; }
+    if (s.mood === 'land grab' && y - m.on >= (m.lead ? 9 : 4)) { s.mood = 'steady'; svcNews(`${TV_NETS[s.k].name} says growth now has to pay for itself.`); }
+    if (s.mood !== 'profit pivot' && (s.lossY >= 2 || s.debt > rev * 16) && y >= 2021) { s.mood = 'profit pivot'; s.pivot = S.week; s.boost -= .03; svcNews(`${TV_NETS[s.k].name} pivots to profit: fewer shows, a higher price, and ${10 + Math.floor(rnd() * 30)} titles pulled and written off.`); svcPivotHits(s); }
+    if (s.mood === 'profit pivot' && s.op > 0 && S.week - (s.pivot || 0) > 104) s.mood = 'steady';
+    s.boost *= .6;
+    s.h.push({ w: S.week, subs: +s.subs.toFixed(1), price: +s.price.toFixed(2), rev: Math.round(rev), op: Math.round(op), stock: +s.stock.toFixed(1), ad: +s.ad.toFixed(2) }); if (s.h.length > 160) s.h.shift();
+  }
+  // sport: once a year a package goes to whoever bids most
+  if (S.week % 52 < 13 && y >= 2017 && rnd() < .3) { const b = live.filter(s => s.cash > 500 || SVC_META[s.k].lead || SVC_META[s.k].bundle).sort((a, c) => c.subs - a.subs)[Math.floor(rnd() * 2)]; if (b) { b.sport = S.week; svcNews(`${TV_NETS[b.k].name} wins a live sports package for $${(.5 + rnd() * 2).toFixed(1)}B a year.`); } }
+  // consolidation: two small studio-owned services merge after three years in the leader's shadow
+  if (lead && y >= 2023) { const small = live.filter(s => SVC_META[s.k].studio && s.subs < lead.subs * .4); for (const s of small) s.small = (s.small || 0) + 1;
+    const ripe = small.filter(s => s.small >= 12).sort((a, c) => a.subs - c.subs); if (ripe.length >= 2 && rnd() < .15) { const [a, b] = ripe; b.subs += a.subs * .8; a.closed = S.week; a.into = b.k; svcNews(`${TV_NETS[a.k].name} folds into ${TV_NETS[b.k].name}. The combined service keeps four in five of its subscribers and a third of its staff.`); } }
+}
+function svcNews(t) { const N = S.svcNews = S.svcNews || []; N.push({ w: S.week, t }); if (N.length > 60) N.shift(); if (!S.archiving) news('Streaming', t, {}); }
+// a pivot pulls titles: if one of yours goes, you hear about it
+function svcPivotHits(s) {
+  const M = S.me; if (!M || !M.party || !M.party.done) return;
+  const mine = (typeof strm === 'function' ? strm().t : []).filter(t => t.sv === s.k && S.films[t.f] && (ME().credits || []).includes(t.f)).slice(0, 1);
+  for (const t of mine) inbox('note', `${S.films[t.f].title} is pulled`, `${TV_NETS[s.k].name} removes ${S.films[t.f].title} in its profit pivot and writes off what it paid. It turns up a month later on a free channel with ads. Your residuals drop to almost nothing.`);
+}
+{ const _mo = monthly; monthly = function () { const r = _mo.apply(this, arguments); const q = Math.floor(S.week / 13); if (S.svcQ !== q) { S.svcQ = q; svcQuarter(); } return r; }; }
+
+// ---- what the rest of the world sees ----
+// subscribers: the live service when it exists, the old curve otherwise
+{ const _sub = subs; subs = function (n, w = S.week) { const s = n && svcOf(n.k); if (!s || !s.h.length) return _sub.apply(this, arguments); if (s.closed && w >= s.closed) return 0;
+  const H = s.h; if (w >= H[H.length - 1].w) return s.subs; for (let i = H.length - 1; i > 0; i--) if (H[i - 1].w <= w) { const a = H[i - 1], b = H[i]; return a.subs + (b.subs - a.subs) * (w - a.w) / Math.max(1, b.w - a.w); } return H[0].subs; }; }
+{ const _st = streamers; streamers = function () { return _st.apply(this, arguments).filter(n => !(svcOf(n.k) || {}).closed); }; }
+// what a service will pay: more in a land grab, less in a pivot, less when its greenlight bar is up
+function svcBidMul(k) { const s = svcOf(k); if (!s) return 1; return (s.mood === 'land grab' ? 1.25 : s.mood === 'profit pivot' ? .7 : 1) / Math.sqrt(s.bar); }
+function svcLicMul() { const L = svcLive().map(svcOf).filter(Boolean); if (!L.length) return 1; const w = L.reduce((t, s) => t + s.subs, 0); return clamp(L.reduce((t, s) => t + svcBidMul(s.k) * s.subs, 0) / Math.max(1, w), .82, 1.25); }
+{ const _lb = licBids; licBids = function (f) { return _lb.apply(this, arguments).map(([n, v]) => [n, v * svcBidMul(n.k)]).sort((a, b) => b[1] - a[1]); }; }
+// the share price on the Ticker follows the business
+{ const _sd = sectorDriver; sectorDriver = function (s, w) { const v = s && s.k && s.k.startsWith('net_') && svcOf(s.k.slice(4)); if (!v || !v.h.length) return _sd.apply(this, arguments); const H = v.h; let x = H[0].stock; for (const p of H) if (p.w <= w) x = p.stock; return Math.max(.1, x / 50); }; }
+// cinemas: the window shrinks and attendance with it
+function cinemaWindow(y = S.year) { return y < 2020 ? 90 : y < 2022 ? 30 : y < 2026 ? 40 : 45; }
+function cinemaIndex(y = S.year) { const L = svcLive(y + .5).map(svcOf).filter(Boolean), share = Math.min(.6, L.reduce((t, s) => t + s.subs, 0) / 2000); return clamp(1 - .03 * (90 - cinemaWindow(y)) / 10 - share * .25, .55, 1); }
+
+// ---- jobs inside a service ----
+const SV_JOBS = [
+  { k: 'sv_coord', jid: 'sv_coordinator', t: 'Content coordinator (streaming)', tier: 1, subs: ['tas', 'eth'], days: 5, rate: 260, weeks: 20, fam: 'stream', sv: 1, d: 'Track every project, take notes in every meeting, write coverage on the scripts nobody else has time for.' },
+  { k: 'sv_analyst', jid: 'sv_content_analyst', t: 'Content strategy analyst', tier: 2, subs: ['fin', 'tas'], days: 5, rate: 520, weeks: 26, fam: 'stream', sv: 1, d: 'Forecast what a pitch will be watched for, and tell the room after launch whether you were right: starters, completers, cost per view.' },
+  { k: 'sv_prog', jid: 'sv_programming', t: 'Programming manager (homepage)', tier: 2, subs: ['tas', 'pack'], days: 5, rate: 480, weeks: 26, fam: 'stream', sv: 1, d: 'Decide what launches when, which title gets the big banner, and when to drop a season all at once or weekly.' },
+  { k: 'sv_loc', jid: 'sv_localisation', t: 'Localisation manager', tier: 2, subs: ['pack', 'eth'], days: 5, rate: 420, weeks: 26, fam: 'stream', sv: 1, d: 'Thirty languages, one release date: commission the dubs and subtitles, cast the voices, check them all.' },
+  { k: 'sv_art', jid: 'sv_key_art', t: 'Marketing and key art manager', tier: 2, subs: ['tas', 'cha'], days: 5, rate: 500, weeks: 26, fam: 'stream', sv: 1, d: 'Dozens of versions of every poster, tested on real viewers; trailers, social and the press tour.' },
+  { k: 'sv_acq', jid: 'sv_acquisitions', t: 'Acquisitions manager', tier: 3, subs: ['tas', 'fin'], days: 5, rate: 900, weeks: 26, fam: 'stream', sv: 1, d: 'Festivals and markets: watch everything, model what each film is worth to the service, bid at midnight.' },
+  { k: 'sv_ce', jid: 'sv_creative_exec', t: 'Creative executive (originals)', tier: 3, subs: ['struc', 'tas', 'pack'], days: 5, rate: 850, weeks: 30, fam: 'stream', sv: 1, d: 'Hear pitches, give notes on scripts and cuts, defend your projects in the greenlight meeting.' },
+  { k: 'sv_ba', jid: 'sv_business_affairs', t: 'Business affairs director', tier: 4, subs: ['fin', 'pack', 'cha'], days: 5, rate: 1600, weeks: 30, fam: 'stream', sv: 1, d: 'Negotiate the deals: cost-plus premiums, overall deals, library licences, the guild rules.' },
+  { k: 'sv_vp', jid: 'sv_vp_originals', t: 'VP, originals', tier: 5, subs: ['pack', 'fin', 'tas'], days: 5, rate: 3500, weeks: 40, fam: 'stream', sv: 1, d: 'Own a slate: the budget, the greenlights, the renewals, and the quarterly call with the people who run the service.' }
+];
+for (const t of SV_JOBS) if (!ODD_JOBS.some(x => x.k === t.k)) { ODD_JOBS.push(t); ODD_BY[t.k] = t; }
+if (typeof FAM_TOPIC !== 'undefined') FAM_TOPIC.stream = 'stream';
+function svcPosts() {
+  const M = S.me, L = tierLevel(), y = svcYear(S.week), live = svcLive(y).filter(k => (HUBS[TV_NETS[k].hub] || {}).m === (HUBS[M.hub] || {}).m), out = [];
+  if (!live.length || prnd() > .6) return out;
+  const T = SV_JOBS.filter(t => t.tier <= L + 1 && t.tier >= L - 2 && (t.k !== 'sv_ce' && t.k !== 'sv_vp' || y >= 2013) && !M.jobs.some(j => j.k === t.k));
+  for (let i = 0, n = 1 + (L >= 3 ? 1 : 0); i < n && T.length; i++) { const k = live[Math.floor(prnd() * live.length)], t = T[Math.floor(prnd() * T.length)], p = makePost(t, null);
+    Object.assign(p, { t: `${t.t}, ${TV_NETS[k].name}`, mco: TV_NETS[k].name, sv: k }); out.push(p); }
+  return out;
+}
+{ const _tp = tvPosts; tvPosts = function () { return _tp.apply(this, arguments).concat(svcPosts()); }; }
+function svJob() { return S.me.jobs.find(j => /^sv_/.test(j.k)); }
+
+// ---- the work itself: a decision every fortnight, drawn from what your job does ----
+const SV_DESK = {
+  greenlight: { who: ['sv_ce', 'sv_vp', 'sv_analyst', 'sv_coord'], mk: (s, r) => { const f = (.7 + r() * .9).toFixed(2), bar = s.bar.toFixed(2); return { title: 'The greenlight meeting', text: `A ${pickLine(['heist series', 'family comedy', 'true-crime documentary', 'fantasy epic', 'local-language thriller', 'dating show'], S.week)} is up. The forecast puts it at ${f}× the service's efficiency bar of ${bar}; the room is split. ${+f < 1 ? 'The numbers say no. The showrunner\'s last show was loved by the people who saw it.' : 'The numbers say yes. Nobody in the room likes the script.'}`, eff: +f, opts: [['gl_numbers', 'Go with the forecast'], ['gl_gut', 'Go with your gut'], ['gl_cheap', 'Ask for a cheaper version']] }; } },
+  renewal: { who: ['sv_ce', 'sv_vp', 'sv_analyst'], mk: (s, r) => { const c = 38 + Math.floor(r() * 26); return { title: 'The renewal memo', text: `A season-two show finished at ${c}% completion; the cast's new deals push the next season's cost up 20%. ${c >= 50 ? 'Above the line most services use.' : 'Below the 50% line most services use.'} The showrunner has already broken the story for season three.`, comp: c, opts: [['rn_renew', 'Renew it'], ['rn_final', 'Order a short final season'], ['rn_cancel', 'Cancel it']] }; } },
+  billboard: { who: ['sv_prog', 'sv_vp'], mk: () => ({ title: 'The homepage banner', text: 'One slot at the top of the homepage this week. A new original with a big star, a licensed sitcom that keeps people subscribed, or an international hit that is quietly climbing the Top 10.', opts: [['bb_orig', 'The new original'], ['bb_comfort', 'The comfort sitcom'], ['bb_intl', 'The international hit']] }) },
+  drop: { who: ['sv_prog'], mk: () => ({ title: 'All at once, or weekly?', text: 'A mystery series launches next month. All eight episodes at once makes a bigger first week; weekly keeps people talking (and subscribed) for two months.', opts: [['dr_binge', 'All at once'], ['dr_weekly', 'Weekly']] }) },
+  art: { who: ['sv_art'], mk: () => ({ title: 'The key-art test', text: 'Seven versions of the poster went out to a slice of the audience. The one that tested best doesn\'t show the lead actor at all. Their agent has already called twice.', opts: [['ka_data', 'Use the winner'], ['ka_star', 'Keep the star'], ['ka_split', 'Different art in different regions']] }) },
+  dub: { who: ['sv_loc'], mk: () => ({ title: 'Thirty languages', text: 'A local-language drama is testing well at home. Dubbing it into thirty languages for day one costs a fortune; subtitles cost almost nothing, and most people won\'t watch with them.', opts: [['db_full', 'Full dubs, day one'], ['db_sub', 'Subtitles only'], ['db_five', 'Dub the five biggest markets']] }) },
+  festival: { who: ['sv_acq'], mk: (s, r) => { const v = 8 + Math.floor(r() * 25); return { title: 'Midnight at the festival', text: `The film everyone stood up for is being sold tonight. Two other services and an independent distributor are bidding; the price is near $${v}M for the world. The independent offers the filmmakers a real cinema release.`, v, opts: [['fs_win', `Bid $${Math.round(v * 1.2)}M for the world`], ['fs_theatre', 'Promise a cinema release too'], ['fs_walk', 'Walk away']] }; } },
+  costplus: { who: ['sv_ba', 'sv_vp'], mk: (s, r) => { const p = 20 + Math.floor(r() * 4) * 5; return { title: 'The cost-plus offer', text: `A creator with two hits wants to make their next show with you. Standard is the budget plus ${p}% up front, and the service owns it forever: no backend. A studio has offered them less now and a share of the profits later.`, p, opts: [['cp_std', `Hold at ${p}%`], ['cp_up', `Go to ${p + 10}%`], ['cp_back', 'Offer a small backend instead']] }; } },
+  price: { who: ['sv_vp'], mk: s => ({ title: 'The price memo', text: `Finance wants the price up $2, to $${(s.price + 2).toFixed(2)}. The last rise cost a quarter of growth for a few months; this one would pay for the slate.`, opts: [['pr_up', 'Raise it'], ['pr_hold', 'Hold it'], ['pr_ads', 'Push people to the plan with ads instead']] }) }
+};
+function svDeskWeek() {
+  const M = S.me, j = svJob(); if (!j || S.week % 2 || pending().some(x => x.kind === 'svdesk')) return;
+  const s = svcOf(j.sv || svcLive()[0]); if (!s) return;
+  const keys = Object.keys(SV_DESK).filter(k => SV_DESK[k].who.includes(j.k) && !(k === 'renewal' && S.year < 2015)); if (!keys.length) return;
+  const r = hashRand((M.id + 1) * 7919 + S.week), k = keys[Math.floor(r() * keys.length)], D = SV_DESK[k].mk(s, r);
+  inbox('svdesk', D.title, D.text + ` (${TV_NETS[s.k].name})`, Object.assign({ desk: k, sv: s.k, job: j.id, choices: D.opts.map(([key, label]) => ({ k: key, label })) }, D, { title: D.title }));
+}
+function svDeskPick(it, k) {
+  if (it.kind !== 'svdesk') return false; it.done = true; const M = S.me, me = ME(), s = svcOf(it.sv), j = M.jobs.find(x => x.id === it.job);
+  const fx = (score, boost, t, ok) => { if (j && typeof jobScore === 'function') jobScore(j, score, it.title); if (s) s.boost += boost; if (score > 0) me.standing = clamp(me.standing + score * .3, 0, 100); it.result = { ok, roll: ok !== undefined ? M.lastRoll : undefined, t }; return true; };
+  switch (k) {
+    case 'gl_numbers': return it.eff >= 1 ? fx(1, .01, 'It goes ahead on the numbers. Six months later it does almost exactly what the forecast said, which nobody remembers as a triumph.') : fx(.5, 0, 'You pass. The showrunner takes it to a rival, where it does fine. Fine is not a hit.');
+    case 'gl_gut': { const ok = roll('tas', 14); return ok ? fx(2, .03, 'Your gut was right: it is the most-talked-about show of the season, and your name is on the memo that saved it.', ok) : fx(-1, -.01, 'Your gut was wrong. The finance team circulates the forecast you ignored.', ok); }
+    case 'gl_cheap': return fx(.8, .005, 'Eight episodes become six and the budget drops by a quarter. Everyone is a little unhappy, which means it was a fair deal.');
+    case 'rn_renew': return it.comp >= 50 ? fx(1.2, .02, 'Renewed. The fans who finished it are loud and loyal.') : fx(-.5, -.01, 'Renewed against the numbers. The third season costs more and fewer people finish it.');
+    case 'rn_final': return fx(1, .01, 'A six-episode final season. The fans get an ending; the service gets a show that was not cancelled on a cliffhanger.');
+    case 'rn_cancel': return fx(it.comp < 50 ? 1 : -.3, it.comp < 50 ? 0 : -.01, it.comp < 50 ? 'Cancelled. The petition gets two hundred thousand signatures and changes nothing.' : 'Cancelled at a healthy completion rate. Someone leaks the memo.');
+    case 'bb_orig': { const ok = roll('tas', 12); return fx(ok ? 1.2 : .2, ok ? .02 : 0, ok ? 'The original opens at number one in forty countries.' : 'The original opens at number seven. The star\'s team asks why.', ok); }
+    case 'bb_comfort': return fx(.6, .01, 'Churn ticks down a fraction. Nobody outside the building notices; the finance team does.');
+    case 'bb_intl': { const ok = roll('tas', 13); return fx(ok ? 1.5 : .3, ok ? .03 : 0, ok ? 'The international hit goes global. A show made for the price of one episode of the big original outdraws it.' : 'It stays a local hit. Lovely numbers in one country.', ok); }
+    case 'dr_binge': return fx(.7, .01, 'A huge first week, then silence. By week three it is gone from the Top 10.');
+    case 'dr_weekly': return fx(.9, .015, 'Two months of theories online. Fewer people cancel while it runs.');
+    case 'ka_data': return fx(.9, .015, 'The art without the star wins the test and the launch. The star\'s agent stops returning your calls.');
+    case 'ka_star': return fx(.4, 0, 'The star stays on the poster and is happy. The launch is fine.');
+    case 'ka_split': { const ok = roll('pack', 12); return fx(ok ? 1.1 : .3, ok ? .015 : 0, ok ? 'Different art for different places. Everyone gets the poster that works on them.' : 'The regional versions leak side by side. The press has fun with it.', ok); }
+    case 'db_full': { const ok = roll('pack', 13); return fx(ok ? 1.5 : 0, ok ? .03 : -.005, ok ? 'It travels: number one in thirty countries. Dubbing paid for itself in a week.' : 'The dubs are rushed and the reviews say so. It stays home.', ok); }
+    case 'db_sub': return fx(.3, 0, 'Subtitles. It does well where people read them.');
+    case 'db_five': return fx(.9, .01, 'Five big markets dubbed; it does well in four of them.');
+    case 'fs_win': { const ok = roll('tas', 13); return fx(ok ? 1.4 : -.5, ok ? .02 : -.01, ok ? 'You win it. It becomes the service\'s first awards contender.' : 'You win it, for too much. It opens to polite reviews and is gone in a week.', ok); }
+    case 'fs_theatre': { const ok = roll('cha', 13); return fx(ok ? 1.6 : .2, ok ? .02 : 0, ok ? 'The filmmakers choose you because you promised them cinemas. The award campaign writes itself.' : 'They choose the independent. They wanted a real release, and believed the one who has always done it.', ok); }
+    case 'fs_walk': return fx(.4, 0, 'You walk. The film sells for twice your number and underperforms. You feel fine about it.');
+    case 'cp_std': { const ok = roll('pack', 13); return fx(ok ? 1.2 : .3, ok ? .015 : 0, ok ? 'They sign. The show is yours forever; their next one may not be.' : 'They go to the studio for the backend.', ok); }
+    case 'cp_up': return fx(1, .02, 'Ten points more and they sign on the spot. The service owns the hit; your finance team grumbles about the premium.');
+    case 'cp_back': { const ok = roll('cha', 14); return fx(ok ? 1.5 : 0, ok ? .02 : 0, ok ? 'A small backend, unheard of here. They sign, and talk about it, and three other creators call.' : 'Legal blocks it: the service doesn\'t do backends.', ok); }
+    case 'pr_up': if (s) { s.price += 2; s.lastRise = S.week; svcNews(`${TV_NETS[s.k].name} raises its price by $2 to $${s.price.toFixed(2)} a month.`); } return fx(.8, -.02, 'The price goes up. Growth stalls for a quarter; the money comes in.');
+    case 'pr_hold': return fx(.4, .01, 'You hold. The quarter looks good; the next budget meeting does not.');
+    case 'pr_ads': if (s && !s.adOn && S.year >= 2020) { s.adOn = S.week; svcNews(`${TV_NETS[s.k].name} launches a cheaper plan with ads.`); } return fx(1, .01, 'More people choose the plan with ads than anyone predicted. The ad sales team is hiring.');
+  }
+  it.result = { t: 'Noted.' }; return true;
+}
+
+// ---- deals that come to you ----
+function svDealsWeek() {
+  const M = S.me, me = ME(); if (!M || !M.party || !M.party.done || S.week % 13 !== 7) return;
+  const live = svcLive().map(svcOf).filter(Boolean); if (!live.length) return;
+  const grab = live.filter(s => s.mood !== 'profit pivot' && s.bar <= 1.15).sort((a, b) => b.cash - a.cash)[0];
+  // a cost-plus offer for a film your company is finishing
+  const c = typeof myCo === 'function' ? myCo() : null;
+  if (grab && c && !pending().some(x => x.kind === 'svbuy')) { const f = S.films.find(f => f.co === c.id && f.rel === null && f.stage === 3 && !f.streamSold && !f.svOffer);
+    if (f && prnd() < .35) { f.svOffer = S.week; const prem = .15 + prnd() * .25, fee = f.cost * (1 + prem);
+      inbox('svbuy', `${TV_NETS[grab.k].name} wants ${f.title}`, `They will buy ${f.title} outright for ${fmtM(fee)}: its cost plus ${Math.round(prem * 100)}%, paid now. It goes straight to the service in every country. No cinemas, no box office, no backend; if it is a hit, the hit is theirs.`, { film: f.id, fee, sv: grab.k, choices: [{ k: 'sb_sell', label: `Sell it (${fmtM(fee)})` }, { k: 'sb_keep', label: 'Keep it for cinemas' }] }); } }
+  // an overall deal for someone with a name
+  const L = careerLevel(); if (grab && !M.overall && L >= 4 && ((me.fame || 0) >= 35 || me.standing >= 65) && ['writer', 'director', 'producer'].includes(me.role) && prnd() < .15 && !pending().some(x => x.kind === 'svoverall')) {
+    const per = usd(Math.round(250000 * L * (1 + (me.fame || 0) / 50) / 50000) * 50000);
+    inbox('svoverall', `An overall deal from ${TV_NETS[grab.k].name}`, `Three years, ${fmtCash(per)} a year, to make shows only for them. They expect at least one greenlit project a year: deals that produce nothing get "reviewed".`, { per, sv: grab.k, choices: [{ k: 'od_yes', label: 'Sign it' }, { k: 'od_no', label: 'Stay free' }] }); }
+  // the overall deal's money, and its review
+  const O = M.overall; if (O && !O.done) { const q = Math.round(O.per / 4); M.cash += q - taxOn(q); O.paid = (O.paid || 0) + q;
+    if (S.week - O.w >= 52 && S.week - (O.chk || O.w) >= 52) { O.chk = S.week; const made = (M.shows || []).some(x => x.y === S.year || x.y === S.year - 1) || (me.credits || []).some(id => S.films[id] && S.films[id].gl > S.week - 52);
+      if (!made) { O.dry = (O.dry || 0) + 1; if (O.dry >= 2 || prnd() < .5) { const buy = Math.round(O.per * (O.until - S.week) / 52 * .5); M.cash += buy - taxOn(buy); O.done = 1; inbox('note', 'Your deal is reviewed', `A year with nothing greenlit. ${TV_NETS[O.sv].name} buys out the rest of your deal at half: ${fmtCash(buy)}. You are free, and slightly less in demand.`); } } else O.dry = 0; }
+    if (S.week >= O.until) { O.done = 1; diary(`Your overall deal with ${TV_NETS[O.sv].name} ends.`); } }
+  // the streamer bump: an old show of yours found by millions
+  if (S.week % 52 === 20) for (const sh of (M.shows || []).filter(x => x.status && /cancelled/.test(x.status) && S.year - (x.last || x.y) >= 5 && !x.bump)) { if (prnd() > .15) continue; sh.bump = S.year; const L1 = svcLive()[0], roy = usd(15000 * (sh.seas ? sh.seas.length : 1));
+    M.cash += roy - taxOn(roy); me.fame = clamp((me.fame || 0) + 2, 0, 100); milestone(`${sh.title} found a new audience on streaming`, 'work');
+    inbox('note', `${sh.title} is suddenly everywhere`, `${TV_NETS[L1].name} licensed ${sh.title} and it is the most-watched show of the summer, years after it was cancelled. Your fixed residual: ${fmtCash(roy)}. The views go up a thousand times; the residuals don't.`); }
+  // the worst of it: bought streams
+  const songs = (M.works || []).filter(w => w.type === 'song').length; if (songs >= 2 && !M.botOffer && followers('spinly') < 20000 && prnd() < .2) { M.botOffer = S.week;
+    inbox('svbots', 'A million streams for $2,000', 'A stranger in your messages sells "promotion": a million plays on your next song, guaranteed, from accounts that never sleep. Playlists notice numbers. So do the platforms.', { choices: [{ k: 'bt_buy', label: 'Buy them' }, { k: 'bt_no', label: 'Block them' }] }); }
+  if (M.bots && !M.bots.caught && S.week - M.bots.w > 8 && prnd() < .35) { M.bots.caught = S.week; for (const w of (M.works || []).filter(w => w.type === 'song' && w.rel >= M.bots.w)) { w.done = 1; w.units = Math.round(w.units * .2); }
+    me.standing = clamp(me.standing - 5, 0, 100); if (M.deal) M.deal = null; milestone('Caught buying streams', 'life'); inbox('note', 'Taken down', 'The platform\'s fraud team removes your songs released since the purchase and withholds the royalties. If you had a label, you don\'t now. People in the business heard.'); }
+}
+function svPick(it, k) {
+  const M = S.me, me = ME();
+  if (it.kind === 'svbuy') { it.done = true; const f = S.films[it.film], c = typeof myCo === 'function' ? myCo() : null;
+    if (k === 'sb_sell' && f && c && f.rel === null) { c.cash += it.fee; f.streamSold = S.week; f.svcBuyer = it.sv; f.cost = f.cost; it.result = { t: `Sold. ${fmtM(it.fee)} lands in the company's account. ${f.title} premieres on ${TV_NETS[it.sv].name} in every country at once.` }; }
+    else it.result = { t: 'You keep it. It will live or die in cinemas, and the backend is yours.' }; return true; }
+  if (it.kind === 'svoverall') { it.done = true; if (k === 'od_yes') { M.overall = { sv: it.sv, per: it.per, w: S.week, until: S.week + 156 }; milestone(`Signed an overall deal with ${TV_NETS[it.sv].name}`, 'money'); it.result = { t: 'You sign. Money every quarter; a parking space with your name on it; the feeling of being owned, a little.' }; } else it.result = { t: 'You stay free. You can sell to anyone.' }; return true; }
+  if (it.kind === 'svbots') { it.done = true; if (k === 'bt_buy') { const c0 = usd(2000); M.cash -= c0; M.bots = { w: S.week }; it.result = { t: 'Paid. Your next song will have a very good first week.' }; } else it.result = { t: 'Blocked and reported. The account is gone by morning; so is the next one.' }; return true; }
+  return false;
+}
+// bought streams inflate the next releases, until someone looks
+{ const _rw = releaseWork; releaseWork = function (a) { const n0 = (S.me.works || []).length, ok = _rw.apply(this, arguments), w = ok && S.me.works[n0]; if (w && w.type === 'song' && S.me.bots && !S.me.bots.caught) w.v0 = Math.round(w.v0 * 3 + 50000); return ok; }; }
+WEEK_HOOKS.push(svDeskWeek, svDealsWeek);
+PICK_HOOKS.push(svDeskPick, svPick);
+// what the afterlife licence pays depends on how hungry the services are (index.html afterlife)
+
+// ---- what it's like, and how it's taught: the Craft Library topic ----
+if (typeof CODEX !== 'undefined') CODEX.stream = ['The streaming business', 'fin',
+  ['A subscription service lives on two numbers: how many people join each month and how many leave (churn). The leaders lose about 2% a month; weak services lose 7%.', 'Revenue per subscriber depends on where they live: a subscriber in a cheap market pays a fraction of an American one.', 'Original shows cost more than licensed ones but can\'t be taken away by a rival who owns them.'],
+  ['A greenlight is a forecast of viewing divided by cost: the "efficiency" a service needs rises when its share price falls.', 'Cost-plus deals pay the budget plus a premium up front and buy out the backend: safe for creators, and a hit pays them no more.', 'Completion rate (how many who start a season finish it) decides renewals; around half is the usual line.'],
+  ['Price rises cost a quarter of growth and pay for the slate; ad-supported plans win the price-sensitive back.', 'A studio that launches its own service stops licensing its films to others, and loses that money while the service grows.', 'Markets price a subscription company on subscriber growth: a miss of a few million can wipe a third off its value in a day.']];
+
+// ---- the Streamboard: the whole market on one screen ----
+function streamboardHTML() {
+  const y = svcYear(S.week), L = svcLive(y).map(svcOf).filter(Boolean).sort((a, b) => b.subs - a.subs);
+  if (!L.length) return `<div class="card"><h3>Streamboard</h3><p class="muted">No streaming services yet. ${S.year < 1997 ? 'The first one starts as a company that posts DVDs, in 1997.' : 'The DVD-by-mail company will start streaming in 2007.'}</p></div>`;
+  const tot = L.reduce((t, s) => t + s.subs, 0), B = v => v >= 1000 ? `$${(v / 1000).toFixed(1)}B` : `$${Math.round(v)}M`;
+  const spark = s => { const H = s.h.slice(-16), mx = Math.max(...H.map(p => p.stock)), mn = Math.min(...H.map(p => p.stock)); return `<svg width="80" height="20" viewBox="0 0 80 20"><polyline fill="none" stroke="currentColor" stroke-width="1.5" points="${H.map((p, i) => `${(i / Math.max(1, H.length - 1) * 78 + 1).toFixed(1)},${(19 - (p.stock - mn) / Math.max(1e-6, mx - mn) * 18).toFixed(1)}`).join(' ')}"/></svg>`; };
+  const cols = ['#C0392B', '#1F4E79', '#C9971C', '#5B2D90', '#2D7A4C', '#8A5A12', '#6E7F95'];
+  const rows = L.map((s, i) => { const n = TV_NETS[s.k], m = SVC_META[s.k], add = s.adds.length ? s.adds[s.adds.length - 1] : 0;
+    return `<tr><td><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${cols[i % cols.length]}"></i> <b>${typeof netLink === 'function' ? netLink(s.k) : esc(n.name)}</b><br><span class="small muted">${esc(m.who)} · ${esc(s.mood)}</span></td><td class="n">${s.subs.toFixed(1)}M<br><span class="small ${add >= 0 ? 'good' : 'bad'}">${add >= 0 ? '+' : ''}${add.toFixed(1)}M</span></td><td class="n">$${s.price.toFixed(2)}${s.adOn ? `<br><span class="small muted">ads $${(s.price * .45).toFixed(2)} · ${Math.round(s.ad * 100)}%</span>` : ''}</td><td class="n">${B((s.rev || 0) * 4)}<br><span class="small ${s.op >= 0 ? 'good' : 'bad'}">${s.rev ? Math.round(s.op / s.rev * 100) : 0}% margin</span></td><td class="n">${B((s.spend || 0) * 4)}</td><td class="n">${s.debt > 1 ? B(s.debt) : '—'}</td><td class="n">${s.stock.toFixed(0)} ${spark(s)}</td><td class="n">${s.bar.toFixed(2)}</td></tr>`; }).join('');
+  const N = (S.svcNews || []).slice(-8).reverse();
+  return `<div class="card"><h3>Streamboard</h3><p class="small muted">Every service as a business: subscribers (global, millions), price a month, revenue and content spend a year, debt, the share price (100 at launch) and the efficiency a pitch needs to be greenlit (the bar).</p>
+    <div class="finbar">${L.map((s, i) => `<span style="width:${(s.subs / tot * 100).toFixed(1)}%;background:${cols[i % cols.length]}" title="${esc(TV_NETS[s.k].name)}"></span>`).join('')}</div>
+    <div class="tw"><table class="grid small"><thead><tr><th>Service</th><th>Subscribers</th><th>Price</th><th>Revenue</th><th>Content</th><th>Debt</th><th>Shares</th><th>Bar</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <h4>Cinemas</h4><p class="small">The exclusive cinema window is <b>${cinemaWindow()} days</b> (it was 90 before 2020). Cinema-going index: <b>${Math.round(cinemaIndex() * 100)}</b> (2019 = 100 before the services).</p>
+    <h4>How the money works</h4><ul class="small"><li><b>Adds and churn.</b> A service grows when what it has on is better and cheaper than the rest. A price rise costs a quarter of growth; a password crackdown brings a surge.</li><li><b>Losses, then profit.</b> New services spend more than they earn for years, on debt. When the losses run two years, the owners pivot: fewer shows, higher prices, titles pulled and written off.</li><li><b>The market.</b> Shares move on the surprise in subscribers. A fall of a fifth freezes greenlights; a land grab lowers the bar and raises what services pay for films (yours included).</li><li><b>Deals.</b> Services buy finished films outright at cost plus a premium, and sign creators to overall deals that want a show a year.</li></ul>
+    <h4>This quarter</h4><ul class="small">${N.map(x => `<li>${fmtDate(x.w, true)}: ${esc(x.t)}</li>`).join('') || '<li class="muted">Quiet.</li>'}</ul></div>`;
+}
+OS_EXTRA.stream = ['📡', 'Streamboard', 'The streaming services as businesses: subscribers, money, shares'];
+OS_VIEWS.stream = () => streamboardHTML();
+{ const g = OS_GROUPS.find(x => x[0] === 'Industry'); if (g && !g[1].includes('stream')) g[1].push('stream'); }
+if (typeof APP_GUIDE !== 'undefined') APP_GUIDE.stream = ['The streaming services, as businesses.', 'Each service adds and loses subscribers every quarter, raises its price, borrows, pivots and is priced by the market on its growth. What it pays for films and shows follows its mood.', 'Sell to a service when it is hungry; a land grab pays more for your films, a pivot pulls them.', 'Look at who is growing and who is losing money: that is who is buying.'];
+// </streaming>
+// <acts>
+// ---------------- The other industries, lived in: acts as people, releases as works ----------------
+// Music, online video, podcasts and the stage used to be a list of names with hashed numbers behind them. Now every
+// act is a person in the world, made the same way as everyone in film (skills, traits, a portrait, relationships,
+// a page you can open), with a career that runs week by week:
+//  · acts release on their own rhythm (a single every few months and an album now and then; a video most weeks;
+//    a podcast season; a play a year or so), with quality from their skills and an audience from their fans;
+//  · the charts are what was released, ranked by what it is doing this week (a release fades week by week, a good one
+//    more slowly), so a number one is a real song by a real act, with its own page;
+//  · fans follow good work and drift away from silence; fame follows fans;
+//  · the year's awards go to the year's best work (quality × audience), and the winners keep them;
+//  · new acts arrive every year and old ones stop; legends from the history of each form are in it too.
+// The people are made while the world is built (before the save baseline), with hashed dice, so every load makes
+// the same ones; a save from before this round loads without them and the old charts carry on.
+const ACT_ROLE = { singer: 'composer', band: 'composer', rapper: 'composer', dj: 'composer', duo: 'composer', choir: 'composer', composer: 'composer', creator: 'editor', blipper: 'editor', streamer: 'editor', show: 'writer', playwright: 'writer', troupe: 'actor' };
+const ACT_GROUP = new Set(['band', 'duo', 'choir', 'troupe', 'show']);
+const ACT_RATE = { music: .22, creator: .85, podcast: .45, stage: .06 };   // chance of a release at each four-weekly look
+const ACT_ENG = { music: 1.4, creator: 2.2, podcast: .5, stage: .02 }, ACT_CONV = { music: .05, creator: .04, podcast: .08, stage: .3 };
+const ACT_DECAY = { music: .82, creator: .6, podcast: .9, stage: .93 };
+const ACT_KIND = { music: ['single', 'single', 'single', 'album'], creator: ['video'], podcast: ['season'], stage: ['production'] };
+const ACT_SUBS = { composer: ['song', 'theme', 'score', 'orch'], editor: ['rhythm', 'shape', 'cont'], writer: ['struc', 'dial', 'char'], actor: ['range', 'pres', 'comic'] };
+function actsOn() { return !!S.actsOn; }
+function actSkill(p) { const L = ACT_SUBS[p.role] || []; return L.length ? L.reduce((t, k) => t + (p.sk[k] || 8), 0) / L.length : 10; }
+function actFame(fans) { return clamp(Math.log10(Math.max(10, fans)) * 15 - 40, 0, 95); }
+// one act, as a person
+function actMake(x, hub, i) {
+  const prev = R; R = mulberry((hashRand(HUB_IDS.indexOf(hub) * 7919 + i * 104729 + x.name.length * 31 + (S.seed | 0))() * 4294967296) >>> 0);
+  try {
+    const role = ACT_ROLE[x.kind] || 'composer', age = clamp(20 + Math.floor(rnd() * 8) + (S.year - x.from), 18, 104);
+    const p = makePerson(hub, role, { age, noPool: true }); if (ACT_GROUP.has(x.kind)) p.g = 'X';
+    p.name = x.name; p.ind = x.field; p.act = x.kind; p.fans = x.fans; p.mfrom = x.from; if (x.to) p.mto = x.to; p.debut = weekOfYear(Math.max(S.y0, x.from));
+    if (x.legend) p.legend = 1;
+    const boost = Math.log10(Math.max(10, x.fans)) - 3; for (const k of ACT_SUBS[role] || []) { p.sk[k] = clamp(p.sk[k] + boost * 1.6, 1, 20); p.pot[k] = Math.max(p.pot[k], p.sk[k]); } recalc(p);
+    p.fame = actFame(x.fans); p.standing = clamp(p.fame * .8 + rnd() * 10, 1, 95);
+    if (x.to && x.to < S.year) { p.retired = true; p.retY = x.to; }
+    if (p.born < 1925) { p.dead = true; p.retired = true; }   // the old legends: no obituary, they are simply history
+    if (ACT_GROUP.has(x.kind) && x.kind !== 'show') { const N = NAMES[HUBS[hub].lang] || NAMES.en; p.members = Array.from({ length: x.kind === 'duo' ? 2 : x.kind === 'choir' ? 6 : 3 + Math.floor(rnd() * 3) }, () => `${N.F.concat(N.M)[Math.floor(rnd() * (N.F.length + N.M.length))]} ${N.L[Math.floor(rnd() * N.L.length)]}`); }
+    const lab = typeof figLabel === 'function' ? figLabel(x) : null; if (lab) p.label = lab[1];
+    p.rel = []; p.discN = Math.max(0, Math.round((Math.min(S.year, x.to || S.year) - x.from) * (x.field === 'music' ? 1.5 : x.field === 'creator' ? 30 : x.field === 'podcast' ? 2 : .6)));
+    x.pid = p.id;
+    return p;
+  } finally { R = prev; }
+}
+// a release: quality from skills, an audience from fans, and a title from the same generator the old charts used
+function actRelease(p, w, x) {
+  const f = p.ind, kind = ACT_KIND[f][Math.floor(rnd() * ACT_KIND[f].length)], q = clamp(Math.round(actSkill(p) * 3.6 + 12 + gauss() * 9), 5, 98);
+  const v0 = Math.round(p.fans * ACT_ENG[f] * Math.pow(q / 60, 2) * (.5 + rnd() * 1.1) * (kind === 'album' ? 1.6 : 1));
+  const t = typeof workTitleFor === 'function' && x ? workTitleFor(x, w) : `${p.name} ${w}`;
+  const r = { t: String(t).replace(/^"([^"]+)".*$/, '$1').replace(/ \([^)]*\)$/, ''), w, q, v0, kind };
+  p.rel.push(r); if (p.rel.length > 12) p.rel.shift(); p.discN = (p.discN || 0) + 1;
+  p.units = (p.units || 0) + v0 / (1 - ACT_DECAY[f]);
+  p.fans = Math.max(50, p.fans + v0 * ACT_CONV[f] * (q / 70));
+  p.fame = actFame(p.fans); p.lastWork = w;
+  return r;
+}
+function actUnits(p, r, w) { return w < r.w ? 0 : r.v0 * Math.pow(ACT_DECAY[p.ind] + (r.q - 60) / 2000, w - r.w); }
+// ---- the world builds them ----
+function actsInit() {
+  if (S.actsOn || typeof mediaFigures !== 'function') return;
+  for (const h of HUB_IDS) { const L = mediaFigures(h); L.forEach((x, i) => { if (!x.pid && x.from <= S.year) actMake(x, h, i); }); }
+  // a few recent releases each, so the charts have something on the first day
+  const prevR = R; R = wstream('acts', 'seed', S.week);
+  for (const h of HUB_IDS) for (const x of mediaFigures(h)) { const p = x.pid != null && P(x.pid); if (!p || p.retired || p.dead) continue; const n = p.ind === 'creator' ? 4 : p.ind === 'stage' ? 1 : 2; for (let k = n; k >= 1; k--) actRelease(p, S.week - Math.floor(k * (p.ind === 'creator' ? 3 : 10) * (.6 + rnd() * .8)), x); }
+  S.actsOn = 1; S.actsW0 = S.week; R = prevR;
+}
+{ const _fw = finishWarm; finishWarm = function () { const r = _fw.apply(this, arguments); actsInit(); return r; }; }
+// every week: a quarter of the acts take stock and maybe put something out
+function actsWeek() {
+  if (!S.actsOn) return; R = wstream('acts', S.week);
+  for (const h of HUB_IDS) for (const x of mediaFigures(h)) { const p = x.pid != null ? P(x.pid) : null; if (!p || p.dead || p.retired || (p.id + S.week) % 4) continue;
+    if (rnd() < ACT_RATE[p.ind] * (p.legend ? .6 : 1)) { const r = actRelease(p, S.week, x); if (r.v0 > 2e6 && p.ind === 'music') news('Music', `${p.name} release "${r.t}"; it is everywhere within a week.`, { person: p.id }); }
+    else if (S.week - (p.lastWork || 0) > 26) p.fans *= .985; }
+}
+{ const _t = tick; tick = function () { const r = _t.apply(this, arguments); if (S.actsOn && !S.archiving) actsWeek(); return r; }; }
+// every year: new acts arrive, some stop
+function actsYear() {
+  if (!S.actsOn) return; R = wstream('acts', 'year', S.year);
+  for (const h of HUB_IDS) { const L = mediaFigures(h); L.forEach((x, i) => { if (x.pid == null && x.from <= S.year) { const p = actMake(x, h, i); if (p.fans > 2e5) news('Music', `${p.name} arrive${ACT_GROUP.has(p.act) ? '' : 's'}: the ${(KIND_LABEL[p.act] || p.act).toLowerCase()} everyone in ${HUBS[h].name} is suddenly talking about.`, { person: p.id }); } });
+    for (const x of L) { const p = x.pid != null ? P(x.pid) : null; if (p && !p.retired && x.to && x.to < S.year) { p.retired = true; p.retY = S.year; if (p.fans > 1e6) news('Music', `${p.name} ${ACT_GROUP.has(p.act) ? 'split up' : 'stop'} after ${S.year - p.mfrom} years.`, { person: p.id }); } } }
+}
+{ const _y = yearly; yearly = function () { const r = _y.apply(this, arguments); actsYear(); return r; }; }
+
+// ---- the charts read the real releases ----
+{ const _ca = chartAt; chartAt = function (field, hub, w, n = 100) {
+  if (!S.actsOn || w < (S.actsW0 || 0) - 40) return _ca.apply(this, arguments);
+  const all = mediaFigures(hub), out = [];
+  for (let i = 0; i < all.length; i++) { const x = all[i]; if (x.field !== field || x.pid == null) continue; const p = P(x.pid); if (!p || !p.rel || !p.rel.length) continue;
+    let best = null, bu = 0; for (let k = 0; k < p.rel.length; k++) { const u = actUnits(p, p.rel[k], w); if (u > bu) { bu = u; best = k; } }
+    if (best !== null && bu >= 1) out.push({ name: p.name, by: p.act, score: bu, title: p.rel[best].t, fid: `${hub}~${i}`, pid: p.id, rk: best, rw: p.rel[best].w }); }
+  const mine = _ca.call(this, field, hub, w, n).filter(c => c.mine); out.push(...mine);
+  return out.sort((a, b) => b.score - a.score).slice(0, n);
+}; }
+function relLink(c) { return `<a href="#" class="lk" data-go="mrel:${c.pid}~${c.rw}">${esc(c.title)}</a>`; }
+function actRel(pid, w) { const p = P(pid); return p && (p.rel || []).find(r => r.w === +w) || null; }
+// ---- pages: the act is a person; a release has its own page ----
+{ const _vp = viewPerson; viewPerson = function (id) { const h = _vp.apply(this, arguments), p = P(+id); return p && p.ind ? h + actSection(p) : h; }; }
+function actSection(p) {
+  const lab = p.label != null && typeof mcoLink === 'function' ? mcoLink(p.label) : '', aw = (typeof figAwards === 'function' ? figAwards(p.name) : []);
+  const unit = { music: 'streams', creator: 'views', podcast: 'downloads', stage: 'tickets' }[p.ind] || 'plays';
+  const rel = (p.rel || []).slice().reverse(), fmtN = v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : Math.round(v);
+  return `<section class="panel"><h3>${esc(FIELD_LABEL[p.ind] || p.ind)}: ${esc(KIND_LABEL[p.act] || p.act)}${p.legend ? ' · a legend of the form' : ''}</h3>
+    <p>${p.members ? `${esc(p.members.join(', '))}. ` : ''}Active since ${p.mfrom}${p.retired ? `, until ${p.retY || p.mto || '—'}` : ''}. <b>${fmtN(p.fans)}</b> fans${lab ? ` · ${lab}` : ''}. ${(p.discN || 0).toLocaleString()} ${p.ind === 'creator' ? 'videos' : p.ind === 'podcast' ? 'seasons' : p.ind === 'stage' ? 'productions' : 'releases'} in all.</p>
+    <h4>Latest</h4><ul class="plain">${rel.map(r => `<li>${relLink({ pid: p.id, rw: r.w, title: r.t })} <span class="muted small">${esc(r.kind)} · ${fmtDate(r.w, true)} · quality ${r.q} · ${fmtN(r.v0 / (1 - ACT_DECAY[p.ind]))} ${unit}</span></li>`).join('') || '<li class="muted">Nothing recent.</li>'}</ul>
+    ${aw.length ? `<h4>Awards</h4><ul class="plain">${aw.map(a => `<li>🏆 ${esc(a.show)} ${a.y}: ${esc(a.c)}</li>`).join('')}</ul>` : ''}</section>`;
+}
+function viewRelease(id) {
+  const [pid, w] = String(id).split('~'), p = P(+pid), r = actRel(pid, w); if (!p || !r) return '<p class="muted">Not found.</p>';
+  const unit = { music: 'streams', creator: 'views', podcast: 'downloads', stage: 'tickets sold' }[p.ind] || 'plays', tot = r.v0 / (1 - ACT_DECAY[p.ind]), now = actUnits(p, r, S.week);
+  const hr = hashRand(p.id * 131 + r.w), pool = S.people.filter(x => !x.dead && x.hub === p.hub && !x.ind && (x.role === 'composer' || x.role === 'sound' || x.role === 'producer'));
+  const crew = pool.length ? [...new Set([0, 1].map(() => pool[Math.floor(hr() * pool.length)].id))] : [];
+  const wk = Array.from({ length: 16 }, (_, i) => actUnits(p, r, r.w + i)), mx = Math.max(1, ...wk);
+  return `<div class="head"><p class="eyebrow">${esc(FIELD_LABEL[p.ind] || '')} · ${esc(r.kind)} · ${fmtDate(r.w, true)}</p><h2>${esc(r.t)}</h2><p class="lede">By ${pl(p.id)}${p.label != null && typeof mcoLink === 'function' ? ` · ${mcoLink(p.label)}` : ''}.</p></div>
+   <div class="kpis mini"><div><span>Quality</span><b>${r.q}</b></div><div><span>${unit}, first week</span><b>${Math.round(r.v0).toLocaleString()}</b></div><div><span>${unit}, so far</span><b>${Math.round(Math.min(tot, tot - now / (1 - ACT_DECAY[p.ind]))).toLocaleString()}</b></div></div>
+   <section class="panel"><h3>Week by week</h3><svg viewBox="0 0 320 62" width="100%" height="90" preserveAspectRatio="none">${wk.map((v, i) => `<rect x="${i * 20}" y="${60 - v / mx * 56}" width="16" height="${v / mx * 56}" fill="var(--accent)"/>`).join('')}</svg></section>
+   ${crew.length && p.ind === 'music' ? `<section class="panel"><h3>Credits</h3><p>Written by ${pl(p.id)}, with ${crew.map(pl).join(' and ')}.</p></section>` : ''}`;
+}
+{ const _ve = viewExtra; viewExtra = function (cur) { if (cur.kind === 'mrel') return viewRelease(cur.id); return _ve.apply(this, arguments); }; }
+// links to an act go to the person
+{ const _fl = figLink; figLink = function (x, label) { if (x && x.pid != null && P(x.pid)) return `<a href="#" class="lk" data-go="person:${x.pid}">${esc(label || x.name)}</a>`; return _fl.apply(this, arguments); }; }
+{ const _vf = viewFigure; viewFigure = function (id) { const x = figAt(id); return x && x.pid != null && P(x.pid) ? viewPerson(x.pid) : _vf.apply(this, arguments); }; }
+// people who are acts say so wherever an occupation is shown
+if (typeof occupationOf === 'function') { const _oc = occupationOf; occupationOf = function (p) { return p && p.ind ? `${KIND_LABEL[p.act] || p.act} (${(FIELD_LABEL[p.ind] || p.ind).toLowerCase()})` : _oc.apply(this, arguments); }; }
+// the legends are real people under other names: nothing bad happens to them
+if (typeof realLiving === 'function') { const _rl = realLiving; realLiving = function (p) { return _rl.apply(this, arguments) || !!(p && p.legend && !p.dead); }; }
+
+// ---- awards from the year's best work ----
+{ const _ma = mediaAwardsWeek; mediaAwardsWeek = function () {
+  const M = S.me; if (!S.actsOn || !M || dateOf(S.week).getUTCMonth() !== 0 || M.mAwY === S.year) return _ma.apply(this, arguments);
+  const n0 = (S.mawards || []).length, r = _ma.apply(this, arguments), y = S.year - 1;
+  for (let i = n0; i < (S.mawards || []).length; i++) {
+    const A = S.mawards[i], f = Object.keys(MEDIA_AWARDS).find(k => MEDIA_AWARDS[k][0] === A.show); if (!f) continue;
+    const hubs = HUB_IDS.filter(h => h === M.hub || HUBS[h].m === HUBS[M.hub].m || HUBS[h].m === 'US');
+    const cand = []; for (const h of hubs) for (const x of mediaFigures(h)) { const p = x.pid != null ? P(x.pid) : null; if (!p || p.ind !== f) continue; for (const rl of p.rel || []) if (yearOf(rl.w) === y) cand.push([p, rl, rl.q * Math.log10(10 + rl.v0 / (1 - ACT_DECAY[f]))]); }
+    if (!cand.length) continue; cand.sort((a, b) => b[2] - a[2]);
+    A.w = A.w.map(([c, n], k) => { if (/you|, for /i.test(n) && n.includes(ME().name)) return [c, n];
+      const L = (/New/.test(c) ? cand.filter(([p]) => p.mfrom >= y - 2) : cand).slice(0, 5); if (!L.length) return [c, n];
+      const hr = hashRand(y * 977 + k * 31 + f.length)(), win = L[Math.min(L.length - 1, hr < .55 ? 0 : hr < .8 ? 1 : 2)], [p, rl] = win;
+      p.awards = p.awards || []; p.awards.push(`${A.show} ${y}: ${c}`); p.fans *= 1.15; p.fame = actFame(p.fans);
+      A.nom = A.nom || {}; A.nom[c] = L.map(([q]) => q.id);
+      return [c, /Artist|Creator|Show|Performance/.test(c) ? p.name : `${rl.t} (${p.name})`]; });
+  }
+  return r; }; }
+
+// ---- if you work in the field, you meet them ----
+WEEK_HOOKS.push(() => { const M = S.me; if (!S.actsOn || !M || !M.party || !M.party.done || S.week % 5 !== 2 || prnd() > .35) return;
+  const f = { music: 'music', creator: 'creator', podcast: 'podcast', stage: 'stage' }[M.field] || (ME().role === 'composer' ? 'music' : null); if (!f) return;
+  const L = mediaFigures(M.hub).map(x => x.pid != null ? P(x.pid) : null).filter(p => p && p.ind === f && !p.dead && !p.retired && !M.known[p.id]); if (!L.length) return;
+  const p = L[Math.floor(prnd() * L.length)]; meet(p.id, pickLine(['At a gig', 'Backstage', 'In a green room', 'At a session', 'At a showcase'], S.week), 4); diary(`You meet ${p.name} (${(KIND_LABEL[p.act] || p.act).toLowerCase()}).`); });
+// how much of each world there is (the loading screen and the almanac)
+function worldsCount() {
+  const out = { acts: 0, music: 0, creator: 0, podcast: 0, stage: 0, rel: 0 };
+  if (S.actsOn) for (const h of HUB_IDS) for (const x of (S.mfig && S.mfig[h]) || []) { const p = x.pid != null ? P(x.pid) : null; if (!p) continue; out.acts++; out[p.ind] = (out[p.ind] || 0) + 1; out.rel += p.discN || 0; }
+  out.shows = typeof tvAll === 'function' ? tvAll().length : 0;
+  return out;
+}
+// the loading line: everything being made, not only films (the acts arrive at the end of the build)
+function worldTally() {
+  const y = S.archY || S.year, n = v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e4 ? Math.round(v / 1e3) + 'k' : Math.round(v).toLocaleString();
+  const shows = typeof TV_NETS !== 'undefined' ? Object.values(TV_NETS).reduce((t, net) => t + Math.max(0, Math.min(y, S.year) - Math.max(net.orig, 1946)) * net.per, 0) : 0;
+  const rec = Math.max(0, y - 1950) * 2600, pods = Math.max(0, y - 2005) * 900, vids = Math.max(0, y - 2006) * 40000, plays = Math.max(0, y - 1900) * 120;
+  return [`${n(S.films.length)} films`, `${n(S.people.length)} people`, `${n(S.companies.length)} studios`, shows ? `${n(shows)} TV shows` : '', rec ? `${n(rec)} records` : '', plays ? `${n(plays)} stage productions` : '', pods ? `${n(pods)} podcast seasons` : '', vids ? `${n(vids)} videos` : ''].filter(Boolean).join(' · ');
+}
+// </acts>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -45614,7 +46094,7 @@ function build(year, seed, depth) {
   UI.stack = [];
   newWorld(year, seed, depth);
   setBusy(true, 'Building the world');
-  $('#main').innerHTML = `<div class="loading"><p class="eyebrow">Building the world</p><h2>Writing film history from ${S.archY} to ${year}</h2><p class="lede">Studios, careers and releases across twenty-five hubs, real films from the catalogue where it reaches and invented ones elsewhere, then one year simulated week by week so films are in production when you arrive. ${depth === 'full' ? 'Full history takes around half a minute.' : 'This takes a few seconds.'}</p><div class="prog"><i id="prog"></i></div><p class="count" id="progtxt"></p></div>`;
+  $('#main').innerHTML = `<div class="loading"><p class="eyebrow">Building the world</p><h2>Writing entertainment history from ${S.archY} to ${year}</h2><p class="lede">Films, records, television, podcasts, online video and the stage: the studios, labels, networks and theatres behind them and the people who made them. Real works from the catalogue where it reaches, invented ones elsewhere, then one year simulated week by week so everything is moving when you arrive. ${depth === 'full' ? 'Full history takes around half a minute.' : 'This takes a few seconds.'}</p><div class="prog"><i id="prog"></i></div><p class="count" id="progtxt"></p></div>`;
   const a0 = S.archY, aN = S.y0 - a0;
   const total = (Date.UTC(year, 0, 1) - Date.UTC(S.y0, 0, 1)) / 6048e5;
   const replay = !!UI.boot;
@@ -45626,10 +46106,10 @@ function build(year, seed, depth) {
       const prior = S.priorY < S.priorEnd;
       archiveStep();
       const pN = a0 - 1888;
-      bar((S.priorY - 1888 + S.archY - a0) / (pN + aN) * 60, prior ? `Recording the real films of ${S.priorY - 1} and earlier` : `${S.archY - 1} · ${S.films.length.toLocaleString()} films so far`);
+      bar((S.priorY - 1888 + S.archY - a0) / (pN + aN) * 60, prior ? `Recording the real works of ${S.priorY - 1} and earlier` : `${S.archY - 1} · ${typeof worldTally === 'function' ? worldTally() : S.films.length.toLocaleString() + ' films'} so far`);
     } else {
       for (let i = 0; i < 6 && warming(); i++) tick();
-      bar(60 + S.week / total * 40, `Simulating ${S.year} week by week`);
+      bar(60 + S.week / total * 40, `Simulating ${S.year} week by week · ${typeof worldTally === 'function' ? worldTally() : S.films.length.toLocaleString() + ' films'}`);
     }
     if (archiving() || warming()) setTimeout(step, 0);
     else {

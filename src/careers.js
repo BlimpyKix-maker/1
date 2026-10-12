@@ -171,45 +171,45 @@ const CAREERS = {
 delete CAREERS.gerwig_;
 // Executives who are not in the film record, keyed by the name they go by in this world.
 const EXEC_CAREERS = {
-  'Peter Saffron': [[1990, 1995, 'Entertainment lawyer', 'Los Angeles'], [1995, 2005, 'Talent manager', 'a comedy management firm'], [2005, 2022, 'Founder and producer of horror and superhero hits', 'The Saffron Company'], [2022, null, 'Co-chairman and chief executive', 'Daring Comics Studios, at Warden Brothers']],
+  'Peter Crocus': [[1990, 1995, 'Entertainment lawyer', 'Los Angeles'], [1995, 2005, 'Talent manager', 'a comedy management firm'], [2005, 2022, 'Founder and producer of horror and superhero hits', 'The Saffron Company'], [2022, null, 'Co-chairman and chief executive', 'Daring Comics Studios, at Warden Brothers']],
   'Kevin Endgame': [[1994, 2000, 'Assistant to a producer', 'the mutant films'], [2000, 2007, 'Producer', 'Marvelous Studios'], [2007, null, 'President', 'Marvelous Studios'], [2019, null, 'Chief creative officer', 'the Mouse House\'s entertainment arm']],
-  'Kathleen Kennerly': [[1975, 1979, 'Camera operator and secretary', 'a San Diego TV station, then a screenwriter\'s office'], [1979, 1981, 'Assistant to Steven Spielmann', 'a war comedy'], [1981, 1992, 'Co-founder', 'Ambling Entertainment'], [2012, 2026, 'President', 'Lukewarm Films']],
-  'Dave Filonius': [[2005, 2008, 'Animator and director', 'an animated series'], [2008, 2020, 'Supervising director', 'Lukewarm Films\' animated wars'], [2020, 2026, 'Executive creative director', 'Lukewarm Films'], [2026, null, 'President and chief creative officer', 'Lukewarm Films']],
-  'Bob Eiger': [[1974, 1976, 'Studio supervisor and weatherman', 'a network\'s local station'], [1994, 1995, 'President', 'a broadcast network'], [2000, 2005, 'Chief operating officer', 'Dizzy Brothers'], [2005, 2020, 'Chief executive', 'Dizzy Brothers'], [2022, 2026, 'Chief executive, again', 'Dizzy Brothers']],
-  "Josh D'Amore": [[1998, 2020, 'Theme park executive, from the theme parks\' finance team to president', 'Dizzy Brothers\' parks'], [2020, 2026, 'Chairman', 'Dizzy Brothers\' parks and products'], [2026, null, 'Chief executive', 'Dizzy Brothers']],
-  'David Zaslow': [[1989, 2006, 'Lawyer, then cable executive', 'a broadcast network'], [2007, 2022, 'Chief executive', 'a factual cable company'], [2022, null, 'Chief executive', 'Warden Brothers Discovery']],
-  'Michael De Lucca': [[1985, 2001, 'Intern, story editor, then president of production', 'New Lane Cinema'], [2001, 2004, 'Head of production', 'DreamWeavers SKG'], [2019, 2022, 'Chairman of the film group', 'Metro-Goldmine-Mayhem'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
-  'Pam Abbey': [[1995, 2010, 'Producer and executive', 'independent production companies'], [2020, 2022, 'President', 'Metro-Goldmine-Mayhem\'s film group'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
-  'Ted Saranwrap': [[1983, 1989, 'Video store clerk, then manager', 'an Arizona video chain'], [2000, 2020, 'Chief content officer', 'Netflux'], [2020, null, 'Co-chief executive', 'Netflux']],
-  'Donna Langdon': [[1990, 1999, 'Development executive', 'New Lane Cinema and independents'], [1999, 2013, 'Executive, then co-chairman', 'Omniversal Pictures'], [2013, null, 'Chairman, later chief content officer of the parent', 'Omniversal Pictures']],
-  'Tom Rothmere': [[1980, 1987, 'Entertainment lawyer', 'New York'], [1994, 2012, 'Founder of a specialty label, then co-chairman', '20th Century-Vixen'], [2015, null, 'Chairman', 'Colombina Pictures']],
-  'David Ellerson': [[2006, 2025, 'Founder', 'Skyward Dance Media'], [2025, null, 'Chief executive after the merger', 'Paramountain Pictures']],
-  'Jeffrey Katzenburg': [[1969, 1973, 'Aide', 'the mayor of New York'], [1975, 1984, 'Assistant to the chairman, then head of production', 'Paramountain Pictures'], [1984, 1994, 'Studio chairman', 'Dizzy Brothers'], [1994, 2016, 'Co-founder', 'DreamWeavers SKG'], [2018, 2020, 'Founder', 'a short-form streaming service that folded in six months']],
-  'Sherry Lansdowne': [[1966, 1969, 'Mathematics teacher', 'Los Angeles schools'], [1970, 1977, 'Script reader, then story editor', 'Metro-Goldmine-Mayhem'], [1980, 1983, 'President of production, the first woman to run a studio', '20th Century-Vixen'], [1992, 2004, 'Chairman', 'Paramountain Pictures']],
-  'Barry Dillon': [[1961, 1964, 'Mailroom clerk', 'a talent agency'], [1964, 1974, 'Programming executive who invented the TV movie of the week', 'a broadcast network'], [1974, 1984, 'Chairman', 'Paramountain Pictures'], [1984, 1992, 'Chairman, who built a fourth network', '20th Century-Vixen']],
+  'Kathleen Helmsworth': [[1975, 1979, 'Camera operator and secretary', 'a San Diego TV station, then a screenwriter\'s office'], [1979, 1981, 'Assistant to Steven Spielmann', 'a war comedy'], [1981, 1992, 'Co-founder', 'Ambling Entertainment'], [2012, 2026, 'President', 'Lukewarm Films']],
+  'Dave Threadwell': [[2005, 2008, 'Animator and director', 'an animated series'], [2008, 2020, 'Supervising director', 'Lukewarm Films\' animated wars'], [2020, 2026, 'Executive creative director', 'Lukewarm Films'], [2026, null, 'President and chief creative officer', 'Lukewarm Films']],
+  'Bob Keenly': [[1974, 1976, 'Studio supervisor and weatherman', 'a network\'s local station'], [1994, 1995, 'President', 'a broadcast network'], [2000, 2005, 'Chief operating officer', 'Dizzy Brothers'], [2005, 2020, 'Chief executive', 'Dizzy Brothers'], [2022, 2026, 'Chief executive, again', 'Dizzy Brothers']],
+  "Josh Bittersweet": [[1998, 2020, 'Theme park executive, from the theme parks\' finance team to president', 'Dizzy Brothers\' parks'], [2020, 2026, 'Chairman', 'Dizzy Brothers\' parks and products'], [2026, null, 'Chief executive', 'Dizzy Brothers']],
+  'David Gloryfield': [[1989, 2006, 'Lawyer, then cable executive', 'a broadcast network'], [2007, 2022, 'Chief executive', 'a factual cable company'], [2022, null, 'Chief executive', 'Warden Brothers Discovery']],
+  'Michael De Lumen': [[1985, 2001, 'Intern, story editor, then president of production', 'New Lane Cinema'], [2001, 2004, 'Head of production', 'DreamWeavers SKG'], [2019, 2022, 'Chairman of the film group', 'Metro-Goldmine-Mayhem'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
+  'Pam Cloister': [[1995, 2010, 'Producer and executive', 'independent production companies'], [2020, 2022, 'President', 'Metro-Goldmine-Mayhem\'s film group'], [2022, null, 'Co-chairman', 'Warden Brothers Pictures']],
+  'Ted Clingfilm': [[1983, 1989, 'Video store clerk, then manager', 'an Arizona video chain'], [2000, 2020, 'Chief content officer', 'Netflux'], [2020, null, 'Co-chief executive', 'Netflux']],
+  'Donna Longmeadow': [[1990, 1999, 'Development executive', 'New Lane Cinema and independents'], [1999, 2013, 'Executive, then co-chairman', 'Omniversal Pictures'], [2013, null, 'Chairman, later chief content officer of the parent', 'Omniversal Pictures']],
+  'Tom Redman': [[1980, 1987, 'Entertainment lawyer', 'New York'], [1994, 2012, 'Founder of a specialty label, then co-chairman', '20th Century-Vixen'], [2015, null, 'Chairman', 'Colombina Pictures']],
+  'David Prophetson': [[2006, 2025, 'Founder', 'Skyward Dance Media'], [2025, null, 'Chief executive after the merger', 'Paramountain Pictures']],
+  'Jeffrey Cathill': [[1969, 1973, 'Aide', 'the mayor of New York'], [1975, 1984, 'Assistant to the chairman, then head of production', 'Paramountain Pictures'], [1984, 1994, 'Studio chairman', 'Dizzy Brothers'], [1994, 2016, 'Co-founder', 'DreamWeavers SKG'], [2018, 2020, 'Founder', 'a short-form streaming service that folded in six months']],
+  'Sherry Lancewood': [[1966, 1969, 'Mathematics teacher', 'Los Angeles schools'], [1970, 1977, 'Script reader, then story editor', 'Metro-Goldmine-Mayhem'], [1980, 1983, 'President of production, the first woman to run a studio', '20th Century-Vixen'], [1992, 2004, 'Chairman', 'Paramountain Pictures']],
+  'Barry Pickler': [[1961, 1964, 'Mailroom clerk', 'a talent agency'], [1964, 1974, 'Programming executive who invented the TV movie of the week', 'a broadcast network'], [1974, 1984, 'Chairman', 'Paramountain Pictures'], [1984, 1992, 'Chairman, who built a fourth network', '20th Century-Vixen']],
   'Lew Waterman': [[1933, 1936, 'Cinema usher and publicist', 'Cleveland'], [1936, 1946, 'Band booker, then agent', 'MCA'], [1946, 1962, 'President', 'MCA'], [1962, 1995, 'Chairman', 'Omniversal Pictures']],
-  'Irving Thalbert': [[1918, 1919, 'Secretary', 'Omniversal Pictures\' New York office'], [1919, 1923, 'General manager at twenty', 'Omniversal Pictures'], [1924, 1936, 'Head of production', 'Metro-Goldmine-Mayhem']],
-  'Ed Catmill': [[1974, 1979, 'Computer graphics researcher', 'the University of Utah, then NYIT'], [1979, 1986, 'Head of the computer division', 'Lukewarm Films'], [1986, 2019, 'Co-founder and president', 'Pixelar Animation Studios']],
-  'Jason Bloom': [[1991, 1995, 'Assistant', 'an indie director, then an acquisitions team at Mirabelle'], [2000, null, 'Founder and chief executive', 'Bloomhouse Productions']],
-  'Reed Hastings-Streamer': [[1991, 1997, 'Founder', 'a software company'], [1997, 2023, 'Co-founder and chief executive', 'Netflux'], [2023, null, 'Executive chairman', 'Netflux']]
+  'Irving Thalheimer': [[1918, 1919, 'Secretary', 'Omniversal Pictures\' New York office'], [1919, 1923, 'General manager at twenty', 'Omniversal Pictures'], [1924, 1936, 'Head of production', 'Metro-Goldmine-Mayhem']],
+  'Ed Whiskerson': [[1974, 1979, 'Computer graphics researcher', 'the University of Utah, then NYIT'], [1979, 1986, 'Head of the computer division', 'Lukewarm Films'], [1986, 2019, 'Co-founder and president', 'Pixelar Animation Studios']],
+  'Jason Blossom': [[1991, 1995, 'Assistant', 'an indie director, then an acquisitions team at Mirabelle'], [2000, null, 'Founder and chief executive', 'Bloomhouse Productions']],
+  'Reed Battlefield': [[1991, 1997, 'Founder', 'a software company'], [1997, 2023, 'Co-founder and chief executive', 'Netflux'], [2023, null, 'Executive chairman', 'Netflux']]
 };
 // Current posts the old head list didn't know about.
 (function freshHeads() {
   const H = STUDIO_HEADS, add = (k, row) => { if (H[k] && !H[k].some(r => r[3] === row[3] && r[0] === row[0])) H[k].push(row); };
-  if (H.disney) { const r = H.disney.find(x => x[3] === 'Bob Iger' && x[0] === 2022); if (r) r[1] = 2026; add('disney', [2026, null, null, "Josh D'Amaro", "Josh D'Amore", 'Chief executive']); }
-  add('warner', [2022, null, null, 'Pam Abdy', 'Pam Abbey', 'Co-chairman']);
+  if (H.disney) { const r = H.disney.find(x => x[3] === 'Bob Iger' && x[0] === 2022); if (r) r[1] = 2026; add('disney', [2026, null, null, "Josh D'Amaro", "Josh Bittersweet", 'Chief executive']); }
+  add('warner', [2022, null, null, 'Pam Abdy', 'Pam Cloister', 'Co-chairman']);
   add('warner', [2022, null, 'gunn', 'James Gunn', null, 'Co-chairman and CEO, Daring Comics Studios']);
-  add('warner', [2022, null, null, 'Peter Safran', 'Peter Saffron', 'Co-chairman and CEO, Daring Comics Studios']);
-  add('warner', [2022, null, null, 'David Zaslav', 'David Zaslow', 'Chief executive of the parent, Warden Brothers Discovery']);
-  if (H.lucasfilm) { const r = H.lucasfilm.find(x => x[3] === 'Kathleen Kennedy'); if (r) r[1] = 2026; add('lucasfilm', [2026, null, null, 'Dave Filoni', 'Dave Filonius', 'President and chief creative officer']); }
+  add('warner', [2022, null, null, 'Peter Safran', 'Peter Crocus', 'Co-chairman and CEO, Daring Comics Studios']);
+  add('warner', [2022, null, null, 'David Zaslav', 'David Gloryfield', 'Chief executive of the parent, Warden Brothers Discovery']);
+  if (H.lucasfilm) { const r = H.lucasfilm.find(x => x[3] === 'Kathleen Kennedy'); if (r) r[1] = 2026; add('lucasfilm', [2026, null, null, 'Dave Filoni', 'Dave Threadwell', 'President and chief creative officer']); }
   if (H.marvelstudios) { const r = H.marvelstudios.find(x => x[3] === 'Kevin Feige'); if (r) r[5] = 'President; chief creative officer of the parent\'s entertainment arm'; }
-  add('netflix', [2023, null, null, 'Greg Peters', 'Greg Petersen', 'Co-chief executive']);
+  add('netflix', [2023, null, null, 'Greg Peters', 'Greg Stoneman', 'Co-chief executive']);
   if (H.netflix) { const r = H.netflix.find(x => x[3] === 'Reed Hastings'); if (r) r[5] = 'Co-founder, chief executive, then executive chairman'; }
-  H.amazonmgm = H.amazonmgm || [[2022, null, null, 'Mike Hopkins', 'Mike Hopwood', 'Head of the streaming service and the studio'], [2023, null, null, 'Courtenay Valenti', 'Courtenay Valentine', 'Head of film']];
-  H.appleorig = H.appleorig || [[2017, null, null, 'Zack Van Amburg', 'Zack Van Amberley', 'Co-head of worldwide video'], [2017, null, null, 'Jamie Erlicht', 'Jamie Ehrlich', 'Co-head of worldwide video']];
-  add('a24', [2012, null, null, 'David Fenkel', 'David Finkle', 'Co-founder']);
-  add('a24', [2012, null, null, 'John Hodges', 'John Hodgkins', 'Co-founder']);
-  add('universal', [2023, null, null, 'Donna Langley', 'Donna Langdon', 'Chairman and chief content officer of the parent']);
+  H.amazonmgm = H.amazonmgm || [[2022, null, null, 'Mike Hopkins', 'Mike Robinette', 'Head of the streaming service and the studio'], [2023, null, null, 'Courtenay Valenti', 'Courtenay Strongwell', 'Head of film']];
+  H.appleorig = H.appleorig || [[2017, null, null, 'Zack Van Amburg', 'Zack Van Barnstead', 'Co-head of worldwide video'], [2017, null, null, 'Jamie Erlicht', 'Jamie Brightling', 'Co-head of worldwide video']];
+  add('a24', [2012, null, null, 'David Fenkel', 'David Aniseed', 'Co-founder']);
+  add('a24', [2012, null, null, 'John Hodges', 'John Rogerson', 'Co-founder']);
+  add('universal', [2023, null, null, 'Donna Langley', 'Donna Longmeadow', 'Chairman and chief content officer of the parent']);
 })();
 // The post someone holds now, from the head lists and from their career path.
 function currentPost(p) {

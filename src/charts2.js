@@ -49,8 +49,8 @@ function numberOnes(field, hub, y) {
   for (let w = w0; w < w1; w++) { const c = chartAt(field, hub, w, 1)[0]; if (!c) continue; const last = out[out.length - 1]; if (last && last.c.name === c.name && last.c.title === c.title) last.n++; else out.push({ w, c, n: 1 }); }
   return A[k] = out;
 }
-const chLink = (field, c) => c.mine ? `<a href="#" class="lk" data-go="work:${c.wid}">${esc(c.title)}</a>` : `<a href="#" class="lk" data-go="${field === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(field === 'podcast' ? c.name : c.title)}</a>`;
-const chBy = (field, c) => field === 'podcast' ? (c.mine ? 'your show' : esc(KIND_LABEL[c.by] || 'podcast')) : c.mine ? `${esc(c.name)} (you)` : `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>`;
+const chLink = (field, c) => c.pid != null && typeof relLink === 'function' ? (field === 'podcast' ? pl(c.pid) : relLink(c)) : c.mine ? `<a href="#" class="lk" data-go="work:${c.wid}">${esc(c.title)}</a>` : `<a href="#" class="lk" data-go="${field === 'podcast' ? 'fig:' + c.fid : 'song:' + c.fid + '~' + c.slot}">${esc(field === 'podcast' ? c.name : c.title)}</a>`;
+const chBy = (field, c) => c.pid != null ? (field === 'podcast' ? esc(KIND_LABEL[c.by] || 'podcast') : pl(c.pid)) : field === 'podcast' ? (c.mine ? 'your show' : esc(KIND_LABEL[c.by] || 'podcast')) : c.mine ? `${esc(c.name)} (you)` : `<a href="#" class="lk" data-go="fig:${c.fid}">${esc(c.name)}</a>`;
 function chartPage(id) {
   const [field, hub0] = String(id).split('~');
   if (!UI.ch || UI.ch.id !== id) UI.ch = { id, field, hub: HUBS[hub0] ? hub0 : (S.me ? S.me.hub : 'hollywood'), tab: 'week', y: S.year, w: S.week };

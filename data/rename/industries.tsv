@@ -1,0 +1,198 @@
+real	old	new	file	kind
+Johnny Cash	Johnny Cache	Johnny Tender	src/media-industry.js	music
+Bob Dylan	Bob Dillon	Bob Seaborne	src/media-industry.js	music
+Aretha Franklin	Aretha Franklean	Aretha Freeholder	src/media-industry.js	music
+The Beatles	The Beadles	The Scarabs	src/media-industry.js	music
+The Rolling Stones	The Rolling Scones	The Tumbling Boulders	src/media-industry.js	music
+Dolly Parton	Dolly Partin	Dolly Fraction	src/media-industry.js	music
+David Bowie	David Bowey	David Stardust	src/media-industry.js	music
+Queen	Queeen	Sovereign	src/media-industry.js	music
+Michael Jackson	Michael Jaxon	Michael Hoistson	src/media-industry.js	music
+Prince	Prints	Dauphin	src/media-industry.js	music
+Madonna	Madonnah	Madrigal	src/media-industry.js	music
+Whitney Houston	Whitney Houseton	Whitney Hightower	src/media-industry.js	music
+Nirvana	Nirvanna	Satori	src/media-industry.js	music
+Radiohead	Radiohed	Signalhead	src/media-industry.js	music
+Jay-Z	Jay-Zed	Jay-Omega	src/media-industry.js	music
+Beyoncé	Beyonsay	Yonder	src/media-industry.js	music
+Amy Winehouse	Amy Winemouse	Amy Bodega	src/media-industry.js	music
+Taylor Swift	Tay Swiftwater	Taylor Quickly	src/media-industry.js	music
+Adele	Adelle	Noblesse	src/media-industry.js	music
+Kendrick Lamar	Kendrik Lamarr	Kendrik Seaway	src/media-industry.js	music
+Billie Eilish	Billie Eyelash	Billie Oath	src/media-industry.js	music
+BTS (Bangtan Boys)	Bangtan Boyz	Armorplate Boys	src/media-industry.js	music
+BLACKPINK	BLACKPINQ	NOIRBLUSH	src/media-industry.js	music
+Psy	Sigh	Synapse	src/media-industry.js	music
+Fela Kuti	Fela Kootie	Fela Drumfire	src/media-industry.js	music
+Burna Boy	Burna Bwoy	Blaze Lad	src/media-industry.js	music
+Wizkid	Wizkidd	Conjure Kid	src/media-industry.js	music
+Tems	Temz	Gratia	src/media-industry.js	music
+Lata Mangeshkar	Lata Mangeskar	Lata Kokila	src/media-industry.js	music
+Kishore Kumar	Kishore Kumarr	Kishore Yodeller	src/media-industry.js	music
+A. R. Rahman	A.R. Rahmaan	A. R. Mozartmadras	src/media-industry.js	music
+Arijit Singh	Arijit Singhh	Arijit Sher	src/media-industry.js	music
+Hikaru Utada	Utada Hikaro	Hoshi Akari	src/media-industry.js	music
+Yellow Magic Orchestra	Yellow Magic Orchestrata	Amber Sorcery Orchestra	src/media-industry.js	music
+Édith Piaf	Edith Piaff	Edith Moineau	src/media-industry.js	music
+Serge Gainsbourg	Serge Gainsborrow	Serge Gagneville	src/media-industry.js	music
+Daft Punk	Daft Punque	Dizzy Rebels	src/media-industry.js	music
+Juan Gabriel	Juan Gabriell	Juan Serafín	src/media-industry.js	music
+Antônio Carlos Jobim	Antonio Carlos Jobeam	Antônio Carlos Ipanema	src/media-industry.js	music
+Anitta	Anitah	Gracinha	src/media-industry.js	music
+ABBA	ABBBA	PATER	src/media-industry.js	music
+Robyn	Robbyn	Redbreast	src/media-industry.js	music
+Stephen Sondheim	Stephen Sondheimer	Stephen Hearthsong	src/media-industry.js	theatre
+Lin-Manuel Miranda	Lin-Manuel Marinara	Lin-Manuel Maravilla	src/media-industry.js	theatre
+Caryl Churchill	Caryl Churchyard	Caryl Chapelmount	src/media-industry.js	theatre
+August Wilson	August Wilsen	August Wishart	src/media-industry.js	theatre
+Tom Stoppard	Tom Stoppered	Tom Stopwatch	src/media-industry.js	theatre
+MrBeast	MrBeest	MrCritter	src/media-industry.js	creator
+PewDiePie	PewDieGuy	BlamBlamTart	src/media-industry.js	creator
+Lilly Singh	Lilly Single	Lilly Sherni	src/media-industry.js	creator
+Khaby Lame	Khaby Lamed	Khaby Shrug	src/media-industry.js	creator
+Charli D'Amelio	Charli D'Amore	Charli D'Industria	src/media-industry.js	creator
+Mark Rober	Mark Robber	Mark Contraption	src/media-industry.js	creator
+Joe Rogan	The Joe Brogan Experience	The Joe Dojo Experience	src/media-industry.js	podcast
+Jess Oppenheimer	Jess Oppenheimer-Ross	Jess Openhouse	src/tv.js	tv
+Jackie Gleason	Jack Gleason	Jack Sheaf	src/tv.js	tv
+Rod Serling	Rod Sterling	Rod Bullion	src/tv.js	tv
+Gene Roddenberry	Gene Rodenbury	Gene Caneberry	src/tv.js	tv
+Norman Lear	Norman Leer	Norman Kingsley	src/tv.js	tv
+Larry Gelbart	Larry Gelbard	Larry Goldbeard	src/tv.js	tv
+Lorne Michaels	Lorne Michaelson	Lorne Gabrielson	src/tv.js	tv
+David Jacobs	David Jacobsen	David Ladderson	src/tv.js	tv
+Steven Bochco	Steven Bochko	Steven Beatwell	src/tv.js	tv
+Glen & Les Charles, James Burrows	the Charles-Burrows trio	the Carlos-Warren trio	src/tv.js	tv
+Susan Harris	Susan Harrison	Susan Tweedwell	src/tv.js	tv
+Matt Groening	Matt Groaning	Matt Verdant	src/tv.js	tv
+Larry David	Larry Davidson	Larry Slingsby	src/tv.js	tv
+Jerry Seinfeld	Jerry Steinfield	Jerry Meadows	src/tv.js	tv
+Seinfeld (show named after him)	Steinfield	Meadows	src/tv.js	tv
+Dick Wolf	Dick Wolfson	Dick Howler	src/tv.js	tv
+David Lynch	David Lunch	David Lynchburg	src/tv.js	tv
+Mark Frost	Mark Frosty	Mark Hoarfield	src/tv.js	tv
+Chris Carter	Chris Carterson	Chris Drayman	src/tv.js	tv
+Marta Kauffman, David Crane, Kevin Bright	Kauffman & Crane-Bright	Merchant & Heron-Shine	src/tv.js	tv
+Michael Crichton	Michael Crichtonson	Michael Raptorson	src/tv.js	tv
+Garry Shandling	Garry Shandlin	Garry Lampwick	src/tv.js	tv
+Darren Star	Darren Starr	Darren Comet	src/tv.js	tv
+David Chase	David Chaser	David Pursuit	src/tv.js	tv
+Aaron Sorkin	Aaron Sorkind	Aaron Walkandtalk	src/tv.js	tv
+Mark Burnett	Mark Burnet-Hall	Mark Scorchwell	src/tv.js	tv
+David Simon	David Simone	David Hearwell	src/tv.js	tv
+Simon Fuller, Simon Cowell	Simon Fuller-Cowl	Simon Tucker-Hood	src/tv.js	tv
+J. J. Abrams	J.J. Abramsky	J. J. Lensflare	src/tv.js	tv
+Damon Lindelof	Damon Lindelhof	Damon Limetree	src/tv.js	tv
+Greg Daniels	Greg Danielson	Greg Lionsden	src/tv.js	tv
+Matthew Weiner	Matthew Wiener	Matthew Danube	src/tv.js	tv
+Vince Gilligan	Vince Gilligham	Vince Castaway	src/tv.js	tv
+David Benioff, D. B. Weiss	Benioff & Weisz	Bennison & Blanc	src/tv.js	tv
+Matt & Ross Duffer	the Duffy brothers	the Rookie brothers	src/tv.js	tv
+Peter Morgan	Peter Morganz	Peter Crownley	src/tv.js	tv
+Jesse Armstrong	Jesse Armstrongarm	Jesse Stoutarm	src/tv.js	tv
+Hwang Dong-hyuk	Hwang Dong-hyuck	Hwang Squidgame	src/tv.js	tv
+Christopher Storer	Christopher Storey	Christopher Pantry	src/tv.js	tv
+Connie Booth	Connie Booth-Hall	Connie Stallworth	src/tv.js	tv
+Sydney Newman	Sydney Newmann	Sydney Freshman	src/tv.js	tv
+Tony Warren	Tony Warrender	Tony Burrowes	src/tv.js	tv
+Ricky Gervais	Ricky Gervaise	Ricky Spearman	src/tv.js	tv
+Stephen Merchant	Stephen Merchantman	Stephen Trader	src/tv.js	tv
+Steven Moffat, Mark Gatiss	Moffitt & Gattiss-Hall	Steadman & Gatehouse	src/tv.js	tv
+Julian Fellowes	Julian Fellowes-Wright	Julian Fairhurst	src/tv.js	tv
+Phoebe Waller-Bridge	Phoebe Waller-Bridges	Phoebe Fleabag	src/tv.js	tv
+Sugako Hashida	Sugako Hashimotto	Sugako Hashizume	src/tv.js	tv
+Yoon Seok-ho	Yoon Seok-hoe	Baek Seok-jin	src/tv.js	tv
+Ramanand Sagar	Ramanand Sagar-Rao	Ramanand Samudra	src/tv.js	tv
+Fernando Gaitán	Fernando Gaitán-Ruiz	Fernando Dulzaina	src/tv.js	tv
+João Emanuel Carneiro	João Emanuel Carneiro-Lima	João Emanuel Pastor	src/tv.js	tv
+Joan Ganz Cooney	Joan Ganz Cooney-Hart	Joan Gander Hareton	src/tv.js	tv
+Roger Ebert	Roger Everett	Roger Boarhart	src/critics.js	critic
+Gene Siskel	Gene Sizzle	Gene Marquette	src/critics.js	critic
+Pauline Kael	Pauline Kale	Pauline Chard	src/critics.js	critic
+Bosley Crowther	Bosley Crowfoot	Bosley Ravensworth	src/critics.js	critic
+Andrew Sarris	Andrew Sarrus	Andrew Pantheon	src/critics.js	critic
+Molly Haskell	Molly Haskel	Molly Hazelton	src/critics.js	critic
+Vincent Canby	Vincent Candy	Vincent Toffee	src/critics.js	critic
+Janet Maslin	Janet Muslin	Janet Calico	src/critics.js	critic
+A. O. Scott	A. O. Scotch	A. O. Highland	src/critics.js	critic
+Manohla Dargis	Manola Dargiss	Manola Dartmoor	src/critics.js	critic
+Peter Bradshaw	Peter Bradshore	Peter Broadwood	src/critics.js	critic
+Mark Kermode	Mark Kermudgeon	Mark Crankshaw	src/critics.js	critic
+Leonard Maltin	Leonard Malted	Leonard Barley	src/critics.js	critic
+Richard Roeper	Richard Rooper	Richard Lasso	src/critics.js	critic
+Anthony Lane	Anthony Laine	Anthony Alleyway	src/critics.js	critic
+David Denby	David Denbie	David Lairby	src/critics.js	critic
+Wesley Morris	Wesley Morrow	Wesley Maypole	src/critics.js	critic
+Justin Chang	Justin Chung	Justin Everlong	src/critics.js	critic
+Kenneth Turan	Kenneth Turran	Kenneth Steppe	src/critics.js	critic
+James Agee	James Agley	James Vintage	src/critics.js	critic
+Dilys Powell	Dilys Pole	Dilys Eminence	src/critics.js	critic
+C. A. Lejeune	C. A. Lejeunesse	C. A. Lenouveau	src/critics.js	critic
+André Bazin	André Bazaine	André Fondateur	src/critics.js	critic
+François Truffaut	François Trufaux	François Truffle	src/critics.js	critic
+Owen Gleiberman	Owen Gleibermeyer	Owen Gladfield	src/critics.js	critic
+Peter Travers	Peter Travis	Peter Fordwell	src/critics.js	critic
+Kim Newman	Kim Newmann	Kim Neophyte	src/critics.js	critic
+Alison Willmore	Alison Wilmor	Alison Plentiful	src/critics.js	critic
+David Ehrlich	David Ehrlichson	David Truthwell	src/critics.js	critic
+Stephanie Zacharek	Stephanie Zachary	Stephanie Memoria	src/critics.js	critic
+Armond White	Armond Whitish	Armond Ivory	src/critics.js	critic
+Rex Reed	Rex Reedy	Rex Bulrush	src/critics.js	critic
+Gene Shalit	Gene Shallot	Gene Scallion	src/critics.js	critic
+Judith Crist	Judith Crisp	Judith Wafer	src/critics.js	critic
+Stanley Kauffmann	Stanley Kauffmannson	Stanley Tradesman	src/critics.js	critic
+Shigehiko Hasumi	Akiko Hasumi	Akiko Renge	src/critics.js	critic
+Anupama Chopra	Anupama Chopray	Anupama Cinemawala	src/critics.js	critic
+Jean-Michel Frodon	Jean-Michel Frodo	Jean-Michel Fronde	src/critics.js	critic
+Mick LaSalle	Mick LaSalle-Street	Mick Lachambre	src/critics.js	critic
+Michael Eisner	Michael Eisenberg	Michael Ironmonger	src/corrections.js	executive
+Jeffrey Katzenberg	Jeffrey Katzenburg	Jeffrey Cathill	src/careers.js,src/corrections.js	executive
+Bob Iger	Bob Eiger	Bob Keenly	src/careers.js,src/corrections.js	executive
+Bob Chapek	Bob Chapman	Bob Storkling	src/corrections.js	executive
+Avi Arad	Avi Arcade	Avi Negev	src/corrections.js	executive
+Ted Ashley	Ted Ashford	Ted Cinderfield	src/corrections.js	executive
+Bob Daly	Bob Daley	Bob Weekday	src/corrections.js	executive
+Barry Meyer	Barry Meyers	Barry Steward	src/corrections.js	executive
+Kevin Tsujihara	Kevin Tsujimura	Kevin Crossfield	src/corrections.js	executive
+Michael De Luca	Michael De Lucca	Michael De Lumen	src/careers.js,src/corrections.js	executive
+Barry Diller	Barry Dillon	Barry Pickler	src/careers.js,src/corrections.js	executive
+Sherry Lansing	Sherry Lansdowne	Sherry Lancewood	src/careers.js,src/corrections.js	executive
+Brad Grey	Brad Gray	Brad Pewter	src/corrections.js	executive
+David Ellison	David Ellerson	David Prophetson	src/careers.js,src/corrections.js	executive
+Irving Thalberg	Irving Thalbert	Irving Thalheimer	src/careers.js,src/corrections.js	executive
+Dore Schary	Dore Scharf	Dore Plowman	src/corrections.js	executive
+Kirk Kerkorian	Kirk Kirkland	Kirk Highroller	src/corrections.js	executive
+Donna Langley	Donna Langdon	Donna Longmeadow	src/careers.js,src/corrections.js	executive
+David Puttnam	David Puttenham	David Pitstead	src/corrections.js	executive
+Amy Pascal	Amy Paschal	Amy Easterly	src/corrections.js	executive
+Tom Rothman	Tom Rothmere	Tom Redman	src/careers.js,src/corrections.js	executive
+Alan Ladd Jr.	Alan Ladder Jr.	Alan Stripling Jr.	src/corrections.js	executive
+Stacey Snider	Stacey Snyderman	Stacey Tailor	src/corrections.js	executive
+Arthur Krim	Arthur Krimson	Arthur Blacksea	src/corrections.js	executive
+Kathleen Kennedy	Kathleen Kennerly	Kathleen Helmsworth	src/careers.js,src/corrections.js	executive
+Ed Catmull	Ed Catmill	Ed Whiskerson	src/careers.js,src/corrections.js	executive
+Bob Shaye	Bob Shea	Bob Lanefield	src/corrections.js	executive
+Raymond Chow	Raymond Chau	Raymond Tsang	src/corrections.js	executive
+Toshio Suzuki	Toshio Suzuka	Toshio Bellwood	src/corrections.js	executive
+Tim Bevan	Tim Bevin	Tim Evanson	src/corrections.js	executive
+Thomas Tull	Thomas Tully	Thomas Seeddrill	src/corrections.js	executive
+Mario Kassar	Mario Kassab	Mario Cassaforte	src/corrections.js	executive
+Menahem Golan	Menahem Golanski	Menahem Heights	src/corrections.js	executive
+Jon Feltheimer	Jon Feldheimer	Jon Fieldhome	src/corrections.js	executive
+Jason Blum	Jason Bloom	Jason Blossom	src/careers.js,src/corrections.js	executive
+Reed Hastings	Reed Hastings-Streamer	Reed Battlefield	src/careers.js,src/corrections.js	executive
+Ted Sarandos	Ted Saranwrap	Ted Clingfilm	src/careers.js,src/corrections.js	executive
+Daniel Katz	Daniel Kaplan	Daniel Feline	src/corrections.js	executive
+Tom Quinn	Tom Quill	Tom Fifthson	src/corrections.js	executive
+Peter Safran	Peter Saffron	Peter Crocus	src/careers.js	executive
+Dave Filoni	Dave Filonius	Dave Threadwell	src/careers.js	executive
+Josh D'Amaro	Josh D'Amore	Josh Bittersweet	src/careers.js	executive
+David Zaslav	David Zaslow	David Gloryfield	src/careers.js	executive
+Pam Abdy	Pam Abbey	Pam Cloister	src/careers.js	executive
+Greg Peters	Greg Petersen	Greg Stoneman	src/careers.js	executive
+Mike Hopkins	Mike Hopwood	Mike Robinette	src/careers.js	executive
+Courtenay Valenti	Courtenay Valentine	Courtenay Strongwell	src/careers.js	executive
+Zack Van Amburg	Zack Van Amberley	Zack Van Barnstead	src/careers.js	executive
+Jamie Erlicht	Jamie Ehrlich	Jamie Brightling	src/careers.js	executive
+David Fenkel	David Finkle	David Aniseed	src/careers.js	executive
+John Hodges	John Hodgkins	John Rogerson	src/careers.js	executive

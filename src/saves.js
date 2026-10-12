@@ -5,7 +5,7 @@
 // on a newer one. Saves live in this browser (IndexedDB), compressed. Autosaves come on a schedule you choose and
 // the five most recent are kept; up to fifty manual saves sit beside them. Between saves, a short journal of what
 // you did since is kept too, so closing the tab loses nothing.
-const SNAP_V = 2, BUILD_ID = 'b69', MAX_MANUAL = 20, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
+const SNAP_V = 2, BUILD_ID = 'b70', MAX_MANUAL = 50, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
 const AUTO_EVERY = { week: 'Every week', month: 'Every month', half: 'Every six months', year: 'Every year', five: 'Every five years', off: 'Never' };
 let BASE = null;
 const PRIM_NO = Symbol('object');   // marks a baseline field that was an object (compared by hash, not value)   // what the world looked like as it was built, before you arrived: hashes, field by field
@@ -30,11 +30,30 @@ function snapBaseline() {
     }
     b.n[set] = n; b.h[set] = H; b.fk[set] = FK; b.fh[set] = FH; b.fv[set] = FV; b.fs[set] = FS;
   }
+  b.restH = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') b.restH[k] = fnv(JSON.stringify(S[k]) || 'u');   // rebuilt from the seed on load: unchanged ones needn't be saved
   BASE = b; return b;
 }
 // skills travel as a compact array in this fixed order (and the craft averages are rebuilt from them)
 let SKO = null;
 function SK_ORDER() { if (!SKO) { SKO = []; for (const c in CRAFTS) for (const k in CRAFTS[c].subs) SKO.push(k); } return SKO; }
+// Precision for the world's slow numbers in a normal save (an exact save, for the tests, keeps everything): skills to
+// 2 decimals, ties to 1, fame-like scores to 2, money (the world's millions) to the thousand. The world's long tail of
+// 4-decimal noise was most of a save's size; nobody can see the difference.
+let SNAP_PREC = true;
+const SNAP_R2 = new Set(['standing', 'fame', 'intl', 'heat']), SNAP_R3 = new Set(['afterTotal', 'theatrical', 'rentals', 'pa', 'backend', 'total', 'libInc', 'cash']), SNAP_O3 = new Set(['after', 'gross']);
+const rnd2 = v => Math.round(v * 100) / 100, rnd3 = v => Math.round(v * 1000) / 1000;
+function snapPrec(set, k, v) {
+  if (!SNAP_PREC || typeof v !== 'number' && (v === null || typeof v !== 'object')) return v;
+  if (typeof v === 'number') return set === 'people' && SNAP_R2.has(k) ? rnd2(v) : set !== 'people' && SNAP_R3.has(k) ? rnd3(v) : v;
+  if (set === 'films' && SNAP_O3.has(k) && !Array.isArray(v)) { const o = {}; for (const x in v) o[x] = typeof v[x] === 'number' ? rnd3(v[x]) : v[x]; return o; }
+  return v;
+}
+// the world's other fields: only the ones that changed since it was built
+function snapRest(d) {
+  const rest = {}, same = [];
+  for (const k in S) { if (SNAP_SETS.includes(k) || k === 'log' || k === 'me') continue; const h = BASE.restH && BASE.restH[k]; if (h !== undefined && fnv(JSON.stringify(S[k]) || 'u') === h) same.push(k); else rest[k] = S[k]; }
+  d.rest = rest; d.same = same;
+}
 // one entity against its baseline: the fields that changed (ties entry by entry), or null if none did
 function entDiff(set, i, e) {
   const fk = BASE.fk[set][i], fh = BASE.fh[set][i], fv = BASE.fv[set][i], fs = BASE.fs[set][i], out = {}; let any = false;
@@ -44,21 +63,21 @@ function entDiff(set, i, e) {
     if (P && k === 'c') continue;   // derived from the skills: recomputed on load
     const j = fk.indexOf(id);
     // plain values compare directly; objects by hash (people's skills and ties field by field, below)
-    if (j >= 0 && fv[j] !== PRIM_NO) { if (v === fv[j] || (v !== v && fv[j] !== fv[j])) continue; if (v === null || typeof v !== 'object') { out[k] = v === undefined ? null : v; any = true; continue; } }
+    if (j >= 0 && fv[j] !== PRIM_NO) { if (v === fv[j] || (v !== v && fv[j] !== fv[j])) continue; if (v === null || typeof v !== 'object') { out[k] = v === undefined ? null : snapPrec(set, k, v); any = true; continue; } }
     if (P && k === 'ties' && j >= 0 && v) {
       const t = v, d = {}, bk = BASE.tk[i], bv = BASE.tv[i], had = new Set(); let ch = false;
       for (let q = 0; q < bk.length; q++) { const x = bk[q]; had.add(x); if (!(x in t)) { d[x] = null; ch = true; } else if (Math.fround(t[x]) !== bv[q]) { d[x] = t[x]; ch = true; } }
       for (const x in t) if (!had.has(+x)) { d[x] = t[x]; ch = true; }
-      if (ch) { out['~ties'] = d; any = true; }
+      if (ch) { if (SNAP_PREC) for (const x in d) if (d[x] !== null) d[x] = Math.round(d[x] * 10) / 10; out['~ties'] = d; any = true; }
       continue;
     }
     if (P && k === 'sk' && v && j >= 0) {
       const SO = SK_ORDER(), b = BASE.sk[i]; let full = Object.keys(v).length === SO.length, same = !!b;
       for (let q = 0; q < SO.length; q++) { const x = v[SO[q]]; if (x === undefined) { full = false; break; } if (same && x !== b[q]) same = false; }
-      if (full) { if (!same) { out['~sk'] = SO.map(x => snapRoundNum(v[x])); any = true; } continue; }
+      if (full) { if (!same) { if (SNAP_PREC && b && SO.every((x, q) => b[q] === b[q])) out['~sd'] = SO.map((x, q) => rnd2(v[x] - b[q]) || 0); else out['~sk'] = SO.map(x => SNAP_PREC ? rnd2(v[x]) : snapRoundNum(v[x])); any = true; } continue; }
     }
     if (j >= 0) { const js = JSON.stringify(v); if (fs[j] !== undefined ? js === fs[j] : fnv(js || 'u') === fh[j]) continue; }
-    out[k] = v === undefined ? null : v; any = true;
+    out[k] = v === undefined ? null : snapPrec(set, k, v); any = true;
   }
   const gone = []; for (let j = 0; j < fk.length; j++) if (!seen.has(fk[j])) gone.push(KEYS[fk[j]]);
   if (gone.length) { out['~gone'] = gone; any = true; }
@@ -67,6 +86,7 @@ function entDiff(set, i, e) {
 // the save, built a slice at a time so the page keeps breathing and a progress bar can move
 async function snapDataAsync(onProg) {
   if (!BASE) throw new Error('no baseline');
+  SNAP_PREC = true;
   const d = { v: SNAP_V, build: BUILD_ID, seed: S.seed, year: S.startYear, depth: S.depth, sig: BASE.sig, base: BASE.n, n: {}, ch: {}, r: R.s, pr: S.me && S.me.rng ? S.me.rng.s : null };
   const total = SNAP_SETS.reduce((t, set) => t + S[set].length, 0); let done = 0, t0 = performance.now();
   for (const set of SNAP_SETS) {
@@ -77,8 +97,7 @@ async function snapDataAsync(onProg) {
     }
     d.ch[set] = out;
   }
-  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
-  d.rest = rest;
+  snapRest(d);
   if (onProg) onProg(.88); await new Promise(r => setTimeout(r, 0));
   const str = JSON.stringify(d);
   const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
@@ -88,6 +107,7 @@ async function snapDataAsync(onProg) {
 // the save itself, as a string
 function snapData(exact) {
   if (!BASE) throw new Error('no baseline');
+  SNAP_PREC = !exact;
   const d = { v: SNAP_V, build: BUILD_ID, seed: S.seed, year: S.startYear, depth: S.depth, sig: BASE.sig, base: BASE.n, n: {}, ch: {}, r: R.s, pr: S.me && S.me.rng ? S.me.rng.s : null };
   for (const set of SNAP_SETS) {
     const L = S[set], nb = BASE.n[set], out = []; d.n[set] = L.length;
@@ -97,8 +117,7 @@ function snapData(exact) {
     }
     d.ch[set] = out;
   }
-  const rest = {}; for (const k in S) if (!SNAP_SETS.includes(k) && k !== 'log' && k !== 'me') rest[k] = S[k];
-  d.rest = rest;
+  snapRest(d);
   const str = JSON.stringify(d);
   // your own life is small and kept exact, so the journal replays onto exactly the numbers you left
   const me = JSON.stringify(S.me === undefined ? null : S.me), mp = S.me && S.people[S.me.id] ? JSON.stringify(S.people[S.me.id]) : 'null';
@@ -118,6 +137,7 @@ function snapApply(str) {
       const e = L[i];
       for (const k in x) {
         if (k === '~gone') { for (const g of x[k]) delete e[g]; continue; }
+        if (k === '~sd') { const o = {}, K = SK_ORDER(), b = BASE.sk[i]; for (let z = 0; z < K.length; z++) o[K[z]] = rnd2(b[z] + x[k][z]); e.sk = o; recalc(e); continue; }
         if (k === '~sk') { const o = {}, K = SK_ORDER(); for (let z = 0; z < K.length; z++) o[K[z]] = x[k][z]; e.sk = o; recalc(e); continue; }
         if (k === '~ties') { const t = e.ties = e.ties || {}; for (const id in x[k]) { if (x[k][id] === null) delete t[id]; else t[id] = x[k][id]; } continue; }
         e[k] = x[k];
@@ -125,6 +145,7 @@ function snapApply(str) {
     }
     L.length = d.n[set];
   }
+  for (const k of d.same || []) if (k in S) rest[k] = S[k];   // unchanged since the world was built: the rebuilt copy is the same
   if (d.mep && rest.me && S.people[rest.me.id]) S.people[rest.me.id] = d.mep;   // your own record, exact
   const keep = { people: S.people, films: S.films, companies: S.companies };
   S = Object.assign({}, rest, keep, { log: [] });   // a new object: every cache keyed on the old world lets go
@@ -212,6 +233,9 @@ async function saveRun(kind, name, id) {
   await new Promise(r => setTimeout(r, 30));
   // building a snapshot takes a moment of the page's attention: never while the dice are rolling
   for (let i = 0; i < 200 && typeof document !== 'undefined' && document.getElementById('rollov'); i++) await new Promise(r => setTimeout(r, 250));
+  // the manual slots are full: say so plainly, rather than quietly not saving
+  if (kind === 'manual' && !id) { const n = (await saveList()).filter(x => x.kind === 'manual').length;
+    if (n >= MAX_MANUAL) { UI.saveMsg = `Not saved: all ${MAX_MANUAL} save slots are full. Overwrite or delete one on the Saves page.`; UI.saveFull = 1; SAVING = false; saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 12000); return null; } }
   try { const m = await writeSlot(kind, name, id); AUTO_AT = autoPeriod(); UI.saveMsg = `${kind === 'auto' ? 'Autosaved' : 'Saved'} · ${fmtDate(m.week, true)}`; UI.saveList = null; return m; }
   catch (e) { UI.saveMsg = 'Couldn\'t save: ' + ((e && e.name) || 'storage unavailable'); return null; }
   finally { SAVING = false; saveProgress(null); saveBadge(); setTimeout(() => { UI.saveMsg = ''; saveBadge(); }, 4000); }
@@ -255,6 +279,7 @@ function savesHTML() {
   const row = x => `<tr${x.seed !== S.seed || x.year !== S.startYear || x.depth !== S.depth ? ' class="muted"' : ''}><td><b>${esc(x.name || (x.kind === 'auto' ? 'Autosave' : 'Save'))}</b><br><span class="small muted">${esc(x.label)}</span></td><td class="small">${new Date(x.when).toLocaleString()}</td><td class="n small">${(x.size / 1e6).toFixed(1)} MB</td><td>${sBtn('sload', x.id, 'Load', 'Click again to load', '')} ${x.kind === 'manual' ? sBtn('sover', x.id, 'Overwrite', 'Click again to overwrite', ' ghost') + ' ' : ''}${sBtn('sdel', x.id, 'Delete', 'Click again to delete', ' ghost')} <button class="btn-s ghost" data-sexp="${x.id}" title="Download this save as a file, to keep or to open in another browser">Export</button></td></tr>`;
   return `<section class="panel"><h3>Save your life</h3>
    <div class="ccrow"><label>Name <input id="save-name" maxlength="40" placeholder="${esc(snapLabel())}" value="${esc(UI.saveName || '')}"></label> <button class="btn-s" data-snew="1" ${man.length >= MAX_MANUAL ? 'disabled' : ''}>Save now</button> <span class="muted small">${man.length} of ${MAX_MANUAL} manual saves${man.length >= MAX_MANUAL ? ': delete or overwrite one to save again' : ''}</span></div>
+   ${man.length >= MAX_MANUAL ? `<p class="bad"><b>All ${MAX_MANUAL} save slots are full.</b> The game can't make a new save until you free one: use <b>Overwrite</b> on a save you no longer need, or <b>Delete</b> one below. Autosaves still work (the ${MAX_AUTO} newest are kept).</p>` : man.length >= MAX_MANUAL - 5 ? `<p class="small"><b>${MAX_MANUAL - man.length} save slot${MAX_MANUAL - man.length === 1 ? '' : 's'} left</b> of ${MAX_MANUAL}. After that, overwrite or delete an old save to make a new one.</p>` : ''}
    <div class="ccrow"><label>Autosave ${sel('save-auto', Object.entries(AUTO_EVERY), autoPref())}</label> <span class="muted small">The ${MAX_AUTO} most recent autosaves are kept. ${autoPref() === 'week' ? 'Weekly autosaves take a moment each week.' : ''}</span></div>
    <div class="ccrow"><label class="btn-s ghost" style="cursor:pointer">Import a save file <input type="file" id="save-import" accept=".applebox,.json,application/gzip,application/json" hidden></label> <span class="muted small">${esc(UI.saveIO || 'Export a save to keep a copy, or to carry your career to another browser or computer.')}</span></div>
    <p class="small muted">${UI.saveQuota ? `Using ${(UI.saveQuota[0] / 1e6).toFixed(0)} MB of the ${(UI.saveQuota[1] / 1e9).toFixed(1)} GB this browser allows. ` : ''}Saves live in this browser. A save made on an older version of the game loads on a newer one. Between saves, what you do is journalled, so closing the tab loses nothing.</p></section>
