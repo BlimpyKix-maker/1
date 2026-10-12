@@ -5,7 +5,7 @@
 // on a newer one. Saves live in this browser (IndexedDB), compressed. Autosaves come on a schedule you choose and
 // the five most recent are kept; up to fifty manual saves sit beside them. Between saves, a short journal of what
 // you did since is kept too, so closing the tab loses nothing.
-const SNAP_V = 2, BUILD_ID = 'b68', MAX_MANUAL = 50, MAX_AUTO = 5, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
+const SNAP_V = 2, BUILD_ID = 'b69', MAX_MANUAL = 20, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
 const AUTO_EVERY = { week: 'Every week', month: 'Every month', half: 'Every six months', year: 'Every year', five: 'Every five years', off: 'Never' };
 let BASE = null;
 const PRIM_NO = Symbol('object');   // marks a baseline field that was an object (compared by hash, not value)   // what the world looked like as it was built, before you arrived: hashes, field by field
