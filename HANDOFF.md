@@ -70,7 +70,7 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/festivals.js` | `FEST_INFO` (24 festivals: rules, sections, prizes, statuette kinds), `festFits`, `festPeople` (directors, programmers, juries), `festWinners`/`festRecord`, `STATUETTES` SVGs, trophies (`trophyWeek`, `trophyAct` show/sell, `trophyShelfHTML`), `festivalPage` |
 | `src/messaging.js` | Who texts you (`innerCircle`, `recentColleagues`), stakes texts (`STAKES`, `stakeText`, `stakeReply`, `stakesWeek`); `TOPICS` (22 ways to start a text) via `topicText`, `makeLead`/`leadBoard` (real postings from friends), NPC asks (`ASKS`, `askReply`), delayed answers in `msgWeek` (`M.msgq`), email compose (`EMAIL_KINDS`, `emailAct`, `mailReply`, `composeMailHTML`) |
 | `src/depth.js` | `GIGS` (one-week jobs, `gigPosts`), more `VENUES` and `COMPS`, the Bazaar computer app (`BAZAAR`, collectibles `bzLots`/`bzValue`, `bazaarAct`, `bazaarWeek`), achievements (`ACH`, `achWeek`, `achHTML`) |
-| `src/os.js` | ApplOS, the computer: `osPanel` (sidebar groups `OS_GROUPS`, header, body), apps `osHome`, `osJobs`, `osCal`, `osContacts`, `osBank` (`osNetWorth`), scoped dark theme under `.os` |
+| `src/os.js` | SlateOS (renamed from ApplOS in Round 19), the computer: `osPanel` (sidebar groups `OS_GROUPS`, header, body), apps `osHome`, `osJobs`, `osCal`, `osContacts`, `osBank` (`osNetWorth`), scoped dark theme under `.os` |
 | `src/archive2.js` | Pages for media figures (`viewFigure`, ids `hub~i`), songs (`viewSong`), media companies (`viewMediaCo`), your works (`viewWork`); `viewExtra` route hook; The Daily Slate (`paperHTML`, sections, search `npq`, monthly archive); `playerArticle` for stories about you |
 | `src/companywork.js` | Named employers for every off-set job (`nameEmployer`, `BIZ_NAMES`, `employerLink`); company slate influence by rung (`SWAY`, `slateWeek`, `f.exec`), big calls (`SLATE_CALLS`, `slatePick`, inbox kind `slate`), `slateHTML`, `companyWorkHTML` |
 | `src/awards2.js` | Full winners for every prize: `ceremonyRecord` (`CER_CATS`, `CER_ALIAS` canonical names, `CER_START`), `mediaRecord` (`MEDIA_CATS`), `contestRecord`, `allWinners` (cached), `awardTableHTML` (category chips, `ab-cat`/`ab-y`/`ab-sort`), `festLineup` |
@@ -189,6 +189,16 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/depth7.js` | Skill voices on decisions (a line when a check uses a skill ≥ 16 or ≤ 6) and the advisor ring on production calls (agent, mentor, partner each back an option; their record is kept in `M.advRec`). |
 | `src/cinema2.js` | Owning a cinema (Money group app): venue kinds by era (nickelodeon … microcinema, video store 1978–2010), listings every 8 weeks, weekly programming from new releases and classics, events (Q&A, double bill, members, midnight), the manager's picks when you don't, rental terms in `cinHire`/`cinTerms` (70/60/50% sliding scale; repertory 35% or a minimum; video 40%), concessions after cost, reputation with mean reversion, `cinWeek` books in `C.hist`. Money is in the cinema's own city (`cinMoney`). Heirs inherit it. |
 | `src/confid.js` | Confidant ranks 1–10 (`CFD_AT`, points from positive `addTie` ×0.35), perks at 2/4/6/8/10 (`CFD_PERK`: vouch on hires, a favour a season, craft growth, double word, follow you), asks at ranks 3/6/9 (`cfd` inbox; saying no stalls 26 weeks). Fame quirks (`QUIRKS`, from 26-week habit counts in `M.acts` once fame ≥ 5; fade when the habit drops below 2/3 of the line), shown as 🎭 conditions. |
+| `src/depth8.js` | Life verdicts at 30–70 (`verdictWeek`, `DECADE`), the Desk app (`DESK_CARDS`), skill rust (`rustWeek`, floor 80% of best), ageing fans (`fanAgeMul`), household bills (`billWeek`, `billMul`). |
+| `src/world2.js` | The world's decision-makers: breakouts and busts, company character (`coDNA`, `companyTaste`), failure as sale/rescue/closure (`coFail`), the audience calendar and competition (`boxCalendar`, `f.why`), one economy (`econLevel`, `econGL`/`econBudget`/`econDemand`, strikes, tax credits), NPC illness and recasts (`npcLivesMonth`), voted awards (`VOTE_BLOCS`, `awardVote`), declines with reasons, career moves, sequels with fatigue, dividends and founding (`coYear`), the "why it did that" panel (`boxWhyHTML`). |
+| `src/latepace.js` | Late-game offers need a cause: patronage at level 5 with a released film (once each), windfalls need a body of work (`LATE_CAUSE`), 156-week cooldowns, one late offer per 6 weeks, crowdfunding owed to a project. |
+| `src/pressure.js` | Stress from the job (+0.7 a week, +0.6 a level, +2 for a second job), shoots (+2), post (+1) and enemies (up to +3), shown as "Under pressure"; relief from a single scene or story beat halved. |
+| `src/social2.js` | Contacts fade after two years unseen (`KEEP_TAGS` exempt; soft cap 240), text variety (`TX_ALT`, `TX_TAIL`), at most two offers a week. |
+| `src/scenes3.js` | No scene repeats within 26 weeks; opening lines that cite their cause (`sceneFact`); callbacks to earlier choices (`M.choiceLog`). |
+| `src/sides.js` | Round 19 side industries: syncs priced by use (`SYNC_FEE`), score commissions, royalty statements, session calls, door deals, the podcast episode-seven wall, demonetisation weeks (`demonWindow`), creator burnout, stage runs with closing notices, transfers and film options, TV script fees and created-by royalties, say-on-pay and activists (`sidePick`). |
+| `src/about.js` | The About app: credits, font licences, sources, the fiction notice and the AI note (`aboutHTML`). |
+| `src/safety.js` | Real people still alive: no negative traits or events, no simulated death, no lookalike portrait (`realLiving`, `NEG_TRAITS`, `NEG_EVENTS`). |
+| `src/streams.js` | Built last: the world's dice per system and week (`wstream`), the player's own dice for actions, so two careers on one seed share the world. |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
 ## Rules that keep it working
@@ -223,7 +233,17 @@ node tools/playtest.js 60          # bot career; must print "replayed … IDENTI
 node tools/rendertest.js 40        # same, opening every page each week; catches pages that roll dice
 node tools/fuzz.js 5 60            # random careers; every line must say "ok"
 NODE_PATH=$(npm root -g) node tools/uitest.js <outdir>   # Playwright; needs "SAVE OK", overflow 0
+node tools/blocklist.js            # real names in anything the page can show; must print total 0 (the build warns too)
+node tools/safetytest.js 2027 15   # real people still alive: no negative traits, events, deaths or lookalikes; nBad 0
 ```
+
+Standing probes from the audit (Round 19), with the targets they are held to:
+
+| probe | measures | target |
+|---|---|---|
+| `node tools/probe-world2.js <seed> 15 out.json` | a world with no player, 15 years | tier-1 studios closed outright < 10% of 85; active companies within 15% of the start; top-30 by fame has ≥ 8 newcomers; awards don't always go to the best film (share 0.5–0.65); busiest month 3–4.5× the quietest |
+| `node tools/probe-pressure.js <seed> 104` | a working bot's weekly energy low and stress | energy weekly-low median 35–50; stress over 40 in 10–35% of weeks; no burnout in the first year |
+| `node tools/probe-player.js`, `probe-paths.js`, `probe-cash.js`, `probe-jump.js` | the audit's career, path, money and level-jump probes | see the audit handoff in `handoff/` |
 
 ## Recent balance decisions
 - Save version is 8 (job tasks changed the dice stream).
@@ -294,6 +314,33 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 19: the audit, the legal pass, and the side industries from sources
+
+- Asked for: finish the comparable-games list; then act on the two audit handoffs (`handoff/` zips: 15 work orders,
+  phases 0–4, legal items L1–L12); deepen TV, music, podcasts and the boardroom from real sources so the side
+  industries are memorable rather than money engines; the bots should make the world live and breathe together.
+- Owner decisions: real people keep pun-on-meaning names (`data/rename/living-safety.tsv` for the living), and
+  nothing negative happens to anyone alive in reality; the title may change (options in the report); free release
+  with the AI feature switchable; the AI disclosure wording is decided later; `LICENSE` and making the repo private
+  are the owner's.
+- Legal: no outside requests (fonts embedded); no third-party data (IMDb numbers gone); employers reduced to types;
+  ApplOS → SlateOS; real festivals and prizes renamed (L7); about 860 taglines and 1,640 lines of dialogue that copied
+  the originals rewritten by seven parallel review passes (L9; edit maps in the session scratchpad); original
+  catalogue notes moved out of the page to `data/catalogue-notes.json` and a blocklist scan added (L10, total 0);
+  "Read the pages" behind `--no-ai` and a player toggle with an AI-written label (L11); `SOURCES.md` and an About
+  app (L12).
+- World (work orders 1–9): separate dice for the world and the player (97–99% of world films shared across bots
+  with different policies on one seed); breakouts; company character; rescues and sales instead of closures; an
+  audience calendar with competition; one economy; NPC illness and recasts; voted awards; declines; sequels.
+  Studios lost money on most films because nothing after 2012 paid like home video: a digital sales and rental
+  window and a larger first licence were added to `afterlife`.
+- Career (work orders 10–14): levels and promotions need a body of work; festival premieres capped; the late game
+  needs causes; stress builds from jobs and shoots and a single scene no longer wipes it out; contacts fade; texts
+  vary; scenes say why they happen.
+- Side industries (`src/sides.js`, research in `docs/RESEARCH.md` Round 19): see the source map row. Sync fees fell
+  from about $80k a song to $500–$50k by use, and all side income is taxed.
+- Probe numbers against targets are in the Round 19 report; re-run the standing probes (Tests) after any balance change.
 
 ## Round 18: a cinema, confidants, fame quirks, and the caveats checked
 

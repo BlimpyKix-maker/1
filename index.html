@@ -10877,7 +10877,8 @@ function afterlife(y) {
     }
     if (y >= 1985 && (!f.cab || y - f.cab >= 7) && rnd() < .5) { f.cab = y; add('Cable & pay TV', V * .06 * qf); }
     if (y >= 2012) add('Streaming', V * .01 * (f.q / 60 + cf * 1.5 + (age <= 3 ? 1 : 0)));
-    if (y >= 2013 && !f.svod && age >= 1) { f.svod = y; add('Streaming & TV licence', V * .25 * qf); }   // the first licence to a streamer or broadcaster, a year or so after release
+    if (y >= 2013 && !f.svod && age >= 1) { f.svod = y; add('Streaming & TV licence', V * .32 * qf); }   // the first licence to a streamer or broadcaster, a year or so after release
+    if (y >= 2012 && age >= 1 && age <= 5) add('Digital sales & rental', V * (age === 1 ? .16 : .025) * qf);   // buy and rent at home: studios' biggest line after the cinema (the audit found theatrical alone loses on most films)
     if (age >= 10 && rnd() < .004 * (f.q / 60 + cf * 2) * Math.min(3, f.total / Math.max(.001, f.cost))) {
       add('Remake & sequel rights', V * .04);
       if ((f.q > 72 || f.cult > 60) && rnd() < .3) news('Library', `Remake rights to ${f.title} (${f.ry}) are sold.`, { film: f.id });
@@ -17176,7 +17177,11 @@ function startWork(a) {
 }
 const WT_A = ['Midnight', 'Paper', 'Golden', 'Static', 'Velvet', 'Neon', 'Quiet', 'Electric', 'Borrowed', 'Northern', 'Salt', 'Broken', 'Little', 'Summer', 'Glass', 'Crimson', 'Silver', 'Hollow', 'Wild', 'Blue', 'Burning', 'Sunday', 'Restless', 'Lucky', 'Faded', 'Secret', 'Lonely', 'Dirty', 'Sweet', 'Distant'];
 const WT_B = ['Hearts', 'Radio', 'Season', 'Signals', 'Rooms', 'Weather', 'Machines', 'Ghosts', 'Letters', 'Lights', 'Roads', 'Dreams', 'Hours', 'Kings', 'Rivers', 'Highway', 'Satellites', 'Strangers', 'Thunder', 'Mornings', 'Horses', 'Diamonds', 'Rebels', 'Echoes', 'Lovers', 'Avenue', 'Fever', 'Mirrors', 'Promises', 'Waves'];
-function workTitle(type, n) { const r = hashRand(S.me.id * 13 + n * 7 + type.length); const t = `${WT_A[Math.floor(r() * WT_A.length)]} ${WT_B[Math.floor(r() * WT_B.length)]}`; return type === 'podcast' ? `The ${t} Podcast, ep. ${((S.me.works || []).filter(w => w.type === 'podcast').length) + 1}` : type === 'blip' ? `${t.toLowerCase()} #${n + 1}` : t; }
+function workTitle(type, n) { const r = hashRand(S.me.id * 13 + n * 7 + type.length); const t = `${WT_A[Math.floor(r() * WT_A.length)]} ${WT_B[Math.floor(r() * WT_B.length)]}`; if (type === 'podcast') {   // episodes belong to a show: the same name until you end it (src/sides.js)
+    const L = (S.me.works || []).filter(w => w.type === 'podcast'), last = L[L.length - 1], show = last && String(last.title).split(', ep.')[0];
+    if (show && !(((S.me.sideF || {}).ended || {})[show])) return `${show}, ep. ${L.filter(w => String(w.title).split(', ep.')[0] === show).length + 1}`;
+    return `The ${t} Podcast, ep. 1`; }
+  return type === 'blip' ? `${t.toLowerCase()} #${n + 1}` : t; }
 // A block of making: the project moves along; a good session (a roll) adds a little quality.
 function makeSession(L) {
   const M = S.me, me = ME(), k = M.make;
@@ -43606,7 +43611,7 @@ function breakoutYear() {
     const pot = p => { const subs = Object.keys(CRAFTS[MAIN[p.role]].subs); return avg(subs.map(k => p.pot[k] || 0)); };
     const cand = L.map(p => [p, pot(p) + rnd() * 4]).sort((a, b) => b[1] - a[1]).slice(0, 6);
     for (let i = 0; i < n && cand.length; i++) { const [p] = cand.splice(Math.floor(rnd() * Math.min(3, cand.length)), 1)[0];
-      p.heat = Math.max(p.heat || 0, 60); p.standing = clamp(p.standing + 8, 0, 100); p.fame = clamp((p.fame || 0) + 15, 0, 100); p.breakout = S.year;
+      p.heat = Math.max(p.heat || 0, 70); p.standing = clamp(p.standing + 8, 0, 100); p.fame = clamp((p.fame || 0) + 22, 0, 100); p.breakout = S.year;
       news('People', `${p.name} is the ${ROLE_LABEL[p.role].toLowerCase()} everyone in ${HUBS[h].name} is suddenly talking about.`, { person: p.id }); }
   }
 }
@@ -43650,7 +43655,7 @@ function companyTaste(c, recent, m) {
 function coFail(c, y, scale) {
   R = wstream('rescue', c.id, y); const base = [0, 40, 12, 3][c.tier] * scale;
   const buyer = S.companies.filter(b => b !== c && b.closed === null && b.owner === undefined && b.tier <= Math.max(1, c.tier) && b.cash > -c.cash * .5 + base * .2 && (c.tier === 1 || HUBS[b.hub].m === HUBS[c.hub].m)).sort((a, b) => b.cash - a.cash)[0];
-  const pBuy = [0, .35, .3, .1][c.tier], pRescue = [0, .75, .35, .05][c.tier];
+  const pBuy = [0, .45, .3, .1][c.tier], pRescue = [0, .85, .35, .05][c.tier];
   if (buyer && rnd() < pBuy) {
     buyer.cash += c.cash * .5;
     for (const f of S.films) { if (f.owner === c.id) f.owner = buyer.id; if (f.co === c.id && f.rel === null) { f.co = buyer.id; buyer.films.push(f.id); } }
@@ -43894,7 +43899,7 @@ function boxWhyHTML(f) {
 // The audit found energy and stress never constrained anything: the auto-schedule kept energy above 55 and stress at
 // zero for years. Nights now restore a little less than a working day costs (SLEEP_BASE in life.js), and three
 // pressures build stress week by week, each named in your conditions so you can see where it comes from:
-//  · the job itself: more senior jobs weigh more (+0.6 a week per level; a second job +2);
+//  · the job itself: any job +0.7 a week, more senior jobs more (+0.6 per level); a second job +2;
 //  · a deadline: a film you're on is shooting (+2 a week), or you head a department in post (+1);
 //  · enemies: people who can't stand you (+0.5 each a week, up to +3);
 //  · money: already counted in the week (rent you can't cover, debt).
@@ -43903,7 +43908,7 @@ function pressureParts() {
   const M = S.me, me = ME(), out = [];
   const shoot = M.jobs.filter(j => j.film !== null && j.film !== undefined && S.films[j.film] && S.films[j.film].stage === 2).length, post = M.jobs.filter(j => j.film !== null && j.film !== undefined && S.films[j.film] && S.films[j.film].stage === 3 && ((tmplOf(j) || {}).lv || 0) >= 4).length;
   if (shoot) out.push(['a shoot', 2 * Math.min(2, shoot)]); else if (post) out.push(['post-production', 1]);
-  const lv = Math.max(0, ...M.jobs.map(j => (tmplOf(j) || {}).lv || 1)); if (M.jobs.length) out.push([M.jobs.length > 1 ? 'two jobs at once' : 'the job', +(lv * .6 + (M.jobs.length - 1) * 2).toFixed(1)]);
+  const lv = Math.max(0, ...M.jobs.map(j => (tmplOf(j) || {}).lv || 1)); if (M.jobs.length) out.push([M.jobs.length > 1 ? 'two jobs at once' : 'the job', +(.7 + lv * .6 + (M.jobs.length - 1) * 2).toFixed(1)]);
   const enemies = Object.keys(M.known || {}).map(Number).filter(id => P(id) && !P(id).dead && opinion(id) <= -30).length;
   if (enemies) out.push([`${enemies} ${enemies === 1 ? 'person who can\'t stand you' : 'people who can\'t stand you'}`, Math.min(3, enemies * .5)]);
   return out;
@@ -44071,7 +44076,7 @@ function firstReleaseWeek() {
 // session work: three hours on someone else's record at union scale, the steadiest money in music
 const SESSION_SCALE = 475;
 function sessionWeek() {
-  const M = S.me, me = ME(); if (S.week % 9 !== 4 || pending().some(x => x.kind === 'session')) return;
+  const M = S.me, me = ME(); if (S.week % 13 !== 4 || pending().some(x => x.kind === 'session') || prnd() > .6) return;
   if (!(me.role === 'composer' || M.field === 'music') || skillOf(me, 'song') < 8) return;
   const lead = me.standing >= 40, pay = usd(SESSION_SCALE * (lead ? 2 : 1));
   inbox('session', 'A session call', `${pickLine(['A producer', 'A singer', 'An arranger'], S.week)} needs ${lead ? 'a leader for' : 'one more player on'} a three-hour session on ${pickLine(['Thursday', 'Saturday', 'Monday'], S.week + 1)}. Scale is ${fmtCash(pay)}, plus pension.`, { pay, choices: [{ k: 'ss_yes', label: `Take it (${fmtCash(pay)})` }, { k: 'ss_no', label: 'Pass' }] });
@@ -44200,7 +44205,7 @@ function sidePick(it, k) {
   if (it.kind === 'podwall') { it.done = true;
     if (k === 'pw_keep') { F.grit = S.week + 26; M.stress = clamp(M.stress + 4, 0, 100); it.result = { t: 'You book the next three guests before you can change your mind. Episode ten is going to happen.' }; }
     else if (k === 'pw_break') { F.podBreak = S.week + 6; M.fol.podhaus = (M.fol.podhaus || 0) * .9; M.stress = clamp(M.stress - 6, 0, 100); it.result = { t: 'A short note to listeners: back in six weeks. Some of them will be.' }; }
-    else { milestone(`Ended ${it.show}`, 'work'); it.result = { t: `${it.show} ends. The feed stays up; every so often somebody finds it and writes to ask where you went.` }; }
+    else { (F.ended = F.ended || {})[it.show] = S.week; milestone(`Ended ${it.show}`, 'work'); it.result = { t: `${it.show} ends. The feed stays up; every so often somebody finds it and writes to ask where you went.` }; }
     return true; }
   if (it.kind === 'quitcheck') { it.done = true;
     if (k === 'qc_off') { for (const p of ['vidwire', 'blip']) M.fol[p] = (M.fol[p] || 0) * .93; M.stress = clamp(M.stress - 15, 0, 100); F.grind = 0; it.result = { t: 'A month without a camera. You lose some subscribers and find some sleep.' }; }
@@ -44230,6 +44235,30 @@ function sidePick(it, k) {
 }
 PICK_HOOKS.push(sidePick);
 // </sides>
+// <about>
+// ---------------- About: credits, licences and sources (audit L12) ----------------
+// What the page is built from and on whose terms: the typefaces and their licence, where the numbers come from,
+// that every film, person, company and prize in the world is invented or renamed, and what the AI feature does.
+// The long versions live in SOURCES.md and assets/FONT-LICENSES.txt in the project.
+const ABOUT_FONTS = [['Barlow Condensed', 'The Barlow Project Authors'], ['Barlow', 'The Barlow Project Authors'], ['IBM Plex Mono', 'IBM Corp.']];
+function aboutHTML() {
+  const ai = typeof AI_PAGES !== 'undefined' && AI_PAGES;
+  return `<div class="card"><h3>About this game</h3>
+    <p>A life in the film business, from the first unpaid job to whatever you make of it. The world is simulated week by week and is the same for everyone who starts with the same seed.</p>
+    <h4>A made-up world</h4>
+    <p class="small">Every film, person, company, festival, prize, platform and brand in the game is invented, or renamed so that it isn't the real one. Film histories are retold in the game's own words; no real tagline, slogan or line of dialogue is used. Any resemblance to real events is how history went, retold; any resemblance to a real person's private life is accidental.</p>
+    <h4>Where the numbers come from</h4>
+    <p class="small">Box office shapes, fees, union scales, streaming payouts, renewal rates, recoupment odds and board practice are calibrated against public reports and trade sources, listed with links in the project's research notes. Only numbers are taken from them, never text.</p>
+    <h4>Typefaces</h4>
+    <p class="small">${ABOUT_FONTS.map(([n, by]) => `<b>${n}</b> by ${by}`).join(', ')}. All three are used under the SIL Open Font License 1.1 and travel inside the page; the game makes no outside requests.</p>
+    <h4>AI</h4>
+    <p class="small">${ai ? 'One optional feature, "Read the pages", asks an AI model to write a few pages of a script you are working on. Those pages are marked as AI-written, can be wrong or odd, and can be turned off on the script page. Nothing else in the game calls a model while you play.' : 'This build has no AI features: nothing in the game calls a model while you play.'}</p>
+  </div>`;
+}
+OS_EXTRA.about = ['ℹ️', 'About', 'Credits, licences and sources'];
+OS_VIEWS.about = () => aboutHTML();
+{ const g = OS_GROUPS.find(x => x[0] === 'Learn'); if (g && !g[1].includes('about')) g[1].push('about'); }
+// </about>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

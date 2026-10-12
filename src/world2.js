@@ -16,7 +16,7 @@ function breakoutYear() {
     const pot = p => { const subs = Object.keys(CRAFTS[MAIN[p.role]].subs); return avg(subs.map(k => p.pot[k] || 0)); };
     const cand = L.map(p => [p, pot(p) + rnd() * 4]).sort((a, b) => b[1] - a[1]).slice(0, 6);
     for (let i = 0; i < n && cand.length; i++) { const [p] = cand.splice(Math.floor(rnd() * Math.min(3, cand.length)), 1)[0];
-      p.heat = Math.max(p.heat || 0, 60); p.standing = clamp(p.standing + 8, 0, 100); p.fame = clamp((p.fame || 0) + 15, 0, 100); p.breakout = S.year;
+      p.heat = Math.max(p.heat || 0, 70); p.standing = clamp(p.standing + 8, 0, 100); p.fame = clamp((p.fame || 0) + 22, 0, 100); p.breakout = S.year;
       news('People', `${p.name} is the ${ROLE_LABEL[p.role].toLowerCase()} everyone in ${HUBS[h].name} is suddenly talking about.`, { person: p.id }); }
   }
 }
@@ -60,7 +60,7 @@ function companyTaste(c, recent, m) {
 function coFail(c, y, scale) {
   R = wstream('rescue', c.id, y); const base = [0, 40, 12, 3][c.tier] * scale;
   const buyer = S.companies.filter(b => b !== c && b.closed === null && b.owner === undefined && b.tier <= Math.max(1, c.tier) && b.cash > -c.cash * .5 + base * .2 && (c.tier === 1 || HUBS[b.hub].m === HUBS[c.hub].m)).sort((a, b) => b.cash - a.cash)[0];
-  const pBuy = [0, .35, .3, .1][c.tier], pRescue = [0, .75, .35, .05][c.tier];
+  const pBuy = [0, .45, .3, .1][c.tier], pRescue = [0, .85, .35, .05][c.tier];
   if (buyer && rnd() < pBuy) {
     buyer.cash += c.cash * .5;
     for (const f of S.films) { if (f.owner === c.id) f.owner = buyer.id; if (f.co === c.id && f.rel === null) { f.co = buyer.id; buyer.films.push(f.id); } }

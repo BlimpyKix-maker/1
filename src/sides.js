@@ -66,7 +66,7 @@ function firstReleaseWeek() {
 // session work: three hours on someone else's record at union scale, the steadiest money in music
 const SESSION_SCALE = 475;
 function sessionWeek() {
-  const M = S.me, me = ME(); if (S.week % 9 !== 4 || pending().some(x => x.kind === 'session')) return;
+  const M = S.me, me = ME(); if (S.week % 13 !== 4 || pending().some(x => x.kind === 'session') || prnd() > .6) return;
   if (!(me.role === 'composer' || M.field === 'music') || skillOf(me, 'song') < 8) return;
   const lead = me.standing >= 40, pay = usd(SESSION_SCALE * (lead ? 2 : 1));
   inbox('session', 'A session call', `${pickLine(['A producer', 'A singer', 'An arranger'], S.week)} needs ${lead ? 'a leader for' : 'one more player on'} a three-hour session on ${pickLine(['Thursday', 'Saturday', 'Monday'], S.week + 1)}. Scale is ${fmtCash(pay)}, plus pension.`, { pay, choices: [{ k: 'ss_yes', label: `Take it (${fmtCash(pay)})` }, { k: 'ss_no', label: 'Pass' }] });
@@ -195,7 +195,7 @@ function sidePick(it, k) {
   if (it.kind === 'podwall') { it.done = true;
     if (k === 'pw_keep') { F.grit = S.week + 26; M.stress = clamp(M.stress + 4, 0, 100); it.result = { t: 'You book the next three guests before you can change your mind. Episode ten is going to happen.' }; }
     else if (k === 'pw_break') { F.podBreak = S.week + 6; M.fol.podhaus = (M.fol.podhaus || 0) * .9; M.stress = clamp(M.stress - 6, 0, 100); it.result = { t: 'A short note to listeners: back in six weeks. Some of them will be.' }; }
-    else { milestone(`Ended ${it.show}`, 'work'); it.result = { t: `${it.show} ends. The feed stays up; every so often somebody finds it and writes to ask where you went.` }; }
+    else { (F.ended = F.ended || {})[it.show] = S.week; milestone(`Ended ${it.show}`, 'work'); it.result = { t: `${it.show} ends. The feed stays up; every so often somebody finds it and writes to ask where you went.` }; }
     return true; }
   if (it.kind === 'quitcheck') { it.done = true;
     if (k === 'qc_off') { for (const p of ['vidwire', 'blip']) M.fol[p] = (M.fol[p] || 0) * .93; M.stress = clamp(M.stress - 15, 0, 100); F.grind = 0; it.result = { t: 'A month without a camera. You lose some subscribers and find some sleep.' }; }

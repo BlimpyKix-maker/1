@@ -247,6 +247,7 @@ for name, anchor in [('cat-fill', 'const CATALOGUES = ['),
                      ('social2', '// ================= Apple Box — World Core UI ================='),
                      ('scenes3', '// ================= Apple Box — World Core UI ================='),
                      ('sides', '// ================= Apple Box — World Core UI ================='),
+                     ('about', '// ================= Apple Box — World Core UI ================='),
                      ('safety', '// ================= Apple Box — World Core UI ================='),
                      ('streams', '// ================= Apple Box — World Core UI ================='),
                      ('career-ui', '// ---------- render & routing ----------')]:
