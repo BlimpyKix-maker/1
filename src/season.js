@@ -13,17 +13,25 @@ function festWindow(F) {   // weeks until the festival's month starts, and wheth
 }
 // the chance a film is selected: by the festival's bar and level, the film's quality (or how it looks before it's
 // finished), and a nudge for small films at festivals that love discoveries
+// what the programmers judge: the finished film, or a rough cut of one in post-production (its quality before
+// the luck of the release), or, earlier still, the script and the director
+function festQ(f) { return f.q ?? (f.stage >= 3 && typeof previewQ === 'function' ? previewQ(f) : preQ(f)); }
 function festSelOdds(F, f) {
-  const q = (f.q ?? preQ(f)) + ((f.tier === 3 || f.co === null) && F.small ? 4 : 0);
-  const cap = [0, .55, .7, .8][F.tier || 2], floor = [0, .01, .03, .06][F.tier || 2];
+  const q = festQ(f) + ((f.tier === 3 || f.co === null) && F.small ? 4 : 0);
+  // a top festival takes about one feature in fifty (Sundance 2026: 90 of 4,255); the best films do far better, never certain
+  const cap = [0, .25, .45, .7][F.tier || 2], floor = [0, .004, .02, .05][F.tier || 2];
   return clamp(floor + cap / (1 + Math.exp(-(q - F.bar - 3) / 3.5)), floor, cap);
 }
-function festWinOdds(F, f) { const q = f.q ?? preQ(f); return clamp(.03 + (q - F.bar - 4) / 45, .02, .3); }
+function festWinOdds(F, f) { const q = festQ(f); return clamp(.03 + (q - F.bar - 4) / 45, .02, [0, .2, .25, .3][F.tier || 2]); }
+// one film's whole festival run can lift you only so far: +10 standing and +8 fame in all
+const FEST_CAP = { st: 10, fm: 8 };
+function festGain(f, st, fm) { const C = f.circ = f.circ || { st: 0, fm: 0 }, me = ME(), a = Math.max(0, Math.min(st, FEST_CAP.st - C.st)), b = Math.max(0, Math.min(fm, FEST_CAP.fm - C.fm)); C.st += a; C.fm += b; me.standing = clamp(me.standing + a, 0, 100); me.fame = clamp((me.fame || 0) + b, 0, 100); return [a, b]; }
 function festChanceLabel(p) { return p >= .45 ? 'a strong chance' : p >= .25 ? 'a real chance' : p >= .1 ? 'an outside chance' : 'a long shot'; }
 submitFest = function (a) {
   const M = S.me, f = S.films[a.film], F = FESTIVALS.find(x => x.k === a.k);
   if (!f || !F || !myFilms().includes(f) || !festEligible(f) || (typeof festFits === 'function' && !festFits(F, f)) || (M.fests || []).some(x => x.film === f.id && x.k === F.k) || M.cash < usd(F.fee)) return false;
   const W = festWindow(F); if (!W.open) return false;
+  if ((F.tier || 2) === 1 && f.prem && f.prem !== F.k) return false;   // it has had its premiere; the top festivals want premieres
   M.cash -= usd(F.fee);
   (M.fests = M.fests || []).push({ film: f.id, k: F.k, due: W.due, w: S.week });
   diary(`You submit ${f.title} to ${F.name}. The line-up is announced in ${MON[F.month]}.`);
@@ -36,12 +44,15 @@ festWeek = function () {
     const f = S.films[e.film], F = FESTIVALS.find(x => x.k === e.k); if (!f || !F) continue;
     const ps = festSelOdds(F, f);
     if (prnd() >= ps) { e.res = 'passed'; inbox('note', `${F.name.replace(/^the /, 'The ')}: not selected`, `${f.title} isn't in this year's line-up. ${pickLine(['Thousands of films, a few dozen slots.', 'The programmers wanted something else this year.', 'They sent the same two-line email to four thousand people.', 'A programmer you met once says it was close. It may even be true.'], f.id + e.due)}`, { film: f.id }); continue; }
-    e.sel = 1; e.res = 'selected'; f.cult = clamp((f.cult || 0) + 6, 0, 100); me.standing = clamp(me.standing + [0, 2.5, 1.5, 1][F.tier || 2], 0, 100);
+    e.sel = 1; e.res = 'selected'; f.cult = clamp((f.cult || 0) + 6, 0, 100); festGain(f, [0, 2.5, 1.5, 1][F.tier || 2], 0);
+    if ((F.tier || 2) === 1 && !f.prem) { f.prem = F.k; for (const x of (M.fests || []).filter(x => x.film === f.id && !x.done && x !== e && (FESTIVALS.find(y => y.k === x.k) || {}).tier === 1)) { x.done = true; x.res = 'withdrawn'; diary(`You withdraw ${f.title} from ${FESTIVALS.find(y => y.k === x.k).name}: a film only premieres once.`); } }
     const sec = (F.sections || ['the official selection'])[Math.floor(prnd() * Math.min(2, (F.sections || ['x']).length))];
     let t = `${f.title} is in ${sec} at ${F.name}. ${F.d}`;
     if (prnd() < festWinOdds(F, f)) {
-      e.res = 'won'; award(f, `${F.name.replace(/^the /, '')}: ${F.prize}`, [f.dir, f.prod].filter((x, i, A) => A.indexOf(x) === i));
-      me.fame = clamp((me.fame || 0) + [0, 5, 3, 2][F.tier || 2], 0, 100); me.standing = clamp(me.standing + [0, 4, 2.5, 1.5][F.tier || 2], 0, 100);
+      const wt = [0, .6, .35, .2][F.tier || 2], s0 = me.standing, f0 = me.fame || 0;
+      e.res = 'won'; award(f, `${F.name.replace(/^the /, '')}: ${F.prize}`, [f.dir, f.prod].filter((x, i, A) => A.indexOf(x) === i), wt);
+      const dS = me.standing - s0, dF = (me.fame || 0) - f0; me.standing = s0; me.fame = f0;   // your own share goes through the run's cap
+      festGain(f, dS + [0, 4, 2.5, 1.5][F.tier || 2], dF + [0, 5, 3, 2][F.tier || 2]);
       t += ` And it wins the ${F.prize}.`; milestone(`${f.title} won the ${F.prize} at ${F.name}`, 'prize');
     } else milestone(`${f.title} selected for ${F.name}`, 'prize');
     inbox('news', F.name.replace(/^the /, 'The '), t, { film: f.id });

@@ -12,12 +12,14 @@ function careerLevel() {
   // work for hire counts too (commercials, videos, episodes, the play above the pub), a little less than a film credit
   const hired = (M.gigs || []).filter(g => g.q >= 45).length;
   const body = me.credits.length + Math.min(6, hired * .4) + (M.works || []).filter(w => w.rel !== undefined).length * .5 + (typeof corpRung === 'function' && corpRung() >= 3 ? 3 : 0);
-  const base = Math.min(clamp(Math.floor(me.credits.length * .35 + Math.min(1.5, hired * .12) + me.standing / 20 + M.stats.weeks / 90 + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5), body >= 5 ? 5 : body >= 2 ? 4 : 3);
+  // levels are earned by a body of work: time served adds at most one level, standing up to four, and without any
+  // credit or released work you stop at 3 (one or two pieces of work: 4; five: the top of the craft)
+  const base = Math.min(clamp(Math.floor(me.credits.length * .35 + Math.min(1.5, hired * .12) + me.standing / 25 + Math.min(1, M.stats.weeks / 260) + clamp(work / 18, -1, 1.5) + (M.agent ? .5 : 0)), 0, 5), body >= 5 ? 5 : body >= 2 ? 4 : body >= .5 ? 3 : 2);
   if (base < 5) return base;
   // past the top of the craft, what counts is a name: awards, fame, a body of work, or the top of a company
   const aw = (me.awards || []).length + Math.floor(((M.gigPrizes || []).length) / 2), fame = me.fame || 0, cr = me.credits.length + Math.floor(hired / 3), rung = typeof corpRung === 'function' ? corpRung() : -1;
-  if (me.standing >= 80 && M.stats.weeks >= 400 && (aw >= 2 || fame >= 70 || cr >= 20 || rung >= 7)) return 7;
-  if (me.standing >= 60 && M.stats.weeks >= 200 && (aw >= 1 || fame >= 35 || cr >= 8 || rung >= 5)) return 6;
+  if (body >= 10 && me.standing >= 80 && M.stats.weeks >= 400 && (aw >= 2 || fame >= 70 || cr >= 20 || rung >= 7)) return 7;
+  if (body >= 5 && me.standing >= 60 && M.stats.weeks >= 200 && (aw >= 1 || fame >= 35 || cr >= 8 || rung >= 5)) return 6;
   return 5;
 }
 // Jobs only come in five tiers: the levels above that are about your name, not the jobs you can do.

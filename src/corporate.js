@@ -78,9 +78,18 @@ function corpPosts() {
   return out;
 }
 // who gets the senior floors: vice presidents have a reputation, presidents have a record, chiefs have both
+// From vice president up, the slate released on your watch has to have earned its keep: enough films, returning
+// at least their cost on average, and (for the top two floors) a hit or two.
+function corpRecord(j) {
+  const L = j ? S.films.filter(f => f.co === j.co && f.rel !== null && f.rel >= (j.started || 0) && f.cost > 0) : [];
+  const ratio = L.length ? L.reduce((t, f) => t + (f.total || 0), 0) / L.reduce((t, f) => t + f.cost, 0) : 0;
+  return { n: L.length, ratio, hits: L.filter(f => (f.total || 0) >= f.cost * 2.5).length };
+}
+const CORP_NEED = { 4: [2, .9, 0], 5: [4, 1, 0], 6: [6, 1.1, 1], 7: [8, 1.2, 2] };   // films, average return, hits
 function corpGate(r) {
-  const me = ME(), L = careerLevel(), sc = (corpJob() || {}).score || 0;
+  const me = ME(), L = careerLevel(), sc = (corpJob() || {}).score || 0, R = corpRecord(corpJob()), N = CORP_NEED[r];
   if (r <= 3) return true;
+  if (N && (R.n < N[0] || R.ratio < N[1] || R.hits < N[2])) return false;
   if (r === 4) return me.standing >= 30;
   if (r === 5) return me.standing >= 42 && L >= 4;
   if (r === 6) return me.standing >= 58 && L >= 5 && sc >= 1;

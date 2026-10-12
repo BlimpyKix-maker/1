@@ -8,7 +8,7 @@ const DAYS7 = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday
 const BLOCKS = ['Morning', 'Afternoon', 'Evening'], BEAT_NAMES = BLOCKS;
 // What a block can hold. e: energy it costs (negative restores); stress likewise. Venues add more (life-city.js).
 const BLOCK_ACTS = {
-  work: { label: 'Work', icon: '🎬', e: 14, stress: 1.5 },
+  work: { label: 'Work', icon: '🎬', e: 14, stress: 2.3 },
   hunt: { label: 'Look for work', icon: '📋', e: 7, stress: 1, d: 'Each block lets you send three applications from the board.' },
   write: { label: 'Write', icon: '✍️', e: 9, stress: .3, d: 'Work on your script. Your traits shape how it goes.' },
   train: { label: 'Take a class', icon: '🎓', e: 9, stress: .3, cost: 35, d: 'A class in one craft. Steady, always available.' },
@@ -16,10 +16,10 @@ const BLOCK_ACTS = {
   network: { label: 'Industry mixer', icon: '🥂', e: 9, stress: .5, cost: 40, d: 'Meet new people in the business. Charisma decides how it goes.' },
   catchup: { label: 'Catch up with a contact', icon: '☕', e: 5, stress: -1, cost: 15, d: 'Coffee with someone you know; or text them from your phone to fix a time.' },
   hustle: { label: 'Side hustle', icon: '🛵', e: 16, stress: 1.5, d: 'Bar shifts and deliveries: $75 a block. Teaches nothing.' },
-  rest: { label: 'Rest', icon: '🛋️', e: -13, stress: -3, d: 'Sleep in, walk, see nobody. Restores energy.' },
-  home: { label: 'Stay in', icon: '🏠', e: -6, stress: -1.5, d: 'Cook, call home, early night.' },
+  rest: { label: 'Rest', icon: '🛋️', e: -13, stress: -2.5, d: 'Sleep in, walk, see nobody. Restores energy.' },
+  home: { label: 'Stay in', icon: '🏠', e: -6, stress: -1.2, d: 'Cook, call home, early night.' },
   out: { label: 'Out with friends', icon: '🍻', e: 12, stress: -5, cost: 35, d: 'Friends outside the business. Costs energy, melts stress.' },
-  read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -2, d: 'Homework that feels like a treat. Taste grows.' },
+  read: { label: 'Read scripts, watch films', icon: '🎞️', e: -2, stress: -1.6, d: 'Homework that feels like a treat. Taste grows.' },
   make: { label: 'Make things', icon: '🎛️', e: 9, stress: .2, d: 'Work on your song, video, podcast or play (start one on the Create tab).' }
 };
 const EVENINGS = { home: BLOCK_ACTS.home, out: BLOCK_ACTS.out, latewrite: Object.assign({}, BLOCK_ACTS.write, { label: 'Write late' }), read: BLOCK_ACTS.read };
@@ -50,7 +50,7 @@ function calOf() {
 // Burnout makes it all rest. M.autoOblig === false leaves study placement to you.
 // what study displaces first: a class or a night out before your writing, and your rest last of all
 const OBLIG_RANK = { train: 0, out: 0, read: 1, make: 1, network: 2, catchup: 2, write: 3, hustle: 4, hunt: 4, home: 5, rest: 6 };
-const SLEEP_BASE = 20;
+const SLEEP_BASE = 17;   // a night restores a little less than a working day costs: the week has to be planned
 const OBLIG_PREF = [[0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [0, 1, 4], [3, 5, 7], [3, 5, 7]];
 function obligations() {
   const M = S.me, W = M.wk, now = W ? W.day * 3 + W.block : 0;
@@ -168,7 +168,7 @@ function commute() {
 const AT_HOME = new Set(['rest', 'home', 'write', 'read', 'make']);
 // A work block costs what the job asks of you: shooting days hardest, senior jobs harder, two jobs at once hardest of all.
 function workCost() {
-  const M = S.me; let c = 11;
+  const M = S.me; let c = 12;
   for (const j of M.jobs) { const f = j.film !== null && j.film !== undefined ? S.films[j.film] : null, t = tmplOf(j) || {}; c = Math.max(c, (f ? (f.stage === 2 ? 15 : 12) : 11) + Math.max(0, (t.lv ?? 2) - 2)); }
   return Math.min(21, c + 3 * Math.max(0, M.jobs.length - 1));
 }

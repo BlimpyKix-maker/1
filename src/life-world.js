@@ -125,7 +125,7 @@ function worldWeek() {
     }
   }
   // a strike stops the clock on every production in the city; when it ends, everyone goes back
-  if (worldFx().halt) for (const id of S.active) { const f = S.films[id]; if (f.hub === M.hub && f.stage >= 0 && f.stage < 4) f.stageEnd++; }
+  // (a strike's halt on every production in the city is now the world's: see src/world2.js)
   for (const e of W.ev) if (e.k === 'walkout' && e.to === S.week + 1) inbox('note', 'The strike is over', 'A deal is signed in the small hours. Productions restart on Monday; the board fills up again.');
   return worldFx().stress;
 }

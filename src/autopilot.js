@@ -65,7 +65,7 @@ function craftJob(p) { return jobRelevance(p) >= 1; }
 function rankedFits(n) {
   const M = S.me, short = runwayWeeks() < 12, floor = careerLevel() >= 3 && !short ? tierLevel() - 1 : 0;   // established: nothing far below your level
   const L = M.board.filter(p => !blockedFrom(tmplOf(p)) && (p.tier || 1) >= floor).map(p => [p, hireOdds(p), jobRelevance(p)]);
-  const wt = x => x[2] >= 1 ? 1.8 : x[2] >= .8 ? 1.2 : x[2] >= .6 ? 1 : .55;
+  const wt = x => x[2] >= 1 ? 3 : x[2] >= .8 ? 1.5 : x[2] >= .6 ? 1 : .4;   // craft first: a job in your own craft wins unless its odds are three times worse
   const want = M.jobs.length || M.looking === 'craft' ? L.filter(x => x[2] >= 1) : L.filter(x => x[2] >= .6 || short);
   const ranked = want.sort((a, b) => b[1] * wt(b) - a[1] * wt(a));
   // never leave a broke player with nothing to apply for
