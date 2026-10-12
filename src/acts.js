@@ -35,7 +35,7 @@ function actMake(x, hub, i) {
     const role = ACT_ROLE[x.kind] || 'composer', age = clamp(20 + Math.floor(rnd() * 8) + (S.year - x.from), 18, 104);
     const p = makePerson(hub, role, { age, noPool: true }); if (ACT_GROUP.has(x.kind)) p.g = 'X';
     p.name = A0.nm.has(x.name) ? `${x.name} (${HUBS[hub].name})` : x.name; p.akey = key; p.ahub = hub; A0.nm.add(p.name); A0.id.set(key, p.id); p.ind = x.field; p.act = x.kind; p.fans = x.fans; p.mfrom = x.from; if (x.to) p.mto = x.to; p.debut = weekOfYear(Math.max(S.y0, x.from));
-    if (x.legend) p.legend = 1;
+    if (x.legend) { p.legend = 1; if (typeof NEG_TRAITS !== 'undefined') p.traits = p.traits.filter(t => !NEG_TRAITS.includes(t)); }   // real people: no unflattering temperament
     const boost = Math.log10(Math.max(10, x.fans)) - 3; for (const k of ACT_SUBS[role] || []) { p.sk[k] = clamp(p.sk[k] + boost * 1.6, 1, 20); p.pot[k] = Math.max(p.pot[k], p.sk[k]); } recalc(p);
     p.fame = actFame(x.fans); p.standing = clamp(p.fame * .8 + rnd() * 10, 1, 95);
     if (x.to && x.to < S.year) { p.retired = true; p.retY = x.to; }

@@ -38843,8 +38843,9 @@ function livingLine() {
 //    a line too, and everything lands in your filmography when it comes out, with a note;
 //  - one Credits page shows everything: in production, wrapped, out, TV, gigs, shorts, and anything that slipped
 //    through, with the reason.
-function crTitles(fid) { const M = S.me; return ((M.ftitles = M.ftitles || {})[fid] = M.ftitles[fid] || []); }
-function crAdd(fid, t) { const L = crTitles(fid); if (t && !L.includes(t)) L.push(t); }
+// reading never writes: a page that only looks must not add films to the ledger (it would change the save)
+function crTitles(fid) { const M = S.me; return (M.ftitles && M.ftitles[fid]) || []; }
+function crAdd(fid, t) { const M = S.me, L = ((M.ftitles = M.ftitles || {})[fid] = M.ftitles[fid] || []); if (t && !L.includes(t)) L.push(t); }
 { const _fj = finishJob;
   finishJob = function (j, L, quit) {
     const M = S.me, n0 = M.past.length, r = _fj.apply(this, arguments);
@@ -44613,7 +44614,7 @@ function actMake(x, hub, i) {
     const role = ACT_ROLE[x.kind] || 'composer', age = clamp(20 + Math.floor(rnd() * 8) + (S.year - x.from), 18, 104);
     const p = makePerson(hub, role, { age, noPool: true }); if (ACT_GROUP.has(x.kind)) p.g = 'X';
     p.name = A0.nm.has(x.name) ? `${x.name} (${HUBS[hub].name})` : x.name; p.akey = key; p.ahub = hub; A0.nm.add(p.name); A0.id.set(key, p.id); p.ind = x.field; p.act = x.kind; p.fans = x.fans; p.mfrom = x.from; if (x.to) p.mto = x.to; p.debut = weekOfYear(Math.max(S.y0, x.from));
-    if (x.legend) p.legend = 1;
+    if (x.legend) { p.legend = 1; if (typeof NEG_TRAITS !== 'undefined') p.traits = p.traits.filter(t => !NEG_TRAITS.includes(t)); }   // real people: no unflattering temperament
     const boost = Math.log10(Math.max(10, x.fans)) - 3; for (const k of ACT_SUBS[role] || []) { p.sk[k] = clamp(p.sk[k] + boost * 1.6, 1, 20); p.pot[k] = Math.max(p.pot[k], p.sk[k]); } recalc(p);
     p.fame = actFame(x.fans); p.standing = clamp(p.fame * .8 + rnd() * 10, 1, 95);
     if (x.to && x.to < S.year) { p.retired = true; p.retY = x.to; }
@@ -45041,7 +45042,7 @@ function mhPlayer(i, to, cuts) {
 // and the staff is sized to the business: costs move a third of the way towards seventy per cent of what the roster earned the house, and shrink after a losing year
 function mhYear() { if (!mhOn()) return; R = wstream('houses', 'year', S.year);
   // a closed name is worth something: after a few years, new owners may relaunch it with an empty roster
-  S.mh.forEach((h, i) => { if (!h || !h.closed || h.by != null || S.week - h.closed < 156 || rnd() > .35) return; const t = MEDIA_COS[i].tier, fl = t === 1 ? 4e6 : t === 2 ? 1.2e6 : 3e5;
+  S.mh.forEach((h, i) => { if (!h || !h.closed || h.by != null || S.week - h.closed < 104 || rnd() > .4) return; const t = MEDIA_COS[i].tier, fl = t === 1 ? 4e6 : t === 2 ? 1.2e6 : 3e5;
     Object.assign(h, { closed: 0, revived: S.week, cut: 0, cash: Math.round(fl), over: Math.round(fl * .5), yrRev: 0, yrCost: 0, yrNet: 0 }); mhNote(i, 'Relaunched under new owners');
     news('Business', `${MEDIA_COS[i].n} is back: new owners relaunch the name with an empty roster and money to sign.`, {}); });
   for (const h of S.mh) { if (!h || h.closed) continue; h.last = { rev: h.yrRev, cost: h.yrCost }; h.over = Math.round(h.yrNet > 0 ? h.over * .67 + h.yrNet * .7 * .33 : h.over * .9); h.yrRev = 0; h.yrCost = 0; h.yrNet = 0; } }

@@ -120,7 +120,7 @@ function mhPlayer(i, to, cuts) {
 // and the staff is sized to the business: costs move a third of the way towards seventy per cent of what the roster earned the house, and shrink after a losing year
 function mhYear() { if (!mhOn()) return; R = wstream('houses', 'year', S.year);
   // a closed name is worth something: after a few years, new owners may relaunch it with an empty roster
-  S.mh.forEach((h, i) => { if (!h || !h.closed || h.by != null || S.week - h.closed < 156 || rnd() > .35) return; const t = MEDIA_COS[i].tier, fl = t === 1 ? 4e6 : t === 2 ? 1.2e6 : 3e5;
+  S.mh.forEach((h, i) => { if (!h || !h.closed || h.by != null || S.week - h.closed < 104 || rnd() > .4) return; const t = MEDIA_COS[i].tier, fl = t === 1 ? 4e6 : t === 2 ? 1.2e6 : 3e5;
     Object.assign(h, { closed: 0, revived: S.week, cut: 0, cash: Math.round(fl), over: Math.round(fl * .5), yrRev: 0, yrCost: 0, yrNet: 0 }); mhNote(i, 'Relaunched under new owners');
     news('Business', `${MEDIA_COS[i].n} is back: new owners relaunch the name with an empty roster and money to sign.`, {}); });
   for (const h of S.mh) { if (!h || h.closed) continue; h.last = { rev: h.yrRev, cost: h.yrCost }; h.over = Math.round(h.yrNet > 0 ? h.over * .67 + h.yrNet * .7 * .33 : h.over * .9); h.yrRev = 0; h.yrCost = 0; h.yrNet = 0; } }

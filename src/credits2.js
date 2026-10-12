@@ -8,8 +8,9 @@
 //    a line too, and everything lands in your filmography when it comes out, with a note;
 //  - one Credits page shows everything: in production, wrapped, out, TV, gigs, shorts, and anything that slipped
 //    through, with the reason.
-function crTitles(fid) { const M = S.me; return ((M.ftitles = M.ftitles || {})[fid] = M.ftitles[fid] || []); }
-function crAdd(fid, t) { const L = crTitles(fid); if (t && !L.includes(t)) L.push(t); }
+// reading never writes: a page that only looks must not add films to the ledger (it would change the save)
+function crTitles(fid) { const M = S.me; return (M.ftitles && M.ftitles[fid]) || []; }
+function crAdd(fid, t) { const M = S.me, L = ((M.ftitles = M.ftitles || {})[fid] = M.ftitles[fid] || []); if (t && !L.includes(t)) L.push(t); }
 { const _fj = finishJob;
   finishJob = function (j, L, quit) {
     const M = S.me, n0 = M.past.length, r = _fj.apply(this, arguments);
