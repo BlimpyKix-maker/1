@@ -198,6 +198,7 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/sides.js` | Round 19 side industries: syncs priced by use (`SYNC_FEE`), score commissions, royalty statements, session calls, door deals, the podcast episode-seven wall, demonetisation weeks (`demonWindow`), creator burnout, stage runs with closing notices, transfers and film options, TV script fees and created-by royalties, say-on-pay and activists (`sidePick`). |
 | `src/about.js` | The About app: credits, font licences, sources, the fiction notice and the AI note (`aboutHTML`). |
 | `src/safety.js` | Real people still alive: no negative traits or events, no simulated death, no lookalike portrait (`realLiving`, `NEG_TRAITS`, `NEG_EVENTS`). |
+| `src/sidecrit.js` | Round 21: critics for music, podcasts, theatre and online video (`SIDE_OUTLETS`, `sideReviews`, hashed so no dice stream moves; `r.cs` on notable act releases nudges fans; the player's releases get `w.cs`, a review mail and a follower nudge), yearly showcase festivals (`SIDE_FESTS`: Northbound in March, Creator Summit in June, Fringe Fortnight in August, the Listening Room in September; lineups of 12 by reviews and momentum, a breakout chased by houses via `mhMomentum`; the player applies with their best work, plays a slot and can win a label or sponsor offer), and the house desk (`sideDeskWeek`: working at a label, network, studio or theatre brings sign/pass and keep/drop calls on the real books, judged 26 weeks later). |
 | `src/streaming.js` | Round 20 streaming business: services with subscribers, price, ad tier, spend, debt and a share price (`SVC_META`, `SVC_PATH`, `SVC_PRICE`); `svcQuarter` (adds from the growth path × appeal, price rises, ad tiers from 2022, the password crackdown, moods land grab / steady / profit pivot, sports rights, mergers and folds); licence bids scale with mood (`svcBidMul`, `svcLicMul` in `afterlife`); the cinema window and index (`cinemaWindow`, `cinemaIndex`); nine `sv_` jobs, the fortnightly desk (`SV_DESK`, `svDeskPick`), cost-plus buyouts, overall deals, bought streams that get caught (`svDealsWeek`); the Streamboard app. Probe: `tools/probe-streaming.js`. |
 | `src/acts.js` | Musicians, creators, podcasters and stage acts as real people (~2,100, `actMake` via `makePerson`, hashed): fans, releases (`actRelease`, `actUnits`), weekly output (`ACT_RATE`), churn and a field ceiling on growth (`ACT_CHURN`, `ACT_CAP`), new acts and retirements yearly; charts read real releases; release pages (`mrel:`), person pages with discography (`actSection`); merit awards; `worldTally` for the loading line. |
 | `src/improv.js` | The improv and sketch life: theatres per city (`impTheatres`), classes, jams, house-team auditions, indie teams, festivals, teaching, corporate and cruise gigs, the late-night packet, scouts, fans, owning a theatre (`impOwnMonth`: pay policy, the open letter, closing); dreams `improv`, `sketch`, `drag`, `promoter`, `themepark`, `warmup`, `caster`; the Improv app. |
@@ -319,6 +320,19 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 21: avatars rebuilt, titles, critics and showcases for the other fields
+
+- Asked for: a longer list of title options; avatars that are clean, sleek and close to real (no thumb-like hands,
+  a proper neck, finer facial features); then the next work, including the side fields' critics, festivals and desks.
+- Avatars (`src/portrait.js`, `src/figure.js`): the head is drawn to life proportions (`FACE_SHAPE`, `faceGeom`:
+  eyes halfway down the head and an eye-width apart; almond eyes under a lid; tapered brows; a shaded nose without an
+  outline; shaped lips); a neck that widens into the shoulders (`neckHalf`); full figures about eight heads tall
+  (`FIG` landmarks, the head placed by `FIG_HEAD`), limbs as tapered outlines (`limbPath`, `crPath`), hands with a palm,
+  four tapering fingers and a thumb (`figHand`), no ink outline. Saved looks keep every option. Condition marks
+  (`src/living.js`) are drawn in the head's frame (`headXform`). Dev gallery scripts are in the session scratchpad.
+- Titles: `docs/TITLES.md` (about 90 options, grouped, with a shortlist).
+- Side fields (`src/sidecrit.js`): see the source map.
 
 ## Round 20: saves, streaming, acts as people, improv, houses with books, live TV
 

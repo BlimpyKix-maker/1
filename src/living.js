@@ -139,13 +139,14 @@ function livingLine() {
   portraitSVG = function (L, age, size = 96, bare = false, fig = false) {
     const out = _pt(L, age, size, bare, fig), C = L && L._cond;
     if (!C || (L.style === 1) || !Object.keys(C).some(k => C[k])) return out;
-    const LL = Object.assign(defaultLook(), L), fw = [30, 33, 32, 28, 31, 30, 33, 30, 35, 27][LL.face || 0], fh = [38, 35, 36, 42, 37, 38, 36, 38, 35, 40][LL.face || 0], cx = 60, cy = 52;
+    // drawn in the head's own frame, so the marks land on the new face wherever the head sits
+    const LL = Object.assign(defaultLook(), L), G = faceGeom(LL), { cx, cy, fh } = G, fw = G.fw, HT = headXform(fig, bare);
     const skin = LOOK.skin.opts[LL.skin] || '#D19A72', hc = LOOK.hairColor.opts[LL.hairColor] || '#3A2618', o = [];
-    if (C.pale) o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${fw / 2}" ry="${fh / 2}" fill="#E8EFE4" opacity=".18"/>`);
-    if (C.tan) o.push(`<ellipse cx="${cx}" cy="${cy}" rx="${fw / 2}" ry="${fh / 2}" fill="#7A4A22" opacity=".12"/>`);
-    o.push(toonCondFace(Object.assign({}, C, { pale: 0, tan: 0 }), cx, cy, cy - 3, fw * .2, fw / 2 - 2, fh / 2, skin, mixHex(skin, '#000', .5), hc, !!LL.facial));
+    if (C.pale) o.push(`<path d="${facePath(G)}" fill="#E8EFE4" opacity=".16"/>`);
+    if (C.tan) o.push(`<path d="${facePath(G)}" fill="#7A4A22" opacity=".1"/>`);
+    o.push(toonCondFace(Object.assign({}, C, { pale: 0, tan: 0 }), cx, cy, G.ey - 2, G.ex, fw / 2 - 2, fh / 2, skin, mixHex(skin, '#000', .5), hc, !!LL.facial));
     if (C.messy && !LL.head) o.push(toonCondHair(C, cx, cy - 4, fh / 2, hc));
-    if (fig && C.wrap) o.push(toonCondBody(C, cx, cy + fh / 2 + 6, 42));
-    const k = out.lastIndexOf('</svg>'); return out.slice(0, k) + o.join('') + out.slice(k);
+    const body = fig && C.wrap ? toonCondBody(C, cx, FIG.sy - 2, 40) : '';
+    const k = out.lastIndexOf('</svg>'); return out.slice(0, k) + (HT ? `<g transform="${HT}">` : '<g>') + o.join('') + '</g>' + body + out.slice(k);
   };
 }
