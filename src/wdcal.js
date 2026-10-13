@@ -8,6 +8,7 @@
 const WD_HUB = { hollywood: ['US'], newyork: ['US'], toronto: ['CA'], mexico: ['MX'], london: ['GB'], paris: ['FR'], rome: ['IT'], berlin: ['DE', 'DD'], madrid: ['ES'], hongkong: ['HK'], taipei: ['TW'], tokyo: ['JP'], seoul: ['KR'], beijing: ['CN'], mumbai: ['IN'], chennai: ['IN'], kolkata: ['IN'], sydney: ['AU'], wellington: ['NZ'], lagos: ['NG'], cairo: ['EG'], rio: ['BR'], buenosaires: ['AR'], moscow: ['RU', 'SU'], stockholm: ['SE'], copenhagen: ['DK'], prague: ['CZ', 'CS'], warsaw: ['PL'], budapest: ['HU'], helsinki: ['FI'], istanbul: ['TR'], tehran: ['IR'], dakar: ['SN'], manila: ['PH'], bangkok: ['TH'], hochiminh: ['VN'], bogota: ['CO'], jakarta: ['ID'], johannesburg: ['ZA'] };
 const WD_DECS = [1930, 1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
 let WD_SHAPE = null;
+const WD_SKIP = new Set(['lagos']);   // Nollywood's home-video boom is barely recorded in Wikidata; its own curve is closer to the truth
 function wdShapes() {
   if (WD_SHAPE || typeof WD_FILMS === 'undefined') return WD_SHAPE;
   const tot = {}; for (const k in WD_FILMS) for (const d of WD_DECS) tot[d] = (tot[d] || 0) + (WD_FILMS[k][d] || 0);
@@ -21,7 +22,7 @@ function wdShapes() {
 const WD_GAVG = {};
 function wdGameAvg(h) { if (WD_GAVG[h] == null) { let t = 0, n = 0; for (let y = 1955; y <= 2025; y += 10) { t += era(HUBS[h].prod, y); n++; } WD_GAVG[h] = t / n; } return WD_GAVG[h]; }
 function wdFactor(h, y) {
-  const Sh = wdShapes(); if (!Sh || !Sh[h] || y < 1930 || !HUBS[h]) return 1;
+  const Sh = wdShapes(); if (!Sh || !Sh[h] || y < 1930 || !HUBS[h] || WD_SKIP.has(h)) return 1;
   const t = clamp((y - 1935) / 10, 0, WD_DECS.length - 1), i = Math.floor(t), f = t - i, real = Sh[h][i] * (1 - f) + Sh[h][Math.min(WD_DECS.length - 1, i + 1)] * f;
   const game = era(HUBS[h].prod, y) / Math.max(.01, wdGameAvg(h));
   return clamp(Math.sqrt(Math.max(.05, real) / Math.max(.05, game)), .6, 1.6);
