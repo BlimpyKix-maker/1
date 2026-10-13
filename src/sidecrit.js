@@ -156,4 +156,7 @@ function sideDeskPick(it, k) {
   rec('keep'); it.result = { t: 'You argue for one more release. Finance gives you six months.' }; return true;
 }
 PICK_HOOKS.push(sideDeskPick);
-if (typeof CODEX !== 'undefined') CODEX.sidecrit = { title: 'Critics, showcases and the label desk', body: 'Outside film, reviews still move audiences: a rave adds listeners, a pan costs a few. Each field has a showcase festival every year: music in March, creators in June, the fringe in August, podcasts in September. A breakout there is chased by every label for six months. Working at a label, network, studio or theatre puts real signings on your desk; the verdict arrives half a year later.' };
+if (typeof CODEX !== 'undefined') CODEX.sidecrit = ['Critics, showcases and the label desk', 'tas',
+  ['Outside film, reviews still move audiences: a rave adds listeners, a pan costs a few.', 'Most critics review albums, seasons and productions; a single gets noticed only once you have a following.', 'A critics\' score is the average of the outlets that reviewed you.'],
+  ['Each field has a showcase festival every year: music in March, creators in June, the fringe in August, podcasts in September.', 'About two thousand acts apply for ninety slots; reviews and recent momentum get you in.', 'The breakout of a showcase is chased by every label for six months.'],
+  ['A label signs on momentum and pays an advance it hopes to earn back from royalties.', 'An act that never earns back its advance is usually dropped when the deal ends.', 'At a label, network, studio or theatre, the calls you make are judged half a year later.']];
