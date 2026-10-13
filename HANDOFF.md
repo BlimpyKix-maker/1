@@ -198,6 +198,8 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/sides.js` | Round 19 side industries: syncs priced by use (`SYNC_FEE`), score commissions, royalty statements, session calls, door deals, the podcast episode-seven wall, demonetisation weeks (`demonWindow`), creator burnout, stage runs with closing notices, transfers and film options, TV script fees and created-by royalties, say-on-pay and activists (`sidePick`). |
 | `src/about.js` | The About app: credits, font licences, sources, the fiction notice and the AI note (`aboutHTML`). |
 | `src/safety.js` | Real people still alive: no negative traits or events, no simulated death, no lookalike portrait (`realLiving`, `NEG_TRAITS`, `NEG_EVENTS`). |
+| `src/mcampaign.js` | Round 22 awards season for music, podcasts, theatre and online video: October house campaigns paid from `S.mh` (`mcHouseSpend`, `S.mcp`), the player's fortnightly campaign steps October–November (`MC_STEPS`, `M.mcamp`), nominations in early December (`mcNominate`, `S.mnoms`, five per headline category), and a January ceremony that picks among nominees with weights `score^4` (`mediaAwardsWeek` wrapper). |
+| `src/wdcal.js`, `src/wddata.js` | Real film output by country and decade from Wikidata (counts only, fetched by `tools/wikidata_films.js`, generated `wddata.js`); `wdFactor` bends `hubProd` halfway towards each country's historical share (×0.6–1.6); the World app's almanac. |
 | `src/sidecrit.js` | Round 21: critics for music, podcasts, theatre and online video (`SIDE_OUTLETS`, `sideReviews`, hashed so no dice stream moves; `r.cs` on notable act releases nudges fans; the player's releases get `w.cs`, a review mail and a follower nudge), yearly showcase festivals (`SIDE_FESTS`: Northbound in March, Creator Summit in June, Fringe Fortnight in August, the Listening Room in September; lineups of 12 by reviews and momentum, a breakout chased by houses via `mhMomentum`; the player applies with their best work, plays a slot and can win a label or sponsor offer), and the house desk (`sideDeskWeek`: working at a label, network, studio or theatre brings sign/pass and keep/drop calls on the real books, judged 26 weeks later). |
 | `src/streaming.js` | Round 20 streaming business: services with subscribers, price, ad tier, spend, debt and a share price (`SVC_META`, `SVC_PATH`, `SVC_PRICE`); `svcQuarter` (adds from the growth path × appeal, price rises, ad tiers from 2022, the password crackdown, moods land grab / steady / profit pivot, sports rights, mergers and folds); licence bids scale with mood (`svcBidMul`, `svcLicMul` in `afterlife`); the cinema window and index (`cinemaWindow`, `cinemaIndex`); nine `sv_` jobs, the fortnightly desk (`SV_DESK`, `svDeskPick`), cost-plus buyouts, overall deals, bought streams that get caught (`svDealsWeek`); the Streamboard app. Probe: `tools/probe-streaming.js`. |
 | `src/acts.js` | Musicians, creators, podcasters and stage acts as real people (~2,100, `actMake` via `makePerson`, hashed): fans, releases (`actRelease`, `actUnits`), weekly output (`ACT_RATE`), churn and a field ceiling on growth (`ACT_CHURN`, `ACT_CAP`), new acts and retirements yearly; charts read real releases; release pages (`mrel:`), person pages with discography (`actSection`); merit awards; `worldTally` for the loading line. |
@@ -320,6 +322,18 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 22: bodies redrawn, awards season for every field, real output by decade
+
+- Asked for: the "not done yet" items (side-field awards campaigns; Wikidata film data), and bodies, arms, legs and
+  neck that look like real people of this world, with the faces dialled in further.
+- Bodies (`src/figure.js`): about seven and a half heads tall; contrapposto (one hip up, the other leg relaxed, the
+  shoulders tilting against the hips); arms that start inside the shoulder and hang close with a slight bend;
+  one-piece sleeves with elbow folds; trousers with ease, knee and hem folds; front-view shoes with a rounded toe;
+  relaxed side-view hands with a thumb in front; the head placed lower so the neck is a third of a head.
+  Faces: skin-tinted blush, softer eye whites, a cheekbone shadow, a swept hairline on short hair; head-and-shoulder
+  portraits raise the shoulders so the neck reads shorter.
+- Awards season and Wikidata: see the source map rows for `src/mcampaign.js` and `src/wdcal.js`.
 
 ## Round 21: avatars rebuilt, titles, critics and showcases for the other fields
 

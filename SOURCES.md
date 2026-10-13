@@ -20,6 +20,16 @@ is in `docs/RESEARCH.md`, round by round; Round 19 covers television, music, pod
 boards. Figures marked [U] there are unverified. Only numbers were taken from these sources: no wording, names or
 slogans. They were read once by researchers during development; the game never contacts them.
 
+## Film output by country and decade (Wikidata)
+
+`tools/wikidata_films.js` asks Wikidata's public query service, once at build time, how many items that are films
+(Q11424) record each country of origin (P495) per decade of publication (P577). Only those counts are kept, in
+`data/wikidata/film-output.json` and the generated `src/wddata.js`: no titles, people or text. Wikidata's data is
+released under CC0 (public domain dedication), so no attribution is required; it is credited here and in the
+World app's almanac anyway. The game never contacts Wikidata. `src/wdcal.js` uses the counts as a shape (each
+country's share of a decade against its own average) to bend each city's production curve, and shows the
+largest producers per decade in the World app.
+
 ## The film-history catalogue
 
 Films, people, studios and their histories from 1888 on are compiled from general knowledge and public reference
