@@ -15,7 +15,11 @@ const SYNC_WHERE = { student: ['the end credits of a graduation film', 'a festiv
   studio: ['the montage everyone will talk about', 'the trailer and the film both'], advert: ['a car advert that runs all through the playoffs', 'a phone advert on every bus shelter in town'] };
 syncWeek = function () {
   const M = S.me, me = ME(); if (!M.works || S.week % 4 !== 1) return;
-  for (const w of M.works.filter(x => x.type === 'song' && x.q >= 40 && !x.syncW)) {
+  // Round 23: a music supervisor places one song from your catalogue at a time, not one per song: a catalogue of
+  // two hundred songs used to roll two hundred times a month. The best unplaced songs are offered first.
+  let placed = 0;
+  for (const w of M.works.filter(x => x.type === 'song' && x.q >= 40 && !x.syncW).sort((a, b) => b.q - a.q).slice(0, 12)) {
+    if (placed) break;
     const p = .003 + (w.q - 40) / 4000 + Math.log10((w.units || 0) + 10) / 400 + (M.agent ? .006 : 0);
     if (prnd() > p) continue;
     const films = S.films.filter(f => f.rel === null && f.stage >= 2 && f.stage <= 3 && f.hub === M.hub), shows = typeof tvAll === 'function' ? tvAll().filter(s => tvOnAir(s, S.year) && s.m === (HUBS[M.hub] || {}).m) : [];
@@ -25,11 +29,11 @@ syncWeek = function () {
     else if (films.length) { f = films[Math.floor(prnd() * films.length)]; use = f.tier === 1 ? 'studio' : f.tier === 2 ? 'mid' : f.budget < .3 ? 'student' : 'indie'; }
     else continue;
     const trailer = use === 'studio' && prnd() < .15;
-    let fee = SYNC_FEE[use] * (.6 + w.q / 125) * (1 + Math.min(1.5, (me.fame || 0) / 40)) + (trailer ? 25000 : 0);
+    let fee = SYNC_FEE[use] * (.6 + w.q / 125) * (1 + Math.min(.8, (me.fame || 0) / 80)) + (trailer ? 25000 : 0);
     fee = usd(Math.round(fee / 50) * 50);
     const cut = typeof pathCut === 'function' ? pathCut('library') : 1; fee = Math.round(fee * (.5 + .5 * cut));   // a publisher takes its share of the song half
     const spike = Math.round(SYNC_SPIKE[use] * (w.q / 70)), streamPay = Math.round(spike * payNow(M.deal ? (M.deal.rate || .0011) : .003));
-    w.syncW = S.week; w.sync = use; M.cash += fee - taxOn(fee) + streamPay; w.earned = (w.earned || 0) + fee + streamPay; w.units = (w.units || 0) + spike; w.v0 = Math.round((w.v0 || 0) + spike * .02);
+    placed = 1; w.syncW = S.week; w.sync = use; M.cash += fee - taxOn(fee) + streamPay; w.earned = (w.earned || 0) + fee + streamPay; w.units = (w.units || 0) + spike; w.v0 = Math.round((w.v0 || 0) + spike * .02);
     me.fame = clamp((me.fame || 0) + (use === 'studio' || use === 'advert' ? .8 : .3), 0, 100);
     const where = f ? f.title : s ? s.title : 'an advert', what = pickLine(SYNC_WHERE[use], w.q + S.week);
     milestone(`${w.title} licensed into ${where}`, 'work');

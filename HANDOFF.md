@@ -206,6 +206,9 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/improv.js` | The improv and sketch life: theatres per city (`impTheatres`), classes, jams, house-team auditions, indie teams, festivals, teaching, corporate and cruise gigs, the late-night packet, scouts, fans, owning a theatre (`impOwnMonth`: pay policy, the open letter, closing); dreams `improv`, `sketch`, `drag`, `promoter`, `themepark`, `warmup`, `caster`; the Improv app. |
 | `src/houses.js` | Labels, podcast networks, creator studios and theatres keep books (`S.mh`): revenue from the roster's units (`MH_RATE`), royalties and recoupment (`MH_ROY`, `p.deal`), quarterly signings by momentum (richest first, `MH_CAP` roster caps), re-sign / poach / drop at deal end, cuts, sales, closures, private-equity rescues for majors, relaunches of closed names; overhead adapts yearly; the player's own record deal follows its label (`mhPlayer`); company pages show the books and the roster. |
 | `src/tvlive.js` | Television from the first year of play: quality from the show's people (`tvlQ`), yearly renewals from audience against the channel bar, reviews, age and the streamer's mood (`TVL_RENEW`, `S.tvl`), merit Emmets for live years that move winners' standing and fame (`tvlAwards`). |
+| `src/trailer3.js` | Round 23 trailers: camera moves on every shot (push, pull, pan, tilt), parallax layers, actors who breathe, whip cuts and light leaks timed to whole beats of the score (`tv3Retime`), letterbox, spoken narration and dialogue through `speechSynthesis` with a voice toggle (`TV3.voice`), billing block (`tv3Billing`); the score fades when a trailer ends. |
+| `src/careerpay.js` | Round 23: the Careers page's pay column. A career is matched to the game's own posts and jobs by its words (`cpIndex`, `cpMatch`), and shows a day rate by level (`CP_LEVEL`) and what you have earned at it (`careerPayCell`, `careerPayDetail`); sortable. |
+| `src/crossover.js` | Round 23: once a year on the world's dice, songs from real acts land on big films' soundtracks (`f.song`), studios buy acclaimed plays, networks adapt big podcasts and studios sign creators; recorded on the act (`p.cross`, "Across the business"). |
 | `src/streams.js` | Built last: the world's dice per system and week (`wstream`), the player's own dice for actions, so two careers on one seed share the world. |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
@@ -322,6 +325,27 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 23: loopholes closed, offers from the world, trailers, fine-tune sliders
+
+- Asked for: close the festival shortcut and the late-game offers first, together with the phase 0 removals; offers
+  and big events from the world; crossover between the fields; separate dice; avatars you can fully customise in the
+  manner of management and role-playing games; a working pay column on Careers; the fourth still repeating; music
+  running on after trailers; trailers with style. The real-people decision is recorded in `docs/DECISIONS.md`.
+- Money: a songwriter's catalogue now gets one sync placement at a time instead of one roll per song, and fame lifts a
+  sync fee by at most 80% (`syncWeek` in `src/sides.js`); jobs for hire pay at most three times the base fee at the
+  top level, not six and a half (`gigFee`); the late-game offers pay less (first-look deal, brand work, consulting,
+  masterclasses, the yield on a ranch or a cinema). On the songwriter bot (seed 2027, five years) music now earns
+  more than offers. The festival probe (`tools/probe-jump.js`) still shows no jump from one unfinished film.
+- Offers from the world: film calls (`callsMorning` in `src/arcs.js`) come more often after good credits and
+  well-reviewed releases, and the caller is a real person with a reason (worked with you, put your name forward, saw
+  your film, a friend vouched).
+- Crossover, trailers, Careers pay: see the source map rows for `src/crossover.js`, `src/trailer3.js` and
+  `src/careerpay.js`. Stills (`src/cinema.js`) no longer repeat a setting in one film and show the film's real cast,
+  dressed for the scene (`castFigure`).
+- Avatars: sixteen fine-tune sliders (height, weight, muscle, shoulders, and face length, cheekbones, jaw, chin, eye
+  size and spacing, brows, nose width and length, lips, mouth width, ears) in the look editor (`LOOK_SLIDERS`,
+  `lookD`); people in the world get their own random settings.
 
 ## Round 22: bodies redrawn, awards season for every field, real output by decade
 

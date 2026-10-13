@@ -19,8 +19,15 @@ Object.assign(LOOK, {
   pose: { label: 'Pose', opts: ['Standing', 'Hand on hip', 'Waving', 'Arms crossed', 'Hands in pockets'] }
 });
 for (const k of ['pattern', 'bottoms', 'bottomColour', 'shoes', 'bag', 'tattoo', 'pose']) if (!LOOK_KEYS.includes(k)) LOOK_KEYS.push(k);
+// Fine-tuning, as in the big character creators: sliders from 0 to 100 (50 is the middle) that shape the face and
+// the body continuously. Everyone else gets their own values from their id, so no two strangers share a face.
+const LOOK_SLIDERS = [['bHeight', 'Height'], ['bWeight', 'Weight'], ['bMuscle', 'Muscle'], ['bShoulder', 'Shoulders'], ['fLen', 'Face length'], ['fCheek', 'Cheekbones'], ['fJaw', 'Jaw'], ['fChin', 'Chin'], ['fEyeS', 'Eye size'], ['fEyeW', 'Eye spacing'], ['fBrow', 'Brows'], ['fNoseW', 'Nose width'], ['fNoseL', 'Nose length'], ['fLip', 'Lips'], ['fMouth', 'Mouth width'], ['fEar', 'Ears']];
+for (const [k, label] of LOOK_SLIDERS) { LOOK[k] = { label, opts: Array.from({ length: 101 }, (_, i) => String(i)), slider: 1 }; if (!LOOK_KEYS.includes(k)) LOOK_KEYS.push(k); }
+const lookD = (L, k) => clamp(((L[k] ?? 50) - 50) / 50, -1, 1);   // a slider as -1…1
+{ const _dl = defaultLook; defaultLook = function () { const L = _dl.apply(this, arguments); for (const [k] of LOOK_SLIDERS) L[k] = 50; return L; }; }
 // what everyone else wears below the waist, from a seed of their own (their face and top are untouched)
 function npcFigure(p, L) {
+  { const r = hashRand(p.id * 29 + 11); for (const [k] of LOOK_SLIDERS) if (L[k] === undefined) L[k] = clamp(Math.round(50 + (r() + r() + r() - 1.5) * 26), 4, 96); }
   if (L.bottoms !== undefined) return L;
   const r = hashRand(p.id * 13 + 5), pk = n => Math.floor(r() * n), F = p.g === 'F', y = p.born + 30;
   return Object.assign(L, { pattern: r() < .7 ? 0 : 1 + pk(9), bottoms: F ? [0, 1, 2, 4, 5, 6, 8, 9][pk(8)] : [0, 1, 2, 3, 6, 7, 8][pk(7)], bottomColour: pk(FIG_COLOURS.length), shoes: y < 1960 ? [3, 6][pk(2)] : F ? [0, 1, 2, 3, 4, 5, 7][pk(7)] : [0, 1, 2, 3, 6, 8][pk(6)], bag: r() < .6 ? 0 : 1 + pk(9), tattoo: r() < .85 ? 0 : 1 + pk(4), pose: pk(5) });
@@ -59,9 +66,11 @@ const lerp2 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const b = L.build || 0, top = L.outfit, bot = L.bottoms || 0, shoe = L.shoes || 0, pose = (L.pose === 4 && (top === 10 || bot === 4 || bot === 5)) ? 0 : L.pose || 0, bag = L.bag || 0, tat = L.tattoo || 0;
   const FT = L._fit || { mus: 0, mass: 0 };
-  const sw = [19.5, 20.5, 22, 23.5, 25.5, 27, 18, 18.5, 25.5, 21][b] + FT.mus * .5 + FT.mass * .3, ww = [11.5, 12.5, 14, 16, 18, 21.5, 11, 11, 15, 12.5][b] + FT.mass * .8 - FT.mus * .1, hp = [14, 14.5, 16, 17.5, 19, 23, 13.5, 13.5, 16.5, 19.5][b] + FT.mass * .45;
-  const af = [.92, .96, 1, 1.06, 1.12, 1.22, .88, .9, 1.16, 1][b] + FT.mus * .025 + Math.max(0, FT.mass) * .02, lf = [.95, .98, 1, 1.05, 1.1, 1.2, .9, .9, 1.12, 1.08][b] + Math.max(0, FT.mass) * .02;
-  const dl = b === 7 ? 3 : b === 6 ? -5 : 0, { sy, wy, cr } = FIG, kn = FIG.kn + dl * .5, an = FIG.an + dl, fy = FIG.fy + dl;
+  const sw0 = [19.5, 20.5, 22, 23.5, 25.5, 27, 18, 18.5, 25.5, 21][b] + FT.mus * .5 + FT.mass * .3, ww0 = [11.5, 12.5, 14, 16, 18, 21.5, 11, 11, 15, 12.5][b] + FT.mass * .8 - FT.mus * .1, hp0 = [14, 14.5, 16, 17.5, 19, 23, 13.5, 13.5, 16.5, 19.5][b] + FT.mass * .45;
+  const af0 = [.92, .96, 1, 1.06, 1.12, 1.22, .88, .9, 1.16, 1][b] + FT.mus * .025 + Math.max(0, FT.mass) * .02, lf0 = [.95, .98, 1, 1.05, 1.1, 1.2, .9, .9, 1.12, 1.08][b] + Math.max(0, FT.mass) * .02;
+  const dW = lookD(L, 'bWeight'), dM = lookD(L, 'bMuscle'), dS = lookD(L, 'bShoulder'), dH = lookD(L, 'bHeight');
+  const sw = sw0 + dS * 4 + dM * 1.5, ww = ww0 + dW * 5.2 - dM * .4, hp = hp0 + dW * 3.6, af = af0 + dM * .16 + dW * .12, lf = lf0 + dW * .14 + dM * .08;
+  const dl = (b === 7 ? 3 : b === 6 ? -5 : 0) + dH * 10, { sy, wy, cr } = FIG, kn = FIG.kn + dl * .5, an = FIG.an + dl, fy = FIG.fy + dl;
   // the stance: which leg takes the weight (some people stand square)
   const st = hashRand(L.skin * 7 + L.face * 31 + L.build * 131 + L.hair * 17 + (L.outfit || 0) * 3)(), w = pose === 3 || pose === 4 ? (st < .5 ? -1 : 1) : st < .38 ? -1 : st < .76 ? 1 : 0, tilt = w * 1.5;
   const hy = FIG.hy, nb = neckHalf(L) * .74;

@@ -861,7 +861,7 @@ function finishJob(j, L, quit) {
   const credited = !quit && f && t.cr && j.done >= Math.min(2, j.weeks) && f.stage >= 0;
   if (credited) { f.xc = f.xc || {}; f.xc[me.id] = j.t; milestone(`${me.credits.length || M.past.some(p => p.credited) ? 'Screen credit' : 'First screen credit'}: ${j.t.toLowerCase()} on ${f.title}`, 'credit'); }
   const T = j.tasks || [];
-  M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
+  M.past.push({ k: j.k, t: j.t, rate: j.rate, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
   if (T.length && L) L.push(`Your work as ${j.t.toLowerCase()}: ${T.length} task${T.length > 1 ? 's' : ''} delivered, ${T.filter(x => x.pts > 0).length} good, ${T.filter(x => x.pts < 0).length} rough${f && j.contrib ? `; it moved the film ${j.contrib > 0 ? 'up' : 'down'} ${Math.abs(j.contrib).toFixed(1)} points` : ''}.`);
   if (j.head != null && j.head !== M.id && P(j.head) && !quit) {   // you can't earn your own trust when you were the boss
     if (!M.known[j.head]) meet(j.head);

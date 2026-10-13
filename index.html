@@ -941,6 +941,7 @@ tr.blocked td { opacity: .55; }
 .ccface { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; align-items: start; }
 .looks { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 8px 18px; }
 .lk-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; font-size: 14px; }
+.lk-fine { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px 14px; } .lk-fine h4 { grid-column: 1 / -1; margin: 6px 0 2px; } .lk-sl { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 8px; font-size: 13px; } .lk-sl input { width: 100%; accent-color: var(--accent, #C8553D); }
 .lk-row select { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 5px 6px; color: var(--ink); min-width: 0; }
 .sw { display: inline-flex; flex-wrap: wrap; gap: 3px; }
 .swb { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--panel); box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
@@ -11915,7 +11916,7 @@ function finishJob(j, L, quit) {
   const credited = !quit && f && t.cr && j.done >= Math.min(2, j.weeks) && f.stage >= 0;
   if (credited) { f.xc = f.xc || {}; f.xc[me.id] = j.t; milestone(`${me.credits.length || M.past.some(p => p.credited) ? 'Screen credit' : 'First screen credit'}: ${j.t.toLowerCase()} on ${f.title}`, 'credit'); }
   const T = j.tasks || [];
-  M.past.push({ k: j.k, t: j.t, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
+  M.past.push({ k: j.k, t: j.t, rate: j.rate, film: j.film, head: j.head, from: j.started, to: S.week, credited, quit: !!quit, score: j.score || 0, contrib: j.contrib || 0, tasks: T.length });
   if (T.length && L) L.push(`Your work as ${j.t.toLowerCase()}: ${T.length} task${T.length > 1 ? 's' : ''} delivered, ${T.filter(x => x.pts > 0).length} good, ${T.filter(x => x.pts < 0).length} rough${f && j.contrib ? `; it moved the film ${j.contrib > 0 ? 'up' : 'down'} ${Math.abs(j.contrib).toFixed(1)} points` : ''}.`);
   if (j.head != null && j.head !== M.id && P(j.head) && !quit) {   // you can't earn your own trust when you were the boss
     if (!M.known[j.head]) meet(j.head);
@@ -12428,13 +12429,13 @@ let PORTRAIT_UID = 0;
 // FACE_SHAPE: [cheekbone half-width, jaw half-width, chin half-width, face height] for each face option.
 const FACE_SHAPE = [[14.5, 11, 4.2, 40], [16, 13, 5.6, 37], [15.6, 14, 6.6, 38], [13.6, 10.6, 4, 43], [15.6, 10, 3.2, 39], [15.4, 10.4, 3.6, 40], [15.4, 12.6, 5, 38], [14.6, 12.8, 4.6, 40], [16.6, 14, 6, 37], [13, 10, 3.8, 41]];
 function faceGeom(L) {
-  const F = FACE_SHAPE[L.face] || FACE_SHAPE[0], m = ((L._fit || {}).mass || 0) * .18;
-  const c = F[0] + m, j = F[1] + m * 1.2, ch = F[2] + m * .5, fh = F[3], cx = 60, cy = 50, top = cy - fh / 2, bot = cy + fh / 2;
-  const ey = top + fh * .47, ew = c * .225, ny = ey + fh * .235;
-  return { c, j, ch, fh, fw: c * 2, cx, cy, top, bot, ey, ex: c * .45, ew, eh: ew * .46, ny, my: ny + fh * .118, mw: c * .31, jawY: bot - fh * .2 };
+  const F = FACE_SHAPE[L.face] || FACE_SHAPE[0], d = k => typeof lookD === 'function' ? lookD(L, k) : 0, m = ((L._fit || {}).mass || 0) * .18 + d('bWeight') * 1.5;
+  const c = F[0] + m + d('fCheek') * 2.2, j = F[1] + m * 1.2 + d('fJaw') * 3.2, ch = F[2] + m * .5 + d('fChin') * 2.4, fh = F[3] + d('fLen') * 5, cx = 60, cy = 50, top = cy - fh / 2, bot = cy + fh / 2;
+  const ey = top + fh * .47, ew = c * .225 * (1 + d('fEyeS') * .26), ny = ey + fh * .235 + d('fNoseL') * 2.4;
+  return { c, j, ch, fh, fw: c * 2, cx, cy, top, bot, ey, ex: c * .45 * (1 + d('fEyeW') * .15), ew, eh: ew * .46, ny, my: ny + fh * .118 - d('fNoseL') * .8, mw: c * .31 * (1 + d('fMouth') * .25), jawY: bot - fh * .2, nw: 1 + d('fNoseW') * .45, lf: 1 + d('fLip') * .55, ear: 1 + d('fEar') * .45, bt: 1 + d('fBrow') * .8 };
 }
 // the neck's half-width, shared with the full-length body
-function neckHalf(L) { const FT = L._fit || { mus: 0, mass: 0 }, G = faceGeom(L); return G.c * .5 + [0, .2, .5, .9, 1.3, 1.7, -.2, -.3, 1.6, .4][L.build || 0] + FT.mus * .22 + Math.max(0, FT.mass) * .1; }
+function neckHalf(L) { const FT = L._fit || { mus: 0, mass: 0 }, G = faceGeom(L), d = k => typeof lookD === 'function' ? lookD(L, k) : 0; return d('bMuscle') * .6 + d('bWeight') * .4 + G.c * .5 + [0, .2, .5, .9, 1.3, 1.7, -.2, -.3, 1.6, .4][L.build || 0] + FT.mus * .22 + Math.max(0, FT.mass) * .1; }
 // where the head sits: full-length figures are about eight heads tall, so the head is drawn smaller there
 const FIG_HEAD = 'translate(60 19.7) scale(.74) translate(-60 -31)', PORTRAIT_HEAD = 'translate(60 60) scale(1.22) translate(-60 -55)';
 function headXform(fig, bare) { return fig ? FIG_HEAD : bare ? '' : PORTRAIT_HEAD; }
@@ -12468,7 +12469,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   const F = L.hair >= 7 && L.hair <= 9 || L.facial === 0 && [3, 7, 8, 9, 10, 11, 13, 14, 16].includes(L.hair);   // a softer brow and lip for longer styles
   const skin = LOOK.skin.opts[L.skin], shade = mixHex(skin, '#3A1E14', .22), line = mixHex(skin, '#1A0E0A', .55), ink = mixHex(skin, '#140A08', .72);
   const grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
-  const FT = L._fit || { mus: 0, mass: 0 }, bw = [36, 38, 41, 44, 47, 50, 34, 36, 46, 42][L.build] + FT.mus * .9 + FT.mass * .7, neck = neckHalf(L);
+  const FT = L._fit || { mus: 0, mass: 0 }, bw = [36, 38, 41, 44, 47, 50, 34, 36, 46, 42][L.build] + FT.mus * .9 + FT.mass * .7 + (typeof lookD === 'function' ? lookD(L, 'bWeight') * 3 + lookD(L, 'bShoulder') * 3 + lookD(L, 'bMuscle') * 1.5 : 0), neck = neckHalf(L);
   const recede = L.hairline === 1 ? clamp((age - 32) / 30, 0, 1) : 0;
   const o = [];
   const pr = hashRand(L.skin * 131 + L.hair * 17 + L.colour * 7 + L.face * 3 + L.outfit + L.eyes * 29), bgc = mixHex(cloth, '#FFFFFF', .74), bgd = mixHex(cloth, '#FFFFFF', .52);
@@ -12513,7 +12514,7 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
   if (L.neck === 7) o.push(`<path d="M${cx - 8} 86 Q${cx} 96 ${cx + 8} 86" fill="none" stroke="#C9A646" stroke-width=".9"/><circle cx="${cx}" cy="95" r="2.1" fill="#2E8B57" stroke="#C9A646" stroke-width=".7"/>`);
   if (!fig) o.push('</g>');
   // ears, then the face over them
-  for (const s of [-1, 1]) o.push(`<path d="M${n1(cx + s * (c - 1))} ${n1(ey - 2)} C${n1(cx + s * (c + 2.4))} ${n1(ey - 3.6)} ${n1(cx + s * (c + 2.9))} ${n1(ey + 4.6)} ${n1(cx + s * (c - .6))} ${n1(ey + 8.4)} Z" fill="${mixHex(skin, '#2A140C', .1)}" stroke="${line}" stroke-width=".35" stroke-opacity=".4"/><path d="M${n1(cx + s * (c + .4))} ${n1(ey - .8)} C${n1(cx + s * (c + 1.9))} ${n1(ey - 1.2)} ${n1(cx + s * (c + 1.8))} ${n1(ey + 4)} ${n1(cx + s * (c + .3))} ${n1(ey + 5.4)}" stroke="${shade}" stroke-width=".55" fill="none" opacity=".6"/>`);
+  const ea = G.ear; for (const s of [-1, 1]) o.push(`<path d="M${n1(cx + s * (c - 1))} ${n1(ey - 2 * ea)} C${n1(cx + s * (c + 2.4 * ea))} ${n1(ey - 3.6 * ea)} ${n1(cx + s * (c + 2.9 * ea))} ${n1(ey + 4.6 * ea)} ${n1(cx + s * (c - .6))} ${n1(ey + 8.4 * ea)} Z" fill="${mixHex(skin, '#2A140C', .1)}" stroke="${line}" stroke-width=".35" stroke-opacity=".4"/><path d="M${n1(cx + s * (c + .4))} ${n1(ey - .8)} C${n1(cx + s * (c + 1.9))} ${n1(ey - 1.2)} ${n1(cx + s * (c + 1.8))} ${n1(ey + 4)} ${n1(cx + s * (c + .3))} ${n1(ey + 5.4)}" stroke="${shade}" stroke-width=".55" fill="none" opacity=".6"/>`);
   o.push(`<path d="${facePath(G)}" fill="url(#${uid}f)" stroke="${line}" stroke-width=".4" stroke-opacity=".35"/>`);
   // light from the left: the far cheek and jaw turn into shadow, the chin throws a soft shadow
   o.push(`<g clip-path="url(#${uid}fc)"><path d="M${n1(cx + c - 4.5)} ${n1(ey - 8)} C${n1(cx + c - 2)} ${n1(ey + 4)} ${n1(cx + G.j - 2.5)} ${n1(jawY)} ${n1(cx + 2)} ${n1(G.bot + 1)} L${n1(cx + c + 3)} ${n1(G.bot + 3)} L${n1(cx + c + 3)} ${n1(ey - 8)} Z" fill="${shade}" opacity=".2"/><ellipse cx="${n1(cx - c * .3)}" cy="${n1(top + fh * .24)}" rx="${n1(c * .55)}" ry="${n1(fh * .12)}" fill="#FFFFFF" opacity=".07"/></g>`);
@@ -12527,15 +12528,15 @@ function portraitSVG(L, age, size = 96, bare = false, fig = false) {
     o.push(`<defs><clipPath id="${id}"><path d="${shape}"/></clipPath></defs><path d="${shape}" fill="${mixHex('#F1ECE6', skin, .14)}"/><g clip-path="url(#${id})"><circle cx="${n1(x - s * ew * .04)}" cy="${n1(ey - eh * .05)}" r="${n1(eh * 1.22)}" fill="${ec}"/><circle cx="${n1(x - s * ew * .04)}" cy="${n1(ey - eh * .05)}" r="${n1(eh * 1.22)}" fill="none" stroke="${mixHex(ec, '#000', .5)}" stroke-width=".35"/><circle cx="${n1(x - s * ew * .04)}" cy="${n1(ey - eh * .05)}" r="${n1(eh * .5)}" fill="#0E0A08"/><path d="${up}" stroke="${shade}" stroke-width="${n1(eh * .9)}" fill="none" opacity=".3"/></g><circle cx="${n1(x - s * ew * .04 + .55)}" cy="${n1(ey - eh * .45)}" r=".42" fill="#FFFFFF" opacity=".9"/>`);
     o.push(`<path d="${up}" stroke="${ink}" stroke-width="${F ? .95 : .8}" fill="none" stroke-linecap="round"/>${F ? `<path d="M${n1(b)} ${n1(ey - eh * .1)} l${n1(s * 1.2)} ${n1(-eh * .9)}" stroke="${ink}" stroke-width=".6" stroke-linecap="round"/>` : ''}<path d="M${n1(b)} ${n1(ey - eh * .1)} C${n1(x + s * ew * .35)} ${n1(ey + eh * 1)} ${n1(x - s * ew * .5)} ${n1(ey + eh * 1)} ${n1(a)} ${n1(ey + .2)}" stroke="${line}" stroke-width=".4" fill="none" opacity=".45"/><path d="M${n1(x - s * ew * .75)} ${n1(ey - eh * 1.4)} Q${n1(x + s * ew * .1)} ${n1(ey - eh * 2.5)} ${n1(x + s * ew * .98)} ${n1(ey - eh * .95)}" stroke="${line}" stroke-width=".4" fill="none" opacity=".2"/>`);
     // brows: tapered, rising to an arch two-thirds of the way out
-    const bc = mixHex(hc, '#000', .22), tb = F ? .85 : 1.25, ix = x - s * ew * 1.05, iy = ey - eh * 3.1, axx = x + s * ew * .45, ay = ey - eh * 4.1, tx = x + s * ew * 1.35, ty = ey - eh * 3.1;
+    const bc = mixHex(hc, '#000', .22), tb = (F ? .85 : 1.25) * G.bt, ix = x - s * ew * 1.05, iy = ey - eh * 3.1, axx = x + s * ew * .45, ay = ey - eh * 4.1, tx = x + s * ew * 1.35, ty = ey - eh * 3.1;
     o.push(`<path d="M${n1(ix)} ${n1(iy - tb * .6)} Q${n1(axx - s * ew * .2)} ${n1(ay - tb * .9)} ${n1(tx)} ${n1(ty)} Q${n1(axx - s * ew * .1)} ${n1(ay + tb * .55)} ${n1(ix)} ${n1(iy + tb * .7)} Z" fill="${bc}" opacity=".92"/>`);
   }
   // the nose: a shadow down one side of the bridge, the wings and the tip, no outline
-  o.push(`<path d="M${n1(cx + 1.4)} ${n1(ey + 1)} C${n1(cx + 2)} ${n1(ey + 4)} ${n1(cx + 2.3)} ${n1(ny - 4)} ${n1(cx + 2.9)} ${n1(ny - 1.4)}" stroke="${shade}" stroke-width=".9" fill="none" opacity=".35" stroke-linecap="round"/><path d="M${n1(cx - 3.2)} ${n1(ny - 1.3)} C${n1(cx - 3.8)} ${n1(ny + .4)} ${n1(cx - 2.6)} ${n1(ny + 1.3)} ${n1(cx - 1.3)} ${n1(ny + .8)} Q${n1(cx)} ${n1(ny + 1.6)} ${n1(cx + 1.3)} ${n1(ny + .8)} C${n1(cx + 2.6)} ${n1(ny + 1.3)} ${n1(cx + 3.8)} ${n1(ny + .4)} ${n1(cx + 3.2)} ${n1(ny - 1.3)}" stroke="${line}" stroke-width=".6" fill="none" opacity=".5" stroke-linecap="round"/><ellipse cx="${n1(cx - 1.7)}" cy="${n1(ny + .55)}" rx=".75" ry=".42" fill="${ink}" opacity=".35"/><ellipse cx="${n1(cx + 1.7)}" cy="${n1(ny + .55)}" rx=".75" ry=".42" fill="${ink}" opacity=".4"/><ellipse cx="${n1(cx - .4)}" cy="${n1(ny - 1.7)}" rx="1.1" ry=".8" fill="#FFFFFF" opacity=".18"/>`);
+  o.push(`<path d="M${n1(cx + 1.4)} ${n1(ey + 1)} C${n1(cx + 2)} ${n1(ey + 4)} ${n1(cx + 2.3)} ${n1(ny - 4)} ${n1(cx + 2.9)} ${n1(ny - 1.4)}" stroke="${shade}" stroke-width=".9" fill="none" opacity=".35" stroke-linecap="round"/><path d="M${n1(cx - 3.2 * G.nw)} ${n1(ny - 1.3)} C${n1(cx - 3.8 * G.nw)} ${n1(ny + .4)} ${n1(cx - 2.6 * G.nw)} ${n1(ny + 1.3)} ${n1(cx - 1.3 * G.nw)} ${n1(ny + .8)} Q${n1(cx)} ${n1(ny + 1.6)} ${n1(cx + 1.3 * G.nw)} ${n1(ny + .8)} C${n1(cx + 2.6 * G.nw)} ${n1(ny + 1.3)} ${n1(cx + 3.8 * G.nw)} ${n1(ny + .4)} ${n1(cx + 3.2 * G.nw)} ${n1(ny - 1.3)}" stroke="${line}" stroke-width=".6" fill="none" opacity=".5" stroke-linecap="round"/><ellipse cx="${n1(cx - 1.7 * G.nw)}" cy="${n1(ny + .55)}" rx=".75" ry=".42" fill="${ink}" opacity=".35"/><ellipse cx="${n1(cx + 1.7 * G.nw)}" cy="${n1(ny + .55)}" rx=".75" ry=".42" fill="${ink}" opacity=".4"/><ellipse cx="${n1(cx - .4)}" cy="${n1(ny - 1.7)}" rx="1.1" ry=".8" fill="#FFFFFF" opacity=".18"/>`);
   // cheeks and the mouth: a shaped upper lip, a fuller lower lip, a line where they meet
   const blush = mixHex(skin, '#C2505A', .45), bo = (F ? .14 : .06) * (L.skin >= 6 ? .5 : 1);
   o.push(`<ellipse cx="${n1(cx - ex - 1.2)}" cy="${n1(ny - .6)}" rx="3.4" ry="2" fill="${blush}" opacity="${n1(bo)}"/><ellipse cx="${n1(cx + ex + 1.2)}" cy="${n1(ny - .6)}" rx="3.4" ry="2" fill="${blush}" opacity="${n1(bo * .85)}"/><path d="M${n1(cx - c + 1.4)} ${n1(ny - 1)} Q${n1(cx - ex)} ${n1(ny + 2.6)} ${n1(cx - mw - 2)} ${n1(ny + 1.5)} M${n1(cx + c - 1.4)} ${n1(ny - 1)} Q${n1(cx + ex)} ${n1(ny + 2.6)} ${n1(cx + mw + 2)} ${n1(ny + 1.5)}" stroke="${shade}" stroke-width="1.6" fill="none" opacity=".1" stroke-linecap="round"/><path d="M${n1(cx - .8)} ${n1(ny + 1.6)} L${n1(cx - .7)} ${n1(my - 1.7)} M${n1(cx + .8)} ${n1(ny + 1.6)} L${n1(cx + .7)} ${n1(my - 1.7)}" stroke="${shade}" stroke-width=".4" opacity=".22"/>`);
-  { const lip = mixHex(skin, F ? '#B5485A' : '#9A4A4A', F ? .42 : .26), lf = F ? 1.15 : .95;
+  { const lip = mixHex(skin, F ? '#B5485A' : '#9A4A4A', F ? .42 : .26), lf = (F ? 1.15 : .95) * G.lf;
     o.push(`<path d="M${n1(cx - mw)} ${n1(my)} C${n1(cx - mw * .6)} ${n1(my - 1)} ${n1(cx - mw * .35)} ${n1(my - 1.9)} ${n1(cx - .8)} ${n1(my - 1.55)} Q${n1(cx)} ${n1(my - 1.1)} ${n1(cx + .8)} ${n1(my - 1.55)} C${n1(cx + mw * .35)} ${n1(my - 1.9)} ${n1(cx + mw * .6)} ${n1(my - 1)} ${n1(cx + mw)} ${n1(my)} Q${n1(cx)} ${n1(my + .35)} ${n1(cx - mw)} ${n1(my)} Z" fill="${mixHex(lip, '#000', .18)}"/><path d="M${n1(cx - mw * .9)} ${n1(my + .25)} C${n1(cx - mw * .6)} ${n1(my + 2.6 * lf)} ${n1(cx + mw * .6)} ${n1(my + 2.6 * lf)} ${n1(cx + mw * .9)} ${n1(my + .25)} Q${n1(cx)} ${n1(my + .55)} ${n1(cx - mw * .9)} ${n1(my + .25)} Z" fill="${lip}"/><path d="M${n1(cx - mw)} ${n1(my)} Q${n1(cx)} ${n1(my + .5)} ${n1(cx + mw)} ${n1(my)}" stroke="${mixHex(lip, '#000', .55)}" stroke-width=".55" fill="none" stroke-linecap="round" opacity=".85"/><ellipse cx="${n1(cx + .6)}" cy="${n1(my + 1.3)}" rx="1.5" ry=".45" fill="#FFFFFF" opacity=".22"/><path d="M${n1(cx - 2.4)} ${n1(my + 3.5)} Q${n1(cx)} ${n1(my + 4.4)} ${n1(cx + 2.4)} ${n1(my + 3.5)}" stroke="${shade}" stroke-width=".7" fill="none" opacity=".25"/>`); }
   if (L.mark === 1) o.push(`<circle cx="${n1(cx + 2.7)}" cy="${n1(ny + .3)}" r="1" fill="none" stroke="#C0C0C0" stroke-width=".6"/>`);
   if (L.mark === 2) o.push(`<circle cx="${n1(cx + 2.6)}" cy="${n1(ny - .4)}" r=".6" fill="#D9D9D9"/>`);
@@ -18355,13 +18356,14 @@ const GRADES = { Horror: ['#2E6B5E', .14], Western: ['#C88A3A', .14], 'Sci-fi': 
 function frameOf(f, i) {
   const SF = typeof storyFrame === 'function' ? storyFrame(f, i) : null; if (SF) return SF;
   const r = hashRand(f.id * 71 + i * 13 + 5), era = f.rel !== null ? yearOf(f.rel) : S.year;
-  const G = GENRE_SETTINGS[f.genre] || GENRE_SETTINGS.Drama;
-  let setting = G[(i + Math.floor(r() * G.length)) % G.length];
+  // each still a different place, in an order of the film's own (a repeated place made the fourth still a copy of the first)
+  const G = [...new Set(GENRE_SETTINGS[f.genre] || GENRE_SETTINGS.Drama)], rot = Math.floor(hashRand(f.id * 7 + 2)() * G.length); r();
+  let setting = G[(i + rot) % G.length];
   if (era < 1955 && ['bridge', 'planet', 'lab'].includes(setting) && f.genre !== 'Sci-fi') setting = 'street';
   const tods = ['Horror', 'Crime'].includes(f.genre) ? [3, 3, 2, 0] : f.genre === 'Romance' ? [1, 2, 0, 3] : [0, 0, 1, 2, 3];
   const tod = tods[Math.floor(r() * tods.length)];
   const cast = f.cast || [], n = setting === 'interview' ? 1 : r() < .55 && cast.length > 1 ? 2 : r() < .25 && cast.length > 2 ? 3 : 1;
-  const who = Array.from({ length: n }, (_, k) => cast[(i + k) % Math.max(1, cast.length)]).filter((x, k, A) => x !== undefined && A.indexOf(x) === k);
+  const who = Array.from({ length: n }, (_, k) => cast[(i + k + Math.floor(i / Math.max(1, cast.length))) % Math.max(1, cast.length)]).filter((x, k, A) => x !== undefined && A.indexOf(x) === k);
   const V = SC_VERBS[f.genre] || SC_VERBS.Drama, verb = (who.length > 1 ? V[0] : V[1])[Math.floor(r() * 3)];
   return { r, era, setting, tod, who, verb };
 }
@@ -18385,12 +18387,27 @@ function stillSVG(f, i, w = 320, animated = false) {
     const pose = D.sit ? 'sit' : D.fly ? 'raise' : F.genre === 'Action' ? (r() < .6 ? 'run' : 'point') : poses[Math.floor(r() * poses.length)];
     const h = D.fly ? 54 : D.toon ? 70 : F.setting === 'interview' ? 150 : 96 + r() * 12;
     const gy = D.fly ? D.gy - 30 * k : D.gy + (k % 2) * 2;
+    // the film's real cast, drawn with the same figures as everywhere else (sitting and cartoon frames keep the simple drawing)
+    if (id !== undefined && P(id) && !D.toon && !D.sit && !D.fly && F.setting !== 'interview' && typeof portraitSVG === 'function') return castFigure(id, slots[k] ?? 160, gy, h, pose, D, F, r);
     return actor(slots[k] ?? 160, gy, h, L, { face, pose, costume: D.costume || (F.era < 1940 || F.genre === 'Period' ? 'suit' : r() < .25 ? 'suit' : null), hat: D.hat || (F.era < 1955 && r() < .4 ? 'fedora' : undefined), helmet: D.helmet, prop: k === 0 && r() < .55 ? (pr || undefined) : undefined, dress: D.dress, cape: D.fly ? ['#C62828', '#2C4F7C', '#E3B23C'][k % 3] : undefined, rim: T.night ? '#BFD8F2' : null });
   });
   const grade = GRADES[f.genre], old = F.era < 1952 && f.genre !== 'Animation';
   const vign = `<defs><radialGradient id="vg${uid}" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${old ? .45 : .28}"/></radialGradient></defs><rect width="${CW}" height="${CH}" fill="url(#vg${uid})"/>`;
   const wide = hashRand(f.id * 3 + 1)() < .55 ? `<rect width="${CW}" height="14" fill="#000"/><rect y="${CH - 14}" width="${CW}" height="14" fill="#000"/>` : '';
-  return `<svg class="still${animated ? ' moving' : ''}" viewBox="0 0 ${CW} ${CH}" width="${w}" height="${Math.round(w * CH / CW)}" role="img" aria-label="${esc(stillCaption(f, i))}"${old ? ' style="filter:grayscale(1) contrast(1.08) brightness(1.08)"' : ''}>${D.bg}${animated && D.anim ? D.anim : ''}${actors.join('')}${D.fg || ''}${grade ? `<rect width="${CW}" height="${CH}" fill="${grade[0]}" opacity="${grade[1]}" style="mix-blend-mode:multiply"/>` : ''}${T.night ? `<rect width="${CW}" height="${CH}" fill="#2A3F6E" opacity=".12"/>` : ''}${vign}${wide}</svg>`;
+  return `<svg class="still${animated ? ' moving' : ''}" viewBox="0 0 ${CW} ${CH}" width="${w}" height="${Math.round(w * CH / CW)}" role="img" aria-label="${esc(stillCaption(f, i))}"${old ? ' style="filter:grayscale(1) contrast(1.08) brightness(1.08)"' : ''}><g class="L-bg">${D.bg}${animated && D.anim ? D.anim : ''}</g><g class="L-act">${actors.map((x, k) => `<g class="L-a L-a${k}">${x}</g>`).join('')}</g><g class="L-fg">${D.fg || ''}</g>${grade ? `<rect width="${CW}" height="${CH}" fill="${grade[0]}" opacity="${grade[1]}" style="mix-blend-mode:multiply"/>` : ''}${T.night ? `<rect width="${CW}" height="${CH}" fill="#2A3F6E" opacity=".12"/>` : ''}${vign}${wide}</svg>`;
+}
+// a cast member in costume for the scene: the person's own face, hair and build, the frame's wardrobe
+function castFigure(id, x, gy, h, pose, D, F, r) {
+  const p = P(id), L = Object.assign({}, lookOf(p)), cos = D.costume || (F.era < 1940 || (F.r && false) ? 'suit' : null);
+  const W = { suit: { outfit: 9, colour: 1 }, space: { outfit: 17, colour: 9 }, armor: { outfit: 4, colour: 7 }, uniform: { outfit: 3, colour: 3 }, gi: { outfit: 0, colour: 9, bottoms: 6, bottomColour: 6 }, robe: { outfit: 12, colour: 6 } }[cos];
+  if (W) Object.assign(L, W);
+  if (D.dress && p.g === 'F') Object.assign(L, { outfit: 10 });
+  if (D.hat || (F.era < 1955 && r() < .35)) L.head = 8;
+  if (D.helmet) L.head = 2;
+  if (F.era < 1960) { L.bag = 0; L.ears = 0; L.tattoo = 0; L.wrist = 0; if (L.shoes === 0 || L.shoes === 1 || L.shoes === 9) L.shoes = 6; if ([1, 3, 7, 9].includes(L.bottoms)) L.bottoms = 6; if ([1, 10, 11, 13, 14, 16, 17].includes(L.outfit) && !W) L.outfit = 7; }
+  L.pose = pose === 'walk' || pose === 'run' ? 0 : L.pose === 2 && !D.stage ? 0 : L.pose;
+  x = clamp(x, 46, CW - 46); const sc = h * .86 / 210, age = S.year - p.born, svg = portraitSVG(L, age, 240, true, true).replace(/^<svg class="portrait([^"]*)"[^>]*>/, `<svg class="portrait$1" x="${(x - 60 * sc).toFixed(1)}" y="${(gy - 224 * sc).toFixed(1)}" width="${(120 * sc).toFixed(1)}" height="${(240 * sc).toFixed(1)}" viewBox="0 0 120 240" overflow="visible">`);
+  return svg;
 }
 function stillsHTML(f) {
   const r = hashRand(f.id * 19 + 3), st = typeof storyOf === 'function' ? storyOf(f) : null, n = st ? Math.min(6, st.frames.length) : 3 + Math.floor(r() * 3);
@@ -21509,6 +21526,10 @@ function trailerScore(f) {
     hush(h) { hush = h ? 1 : 0; },
     scratch() { if (!ctx) return; const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime; o.type = 'sawtooth'; o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(120, t + .25); g.gain.setValueAtTime(.25, t); g.gain.exponentialRampToValueAtTime(.001, t + .3); o.connect(g); g.connect(master); o.start(t); o.stop(t + .32); hush = 1; },
     mute(m) { muted = m; if (master) master.gain.value = m ? 0 : .16; },
+    // under a voice: the score drops back, then returns
+    duck(d) { if (master && !muted) master.gain.setTargetAtTime(d ? .055 : .16, ctx.currentTime, .12); },
+    // the end: the last chord rings out instead of the loop playing on
+    fade(ms = 1600) { if (!ctx) return; clearInterval(timer); timer = null; if (master) master.gain.setTargetAtTime(0, ctx.currentTime, ms / 4000); const c = ctx; setTimeout(() => { try { c.close(); } catch (e) { } }, ms + 200); ctx = null; },
     pause(p) { if (ctx) p ? ctx.suspend() : ctx.resume(); },
     stop() { clearInterval(timer); timer = null; if (ctx) { try { ctx.close(); } catch (e) { } ctx = null; } }
   };
@@ -28795,7 +28816,7 @@ const LATE = [
   { id: 'lg_cinema', pool: 'late', need: () => !holdings().some(h => h.k === 'cinema'), mk: c => { c.amt = lateAmt(.15, 90000, 4000000); c.place = ppick(['a 1920s picture palace with a Wurlitzer organ', 'the art-deco single screen where you saw your first film here', 'a neighbourhood cinema with 400 velvet seats and a leaking roof', 'a repertory house that has shown a double bill every night since 1958']); },
     title: 'A cinema for sale', text: c => `It's ${c.place}, and it's closing. The owner would rather sell to someone who'll keep it open. ${fmtCash(c.amt)}.`,
     opts: [
-      { k: 'buy', label: c => `Buy it and keep it running: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('cinema', 'Your cinema', c.amt, c.amt * lateR(-.0006, .0016)); lateFx({ stand: 1.2, fame: 3, mile: 'Bought a cinema and kept it open' }); return 'You get the keys and the alarm code. On opening night under your name you sell out a fifty-year-old film and stand at the back.'; } },
+      { k: 'buy', label: c => `Buy it and keep it running: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('cinema', 'Your cinema', c.amt, c.amt * lateR(-.0006, .0009)); lateFx({ stand: 1.2, fame: 3, mile: 'Bought a cinema and kept it open' }); return 'You get the keys and the alarm code. On opening night under your name you sell out a fifty-year-old film and stand at the back.'; } },
       { k: 'campaign', label: () => 'Lead a campaign to save it instead', check: ['cha', 14], go: (c, ok) => { lateFx(ok ? { stand: .8, fame: 2, energy: -10 } : { energy: -10, stress: 4 }); return ok ? 'The city lists the building. A community trust buys it. They put your name on a seat.' : 'The petition gets twenty thousand names. It becomes a gym anyway.'; } },
       { k: 'no', label: () => 'Not your problem', go: c => 'It closes in March. You walk past it more often than you need to.' }] },
   { id: 'lg_scholar', pool: 'late', cool: 104, mk: c => { c.amt = lateAmt(.03, 10000, 500000); },
@@ -28821,12 +28842,12 @@ const LATE = [
       { k: 'yes', label: () => 'Accept', go: c => { c.out = []; lateFx({ stand: 1, intl: 4, energy: -15, xp: { tas: .3 }, meet: 'abroad', meetTag: 'On the jury with you' }, c, c.out); return 'The deliberations run until four in the morning. You win the argument that matters. ' + c.out.join(' '); } },
       { k: 'fight', label: () => 'Accept, and fight for the strange film nobody likes', check: ['cha', 15], go: (c, ok) => { lateFx(ok ? { stand: 1.6, intl: 5, fame: 2, energy: -15 } : { stand: .5, intl: 3, energy: -15, stress: 4 }); return ok ? 'It wins. The director cries on stage and thanks "the jury, and one juror in particular".' : 'You lose seven to two. The strange film gets a special mention, which is something.'; } },
       { k: 'no', label: () => 'Decline politely', go: c => 'They ask again in two years. People who decline twice don\'t get asked a third time.' }] },
-  { id: 'lg_masterclass', pool: 'late', need: () => careerLevel() >= 4, mk: c => { c.fee = lateAmt(.004, 4000, 60000); c.city = ppick(['Lisbon', 'Seoul', 'Mexico City', 'Copenhagen', 'Lagos', 'Melbourne', 'Mumbai', 'Buenos Aires']); },
+  { id: 'lg_masterclass', pool: 'late', need: () => careerLevel() >= 4, mk: c => { c.fee = lateAmt(.002, 4000, 30000); c.city = ppick(['Lisbon', 'Seoul', 'Mexico City', 'Copenhagen', 'Lagos', 'Melbourne', 'Mumbai', 'Buenos Aires']); },
     title: 'A masterclass abroad', text: c => `A film academy in ${c.city} wants a three-day masterclass from you. ${fmtCash(c.fee)}, business class, and a hotel with a view of something.`,
     opts: [
       { k: 'yes', label: () => 'Go and teach', check: ['com', 12], go: (c, ok) => { c.out = []; lateFx(ok ? { cash: c.fee, intl: 4, fame: 1, energy: -8, meet: 'abroad', meetTag: 'At your masterclass' } : { cash: c.fee, intl: 2, energy: -8 }, c, c.out); return (ok ? 'The questions are better than the ones at home. You leave with a full notebook. ' : 'Jet lag eats the first day. The students are kind about it. ') + c.out.join(' '); } },
       { k: 'no', label: () => 'Too far, too busy', go: c => 'They get someone else. You see the photos: it looked lovely.' }] },
-  { id: 'lg_firstlook', pool: 'late', need: () => careerLevel() >= 5 && !holdings().some(h => h.k === 'deal'), mk: c => { c.amt = Math.round(usd(1200 + careerLevel() * 600) / 50) * 50; },
+  { id: 'lg_firstlook', pool: 'late', need: () => careerLevel() >= 5 && !holdings().some(h => h.k === 'deal'), mk: c => { c.amt = Math.round(usd(500 + careerLevel() * 250) / 50) * 50; },
     title: 'A first-look deal', text: c => `A streamer wants first look at anything you develop for two years: ${fmtCash(c.amt)} a week, an office and an assistant. They can pass on anything; anything they pass on is yours to take elsewhere.`,
     opts: [
       { k: 'yes', label: c => `Sign: ${fmtCash(c.amt)} a week`, go: c => { lateHold('deal', 'First-look deal', 0, c.amt, { until: S.week + 104 }); lateFx({ stand: 1, mile: 'Signed a first-look deal' }); return 'There is a parking space with your name on it. It\'s the smallest thing and it makes you absurdly happy.'; } },
@@ -28838,7 +28859,7 @@ const LATE = [
       { k: 'lend', label: c => `Lend it: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateFx({ tie: 8 }, c); lateLater(lateR(26, 70), 'repay', { who: c.who, amt: c.amt }); return 'They hug you in the street. You try not to think about whether you\'ll see it again.'; } },
       { k: 'gift', label: c => `Give it, and say never mind paying it back`, cost: c => c.amt, go: c => { lateFx({ tie: 16 }, c); trust(c.who, 10); return 'They can\'t speak for a moment. Years later they\'ll still mention it.'; } },
       { k: 'no', label: () => 'Say you can\'t', go: c => { lateFx({ tie: -6 }, c); return 'They say they understand. They mostly do.'; } }] },
-  { id: 'lg_memoir', pool: 'late', once: 1, need: () => careerLevel() >= 5 || (ME().fame || 0) >= 25, mk: c => { c.amt = Math.round(usd(40000 + (ME().fame || 0) * 4000 + careerLevel() * 15000) / 1000) * 1000; },
+  { id: 'lg_memoir', pool: 'late', once: 1, need: () => careerLevel() >= 5 || (ME().fame || 0) >= 25, mk: c => { c.amt = Math.round(usd(20000 + (ME().fame || 0) * 1500 + careerLevel() * 8000) / 1000) * 1000; },
     title: 'A book deal', text: c => `A publisher wants your memoir. ${fmtCash(c.amt)} advance. "Honest, funny, a bit of gossip. Not too much gossip. Some gossip."`,
     opts: [
       { k: 'ghost', label: () => 'Take it, with a ghostwriter', go: c => { lateFx({ cash: c.amt * .7, fame: 4, stress: 3 }); return 'The ghostwriter interviews you for nine hours and makes you sound wittier than you are. It sells.'; } },
@@ -28862,7 +28883,7 @@ const LATE = [
   { id: 'lg_ranch', pool: 'late', need: () => !holdings().some(h => h.k === 'ranch'), mk: c => { c.amt = lateAmt(.12, 60000, 3000000); c.place = ppick(['a ranch two hours out with a fake Western street left over from the fifties', 'a crumbling mansion that has played a haunted house in nine films', 'a disused factory with forty-foot ceilings, perfect for building sets', 'an old motel by a desert highway that every music video wants']); },
     title: 'A location for sale', text: c => `For sale: ${c.place}. ${fmtCash(c.amt)}. Productions rent it all year.`,
     opts: [
-      { k: 'buy', label: c => `Buy it and rent it out: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('ranch', 'Your location', c.amt, c.amt * lateR(.0008, .0022)); return 'The first booking is a car advert. The second is a horror film that sets the porch on fire, on purpose, twice.'; } },
+      { k: 'buy', label: c => `Buy it and rent it out: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('ranch', 'Your location', c.amt, c.amt * lateR(.0002, .0011)); return 'The first booking is a car advert. The second is a horror film that sets the porch on fire, on purpose, twice.'; } },
       { k: 'no', label: () => 'Pass', go: c => 'You see it in a film a year later and feel a small, irrational pang.' }] },
   { id: 'lg_shelter', pool: 'late', mk: c => { c.amt = lateAmt(.05, 10000, 600000); },
     title: 'A clever accountant', text: c => `Your accountant has a scheme: put ${fmtCash(c.amt)} into "film production partnerships" and you'll save nearly half of it in tax. "Everyone's doing it."`,
@@ -29027,7 +29048,7 @@ const LATE = [
     opts: [
       { k: 'yes', label: () => 'Go on and be yourself', check: ['cha', 12], go: (c, ok) => { lateFx(ok ? { fame: 3 } : { fame: 1, stress: 2 }); return ok ? 'Two hours fly by. The episode gets clipped and passed around for a week.' : 'You say "um" two hundred times. Someone counts.'; } },
       { k: 'no', label: () => 'Decline', go: c => 'They have someone else on. You listen. You\'d have been better.' }] },
-  { id: 'in_brand', pool: 'indie', mk: c => { c.amt = Math.round(usd(lateR(8000, 30000) * (1 + careerLevel() * .4)) / 500) * 500; c.brand = ppick(['a sportswear company', 'a car maker', 'a bank', 'an energy drink', 'a supermarket']); }, title: 'A commercial', text: c => `${c.brand.charAt(0).toUpperCase() + c.brand.slice(1)} wants you for a commercial. ${fmtCash(c.amt)} for a week's work. The script involves a dancing mascot.`,
+  { id: 'in_brand', pool: 'indie', mk: c => { c.amt = Math.round(usd(lateR(6000, 20000) * (1 + careerLevel() * .15)) / 500) * 500; c.brand = ppick(['a sportswear company', 'a car maker', 'a bank', 'an energy drink', 'a supermarket']); }, title: 'A commercial', text: c => `${c.brand.charAt(0).toUpperCase() + c.brand.slice(1)} wants you for a commercial. ${fmtCash(c.amt)} for a week's work. The script involves a dancing mascot.`,
     opts: [
       { k: 'yes', label: () => 'Take the money', go: c => { lateFx({ cash: c.amt, stand: -.2, energy: -8 }); return 'The mascot is a man named Doug. Doug is a consummate professional.'; } },
       { k: 'yours', label: () => 'Take it, if you can rewrite the script', check: ['vis', 14], go: (c, ok) => { lateFx(ok ? { cash: c.amt, fame: 2, energy: -8 } : { stress: 3 }); return ok ? 'Your version wins an advertising award. Doug is very proud.' : 'They say thanks but no thanks, and find someone who likes mascots.'; } },
@@ -29038,7 +29059,7 @@ const LATE = [
       { k: 'no', label: () => 'Not your thing', go: c => 'They find someone else. The biscuits go to waste.' }] },
   { id: 'in_crowd', pool: 'indie', title: 'Crowdfunding', text: () => 'You could crowdfund the passion project: a video, a target, thirty days of asking everyone you know for money.',
     opts: [
-      { k: 'yes', label: () => 'Launch it', check: ['cha', 14], go: (c, ok) => { const a = Math.round(usd(lateR(8000, 40000) * (1 + (ME().fame || 0) / 30)) / 100) * 100; lateFx(ok ? { cash: a, fame: 2, energy: -10 } : { cash: a * .25, energy: -10, stress: 6 }); return ok ? `It hits its target in nine days. ${fmtCash(a)}. Strangers believe in you, which is terrifying.` : `It limps to a quarter of the target. You keep what you raised: ${fmtCash(a * .25)}, and a lot of awkward thank-you emails.`; } },
+      { k: 'yes', label: () => 'Launch it', check: ['cha', 14], go: (c, ok) => { const a = Math.round(usd(lateR(8000, 40000) * (1 + (ME().fame || 0) / 60)) / 100) * 100; lateFx(ok ? { cash: a, fame: 2, energy: -10 } : { cash: a * .25, energy: -10, stress: 6 }); return ok ? `It hits its target in nine days. ${fmtCash(a)}. Strangers believe in you, which is terrifying.` : `It limps to a quarter of the target. You keep what you raised: ${fmtCash(a * .25)}, and a lot of awkward thank-you emails.`; } },
       { k: 'no', label: () => 'You hate asking for money', go: c => 'You keep saving instead. Slower, but nobody\'s watching.' }] },
   { id: 'in_lab', pool: 'indie', title: 'A festival lab', text: () => 'A festival\'s development lab is taking eight projects. A week in the mountains with mentors, if they pick yours.',
     opts: [
@@ -29060,7 +29081,7 @@ const LATE = [
     opts: [
       { k: 'join', label: c => `Join: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { c.out = []; lateFx({ meet: 'young', meetTag: 'In your co-op' }, c, c.out); lateFx({ meet: 'known', xp: { setm: .1 } }, c, c.out); return 'You borrow a lens the first week and lend your sofa the second. ' + c.out.join(' '); } },
       { k: 'no', label: () => 'You work alone', go: c => 'Alone is quieter. Not always better.' }] },
-  { id: 'in_consult', pool: 'indie', need: () => careerLevel() >= 3, mk: c => { c.amt = Math.round(usd(1500 + careerLevel() * 1200) / 100) * 100; }, title: 'A day\'s consulting', text: c => `A studio wants one day of your eyes on a troubled project. ${fmtCash(c.amt)}, no commitment, no credit.`,
+  { id: 'in_consult', pool: 'indie', need: () => careerLevel() >= 3, mk: c => { c.amt = Math.round(usd(1200 + careerLevel() * 450) / 100) * 100; }, title: 'A day\'s consulting', text: c => `A studio wants one day of your eyes on a troubled project. ${fmtCash(c.amt)}, no commitment, no credit.`,
     opts: [
       { k: 'yes', label: () => 'Give them your honest notes', check: ['tas', 13], go: (c, ok) => { c.out = []; lateFx(ok ? { cash: c.amt, stand: .5, meet: 'power', meetTag: 'You consulted for them' } : { cash: c.amt }, c, c.out); return (ok ? 'Your three notes save the film\'s third act. They know it. ' : 'They nod and ignore everything you said. The cheque clears.') + c.out.join(' '); } },
       { k: 'no', label: () => 'Not interested', go: c => 'They find someone hungrier.' }] },
@@ -29073,7 +29094,7 @@ const LATE = [
     opts: [
       { k: 'make', label: () => 'Make something from them', check: ['tas', 13], go: (c, ok) => { lateFx(ok ? { fame: 2, xp: { tas: .3 }, stand: .4 } : { xp: { tas: .15 } }); return ok ? 'A twelve-minute film with no words. It makes people cry in three languages.' : 'You scan everything and make nothing yet. The boxes sit by your desk.'; } },
       { k: 'archive', label: () => 'Give them to the archive', go: c => 'The archivists are delighted. Someone else will make the film.' }] },
-  { id: 'in_teachonline', pool: 'indie', cool: 52, mk: c => { c.amt = Math.round(usd(R2(2000, 9000) * (1 + careerLevel() * .3)) / 100) * 100; }, title: 'An online course', text: c => `A course platform wants you to film a class: eight lessons on what you know. ${fmtCash(c.amt)} up front and a share of sales.`,
+  { id: 'in_teachonline', pool: 'indie', cool: 52, mk: c => { c.amt = Math.round(usd(R2(2000, 9000) * (1 + careerLevel() * .12)) / 100) * 100; }, title: 'An online course', text: c => `A course platform wants you to film a class: eight lessons on what you know. ${fmtCash(c.amt)} up front and a share of sales.`,
     opts: [
       { k: 'yes', label: () => 'Film it properly', check: ['com', 12], go: (c, ok) => { lateFx(ok ? { cash: c.amt * 1.5, fame: 2 } : { cash: c.amt }); return ok ? 'It sells steadily for years. Strangers quote your lessons back to you.' : 'It\'s fine. You hate watching yourself on it.'; } },
       { k: 'no', label: () => 'Your secrets stay secret', go: c => 'You keep your secrets. They\'re not that secret.' }] },
@@ -29534,8 +29555,15 @@ Object.assign(LOOK, {
   pose: { label: 'Pose', opts: ['Standing', 'Hand on hip', 'Waving', 'Arms crossed', 'Hands in pockets'] }
 });
 for (const k of ['pattern', 'bottoms', 'bottomColour', 'shoes', 'bag', 'tattoo', 'pose']) if (!LOOK_KEYS.includes(k)) LOOK_KEYS.push(k);
+// Fine-tuning, as in the big character creators: sliders from 0 to 100 (50 is the middle) that shape the face and
+// the body continuously. Everyone else gets their own values from their id, so no two strangers share a face.
+const LOOK_SLIDERS = [['bHeight', 'Height'], ['bWeight', 'Weight'], ['bMuscle', 'Muscle'], ['bShoulder', 'Shoulders'], ['fLen', 'Face length'], ['fCheek', 'Cheekbones'], ['fJaw', 'Jaw'], ['fChin', 'Chin'], ['fEyeS', 'Eye size'], ['fEyeW', 'Eye spacing'], ['fBrow', 'Brows'], ['fNoseW', 'Nose width'], ['fNoseL', 'Nose length'], ['fLip', 'Lips'], ['fMouth', 'Mouth width'], ['fEar', 'Ears']];
+for (const [k, label] of LOOK_SLIDERS) { LOOK[k] = { label, opts: Array.from({ length: 101 }, (_, i) => String(i)), slider: 1 }; if (!LOOK_KEYS.includes(k)) LOOK_KEYS.push(k); }
+const lookD = (L, k) => clamp(((L[k] ?? 50) - 50) / 50, -1, 1);   // a slider as -1…1
+{ const _dl = defaultLook; defaultLook = function () { const L = _dl.apply(this, arguments); for (const [k] of LOOK_SLIDERS) L[k] = 50; return L; }; }
 // what everyone else wears below the waist, from a seed of their own (their face and top are untouched)
 function npcFigure(p, L) {
+  { const r = hashRand(p.id * 29 + 11); for (const [k] of LOOK_SLIDERS) if (L[k] === undefined) L[k] = clamp(Math.round(50 + (r() + r() + r() - 1.5) * 26), 4, 96); }
   if (L.bottoms !== undefined) return L;
   const r = hashRand(p.id * 13 + 5), pk = n => Math.floor(r() * n), F = p.g === 'F', y = p.born + 30;
   return Object.assign(L, { pattern: r() < .7 ? 0 : 1 + pk(9), bottoms: F ? [0, 1, 2, 4, 5, 6, 8, 9][pk(8)] : [0, 1, 2, 3, 6, 7, 8][pk(7)], bottomColour: pk(FIG_COLOURS.length), shoes: y < 1960 ? [3, 6][pk(2)] : F ? [0, 1, 2, 3, 4, 5, 7][pk(7)] : [0, 1, 2, 3, 6, 8][pk(6)], bag: r() < .6 ? 0 : 1 + pk(9), tattoo: r() < .85 ? 0 : 1 + pk(4), pose: pk(5) });
@@ -29574,9 +29602,11 @@ const lerp2 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
 function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const b = L.build || 0, top = L.outfit, bot = L.bottoms || 0, shoe = L.shoes || 0, pose = (L.pose === 4 && (top === 10 || bot === 4 || bot === 5)) ? 0 : L.pose || 0, bag = L.bag || 0, tat = L.tattoo || 0;
   const FT = L._fit || { mus: 0, mass: 0 };
-  const sw = [19.5, 20.5, 22, 23.5, 25.5, 27, 18, 18.5, 25.5, 21][b] + FT.mus * .5 + FT.mass * .3, ww = [11.5, 12.5, 14, 16, 18, 21.5, 11, 11, 15, 12.5][b] + FT.mass * .8 - FT.mus * .1, hp = [14, 14.5, 16, 17.5, 19, 23, 13.5, 13.5, 16.5, 19.5][b] + FT.mass * .45;
-  const af = [.92, .96, 1, 1.06, 1.12, 1.22, .88, .9, 1.16, 1][b] + FT.mus * .025 + Math.max(0, FT.mass) * .02, lf = [.95, .98, 1, 1.05, 1.1, 1.2, .9, .9, 1.12, 1.08][b] + Math.max(0, FT.mass) * .02;
-  const dl = b === 7 ? 3 : b === 6 ? -5 : 0, { sy, wy, cr } = FIG, kn = FIG.kn + dl * .5, an = FIG.an + dl, fy = FIG.fy + dl;
+  const sw0 = [19.5, 20.5, 22, 23.5, 25.5, 27, 18, 18.5, 25.5, 21][b] + FT.mus * .5 + FT.mass * .3, ww0 = [11.5, 12.5, 14, 16, 18, 21.5, 11, 11, 15, 12.5][b] + FT.mass * .8 - FT.mus * .1, hp0 = [14, 14.5, 16, 17.5, 19, 23, 13.5, 13.5, 16.5, 19.5][b] + FT.mass * .45;
+  const af0 = [.92, .96, 1, 1.06, 1.12, 1.22, .88, .9, 1.16, 1][b] + FT.mus * .025 + Math.max(0, FT.mass) * .02, lf0 = [.95, .98, 1, 1.05, 1.1, 1.2, .9, .9, 1.12, 1.08][b] + Math.max(0, FT.mass) * .02;
+  const dW = lookD(L, 'bWeight'), dM = lookD(L, 'bMuscle'), dS = lookD(L, 'bShoulder'), dH = lookD(L, 'bHeight');
+  const sw = sw0 + dS * 4 + dM * 1.5, ww = ww0 + dW * 5.2 - dM * .4, hp = hp0 + dW * 3.6, af = af0 + dM * .16 + dW * .12, lf = lf0 + dW * .14 + dM * .08;
+  const dl = (b === 7 ? 3 : b === 6 ? -5 : 0) + dH * 10, { sy, wy, cr } = FIG, kn = FIG.kn + dl * .5, an = FIG.an + dl, fy = FIG.fy + dl;
   // the stance: which leg takes the weight (some people stand square)
   const st = hashRand(L.skin * 7 + L.face * 31 + L.build * 131 + L.hair * 17 + (L.outfit || 0) * 3)(), w = pose === 3 || pose === 4 ? (st < .5 ? -1 : 1) : st < .38 ? -1 : st < .76 ? 1 : 0, tilt = w * 1.5;
   const hy = FIG.hy, nb = neckHalf(L) * .74;
@@ -33239,17 +33269,27 @@ function arcPick(it, k) {
 function callsMorning() {
   const M = S.me, W = M.wk; if (W.day !== 0 || careerLevel() < 3 || typeof craftJob !== 'function') return;
   if (M.jobs.some(craftJob) || S.week - (M.callW || -99) < 8 || M.inbox.some(it => it.kind === 'offer' && !it.done)) return;
-  if (prnd() > (lookingForWork() ? .25 : .45)) return;
+  // work finds people who did good work: the more of it behind you, the likelier the phone rings
+  const good = (M.past || []).filter(x => x.credited && (x.score || 0) >= 55 && S.week - (x.to || 0) < 156), made = (M.works || []).filter(w => (w.cs || 0) >= 65 && S.week - w.rel < 104);
+  if (prnd() > (lookingForWork() ? .14 : .26) + Math.min(.3, good.length * .05 + made.length * .06)) return;
   const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7 && !((tmplOf(p) || {}).actor && (p.tier || 1) >= 3 && (ME().fame || 0) < 20 + (p.tier || 1) * 5));   // nobody calls an unknown to offer a lead
   if (!L.length) return;
   // your own industry first, then the most senior; the very top pick varies, so it isn't the same job every time
   const home = q => (typeof postIndustry !== 'function' || postIndustry(q) === (M.field || 'film')) ? 1 : 0;
   L.sort((a, b) => home(b) - home(a) || (b.tier || 1) - (a.tier || 1) || b.rate - a.rate);
   const p = L[Math.floor(prnd() * Math.min(3, L.length))];
-  const caller = p.head !== null && p.head !== undefined && M.known[p.head] ? p.head : (() => { const ids = aliveKnown().filter(id => opinion(id) > 5); return ids.length ? ppick(ids) : p.head; })();
+  // who calls, and why: someone who worked with you and rated it, someone who saw your work, or a friend vouching
+  const film = x => x.film !== null && x.film !== undefined && S.films[x.film] ? S.films[x.film].title : null;
+  const ally = good.filter(x => x.head !== null && x.head !== undefined && P(x.head) && !P(x.head).dead && opinion(x.head) > 0).sort((a, b) => (b.score || 0) - (a.score || 0) || b.to - a.to);
+  let caller = null, why = '';
+  const same = ally.find(x => x.head === p.head);
+  if (same) { caller = same.head; why = `You worked for them on ${film(same) || 'a job last year'}, and they remember it.`; }
+  else if (ally.length) { const x = ally[Math.floor(prnd() * Math.min(2, ally.length))]; caller = x.head; why = `${P(x.head).name} worked with you on ${film(x) || 'a job'} and put your name forward.`; }
+  else if (made.length) { const w = made.slice().sort((a, b) => (b.cs || 0) - (a.cs || 0))[0]; caller = p.head; why = `They saw ${w.title} (the critics gave it ${w.cs}) and want whoever made it.`; }
+  else { const ids = aliveKnown().filter(id => opinion(id) > 5); caller = M.known[p.head] ? p.head : ids.length ? ppick(ids) : p.head; why = caller !== p.head && caller !== null && caller !== undefined && P(caller) ? `${P(caller).name} vouched for you.` : 'Someone dropped out and you were the next name on the list.'; }
   const who = caller !== null && caller !== undefined && P(caller) ? P(caller).name : 'A producer';
   M.callW = S.week;
-  inbox('offer', `A call: ${p.t}`, `${who} calls. ${pickLine(['They asked for you by name.', 'Your name came up in a meeting and nobody argued.', 'Someone dropped out and you were the first call.', 'They\'ve seen your work, and they want it on this.', 'No interview, no list. They want you.'], S.week + p.id)} ${offerText(p)}`, { post: p, person: caller !== null && caller !== undefined ? caller : undefined, choices: [{ k: 'yes', label: 'Take it' }, { k: 'no', label: 'Turn it down' }] });
+  inbox('offer', `A call: ${p.t}`, `${who} calls. ${why} ${offerText(p)}`, { post: p, person: caller !== null && caller !== undefined ? caller : undefined, choices: [{ k: 'yes', label: 'Take it' }, { k: 'no', label: 'Turn it down' }] });
 }
 // Life tab: the stories of your life so far
 function arcLogHTML() {
@@ -33833,7 +33873,7 @@ const GIG_TYPES = {
   jingle: { label: 'Jingle', roles: { composer: 'Composer', actor: 'Singer', sound: 'Producer' }, lv: 0, w: 1, days: 2, fee: [1500, 12000], subs: { composer: ['song', 'theme'], actor: ['voice'] }, field: 'music', pres: 1, fame: 1, back: 1, snag: 'client' }
 };
 const GIG_KEYS = Object.keys(GIG_TYPES);
-const gigFee = { 0: .3, 1: .4, 2: .6, 3: 1, 4: 1.6, 5: 2.6, 6: 4.2, 7: 6.5 };   // early work pays little; a name pays a lot
+const gigFee = { 0: .3, 1: .4, 2: .6, 3: .9, 4: 1.25, 5: 1.7, 6: 2.3, 7: 3 };   // early work pays little; a name pays more (Round 23: the top was 6.5x and jobs for hire outearned careers)
 
 // ---- clients and names ----
 const GIG_BRANDS = ['Kestrel Motors', 'Brightmilk', 'Halden Bank', 'Lumen Phones', 'Pop Fizz', 'Northwind Air', 'Greenleaf Grocers', 'Atlas Insurance', 'Velo Sportswear', 'Crisp & Co. crisps', 'Marlow Beer', 'Okto Trainers', 'Sundial Watches', 'Hearth Furniture', 'Bluefin Telecom', 'Paloma Perfume', 'Ironbark Outdoor', 'Tandem Rail', 'Quill Stationers', 'Copperline Energy', 'Mantis Games', 'Saffron Tea', 'Nimbus Streaming', 'Harbour Holidays', 'Petal Cosmetics', 'Granite Building Society', 'Zephyr Electric Cars', 'Plum Pet Food'];
@@ -44172,7 +44212,11 @@ const SYNC_WHERE = { student: ['the end credits of a graduation film', 'a festiv
   studio: ['the montage everyone will talk about', 'the trailer and the film both'], advert: ['a car advert that runs all through the playoffs', 'a phone advert on every bus shelter in town'] };
 syncWeek = function () {
   const M = S.me, me = ME(); if (!M.works || S.week % 4 !== 1) return;
-  for (const w of M.works.filter(x => x.type === 'song' && x.q >= 40 && !x.syncW)) {
+  // Round 23: a music supervisor places one song from your catalogue at a time, not one per song: a catalogue of
+  // two hundred songs used to roll two hundred times a month. The best unplaced songs are offered first.
+  let placed = 0;
+  for (const w of M.works.filter(x => x.type === 'song' && x.q >= 40 && !x.syncW).sort((a, b) => b.q - a.q).slice(0, 12)) {
+    if (placed) break;
     const p = .003 + (w.q - 40) / 4000 + Math.log10((w.units || 0) + 10) / 400 + (M.agent ? .006 : 0);
     if (prnd() > p) continue;
     const films = S.films.filter(f => f.rel === null && f.stage >= 2 && f.stage <= 3 && f.hub === M.hub), shows = typeof tvAll === 'function' ? tvAll().filter(s => tvOnAir(s, S.year) && s.m === (HUBS[M.hub] || {}).m) : [];
@@ -44182,11 +44226,11 @@ syncWeek = function () {
     else if (films.length) { f = films[Math.floor(prnd() * films.length)]; use = f.tier === 1 ? 'studio' : f.tier === 2 ? 'mid' : f.budget < .3 ? 'student' : 'indie'; }
     else continue;
     const trailer = use === 'studio' && prnd() < .15;
-    let fee = SYNC_FEE[use] * (.6 + w.q / 125) * (1 + Math.min(1.5, (me.fame || 0) / 40)) + (trailer ? 25000 : 0);
+    let fee = SYNC_FEE[use] * (.6 + w.q / 125) * (1 + Math.min(.8, (me.fame || 0) / 80)) + (trailer ? 25000 : 0);
     fee = usd(Math.round(fee / 50) * 50);
     const cut = typeof pathCut === 'function' ? pathCut('library') : 1; fee = Math.round(fee * (.5 + .5 * cut));   // a publisher takes its share of the song half
     const spike = Math.round(SYNC_SPIKE[use] * (w.q / 70)), streamPay = Math.round(spike * payNow(M.deal ? (M.deal.rate || .0011) : .003));
-    w.syncW = S.week; w.sync = use; M.cash += fee - taxOn(fee) + streamPay; w.earned = (w.earned || 0) + fee + streamPay; w.units = (w.units || 0) + spike; w.v0 = Math.round((w.v0 || 0) + spike * .02);
+    placed = 1; w.syncW = S.week; w.sync = use; M.cash += fee - taxOn(fee) + streamPay; w.earned = (w.earned || 0) + fee + streamPay; w.units = (w.units || 0) + spike; w.v0 = Math.round((w.v0 || 0) + spike * .02);
     me.fame = clamp((me.fame || 0) + (use === 'studio' || use === 'advert' ? .8 : .3), 0, 100);
     const where = f ? f.title : s ? s.title : 'an advert', what = pickLine(SYNC_WHERE[use], w.q + S.week);
     milestone(`${w.title} licensed into ${where}`, 'work');
@@ -45560,6 +45604,266 @@ function wdAlmanacHTML() {
 }
 if (typeof OS_VIEWS !== 'undefined' && OS_VIEWS.world) { const _ow = OS_VIEWS.world; OS_VIEWS.world = function () { return _ow.apply(this, arguments) + wdAlmanacHTML(); }; }
 // </wdcal>
+// <trailer3>
+// ================= Trailers, take three: depth, pace and a voice =================
+// Round 23. The trailers were stills with captions under them and black cards between: a silent film, minus the
+// charm. Same scripts (trailerPlan2), new delivery:
+//  - depth: every frame is drawn in layers (background, each actor, foreground) and the camera move pushes them at
+//    different speeds, so a pan has parallax; the actors breathe and sway; light leaks and lens streaks on the cuts;
+//  - pace: every shot lasts a whole number of beats of the score, so cuts land on the music; montages whip-pan;
+//    the narrator's cards sit over moving footage instead of black; letterbox bars slide in at the start;
+//  - a voice: the narrator speaks the voice-over through the browser's own speech (low and slow), characters speak
+//    their lines, and the score ducks under them. A button turns voices off; nothing is fetched from anywhere;
+//  - an ending: the title slams in over a billing block, the score rings out and stops (it used to play on).
+// No dice: everything comes from the film and its hash, as before.
+const TV3_CSS = `
+#trailer.v3 .tv-screen{background:#000}
+#trailer.v3 .tv-seg{transition:opacity .28s ease}
+#trailer.v3 .tv-shot{position:absolute;inset:0;animation:none!important;filter:none}
+#trailer.v3 .tv-shot svg{width:100%;height:100%;display:block;transform-origin:50% 50%;will-change:transform}
+#trailer.v3 .tv-seg.on .tv-shot svg{animation:var(--cam) var(--d) linear forwards}
+#trailer.v3 .tv-shot.dim svg{filter:brightness(.5) saturate(.8)}
+@keyframes c3push{from{transform:scale(1.03)}to{transform:scale(1.17)}}
+@keyframes c3pull{from{transform:scale(1.18)}to{transform:scale(1.04)}}
+@keyframes c3panl{from{transform:scale(1.14) translateX(3.5%)}to{transform:scale(1.14) translateX(-3.5%)}}
+@keyframes c3panr{from{transform:scale(1.14) translateX(-3.5%)}to{transform:scale(1.14) translateX(3.5%)}}
+@keyframes c3tilt{from{transform:scale(1.14) translateY(3%)}to{transform:scale(1.14) translateY(-3%)}}
+#trailer.v3 .L-bg,#trailer.v3 .L-act,#trailer.v3 .L-fg,#trailer.v3 .L-a{transform-box:fill-box;transform-origin:50% 100%}
+#trailer.v3 .tv-seg.on .L-bg{animation:c3par var(--d) linear forwards;--amp:calc(var(--px) * 4px)}
+#trailer.v3 .tv-seg.on .L-act{animation:c3par var(--d) linear forwards;--amp:calc(var(--px) * -9px)}
+#trailer.v3 .tv-seg.on .L-fg{animation:c3par var(--d) linear forwards;--amp:calc(var(--px) * -18px)}
+@keyframes c3par{from{transform:translateX(calc(var(--amp) * -1))}to{transform:translateX(var(--amp))}}
+#trailer.v3 .tv-seg.on .L-a{animation:c3breath 2.6s ease-in-out infinite alternate}
+#trailer.v3 .tv-seg.on .L-a1{animation-delay:-1.1s}#trailer.v3 .tv-seg.on .L-a2{animation-delay:-1.9s}
+@keyframes c3breath{from{transform:scaleY(1) rotate(-.25deg)}to{transform:scaleY(1.014) rotate(.35deg)}}
+#trailer.v3 .tv-seg.whip{animation:c3whip .3s ease-out}
+@keyframes c3whip{from{transform:translateX(30%);filter:blur(9px)}to{transform:none;filter:none}}
+#trailer.v3 .tv3-leak{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;opacity:0;background:radial-gradient(60% 80% at var(--lx,80%) 30%,rgba(255,170,90,.55),transparent 70%)}
+#trailer.v3 .tv3-leak.go{animation:c3leak 1.1s ease-out}
+@keyframes c3leak{0%{opacity:0}25%{opacity:.85}100%{opacity:0}}
+#trailer.v3 .tv3-streak{position:absolute;left:-10%;right:-10%;top:48%;height:2px;background:linear-gradient(90deg,transparent,rgba(160,210,255,.9),transparent);opacity:0;pointer-events:none}
+#trailer.v3 .tv3-streak.go{animation:c3streak .5s ease-out}
+@keyframes c3streak{0%{opacity:0;transform:scaleX(.2)}30%{opacity:1}100%{opacity:0;transform:scaleX(1.3)}}
+#trailer.v3 .tv3-bars::before,#trailer.v3 .tv3-bars::after{content:"";position:absolute;left:0;right:0;height:0;background:#000;z-index:5;transition:height .9s cubic-bezier(.2,.8,.2,1)}
+#trailer.v3 .tv3-bars::before{top:0}#trailer.v3 .tv3-bars::after{bottom:0}
+#trailer.v3 .tv3-bars.in::before,#trailer.v3 .tv3-bars.in::after{height:9%}
+#trailer.v3 .tv3-vo{position:absolute;left:5%;right:5%;top:50%;transform:translateY(-50%);text-align:center;color:#F7EFE0;font:800 clamp(20px,4.4vw,44px)/1.1 var(--f-display,sans-serif);text-transform:uppercase;text-shadow:0 2px 14px rgba(0,0,0,.9);opacity:0;z-index:4}
+#trailer.v3 .tv-seg.on .tv3-vo{animation:c3track var(--d) cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes c3track{0%{opacity:0;letter-spacing:.55em;filter:blur(5px)}18%{opacity:1;letter-spacing:.16em;filter:none}85%{opacity:1;letter-spacing:.2em}100%{opacity:0;letter-spacing:.22em}}
+#trailer.v3 .tv3-line{position:absolute;left:8%;right:8%;bottom:15%;text-align:center;color:#fff;z-index:4;opacity:0;text-shadow:0 2px 10px #000,0 0 3px #000}
+#trailer.v3 .tv3-line q{display:block;font:italic 600 clamp(17px,2.9vw,30px)/1.3 Georgia,'Times New Roman',serif;quotes:"\\201C" "\\201D"}
+#trailer.v3 .tv3-line small{display:block;margin-top:.45em;font:600 clamp(10px,1.3vw,13px) var(--f-display,sans-serif);letter-spacing:.3em;text-transform:uppercase;opacity:.75}
+#trailer.v3 .tv-seg.on .tv3-line{animation:c3up .5s ease-out .15s forwards}
+@keyframes c3up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#trailer.v3 .tv3-title{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:14px;z-index:4;text-align:center;padding:0 6%}
+#trailer.v3 .tv3-title b{font:900 clamp(30px,7.4vw,84px)/1 var(--f-display,sans-serif);letter-spacing:.06em;color:var(--tc,#fff);text-shadow:0 0 30px rgba(255,255,255,.18),0 4px 18px #000;opacity:0}
+#trailer.v3 .tv-seg.on .tv3-title b{animation:c3slam .7s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes c3slam{from{opacity:0;transform:scale(1.5);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+#trailer.v3 .tv3-bill{font:600 clamp(7px,1.05vw,11px)/1.25 var(--f-display,sans-serif);letter-spacing:.06em;color:rgba(255,255,255,.72);text-transform:uppercase;transform:scaleY(1.55);max-width:80%;opacity:0}
+#trailer.v3 .tv-seg.on .tv3-bill{animation:c3up .6s ease-out .8s forwards}
+#trailer.v3 .tv3-card{position:absolute;inset:0;display:grid;place-items:center;z-index:4;text-align:center;padding:0 8%;color:#F4EBD6;font:700 clamp(16px,3vw,30px)/1.25 var(--f-display,sans-serif);letter-spacing:.12em;text-transform:uppercase;text-shadow:0 2px 12px #000;opacity:0}
+#trailer.v3 .tv-seg.on .tv3-card{animation:c3fade var(--d) ease forwards}
+@keyframes c3fade{0%{opacity:0}15%{opacity:1}85%{opacity:1}100%{opacity:0}}
+#trailer.v3 .tv3-card .tv-logo{margin:0 auto 10px;width:54px}
+@media (prefers-reduced-motion:reduce){#trailer.v3 *{animation-duration:.01ms!important;animation-iteration-count:1!important}}`;
+function tv3Style() { if (document.getElementById('tv3css')) return; const st = document.createElement('style'); st.id = 'tv3css'; st.textContent = TV3_CSS; document.head.appendChild(st); }
+const TV3_CAM = { push: 'c3push', pull: 'c3pull', panl: 'c3panl', panr: 'c3panr', tilt: 'c3tilt' };
+// Every segment a whole number of beats: shots of four, quick cuts of one, the title of eight.
+function tv3Retime(plan, beat, f) {
+  const out = [], b = n => Math.round(n * beat), cast = f.cast || [];
+  let lastShot = 0, line = 0;
+  for (const s0 of plan) {
+    const s = Object.assign({}, s0);
+    if (s.shot !== null && s.shot !== undefined) lastShot = s.shot;
+    if (s.slam) { s.kind = 'title'; s.ms = b(8); }
+    else if (s.logo) { s.kind = 'card'; s.ms = b(4); }
+    else if (s.laurel) { s.kind = 'card'; s.ms = b(4); }
+    else if (s.pos === 'card' && s.vo) { s.kind = 'vo'; s.shot = s.shot ?? lastShot + 20; s.ms = b(Math.max(3, Math.ceil((s.text || '').length / 9))); }
+    else if (s.pos === 'card') { s.kind = 'vo'; s.shot = s.shot ?? lastShot + 30; s.ms = b(Math.max(4, Math.ceil((s.text || '').length / 8))); }
+    else if (s.sub) { s.kind = 'line'; s.who = cast[line++ % Math.max(1, Math.min(2, cast.length))]; s.ms = b(Math.max(4, Math.ceil(s.sub.length / 7))); }
+    else if (s.text) { s.kind = 'vo'; s.ms = b(Math.max(4, Math.ceil(s.text.length / 8))); }
+    else { s.kind = 'shot'; s.ms = s.ms < 1000 ? b(beat < 420 ? 2 : 1) : b(beat < 500 ? 6 : 4); }
+    if (s.ms < 1000 && s.kind !== 'shot') s.ms = b(2);
+    out.push(s);
+  }
+  return out;
+}
+const TV3 = { voice: (() => { try { return localStorage.getItem('ab-trailer-voice') !== 'off'; } catch (e) { return true; } })() };
+function tv3Voices() { try { return window.speechSynthesis ? speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang)) : []; } catch (e) { return []; } }
+function tv3Speak(text, kind, g, A) {
+  if (!TV3.voice || !text || typeof window === 'undefined' || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
+  try {
+    const u = new SpeechSynthesisUtterance(String(text).replace(/[♪“”"]/g, '').replace(/\s+/g, ' ').trim()), V = tv3Voices();
+    const want = kind === 'vo' || g === 'M' ? /male|daniel|alex|fred|david|george|arthur|guy|james/i : /female|samantha|victoria|karen|moira|serena|susan|zira|libby/i;
+    u.voice = V.find(v => want.test(v.name) && !(kind === 'vo' && /female/i.test(v.name))) || V[0] || null;
+    if (kind === 'vo') { u.pitch = .45; u.rate = .82; } else { u.pitch = g === 'F' ? 1.12 : g === 'M' ? .82 : 1; u.rate = 1.02; }
+    u.volume = 1; u.onstart = () => A && A.duck && A.duck(true); u.onend = () => A && A.duck && A.duck(false);
+    speechSynthesis.speak(u);
+  } catch (e) { }
+}
+function tv3Hush() { try { if (window.speechSynthesis) speechSynthesis.cancel(); } catch (e) { } }
+function tv3Billing(f) {
+  const nm = id => id !== undefined && id !== null && P(id) ? P(id).name : null, co = f.co !== null && S.companies[f.co] ? S.companies[f.co].name : 'an independent', c = f.crew || {};
+  const cast = (f.cast || []).slice(0, 4).map(nm).filter(Boolean), wri = (f.wri || []).map(nm).filter(Boolean);
+  return [`${co} presents`, `a ${nm(f.dir)} film`, cast.length ? cast.join('  ') : '', nm(c.mus) ? `music by ${nm(c.mus)}` : '', nm(f.dp) ? `director of photography ${nm(f.dp)}` : '', nm(f.ed) ? `edited by ${nm(f.ed)}` : '', wri.length ? `written by ${wri.join(' & ')}` : '', `directed by ${nm(f.dir)}`].filter(Boolean).join('   ·   ');
+}
+playTrailer = function (id) {
+  const f = S.films[id]; if (!f || typeof document === 'undefined') return;
+  tv3Style(); tv3Hush();
+  const old = document.getElementById('trailer'); if (old) old.remove();
+  const fam = TR_FAMILY[f.genre] || 'drama', Sc = TR_SCORES[fam] || TR_SCORES.drama, beat = 60000 / Sc.bpm;
+  const c = GENRE_LOOK[f.genre] || GENRE_LOOK.Drama, plan = tv3Retime(trailerPlan2(f), beat, f), total = plan.reduce((s, x) => s + x.ms, 0);
+  const el = document.createElement('div'); el.id = 'trailer'; el.className = 'v3'; el.style.setProperty('--tc', c[2]); el.style.setProperty('--tb', c[0]);
+  const r = hashRand(f.id * 101 + 7);
+  const layer = (s, k) => {
+    const mv = s.kind === 'title' ? 'push' : s.move || 'push', px = mv === 'panl' ? 1 : mv === 'panr' ? -1 : (k % 2 ? .5 : -.5), dim = s.kind === 'vo' || s.kind === 'title' || s.kind === 'card';
+    const shot = s.shot !== null && s.shot !== undefined ? `<div class="tv-shot${dim ? ' dim' : ''}${s.freeze ? ' freeze' : ''}">${stillSVG(f, s.shot, 960, true)}</div>` : '';
+    let over = '';
+    if (s.kind === 'title') over = `<div class="tv3-title"><b>${esc(f.title)}</b><span class="tv3-bill">${esc(tv3Billing(f))}</span></div>`;
+    else if (s.kind === 'card') over = `<div class="tv3-card"><div>${s.logo ? logoSVGFor(f).replace('<svg', '<svg class="tv-logo"') : ''}${s.laurel && typeof laurelSVG === 'function' ? laurelSVG(s.laurel) : ''}${s.text && s.text.trim() ? esc(s.text) : ''}</div></div>`;
+    else if (s.kind === 'vo') over = `<div class="tv3-vo">${esc(s.text || '')}</div>`;
+    else if (s.kind === 'line') over = `<div class="tv3-line"><q>${esc(s.sub)}</q>${s.who !== undefined && P(s.who) ? `<small>${esc(P(s.who).name)}</small>` : ''}</div>`;
+    return `<div class="tv-seg" data-k="${k}" style="--d:${s.ms + 300}ms;--cam:${TV3_CAM[mv] || 'c3push'};--px:${px}">${shot}${over}</div>`;
+  };
+  el.innerHTML = `<div class="tv"><div class="tv-screen tv3-bars">${plan.map(layer).join('')}<div class="tv3-leak"></div><div class="tv3-streak"></div><div class="tv-flash"></div><div class="tv-grain"></div></div>
+   <div class="tv-bar"><button class="tv-btn tv-play" aria-label="Pause">❚❚</button><button class="tv-btn tv-again" aria-label="Replay">↺</button><span class="tv-prog"><i></i></span><span class="tv-time">0:00 / ${fmtClock(total)}</span><button class="tv-btn tv-voice" aria-label="Voices" title="Narrator and voices">${TV3.voice ? '🎙' : '🎙̸'}</button><button class="tv-btn tv-mute" aria-label="Mute">🔊</button><button class="tv-btn tv-close" aria-label="Close">✕</button></div></div>`;
+  document.body.appendChild(el);
+  const screen = el.querySelector('.tv-screen'), segs = [...el.querySelectorAll('.tv-seg')], flash = el.querySelector('.tv-flash'), leak = el.querySelector('.tv3-leak'), streak = el.querySelector('.tv3-streak');
+  const bar = el.querySelector('.tv-prog i'), clock = el.querySelector('.tv-time'), playB = el.querySelector('.tv-play'), muteB = el.querySelector('.tv-mute'), voiceB = el.querySelector('.tv-voice');
+  let A = trailerScore(f); const starts = []; let acc = 0; for (const s of plan) { starts.push(acc); acc += s.ms; }
+  let t = 0, cur = -1, last = null, paused = false, muted = false, raf = 0, done = false;
+  const fx = (node, cls) => { node.classList.remove(cls); void node.offsetWidth; node.classList.add(cls); };
+  const enter = k => {
+    const s = plan[k], prev = segs[cur];
+    if (prev) { prev.classList.remove('on', 'whip'); prev.classList.add('off'); setTimeout(() => prev.classList.remove('off'), 400); }
+    const seg = segs[k]; seg.classList.remove('off'); void seg.offsetWidth; seg.classList.add('on');
+    seg.querySelectorAll('svg').forEach(svg => { try { svg.setCurrentTime(0); svg.unpauseAnimations(); } catch (e) { } });
+    const quick = s.kind === 'shot' && s.ms < beat * 2.5;
+    if (quick) fx(seg, 'whip');
+    if (s.cut === 'flash' || s.kind === 'title') fx(flash, 'go');
+    if (s.kind === 'vo' || (s.kind === 'shot' && !quick && r() < .35)) { leak.style.setProperty('--lx', `${Math.round(15 + r() * 70)}%`); fx(leak, 'go'); }
+    if (s.kind === 'title' || (quick && k % 3 === 0)) fx(streak, 'go');
+    el.classList.toggle('hardcut', s.cut === 'hard' || quick);
+    if (A.hush) A.hush(!!s.hush || (!!s.freeze && plan[k - 1] && plan[k - 1].freeze));
+    if (s.freeze && !(plan[k - 1] && plan[k - 1].freeze) && A.scratch) A.scratch();
+    else if (s.kind === 'title') A.hit(true); else if (s.cut === 'hard' || s.vo || quick) A.hit(false);
+    A.swell(Math.min(1, k / plan.length * 1.2));
+    if (s.kind === 'vo' && s.text && s.text.trim()) tv3Speak(s.text, 'vo', null, A);
+    else if (s.kind === 'line') tv3Speak(s.sub, 'line', s.who !== undefined && P(s.who) ? P(s.who).g : null, A);
+    else if (s.kind === 'title') tv3Speak(f.title, 'vo', null, A);
+    cur = k;
+  };
+  const finish = () => { done = true; segs[cur] && segs[cur].classList.add('hold'); playB.textContent = '▶'; bar.style.width = '100%'; clock.textContent = `${fmtClock(total)} / ${fmtClock(total)}`; if (A.fade) A.fade(1800); else A.stop(); };
+  const tick = now => {
+    if (last === null) last = now;
+    if (!paused) t += now - last;
+    last = now;
+    if (t >= total) { if (!done) finish(); return; }
+    const k = starts.findIndex((s0, j) => t >= s0 && t < s0 + plan[j].ms);
+    if (k !== cur && k >= 0) enter(k);
+    bar.style.width = (t / total * 100).toFixed(2) + '%'; clock.textContent = `${fmtClock(t)} / ${fmtClock(total)}`;
+    raf = requestAnimationFrame(tick);
+  };
+  const setPause = p => { paused = p; el.classList.toggle('paused', p); playB.textContent = p ? '▶' : '❚❚'; A.pause(p); if (p) tv3Hush(); el.querySelectorAll('svg').forEach(svg => { try { p ? svg.pauseAnimations() : svg.unpauseAnimations(); } catch (e) { } }); };
+  const begin = () => { A.start({ Horror: 55, Action: 73, Comedy: 98, Romance: 87, Western: 65, 'Sci-fi': 61 }[f.genre] || 69); if (muted) A.mute(true); screen.classList.remove('in'); void screen.offsetWidth; screen.classList.add('in'); };
+  const restart = () => { cancelAnimationFrame(raf); tv3Hush(); A.stop(); A = trailerScore(f); segs.forEach(s => s.classList.remove('on', 'off', 'hold', 'whip')); t = 0; cur = -1; last = null; done = false; paused = false; el.classList.remove('paused'); playB.textContent = '❚❚'; begin(); raf = requestAnimationFrame(tick); };
+  const close = () => { cancelAnimationFrame(raf); tv3Hush(); A.stop(); el.remove(); document.removeEventListener('keydown', key); };
+  const key = e => { if (e.key === 'Escape') close(); else if (e.key === ' ') { e.preventDefault(); e.stopPropagation(); done ? restart() : setPause(!paused); } };
+  document.addEventListener('keydown', key);
+  playB.onclick = () => done ? restart() : setPause(!paused);
+  el.querySelector('.tv-again').onclick = restart;
+  muteB.onclick = () => { muted = !muted; A.mute(muted); if (muted) tv3Hush(); muteB.textContent = muted ? '🔇' : '🔊'; };
+  voiceB.onclick = () => { TV3.voice = !TV3.voice; try { localStorage.setItem('ab-trailer-voice', TV3.voice ? 'on' : 'off'); } catch (e) { } if (!TV3.voice) tv3Hush(); voiceB.textContent = TV3.voice ? '🎙' : '🎙̸'; };
+  el.querySelector('.tv-close').onclick = close;
+  el.querySelector('.tv-prog').onclick = e => { const b = e.currentTarget.getBoundingClientRect(); tv3Hush(); t = clamp((e.clientX - b.left) / b.width, 0, .999) * total; segs.forEach(s => s.classList.remove('on', 'off', 'hold', 'whip')); cur = -1; if (done) { A = trailerScore(f); begin(); done = false; raf = requestAnimationFrame(tick); } };
+  el.onclick = e => { if (e.target === el) close(); };
+  begin();
+  raf = requestAnimationFrame(tick);
+};
+// </trailer3>
+// <careerpay>
+// ================= What a job pays, in this world =================
+// Round 23. The careers catalogue only had research notes on pay for 86 of 546 jobs ("Pay seen"), so the column was
+// mostly empty and never matched what the game paid. Now each job shows a typical day rate in this world: the rate
+// the job board pays for the same job (matched by title), or, where the board never posts it, the going rate for
+// its level. It is scaled to your city and year like every other wage, and if you have done the job your own best
+// rate is shown under it. The research notes live in the job's details, as what people report.
+let CP_IDX = null;
+const CP_STOP = new Set(['the', 'and', 'for', 'of', 'a', 'an', 'to', 'in', 'on', 'at']);
+function cpWords(s) { return String(s || '').toLowerCase().replace(/[^a-z ]/g, ' ').split(/\s+/).filter(w => w.length > 1 && !CP_STOP.has(w)); }
+function cpSim(A, B) { let n = 0; for (const w of A) if (B.has(w)) n++; return n / Math.max(1, A.size + B.size - n); }
+function cpIndex() {
+  if (CP_IDX) return CP_IDX;
+  const T = [].concat(typeof POSTS !== 'undefined' ? POSTS : [], typeof ODD_JOBS !== 'undefined' ? ODD_JOBS : [], typeof FIELD_JOBS !== 'undefined' ? FIELD_JOBS : []).filter(t => t && t.t && t.rate > 0);
+  return CP_IDX = T.map(t => [new Set(cpWords(t.t)), t]);
+}
+const CP_MEMO = {};
+function cpMatch(j) {
+  if (CP_MEMO[j.id] !== undefined) return CP_MEMO[j.id];
+  const W = new Set(cpWords(j.t)); let best = null, bs = 0;
+  for (const [S2, t] of cpIndex()) { const sc = cpSim(W, S2); if (sc > bs) { bs = sc; best = t; } }
+  return CP_MEMO[j.id] = bs >= .5 ? best : null;
+}
+// the going day rate by level (2027 dollars), when the board never posts the job
+const CP_LEVEL = [90, 170, 280, 450, 800, 1700];
+function cpRate(j) {
+  const t = cpMatch(j), top = /\b(chief|president|chair|head of|vice president|executive vice|ceo|cfo|coo)\b/i.test(j.t);
+  const base = t ? t.rate : CP_LEVEL[clamp(j.lv || 0, 0, 5)] * (top ? 2.2 : 1);
+  return { day: usdW(base), board: !!t };
+}
+function cpMine(j) {
+  const M = S.me; if (!M) return 0; const W = new Set(cpWords(j.t)); let best = 0;
+  for (const x of [].concat(M.jobs || [], M.past || [])) if (x && x.rate && cpSim(W, new Set(cpWords(x.t))) >= .5) best = Math.max(best, x.rate);
+  return best;
+}
+function careerPayCell(j) {
+  const R = cpRate(j), mine = cpMine(j);
+  return `<b>${fmtCash(R.day)}</b><span class="muted small"> a day${R.board ? '' : ', typical'}</span>${mine ? `<br><span class="small">you: ${fmtCash(mine)} a day</span>` : ''}`;
+}
+function careerPayDetail(j) {
+  const R = cpRate(j), yr = Math.round(R.day * (j.lv >= 4 ? 230 : 160));
+  return `<h4>What it pays</h4><p>About <b>${fmtCash(R.day)}</b> a day in ${esc(S.me ? hubName(S.me.hub) : 'Hollywood')} in ${S.year}${R.board ? ', the rate the board pays for it' : ', the going rate at this level'}; a busy year comes to about ${fmtCash(yr)}.${cpMine(j) ? ` You have been paid ${fmtCash(cpMine(j))} a day for it.` : ''}</p>${j.pay ? `<p class="muted small">What people report: ${esc(deReal(j.pay))}</p>` : ''}`;
+}
+CLICK_HOOKS.cpsort = () => { UI.jobs.paySort = !UI.jobs.paySort; render(true); };
+// </careerpay>
+// <crossover>
+// ================= Crossovers: the fields feed each other =================
+// Round 23. Musicians, podcasters, playwrights and creators are people in this world now, so the world can move them
+// between fields the way the real business does. Once a year, on the world's dice:
+//  - a hit song from a real act lands on a big film's soundtrack (the act gains fans; the film page names the song);
+//  - a studio buys the film rights to an acclaimed play (cash out of the studio's books, news, the playwright's page);
+//  - a network adapts a big podcast for television;
+//  - a creator with a vast audience signs a first-look deal with a studio.
+// Each move is recorded on the act (p.cross) and shown on their page.
+function crossNote(p, y, t) { (p.cross = p.cross || []).push({ y, t }); if (p.cross.length > 12) p.cross.shift(); }
+function crossYear() {
+  if (!S.actsOn) return; const y = S.year - 1, prev = R; R = wstream('cross', y);
+  try {
+    const acts = f => S.people.filter(p => p && p.ind === f && !p.dead && !p.retired);
+    // soundtracks: the year's biggest films and the songs of the moment
+    const big = S.films.filter(f => f.rel !== null && yearOf(f.rel) === y && f.tier === 1 && !f.song).sort((a, b) => (b.total || 0) - (a.total || 0)).slice(0, 12);
+    const songs = acts('music').map(p => [p, (p.rel || []).filter(r => yearOf(r.w) >= y - 1 && !(p.cross || []).some(x => x.t.startsWith(`“${r.t}”`))).sort((a, b) => (b.cs || b.q) - (a.cs || a.q))[0]]).filter(x => x[1]).sort((a, b) => (b[1].cs || b[1].q) * Math.log10(b[0].fans) - (a[1].cs || a[1].q) * Math.log10(a[0].fans));
+    let si = 0;
+    for (const f of big) { if (rnd() > .4 || si >= songs.length) continue; const [p, r] = songs[si++]; f.song = { pid: p.id, t: r.t }; p.fans *= 1.08; crossNote(p, y, `“${r.t}” on the soundtrack of ${f.title}`);
+      if (si <= 2) news('Music', `${p.name}'s “${r.t}” is everywhere again, thanks to ${f.title}.`, { person: p.id }); }
+    // plays bought for the screen
+    for (const p of acts('stage')) { const r = (p.rel || []).filter(r => yearOf(r.w) === y && (r.cs || 0) >= 82)[0]; if (!r || rnd() > .3) continue;
+      const cos = S.companies.filter(c => c.closed === null && c.tier <= 2 && c.cash > 1 && c.owner === undefined); if (!cos.length) continue; const c = cos[Math.floor(rnd() * cos.length)], price = Math.round((.2 + rnd() * .6) * 10) / 10;
+      c.cash -= price * .1; crossNote(p, y, `film rights to ${r.t} bought by ${c.name}`);
+      news('Business', `${c.name} buys the film rights to ${p.name}'s ${r.t}, the hit of the season.`, { company: c.id }); }
+    // podcasts into television
+    for (const p of acts('podcast')) { if (p.fans < 3e6 || rnd() > .18 || (p.cross || []).some(x => /television/.test(x.t))) continue;
+      const nets = Object.keys(TV_NETS).filter(k => TV_NETS[k].founded <= S.year && !(typeof svcOf === 'function' && svcOf(k) && svcOf(k).closed)); if (!nets.length) continue; const n = TV_NETS[nets[Math.floor(rnd() * nets.length)]];
+      crossNote(p, y, `adapted for television by ${n.name}`); news('Television', `${n.name} orders a series based on the podcast ${p.name}.`, { person: p.id }); }
+    // creators into film
+    for (const p of acts('creator')) { if (p.fans < 2e7 || rnd() > .12 || (p.cross || []).some(x => /first-look/.test(x.t))) continue;
+      const cos = S.companies.filter(c => c.closed === null && c.tier === 1 && c.owner === undefined); if (!cos.length) continue; const c = cos[Math.floor(rnd() * cos.length)];
+      crossNote(p, y, `a first-look film deal with ${c.name}`); news('Business', `${p.name} signs a first-look deal with ${c.name}: ${Math.round(p.fans / 1e6)} million subscribers, one feature film.`, { person: p.id }); }
+  } finally { R = prev; }
+}
+{ const _y = yearly; yearly = function () { const r = _y.apply(this, arguments); if (!S.archiving) crossYear(); return r; }; }
+{ const _as = actSection; actSection = function (p) { const h = _as.apply(this, arguments); if (!p.cross || !p.cross.length) return h; return h + `<section class="panel"><h3>Across the business</h3><ul class="plain small">${p.cross.slice().reverse().map(x => `<li>${x.y}: ${esc(x.t)}</li>`).join('')}</ul></section>`; }; }
+// </crossover>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -45756,6 +46060,7 @@ function viewCareers() {
   const detail = j => `<div class="jobd">
     ${j.resp ? `<h4>What the job involves</h4><ul class="plain">${j.resp.map(x => `<li>${esc(deReal(x))}</li>`).join('')}</ul>` : ''}
     ${j.sk ? `<h4>What it takes</h4><p>${j.sk.map(x => esc(deReal(x))).join(' · ')}</p>` : ''}
+    ${typeof careerPayDetail === 'function' ? careerPayDetail(j) : ''}
     <p class="muted">${[j.to ? 'Reports to ' + esc(deReal(j.to)) : '', j.un && deReal(j.un) ? 'Union: ' + esc(deReal(j.un)) : '', j.cr ? 'Screen credit: ' + esc(deReal(j.cr) || j.cr.replace(/[()]/g, '')) : '', j.emp ? 'Seen at: ' + [...new Set(j.emp.map(deReal))].map(esc).join('; ') : '', j.posted && j.posted !== j.t ? 'Posted as “' + esc(j.posted) + '”' : ''].filter(Boolean).join('<br>')}</p>
     ${j.before || j.after ? `<p class="muted">${j.before ? 'Comes from: ' + esc(deReal(j.before)) : ''}${j.before && j.after ? '<br>' : ''}${j.after ? 'Leads to: ' + esc(deReal(j.after)) : ''}</p>` : ''}
     ${j.role ? `<p>About <b>${Math.round(working(j.role) * workforceScale()).toLocaleString()}</b> people hold this job worldwide; ${working(j.role).toLocaleString()} of them are named in this world. <button class="linkish" data-rolejump="${j.role}">See them</button></p>` : ''}
@@ -45768,8 +46073,8 @@ function viewCareers() {
   ${rungs.length ? `<section class="panel ladder"><h3>Your ladder: ${esc(CRAFTS[myCraft].label)}</h3><div class="rungs">${rungs.map(([l, js]) => `<div class="rung"><span class="eyebrow">${esc(l)}</span>${js.slice(0, 4).map(j => `<a href="#" class="lk" data-job="${j.id}">${esc(j.t)}</a>`).join('')}${js.length > 4 ? `<details class="rmore"><summary class="muted small">+${js.length - 4} more</summary>${js.slice(4).map(j => `<a href="#" class="lk" data-job="${j.id}">${esc(j.t)}</a>`).join('')}</details>` : ''}</div>`).join('<i class="rarr">→</i>')}</div></section>` : ''}
   <div class="filters"><input id="j-q" type="search" placeholder="Search jobs and duties" value="${esc(st.q)}">${sel('j-sec', [['ALL', 'Every sector']].concat(secs.map(s => [s, s])), st.sec)}</div>
   <p class="count">${rows.length} jobs</p>
-  ${Object.entries(groups).map(([g, js]) => `<section class="panel"><h3>${esc(g)}</h3><div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Level</th><th>Pay seen</th></tr></thead><tbody>
-    ${js.sort((a, b) => a.lv - b.lv).map(j => `<tr class="jobrow${j.craft && j.craft === myCraft ? ' mine' : ''}${st.open === j.id ? ' open' : ''}" data-job="${j.id}"><td><a>${esc(j.t)}</a>${j.role ? ' ' + chip('In the world', 'hist') : ''}</td><td>${pips(j.lv)} <span class="muted small">${LEVELS[j.lv]}</span></td><td class="muted">${esc(j.pay || '')}</td></tr>${st.open === j.id ? `<tr class="jobopen"><td colspan="3">${detail(j)}</td></tr>` : ''}`).join('')}
+  ${Object.entries(groups).map(([g, js]) => `<section class="panel"><h3>${esc(g)}</h3><div class="tw"><table class="grid"><thead><tr><th>Job</th><th>Level</th><th><button class="linkish" data-hk="cpsort:1" title="Sort by pay">Pay in this world ${st.paySort ? '▼' : '↕'}</button></th></tr></thead><tbody>
+    ${js.sort((a, b) => st.paySort && typeof cpRate === 'function' ? cpRate(b).day - cpRate(a).day : a.lv - b.lv).map(j => `<tr class="jobrow${j.craft && j.craft === myCraft ? ' mine' : ''}${st.open === j.id ? ' open' : ''}" data-job="${j.id}"><td><a>${esc(j.t)}</a>${j.role ? ' ' + chip('In the world', 'hist') : ''}</td><td>${pips(j.lv)} <span class="muted small">${LEVELS[j.lv]}</span></td><td>${typeof careerPayCell === 'function' ? careerPayCell(j) : esc(j.pay || '')}</td></tr>${st.open === j.id ? `<tr class="jobopen"><td colspan="3">${detail(j)}</td></tr>` : ''}`).join('')}
   </tbody></table></div></section>`).join('')}`;
 }
 function viewWorld() {
@@ -45988,9 +46293,11 @@ function randomFav(c) {
 }
 // owned: wardrobe pieces the player has bought; anything else from the shop stays off the list.
 function lookControls(c, owned = []) {
-  return `<div class="looks">${LOOK_KEYS.filter(k => c.look.style === 1 || !CARTOON_ONLY.includes(k)).map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
+  const sliders = LOOK_KEYS.filter(k => LOOK[k].slider && c.look.style !== 1);
+  const fine = sliders.length ? `<div class="lk-fine"><h4>Fine-tune <span class="muted small">face and build, as finely as you like</span> <button class="linkish" data-hk="lookreset:1">Reset</button></h4>${sliders.map(k => { const v = c.look[k] ?? 50; return `<label class="lk-sl"><span class="muted">${esc(LOOK[k].label)}</span><input type="range" min="0" max="100" step="1" value="${v}" data-lookk="${k}" aria-label="${esc(LOOK[k].label)}"></label>`; }).join('')}</div>` : '';
+  return `<div class="looks">${LOOK_KEYS.filter(k => !LOOK[k].slider && (c.look.style === 1 || !CARTOON_ONLY.includes(k))).map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
     const ok = i => { const it = WARDROBE_AT[k + ':' + i]; return !it || owned.includes(it); };
-    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>`;
+    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>${fine}`;
 }
 // The wardrobe shop: things money buys that change how you look and, sometimes, how your rolls go.
 function wardrobeShop() {
@@ -46842,6 +47149,7 @@ function phoneUnread() {
   for (const m of M.phone) if (m.from !== -1 && seen[threadOf(m)] === undefined && m.w === S.week) u++;
   return u;
 }
+CLICK_HOOKS.lookreset = () => { for (const [k] of LOOK_SLIDERS) setLook(k, 50); };
 // </career-ui>
 // ---------- render & routing ----------
 // Tables never scroll sideways: every cell learns its column's name, and a table too wide for its box is drawn as

@@ -131,6 +131,10 @@ function trailerScore(f) {
     hush(h) { hush = h ? 1 : 0; },
     scratch() { if (!ctx) return; const o = ctx.createOscillator(), g = ctx.createGain(), t = ctx.currentTime; o.type = 'sawtooth'; o.frequency.setValueAtTime(900, t); o.frequency.exponentialRampToValueAtTime(120, t + .25); g.gain.setValueAtTime(.25, t); g.gain.exponentialRampToValueAtTime(.001, t + .3); o.connect(g); g.connect(master); o.start(t); o.stop(t + .32); hush = 1; },
     mute(m) { muted = m; if (master) master.gain.value = m ? 0 : .16; },
+    // under a voice: the score drops back, then returns
+    duck(d) { if (master && !muted) master.gain.setTargetAtTime(d ? .055 : .16, ctx.currentTime, .12); },
+    // the end: the last chord rings out instead of the loop playing on
+    fade(ms = 1600) { if (!ctx) return; clearInterval(timer); timer = null; if (master) master.gain.setTargetAtTime(0, ctx.currentTime, ms / 4000); const c = ctx; setTimeout(() => { try { c.close(); } catch (e) { } }, ms + 200); ctx = null; },
     pause(p) { if (ctx) p ? ctx.suspend() : ctx.resume(); },
     stop() { clearInterval(timer); timer = null; if (ctx) { try { ctx.close(); } catch (e) { } ctx = null; } }
   };

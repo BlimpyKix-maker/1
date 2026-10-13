@@ -101,7 +101,7 @@ const LATE = [
   { id: 'lg_cinema', pool: 'late', need: () => !holdings().some(h => h.k === 'cinema'), mk: c => { c.amt = lateAmt(.15, 90000, 4000000); c.place = ppick(['a 1920s picture palace with a Wurlitzer organ', 'the art-deco single screen where you saw your first film here', 'a neighbourhood cinema with 400 velvet seats and a leaking roof', 'a repertory house that has shown a double bill every night since 1958']); },
     title: 'A cinema for sale', text: c => `It's ${c.place}, and it's closing. The owner would rather sell to someone who'll keep it open. ${fmtCash(c.amt)}.`,
     opts: [
-      { k: 'buy', label: c => `Buy it and keep it running: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('cinema', 'Your cinema', c.amt, c.amt * lateR(-.0006, .0016)); lateFx({ stand: 1.2, fame: 3, mile: 'Bought a cinema and kept it open' }); return 'You get the keys and the alarm code. On opening night under your name you sell out a fifty-year-old film and stand at the back.'; } },
+      { k: 'buy', label: c => `Buy it and keep it running: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('cinema', 'Your cinema', c.amt, c.amt * lateR(-.0006, .0009)); lateFx({ stand: 1.2, fame: 3, mile: 'Bought a cinema and kept it open' }); return 'You get the keys and the alarm code. On opening night under your name you sell out a fifty-year-old film and stand at the back.'; } },
       { k: 'campaign', label: () => 'Lead a campaign to save it instead', check: ['cha', 14], go: (c, ok) => { lateFx(ok ? { stand: .8, fame: 2, energy: -10 } : { energy: -10, stress: 4 }); return ok ? 'The city lists the building. A community trust buys it. They put your name on a seat.' : 'The petition gets twenty thousand names. It becomes a gym anyway.'; } },
       { k: 'no', label: () => 'Not your problem', go: c => 'It closes in March. You walk past it more often than you need to.' }] },
   { id: 'lg_scholar', pool: 'late', cool: 104, mk: c => { c.amt = lateAmt(.03, 10000, 500000); },
@@ -127,12 +127,12 @@ const LATE = [
       { k: 'yes', label: () => 'Accept', go: c => { c.out = []; lateFx({ stand: 1, intl: 4, energy: -15, xp: { tas: .3 }, meet: 'abroad', meetTag: 'On the jury with you' }, c, c.out); return 'The deliberations run until four in the morning. You win the argument that matters. ' + c.out.join(' '); } },
       { k: 'fight', label: () => 'Accept, and fight for the strange film nobody likes', check: ['cha', 15], go: (c, ok) => { lateFx(ok ? { stand: 1.6, intl: 5, fame: 2, energy: -15 } : { stand: .5, intl: 3, energy: -15, stress: 4 }); return ok ? 'It wins. The director cries on stage and thanks "the jury, and one juror in particular".' : 'You lose seven to two. The strange film gets a special mention, which is something.'; } },
       { k: 'no', label: () => 'Decline politely', go: c => 'They ask again in two years. People who decline twice don\'t get asked a third time.' }] },
-  { id: 'lg_masterclass', pool: 'late', need: () => careerLevel() >= 4, mk: c => { c.fee = lateAmt(.004, 4000, 60000); c.city = ppick(['Lisbon', 'Seoul', 'Mexico City', 'Copenhagen', 'Lagos', 'Melbourne', 'Mumbai', 'Buenos Aires']); },
+  { id: 'lg_masterclass', pool: 'late', need: () => careerLevel() >= 4, mk: c => { c.fee = lateAmt(.002, 4000, 30000); c.city = ppick(['Lisbon', 'Seoul', 'Mexico City', 'Copenhagen', 'Lagos', 'Melbourne', 'Mumbai', 'Buenos Aires']); },
     title: 'A masterclass abroad', text: c => `A film academy in ${c.city} wants a three-day masterclass from you. ${fmtCash(c.fee)}, business class, and a hotel with a view of something.`,
     opts: [
       { k: 'yes', label: () => 'Go and teach', check: ['com', 12], go: (c, ok) => { c.out = []; lateFx(ok ? { cash: c.fee, intl: 4, fame: 1, energy: -8, meet: 'abroad', meetTag: 'At your masterclass' } : { cash: c.fee, intl: 2, energy: -8 }, c, c.out); return (ok ? 'The questions are better than the ones at home. You leave with a full notebook. ' : 'Jet lag eats the first day. The students are kind about it. ') + c.out.join(' '); } },
       { k: 'no', label: () => 'Too far, too busy', go: c => 'They get someone else. You see the photos: it looked lovely.' }] },
-  { id: 'lg_firstlook', pool: 'late', need: () => careerLevel() >= 5 && !holdings().some(h => h.k === 'deal'), mk: c => { c.amt = Math.round(usd(1200 + careerLevel() * 600) / 50) * 50; },
+  { id: 'lg_firstlook', pool: 'late', need: () => careerLevel() >= 5 && !holdings().some(h => h.k === 'deal'), mk: c => { c.amt = Math.round(usd(500 + careerLevel() * 250) / 50) * 50; },
     title: 'A first-look deal', text: c => `A streamer wants first look at anything you develop for two years: ${fmtCash(c.amt)} a week, an office and an assistant. They can pass on anything; anything they pass on is yours to take elsewhere.`,
     opts: [
       { k: 'yes', label: c => `Sign: ${fmtCash(c.amt)} a week`, go: c => { lateHold('deal', 'First-look deal', 0, c.amt, { until: S.week + 104 }); lateFx({ stand: 1, mile: 'Signed a first-look deal' }); return 'There is a parking space with your name on it. It\'s the smallest thing and it makes you absurdly happy.'; } },
@@ -144,7 +144,7 @@ const LATE = [
       { k: 'lend', label: c => `Lend it: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateFx({ tie: 8 }, c); lateLater(lateR(26, 70), 'repay', { who: c.who, amt: c.amt }); return 'They hug you in the street. You try not to think about whether you\'ll see it again.'; } },
       { k: 'gift', label: c => `Give it, and say never mind paying it back`, cost: c => c.amt, go: c => { lateFx({ tie: 16 }, c); trust(c.who, 10); return 'They can\'t speak for a moment. Years later they\'ll still mention it.'; } },
       { k: 'no', label: () => 'Say you can\'t', go: c => { lateFx({ tie: -6 }, c); return 'They say they understand. They mostly do.'; } }] },
-  { id: 'lg_memoir', pool: 'late', once: 1, need: () => careerLevel() >= 5 || (ME().fame || 0) >= 25, mk: c => { c.amt = Math.round(usd(40000 + (ME().fame || 0) * 4000 + careerLevel() * 15000) / 1000) * 1000; },
+  { id: 'lg_memoir', pool: 'late', once: 1, need: () => careerLevel() >= 5 || (ME().fame || 0) >= 25, mk: c => { c.amt = Math.round(usd(20000 + (ME().fame || 0) * 1500 + careerLevel() * 8000) / 1000) * 1000; },
     title: 'A book deal', text: c => `A publisher wants your memoir. ${fmtCash(c.amt)} advance. "Honest, funny, a bit of gossip. Not too much gossip. Some gossip."`,
     opts: [
       { k: 'ghost', label: () => 'Take it, with a ghostwriter', go: c => { lateFx({ cash: c.amt * .7, fame: 4, stress: 3 }); return 'The ghostwriter interviews you for nine hours and makes you sound wittier than you are. It sells.'; } },
@@ -168,7 +168,7 @@ const LATE = [
   { id: 'lg_ranch', pool: 'late', need: () => !holdings().some(h => h.k === 'ranch'), mk: c => { c.amt = lateAmt(.12, 60000, 3000000); c.place = ppick(['a ranch two hours out with a fake Western street left over from the fifties', 'a crumbling mansion that has played a haunted house in nine films', 'a disused factory with forty-foot ceilings, perfect for building sets', 'an old motel by a desert highway that every music video wants']); },
     title: 'A location for sale', text: c => `For sale: ${c.place}. ${fmtCash(c.amt)}. Productions rent it all year.`,
     opts: [
-      { k: 'buy', label: c => `Buy it and rent it out: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('ranch', 'Your location', c.amt, c.amt * lateR(.0008, .0022)); return 'The first booking is a car advert. The second is a horror film that sets the porch on fire, on purpose, twice.'; } },
+      { k: 'buy', label: c => `Buy it and rent it out: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { lateHold('ranch', 'Your location', c.amt, c.amt * lateR(.0002, .0011)); return 'The first booking is a car advert. The second is a horror film that sets the porch on fire, on purpose, twice.'; } },
       { k: 'no', label: () => 'Pass', go: c => 'You see it in a film a year later and feel a small, irrational pang.' }] },
   { id: 'lg_shelter', pool: 'late', mk: c => { c.amt = lateAmt(.05, 10000, 600000); },
     title: 'A clever accountant', text: c => `Your accountant has a scheme: put ${fmtCash(c.amt)} into "film production partnerships" and you'll save nearly half of it in tax. "Everyone's doing it."`,
@@ -333,7 +333,7 @@ const LATE = [
     opts: [
       { k: 'yes', label: () => 'Go on and be yourself', check: ['cha', 12], go: (c, ok) => { lateFx(ok ? { fame: 3 } : { fame: 1, stress: 2 }); return ok ? 'Two hours fly by. The episode gets clipped and passed around for a week.' : 'You say "um" two hundred times. Someone counts.'; } },
       { k: 'no', label: () => 'Decline', go: c => 'They have someone else on. You listen. You\'d have been better.' }] },
-  { id: 'in_brand', pool: 'indie', mk: c => { c.amt = Math.round(usd(lateR(8000, 30000) * (1 + careerLevel() * .4)) / 500) * 500; c.brand = ppick(['a sportswear company', 'a car maker', 'a bank', 'an energy drink', 'a supermarket']); }, title: 'A commercial', text: c => `${c.brand.charAt(0).toUpperCase() + c.brand.slice(1)} wants you for a commercial. ${fmtCash(c.amt)} for a week's work. The script involves a dancing mascot.`,
+  { id: 'in_brand', pool: 'indie', mk: c => { c.amt = Math.round(usd(lateR(6000, 20000) * (1 + careerLevel() * .15)) / 500) * 500; c.brand = ppick(['a sportswear company', 'a car maker', 'a bank', 'an energy drink', 'a supermarket']); }, title: 'A commercial', text: c => `${c.brand.charAt(0).toUpperCase() + c.brand.slice(1)} wants you for a commercial. ${fmtCash(c.amt)} for a week's work. The script involves a dancing mascot.`,
     opts: [
       { k: 'yes', label: () => 'Take the money', go: c => { lateFx({ cash: c.amt, stand: -.2, energy: -8 }); return 'The mascot is a man named Doug. Doug is a consummate professional.'; } },
       { k: 'yours', label: () => 'Take it, if you can rewrite the script', check: ['vis', 14], go: (c, ok) => { lateFx(ok ? { cash: c.amt, fame: 2, energy: -8 } : { stress: 3 }); return ok ? 'Your version wins an advertising award. Doug is very proud.' : 'They say thanks but no thanks, and find someone who likes mascots.'; } },
@@ -344,7 +344,7 @@ const LATE = [
       { k: 'no', label: () => 'Not your thing', go: c => 'They find someone else. The biscuits go to waste.' }] },
   { id: 'in_crowd', pool: 'indie', title: 'Crowdfunding', text: () => 'You could crowdfund the passion project: a video, a target, thirty days of asking everyone you know for money.',
     opts: [
-      { k: 'yes', label: () => 'Launch it', check: ['cha', 14], go: (c, ok) => { const a = Math.round(usd(lateR(8000, 40000) * (1 + (ME().fame || 0) / 30)) / 100) * 100; lateFx(ok ? { cash: a, fame: 2, energy: -10 } : { cash: a * .25, energy: -10, stress: 6 }); return ok ? `It hits its target in nine days. ${fmtCash(a)}. Strangers believe in you, which is terrifying.` : `It limps to a quarter of the target. You keep what you raised: ${fmtCash(a * .25)}, and a lot of awkward thank-you emails.`; } },
+      { k: 'yes', label: () => 'Launch it', check: ['cha', 14], go: (c, ok) => { const a = Math.round(usd(lateR(8000, 40000) * (1 + (ME().fame || 0) / 60)) / 100) * 100; lateFx(ok ? { cash: a, fame: 2, energy: -10 } : { cash: a * .25, energy: -10, stress: 6 }); return ok ? `It hits its target in nine days. ${fmtCash(a)}. Strangers believe in you, which is terrifying.` : `It limps to a quarter of the target. You keep what you raised: ${fmtCash(a * .25)}, and a lot of awkward thank-you emails.`; } },
       { k: 'no', label: () => 'You hate asking for money', go: c => 'You keep saving instead. Slower, but nobody\'s watching.' }] },
   { id: 'in_lab', pool: 'indie', title: 'A festival lab', text: () => 'A festival\'s development lab is taking eight projects. A week in the mountains with mentors, if they pick yours.',
     opts: [
@@ -366,7 +366,7 @@ const LATE = [
     opts: [
       { k: 'join', label: c => `Join: ${fmtCash(c.amt)}`, cost: c => c.amt, go: c => { c.out = []; lateFx({ meet: 'young', meetTag: 'In your co-op' }, c, c.out); lateFx({ meet: 'known', xp: { setm: .1 } }, c, c.out); return 'You borrow a lens the first week and lend your sofa the second. ' + c.out.join(' '); } },
       { k: 'no', label: () => 'You work alone', go: c => 'Alone is quieter. Not always better.' }] },
-  { id: 'in_consult', pool: 'indie', need: () => careerLevel() >= 3, mk: c => { c.amt = Math.round(usd(1500 + careerLevel() * 1200) / 100) * 100; }, title: 'A day\'s consulting', text: c => `A studio wants one day of your eyes on a troubled project. ${fmtCash(c.amt)}, no commitment, no credit.`,
+  { id: 'in_consult', pool: 'indie', need: () => careerLevel() >= 3, mk: c => { c.amt = Math.round(usd(1200 + careerLevel() * 450) / 100) * 100; }, title: 'A day\'s consulting', text: c => `A studio wants one day of your eyes on a troubled project. ${fmtCash(c.amt)}, no commitment, no credit.`,
     opts: [
       { k: 'yes', label: () => 'Give them your honest notes', check: ['tas', 13], go: (c, ok) => { c.out = []; lateFx(ok ? { cash: c.amt, stand: .5, meet: 'power', meetTag: 'You consulted for them' } : { cash: c.amt }, c, c.out); return (ok ? 'Your three notes save the film\'s third act. They know it. ' : 'They nod and ignore everything you said. The cheque clears.') + c.out.join(' '); } },
       { k: 'no', label: () => 'Not interested', go: c => 'They find someone hungrier.' }] },
@@ -379,7 +379,7 @@ const LATE = [
     opts: [
       { k: 'make', label: () => 'Make something from them', check: ['tas', 13], go: (c, ok) => { lateFx(ok ? { fame: 2, xp: { tas: .3 }, stand: .4 } : { xp: { tas: .15 } }); return ok ? 'A twelve-minute film with no words. It makes people cry in three languages.' : 'You scan everything and make nothing yet. The boxes sit by your desk.'; } },
       { k: 'archive', label: () => 'Give them to the archive', go: c => 'The archivists are delighted. Someone else will make the film.' }] },
-  { id: 'in_teachonline', pool: 'indie', cool: 52, mk: c => { c.amt = Math.round(usd(R2(2000, 9000) * (1 + careerLevel() * .3)) / 100) * 100; }, title: 'An online course', text: c => `A course platform wants you to film a class: eight lessons on what you know. ${fmtCash(c.amt)} up front and a share of sales.`,
+  { id: 'in_teachonline', pool: 'indie', cool: 52, mk: c => { c.amt = Math.round(usd(R2(2000, 9000) * (1 + careerLevel() * .12)) / 100) * 100; }, title: 'An online course', text: c => `A course platform wants you to film a class: eight lessons on what you know. ${fmtCash(c.amt)} up front and a share of sales.`,
     opts: [
       { k: 'yes', label: () => 'Film it properly', check: ['com', 12], go: (c, ok) => { lateFx(ok ? { cash: c.amt * 1.5, fame: 2 } : { cash: c.amt }); return ok ? 'It sells steadily for years. Strangers quote your lessons back to you.' : 'It\'s fine. You hate watching yourself on it.'; } },
       { k: 'no', label: () => 'Your secrets stay secret', go: c => 'You keep your secrets. They\'re not that secret.' }] },

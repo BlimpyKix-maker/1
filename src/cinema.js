@@ -145,13 +145,14 @@ const GRADES = { Horror: ['#2E6B5E', .14], Western: ['#C88A3A', .14], 'Sci-fi': 
 function frameOf(f, i) {
   const SF = typeof storyFrame === 'function' ? storyFrame(f, i) : null; if (SF) return SF;
   const r = hashRand(f.id * 71 + i * 13 + 5), era = f.rel !== null ? yearOf(f.rel) : S.year;
-  const G = GENRE_SETTINGS[f.genre] || GENRE_SETTINGS.Drama;
-  let setting = G[(i + Math.floor(r() * G.length)) % G.length];
+  // each still a different place, in an order of the film's own (a repeated place made the fourth still a copy of the first)
+  const G = [...new Set(GENRE_SETTINGS[f.genre] || GENRE_SETTINGS.Drama)], rot = Math.floor(hashRand(f.id * 7 + 2)() * G.length); r();
+  let setting = G[(i + rot) % G.length];
   if (era < 1955 && ['bridge', 'planet', 'lab'].includes(setting) && f.genre !== 'Sci-fi') setting = 'street';
   const tods = ['Horror', 'Crime'].includes(f.genre) ? [3, 3, 2, 0] : f.genre === 'Romance' ? [1, 2, 0, 3] : [0, 0, 1, 2, 3];
   const tod = tods[Math.floor(r() * tods.length)];
   const cast = f.cast || [], n = setting === 'interview' ? 1 : r() < .55 && cast.length > 1 ? 2 : r() < .25 && cast.length > 2 ? 3 : 1;
-  const who = Array.from({ length: n }, (_, k) => cast[(i + k) % Math.max(1, cast.length)]).filter((x, k, A) => x !== undefined && A.indexOf(x) === k);
+  const who = Array.from({ length: n }, (_, k) => cast[(i + k + Math.floor(i / Math.max(1, cast.length))) % Math.max(1, cast.length)]).filter((x, k, A) => x !== undefined && A.indexOf(x) === k);
   const V = SC_VERBS[f.genre] || SC_VERBS.Drama, verb = (who.length > 1 ? V[0] : V[1])[Math.floor(r() * 3)];
   return { r, era, setting, tod, who, verb };
 }
@@ -175,12 +176,27 @@ function stillSVG(f, i, w = 320, animated = false) {
     const pose = D.sit ? 'sit' : D.fly ? 'raise' : F.genre === 'Action' ? (r() < .6 ? 'run' : 'point') : poses[Math.floor(r() * poses.length)];
     const h = D.fly ? 54 : D.toon ? 70 : F.setting === 'interview' ? 150 : 96 + r() * 12;
     const gy = D.fly ? D.gy - 30 * k : D.gy + (k % 2) * 2;
+    // the film's real cast, drawn with the same figures as everywhere else (sitting and cartoon frames keep the simple drawing)
+    if (id !== undefined && P(id) && !D.toon && !D.sit && !D.fly && F.setting !== 'interview' && typeof portraitSVG === 'function') return castFigure(id, slots[k] ?? 160, gy, h, pose, D, F, r);
     return actor(slots[k] ?? 160, gy, h, L, { face, pose, costume: D.costume || (F.era < 1940 || F.genre === 'Period' ? 'suit' : r() < .25 ? 'suit' : null), hat: D.hat || (F.era < 1955 && r() < .4 ? 'fedora' : undefined), helmet: D.helmet, prop: k === 0 && r() < .55 ? (pr || undefined) : undefined, dress: D.dress, cape: D.fly ? ['#C62828', '#2C4F7C', '#E3B23C'][k % 3] : undefined, rim: T.night ? '#BFD8F2' : null });
   });
   const grade = GRADES[f.genre], old = F.era < 1952 && f.genre !== 'Animation';
   const vign = `<defs><radialGradient id="vg${uid}" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="${old ? .45 : .28}"/></radialGradient></defs><rect width="${CW}" height="${CH}" fill="url(#vg${uid})"/>`;
   const wide = hashRand(f.id * 3 + 1)() < .55 ? `<rect width="${CW}" height="14" fill="#000"/><rect y="${CH - 14}" width="${CW}" height="14" fill="#000"/>` : '';
-  return `<svg class="still${animated ? ' moving' : ''}" viewBox="0 0 ${CW} ${CH}" width="${w}" height="${Math.round(w * CH / CW)}" role="img" aria-label="${esc(stillCaption(f, i))}"${old ? ' style="filter:grayscale(1) contrast(1.08) brightness(1.08)"' : ''}>${D.bg}${animated && D.anim ? D.anim : ''}${actors.join('')}${D.fg || ''}${grade ? `<rect width="${CW}" height="${CH}" fill="${grade[0]}" opacity="${grade[1]}" style="mix-blend-mode:multiply"/>` : ''}${T.night ? `<rect width="${CW}" height="${CH}" fill="#2A3F6E" opacity=".12"/>` : ''}${vign}${wide}</svg>`;
+  return `<svg class="still${animated ? ' moving' : ''}" viewBox="0 0 ${CW} ${CH}" width="${w}" height="${Math.round(w * CH / CW)}" role="img" aria-label="${esc(stillCaption(f, i))}"${old ? ' style="filter:grayscale(1) contrast(1.08) brightness(1.08)"' : ''}><g class="L-bg">${D.bg}${animated && D.anim ? D.anim : ''}</g><g class="L-act">${actors.map((x, k) => `<g class="L-a L-a${k}">${x}</g>`).join('')}</g><g class="L-fg">${D.fg || ''}</g>${grade ? `<rect width="${CW}" height="${CH}" fill="${grade[0]}" opacity="${grade[1]}" style="mix-blend-mode:multiply"/>` : ''}${T.night ? `<rect width="${CW}" height="${CH}" fill="#2A3F6E" opacity=".12"/>` : ''}${vign}${wide}</svg>`;
+}
+// a cast member in costume for the scene: the person's own face, hair and build, the frame's wardrobe
+function castFigure(id, x, gy, h, pose, D, F, r) {
+  const p = P(id), L = Object.assign({}, lookOf(p)), cos = D.costume || (F.era < 1940 || (F.r && false) ? 'suit' : null);
+  const W = { suit: { outfit: 9, colour: 1 }, space: { outfit: 17, colour: 9 }, armor: { outfit: 4, colour: 7 }, uniform: { outfit: 3, colour: 3 }, gi: { outfit: 0, colour: 9, bottoms: 6, bottomColour: 6 }, robe: { outfit: 12, colour: 6 } }[cos];
+  if (W) Object.assign(L, W);
+  if (D.dress && p.g === 'F') Object.assign(L, { outfit: 10 });
+  if (D.hat || (F.era < 1955 && r() < .35)) L.head = 8;
+  if (D.helmet) L.head = 2;
+  if (F.era < 1960) { L.bag = 0; L.ears = 0; L.tattoo = 0; L.wrist = 0; if (L.shoes === 0 || L.shoes === 1 || L.shoes === 9) L.shoes = 6; if ([1, 3, 7, 9].includes(L.bottoms)) L.bottoms = 6; if ([1, 10, 11, 13, 14, 16, 17].includes(L.outfit) && !W) L.outfit = 7; }
+  L.pose = pose === 'walk' || pose === 'run' ? 0 : L.pose === 2 && !D.stage ? 0 : L.pose;
+  x = clamp(x, 46, CW - 46); const sc = h * .86 / 210, age = S.year - p.born, svg = portraitSVG(L, age, 240, true, true).replace(/^<svg class="portrait([^"]*)"[^>]*>/, `<svg class="portrait$1" x="${(x - 60 * sc).toFixed(1)}" y="${(gy - 224 * sc).toFixed(1)}" width="${(120 * sc).toFixed(1)}" height="${(240 * sc).toFixed(1)}" viewBox="0 0 120 240" overflow="visible">`);
+  return svg;
 }
 function stillsHTML(f) {
   const r = hashRand(f.id * 19 + 3), st = typeof storyOf === 'function' ? storyOf(f) : null, n = st ? Math.min(6, st.frames.length) : 3 + Math.floor(r() * 3);

@@ -76,9 +76,11 @@ function randomFav(c) {
 }
 // owned: wardrobe pieces the player has bought; anything else from the shop stays off the list.
 function lookControls(c, owned = []) {
-  return `<div class="looks">${LOOK_KEYS.filter(k => c.look.style === 1 || !CARTOON_ONLY.includes(k)).map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
+  const sliders = LOOK_KEYS.filter(k => LOOK[k].slider && c.look.style !== 1);
+  const fine = sliders.length ? `<div class="lk-fine"><h4>Fine-tune <span class="muted small">face and build, as finely as you like</span> <button class="linkish" data-hk="lookreset:1">Reset</button></h4>${sliders.map(k => { const v = c.look[k] ?? 50; return `<label class="lk-sl"><span class="muted">${esc(LOOK[k].label)}</span><input type="range" min="0" max="100" step="1" value="${v}" data-lookk="${k}" aria-label="${esc(LOOK[k].label)}"></label>`; }).join('')}</div>` : '';
+  return `<div class="looks">${LOOK_KEYS.filter(k => !LOOK[k].slider && (c.look.style === 1 || !CARTOON_ONLY.includes(k))).map(k => { const L = LOOK[k], v = c.look[k] ?? 0, swatch = L.opts[0].startsWith('#');
     const ok = i => { const it = WARDROBE_AT[k + ':' + i]; return !it || owned.includes(it); };
-    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>`;
+    return `<div class="lk-row"><span class="muted">${L.label}</span>${swatch ? `<span class="sw">${L.opts.map((o, i) => `<button class="swb${i === v ? ' on' : ''}" style="background:${o}" data-look="${k}:${i}" aria-label="${L.label} ${i + 1}" aria-pressed="${i === v}"></button>`).join('')}</span>` : `<select data-lookk="${k}">${L.opts.map((o, i) => ok(i) ? `<option value="${i}"${i === v ? ' selected' : ''}>${esc(o)}${WARDROBE_AT[k + ':' + i] ? ' ★' : ''}</option>` : '').join('')}</select>`}</div>`; }).join('')}</div>${fine}`;
 }
 // The wardrobe shop: things money buys that change how you look and, sometimes, how your rolls go.
 function wardrobeShop() {
@@ -930,3 +932,4 @@ function phoneUnread() {
   for (const m of M.phone) if (m.from !== -1 && seen[threadOf(m)] === undefined && m.w === S.week) u++;
   return u;
 }
+CLICK_HOOKS.lookreset = () => { for (const [k] of LOOK_SLIDERS) setLook(k, 50); };

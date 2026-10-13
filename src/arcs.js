@@ -580,17 +580,27 @@ function arcPick(it, k) {
 function callsMorning() {
   const M = S.me, W = M.wk; if (W.day !== 0 || careerLevel() < 3 || typeof craftJob !== 'function') return;
   if (M.jobs.some(craftJob) || S.week - (M.callW || -99) < 8 || M.inbox.some(it => it.kind === 'offer' && !it.done)) return;
-  if (prnd() > (lookingForWork() ? .25 : .45)) return;
+  // work finds people who did good work: the more of it behind you, the likelier the phone rings
+  const good = (M.past || []).filter(x => x.credited && (x.score || 0) >= 55 && S.week - (x.to || 0) < 156), made = (M.works || []).filter(w => (w.cs || 0) >= 65 && S.week - w.rel < 104);
+  if (prnd() > (lookingForWork() ? .14 : .26) + Math.min(.3, good.length * .05 + made.length * .06)) return;
   const floor = Math.max(1, tierLevel() - 1), L = M.board.filter(p => craftJob(p) && (p.tier || 1) >= floor && !blockedFrom(tmplOf(p)) && jobDays() + p.days <= 7 && !((tmplOf(p) || {}).actor && (p.tier || 1) >= 3 && (ME().fame || 0) < 20 + (p.tier || 1) * 5));   // nobody calls an unknown to offer a lead
   if (!L.length) return;
   // your own industry first, then the most senior; the very top pick varies, so it isn't the same job every time
   const home = q => (typeof postIndustry !== 'function' || postIndustry(q) === (M.field || 'film')) ? 1 : 0;
   L.sort((a, b) => home(b) - home(a) || (b.tier || 1) - (a.tier || 1) || b.rate - a.rate);
   const p = L[Math.floor(prnd() * Math.min(3, L.length))];
-  const caller = p.head !== null && p.head !== undefined && M.known[p.head] ? p.head : (() => { const ids = aliveKnown().filter(id => opinion(id) > 5); return ids.length ? ppick(ids) : p.head; })();
+  // who calls, and why: someone who worked with you and rated it, someone who saw your work, or a friend vouching
+  const film = x => x.film !== null && x.film !== undefined && S.films[x.film] ? S.films[x.film].title : null;
+  const ally = good.filter(x => x.head !== null && x.head !== undefined && P(x.head) && !P(x.head).dead && opinion(x.head) > 0).sort((a, b) => (b.score || 0) - (a.score || 0) || b.to - a.to);
+  let caller = null, why = '';
+  const same = ally.find(x => x.head === p.head);
+  if (same) { caller = same.head; why = `You worked for them on ${film(same) || 'a job last year'}, and they remember it.`; }
+  else if (ally.length) { const x = ally[Math.floor(prnd() * Math.min(2, ally.length))]; caller = x.head; why = `${P(x.head).name} worked with you on ${film(x) || 'a job'} and put your name forward.`; }
+  else if (made.length) { const w = made.slice().sort((a, b) => (b.cs || 0) - (a.cs || 0))[0]; caller = p.head; why = `They saw ${w.title} (the critics gave it ${w.cs}) and want whoever made it.`; }
+  else { const ids = aliveKnown().filter(id => opinion(id) > 5); caller = M.known[p.head] ? p.head : ids.length ? ppick(ids) : p.head; why = caller !== p.head && caller !== null && caller !== undefined && P(caller) ? `${P(caller).name} vouched for you.` : 'Someone dropped out and you were the next name on the list.'; }
   const who = caller !== null && caller !== undefined && P(caller) ? P(caller).name : 'A producer';
   M.callW = S.week;
-  inbox('offer', `A call: ${p.t}`, `${who} calls. ${pickLine(['They asked for you by name.', 'Your name came up in a meeting and nobody argued.', 'Someone dropped out and you were the first call.', 'They\'ve seen your work, and they want it on this.', 'No interview, no list. They want you.'], S.week + p.id)} ${offerText(p)}`, { post: p, person: caller !== null && caller !== undefined ? caller : undefined, choices: [{ k: 'yes', label: 'Take it' }, { k: 'no', label: 'Turn it down' }] });
+  inbox('offer', `A call: ${p.t}`, `${who} calls. ${why} ${offerText(p)}`, { post: p, person: caller !== null && caller !== undefined ? caller : undefined, choices: [{ k: 'yes', label: 'Take it' }, { k: 'no', label: 'Turn it down' }] });
 }
 // Life tab: the stories of your life so far
 function arcLogHTML() {

@@ -61,7 +61,7 @@ const GIG_TYPES = {
   jingle: { label: 'Jingle', roles: { composer: 'Composer', actor: 'Singer', sound: 'Producer' }, lv: 0, w: 1, days: 2, fee: [1500, 12000], subs: { composer: ['song', 'theme'], actor: ['voice'] }, field: 'music', pres: 1, fame: 1, back: 1, snag: 'client' }
 };
 const GIG_KEYS = Object.keys(GIG_TYPES);
-const gigFee = { 0: .3, 1: .4, 2: .6, 3: 1, 4: 1.6, 5: 2.6, 6: 4.2, 7: 6.5 };   // early work pays little; a name pays a lot
+const gigFee = { 0: .3, 1: .4, 2: .6, 3: .9, 4: 1.25, 5: 1.7, 6: 2.3, 7: 3 };   // early work pays little; a name pays more (Round 23: the top was 6.5x and jobs for hire outearned careers)
 
 // ---- clients and names ----
 const GIG_BRANDS = ['Kestrel Motors', 'Brightmilk', 'Halden Bank', 'Lumen Phones', 'Pop Fizz', 'Northwind Air', 'Greenleaf Grocers', 'Atlas Insurance', 'Velo Sportswear', 'Crisp & Co. crisps', 'Marlow Beer', 'Okto Trainers', 'Sundial Watches', 'Hearth Furniture', 'Bluefin Telecom', 'Paloma Perfume', 'Ironbark Outdoor', 'Tandem Rail', 'Quill Stationers', 'Copperline Energy', 'Mantis Games', 'Saffron Tea', 'Nimbus Streaming', 'Harbour Holidays', 'Petal Cosmetics', 'Granite Building Society', 'Zephyr Electric Cars', 'Plum Pet Food'];
