@@ -659,3 +659,28 @@ WLIB.add('exch', [
   ['*', 'bittersweet', 'breather', 2, 'A: You laughed.\nH: I didn\'t.\nA: Through your nose. It counts.'],
   ['*', 'light', 'breather', 3, 'A: There\'s a dog outside staring at us.\nH: Wave.\n> {A} waves. The dog turns and walks away, unimpressed.\nA: I think we lost him.'],
 ]);
+WLIB.add('exch', [
+  // ---------- MIXED EXTRAS ----------
+  ['Drama', 'dark', 'conflict', 3, 'A: You paid the funeral home.\nH: Somebody had to.\nA: You paid for the cheapest box.\nH: (folding the receipt very small) He was cheap. He\'d have wanted a bargain.'],
+  ['Drama', 'bittersweet', 'reveal', 2, 'A: She left you the car.\nH: She hated that car.\nA: She left a note in the glove box. "Drive it somewhere I never went."'],
+  ['Musical', 'tense', 'reveal', 2, 'A: The understudy knows every line.\nH: She\'s meant to.\nA: She knows yours from before the rewrite. The ones only you and the director had.'],
+  ['Musical', 'absurd', 'conflict', 2, 'R: You can\'t put a tap number in a funeral scene.\nH: It\'s a very sad tap number.\nR: How sad can tap be?\nH: (demonstrating, slowly) Devastating.'],
+  ['Fantasy', 'dark', 'reveal', 3, 'R: You wondered why the crows follow you.\nH: They follow everyone.\nR: They follow what they\'re owed.\n> Every crow on the wall turns its head toward {H} at once.'],
+  ['Fantasy', 'absurd', 'breather', 2, 'A: The troll under the bridge wants a toll.\nH: How much?\nA: A compliment.\nH: That\'s easy.\nA: He\'s very hard to compliment. He has heard them all.'],
+  ['Documentary', 'dark', 'reveal', 2, 'A: You keep looking at the door.\nH: He said he\'d come if I talked to you.\nA: Who?\nH: The man who owns the camera you\'re holding.'],
+  ['Documentary', 'absurd', 'setup', 2, 'A: And how long have you been the town\'s only clown?\nH: {YEARS}.\nA: Is there competition?\nH: There was. He moved to {CITY}. Went corporate.'],
+  ['Animation', 'tense', 'conflict', 2, 'R: The garden belongs to the snails now.\nH: You\'ve been saying that since Tuesday.\nR: We are very slowly taking over.\nH: You\'re on the first leaf.'],
+  ['Animation', 'dark', 'reveal', 3, 'A: Why doesn\'t the old bear ever leave his cave?\nH: Somebody\'s got to remember the forest before.\nA: Before what?\n> {H} looks at the stumps on the hill and doesn\'t answer.'],
+  ['*', 'dark', 'turn', 3, 'R: You burned the letter.\nH: I memorized it first.\nR: Then it isn\'t gone.\nH: No. Now it\'s only in a place you can\'t reach.'],
+  ['*', 'absurd', 'reveal', 2, 'A: The haunted typewriter keeps typing at night.\nH: What does it type?\nA: Complaints. About the ribbon.\nH: Get it a new ribbon, then.\nA: It says it doesn\'t want to be "a burden."'],
+  ['*', 'absurd', 'conflict', 3, 'A: You put a hat on the snowman.\nH: He looked cold.\nA: That\'s my hat.\nH: He looks better in it.\nA: (staring at the snowman) He does. Damn it.'],
+  ['*', 'tense', 'setup', 3, 'R: You\'ll want to sit near the window.\nH: Why?\nR: The view. (beat) And so they can see you\'re still alive.'],
+  ['*', 'bittersweet', 'payoff', 3, 'A: You finally fixed his watch.\nH: It says the right time.\nA: And?\n> {H} sets it back to the time it stopped, and puts it on.\nH: Some things should stay wrong.'],
+  ['*', '*', 'setup', 3, 'A: There\'s a chair missing from the kitchen.\nH: I lent it.\nA: To whom?\nH: To the porch. It wanted to watch the road for a while.'],
+  ['*', 'dark', 'conflict', 2, 'R: You\'re a {JOB}. You fix things for a living.\nH: I fix things that are broken.\nR: Then come fix me.\nH: You\'re not broken. You\'re just like that.'],
+  ['*', 'light', 'reveal', 3, 'A: You\'ve been watering the plastic plant.\nH: It\'s doing great.\nA: It\'s plastic.\nH: It\'s doing great because I water it.'],
+  ['*', 'tense', 'turn', 2, 'A: The boat leaves in an hour.\nH: Then we have fifty-nine minutes to say no.\nA: And if we don\'t?\nH: Then we have one minute to pack.'],
+  ['*', '*', 'breather', 3, '> {A} hands {H} half an orange, already peeled, the pith picked off the way {H} likes.\nH: You didn\'t have to do that.\nA: I wasn\'t going to eat the pith either.'],
+  ['War', 'absurd', 'breather', 2, 'A: The cook says the stew\'s mostly turnip.\nH: What\'s the rest?\nA: Hope.\nH: (tasting) He\'s overestimating the hope.'],
+  ['Western', 'absurd', 'setup', 2, 'A: The sheriff\'s a goat.\nH: The town elected a goat?\nA: It ran unopposed.\nH: Is it any good?\nA: Crime\'s down. Hedges are down too.'],
+]);
