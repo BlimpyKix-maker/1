@@ -62,7 +62,7 @@ function scriptwriterApp() {
      ${sc.outlined === sc.draft ? `<ol class="small">${(sc.outline || []).map((ci, i) => `<li><b>${BEAT_SLOTS[i][0]}</b>: ${esc((cards.find(c => c.i === ci) || {}).t || '')}</li>`).join('')}</ol>` : `<p class="small muted">Put a scene card on each beat. Two cards don't belong anywhere. A good outline makes every page after it better (and rolls your Structure).</p>
       <div class="sw-beats">${BEAT_SLOTS.map(([l], i) => `<label><span>${l}</span>${sel('sw-beat-' + i, [['', 'Choose a scene…'], ...cards.map(c => [String(c.i), c.t])], String(pick[i]))}</label>`).join('')}</div>
       <button class="btn-s" data-swoutline="${sc.id}" ${pick.some(x => x === '') ? 'disabled' : ''}>Lock the outline</button>`}
-     ${UI.sample && aiPagesOn() ? `<p><button class="btn-s ghost" data-readpages="${sc.id}">📖 Read the pages</button> <span class="small muted">AI-written</span></p>` : ''}`;
+     <p><button class="btn-s ghost" data-hk="readscript:${sc.id}">📖 Read it</button></p>`;
   } else body = `<p>No script in progress. Start one on your writing desk.</p><p><button class="btn-s" data-app="create">Open Create</button></p>`;
   return `<div class="swapp">${body}${done.length ? `<h5>Coverage on finished scripts</h5>${done.map(x => `<details class="sw-cov"><summary><b>${esc(x.title)}</b> <span class="grade g${x.grade}">${x.grade}</span> <span class="muted small">${x.score}/100 · draft ${x.draft}</span></summary><ul class="plain small">${coverageOf(x).map(([k, v]) => `<li><b>${k}:</b> ${esc(v)}</li>`).join('')}</ul></details>`).join('')}` : ''}</div>`;
 }

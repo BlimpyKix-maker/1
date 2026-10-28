@@ -356,7 +356,7 @@ function writingDesk() {
     const pct = Math.round(sc.pages / sc.target * 100);
     return `<div class="script"><div class="sh"><b>${esc(sc.title)}</b> <span class="muted">${esc(sc.genre)} · ${esc(THEMES[sc.theme])} · ${esc(TONES[sc.tone])} · draft ${sc.draft}</span>${sc.grade ? ` <span class="grade g${sc.grade}">${sc.grade}</span>` : ''}${sc.won ? ' ' + chip('Prize', 'good') : ''}</div>
       <p class="muted">${esc(sc.logline)}</p>${sc.made !== undefined ? `<p class="small good">🎬 In the world: ${fl(sc.made)} · ${esc(S.films[sc.made].status)}</p>` : sc.option ? `<p class="small">📝 Optioned by ${pl(sc.option.by)} until ${fmtDate(sc.option.to, true)}. They're trying to get it made.</p>` : ''}${sc.hero || sc.setting || sc.notes ? `<details class="scnotes"><summary>Your notes</summary>${sc.hero ? `<p><b>Hero:</b> ${esc(sc.hero)}</p>` : ''}${sc.setting ? `<p><b>World:</b> ${esc(sc.setting)}</p>` : ''}${sc.notes ? `<p class="notes">${esc(sc.notes)}</p>` : ''}</details>` : ''}
-      ${UI.sample && !aiPagesOn() && (sc.grade || sc.pages >= 10) ? `<p class="small muted">AI-written pages are off. <button class="btn-s ghost" data-aipages="on">Turn them on</button></p>` : ''}${UI.sample && aiPagesOn() && (sc.grade || sc.pages >= 10) ? `<p class="small"><button class="btn-s ghost" data-readpages="${sc.id}">📄 Read the pages</button> <span class="muted">Claude writes the opening as well, or as badly, as ${sc.grade ? 'your ' + sc.grade : 'this draft so far'} deserves.</span></p>` : ''}
+      ${sc.grade || sc.pages >= 10 ? `<p class="small"><button class="btn-s ghost" data-hk="readscript:${sc.id}">📖 Read it</button> <span class="muted">The draft as it stands: beat sheet, pages and the reader's notes.</span></p>` : ''}
       ${sc.stage === 'writing' ? `<div class="pbar"><i style="width:${pct}%"></i></div><p class="small">${sc.pages} of ${sc.target} pages${M.activeScript === sc.id ? ' · <b>writing this one</b>' : ` · <button class="linkish" data-activescript="${sc.id}">Write this one</button>`}</p>`
         : `<p class="small"><button class="btn-s ghost" data-rewrite="${sc.id}">Rewrite (draft ${sc.draft + 1})</button>
           <select data-share="${sc.id}"><option value="">Show it to…</option>${known.filter(id => !sc.shared.includes(id)).map(id => { const t = tasteOf(P(id)); return `<option value="${id}">${esc(P(id).name)}${t.genres.includes(sc.genre) ? ' ♥ ' + esc(sc.genre.toLowerCase()) : ''}</option>`; }).join('')}</select>
@@ -673,8 +673,6 @@ function careerClick(t) {
   if (t.dataset.thread !== undefined) { UI.thread = t.dataset.thread === '' ? null : t.dataset.thread === 'home' || t.dataset.thread === 'crew' ? t.dataset.thread : +t.dataset.thread; if (UI.thread !== null && UI.thread !== 'home' && UI.thread !== 'crew') UI.txt = { id: String(UI.thread), kind: 'hi', slot: 0, msg: '' }; render(true); return true; }
   if (t.dataset.sendtext) { const T = UI.txt, s = upcomingSlots(16)[+T.slot || 0]; if (T.id === '') return true; T.msg = ($('#tx-msg') || {}).value || T.msg || ''; const a = { t: 'text', id: +T.id, kind: T.kind, msg: T.kind === 'hi' || (typeof TOPICS !== 'undefined' && TOPICS[T.kind]) ? T.msg : undefined }; if (T.kind !== 'hi' && !(typeof TOPICS !== 'undefined' && TOPICS[T.kind])) { if (!s) return true; Object.assign(a, s); } doAct(a); UI.txt = { id: T.id, kind: T.kind, slot: 0, msg: '' }; if (UI.thread === undefined || UI.thread === null) UI.thread = +T.id; render(true); return true; }
   if (t.dataset.newscript) { const f = UI.newScript, v = id => ($('#' + id) || {}).value || ''; f.title = v('ns-title'); doAct({ t: 'newscript', title: f.title, genre: f.genre, theme: f.theme, tone: f.tone, premise: v('ns-premise'), hero: v('ns-hero'), setting: v('ns-setting'), notes: v('ns-notes'), src: v('ns-src') || undefined }); UI.newScript = null; render(true); return true; }
-  if (t.dataset.readpages) { readPages(+t.dataset.readpages); return true; }
-  if (t.dataset.aipages) { aiPagesSet(t.dataset.aipages === 'on'); render(true); return true; }
   if (t.dataset.startWork) { doAct({ t: 'startwork', type: UI.newWork || Object.keys(WORK_TYPES).find(workTypeOpen), title: ($('#new-work-title') || {}).value || '' }); render(true); return true; }
   if (t.dataset.releaseWork) { doAct({ t: 'releasework', promo: +(UI.relPromo || 0) }); render(true); return true; }
   if (t.dataset.mentor !== undefined) { const n0 = S.me.rollN || 0; doAct({ t: 'mentor', id: +t.dataset.mentor }); render(true); if ((S.me.rollN || 0) > n0) showRollOverlay(S.me.lastRoll); return true; }
@@ -720,7 +718,7 @@ function careerClick(t) {
 // what you are, as the business would put it: a hopeful at first, then simply the job, then a name
 function roleTitle(role) { const L = careerLevel(), R = (role === ME().role && typeof dreamLabel === 'function' ? dreamLabel() : ROLE_LABEL[role]) || 'Filmmaker'; return L <= 1 ? `${R} hopeful` : L <= 3 ? `Working ${R.toLowerCase()}` : L <= 5 ? R : `Celebrated ${R.toLowerCase()}`; }
 // Every clickable the career screens use; the page's click handler listens for these.
-const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-aipages],[data-hk],[data-cin],[data-primer],[data-gift],[data-pet2],[data-heir],[data-tk],[data-fut],[data-rel],[data-lg],[data-fd],[data-pkg],[data-teller],[data-scout],[data-scheme],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
+const CAREER_CLICKS = COMPUTER_CLICKS + ',[data-hk],[data-cin],[data-primer],[data-gift],[data-pet2],[data-heir],[data-tk],[data-fut],[data-rel],[data-lg],[data-fd],[data-pkg],[data-teller],[data-scout],[data-scheme],[data-spstart],[data-consort],[data-pet],[data-act3],[data-city],[data-placeask],[data-placecancel],[data-placemove],[data-placetrip],[data-ctab],[data-awt],[data-phf],[data-newmsg],[data-txkind],[data-mailarch],[data-mailarchall],[data-cosmore],[data-co2],[data-cityall],[data-crewsay],[data-spl],[data-spfan],[data-spbet],[data-luck],[data-luckt],[data-luckamt],[data-vent],[data-bktab],[data-looking],[data-seasonf],[data-shsub],[data-ledspan],[data-autosave],[data-wxhub],[data-labapply],[data-dealopen],[data-dealv],[data-dealsend],[data-dealtake],[data-dealwalk],[data-stakev],[data-gigpitch],[data-gigv],[data-gigall],[data-tr],[data-tspan],[data-markread],[data-swt],[data-swsave],[data-swchopen],[data-swchar],[data-swscene],[data-swpunch],[data-np2],[data-np2go],[data-stt],[data-crt],[data-st2d],[data-st2m],[data-st2b],[data-st2arr],[data-st2play],[data-st2save],[data-st2bounce],[data-pdq],[data-pd2ord],[data-tbbg],[data-tbsubj],[data-crplay],[data-cr2save],[data-cr2render],[data-nbadd],[data-nbspark],[data-nbkeep],[data-nbfrom],[data-nbk],[data-nbstar],[data-nbdel],[data-nbdev],[data-calpin],[data-calpinall],[data-calpinsnap],[data-calpinclear],[data-calsave],[data-caluse],[data-caldel],[data-caluse2],[data-calname],[data-caldel2],[data-decmin],[data-decnav],[data-quitc],[data-jobpage],[data-schoolpage],[data-rtsort],[data-rtmore],[data-rtclear],[data-coinv],[data-osg],[data-swsess],[data-swoutline],[data-arr],[data-podord],[data-clip2],[data-thumb2],[data-session],[data-angel],[data-cgtab],[data-cgk],[data-cgpost],[data-cgfollow],[data-snew],[data-sexp],[data-sload],[data-sover],[data-sdel],[data-rstyle],[data-retire],[data-nextgen],[data-stdept],[data-stpage],[data-abcat],[data-trophy],[data-auto],[data-autoplan],[data-partyauto],[data-jump],[data-applybest],[data-ambclaim],[data-ambpin],[data-abf],[data-schk],[data-schopen],[data-schapply],[data-schools],[data-bfind],[data-bftier],[data-bffit],[data-mentor],[data-start-work],[data-release-work],[data-campaign],[data-compf],[data-comp],[data-feedf],[data-feedmore],[data-fthread],[data-dept],[data-release],[data-vcat],[data-trip],[data-focus],[data-app],[data-like],[data-sweep],[data-reply],[data-greenlight],[data-dtab],[data-found],[data-comoney],[data-selffund],[data-fest],[data-optionspec],[data-pitch],[data-phonejump],[data-thread],[data-readpages],[data-calfill],[data-sendtext],[data-randcc],[data-story],[data-move],[data-vehicle],[data-tonight],[data-newscript],[data-rewrite],[data-contest],[data-activescript],[data-courses],[data-next],[data-enrol],[data-dropout],[data-query],[data-fireagent],[data-homep],[data-furnish],[data-arrange],[data-guide],[data-day],[data-buy],[data-cc],[data-party],[data-pick],[data-quit],[data-favour],[data-endweek],[data-jobinfo],[data-abandon],[data-startover],[data-look],[data-restyle]';
 function setLook(k, v) {
   if (!LOOK[k] || !(v >= 0 && v < LOOK[k].opts.length)) return;
   if (S.me) { doAct({ t: 'look', k, v }); render(true); return; }
@@ -863,65 +861,6 @@ if (typeof document !== 'undefined') document.addEventListener('keydown', e => {
 // Claude writes the opening of your script at the quality the game says it has: an A reads like a professional
 // draft, an F like the earnest mess it is. It runs on the viewer's own Claude account (the page's `sample`
 // capability), is kept in this browser so a reread is free, and never touches the save or the simulation.
-const GRADE_VOICE = {
-  A: 'superb: precise, surprising and alive, with real subtext, specific images and dialogue nobody else would write. Professional, award-calibre work.',
-  B: 'strong and assured, with a distinct voice, but a few soft spots: a line or two that explains too much, one familiar beat.',
-  C: 'competent but conventional: clear and properly formatted, yet the dialogue is often on the nose and the beats are ones we have seen before.',
-  D: 'weak: clunky exposition, characters announcing their feelings, stock phrases, an uneven rhythm and a scene that goes on too long. Sincere, though, with one moment that almost works.',
-  F: 'bad: overwritten, melodramatic and cliché-ridden, with confused staging, wooden dialogue and formatting mistakes. The kind of amateur first draft that makes readers wince, but still recognisably trying.'
-};
-// "Read the pages" asks an AI model to write a few pages of your script (audit L11). It is a build switch (store
-// builds run python3 tools/build.py --no-ai, which sets AI_PAGES to false and the page never asks for the model) and a
-// player's choice (the overlay can turn it off; the script page can turn it back on). The pages say they're AI-written.
-const AI_PAGES = true;
-function aiPagesOn() { if (!AI_PAGES) return false; try { return localStorage.getItem('applebox-ai') !== 'off'; } catch (e) { return true; } }
-function aiPagesSet(on) { try { localStorage.setItem('applebox-ai', on ? 'on' : 'off'); } catch (e) { /* no storage: this visit only */ } UI.aiOff = !on; }
-if (AI_PAGES && typeof window !== 'undefined' && window.claude && typeof window.claude.use === 'function') window.claude.use('sample').then(s => { UI.sample = s || null; if (s && typeof careerActive === 'function' && careerActive()) render(true); }).catch(() => { UI.sample = null; });
-function pagesPrompt(sc) {
-  const me = ME(), M = S.me, grade = sc.grade || (sc.pages >= 10 ? 'unfinished' : null);
-  const raw = 38 + (sc.q / Math.max(1, sc.pages) - 6) * 5 + (sc.draft - 1) * 7, est = sc.grade ? sc.score : clamp(Math.round(raw > 72 ? 72 + (raw - 72) * .45 : raw), 5, 98);
-  const g = sc.grade || (est >= 85 ? 'A' : est >= 70 ? 'B' : est >= 55 ? 'C' : est >= 40 ? 'D' : 'F');
-  return `You are ghost-writing pages for a character in a film-industry life simulation game. Write the OPENING of their screenplay, about three pages (600 to 900 words), in standard screenplay format (scene headings, action, character cues, dialogue) as plain text.
-
-THE QUALITY MUST HONESTLY MATCH THE GRADE. This draft is graded ${g} (${est}/100): ${GRADE_VOICE[g]} Do not write better than that grade. Do not write worse either.${grade === 'unfinished' ? ' The draft is unfinished; write only its opening.' : ''}
-
-Title: ${sc.title}
-Genre: ${sc.genre}. Tone: ${TONES[sc.tone]}. Theme: ${THEMES[sc.theme]}.
-Logline: ${sc.logline}
-${sc.hero ? 'Hero: ' + sc.hero + '\n' : ''}${sc.setting ? 'World: ' + sc.setting + '\n' : ''}${sc.notes ? 'The writer\'s own notes (use what helps, honour their intentions):\n' + sc.notes.slice(0, 4000) + '\n' : ''}
-The writer: ${esc(me.name)}, ${ageOf(me)}, traits ${me.traits.join(', ')}; their voice keeps returning to ${topThemes(voiceOf()).map(k => THEMES[k].toLowerCase()).join(', ') || 'nothing yet'}. Draft ${sc.draft}. Let their traits show in the writing.
-Rules: invent everything; do not mention or imitate any real film, real person or brand. Reply with the pages only, no preamble or commentary.`;
-}
-async function readPages(id) {
-  const sc = (S.me.scripts || []).find(x => x.id === id);
-  if (!sc || !UI.sample || !aiPagesOn()) return;
-  const key = `applebox-pages-${S.seed}-${S.me.id}-${sc.id}-${sc.draft}-${sc.grade || sc.pages}`;
-  const old = document.getElementById('pagesov'); if (old) old.remove();
-  const el = document.createElement('div');
-  el.id = 'pagesov';
-  el.innerHTML = `<div class="pg-box"><div class="pg-head"><b>${esc(sc.title)}</b> <span class="muted">draft ${sc.draft}${sc.grade ? ' · ' + sc.grade : ''}</span><span class="pg-btns"><button class="btn-s ghost pg-stop">Stop</button> <button class="btn-s pg-close">Close</button></span></div><pre class="pg-text">Thinking…</pre><p class="pg-note muted small"></p></div>`;
-  document.body.appendChild(el);
-  const out = el.querySelector('.pg-text'), note = el.querySelector('.pg-note'), ctl = new AbortController();
-  { const ai = document.createElement('p'); ai.className = 'small muted pg-ai'; ai.innerHTML = 'These pages are written by an AI model from your script\'s notes, not by the game\'s writers. They can be wrong, odd or uneven. <button class="btn-s ghost pg-aioff">Turn AI pages off</button>';
-    el.querySelector('.pg-box').appendChild(ai); ai.querySelector('.pg-aioff').onclick = () => { ctl.abort(); aiPagesSet(false); el.remove(); if (typeof render === 'function') render(true); }; }
-  el.querySelector('.pg-close').onclick = () => { ctl.abort(); el.remove(); };
-  el.querySelector('.pg-stop').onclick = () => ctl.abort();
-  let saved = null; try { saved = localStorage.getItem(key); } catch (e) { /* storage unavailable */ }
-  if (saved) { out.textContent = saved; note.textContent = 'Kept from the last time you read it.'; el.querySelector('.pg-stop').remove(); return; }
-  try {
-    const { text, truncated } = await UI.sample(pagesPrompt(sc), { signal: ctl.signal, onText: ({ text }) => { out.textContent = text; } });
-    out.textContent = text;
-    if (truncated) note.textContent = 'Cut short.';
-    try { localStorage.setItem(key, text); } catch (e) { /* storage unavailable */ }
-  } catch (e) {
-    out.textContent = e.text || '';
-    const msg = { cancelled: '', not_granted: 'Reading pages needs permission to use Claude.', sampling_disabled: 'Claude isn\'t available on this account.', rate_limited: 'Too many requests just now. Try again in a little while.', refused: 'Claude wouldn\'t write these pages. Try changing the notes.' }[e.code];
-    note.textContent = msg ?? 'Something went wrong. Try again.';
-    if (['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'capability_removed'].includes(e.code)) { UI.sample = null; }
-  }
-  const st = el.querySelector('.pg-stop'); if (st) st.remove();
-}
-
 // Unread messages for the header badge: anything from someone else in a thread you haven't opened since.
 function phoneUnread() {
   const M = S.me; if (!M || !M.phone) return 0;

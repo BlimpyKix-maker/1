@@ -26,10 +26,11 @@ after 15 years; recent runs give 12–16).
 **Open items (owner).** A lawyer's review of the approach. The repository is public for now, which exposes the
 renaming tables; making it private is the owner's call, to be made before a public release.
 
-## 2. Free release, AI pages switchable (owner, Round 19)
+## 2. Free release, no AI in the game (owner, Round 19; AI removed Round 25)
 
-The game is free. The AI-written pages ("Read the pages") are behind a player toggle and a build switch
-(`--no-ai`). The wording of the AI disclosure is decided later.
+The game is free. The optional AI-written pages ("Read the pages") were removed in Round 25 at the owner's request:
+the game no longer calls any model. Scripts, songs, plays, reviews and trailer lines are assembled from a hand-written
+library committed with the game (`docs/WRITING-LIBRARY.md`), and the "Read it" button shows those pages.
 
 ## 3. Data from outside is fetched once and committed (Round 19–22)
 

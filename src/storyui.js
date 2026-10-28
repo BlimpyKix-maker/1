@@ -176,4 +176,14 @@ CLICK_HOOKS.songplay = id => { const w = (S.me.works || []).find(x => x.id === +
 .dna-ed{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}.dna-ed label{font-size:12px}
 .dna-notes li{margin:4px 0}.lyric p{margin:0 0 10px;line-height:1.5}.chords .chip{font-weight:700}
 .stage-dir{color:var(--muted,#666)}.mono{margin:10px 0;padding:8px 14px;border-left:3px solid var(--accent,#c84);font-family:Georgia,serif}
+#pagesov .pg-read{overflow:auto;padding:14px 20px;flex:1}
 @media (max-width:560px){.dna-r{grid-template-columns:1fr;gap:2px}}`; document.head.appendChild(st); })();
+// "Read it": the game's own pages for any of your scripts, in an overlay (Round 25; replaces the AI-written pages)
+CLICK_HOOKS.readscript = id => {
+  const sc = scriptOf(+id); if (!sc || typeof document === 'undefined') return;
+  const old = document.getElementById('pagesov'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'pagesov';
+  el.innerHTML = `<div class="pg-box"><div class="pg-head"><b>${esc(sc.title)}</b> <span class="muted">draft ${sc.draft}${sc.grade ? ' · ' + sc.grade : ''}</span><span class="pg-btns"><button class="btn-s ghost pg-close">Close</button></span></div><div class="pg-read">${dnaReadTab(sc)}</div></div>`;
+  el.addEventListener('click', e => { if (e.target === el || e.target.classList.contains('pg-close')) el.remove(); });
+  document.body.appendChild(el);
+};
