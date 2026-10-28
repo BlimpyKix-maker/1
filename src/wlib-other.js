@@ -144,7 +144,7 @@ WLIB.add('stage', [
   ['Comedy', 'light', 'direction', 2, '{A} produces a biscuit tin. Inside: buttons. {A} is as disappointed as everyone else.'],
   ['*', 'dark', 'direction', 2, '{H} sits on the edge of the bed and does not take off {his} shoes.'],
   ['*', 'tense', 'direction', 3, '{R} straightens a picture frame on the wall. It was already straight.'],
-  ['Romance', 'light,bittersweet', 'direction', 2, '{A} offers {his} scarf. {H} takes it, then wraps it around {A} instead.'],
+  ['Romance', 'light,bittersweet', 'direction', 2, '{A} offers a scarf. {H} takes it, then wraps it around {A} instead.'],
   ['*', 'bittersweet', 'direction', 3, '{H} sweeps the floor. {He} sweeps around the place where someone used to stand, the way one does.'],
   ['*', 'tense', 'direction', 1, 'There is a big argument. They shout at each other.'],
   ['Musical', 'light', 'direction', 2, 'The music begins under the dialogue, quietly, as if it has been waiting for permission.'],
@@ -158,7 +158,7 @@ WLIB.add('stage', [
   ['Period', '*', 'direction', 2, 'A maid enters, sees the room, and leaves without setting down the tray.'],
   ['*', 'light', 'direction', 2, '{H} attempts a dance step from a long time ago. {His} feet remember before {he} does.'],
   ['*', '*', 'direction', 1, '{H} cries.'],
-  ['War', 'dark', 'direction', 3, 'The air-raid siren starts. Nobody moves. {A} finishes buttering {his} toast.'],
+  ['War', 'dark', 'direction', 3, 'The air-raid siren starts. Nobody moves. {A} finishes buttering the toast.'],
   ['Comedy', 'light,absurd', 'direction', 2, 'Everyone turns to look at {H}. {H} turns to look behind {him}.'],
   ['*', 'tense', 'direction', 2, 'The door opens three inches and stops on the chain.'],
   ['*', 'bittersweet', 'direction', 3, '{H} answers a question nobody has asked. Then, quietly, {he} asks it.'],
@@ -186,7 +186,7 @@ WLIB.add('stage', [
   ['Western', 'tense', 'direction', 2, 'Outside, a horse snorts and stamps. Both men listen to it as if it might decide things.'],
   ['*', '*', 'direction', 1, '{H} looks at {OBJ}. It means a lot to {him}.'],
   ['Sci-fi', 'tense', 'direction', 3, 'The ship\'s voice announces dinner. Nobody has asked it to. It has never done that before.'],
-  ['*', 'light,absurd', 'direction', 2, '{A} sets off the smoke alarm with the toast. {A} fans it with a cookbook while still trying to make {his} point.'],
+  ['*', 'light,absurd', 'direction', 2, '{A} sets off the smoke alarm with the toast. {A} fans it with a cookbook while still trying to make a point.'],
   ['*', 'dark', 'direction', 3, '{H} drinks from the glass {R} left behind, without thinking, and then thinks.'],
   ['*', '*', 'direction', 2, 'The light shifts. It is evening. Nobody has turned on a lamp.'],
   ['*', 'tense', 'direction', 1, '{H} and {R} glare at each other. It is very tense.'],
@@ -902,4 +902,19 @@ WLIB.add('num', [
   ['Musical,Comedy', 'light', 'finale', 3, 'The office anthem returns at four forty-five on a Friday, and this time, as the manager walks in, he joins in the harmony.'],
   ['Musical', 'tense,bittersweet', 'finale', 2, 'The company sings in a circle around {H}, getting closer each verse, until they lift {him} onto their shoulders on the final note.'],
   ['Musical', 'bittersweet', 'finale', 3, 'The neighbours sing from their windows once more, the same songs as the opening, but this time they listen to each other, and the courtyard falls into one tune.'],
+]);
+WLIB.add('stage', [
+  ['Drama', 'tense', 'open', 1, 'Lights up on {PLACE}. Everyone is worried about what is going to happen next.'],
+  ['Comedy', 'light', 'open', 1, 'A family is having breakfast. They are a funny family and they argue a lot.'],
+  ['*', 'tense', 'mono', 1, 'I cannot take it anymore. I have kept quiet for too long. Now I am going to say what I really think.'],
+  ['*', 'bittersweet', 'mono', 1, 'I remember when we were young and happy. Those were the best days of my life. I wish we could go back.'],
+  ['*', 'dark', 'mono', 1, 'It is all my fault. If only I had been there, none of this would have happened.'],
+  ['Comedy', 'light', 'mono', 1, 'Well, that did not go as planned! I guess I am just not cut out for this kind of thing.'],
+]);
+WLIB.add('pod', [
+  ['*', '*', 'hook', 1, 'We have a very special episode for you today. You do not want to miss this one.'],
+  ['Crime', 'dark', 'hook', 1, 'A small town hides a big secret. In this episode, we uncover the truth.'],
+  ['*', 'light', 'hook', 1, 'Our guest today has done some amazing things. Let\'s hear all about it.'],
+  ['Comedy', 'light', 'hook', 1, 'This week we answer the question everyone has been asking!'],
+  ['Documentary', '*', 'hook', 1, 'In this episode we explore a fascinating topic that you have probably never thought about.'],
 ]);
