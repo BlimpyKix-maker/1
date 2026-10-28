@@ -114,15 +114,22 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   for (const g of legs) { const s = g.s, x = g.A[0], ay = g.A[1], ty = fy - (g.free ? .5 : 0), out = s * (g.free ? 2.2 : 1.2), shaft = [0, 5, 15, 0, 0, 0, 0, 17, 16, 2][shoe], sole = shoe === 7 ? 2.4 : shoe === 4 ? .5 : 1.1, heel = shoe === 4 ? 3 : 0;
     if (shoe === 5) { o.push(`<path d="M${n1(x - 2.8)} ${n1(ay)} L${n1(x + 2.8)} ${n1(ay)} L${n1(x + 3.8 + out)} ${n1(ty - 1)} L${n1(x - 3.6 + out * .4)} ${n1(ty - 1)} Z" fill="${SK}"/><path d="M${n1(x - 3.2)} ${n1(ay + 3)} L${n1(x + 3.4)} ${n1(ay + 5)} M${n1(x - 3.6 + out * .3)} ${n1(ty - 3.2)} L${n1(x + 4 + out)} ${n1(ty - 2.8)}" stroke="${SH[0]}" stroke-width="1.1"/><rect x="${n1(x - 4.2 + out * .4)}" y="${n1(ty - 1.1)}" width="${n1(8.6 + out * .6)}" height="1.3" rx=".6" fill="${mixHex(SH[0], '#000', .3)}"/>`); continue; }
     if (shaft) o.push(`<path d="M${n1(x - 3.9)} ${n1(ay - shaft)} L${n1(x + 3.9)} ${n1(ay - shaft)} L${n1(x + 3.6)} ${n1(ay + 2)} L${n1(x - 3.6)} ${n1(ay + 2)} Z" fill="${SH[0]}" stroke="${mixHex(SH[0], '#000', .4)}" stroke-width=".4"/>`);
-    const tx = x + out * .5, tw = shoe === 4 ? 3.4 : 4.5;   // the toe box, seen from the front: rounded, a little turned out
-    o.push(`<path d="M${n1(x - 3.1)} ${n1(ay - .5)} L${n1(x + 3.1)} ${n1(ay - .5)} C${n1(x + 3.4)} ${n1(ay + 3)} ${n1(tx + tw + .4)} ${n1(ty - 6.5)} ${n1(tx + tw + .3)} ${n1(ty - 3.4 - sole)} C${n1(tx + tw + .2)} ${n1(ty - sole + .2)} ${n1(tx + tw - 1.5)} ${n1(ty - sole + .3)} ${n1(tx)} ${n1(ty - sole + .3)} C${n1(tx - tw + 1.5)} ${n1(ty - sole + .3)} ${n1(tx - tw - .2)} ${n1(ty - sole + .2)} ${n1(tx - tw - .3)} ${n1(ty - 3.4 - sole - heel * .5)} C${n1(tx - tw - .4)} ${n1(ty - 6.5)} ${n1(x - 3.4)} ${n1(ay + 3)} ${n1(x - 3.1)} ${n1(ay - .5)} Z" fill="${SH[0]}" stroke="${mixHex(SH[0], '#000', .45)}" stroke-width=".4"/><path d="M${n1(tx - tw - .2)} ${n1(ty - sole)} Q${n1(tx)} ${n1(ty - sole + .8)} ${n1(tx + tw + .2)} ${n1(ty - sole)} L${n1(tx + tw)} ${n1(ty)} Q${n1(tx)} ${n1(ty + .7)} ${n1(tx - tw)} ${n1(ty)} Z" fill="${SH[1]}"/><path d="M${n1(tx - 2)} ${n1(ty - 5.6)} Q${n1(tx)} ${n1(ty - 6.6)} ${n1(tx + 2)} ${n1(ty - 5.6)}" stroke="#FFFFFF" stroke-width=".45" fill="none" opacity=".3"/>`);
-    if (shoe === 4) o.push(`<path d="M${n1(x - 3.4 + out * .4)} ${n1(ty - heel)} L${n1(x - 2.6 + out * .4)} ${n1(ty + .4)}" stroke="${SH[0]}" stroke-width="1.2"/>`);
-    if (shoe === 9) o.push(`<ellipse cx="${n1(x + out * .5)}" cy="${n1(ty - 3)}" rx="5.8" ry="4" fill="#FFFFFF" opacity=".55"/>`);
+    // Round 25: shoes in three-quarter view, so a foot has length: heel under the ankle, the instep, a toe that turns
+    // out and down toward us, and the sole as a darker band underneath
+    const d = s, col = SH[0], dk = mixHex(col, '#000', .42), soleC = shoe === 0 || shoe === 1 ? '#EDEAE4' : shoe === 9 ? '#F7DCE6' : mixHex(col, '#000', .55);
+    const tw = (shoe === 4 ? 3.2 : shoe === 9 ? 5 : 4.3) * Math.min(1.1, lf), toeX = x + d * (g.free ? 3.4 : 2.4), toeY = ty + .2, heelX = x - d * 2.2, hl = heel || 0;
+    // the toe box comes toward us and turns a little out; the heel sits behind the ankle, just visible
+    const up = `M${n1(x - d * 3.3)} ${n1(ay - .6)} L${n1(x + d * 3.1)} ${n1(ay - .4)} C${n1(x + d * 3.6)} ${n1(ay + 2.6)} ${n1(toeX + d * tw * 1.05)} ${n1(toeY - 5.4)} ${n1(toeX + d * tw * 1.08)} ${n1(toeY - 2.6 - sole)} C${n1(toeX + d * tw * 1.1)} ${n1(toeY - .2)} ${n1(toeX + d * tw * .4)} ${n1(toeY + .5)} ${n1(toeX - d * tw * .2)} ${n1(toeY + .4)} C${n1(toeX - d * tw * .95)} ${n1(toeY + .3)} ${n1(toeX - d * tw * 1.2)} ${n1(toeY - .4)} ${n1(heelX)} ${n1(ty - sole - hl - .6)} C${n1(heelX - d * .8)} ${n1(ty - sole - hl - 2.8)} ${n1(x - d * 3.6)} ${n1(ay + 2.2)} ${n1(x - d * 3.3)} ${n1(ay - .6)} Z`;
+    o.push(`<path d="${up}" fill="${col}" stroke="${dk}" stroke-width=".42" stroke-linejoin="round"/><path d="M${n1(heelX + d * .2)} ${n1(ty - sole * .5 - hl - .4)} C${n1(toeX - d * tw)} ${n1(toeY - sole * .4)} ${n1(toeX + d * tw * .6)} ${n1(toeY - sole * .4 + .3)} ${n1(toeX + d * tw * 1.02)} ${n1(toeY - sole - .8)}" stroke="${soleC}" stroke-width="${n1(sole + .3)}" fill="none" stroke-linecap="round"/><path d="M${n1(toeX - d * tw * .5)} ${n1(toeY - 4.4)} Q${n1(toeX + d * tw * .3)} ${n1(toeY - 5.4)} ${n1(toeX + d * tw * .85)} ${n1(toeY - 3.6)}" stroke="${mixHex(col, '#fff', .45)}" stroke-width=".55" fill="none" opacity=".6"/>`);
+    if (shoe === 0 || shoe === 1) o.push(`<path d="M${n1(x - 1.8)} ${n1(ay + 1.2)} L${n1(x + 1.8)} ${n1(ay + 1.6)} M${n1(x - 1.6)} ${n1(ay + 2.6)} L${n1(x + 2)} ${n1(ay + 3)} M${n1(x - 1.2)} ${n1(ay + 4)} L${n1(x + 2.2)} ${n1(ay + 4.4)}" stroke="${shoe === 1 ? '#F4F2EE' : dk}" stroke-width=".45" opacity=".75"/>`);
+    if (shoe === 4) o.push(`<path d="M${n1(heelX + d * .4)} ${n1(ty - hl - sole)} L${n1(heelX + d * .8)} ${n1(ty + .3)}" stroke="${dk}" stroke-width="1.3" stroke-linecap="round"/>`);
+    if (shoe === 6) o.push(`<path d="M${n1(toeX - d * tw * .7)} ${n1(toeY - 3.2)} Q${n1(toeX)} ${n1(toeY - 4.6)} ${n1(toeX + d * tw * .8)} ${n1(toeY - 3)}" stroke="${dk}" stroke-width=".4" fill="none" stroke-dasharray=".6 .5"/>`);
+    if (shoe === 9) o.push(`<ellipse cx="${n1(toeX)}" cy="${n1(ty - 3)}" rx="6.2" ry="3.6" fill="#FFFFFF" opacity=".5"/>`);
     if (shoe === 1) o.push(`<circle cx="${n1(x - s * 2.4)}" cy="${n1(ay - 2)}" r="1.1" fill="#FFFFFF"/>`); }
   // arms: the shoulder joint sits inside the torso's edge so the sleeve grows out of the shoulder
   const puff = top === 17 ? 2 : 0, sW = sw + puff, wW = ww + puff * .8, shTilt = s => (s === w ? .9 : s === -w ? -.9 : 0);
   const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : cloth, sleeveD = mixHex(sleeve, '#000', .4), wide = top === 12 ? 2.4 : top === 17 ? 1.6 : 0;
-  const Sj = s => [cx + s * (sW - 4), sy + 6.8 + shTilt(s)];
+  const Sj = s => [cx + s * (sW - 4.6), sy + 9 + shTilt(s)];
   const hang = s => [Sj(s), [cx + s * (Math.max(ww + 5.6, sW - 2.4) + (s === w ? .8 : 0)), wy - 3], [cx + s * (hp + 3.4 + (s === w ? 1.2 : 0)), cr - 1]];
   let A = { [-1]: hang(-1), 1: hang(1) }; const hands = { [-1]: 'rest', 1: 'rest' };
   if (pose === 1) { A[1] = [Sj(1), [cx + sw + 10, sy + 26], [cx + ww + 3.4, wy - 1]]; hands[1] = 'fist'; }
@@ -131,7 +138,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   const crossed = pose === 3;
   const AW = [5 * af, 4.7 * af, 3.5 * af, 3.8 * af, 2.6 * af];
   const armJ = J => [J[0], lerp2(J[0], J[1], .38), J[1], lerp2(J[1], J[2], .3), J[2]];
-  const upperArm = (s, J, whole) => { const J5 = armJ(J), up = whole ? J5 : [J5[0], J5[1], J5[2]], out = [];
+  const upperArm = (s, J, whole) => { const J5 = armJ(J); J5[0] = lerp2(J5[0], J5[2], .16); J5[1] = lerp2(J5[0], J5[2], .45); const up = whole ? J5 : [J5[0], J5[1], J5[2]], out = [];
     if (whole && !short) { const cuff = lerp2(J5[2], J5[4], .93); out.push(`<path d="${limbPath([J5[0], J5[1], J5[2], J5[3], cuff], [AW[0] + .5, AW[1] + .7, AW[2] + 1, AW[3] + 1.1 + wide, AW[4] + 1.2 + wide * 1.3], true)}" fill="${CL}" stroke="${sleeveD}" stroke-width=".4"/><path d="M${n1(J5[2][0] - 1.6)} ${n1(J5[2][1] - 1.2)} q1.6 1.6 3.2 .4 M${n1(J5[2][0] - 1.2)} ${n1(J5[2][1] + 1.4)} q1.4 1 2.6 0" stroke="${sleeveD}" stroke-width=".4" fill="none" opacity=".6"/>`); }
     else out.push(`<path d="${limbPath(up, whole ? AW : AW.slice(0, 3))}" fill="${short ? SK : CL}" stroke="${short ? shade : sleeveD}" stroke-width=".4"/>`);
     if (short) { const e = lerp2(J5[0], J5[2], .4); out.push(`<path d="${limbPath([J5[0], lerp2(J5[0], e, .5), e], [AW[0] + .8, AW[0] + 1, AW[1] + 1.3], true)}" fill="${CL}" stroke="${sleeveD}" stroke-width=".4"/>`); }
@@ -146,11 +153,14 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (!crossed) for (const s of [-1, 1]) o.push(upperArm(s, A[s], !bent(s)));
   // the torso, with its own small tilt: shoulders against the hips
   const hem = top === 10 ? kn - 4 : top === 18 ? kn - 8 : hy + 5, hW = top === 10 ? hp + 9 : top === 18 ? hp + 7 : hp + 1.6;
-  const half = s => [[cx + s * (nb + 2.6), sy - .6 + shTilt(s) * .3], [cx + s * (sW - 6), sy + 1.4 + shTilt(s)], [cx + s * (sW - .8), sy + 4.4 + shTilt(s)], [cx + s * sW, sy + 8.6 + shTilt(s)], [cx + s * (sW - 1.8), sy + 16 + shTilt(s)], [cx + s * (wW + 3), wy - 14], [cx + s * (wW + .6), wy - 1], [cx + s * (hp + 1.6), hy - 1 - (s === w ? tilt * .4 : 0)]];
+  const half = s => [[cx + s * (nb + 2.4), sy - .8 + shTilt(s) * .3], [cx + s * (sW - 8), sy + 2.4 + shTilt(s)], [cx + s * (sW - 2.6), sy + 5 + shTilt(s)], [cx + s * (sW - .1), sy + 9.2 + shTilt(s)], [cx + s * (sW - 1), sy + 14.6 + shTilt(s)], [cx + s * Math.max(wW + 4, sW - 2.8), sy + 21], [cx + s * (wW + 2.4), wy - 11], [cx + s * (wW + .5), wy - 1], [cx + s * (hp + 1.6), hy - 1 - (s === w ? tilt * .4 : 0)]];
   const R0 = half(1), L0 = half(-1).reverse();
   const body = crPath(R0) + ` L${n1(cx + hW)} ${n1(hem)} Q${cx} ${n1(hem + 1.6)} ${n1(cx - hW)} ${n1(hem)} L${n1(L0[0][0])} ${n1(L0[0][1])}` + crTail(L0) + ` Q${cx} ${sy + 2.6} ${n1(R0[0][0])} ${n1(R0[0][1])} Z`;
   if (top === 1) o.push(`<path d="M${n1(cx - nb - 6)} ${sy + 1} Q${n1(cx - nb - 4)} ${sy - 8} ${cx} ${sy - 9} Q${n1(cx + nb + 4)} ${sy - 8} ${n1(cx + nb + 6)} ${sy + 1} Z" fill="${dkc}"/>`);
   o.push(`<path d="${body}" fill="${CL}" stroke="${tline}" stroke-width=".5"/>`);
+  // Round 25: a rounded shoulder over the joint, so the sleeve grows out of the shoulder instead of ending in a flat tab
+  if (top !== 19) for (const sd of [-1, 1]) { const t0 = shTilt(sd), ox = sW + 1.4 + puff * .6, cap = `M${n1(cx + sd * (sW - 8.5))} ${n1(sy + 2.2 + t0)} C${n1(cx + sd * (sW - 3))} ${n1(sy + 3.2 + t0)} ${n1(cx + sd * (ox + .4))} ${n1(sy + 5.4 + t0)} ${n1(cx + sd * ox)} ${n1(sy + 14.5 + t0)}`;
+    o.push(`<path d="${cap} L${n1(cx + sd * (sW - 4.2))} ${n1(sy + 15.5 + t0)} L${n1(cx + sd * (sW - 8.5))} ${n1(sy + 6 + t0)} Z" fill="${CL}"/><path d="${cap}" fill="none" stroke="${tline}" stroke-width=".5"/>`); }
   const pat = top === 16 && !L.pattern ? 4 : top === 2 && !L.pattern ? 2 : L.pattern || 0;
   if (pat && top !== 19) { const pc = mixHex(cloth, pat === 6 ? '#3B2516' : '#FFFFFF', pat === 6 ? .6 : .55), P0 = {
       1: `<rect width="6" height="2.6" fill="${pc}"/>`, 2: `<rect width="6" height="2.2" fill="${pc}" opacity=".6"/><rect width="2.2" height="6" fill="${pc}" opacity=".6"/>`, 3: `<circle cx="3" cy="3" r="1.1" fill="${pc}"/>`,

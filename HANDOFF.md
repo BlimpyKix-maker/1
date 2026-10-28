@@ -213,6 +213,9 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/wlib.js`, `src/wlib-*.js` | Round 24 writing library, written once and committed (format and rules in `docs/WRITING-LIBRARY.md`): about 940 screen fragments, 658 dialogue exchanges, 984 lyric lines, 1,071 stage/podcast/video/musical fragments, 980 reader's notes, critics' lines, trailer voice-over and speech fragments. Each is tagged by genre, tone and craft level 1–3. |
 | `src/storyengine.js` | Round 24: picks fragments by DNA and craft (`wlPick`, `wlDist`) and writes loglines, beat sheets, synopses, screenplay pages with the structure visible on the page (`dnaScene`, `dnaPages`), reader's notes (`dnaNotes`), critics' lines, trailer voice-over, speeches, song lyrics rhymed in pairs with a chord chart that plays in the browser (`songLyric`, `songPlay`), plays, podcasts and videos. |
 | `src/storyui.js` | Round 24 wiring: "Where it comes from" on the new-script form, the DNA card on the Story tab (structure and ending are the writer's choice, action `swdna`), the Read tab, a small score adjustment for fit (`finishDraft`), "The story" on film pages, critics and trailers from the DNA, the awards speech, structures that come into fashion after hits (`dnaTrendYear`, `f.dt`), and story panels on works pages. |
+| `src/trailer4.js` | Round 25 trailers: an edit in acts (`t4Plan`: cold open, setup, turn, build, climb, silence, title, button, date), moving footage (camera keyframes per shot, actors walking in / turning / closing in, parallax, focus pull, genre grades and weather overlays, kinetic word-by-word text), and a score scheduled on the audio clock against the edit (`t4Score`: per-genre key, progression and arrangement following the edit's energy, riser, silence, slam; compressor + limiter + reverb). The picture follows the audio clock. |
+| `src/display.js` | Round 25: full screen on the first click or key (`fsEnter`), Esc or the corner button for windowed, remembered per device (`ab-display`). |
+| `src/lifedash.js` | Round 25: the need-meters over the room are removed; a data strip above the room (`lifeDash`) shows net worth, runway, energy, stress, standing, fame, network and level with 12-week sparklines from `M.hist`. |
 | `src/streams.js` | Built last: the world's dice per system and week (`wstream`), the player's own dice for actions, so two careers on one seed share the world. |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
@@ -329,6 +332,19 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 25: a library three times larger, no AI, full screen, trailers rebuilt, feet and shoulders
+
+- Asked for: far more writing so lines don't repeat over many hours; take out the AI "Read the pages"; fix the hint box
+  drawn as two red semicircles in SlateOS; start full screen with a windowed option; trailers that move and cut to
+  the music, with sound that doesn't clip or loop; better feet and body; replace the cutesy bars over the avatar.
+- Library: about 14,300 fragments (was about 5,600): `src/wlib-*2.js`, `src/wlib-dialogue3.js`,
+  `src/wlib-screen-open2.js`, `src/wlib-screen-act2.js`, and `src/dnapools2.js` triples every story-trait pool.
+- AI: removed (`readPages`, the `sample` call, `--no-ai`); "Read it" opens the game's own pages (`CLICK_HOOKS.readscript`).
+- Hint box: the piano roll's `.pr` rule (16px high, `all: unset`) also matched the app primer box; it is now `.proll .pr`.
+- Bodies (`src/figure.js`): shoes in three-quarter view (toe box toward the viewer, sole, heel); sloped shoulders and a
+  rounded shoulder cap so sleeves don't end in flat tabs; the torso tapers from chest to waist.
+- See the source map rows for `src/trailer4.js`, `src/display.js` and `src/lifedash.js`.
 
 ## Round 24: every work its own story, written without a model
 

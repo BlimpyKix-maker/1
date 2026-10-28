@@ -24,15 +24,16 @@ function wlList(kind, tag) {
   const out = []; for (const t in m) if (t.startsWith(tag + '.')) out.push(...m[t]); return m[tag] = out;
 }
 // craft 0..1 → how likely each level is
-function wlDist(c) { c = clamp(c, 0, 1); const p1 = clamp(.7 - c * .95, .03, .7), p3 = clamp(c * 1.05 - .28, .03, .78); return { 0: 1, 1: p1, 2: Math.max(.08, 1 - p1 - p3), 3: p3 }; }
+// Round 25: flatter weights, so each work draws on far more of the library (repeats were too easy to spot)
+function wlDist(c) { c = clamp(c, 0, 1); const p1 = clamp(.6 - c * .75, .12, .6), p3 = clamp(c * .85 - .15, .12, .65); return { 0: 1, 1: p1, 2: Math.max(.2, 1 - p1 - p3), 3: p3 }; }
 // o: { g, tone, c (craft), r, used }
 function wlPick(kind, tag, o) {
   const L = wlList(kind, tag); if (!L.length) return null;
   const D = o.c === undefined ? null : wlDist(o.c), W = [];
   let tot = 0;
   for (const e of L) {
-    let w = e.gs ? (o.g && e.gs.has(o.g) ? 3 : 0) : 1; if (!w) continue;
-    w *= e.ts ? (o.tone && e.ts.has(o.tone) ? 2 : .3) : 1;
+    let w = e.gs ? (o.g && e.gs.has(o.g) ? 1.8 : 0) : 1; if (!w) continue;
+    w *= e.ts ? (o.tone && e.ts.has(o.tone) ? 1.5 : .55) : 1;
     w *= D ? D[e[3]] ?? .1 : 1;
     if (o.used && o.used.has(e[4])) w *= .01;
     if (w > 0) { W.push([e, w]); tot += w; }
@@ -85,10 +86,28 @@ function dnaExch(text, d) {
   }
   return out;
 }
+
+// ---- generated openings and endings (Round 25) ----
+// Some scenes open and close on sentences built from the work's own DNA (its place, its object, its hero's job and
+// flaw) and small pools of sound, light and gesture, so they are new in every work; the library carries the rest.
+const GEN_SOUND = ['a radiator knocking', 'a dog two gardens over', '~the fridge starting up', '~traffic on wet tarmac', 'a kettle working itself up', 'gulls arguing', '~a television through the wall', 'a clock with a loud tick', 'someone practising scales upstairs', '~the hum of a vending machine', '~a lorry reversing', 'church bells, slightly out of time', 'wind in a loose window', 'a tap that won\'t stop dripping', '~a far-off siren', '~a radio playing to nobody', 'crickets', '~a lift arriving on another floor', 'the creak of a ceiling fan', '~a train passing, then silence', 'pigeons on the gutter', '~a phone buzzing in another room', 'the sea, close', 'rain on a tin roof', '~a generator in the yard', 'children in a playground', '~a till drawer slamming', 'an argument, muffled', 'the hiss of a gas fire', 'a foghorn'];
+const GEN_LIGHT = ['Early light, the colour of weak tea.', '~One bulb, no shade.', 'Late sun through dirty glass.', '~Blue light from a screen nobody is watching.', '~Strip lights, one of them flickering.', '~Streetlight in stripes through the blinds.', 'Grey, even light. The kind that forgives nothing.', 'Candlelight, because the power is out again.', '~Neon from the shop across the road.', 'The last of the daylight.', '~Headlights sweep the ceiling and are gone.', '~A desk lamp makes an island in the dark.', 'Winter light, low and hard.', '~Light from an open fridge.', 'Dawn, not yet committed.'];
+const GEN_DO = ['turns {OBJ} over in {his} hands', 'sets {OBJ} down, squares it, sets it down again', 'wipes {OBJ} with a sleeve', 'counts something under {his} breath', 'checks {OBJ}, as if it might have changed', 'stands very still and listens', 'reads the same line twice', 'rolls up {his} sleeves and gets on with it', 'eats standing up, watching the door', 'writes something down and crosses it out', 'pockets {OBJ} and looks round to see if anyone saw', 'fixes a crooked picture that was not crooked', 'looks at {OBJ} for a long time', 'waits, which {he} is bad at', 'practises a sentence in the window\'s reflection', 'straightens chairs that nobody will sit in'];
+const GEN_OPEN = [
+  '{PLACE_C}. {LIGHT} {H} {DO}.', '{PLACE_C}, {DESC}. Somewhere: {SOUND}. {H} {DO}.', '{LIGHT} {PLACE_C}. {H}, still in {his} {JOB} clothes, {DO}.',
+  'We hear {SOUND} before we see anything. Then: {PLACE}, and {H}, who {DO}.', '{PLACE_C}. Nobody else here yet. {H} {DO}.', '{H} has been at {PLACE} since before anyone else. {LIGHT} {He} {DO}.',
+  'Close on {OBJ}. Pull back: {PLACE}, {DESC}. {H} {DO}.', '{SOUND_C}. {PLACE_C}. {H} {DO}, then thinks better of it.', '{PLACE_C} at the end of a long shift. {H} {DO}.',
+  '{LIGHT} Within reach: {OBJ}. {H} {DO}.', '{H} at {PLACE}. {He} {DO}. The sound of {SOUND} fills the gap where a conversation should be.', '{PLACE_C}, {DESC}. {LIGHT}'];
+const GEN_BUTTON = ['{H} leaves {OBJ} where {he} found it. Almost.', 'On {his} way out, {H} switches off the light. Then switches it back on.', '{SOUND_C}. Nobody moves.', '{H} pockets {OBJ}. Decision made.', 'The door closes. {OBJ} is still on the table.', '{H} laughs once, at nothing, and goes.', 'Hold on {OBJ}, {HOW}.', '{H} looks at {OBJ}, {HOW}, and doesn\'t say what {he}\'s thinking.', 'Outside, {SOUND}. {H} picks up {his} coat.', 'CUT TO BLACK on {H}\'s face, deciding.'];
+const GEN_OLD = new Set(['Western', 'Fantasy', 'Period', 'War', 'Martial arts']);
+function genFill(t, d, r) {
+  const old = GEN_OLD.has(d.g), ok = x => !(old && x[0] === '~'), pk = a => { const L = a.filter(ok); const x = L[Math.floor(r() * L.length)]; return x[0] === '~' ? x.slice(1) : x; }, place = String(dnaFill(d.world.place, d)), sound = pk(GEN_SOUND);
+  return dnaFill(t.replace(/\{DO\}/g, () => pk(GEN_DO)).replace(/\{PLACE_C\}/g, cap1(place)).replace(/\{LIGHT\}/g, () => pk(GEN_LIGHT)).replace(/\{SOUND_C\}/g, cap1(sound)).replace(/\{SOUND\}/g, sound).replace(/\{DESC\}/g, d.world.desc).replace(/\{HOW\}/g, d.obj.how), d).replace(/([.!?]\s+)([a-z])/g, (m, a, b) => a + b.toUpperCase());
+}
 // one scene for beat b (0..7)
 function dnaScene(d, b, o) {
   const r = o.r, P = { g: d.g, tone: d.tone, c: o.c, r, used: o.used }, out = [], trick = d.trick;
-  let open = wlText('open', 'open', P, d), slug = d.world.slug;
+  let open = r() < .4 ? genFill(GEN_OPEN[Math.floor(r() * GEN_OPEN.length)], d, r) : wlText('open', 'open', P, d), slug = d.world.slug;
   const m = /^(INT\.|EXT\.|INT\.\/EXT\.)\s*([^\n]*)\n?/.exec(open);
   if (m) { open = open.slice(m[0].length).trim(); if (b !== 0 && b !== 7 && trick !== 'oneroom') slug = m[2].replace(/\s*[–-]\s*\{?TIME\}?.*$/, '').replace(/\s*[–-]\s*(DAY|NIGHT|DAWN|DUSK|CONTINUOUS).*$/, '').trim() || slug; }
   const ie = DNA_EXT.test(slug) ? 'EXT.' : 'INT.';
@@ -110,7 +129,7 @@ function dnaScene(d, b, o) {
   if (trick === 'letters') { const t = wlText('stage', 'mono', P, d); if (t) out.push(`${d.ally.n.toUpperCase()} (V.O.)`, '(reading a letter)', t, ''); }
   if (trick === 'unreliable' && b >= 2 && r() < .55) out.push(`${d.hero.n.toUpperCase()} (V.O.)`, 'That isn\'t how it happened. Not exactly.', '');
   if (trick === 'framed' && b > 0 && r() < .5) out.push(`OLDER ${d.hero.n.toUpperCase()} (V.O.)`, 'I didn\'t know yet what it would cost.', '');
-  const bt = wlText('button', 'button', P);
+  const bt = r() < .35 ? genFill(GEN_BUTTON[Math.floor(r() * GEN_BUTTON.length)], d, r) : wlText('button', 'button', P);
   if (bt) out.push(...(/^(H|R|A):/.test(bt) ? dnaExch(bt, d).slice(1) : [dnaFill(bt, d)]), '');
   if (trick === 'circular' && b === 7 && o.first) out.push(o.first + ' Again.', '');
   return { text: out.join('\n').replace(/\n{3,}/g, '\n\n').trim(), open };

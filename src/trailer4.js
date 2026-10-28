@@ -43,7 +43,8 @@ function t4Plan(f) {
   if (story) lines.push(...story.lines);
   else if (d) for (const tag of ['setup', 'conflict', 'reveal', 'turn', 'payoff', 'breather', 'conflict']) {
     // a trailer uses the punchiest line of the exchange, and lines that belong to the genre
-    let ex = ''; for (let i = 0; i < 4 && !ex; i++) { const e = wlPick('exch', tag, { g: d.g, tone: d.tone, c: Math.max(c, .7), r, used }); if (e && (e.gs ? e.gs.has(d.g) : r() < .5 || i === 3) && (!e.ts || e.ts.has(d.tone) || i >= 2)) ex = e[4]; }
+    const tt = ['action', 'hero', 'war', 'crime', 'scifi', 'western'].includes(fam) ? (d.tone === 'dark' ? 'dark' : 'tense') : fam === 'horror' ? 'dark' : d.tone;
+    let ex = ''; for (let i = 0; i < 6 && !ex; i++) { const e = wlPick('exch', tag, { g: d.g, tone: tt, c: Math.max(c, .7), r, used }); if (e && (e.gs ? e.gs.has(d.g) : r() < .5 || i >= 4) && (e.ts ? e.ts.has(tt) : i >= 2)) ex = e[4]; }
     const L = String(ex).split('\n').map(l => /^(H|R|A):\s*(\([^)]*\))?\s*(.+)$/.exec(l.trim())).filter(m => m && m[3].length > 8 && m[3].length < 90).map(m => m[3]);
     const best = L.sort((x, y) => ((/[?!]|—|\.\.\./.test(y) ? 2 : 0) + (y.length < 60 ? 1 : 0)) - ((/[?!]|—|\.\.\./.test(x) ? 2 : 0) + (x.length < 60 ? 1 : 0)))[0];
     if (best) lines.push(dnaFill(best, d)); }
@@ -214,21 +215,21 @@ const T4_CSS = `
 #trailer.v4 .t4-seg.on.am-approach .L-act{animation:t4appr var(--d) ease-out both}
 @keyframes t4appr{from{transform:scale(.9) translateY(4px)}to{transform:scale(1.07)}}
 #trailer.v4 .t4-seg.on.am-turn .L-a{animation:t4turn var(--d) ease-in-out both}
-@keyframes t4turn{0%,45%{transform:scaleX(1)}55%,100%{transform:scaleX(-1)}}
+@keyframes t4turn{0%,49.5%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
 #trailer.v4 .t4-seg.on.am-idle .L-a{animation:t4breath 2.4s ease-in-out infinite alternate}
 @keyframes t4breath{from{transform:scaleY(1) rotate(-.3deg)}to{transform:scaleY(1.016) rotate(.4deg)}}
-#trailer.v4 .t4-grade{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.9}
-#trailer.v4 .g-drama .t4-shot{filter:saturate(.9) contrast(1.05)} #trailer.v4 .g-drama .t4-grade{background:linear-gradient(180deg,rgba(40,60,90,.35),rgba(200,150,90,.25))}
-#trailer.v4 .g-action .t4-shot,#trailer.v4 .g-hero .t4-shot{filter:contrast(1.25) saturate(1.05) brightness(.92)} #trailer.v4 .g-action .t4-grade,#trailer.v4 .g-hero .t4-grade{background:linear-gradient(180deg,rgba(0,90,120,.5),rgba(255,130,40,.45))}
-#trailer.v4 .g-war .t4-shot{filter:saturate(.55) contrast(1.2) sepia(.15)} #trailer.v4 .g-war .t4-grade{background:rgba(90,80,50,.4)}
-#trailer.v4 .g-horror .t4-shot{filter:saturate(.45) contrast(1.25) brightness(.78)} #trailer.v4 .g-horror .t4-grade{background:radial-gradient(70% 70% at 50% 45%,transparent,rgba(0,20,10,.85))}
-#trailer.v4 .g-crime .t4-shot{filter:saturate(.75) contrast(1.15)} #trailer.v4 .g-crime .t4-grade{background:linear-gradient(180deg,rgba(0,80,90,.45),rgba(30,20,10,.35))}
-#trailer.v4 .g-romance .t4-shot,#trailer.v4 .g-musical .t4-shot{filter:brightness(1.06) saturate(1.1) contrast(.95)} #trailer.v4 .g-romance .t4-grade,#trailer.v4 .g-musical .t4-grade{background:radial-gradient(80% 70% at 70% 30%,rgba(255,190,140,.55),transparent)}
-#trailer.v4 .g-scifi .t4-shot{filter:saturate(1.15) hue-rotate(-10deg) contrast(1.1)} #trailer.v4 .g-scifi .t4-grade{background:linear-gradient(180deg,rgba(0,40,120,.5),rgba(0,160,170,.3))}
-#trailer.v4 .g-fantasy .t4-shot{filter:saturate(1.15) contrast(1.05)} #trailer.v4 .g-fantasy .t4-grade{background:radial-gradient(70% 60% at 50% 20%,rgba(255,220,150,.5),rgba(40,20,80,.35))}
-#trailer.v4 .g-western .t4-shot{filter:sepia(.35) saturate(1.1) contrast(1.08)} #trailer.v4 .g-western .t4-grade{background:linear-gradient(180deg,rgba(255,170,80,.4),rgba(120,60,20,.35))}
-#trailer.v4 .g-comedy .t4-shot,#trailer.v4 .g-toon .t4-shot{filter:saturate(1.2) brightness(1.04)}
-#trailer.v4 .g-doc .t4-shot{filter:saturate(.85) contrast(1.05)}
+#trailer.v4 .t4-grade{position:absolute;inset:0;pointer-events:none;mix-blend-mode:overlay;opacity:.6}
+#trailer.v4.g-drama .t4-shot{filter:saturate(.9) contrast(1.05)} #trailer.v4.g-drama .t4-grade{background:linear-gradient(180deg,rgba(40,60,90,.35),rgba(200,150,90,.25))}
+#trailer.v4.g-action .t4-shot,#trailer.v4.g-hero .t4-shot{filter:contrast(1.25) saturate(1.05) brightness(.92)} #trailer.v4.g-action .t4-grade,#trailer.v4.g-hero .t4-grade{background:linear-gradient(180deg,rgba(0,90,120,.5),rgba(255,130,40,.45))}
+#trailer.v4.g-war .t4-shot{filter:saturate(.55) contrast(1.2) sepia(.15)} #trailer.v4.g-war .t4-grade{background:rgba(90,80,50,.4)}
+#trailer.v4.g-horror .t4-shot{filter:saturate(.45) contrast(1.25) brightness(.78)} #trailer.v4.g-horror .t4-grade{background:radial-gradient(70% 70% at 50% 45%,transparent,rgba(0,20,10,.85))}
+#trailer.v4.g-crime .t4-shot{filter:saturate(.75) contrast(1.15)} #trailer.v4.g-crime .t4-grade{background:linear-gradient(180deg,rgba(0,80,90,.45),rgba(30,20,10,.35))}
+#trailer.v4.g-romance .t4-shot,#trailer.v4.g-musical .t4-shot{filter:brightness(1.06) saturate(1.1) contrast(.95)} #trailer.v4.g-romance .t4-grade,#trailer.v4.g-musical .t4-grade{background:radial-gradient(80% 70% at 70% 30%,rgba(255,190,140,.55),transparent)}
+#trailer.v4.g-scifi .t4-shot{filter:saturate(1.15) hue-rotate(-10deg) contrast(1.1)} #trailer.v4.g-scifi .t4-grade{background:linear-gradient(180deg,rgba(0,40,120,.5),rgba(0,160,170,.3))}
+#trailer.v4.g-fantasy .t4-shot{filter:saturate(1.15) contrast(1.05)} #trailer.v4.g-fantasy .t4-grade{background:radial-gradient(70% 60% at 50% 20%,rgba(255,220,150,.5),rgba(40,20,80,.35))}
+#trailer.v4.g-western .t4-shot{filter:sepia(.35) saturate(1.1) contrast(1.08)} #trailer.v4.g-western .t4-grade{background:linear-gradient(180deg,rgba(255,170,80,.4),rgba(120,60,20,.35))}
+#trailer.v4.g-comedy .t4-shot,#trailer.v4.g-toon .t4-shot{filter:saturate(1.2) brightness(1.04)}
+#trailer.v4.g-doc .t4-shot{filter:saturate(.85) contrast(1.05)}
 #trailer.v4 .t4-fx{position:absolute;inset:0;pointer-events:none;opacity:.8}
 #trailer.v4 .fx-dust{background-image:radial-gradient(1.5px 1.5px at 20% 30%,rgba(255,240,200,.7),transparent),radial-gradient(1px 1px at 70% 60%,rgba(255,240,200,.6),transparent),radial-gradient(2px 2px at 40% 80%,rgba(255,240,200,.5),transparent),radial-gradient(1px 1px at 85% 20%,rgba(255,240,200,.7),transparent);background-size:300px 220px;animation:t4float 14s linear infinite}
 #trailer.v4 .fx-motes{background-image:radial-gradient(2px 2px at 15% 40%,rgba(255,230,160,.9),transparent),radial-gradient(3px 3px at 60% 70%,rgba(255,210,120,.7),transparent),radial-gradient(1.5px 1.5px at 80% 25%,rgba(255,250,200,.9),transparent);background-size:260px 260px;animation:t4float 10s linear infinite}
@@ -247,19 +248,19 @@ const T4_CSS = `
 #trailer.v4 .t4-bars::before{top:0}#trailer.v4 .t4-bars::after{bottom:0}
 #trailer.v4 .t4-grain{position:absolute;inset:-50%;z-index:7;pointer-events:none;opacity:.07;background-image:repeating-radial-gradient(circle at 17% 32%,#fff 0 .5px,transparent 1px 3px);animation:t4grain .5s steps(4) infinite}
 @keyframes t4grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(1%,3%)}}
-#trailer.v4 .t4-vig{position:absolute;inset:0;z-index:6;pointer-events:none;background:radial-gradient(80% 75% at 50% 50%,transparent 45%,rgba(0,0,0,.72));box-shadow:inset 0 0 120px rgba(0,0,0,.5)}
-#trailer.v4 .t4-dim .t4-shot{filter:brightness(.42) saturate(.8)!important}
+#trailer.v4 .t4-vig{position:absolute;inset:0;z-index:6;pointer-events:none;background:radial-gradient(85% 80% at 50% 50%,transparent 55%,rgba(0,0,0,.55));box-shadow:inset 0 0 90px rgba(0,0,0,.35)}
+#trailer.v4 .t4-dim .t4-shot{filter:brightness(.55) saturate(.85)!important}
 #trailer.v4 .t4-vo{position:absolute;inset:0;z-index:5;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:0 .32em;padding:0 9%;text-align:center;color:#F6EEDC;font:800 clamp(18px,3.7vw,46px)/1.15 var(--f-display,sans-serif);text-transform:uppercase;letter-spacing:.12em;text-shadow:0 2px 18px rgba(0,0,0,.9)}
 #trailer.v4 .t4-vo i{font-style:normal;opacity:0;display:inline-block}
 #trailer.v4 .t4-seg.on .t4-vo i{animation:t4word .55s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:var(--wd)}
 @keyframes t4word{from{opacity:0;transform:translateY(10px) scale(1.1);filter:blur(5px)}to{opacity:1;transform:none;filter:none}}
 #trailer.v4 .t4-seg.on .t4-vo{animation:t4out var(--d) linear forwards}
 @keyframes t4out{0%,86%{opacity:1}100%{opacity:0}}
-#trailer.v4 .f-horror .t4-vo{font:300 clamp(16px,3vw,36px)/1.3 Georgia,serif;letter-spacing:.35em}
-#trailer.v4 .f-romance .t4-vo,#trailer.v4 .f-drama .t4-vo,#trailer.v4 .f-doc .t4-vo{font:italic 400 clamp(18px,3.4vw,40px)/1.25 Georgia,serif;letter-spacing:.06em;text-transform:none}
-#trailer.v4 .f-scifi .t4-vo{font:600 clamp(15px,2.6vw,32px)/1.3 var(--f-mono,monospace);letter-spacing:.4em}
-#trailer.v4 .f-action .t4-vo,#trailer.v4 .f-hero .t4-vo,#trailer.v4 .f-war .t4-vo{background:linear-gradient(180deg,#fff,#c9ced6 55%,#7c828c);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 3px 10px rgba(0,0,0,.8))}
-#trailer.v4 .f-comedy .t4-vo,#trailer.v4 .f-toon .t4-vo{color:#FFE37A;letter-spacing:.04em}
+#trailer.v4.f-horror .t4-vo{font:300 clamp(16px,3vw,36px)/1.3 Georgia,serif;letter-spacing:.35em}
+#trailer.v4.f-romance .t4-vo,#trailer.v4.f-drama .t4-vo,#trailer.v4.f-doc .t4-vo{font:italic 400 clamp(18px,3.4vw,40px)/1.25 Georgia,serif;letter-spacing:.06em;text-transform:none}
+#trailer.v4.f-scifi .t4-vo{font:600 clamp(15px,2.6vw,32px)/1.3 var(--f-mono,monospace);letter-spacing:.4em}
+#trailer.v4.f-action .t4-vo,#trailer.v4.f-hero .t4-vo,#trailer.v4.f-war .t4-vo{background:linear-gradient(180deg,#fff,#c9ced6 55%,#7c828c);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:none;filter:drop-shadow(0 3px 10px rgba(0,0,0,.8))}
+#trailer.v4.f-comedy .t4-vo,#trailer.v4.f-toon .t4-vo{color:#FFE37A;letter-spacing:.04em}
 #trailer.v4 .t4-line{position:absolute;left:10%;right:10%;bottom:15%;z-index:5;text-align:center;color:#fff;text-shadow:0 2px 10px #000,0 0 3px #000;opacity:0}
 #trailer.v4 .t4-seg.on .t4-line{animation:t4up .45s ease-out .1s forwards}
 #trailer.v4 .t4-line q{display:block;font:italic 500 clamp(15px,2.4vw,26px)/1.35 Georgia,serif;quotes:"\\201C" "\\201D"}
