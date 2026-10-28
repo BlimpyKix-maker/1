@@ -133,7 +133,9 @@ function dnaFill(t, d, extra) {
 // The player's scripts store their DNA (sc.dna). Films made from them carry it (f.dna). Other films that the
 // simulation makes get DNA from their id when first asked for, cached outside the save; historical films (f.real)
 // keep their own story.
-const DNA_CACHE = new Map();
+const DNA_CACHE = new Map(); let DNA_CACHE_S = null;
+// the cache belongs to one world: a new or loaded world starts it again
+function dnaCacheFor() { if (DNA_CACHE_S !== S) { DNA_CACHE.clear(); DNA_CACHE_S = S; DNA_TITLES = null; } }
 const DNA_GENRE_TONE = { Comedy: 'light', Animation: 'light', Musical: 'light', Romance: 'bittersweet', Drama: 'bittersweet', Period: 'bittersweet', Horror: 'dark', Crime: 'dark', War: 'dark', Thriller: 'tense', Action: 'tense', 'Martial arts': 'tense', Superhero: 'tense', Western: 'tense', 'Sci-fi': 'tense', Fantasy: 'light', Documentary: 'bittersweet' };
 function dnaToneOf(f) { const r = hashRand(f.id * 59 + 3)(); return r < .6 ? DNA_GENRE_TONE[f.genre] || 'bittersweet' : TONE_KEYS_DNA[Math.floor(r * 50) % 5]; }
 const TONE_KEYS_DNA = ['light', 'bittersweet', 'dark', 'absurd', 'tense'];
@@ -148,6 +150,7 @@ function dnaOfFilm(f) {
   if (!f) return null;
   if (f.dna) return f.dna;
   if (f.real) return null;
+  dnaCacheFor();
   if (DNA_CACHE.has(f.id)) return DNA_CACHE.get(f.id);
   DNA_CACHE.set(f.id, null);   // guards against a title loop
   const hub = typeof HUBS !== 'undefined' && HUBS[f.hub], parF = dnaParent(f), par = parF ? dnaOfFilm(parF) : null;
@@ -165,7 +168,7 @@ function dnaSequel(par, fresh) {
 function dnaOfScript(sc) {
   if (!sc) return null;
   if (sc.dna) return sc.dna;
-  const k = 's' + sc.id + sc.genre + sc.theme;
+  dnaCacheFor(); const k = 's' + sc.id + sc.genre + sc.theme;
   if (!DNA_CACHE.has(k)) DNA_CACHE.set(k, dnaMakeScript(sc, 'invent'));
   return DNA_CACHE.get(k);
 }

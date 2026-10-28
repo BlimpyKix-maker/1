@@ -341,6 +341,8 @@ The player should feel like an executive with a trading desk: a lot of informati
   (`src/storyengine.js`); and wiring that carries the DNA into films, reviews, trailers, awards, sequels and fashions
   (`src/storyui.js`). See the source map rows for these files.
 - Rules held: no dice stream moves (everything is hashed), views never write to the save, nothing calls the network.
+- `tools/fuzz.js` builds four worlds in one process; on machines with a small default heap run it as
+  `node --max-old-space-size=6144 tools/fuzz.js` (the Round 23 build fails the same way without it).
 
 ## Round 23: loopholes closed, offers from the world, trailers, fine-tune sliders
 
