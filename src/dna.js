@@ -23,8 +23,13 @@ const DNA_SOURCES = { life: 'From your own life', mix: 'A bit of both', invent: 
 function dnaR(seed) { return hashRand((seed | 0) * 2654435761 % 2147483647 + 17); }
 function dnaPick(r, a) { return a && a.length ? a[Math.floor(r() * a.length)] : undefined; }
 function dnaWPick(r, W) { const k = Object.keys(W), t = k.reduce((s, x) => s + W[x], 0); let x = r() * t; for (const y of k) if ((x -= W[y]) <= 0) return y; return k[k.length - 1]; }
+// a loss can be a person ('{his} brother') or a thing ('the farm'); lines that treat it as a person go to people only
+const DNA_PERSON_LOSS = /\{his\} (mother|father|brother|sister|son|daughter|wife|husband|partner|best friend|friend|uncle|aunt|grandmother|grandfather|grandmother's|twin|mentor|child|baby|fianc|first love|teacher|coach|old|younger|older)/;
+function dnaPickL(r, a, person) { if (!a || !a.length) return undefined; for (let i = 0; i < 8; i++) { const x = a[Math.floor(r() * a.length)], t = Array.isArray(x) ? x[1] : x; if (person || !/\{LOSS\}/.test(t)) return x; } return a.find(x => !/\{LOSS\}/.test(Array.isArray(x) ? x[1] : x)) || a[0]; }
 function dnaG(g) { return DNA_POOLS.jobs[g] ? g : 'Drama'; }
 function dnaFirst(r, lang, g) { const N = (typeof NAMES !== 'undefined' && (NAMES[lang] || NAMES.en)) || { M: ['Sam'], F: ['Alex'] }; return dnaPick(r, N[g] || N.M); }
+// a role that names a gender ('the father who left', 'a sister who never left') decides the character's
+function dnaGOf(who, g) { const t = ' ' + String(who || '').toLowerCase() + ' '; if (/ (father|man|brother|son|husband|king|uncle|grandfather|boyfriend|nephew|prince|monk|priest|lord|sir|widower|fisherman|landlord|policeman|businessman|cowboy|gentleman|duke|baron|emperor|groom|he|his|him) /.test(t)) return 'M'; if (/ (mother|woman|sister|daughter|wife|queen|aunt|grandmother|girlfriend|niece|princess|nun|lady|widow|landlady|actress|duchess|baroness|empress|bride|she|her) /.test(t)) return 'F'; return g; }
 function dnaPron(g) { return g === 'F' ? ['she', 'her', 'her'] : g === 'M' ? ['he', 'him', 'his'] : ['they', 'them', 'their']; }
 function dnaTheme(g, r) { return dnaPick(r, (typeof GENRE_THEMES !== 'undefined' && GENRE_THEMES[g]) || ['family']); }
 
@@ -48,7 +53,7 @@ function lifeSeeds() {
   const past = (M.past || []).filter(j => j && j.t && !j.film).slice(0, 6);
   for (const j of past) out.push({ k: 'job', v: String(j.t).toLowerCase().replace(/^(a|an|the) /, ''), note: `The hero works your old job: ${String(j.t).toLowerCase()}. You know exactly how that feels.` });
   const H = typeof HUBS !== 'undefined' && HUBS[M.hub];
-  if (H) { out.push({ k: 'city', v: H.name, note: `It's set in ${H.name}, the streets you walk every day.` }); if (H.places && H.places.length) out.push({ k: 'desc', v: `around ${H.places[(M.id || 0) % H.places.length]}`, note: `The locations are your neighbourhood.` }); }
+  if (H) { out.push({ k: 'city', v: H.name, note: `It's set in ${H.name}, the streets you walk every day.` }); if (H.places && H.places.length) out.push({ k: 'desc', v: `in ${H.name}, around ${H.places[(M.id || 0) % H.places.length]}`, note: `The locations are your neighbourhood.` }); }
   for (const p of (M.pets || []).slice(0, 2)) if (p && p.name) out.push({ k: 'obj', v: `the ${String(p.kind || p.n || 'dog').toLowerCase()} called ${p.name}`, how: 'who goes everywhere {he} goes', note: `${p.name} is in it, as themselves.` });
   for (const m of (M.milestones || []).filter(m => m.kind === 'life' || m.kind === 'love').slice(-30)) { if (seen.size > 3) break; if (/split up|lost|died|funeral|fired|evicted|stole|thief|fire|crash|hospital/i.test(m.t) && !seen.has(m.t)) { seen.add(m.t); out.push({ k: 'wound', v: m.t.replace(/^You /, '').replace(/^./, c => c.toLowerCase()), note: `The wound is yours: ${m.t.replace(/\.$/, '').toLowerCase()}.` }); } }
   return out;
@@ -61,37 +66,37 @@ function dnaMake(o) {
   const P0 = DNA_POOLS, r = dnaR(o.seed), g = dnaG(o.genre), th = THEMES[o.theme] ? o.theme : dnaTheme(g, r), tone = TONES[o.tone] ? o.tone : 'bittersweet', lang = o.lang || 'en';
   const hg = r() < .5 ? 'F' : 'M', fg = r() < .5 ? 'F' : 'M', ag = r() < .5 ? 'F' : 'M';
   const typed = String(o.hero || '').trim(), typedName = /^[A-Z][a-zà-ÿ'-]+$/.test(typed.split(' ')[0] || '') && typed.split(' ').length <= 2 ? typed.split(' ')[0] : '';
+  const loss0 = dnaPick(r, P0.losses);
   const d = {
-    v: 1, g, th, tone, seed: o.seed,
+    v: 1, loss: loss0, g, th, tone, seed: o.seed,
     hero: { n: typedName || dnaFirst(r, lang, hg), g: hg, job: dnaPick(r, P0.jobs[g]), flaw: dnaPick(r, P0.flaws), wound: dnaPick(r, P0.wounds), want: dnaPick(r, P0.wants[th] || P0.wants.family), need: dnaPick(r, P0.needs[th] || P0.needs.family) },
-    foe: (() => { const f = dnaPick(r, P0.foes[g]) || ['a rival', 'wants the same thing']; let n = dnaFirst(r, lang, fg); return { n, g: fg, who: f[0], want: f[1] }; })(),
-    ally: { n: '', g: ag, who: dnaPick(r, P0.allies) },
+    foe: (() => { const f = dnaPick(r, P0.foes[g]) || ['a rival', 'wants the same thing'], g2 = dnaGOf(f[0], fg); return { n: dnaFirst(r, lang, g2), g: g2, who: f[0], want: f[1] }; })(),
+    ally: (() => { const w = dnaPick(r, P0.allies); return { n: '', g: dnaGOf(w, ag), who: w }; })(),
     world: (() => { const w = dnaPick(r, P0.worlds[g]) || ['the town', 'MAIN STREET', 'in a small town']; return { place: w[0], slug: w[1], desc: w[2], city: o.city || '' }; })(),
-    loss: dnaPick(r, P0.losses),
     obj: (() => { const i = dnaPick(r, P0.images) || ['the photograph', 'that nobody will explain']; return { o: i[0], how: i[1] }; })(),
-    inc: dnaPick(r, P0.incidents[g]) || ['letter', 'A letter arrives.'],
-    mid: dnaPick(r, P0.reversals),
+    inc: dnaPickL(r, P0.incidents[g], DNA_PERSON_LOSS.test(loss0)) || ['letter', 'A letter arrives.'],
+    mid: dnaPickL(r, P0.reversals, DNA_PERSON_LOSS.test(loss0)),
     arg: dnaPick(r, P0.args[th] || P0.args.family),
     hook: dnaPick(r, P0.genreHooks[g]),
     life: []
   };
-  for (let i = 0; i < 5 && (!d.ally.n || d.ally.n === d.hero.n || d.ally.n === d.foe.n); i++) d.ally.n = dnaFirst(r, lang, ag);
-  for (let i = 0; i < 5 && d.foe.n === d.hero.n; i++) d.foe.n = dnaFirst(r, lang, fg);
+  for (let i = 0; i < 5 && (!d.ally.n || d.ally.n === d.hero.n || d.ally.n === d.foe.n); i++) d.ally.n = dnaFirst(r, lang, d.ally.g);
+  for (let i = 0; i < 5 && d.foe.n === d.hero.n; i++) d.foe.n = dnaFirst(r, lang, d.foe.g);
   if (String(o.setting || '').trim()) d.world.desc = String(o.setting).trim().slice(0, 120);
   if (typed && !typedName) d.hero.job = typed.replace(/^(a|an|the) /i, '').slice(0, 60);
   // how it is told: most stories are linear; some tricks suit some genres; a trick in fashion is copied
   const fit = DNA_TRICK_KEYS.filter(k => k !== 'linear' && (P0.trickFit[k] || []).includes(g));
   d.trick = DNA_TRICK_KEYS.includes(o.trick) ? o.trick : o.trend && fit.includes(o.trend) && r() < .45 ? o.trend : r() < .55 || !fit.length ? 'linear' : dnaPick(r, fit);
   d.endK = DNA_END_KEYS.includes(o.end) ? o.end : dnaWPick(r, DNA_TONE_END[tone] || DNA_TONE_END.bittersweet);
-  d.end = dnaPick(r, P0.ends[d.endK]);
+  d.end = dnaPickL(r, P0.ends[d.endK], DNA_PERSON_LOSS.test(d.loss));
   // write what you know
   const src = o.source || 'invent', S0 = src === 'invent' ? [] : lifeSeeds(), take = src === 'life' ? 4 : src === 'mix' ? 2 : 0, used = new Set();
   if (S0.length && take) {
     const order = S0.map((s, i) => [s, r() + (s.k === 'foe' || s.k === 'loss' ? .3 : 0)]).sort((a, b) => b[1] - a[1]).map(x => x[0]);
     for (const s of order) {
       if (d.life.length >= take || used.has(s.k)) continue; used.add(s.k);
-      if (s.k === 'foe') { d.foe.who = s.who; d.foe.from = s.id; }
-      else if (s.k === 'ally') { d.ally.who = s.who; d.ally.from = s.id; }
+      if (s.k === 'foe') { d.foe.who = s.who; d.foe.from = s.id; const q = P(s.id); if (q && q.g && q.g !== d.foe.g) { d.foe.g = q.g; d.foe.n = dnaFirst(r, lang, q.g); } }
+      else if (s.k === 'ally') { d.ally.who = s.who; d.ally.from = s.id; const q = P(s.id); if (q && q.g && q.g !== d.ally.g) { d.ally.g = q.g; d.ally.n = dnaFirst(r, lang, q.g); } }
       else if (s.k === 'loss') d.loss = s.v;
       else if (s.k === 'job') d.hero.job = s.v;
       else if (s.k === 'city') d.world.city = s.v;
@@ -121,7 +126,7 @@ function dnaSlots(d) {
 }
 function dnaFill(t, d, extra) {
   const m = Object.assign(dnaSlots(d), extra || {});
-  return String(t || '').replace(/\{(\w+)\}/g, (x, k) => m[k] !== undefined ? m[k] : x);
+  return String(t || '').replace(/\{(\w+)\}/g, (x, k) => m[k] !== undefined ? m[k] : x).replace(/\b([Tt]hey) (was|is|has|does|wasn't|isn't|hasn't|doesn't)\b/g, (x, a, v) => a + ' ' + ({ was: 'were', is: 'are', has: 'have', does: 'do', "wasn't": "weren't", "isn't": "aren't", "hasn't": "haven't", "doesn't": "don't" })[v]);
 }
 
 // ---- DNA for works in the world ----

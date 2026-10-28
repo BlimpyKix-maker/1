@@ -168,7 +168,7 @@ CLICK_HOOKS.songplay = id => { const w = (S.me.works || []).find(x => x.id === +
 { const _rd = render; render = function () { const r = _rd.apply(this, arguments); if (SONG_PLAYER && typeof document !== 'undefined' && !document.querySelector(`[data-hk="songplay:${SONG_PLAYER.w}"]`)) songStop(); return r; }; }
 
 // ---- styles ----
-(function () { if (typeof document === 'undefined') return; const st = document.createElement('style'); st.textContent = `
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `
 .dna{border:1px solid var(--line,#ddd);border-radius:10px;padding:10px 12px;margin:0 0 14px;background:var(--panel2,transparent)}
 .dna-r{display:grid;grid-template-columns:110px 1fr;gap:10px;padding:4px 0;border-top:1px dashed var(--line,#e5e5e5);font-size:13px}.dna-r:first-of-type{border-top:0}
 .dna-r>span:first-child{color:var(--muted,#777);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding-top:2px}

@@ -209,6 +209,10 @@ capability for "Read the pages"). Work branch: `claude/game-finishing-polishing-
 | `src/trailer3.js` | Round 23 trailers: camera moves on every shot (push, pull, pan, tilt), parallax layers, actors who breathe, whip cuts and light leaks timed to whole beats of the score (`tv3Retime`), letterbox, spoken narration and dialogue through `speechSynthesis` with a voice toggle (`TV3.voice`), billing block (`tv3Billing`); the score fades when a trailer ends. |
 | `src/careerpay.js` | Round 23: the Careers page's pay column. A career is matched to the game's own posts and jobs by its words (`cpIndex`, `cpMatch`), and shows a day rate by level (`CP_LEVEL`) and what you have earned at it (`careerPayCell`, `careerPayDetail`); sortable. |
 | `src/crossover.js` | Round 23: once a year on the world's dice, songs from real acts land on big films' soundtracks (`f.song`), studios buy acclaimed plays, networks adapt big podcasts and studios sign creators; recorded on the act (`p.cross`, "Across the business"). |
+| `src/dna.js`, `src/dnapools.js` | Round 24 story DNA: hero (job, flaw, wound, want, need), opponent, ally, world, loss, signature image, inciting incident, midpoint, ending (`DNA_END_KEYS`), theme argument and structure (`DNA_TRICK_KEYS`), drawn by hash from hand-written pools (`dnaMake`). "Write what you know": `lifeSeeds` turns the player's exes, rivals, family, old jobs, city, pets and losses into traits with a note. Scripts store it (`sc.dna`, made in `newScript`); films get it by id (`dnaOfFilm`, cached outside the save; sequels found by title keep hero, world and image); plays and musicals store it at release. |
+| `src/wlib.js`, `src/wlib-*.js` | Round 24 writing library, written once and committed (format and rules in `docs/WRITING-LIBRARY.md`): about 940 screen fragments, 658 dialogue exchanges, 984 lyric lines, 1,071 stage/podcast/video/musical fragments, 980 reader's notes, critics' lines, trailer voice-over and speech fragments. Each is tagged by genre, tone and craft level 1–3. |
+| `src/storyengine.js` | Round 24: picks fragments by DNA and craft (`wlPick`, `wlDist`) and writes loglines, beat sheets, synopses, screenplay pages with the structure visible on the page (`dnaScene`, `dnaPages`), reader's notes (`dnaNotes`), critics' lines, trailer voice-over, speeches, song lyrics rhymed in pairs with a chord chart that plays in the browser (`songLyric`, `songPlay`), plays, podcasts and videos. |
+| `src/storyui.js` | Round 24 wiring: "Where it comes from" on the new-script form, the DNA card on the Story tab (structure and ending are the writer's choice, action `swdna`), the Read tab, a small score adjustment for fit (`finishDraft`), "The story" on film pages, critics and trailers from the DNA, the awards speech, structures that come into fashion after hits (`dnaTrendYear`, `f.dt`), and story panels on works pages. |
 | `src/streams.js` | Built last: the world's dice per system and week (`wstream`), the player's own dice for actions, so two careers on one seed share the world. |
 | `src/career-ui.js` | all career screens; desk tabs (Today/Your week/Phone/Work/Create/Life/People), forms, space bar, "Read the pages" |
 
@@ -325,6 +329,18 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Show the inputs behind every outcome** (the main criticism of Hollywood Animal; see docs/RESEARCH.md). Film pages have the quality breakdown, "Where the money went" and "Why it did that"; futures show both the market price and tracking.
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
+
+## Round 24: every work its own story, written without a model
+
+- Asked for: lower gig pay so releases come first; then a way for scripts and other creative works to feel unique
+  and creative without calling a model each time.
+- Gigs: the fee multiplier tops out at 1.8 (was 3) and offers come less often (`gigFee`, `gigOfferChance`).
+- The approach (built in full): a story DNA for every work (`src/dna.js`), drawn partly from the player's own life;
+  a large hand-written fragment library (`src/wlib-*.js`) tagged by genre, tone and craft level; an engine that
+  assembles beat sheets, screenplay pages, notes, reviews, trailers, speeches, lyrics and chords from them
+  (`src/storyengine.js`); and wiring that carries the DNA into films, reviews, trailers, awards, sequels and fashions
+  (`src/storyui.js`). See the source map rows for these files.
+- Rules held: no dice stream moves (everything is hashed), views never write to the save, nothing calls the network.
 
 ## Round 23: loopholes closed, offers from the world, trailers, fine-tune sliders
 

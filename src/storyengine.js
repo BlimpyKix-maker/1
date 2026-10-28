@@ -52,9 +52,9 @@ function dnaLogline(d) {
   return dnaFill(cap1(`${aAn(h.job)} who ${h.flaw} tries to ${h.want}, but ${f.who} ${f.want}.`), d);
 }
 function dnaBeats(d) {
-  const h = d.hero, need = String(h.need || '').replace(/^to /, '');
+  const h = d.hero, need = /^to /.test(h.need || '') ? h.need : 'to ' + (h.need || 'let go');
   return [
-    ['Opening image', `We meet {H}, ${aAn(h.job)}, ${d.world.desc}${d.world.city && !d.world.desc.includes(d.world.city) ? ` (${d.world.city})` : ''}. {He} ${h.flaw}.`],
+    ['Opening image', `We meet {H}, ${aAn(h.job)}, at {PLACE}, ${d.world.desc}${d.world.city && !d.world.desc.includes(d.world.city) && !/ in [A-Z]/.test(d.world.desc) ? ` in ${d.world.city}` : ''}. {He} ${h.flaw}.`],
     ['Inciting incident', d.inc[1]],
     ['Into act two', `{H} decides to ${h.want}, whatever it costs. In the way: ${d.foe.who}, {R}, who ${d.foe.want}.`],
     ['Fun and games', `${cap1(d.hook || 'the promise of the premise')}, with {A}, ${d.ally.who}, along for the ride.`],
@@ -179,12 +179,12 @@ function dnaSpeech(d, r) { const used = new Set(), P = { r, used }; return ['tha
 const SONG_KEYS = [['C', 60], ['G', 55], ['D', 62], ['A', 57], ['E', 64], ['F', 53], ['B♭', 58], ['E♭', 63]];
 const SONG_PROGS = { maj: [['I', 'V', 'vi', 'IV'], ['vi', 'IV', 'I', 'V'], ['I', 'vi', 'IV', 'V'], ['I', 'IV', 'vi', 'V'], ['IV', 'I', 'V', 'vi'], ['I', 'iii', 'IV', 'V'], ['ii', 'V', 'I', 'I']], min: [['i', 'VI', 'III', 'VII'], ['i', 'iv', 'v', 'i'], ['i', 'VII', 'VI', 'VII'], ['i', 'iv', 'VII', 'III'], ['i', 'VI', 'iv', 'V']] };
 const DEG = { I: [0, 'maj'], ii: [2, 'min'], iii: [4, 'min'], IV: [5, 'maj'], V: [7, 'maj'], vi: [9, 'min'], i: [0, 'min'], III: [3, 'maj'], iv: [5, 'min'], v: [7, 'min'], VI: [8, 'maj'], VII: [10, 'maj'] };
-const NOTE_N = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+const NOTE_N = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'], NOTE_F = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'C♭'];
 function songOf(w, who) {
   const r = hashRand((w.id + 1) * 7717 + String(w.title).length * 31), mood = w.mood || ['light', 'bittersweet', 'dark', 'absurd', 'tense'][Math.floor(r() * 5)];
   const th = w.th || dnaPick(r, THEME_KEYS), minor = mood === 'dark' || mood === 'tense' || (mood === 'bittersweet' && r() < .5);
   const key = dnaPick(r, SONG_KEYS), prog = dnaPick(r, SONG_PROGS[minor ? 'min' : 'maj']), bpm = Math.round((mood === 'light' || mood === 'absurd' ? 104 : mood === 'tense' ? 118 : 76) + r() * 24);
-  const chords = prog.map(x => { const [s, q] = DEG[x]; return NOTE_N[(key[1] + s) % 12] + (q === 'min' ? 'm' : ''); });
+  const flat = ['F', 'B♭', 'E♭'].includes(key[0]) || (minor && ['C', 'G', 'D', 'F', 'B♭', 'E♭'].includes(key[0])), NN = flat ? NOTE_F : NOTE_N, chords = prog.map(x => { const [s, q] = DEG[x]; return NN[(key[1] + s) % 12].replace('C♭', 'B') + (q === 'min' ? 'm' : ''); });
   return { r, mood, th, minor, key: key[0] + (minor ? ' minor' : ' major'), root: key[1], prog, chords, bpm, to: w.to || dnaFirst(r, 'en', r() < .5 ? 'F' : 'M') };
 }
 function songLyric(w, c) {
