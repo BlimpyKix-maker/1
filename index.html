@@ -51675,7 +51675,7 @@ function dnaCard(d, sc) {
    ${row('Hero', `<b>${esc(d.hero.n)}</b>, ${f(aAn(d.hero.job))} who ${f(d.hero.flaw)}. Wants to ${f(d.hero.want)}; needs ${f(d.hero.need)}. The wound: ${f(d.hero.wound)}.`)}
    ${row('Against', `<b>${esc(d.foe.n)}</b>, ${f(d.foe.who)}, who ${f(d.foe.want)}.`)}
    ${row('Beside', `<b>${esc(d.ally.n)}</b>, ${f(d.ally.who)}.`)}
-   ${row('World', `${f(d.world.place)}, ${f(d.world.desc)}${d.world.city ? ' · ' + esc(d.world.city) : ''}`)}
+   ${row('World', `${f(d.world.place)}, ${f(d.world.desc)}${d.world.city && !d.world.desc.includes(d.world.city) ? ' · ' + esc(d.world.city) : ''}`)}
    ${row('It starts', f(d.inc[1]))}${row('Midpoint', f(d.mid))}${row('Ending', `${esc(DNA_END_LABEL[d.endK])}: ${f(d.end)}`)}
    ${row('What it says', f(d.arg))}${row('The image', `${f(d.obj.o)}, ${f(d.obj.how)}`)}${row('How it\'s told', `<b>${esc(tr[0])}</b>. ${esc(tr[1])}`)}
    ${d.life.length ? `<div class="dna-life"><b>From your life</b><ul class="plain small">${d.life.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}${edit}</section>`;
@@ -51800,7 +51800,7 @@ function workStoryPanel(w) {
   if (w.type === 'video' || w.type === 'blip') { const v = vidOf(w, c); return `<section class="panel"><h3>The video</h3>${v.format ? `<p>${esc(v.format)}</p>` : ''}${v.hook ? `<p>It opens: <q>${esc(v.hook)}</q></p>` : ''}</section>`; }
   return '';
 }
-{ const _vw = viewWork; viewWork = function (id) { const h = _vw.apply(this, arguments), w = (S.me.works || []).find(x => x.id === +id); if (!w || typeof h !== 'string') return h; const x = workStoryPanel(w); return x ? h.replace('<section class="panel"><h3>In the press</h3>', x + '<section class="panel"><h3>In the press</h3>') : h; }; }
+{ const _vw = viewWork; viewWork = function (id) { const h = _vw.apply(this, arguments), w = (S.me.works || []).find(x => x.id === +id); if (!w || typeof h !== 'string') return h; const x = workStoryPanel(w); if (!x) return h; const k = '<section class="panel"><h3>In the press</h3>'; return h.includes(k) ? h.replace(k, x + k) : h + x; }; }
 CLICK_HOOKS.songplay = id => { const w = (S.me.works || []).find(x => x.id === +id); if (!w) return; if (SONG_PLAYER && SONG_PLAYER.w === w.id) songStop(); else songPlay(w); render(true); };
 // leaving the song's page stops the music
 { const _rd = render; render = function () { const r = _rd.apply(this, arguments); if (SONG_PLAYER && typeof document !== 'undefined' && !document.querySelector(`[data-hk="songplay:${SONG_PLAYER.w}"]`)) songStop(); return r; }; }
