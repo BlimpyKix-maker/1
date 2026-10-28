@@ -33873,7 +33873,7 @@ const GIG_TYPES = {
   jingle: { label: 'Jingle', roles: { composer: 'Composer', actor: 'Singer', sound: 'Producer' }, lv: 0, w: 1, days: 2, fee: [1500, 12000], subs: { composer: ['song', 'theme'], actor: ['voice'] }, field: 'music', pres: 1, fame: 1, back: 1, snag: 'client' }
 };
 const GIG_KEYS = Object.keys(GIG_TYPES);
-const gigFee = { 0: .3, 1: .4, 2: .6, 3: .9, 4: 1.25, 5: 1.7, 6: 2.3, 7: 3 };   // early work pays little; a name pays more (Round 23: the top was 6.5x and jobs for hire outearned careers)
+const gigFee = { 0: .25, 1: .35, 2: .5, 3: .7, 4: .9, 5: 1.15, 6: 1.45, 7: 1.8 };   // early work pays little; a name pays more. Round 24: lowered again so a career's own releases and productions come first
 
 // ---- clients and names ----
 const GIG_BRANDS = ['Kestrel Motors', 'Brightmilk', 'Halden Bank', 'Lumen Phones', 'Pop Fizz', 'Northwind Air', 'Greenleaf Grocers', 'Atlas Insurance', 'Velo Sportswear', 'Crisp & Co. crisps', 'Marlow Beer', 'Okto Trainers', 'Sundial Watches', 'Hearth Furniture', 'Bluefin Telecom', 'Paloma Perfume', 'Ironbark Outdoor', 'Tandem Rail', 'Quill Stationers', 'Copperline Energy', 'Mantis Games', 'Saffron Tea', 'Nimbus Streaming', 'Harbour Holidays', 'Petal Cosmetics', 'Granite Building Society', 'Zephyr Electric Cars', 'Plum Pet Food'];
@@ -33961,7 +33961,7 @@ function gigName(g) { const T = GIG_TYPES[g.k]; return `${T.label}: ${g.client}`
 function gigOfferChance() {
   const M = S.me, me = ME(), lv = careerLevel(), dirLike = ['director', 'dp', 'editor'].includes(me.role) ? 1 : ['actor', 'writer', 'composer'].includes(me.role) ? .7 : .45;
   const cl = Object.values(M.clients || {}).reduce((s, n) => s + Math.min(n, 3), 0);
-  return clamp((.05 + lv * .03 + clamp(reelScore(), -2, 8) * .012 + cl * .01 + (M.agent ? .03 + M.agent.tier * .01 : 0) + Math.max(0, me.standing - 20) * .0008) * dirLike, 0, .36);
+  return clamp((.05 + lv * .03 + clamp(reelScore(), -2, 8) * .012 + cl * .01 + (M.agent ? .03 + M.agent.tier * .01 : 0) + Math.max(0, me.standing - 20) * .0008) * dirLike, 0, .24);
 }
 function gigPickType() {
   const M = S.me, L = GIG_KEYS.filter(gigFits), lv = careerLevel(), field = M.field || 'film';
