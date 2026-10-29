@@ -5,7 +5,7 @@
 // usage: node tools/blocklist.js [page] [--list]      exit code 1 if anything is found
 const fs = require('fs'), path = require('path');
 const args = process.argv.slice(2), page = args.find(a => !a.startsWith('--')) || path.join(__dirname, '..', 'index.html'), LIST = args.includes('--list');
-const TERMS = ['Oscar', 'Academy Award', 'Cannes', "Palme d'Or", 'Berlinale', 'Golden Bear', 'Golden Lion', 'Silver Lion', 'Silver Bear', 'Volpi', "Caméra d'Or",
+const TERMS = ['Hot Docs', 'Outfest', 'HollyShorts', 'South by Southwest', 'Ann Arbor Film', 'Ken Burns', 'Animafest', 'Hiroshima Animation', 'Ottawa Animation', 'Fantasia Genre', 'Vienna Shorts', 'Sehnsucht Student', 'Clermont Short', 'Clermont-Ferrand', 'Shorts Shorts', 'Short Shorts', 'Tamperes', 'Kraków Film', 'London Short Film Festival', 'Melbourne Short Film', 'Mobile Film Festival', 'Poitiers Film', 'Hamburg Short Film', 'Toronto Short Cuts', 'Oscar', 'Academy Award', 'Cannes', "Palme d'Or", 'Berlinale', 'Golden Bear', 'Golden Lion', 'Silver Lion', 'Silver Bear', 'Volpi', "Caméra d'Or",
   'Sundance', 'Tribeca', 'Telluride', 'TIFF', 'Toronto International', 'Venice Film Festival', 'Locarno', 'Karlovy Vary', 'San Sebastián', 'Busan International', 'Annecy International', 'SXSW', 'Sitges', 'American Film Market', 'Marché du Film',
   'BAFTA', 'Golden Globe', 'Emmy', 'Grammy', 'Tony Award', 'César', 'Goya Award', 'Golden Raspberry', 'Razzie',
   'YouTube', 'TikTok', 'Instagram', 'Facebook', 'Twitter', 'Spotify', 'Apple Music', 'iTunes', 'Patreon', 'Kickstarter', 'Twitch', 'Snapchat',

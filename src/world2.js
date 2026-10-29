@@ -266,14 +266,14 @@ function seqParse(t) { const m = /^(.*\S) (\d{1,2})$/.exec(t || ''); return m ? 
 function seqTitle(f) {
   const [b0, n0] = seqParse(f.seqBase || f.title), base = f.seqBase ? f.seqBase : b0, n = Math.max((f.seqN || 1), n0) + 1;
   const r = hashRand(f.id * 911 + n * 37), pool = (SEQ_SUB[f.genre] || []).concat(SEQ_SUB['*']), x = r();
-  if (x < .3 || /[:!?]/.test(base) && x < .7) return `${base} ${n}`;                                     // a plain number (30%)
+  if (x < .3 || /[:!?]/.test(base)) return `${base} ${n}`;                // a title with a colon already gets a number                                     // a plain number (30%)
   if (x < .4 && n <= 4) return `${base} ${['', '', 'II', 'III', 'IV'][n]}`; // a roman numeral
   const sub = pool[Math.floor(r() * pool.length)];
   return x < .55 && n === 2 ? `${base} Returns` : x < .85 ? `${base}: ${sub}` : `${base} ${n}: ${sub}`;
 }
 { const _rl = release; release = function (f) { const out = _rl.apply(this, arguments);
   const c = f && f.co !== null ? S.companies[f.co] : null;
-  if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && hashRand((f.id * 131 + 7) >>> 0)() < [0, 0, .22, .13, .08, .04][Math.min(5, Math.max((f.seqN || 1), seqParse(f.title)[1]) + 1)]) {
+  if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && hashRand((f.id * 131 + 7) >>> 0)() < [0, 0, .18, .11, .07, .04][Math.min(5, Math.max((f.seqN || 1), seqParse(f.title)[1]) + 1)] * (f.real ? .45 : 1)) {
     f.seqQueued = 1; (c.seqQ = c.seqQ || []).push({ parent: f.id, w: S.week + 52 + Math.floor(hashRand((f.id * 97) >>> 0)() * 52) }); }
   return out; }; }
 function sequelMonth() {

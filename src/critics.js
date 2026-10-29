@@ -160,6 +160,7 @@ const THUMB_LABEL = p => p >= 90 ? 'Two Thumbs Way Up' : p >= 70 ? 'Thumbs Up' :
 function activeCritics(y) { return CRITICS.map(c => CRITIC[c[0]]).filter(c => c.from <= y && (c.to === null || c.to >= y)); }
 // The reviews a film got, worked out from its critics' score with each critic's taste and temperament.
 let RVC = { S: null, m: {} };
+const RV_TEMPER_ADJ = { tough: -7, acid: -5, fusty: -3, scholarly: -2, sharp: -1, auteurist: 0, urbane: -2, warm: 4, enthusiast: 3, populist: 2, guidebook: -1, poetic: 1, theorist: -2, polemic: -3, witty: 0, pun: 1 };
 function filmReviews(f) {
   if (!f || f.rel === null || f.reviews === undefined) return null;
   if (RVC.S !== S) RVC = { S, m: {} };
@@ -175,14 +176,18 @@ function filmReviews(f) {
   for (const [who, sc, q] of takes) { out.push({ who, out: CRITIC[who] ? OUTLET[CRITIC[who].out].name : '', sc, q, famous: 1 }); used.add(who); }
   const named = crit.filter(c => !used.has(c.name)).sort(() => r() - .5).slice(0, Math.min(crit.length, Math.ceil(N * .4)));
   for (const c of named) {
-    let sc = base + (c.taste[f.genre] || 0) + (r() - .5) * 26;
+    // each critic's temperament moves their grade; near the top, scores bunch (a perfect 100 is rare), and now and
+    // then one critic simply doesn't go for it
+    let sc = base + (c.taste[f.genre] || 0) + (RV_TEMPER_ADJ[c.style] || 0) + (r() - .5) * 26;
     if (c.style === 'contrarian') sc = 100 - sc + (r() - .5) * 10;
+    else if (r() < .06) sc -= 18 + r() * 22;
+    if (sc > 84) sc = 84 + (sc - 84) * .5;
     sc = Math.round(clamp(sc, 2, 100));
     const L = RV_LINES[RV_BAND(sc)][c.style] || RV_LINES[RV_BAND(sc)].warm;
     out.push({ who: c.name, out: OUTLET[c.out].name, sc, q: fill(L[Math.floor(r() * L.length)]) });
   }
   const others = Math.max(0, N - out.length); let pos = out.filter(x => x.sc !== null && x.sc >= 58).length, sum = out.reduce((s, x) => s + (x.sc ?? base), 0);
-  for (let i = 0; i < others; i++) { const sc = clamp(base + (r() - .5) * 30, 2, 100); sum += sc; if (sc >= 58) pos++; }
+  for (let i = 0; i < others; i++) { let sc = base + (r() - .5) * 30; if (r() < .06) sc -= 25; if (sc > 84) sc = 84 + (sc - 84) * .5; sc = clamp(sc, 2, 100); sum += sc; if (sc >= 58) pos++; }
   // the player's reviews count once they're read widely enough
   const mine = S.me ? (S.me.myReviews || []).filter(v => v.film === f.id) : [];
   for (const v of mine) { out.unshift({ who: ME().name, out: v.out || 'your blog', sc: v.sc, q: v.q, mine: 1, counts: criticCounts() }); if (criticCounts()) { sum += v.sc; if (v.sc >= 58) pos++; } }

@@ -63,24 +63,24 @@ function compWorkBest(c) { return (S.me.works || []).filter(w => w.rel !== undef
 const MORE_SHORT_FESTS = [
   ['sundog', 'Sundog Shorts', 'hollywood', 1985, 1, 'all', 0, 1, 'Short Film Grand Jury Prize'],
   ['tribeca', 'Lower Manhattan Shorts', 'newyork', 2002, 2, 'all', 3, 1, 'Best Narrative Short'],
-  ['torontoshorts', 'Toronto Shorts International', 'toronto', 2009, 2, 'all', 8, 1, 'Best Short'],
-  ['hotdocsshort', 'Hot Docs Shorts', 'toronto', 1993, 2, 'doc', 3, 1, 'Best Short Documentary'],
-  ['fantasia', 'Fantasia Genre Shorts', 'toronto', 1996, 2, 'genre', 6, 0, 'Golden Raven'],
+  ['torontoshorts', 'Northern Lights Shorts International', 'toronto', 2009, 2, 'all', 8, 1, 'Best Short'],
+  ['hotdocsshort', 'Warm Reels Documentary Shorts', 'toronto', 1993, 2, 'doc', 3, 1, 'Best Short Documentary'],
+  ['fantasia', 'Phantasmagoria Genre Shorts', 'toronto', 1996, 2, 'genre', 6, 0, 'Golden Raven'],
   ['sitges', 'Seaside Midnight Shorts', 'madrid', 1968, 2, 'genre', 9, 0, 'Silver Magician'],
-  ['zagrebanim', 'Animafest Zagreb', 'budapest', 1972, 1, 'anim', 5, 1, 'Grand Prix'],
-  ['ottawaanim', 'Ottawa Animation Festival', 'toronto', 1976, 2, 'anim', 8, 1, 'Grand Prize'],
-  ['hiroshima', 'Hiroshima Animation Days', 'tokyo', 1985, 2, 'anim', 7, 0, 'Hiroshima Prize'],
-  ['idfashort', 'Amsterdam Documentary Shorts', 'berlin', 1988, 1, 'doc', 10, 1, 'Best Short Documentary'],
-  ['outfest', 'Outfest Shorts', 'hollywood', 1982, 2, 'all', 6, 1, 'Grand Jury Award'],
+  ['zagrebanim', 'The Danube Animation Festival', 'budapest', 1972, 1, 'anim', 5, 1, 'Grand Prix'],
+  ['ottawaanim', 'Rideau Animation Festival', 'toronto', 1976, 2, 'anim', 8, 1, 'Grand Prize'],
+  ['hiroshima', 'Inland Sea Animation Days', 'tokyo', 1985, 2, 'anim', 7, 0, 'Inland Sea Prize'],
+  ['idfashort', 'Canal Docs Shorts', 'berlin', 1988, 1, 'doc', 10, 1, 'Best Short Documentary'],
+  ['outfest', 'Out Loud Shorts', 'hollywood', 1982, 2, 'all', 6, 1, 'Grand Jury Award'],
   ['comedyshorts', 'The Laugh Track Shorts', 'london', 2008, 3, 'comedy', 4, 0, 'Funniest Film'],
   ['mvfest', 'Promo Reel: the Music Video Festival', 'london', 2001, 3, 'all', 2, 0, 'Video of the Year'],
-  ['mobilefest', 'The Mobile Film Festival', 'paris', 2005, 3, 'all', 11, 0, 'Grand Prix'],
+  ['mobilefest', 'The Pocket Film Festival', 'paris', 2005, 3, 'all', 11, 0, 'Grand Prix'],
   ['mumbaishorts', 'Mumbai Shorts', 'mumbai', 1990, 2, 'all', 1, 0, 'Golden Conch'],
   ['seoulshorts', 'Seoul Shorts', 'seoul', 2003, 2, 'all', 8, 0, 'Best Short'],
   ['lagosshorts', 'Lagos Short Film Week', 'lagos', 2010, 3, 'all', 10, 0, 'Best Short'],
   ['bafici', 'Buenos Aires Short Cuts', 'buenosaires', 1999, 3, 'all', 3, 0, 'Best Short'],
-  ['melbshorts', 'Melbourne Short Film Festival', 'sydney', 1952, 2, 'all', 7, 1, 'City of Melbourne Grand Prix'],
-  ['tamperes', 'Tamperes Short Film Festival', 'helsinki', 1970, 2, 'all', 2, 1, 'Grand Prix']
+  ['melbshorts', 'Southern Cross Short Film Festival', 'sydney', 1952, 2, 'all', 7, 1, 'Southern Cross Grand Prix'],
+  ['tamperes', 'The Lakeshore Short Film Days', 'helsinki', 1970, 2, 'all', 2, 1, 'Grand Prix']
 ];
 for (const [k, name, hub, founded, tier, kind, month, qual, prize] of MORE_SHORT_FESTS) if (!SHORT_FEST[k]) { SHORT_FESTS.push([k, name, hub, founded, tier, kind, month, qual, prize]); SHORT_FEST[k] = { k, name, hub, founded, tier, kind, month, qual, prize }; }
 // choose where a short goes: one festival at a time, a fee each, while the short is under a year old

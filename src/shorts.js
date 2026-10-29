@@ -10,15 +10,15 @@ DECAY.short = .6;
 // [key, name, hub, founded, tier, kind, month (0-11), Oswald-qualifying, top prize]
 const SHORT_FESTS = [
   ['oberhaus', 'The Oberhaus Short Film Days', 'berlin', 1954, 1, 'all', 4, 1, 'Grand Prize of the City'],
-  ['clermont', 'The Clermont Short Film Festival', 'paris', 1979, 1, 'all', 1, 1, 'Grand Prix'],
+  ['clermont', 'The Clairmont Short Film Festival', 'paris', 1979, 1, 'all', 1, 1, 'Grand Prix'],
   ['palmvalley', 'Palm Valley ShortFest', 'hollywood', 1995, 1, 'all', 5, 1, 'Best of the Festival'],
   ['annesse', 'Lac d\'Annesse Animation Festival', 'paris', 1960, 1, 'anim', 5, 1, 'Crystal for a Short Film'],
   ['studentacad', 'The Student Academy Shorts', 'hollywood', 1973, 1, 'student', 9, 1, 'Gold Medal'],
   ['lakeland', 'The Lakeland Short Film Festival', 'stockholm', 1969, 2, 'all', 2, 1, 'Grand Prix'],
   ['aspenridge', 'Aspenridge Shortsfest', 'hollywood', 1991, 2, 'all', 3, 1, 'Best Short'],
-  ['krakowshorts', 'The Kraków Film Days', 'warsaw', 1961, 2, 'doc', 4, 0, 'Golden Dragon'],
-  ['shortstokyo', 'Shorts Shorts Tokyo', 'tokyo', 1999, 2, 'all', 5, 1, 'Grand Prix'],
-  ['londonshorts', 'London Short Film Festival', 'london', 2004, 2, 'all', 0, 0, 'Best Short'],
+  ['krakowshorts', 'The Vistula Film Days', 'warsaw', 1961, 2, 'doc', 4, 0, 'Golden Horn'],
+  ['shortstokyo', 'Short Takes Tokyo', 'tokyo', 1999, 2, 'all', 5, 1, 'Grand Prix'],
+  ['londonshorts', 'Thames Short Film Festival', 'london', 2004, 2, 'all', 0, 0, 'Best Short'],
   ['nightshorts', 'Berlin Shorts Night', 'berlin', 1982, 3, 'all', 10, 0, 'Audience Award'],
   ['uppsalund', 'The Uppsalund Short Film Festival', 'stockholm', 1982, 3, 'all', 9, 0, 'Grand Prix']
 ];
@@ -126,6 +126,10 @@ function viewShortFest(fk) {
   return `<div class="head"><p class="eyebrow">Short film festival · ${esc(hubName(F.hub))} · since ${F.founded} · ${['', 'A-list', 'major', 'regional'][F.tier]}</p><h2>${esc(F.name)}</h2><p class="lede">Every ${['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][F.month]}. Top prize: the ${esc(F.prize)}.${F.qual ? ' Its winners qualify for the Oswalds.' : ''}${F.kind === 'student' ? ' Open only to film-school students.' : F.kind === 'anim' ? ' Animation only.' : F.kind === 'doc' ? ' Documentary and short fiction.' : ''}</p></div>
    <section class="panel"><h3>Winners</h3><table class="grid small"><thead><tr><th>Year</th><th>Winner</th><th>Director</th><th>Later</th></tr></thead><tbody>${ys.map(y => { const L = shortsOf(fk, y), w = L.find(s => s.won); if (!w) return ''; const p = w.who !== null ? P(w.who) : null, nf = p ? p.credits.map(k => S.films[k]).filter(f => f && f.rel !== null && f.dir === p.id).length : 0; return `<tr><td>${y}</td><td>${shortLink(w)}</td><td>${shortWho(w)}</td><td class="muted">${nf ? nf + ' feature' + (nf > 1 ? 's' : '') : ''}</td></tr>`; }).join('')}</tbody></table></section>`;
 }
+// prestige first: the majors, then the respected, then the local; within a tier, Oswald-qualifying and older first
+const SF_TIER = { 1: ['The majors', 'A win here qualifies for the Oswalds and gets agents calling. Selection alone is news.'], 2: ['Respected festivals', 'Serious programmers and good audiences; laurels that open doors.'], 3: ['Local and genre festivals', 'Where most shorts start: friendly, smaller, still worth a laurel.'] };
+function sfRanked() { return Object.values(SHORT_FEST).slice().sort((a, b) => a.tier - b.tier || (b.qual || 0) - (a.qual || 0) || (a.kind === 'student') - (b.kind === 'student') || a.founded - b.founded); }
+function sfTierHead(t, inline) { const T = SF_TIER[t] || SF_TIER[3]; return inline ? `<b>${'★'.repeat(4 - Math.min(3, t))} ${esc(T[0])}</b> <span class="muted small">${esc(T[1])}</span>` : `<h3 class="sf-th">${'★'.repeat(4 - Math.min(3, t))} ${esc(T[0])} <span class="muted small">${esc(T[1])}</span></h3>`; }
 function shortsApp() {
   const M = S.me, tab = UI.sht || 'now', y = UI.shy || S.year;
   const tabs = [['now', '🎞️ This year'], ['past', '📜 Year by year'], ['fests', '🏛️ The festivals'], ['cal', '🗓️ Deadlines & entries'], ['mine', `🎬 Your shorts (${(M.works || []).filter(w => w.type === 'short').length})`]];
@@ -133,10 +137,10 @@ function shortsApp() {
   if (tab === 'now' || tab === 'past') {
     const yy = tab === 'now' ? S.year : y, years = []; for (let k = S.year; k >= 1955; k--) years.push(k);
     body = (tab === 'past' ? `<div class="filt"><label><span>Year</span>${sel('sh-y', years.map(k => [k, String(k)]), yy)}</label></div>` : `<p class="muted small">Where the next generation of directors is coming from. Shorts that won are marked 🏆; names you might know later are linked.</p>`) +
-      Object.values(SHORT_FEST).filter(F => F.founded <= yy).map(F => { const L = shortsOf(F.k, yy); return L.length ? `<h4><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a> <span class="muted small">${esc(hubName(F.hub))}</span></h4><ul class="plain small">${L.map(s => `<li>${s.won ? '🏆 ' : ''}${shortLink(s)} <span class="muted">by</span> ${shortWho(s)} <span class="muted">· ${s.mins} min · ${esc(s.kind.toLowerCase())}</span></li>`).join('')}</ul>` : `<h4>${esc(F.name)}</h4><p class="muted small">${yy === S.year ? 'Not held yet this year.' : 'No record.'}</p>`; }).join('');
+      sfRanked().filter(F => F.founded <= yy).map((F, i, A) => { const L = shortsOf(F.k, yy), hd = i === 0 || A[i - 1].tier !== F.tier ? sfTierHead(F.tier) : ''; return hd + (() => { return L.length ? `<h4><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a> <span class="muted small">${esc(hubName(F.hub))}</span></h4><ul class="plain small">${L.map(s => `<li>${s.won ? '🏆 ' : ''}${shortLink(s)} <span class="muted">by</span> ${shortWho(s)} <span class="muted">· ${s.mins} min · ${esc(s.kind.toLowerCase())}</span></li>`).join('')}</ul>` : `<h4>${esc(F.name)}</h4><p class="muted small">${yy === S.year ? 'Not held yet this year.' : 'No record.'}</p>`; })(); }).join('');
   } else if (tab === 'cal' && typeof shortsCalendarHTML === 'function') { body = shortsCalendarHTML();
   } else if (tab === 'fests') {
-    body = `<table class="grid small"><thead><tr><th>Festival</th><th>Where</th><th>Since</th><th>When</th><th>Top prize</th><th></th></tr></thead><tbody>${Object.values(SHORT_FEST).map(F => `<tr><td><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a></td><td>${esc(hubName(F.hub))}</td><td>${F.founded}</td><td>${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][F.month]}</td><td>${esc(F.prize)}</td><td class="muted">${F.qual ? 'Oswald-qualifying' : ''}${F.kind !== 'all' ? ' · ' + F.kind : ''}</td></tr>`).join('')}</tbody></table>`;
+    body = `<table class="grid small"><thead><tr><th>Prestige</th><th>Festival</th><th>Where</th><th>Since</th><th>When</th><th>Top prize</th><th></th></tr></thead><tbody>${sfRanked().map((F, i, A) => `${i === 0 || A[i - 1].tier !== F.tier ? `<tr class="sf-tier"><td colspan="7">${sfTierHead(F.tier, true)}</td></tr>` : ''}<tr><td class="sf-stars" title="${esc(SF_TIER[F.tier] ? SF_TIER[F.tier][0] : '')}">${'★'.repeat(4 - Math.min(3, F.tier))}</td><td><a href="#" class="lk" data-go="shortfest:${F.k}">${esc(F.name)}</a></td><td>${esc(hubName(F.hub))}</td><td>${F.founded}</td><td>${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][F.month]}</td><td>${esc(F.prize)}</td><td class="muted">${F.qual ? 'Oswald-qualifying' : ''}${F.kind !== 'all' ? ' · ' + F.kind : ''}</td></tr>`).join('')}</tbody></table>`;
   } else {
     const L = (M.works || []).filter(w => w.type === 'short');
     body = L.length ? L.slice().reverse().map(w => { const C = w.circuit || { subs: [], laurels: [] }; return `<div class="deal"><b><a href="#" class="lk" data-go="work:${w.id}">${esc(w.title)}</a></b> <span class="muted small">${w.thesis ? 'thesis film · ' : ''}quality ${w.q}</span><p class="small">${C.laurels.map(l => `${l.won ? '🏆' : '🌿'} ${esc(SHORT_FEST[l.k].name)}`).join(' · ') || '<span class="muted">No laurels yet.</span>'}</p><p class="small muted">${C.subs.map(s => `${esc(SHORT_FEST[s.k].name)}: ${s.done ? s.res : 'decides ' + fmtDate(s.due, true)}`).join(' · ')}${C.over ? ' · now online' : ''}</p></div>`; }).join('') : `<p class="muted">No shorts yet. Start one in Create → ${WORK_TYPES.short.icon} Short film: fourteen sessions, a weekend shoot, and ${fmtCash(usd(WORK_TYPES.short.cost))} of favours and pizza. Release with more promotion to send it to more (and bigger) festivals.</p>`;
@@ -163,3 +167,4 @@ amb('x_shortsel', 'fame', 'Get a short into a festival', () => [shortLaurels(), 
 amb('x_short10', 'fame', 'Ten festival laurels for your shorts', () => [shortLaurels(), 10], 6);
 amb('x_shortwin', 'fame', 'Win a prize with a short', () => [myShorts().reduce((n, w) => n + ((w.circuit || {}).laurels || []).filter(l => l.won).length, 0), 1], 5);
 amb('x_shortoswald', 'legend', 'Win the Oswald for best short film', () => [(S.me.milestones || []).some(m => /^Won at Academy Oswalds: Best Short Film/.test(m.t)) ? 1 : 0, 1], 8);
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `.sf-th{margin:18px 0 4px;padding-bottom:4px;border-bottom:1px solid var(--line,#ddd);font-size:15px}.sf-th .muted{font-weight:400;margin-left:6px}.sf-tier td{background:color-mix(in srgb,var(--ink,#111) 5%,transparent);padding-top:8px}.sf-stars{color:#c9a227;white-space:nowrap}`; document.head.appendChild(st); })();

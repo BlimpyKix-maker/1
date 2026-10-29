@@ -16,18 +16,18 @@ for (const row of [
   ['rivierashort', 'The Riviera Short Film Palm', 'paris', 1955, 1, 'all', 4, 1, 'Short Film Palm'],
   ['cinefond', 'The Riviera Cinéfondation', 'paris', 1998, 1, 'student', 4, 0, 'First Prize'],
   ['berlinshort', 'Spree Shorts (the Bruin competition)', 'berlin', 1956, 1, 'all', 1, 1, 'Golden Bruin for Best Short'],
-  ['torontocuts', 'Toronto Short Cuts', 'toronto', 1976, 2, 'all', 8, 1, 'Best Short'],
+  ['torontocuts', 'Harbourfront Short Cuts', 'toronto', 1976, 2, 'all', 8, 1, 'Best Short'],
   ['brigstow', 'Brigstow Encounters', 'london', 1995, 2, 'all', 8, 1, 'Grand Prix'],
-  ['ottawaanim', 'The Ottawa Animation Festival', 'toronto', 1976, 1, 'anim', 8, 1, 'Grand Prize'],
-  ['animazag', 'Animafest Zagreb', 'berlin', 1972, 2, 'anim', 5, 1, 'Grand Prix'],
-  ['hamburgsh', 'Hamburg Short Film Festival', 'berlin', 1985, 2, 'all', 5, 0, 'Hamburg Short Film Prize'],
-  ['viennashorts', 'Vienna Shorts', 'berlin', 2004, 2, 'all', 4, 1, 'Best Short'],
-  ['poitiers', 'The Poitiers Film School Encounters', 'paris', 1977, 2, 'student', 11, 0, 'Grand Prix'],
-  ['sehsucht', 'Sehnsucht Student Film Festival', 'berlin', 1972, 3, 'student', 3, 0, 'Best Film'],
+  ['ottawaanim', 'The Rideau Animation Festival', 'toronto', 1976, 1, 'anim', 8, 1, 'Grand Prize'],
+  ['animazag', 'Drawn Frames Berlin', 'berlin', 1972, 2, 'anim', 5, 1, 'Grand Prix'],
+  ['hamburgsh', 'The Elbe Short Film Festival', 'berlin', 1985, 2, 'all', 5, 0, 'Elbe Short Film Prize'],
+  ['viennashorts', 'Ringstrasse Shorts', 'berlin', 2004, 2, 'all', 4, 1, 'Best Short'],
+  ['poitiers', 'The Loire Film School Encounters', 'paris', 1977, 2, 'student', 11, 0, 'Grand Prix'],
+  ['sehsucht', 'Havel Student Film Days', 'berlin', 1972, 3, 'student', 3, 0, 'Best Film'],
   ['tribshorts', 'Triangle Block Shorts', 'newyork', 2002, 2, 'all', 5, 1, 'Best Narrative Short'],
-  ['hollyshorts', 'HollyShorts', 'hollywood', 2005, 3, 'all', 7, 1, 'Best Short'],
-  ['southby', 'South by Southwest Shorts', 'hollywood', 1994, 2, 'all', 2, 1, 'Grand Jury Award'],
-  ['arbor', 'The Ann Arbor Film Festival', 'newyork', 1963, 3, 'all', 2, 1, 'Ken Burns Award for Best of the Festival']
+  ['hollyshorts', 'Boulevard Shorts', 'hollywood', 2005, 3, 'all', 7, 1, 'Best Short'],
+  ['southby', 'Southbound Shorts', 'hollywood', 1994, 2, 'all', 2, 1, 'Grand Jury Award'],
+  ['arbor', 'The Arborway Film Festival', 'newyork', 1963, 3, 'all', 2, 1, 'Founders\' Award for Best of the Festival']
 ]) { const [k, name, hub, founded, tier, kind, month, qual, prize] = row; if (!SHORT_FEST[k] && (typeof HUBS === 'undefined' || HUBS[hub])) { SHORT_FEST[k] = { k, name, hub, founded, tier, kind, month, qual, prize }; SHORT_FESTS.push(row); } }
 // who decides, what else they give, and the doors they open
 const SF_INFO = {
