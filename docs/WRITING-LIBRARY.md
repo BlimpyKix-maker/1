@@ -1,8 +1,8 @@
 # The writing library
 
 Round 24. The game writes every script, song, play, podcast and video from a fixed **story DNA** (`src/dna.js`) and a
-library of hand-written fragments (`src/wlib-*.js`, `src/dnapools.js`, `src/dnapools2.js`; about 14,300 fragments
-since Round 25). The library was written once and is committed;
+library of hand-written fragments (`src/wlib-*.js`, `src/dnapools.js`, `src/dnapools2.js`; about 23,800 fragments
+since Round 26, plus the generator pools in `src/wgen.js`). The library was written once and is committed;
 nothing calls a model while you play. The engine (`src/storyengine.js`) picks fragments that fit a work's DNA and fills
 their slots, so no two works read the same.
 

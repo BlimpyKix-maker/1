@@ -333,6 +333,18 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 26: the library again, so lines repeat far less
+
+- Asked for: expand the writing library further so lines repeat far less.
+- Added `src/wlib-screen-open3.js` (1,510 openings), `src/wlib-screen-act3.js` (1,203 actions, 900 endings),
+  `src/wlib-dialogue4.js` and `src/wlib-dialogue5.js` (1,803 exchanges), `src/wlib-song3.js` (2,040 lyric lines),
+  `src/wlib-other3.js` (2,040 stage, podcast, video and musical fragments): 23,835 fragments in all. Most new lines
+  are for all genres, where repeats came from.
+- `src/wgen.js` adds about 1,270 sounds, lights, gestures and templates to the generator pools in
+  `src/storyengine.js` (`GEN_*`), which now also writes some mid-scene action lines (`GEN_ACTION`).
+- Measured by writing pages for many works with the story engine and counting fragments already seen: at 100 works, repeated
+  openings fell from 25% to 6%, dialogue from 21% to 12%, actions from 21% to 8%, endings from 32% to 13%.
+
 ## Round 25: a library three times larger, no AI, full screen, trailers rebuilt, feet and shoulders
 
 - Asked for: far more writing so lines don't repeat over many hours; take out the AI "Read the pages"; fix the hint box
