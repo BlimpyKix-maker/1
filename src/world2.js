@@ -248,10 +248,32 @@ function careerMovesYear() {
 // The second film opens bigger (a built-in audience); by the fourth the audience is tiring: each further sequel opens
 // weaker and is made a little worse.
 const SEQ_G = ['Action', 'Superhero', 'Sci-fi', 'Fantasy', 'Animation', 'Horror', 'Comedy', 'Thriller', 'Crime', 'Martial arts'];
-function seqTitle(f) { const n = (f.seqN || 1) + 1, base = f.seqBase || f.title; return n === 2 ? `${base} 2` : `${base} ${n}`; }
+// Most sequels get a subtitle, the way studios name them; only some get a plain number, and never "2 2".
+const SEQ_SUB = {
+  '*': ['Homecoming', 'The Long Way Back', 'Second Wind', 'Afterlight', 'The Return', 'Reckoning', 'Aftershock', 'Legacy', 'New Blood', 'The Last Stand', 'Into the Fire', 'Fault Lines', 'The Next Chapter', 'Undertow', 'Crossroads', 'Higher Ground', 'Breakpoint', 'The Reunion', 'No Way Out', 'Full Circle'],
+  Action: ['Hard Target', 'Zero Hour', 'Dead Drop', 'Blackout', 'Redline', 'Firestorm', 'Point of Impact', 'Ground War', 'Overdrive', 'Final Strike'],
+  Superhero: ['Rise of the Fallen', 'Shattered Sky', 'The Iron Pact', 'Eclipse', 'Dark Orbit', 'Worlds Apart', 'The Lost Order', 'Ascension'],
+  'Sci-fi': ['Event Horizon Line', 'Dark Sector', 'The Outer Ring', 'Signal Lost', 'Colony', 'Ghost Orbit', 'First Light', 'Deep Field'],
+  Fantasy: ['The Ember Crown', 'Kingdom of Ash', 'The Hollow Throne', 'Rise of the Thorn', 'The Glass Tower', 'The Winter Gate', 'Oathbreaker'],
+  Animation: ['The Big Adventure', 'Out of the Woods', 'Party Animals', 'Lost and Found', 'The Great Escape', 'Summer Camp', 'Road Trip'],
+  Horror: ['The Awakening', 'Bloodline', 'The Second Night', 'Origins', 'The Harvest', 'Possession', 'Below', 'The Visitation', 'Bad Blood'],
+  Comedy: ['Back in Business', 'Road Trip', 'The Wedding', 'Twice the Trouble', 'Spring Break', 'Again!', 'Family Holiday', 'Even More'],
+  Thriller: ['The Second Witness', 'Dead Reckoning', 'Cold Trail', 'Double Cross', 'Exit Wound', 'The Inside Man', 'Fallback'],
+  Crime: ['Blood Money', 'The Last Job', 'Made Men', 'Cold Case', 'The Fixer', 'Turf War', 'The Long Con'],
+  'Martial arts': ['The Final Round', 'Way of the Dragon Gate', 'Iron Fist Temple', 'The Last Master', 'Path of the Blade', 'Return of the Dragon Gate']
+};
+function seqParse(t) { const m = /^(.*\S) (\d{1,2})$/.exec(t || ''); return m ? [m[1], +m[2]] : [t, 1]; }
+function seqTitle(f) {
+  const [b0, n0] = seqParse(f.seqBase || f.title), base = f.seqBase ? f.seqBase : b0, n = Math.max((f.seqN || 1), n0) + 1;
+  const r = hashRand(f.id * 911 + n * 37), pool = (SEQ_SUB[f.genre] || []).concat(SEQ_SUB['*']), x = r();
+  if (x < .3 || /[:!?]/.test(base) && x < .7) return `${base} ${n}`;                                     // a plain number (30%)
+  if (x < .4 && n <= 4) return `${base} ${['', '', 'II', 'III', 'IV'][n]}`; // a roman numeral
+  const sub = pool[Math.floor(r() * pool.length)];
+  return x < .55 && n === 2 ? `${base} Returns` : x < .85 ? `${base}: ${sub}` : `${base} ${n}: ${sub}`;
+}
 { const _rl = release; release = function (f) { const out = _rl.apply(this, arguments);
   const c = f && f.co !== null ? S.companies[f.co] : null;
-  if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued) {
+  if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && hashRand((f.id * 131 + 7) >>> 0)() < [0, 0, .22, .13, .08, .04][Math.min(5, Math.max((f.seqN || 1), seqParse(f.title)[1]) + 1)]) {
     f.seqQueued = 1; (c.seqQ = c.seqQ || []).push({ parent: f.id, w: S.week + 52 + Math.floor(hashRand((f.id * 97) >>> 0)() * 52) }); }
   return out; }; }
 function sequelMonth() {
@@ -260,7 +282,7 @@ function sequelMonth() {
       const free = id => id !== undefined && P(id) && !P(id).dead && !P(id).retired && available(id);
       GL_KEY = 'seq:' + f.id; R = wstream('film', GL_KEY);
       let g; try { g = greenlight(c.hub, { co: c.id, genre: f.genre, title: seqTitle(f), budget: f.budget * 1.3 * econBudget(), dir: free(f.dir) ? f.dir : undefined, lead: free(f.cast[0]) ? f.cast[0] : undefined }); } finally { GL_KEY = null; }
-      if (!g) continue; g.seq = f.id; g.seqN = (f.seqN || 1) + 1; g.seqBase = f.seqBase || f.title;
+      if (!g) continue; g.seq = f.id; g.seqN = Math.max(f.seqN || 1, seqParse(f.title)[1]) + 1; g.seqBase = f.seqBase || seqParse(f.title)[0];
       const tired = Math.max(0, g.seqN - 2); g.hook = clamp(g.hook + 12 - tired * 9, 5, 99); g.qBonus = (g.qBonus || 0) - tired * 2;
       news('Company', `${c.name} greenlights ${g.title}${tired ? '. Not everyone is sure the audience wants another' : ', the sequel everyone expected'}.`, { company: c.id, film: g.id }); }
   }

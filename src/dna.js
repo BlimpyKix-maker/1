@@ -142,6 +142,7 @@ const TONE_KEYS_DNA = ['light', 'bittersweet', 'dark', 'absurd', 'tense'];
 // sequels are found by title ("The Haunted House 2" follows "The Haunted House")
 let DNA_TITLES = null, DNA_TITLES_N = 0;
 function dnaParent(f) {
+  if (f.seq !== undefined && S.films[f.seq] && f.seq !== f.id) return S.films[f.seq];
   const m = /^(.*\S) (\d{1,2})$/.exec(f.title || ''); if (!m) return null;
   if (!DNA_TITLES || DNA_TITLES_N !== S.films.length) { DNA_TITLES = new Map(); for (const x of S.films) if (x && !DNA_TITLES.has(x.title)) DNA_TITLES.set(x.title, x); DNA_TITLES_N = S.films.length; }
   const p = DNA_TITLES.get(m[1]); return p && p.id !== f.id ? p : null;
