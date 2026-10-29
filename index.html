@@ -80438,6 +80438,253 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 .fdc-trk{display:inline-block;width:46px;height:6px;border-radius:3px;background:color-mix(in srgb,currentColor 15%,transparent);vertical-align:middle;overflow:hidden}.fdc-trk i{display:block;height:100%;background:var(--accent,#c84)}
 .fdc-key{margin-top:8px}.fdc-key summary{cursor:pointer;font-weight:600;font-size:12.5px}.fdc-key ul{margin:6px 0 0;padding-left:18px}`; document.head.appendChild(st); })();
 // </fdcuts>
+// <scrap2>
+// ================= The scrapbook, filled in (Round 27) =================
+// It used to be milestones only, most of them an emoji on a coloured square. Now it gathers everything your life has
+// left a trace of: milestones, your press clippings (as newspaper cuttings), achievements (as stamps), every new job
+// and side gig, the famous people you met, and your films' stills. Each moment gets a drawn photograph that fits it
+// (a set, a stage, a city at dusk, a dog in the park, a trophy under a spotlight, two people at a café table, a die
+// that came up twenty...), in one of several frames (a polaroid, a postcard, a ticket stub). Filter by kind; each year
+// opens with a cover. Display only, built from the save.
+function scrapScene(kind, text, seed) {
+  const r = hashRand(seed >>> 0), g = artId(), t = String(text || '').toLowerCase(), SK = AP(r, SKIN), day = r() < .6;
+  const sky = day ? AP(r, [['#8ec5fc', '#e0c3fc'], ['#f6d365', '#fda085'], ['#a1c4fd', '#c2e9fb'], ['#fbc2eb', '#a6c1ee']]) : AP(r, [['#0f2027', '#2c5364'], ['#141e30', '#243b55'], ['#2b1055', '#7597de']]);
+  const figure = (x, y, s, col) => aFig(x, y, s, col || AP(r, ['#222', '#3d405b', '#5c3b1e', '#1d3557']), r);
+  const wrap = (body, bg) => svgWrap(`<rect width="320" height="180" fill="url(#${g})"/>${body}<rect width="320" height="180" fill="#fff6e0" opacity=".07"/>`, aGrad(g, (bg || sky)[0], (bg || sky)[1]));
+  const S0 = {
+    set: () => wrap(`<rect y="130" width="320" height="50" fill="#2b2b2b"/>${aLamp(60, 30, 1, true)}${aLamp(270, 34, .9, true)}${aCamera(170, 108, 1.2, '#1b1b1b', true)}${aClapper(214, 112, .9)}${figure(120, 150, .9)}${figure(250, 152, .8)}`, ['#1d1d22', '#3a3a46']),
+    stage: () => wrap(`<rect width="320" height="180" fill="#3b0d0d"/><path d="M0 0 Q40 90 20 180 L0 180Z M320 0 Q280 90 300 180 L320 180Z" fill="#8b1a1a"/><path d="M160 0 L100 160 L220 160Z" fill="#fff6c9" opacity=".25"/><rect y="150" width="320" height="30" fill="#5c3b1e"/>${figure(160, 152, 1.1)}`, ['#120404', '#3b0d0d']),
+    city: () => wrap(`${day ? aSun(250, 50, 1, '#ffd166') : `<circle cx="250" cy="40" r="12" fill="#f4f1de"/>`}${aSkyline(150, day ? '#3d4b66' : '#0b1020', r)}<rect y="150" width="320" height="30" fill="#2b2b2b"/>${figure(90, 172, 1)}<rect x="100" y="152" width="18" height="20" rx="3" fill="#8d5524"/>`),
+    travel: () => wrap(`${aCloud(80, 50, 1)}${aCloud(240, 70, .8)}${aHills(140, '#6a994e', r)}<g transform="translate(${120 + r() * 60} 60) rotate(-8)"><path d="M0 10 L70 6 Q84 8 84 12 Q84 16 70 18 L0 14Z" fill="#fff"/><path d="M30 10 L18 -8 L26 -8 L44 10Z M30 14 L20 30 L28 30 L44 14Z" fill="#c1121f"/></g>`, ['#89c2ff', '#e9f5ff']),
+    pet: () => wrap(`${aHills(130, '#52b788', r, 20)}<rect y="140" width="320" height="40" fill="#40916c"/>${/cat/.test(t) ? aCat(160, 160, 1.4, AP(r, ['#333', '#c97d3a', '#888', '#e9e2d0'])) : aDog(150, 160, 1.4, AP(r, ['#8d5524', '#e9c46a', '#333', '#c0a080']))}${figure(250, 168, 1)}`, ['#bde0fe', '#f1faee']),
+    trophy: () => wrap(`<path d="M160 0 L90 170 L230 170Z" fill="#fff6c9" opacity=".22"/>${aConfetti(50, r)}${aTrophy(160, 150, 1.5)}<rect y="160" width="320" height="20" fill="#2b1a10"/>`, ['#1b1b2f', '#46325d']),
+    people: () => [() => wrap(`${aHills(120, '#74c69d', r, 18)}<rect y="140" width="320" height="40" fill="#b7b7a4"/><path d="M0 150 Q160 138 320 150" stroke="#fff" stroke-width="3" fill="none" opacity=".5"/>${figure(140, 168, 1)}${figure(170, 168, 1, AP(r, ['#e76f51', '#6d597a', '#2a9d8f']))}<circle cx="260" cy="70" r="26" fill="#2d6a4f"/><rect x="256" y="90" width="8" height="50" fill="#5c3b1e"/>`, ['#caf0f8', '#ade8f4']),
+      () => wrap(`<rect y="120" width="320" height="60" fill="#6c584c"/><rect x="40" y="30" width="100" height="70" fill="#f8f9fa" stroke="#adb5bd"/><path d="M50 90 L80 60 L100 76 L130 44" stroke="#e63946" stroke-width="3" fill="none"/>${figure(170, 170, 1)}${figure(240, 170, 1, '#222')}<path d="M188 138 h34" stroke="${SK}" stroke-width="7" stroke-linecap="round"/>`, ['#e9ecef', '#dee2e6']),
+      () => wrap(`${aBulbs(30, r)}<rect x="100" y="120" width="120" height="8" rx="3" fill="#5c3b1e"/><path d="M160 128 v40" stroke="#5c3b1e" stroke-width="5"/>${figure(110, 160, 1)}${figure(210, 160, 1, AP(r, ['#e76f51', '#6d597a', '#2a9d8f']))}<rect x="132" y="112" width="10" height="10" rx="2" fill="#fff"/><rect x="178" y="112" width="10" height="10" rx="2" fill="#fff"/>`, day ? ['#f8edeb', '#fec89a'] : ['#2b2d42', '#5a4e6b'])][Math.floor(r() * 3)](),
+    love: () => wrap(`${aBulbs(26, r)}${figure(140, 170, 1.05)}${figure(180, 170, 1, '#9b2226')}<path d="M160 50 c-10 -16 -32 -4 -20 12 l20 18 l20 -18 c12 -16 -10 -28 -20 -12z" fill="#e63946" opacity=".85"/>`, ['#ffafcc', '#cdb4db']),
+    fallout: () => wrap(`${aRain(70, r)}${figure(90, 170, 1)}${figure(240, 170, 1)}<rect y="170" width="320" height="10" fill="#444"/>`, ['#5c677d', '#979dac']),
+    luck: () => wrap(`<g transform="translate(160 92) rotate(${r() * 30 - 15})"><path d="M0 -60 L52 -30 L52 30 L0 60 L-52 30 L-52 -30Z" fill="#e63946"/><path d="M0 -60 L52 -30 L0 0 L-52 -30Z" fill="#ff6b6b"/>${aTxt(0, 14, 34, '20', '#fff', 'middle', 'Arial,sans-serif')}</g>${aConfetti(30, r)}`, ['#1d3557', '#457b9d']),
+    school: () => wrap(`<rect x="40" y="26" width="240" height="96" fill="#2d4a3e" stroke="#8d5524" stroke-width="8"/>${aTxt(160, 70, 16, AP(r, ['24 fps', 'f/2.8', 'ACT ONE', 'EXT. DAY', 'I = V/R', 'BEAT SHEET']), '#fff', 'middle', 'Comic Sans MS,cursive', 400)}<path d="M70 90 h80 M70 104 h120" stroke="#fff" opacity=".6"/>${aBook(60, 140, 60, 16, '#9b2226')}${aBook(130, 136, 60, 20, '#264653')}${figure(240, 172, 1)}`, ['#e9edc9', '#ccd5ae']),
+    money: () => wrap(`${[0, 1, 2, 3, 4].map(i => `<rect x="${70 + i * 8}" y="${90 - i * 6}" width="120" height="56" rx="4" fill="#52b788" stroke="#2d6a4f" transform="rotate(${-8 + i * 4} 130 118)"/>`).join('')}${aTxt(130, 124, 24, '$', '#1b4332', 'middle', 'Georgia,serif')}<circle cx="240" cy="130" r="22" fill="#e9c46a"/><circle cx="262" cy="146" r="18" fill="#e9c46a"/>`, ['#f1faee', '#d8f3dc']),
+    level: () => wrap(`${aSun(250, 46, 1.2, '#ffb703')}${[0, 1, 2, 3, 4].map(i => `<rect x="${40 + i * 44}" y="${150 - i * 22}" width="44" height="${30 + i * 22}" fill="#3d405b"/>`).join('')}${figure(240, 62, .8)}`, ['#ffe5b4', '#ffc8dd']),
+    office: () => wrap(`<rect x="20" y="20" width="110" height="80" fill="#cde7ff" stroke="#999"/><path d="M30 100 V60 h14 V100 M50 100 V44 h18 V100 M74 100 V70 h12 V100 M92 100 V52 h16 V100" fill="#9fb3c8"/><rect y="120" width="320" height="60" fill="#8d5524"/><rect x="150" y="110" width="80" height="6" fill="#fff"/>${figure(110, 175, 1)}${figure(250, 175, 1, '#222')}<path d="M150 130 q20 -14 40 0" stroke="${SK}" stroke-width="8" fill="none"/>`, ['#f8f9fa', '#dee2e6']),
+    premiere: () => wrap(`<rect y="130" width="320" height="50" fill="#9b2226"/>${aCrowd(132, 12, '#111', r)}${[0, 1, 2, 3, 4, 5].map(() => `<circle cx="${r() * 320}" cy="${40 + r() * 70}" r="${4 + r() * 6}" fill="#fff" opacity=".9"/>`).join('')}${figure(160, 168, 1.1)}`, ['#000', '#2b2d42']),
+    viral: () => wrap(`<rect x="120" y="14" width="80" height="152" rx="12" fill="#111"/><rect x="126" y="26" width="68" height="120" fill="#ffafcc"/>${figure(160, 120, .8)}${[0, 1, 2, 3, 4, 5, 6].map(() => `<path transform="translate(${40 + r() * 240} ${20 + r() * 140}) scale(${.5 + r() * .6})" d="M0 0 c-6 -10 -20 -2 -12 8 l12 10 l12 -10 c8 -10 -6 -18 -12 -8z" fill="#e63946" opacity=".8"/>`).join('')}`, ['#ffe5ec', '#ffc2d1']),
+    night: () => wrap(`<rect y="120" width="320" height="60" fill="#3a2614"/><rect x="40" y="40" width="240" height="70" fill="#1b1b1b"/>${[0, 1, 2, 3, 4, 5, 6].map(i => `<rect x="${52 + i * 32}" y="52" width="10" height="34" fill="${AP(r, ['#9b2226', '#bc6c25', '#2d6a4f', '#e9c46a'])}"/>`).join('')}<rect x="140" y="104" width="16" height="22" fill="#e9c46a" opacity=".8"/>${figure(220, 172, 1)}`, ['#14080e', '#49111c']),
+    home: () => wrap(`${day ? aSun(60, 40, .8) : '<circle cx="60" cy="40" r="10" fill="#f4f1de"/>'}<path d="M90 100 L160 50 L230 100Z" fill="#9b2226"/><rect x="104" y="100" width="112" height="70" fill="#f1e3c8"/><rect x="146" y="128" width="28" height="42" fill="#5c3b1e"/><rect x="116" y="112" width="20" height="18" fill="${day ? '#bde0fe' : '#ffd166'}"/><rect x="184" y="112" width="20" height="18" fill="${day ? '#bde0fe' : '#ffd166'}"/><rect y="170" width="320" height="10" fill="#52b788"/>`),
+    gig: () => wrap(`<rect y="140" width="320" height="40" fill="#adb5bd"/>${aCamera(110, 112, 1, '#1b1b1b', true)}<rect x="170" y="60" width="110" height="70" fill="#fff" stroke="#ccc"/>${aTxt(225, 100, 12, AP(r, ['BRAND', 'LOGO', 'SPEC', 'REEL']), '#333', 'middle', 'Arial,sans-serif')}${figure(260, 172, .9)}`, ['#e9ecef', '#ced4da'])
+  };
+  const k = S0[kind] ? kind : 'city';
+  return S0[k]();
+}
+function scrapKind(m) {
+  const t = m.t || '';
+  const rules = [[/Arrived in|Moved from|moved to|relocat/i, 'city'], [/dog|cat\b|puppy|kitten|Adopted|pet/i, 'pet'], [/natural 20/i, 'luck'], [/Learned|school|degree|graduat|course|class/i, 'school'], [/Fell out|rival|feud|grudge/i, 'fallout'], [/viral|clip|ad about/i, 'viral'], [/Reached level|promot/i, 'level'], [/agent|Signed|contract|deal/i, 'office'],
+    [/award|won |wins|prize|Best |laurel|trophy/i, 'trophy'], [/premiere|opens|released|box office/i, 'premiere'], [/married|wedding|partner|in love|date|kissed/i, 'love'], [/coping|drinks|burnout|bar\b/i, 'night'], [/father|mother|parent|family|went home|\bill\b|hospital/i, 'home'], [/cash|money|\$|debt|broke|bought|sold/i, 'money'],
+    [/theatre|stage|play\b|improv|comedy club/i, 'stage'], [/mentor|champion|tipster|Helped|turned up|friend|met |introduc/i, 'people'], [/DP on|Director|job|wrap|shoot|on set|credit|camera|edit/i, 'set']];
+  for (const [re, k] of rules) if (re.test(t)) return k;
+  return { work: 'set', love: 'love', money: 'money', prize: 'trophy', awards: 'trophy', fame: 'premiere', school: 'school', luck: 'luck', level: 'level', start: 'city' }[m.kind] || 'people';
+}
+const SCRAP_FILT = [['', 'Everything'], ['work', 'Work'], ['people', 'People'], ['life', 'Life'], ['press', 'Press'], ['luck', 'Luck & milestones']];
+function scrapGroup(p) { return p.src === 'press' ? 'press' : p.src === 'ach' ? 'luck' : ['set', 'stage', 'gig', 'office', 'premiere', 'trophy', 'school'].includes(p.scene) ? 'work' : ['people', 'love', 'fallout'].includes(p.scene) ? 'people' : ['luck', 'level'].includes(p.scene) ? 'luck' : 'life'; }
+function scrapPages() {
+  const M = S.me, me = ME(), out = [], seen = new Set(), add = p => { const k = p.t; if (seen.has(k)) return; seen.add(k); out.push(p); };
+  for (const m of M.milestones || []) add({ w: m.w, t: m.t, src: 'm', scene: scrapKind(m) });
+  for (const c of M.press || []) add({ w: c.w, t: c.h, sub: c.sub, paper: c.paper, src: 'press' });
+  if (typeof ACH !== 'undefined') for (const [k, w] of Object.entries(M.ach || {})) { const A = ACH.find(a => a[0] === k); if (A) add({ w, t: A[2], sub: A[3], icon: A[1], src: 'ach' }); }
+  const jobSeen = new Set(); for (const j of M.past || []) { if (!j.t || jobSeen.has(j.t)) continue; jobSeen.add(j.t); add({ w: j.from, t: `First week as ${j.t.toLowerCase().replace(/^(an?|the) /, '')}${j.film !== null && j.film !== undefined && S.films[j.film] ? ' on ' + S.films[j.film].title : ''}`, src: 'job', scene: /theatre|stage|usher|box office/i.test(j.t) ? 'stage' : j.film !== null && j.film !== undefined ? 'set' : 'office', film: j.film }); }
+  for (const g of M.gigs || []) add({ w: g.w || g.from, t: `${g.credit || 'Crew'} on ${g.client}`, sub: g.snag ? `${g.snag}. ${g.snagGo || ''}` : '', src: 'gig', scene: 'gig' });
+  for (const [id, k] of Object.entries(M.known || {})) { const p = P(+id); if (p && (p.fame || 0) >= 45 && k.met !== undefined) add({ w: k.met, t: `Met ${p.name}`, sub: (k.tags || [])[0] || '', src: 'met', scene: 'people', who: +id }); }
+  return out.sort((a, b) => b.w - a.w);
+}
+function scrapCard(p, i) {
+  const seed = (p.w * 131 + i * 17 + p.t.length * 7) >>> 0, rot = ((seed % 9) - 4) * .7, f = p.film !== undefined && p.film !== null ? S.films[p.film] : (ME().credits || []).map(id => S.films[id]).find(x => x && p.t.includes(x.title));
+  if (p.src === 'press') return `<figure class="sb-clip" style="transform:rotate(${rot}deg)"><span class="sb-paper">${esc(p.paper || 'The trades')} · ${esc(fmtDate(p.w, true))}</span><b class="sb-head">${esc(p.t)}</b>${p.sub ? `<span class="sb-dek">${esc(p.sub)}</span>` : ''}<span class="sb-cols"><i></i><i></i><i></i></span></figure>`;
+  if (p.src === 'ach') return `<figure class="sb-stamp" style="transform:rotate(${rot * 2}deg)"><span class="sb-ic">${p.icon || '★'}</span><b>${esc(p.t)}</b><small>${esc(p.sub || '')}</small><small class="sb-d">${esc(fmtDate(p.w, true))}</small></figure>`;
+  const frame = ['polaroid', 'polaroid', 'postcard', 'ticket'][seed % 4], img = f && typeof stillSVG === 'function' ? stillSVG(f, p.w % 6, 180) : scrapScene(p.scene, p.t, seed);
+  return `<figure class="sb-ph sb-${frame}" style="transform:rotate(${rot}deg)"><div class="sb-img">${img}</div><figcaption><b>${esc(fmtDate(p.w, true))}</b> ${p.who !== undefined ? 'Met ' + pl(p.who) : esc(p.t)}${p.sub ? `<small>${esc(p.sub)}</small>` : ''}</figcaption></figure>`;
+}
+scrapHTML = function () {
+  const M = S.me, all = scrapPages(), F = UI.sbf || '', L = F ? all.filter(p => scrapGroup(p) === F) : all;
+  if (!all.length) return '<p class="muted">Nothing yet. The first page is waiting.</p>';
+  const by = {}; for (const p of L) (by[yearOf(p.w)] = by[yearOf(p.w)] || []).push(p);
+  const chips = `<p class="sb-chips">${SCRAP_FILT.map(([k, l]) => `<button class="tk-chip${F === k ? ' on' : ''}" data-sbf="${k}">${l} (${k ? all.filter(p => scrapGroup(p) === k).length : all.length})</button>`).join('')}</p>`;
+  return chips + Object.entries(by).sort((a, b) => b[0] - a[0]).map(([y, ps]) => { const n = ps.length, firsts = ps.filter(p => /^First|Arrived/.test(p.t)).length, press = ps.filter(p => p.src === 'press').length;
+    return `<section class="sb-year"><header class="sb-cover"><b>${y}</b><span>${n} page${n === 1 ? '' : 's'}${firsts ? ` · ${firsts} first${firsts === 1 ? '' : 's'}` : ''}${press ? ` · ${press} clipping${press === 1 ? '' : 's'}` : ''}</span></header><div class="sb-grid">${ps.slice(0, 60).map(scrapCard).join('')}</div></section>`; }).join('');
+};
+OS_VIEWS.scrapbook = () => scrapHTML();
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') document.addEventListener('click', e => { const t = e.target && e.target.closest ? e.target.closest('[data-sbf]') : null; if (!t) return; e.preventDefault(); e.stopPropagation(); UI.sbf = t.dataset.sbf || ''; render(true); }, true);
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `
+.sb-chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}.sb-chips .tk-chip.on{background:var(--accent,#c84);color:#fff;border-color:transparent}
+.sb-year{margin:0 0 22px}.sb-cover{display:flex;align-items:baseline;gap:12px;padding:8px 14px;border-radius:8px;background:linear-gradient(90deg,#3d2c1e,#6b4b2e);color:#f6ead7;margin-bottom:12px}.sb-cover b{font:700 26px Georgia,serif}.sb-cover span{font-size:12.5px;opacity:.85}
+.sb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px 14px;padding:6px 4px;background:repeating-linear-gradient(0deg,transparent 0 23px,rgba(120,90,50,.06) 23px 24px)}
+.sb-ph{margin:0;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18);transition:transform .15s}.sb-ph:hover{transform:rotate(0) scale(1.03)!important;z-index:2}
+.sb-polaroid{padding:8px 8px 10px}.sb-postcard{padding:6px;border:1px solid #e8dcc8;background:#fdf8ef}.sb-ticket{padding:8px;background:#fff7e0;border:2px dashed #d4a373}
+.sb-img{aspect-ratio:16/9;overflow:hidden;background:#ddd}.sb-img svg{width:100%;height:100%;display:block}
+.sb-ph figcaption{font:13px/1.35 'Segoe Print','Bradley Hand','Comic Sans MS',cursive;color:#333;padding-top:6px}.sb-ph figcaption b{display:block;font:600 10.5px var(--f-body,system-ui);letter-spacing:.06em;color:#8a7a66;text-transform:uppercase}.sb-ph figcaption small{display:block;color:#777;font-size:11.5px;margin-top:2px}
+.sb-clip{margin:0;padding:10px 12px;background:#f4efe3;color:#222;box-shadow:0 2px 8px rgba(0,0,0,.15);font-family:Georgia,serif;clip-path:polygon(0 2%,4% 0,30% 1%,62% 0,100% 2%,99% 40%,100% 98%,70% 100%,35% 99%,2% 100%,0 60%)}
+.sb-paper{display:block;font:700 9.5px var(--f-body,system-ui);letter-spacing:.12em;text-transform:uppercase;border-bottom:1px solid #222;padding-bottom:3px;margin-bottom:6px}.sb-head{display:block;font-size:17px;line-height:1.15}.sb-dek{display:block;font-style:italic;font-size:12px;color:#555;margin-top:4px}
+.sb-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.sb-cols i{height:28px;background:repeating-linear-gradient(0deg,#bbb 0 1px,transparent 1px 5px)}
+.sb-stamp{margin:0;align-self:center;justify-self:center;width:160px;padding:12px;border:3px double #b5523b;border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#b5523b;background:rgba(181,82,59,.04)}
+.sb-stamp .sb-ic{font-size:26px}.sb-stamp b{font:700 13px var(--f-body,system-ui);text-transform:uppercase;letter-spacing:.06em}.sb-stamp small{font-size:10.5px;opacity:.85}.sb-stamp .sb-d{margin-top:3px;font-weight:600}`; document.head.appendChild(st); })();
+// </scrap2>
+// <studio3>
+// ================= The Studio, made easier and more fun (Round 27) =================
+// Compose and Lyrics were blank grids and a blank page, graded but never helped. Now:
+//  - Song starters: one click fills drums, bass, chords and a melody with a hook in a style (pop anthem, ballad,
+//    bossa, hip-hop, indie, film cue), different for every song title; the mix is still yours to do.
+//  - "New melody idea" writes a fresh tune over the same chords; each row can be cleared on its own.
+//  - A coach line under the score: the one change that would raise it most.
+//  - Lyrics: pick a theme and a mood, then "suggest a line" for a verse, chorus, bridge or hook (from the game's
+//    library of lyric lines), or build a whole skeleton with your title in the chorus. Rhymes for the last word of
+//    your last line, and the syllables of every line, so the meter is easy to even out.
+// Everything here edits the same draft the Studio already saves; nothing is scored differently.
+const ST3_STYLES = {
+  pop: ['Pop anthem', 'four', 'major', 116, ['I', 'V', 'vi', 'IV']], ballad: ['Ballad', 'ballad', 'major', 72, ['vi', 'IV', 'I', 'V']],
+  bossa: ['Bossa', 'bossa', 'dorian', 96, ['ii', 'V', 'I', 'I']], hiphop: ['Hip-hop', 'boom', 'minor', 90, ['vi', 'IV', 'I', 'V']],
+  indie: ['Indie', 'four', 'major', 124, ['I', 'IV', 'vi', 'V']], cue: ['Film cue', 'march', 'minor', 84, ['I', 'IV', 'V', 'I']]
+};
+function st3Seed(k, salt) { return hashRand(((k && k.title || 'x').split('').reduce((a, c) => a * 31 + c.charCodeAt(0), 7) + (salt || 0) * 7919) >>> 0); }
+// a singable tune: a four-step motif, mostly stepwise, repeated in bar three (the hook), home on the tonic
+function st3Melody(r) {
+  const mel = Array(N16).fill(-1), motif = [], start = [0, 2, 4][Math.floor(r() * 3)]; let d = start;
+  for (let i = 0; i < 4; i++) { motif.push(r() < .2 ? -1 : d); d = clamp(d + [-1, 1, 1, 2, -2, 0][Math.floor(r() * 6)], 0, 6); }
+  if (motif[0] < 0) motif[0] = start;
+  for (let i = 0; i < 4; i++) { mel[i] = motif[i]; mel[8 + i] = motif[i]; }
+  let e = clamp(motif[3] < 0 ? start : motif[3], 0, 6); for (const i of [4, 6]) { e = clamp(e + (r() < .5 ? 1 : -1) * (1 + Math.floor(r() * 2)), 0, 7); mel[i] = e; }
+  mel[13] = clamp(e - 1, 0, 6); mel[14] = r() < .5 ? 1 : 2; mel[15] = 0;
+  return mel;
+}
+function st3Apply(style) {
+  const k = S.me.make, X = st2(), Y = ST3_STYLES[style]; if (!Y) return; const r = st3Seed(k, Object.keys(ST3_STYLES).indexOf(style));
+  const G = GROOVES[Y[1]][1]; X.drums = { k: Array(N16).fill(0), s: Array(N16).fill(0), h: Array(N16).fill(0) }; for (const p of ['k', 's', 'h']) for (const i of G[p]) X.drums[p][i] = 1;
+  if (!X.drums.k[0]) X.drums.k[0] = 1; if (style !== 'ballad') { X.drums.s[4] = 1; X.drums.s[12] = 1; }
+  X.scale = Y[2]; X.bpm = Y[3] + Math.round((r() - .5) * 10); X.key = Math.floor(r() * 12); X.chords = Y[4].slice();
+  X.bass = Array(N16).fill(-1); for (let b = 0; b < 4; b++) { const root = CH_DEG[X.chords[b]] % 5; X.bass[b * 4] = root; if (style !== 'ballad') X.bass[b * 4 + 2] = r() < .5 ? root : (root + 2) % 5; }
+  X.mel = st3Melody(r);   // the mix is left to you
+}
+function st3Coach(k) {
+  const X = st2(), parts = [['melody', melodyRead(X)], ['groove', grooveRead(X)], ['harmony', chordRead(X)], ['mix', mixRead(X)]];
+  if (k.type === 'song' || k.type === 'musical') parts.push(['lyrics', lyricRead(X.lyrics, k.title)]);
+  parts.sort((a, b) => a[1].s - b[1].s); const [name, R] = parts[0];
+  const fix = { melody: 'Try "New melody idea", or repeat bar one\'s notes in bar three and end on the bottom row.', groove: 'Put the kick on the first step, snares on steps 5 and 13, and hats every other step.', harmony: 'Try I–V–vi–IV: it is the progression a million songs trust.', mix: 'On Mix: keep the faders within 40 of each other, the lead on top, reverb 10–45, compression 20–65.', lyrics: 'On Lyrics: mark [Verse] and [Chorus], sing the title in the chorus, and keep lines about the same length.' }[name];
+  const bad = R.notes.find(n => /no |few|lost|buried|drone|fight|keep going|mark|sing the title|clich|sparse|wall|leaps|air|wander|floats|dry|drowned|loose|squashed|stays/i.test(n));
+  if (name === 'lyrics' && bad) { const L = /rhyme/i.test(bad) ? 'End lines on words from the rhymes list under Suggest.' : /length|fight/i.test(bad) ? 'Open "Syllables per line" and even them out to within two or three of each other.' : /title/i.test(bad) ? 'Press "+ title in the chorus".' : /mark/i.test(bad) ? 'Press "Build a whole skeleton", or add [Verse] and [Chorus] lines yourself.' : /keep going/i.test(bad) ? 'Add lines until you have at least twelve.' : fix; return `Biggest gain: the lyrics (${Math.round(R.s)}/10) — ${bad.replace(/\.$/, '')}. ${L}`; }
+  return R.s >= 8 ? `Everything reads well. Bounce the session, or polish the ${name} for the last points.` : `Biggest gain: the ${name} (${Math.round(R.s)}/10)${bad ? ` — ${bad.replace(/\.$/, '')}` : ''}. ${fix}`;
+}
+// ---- lyrics ----
+const ST3_THEMES = ['love', 'memory', 'freedom', 'loneliness', 'family', 'ambition', 'identity', 'survival', 'faith', 'justice', 'power', 'revenge'], ST3_MOODS = ['light', 'bittersweet', 'dark', 'tense', 'absurd'];
+function st3Lines(part, theme, mood) {
+  const L = ((typeof WLIB !== 'undefined' && WLIB.T.lyric) || []).filter(e => typeof e[2] === 'string' && e[2].startsWith(part + '.') && !/\{/.test(e[4]));
+  const fit = L.filter(e => e[2] === part + '.' + theme && (e[1] === '*' || String(e[1]).split(',').includes(mood)));
+  return fit.length >= 3 ? fit : L.filter(e => e[2] === part + '.' + theme).length ? L.filter(e => e[2] === part + '.' + theme) : L;
+}
+function st3Pick(part, n) { const T = UI.st3 || {}, L = st3Lines(part, T.theme || 'love', T.mood || 'bittersweet'); if (!L.length) return []; const r = hashRand(((UI.st3n = (UI.st3n || 0) + 1) * 2654435761 + S.week) >>> 0), out = []; for (let i = 0; i < n && i < 50; i++) { const e = L[Math.floor(r() * L.length)]; if (!out.includes(e[4])) out.push(e[4]); } return out; }
+function st3Insert(section, lines) {
+  const X = st2(), tag = `[${section}]`; let txt = X.lyrics || '';
+  if (!txt.includes(tag)) txt = (txt.trim() ? txt.trim() + '\n\n' : '') + tag;
+  const parts = txt.split('\n'), i = parts.lastIndexOf(tag); let j = i + 1; while (j < parts.length && parts[j].trim() && !/^\[.*\]$/.test(parts[j].trim())) j++;
+  parts.splice(j, 0, ...lines); X.lyrics = parts.join('\n');
+}
+function st3Skeleton(k) {
+  const title = (k && k.title) || 'This song', v1 = st3Pick('verse', 4), ch = st3Pick('chorus', 3), v2 = st3Pick('verse', 4), br = st3Pick('bridge', 2);
+  st2().lyrics = ['[Verse 1]', ...v1, '', '[Chorus]', title, ...ch, '', '[Verse 2]', ...v2, '', '[Chorus]', title, ...ch, '', '[Bridge]', ...br, '', '[Chorus]', title, ...ch].join('\n');
+}
+// words that rhyme with the last word you wrote, from every line in the lyric library
+let ST3_RHY = null;
+function st3Rhymes(word) {
+  if (!ST3_RHY) { ST3_RHY = new Map(); for (const e of (typeof WLIB !== 'undefined' && WLIB.T.lyric) || []) for (const line of String(e[4]).split('\n')) { const w = (line.toLowerCase().match(/[a-z']+(?=[^a-z']*$)/) || [''])[0]; if (w.length < 3) continue; const key = w.replace(/^.*?([aeiouy]+[^aeiouy]*)$/, '$1'); if (!ST3_RHY.has(key)) ST3_RHY.set(key, new Set()); ST3_RHY.get(key).add(w); } }
+  const w = String(word || '').toLowerCase().replace(/[^a-z']/g, ''); if (w.length < 2) return [];
+  const key = w.replace(/^.*?([aeiouy]+[^aeiouy]*)$/, '$1'), S0 = ST3_RHY.get(key); return S0 ? [...S0].filter(x => x !== w).slice(0, 14) : [];
+}
+function st3LyricTools(k) {
+  const X = st2(), T = UI.st3 = UI.st3 || { theme: 'love', mood: 'bittersweet' }, lines = String(X.lyrics || '').split('\n'), lastLine = [...lines].reverse().find(l => l.trim() && !/^\[.*\]$/.test(l.trim())) || '', last = (lastLine.toLowerCase().match(/[a-z']+(?=[^a-z']*$)/) || [''])[0], rh = st3Rhymes(last);
+  const syl0 = l => l.split(/\s+/).reduce((t, w) => t + syl(w), 0);
+  return `<div class="st3-ly"><div class="st3-row"><span class="st3-k">Theme</span>${ST3_THEMES.map(t => `<button class="tk-chip${T.theme === t ? ' on' : ''}" data-st3="theme:${t}">${t}</button>`).join('')}</div>
+   <div class="st3-row"><span class="st3-k">Mood</span>${ST3_MOODS.map(t => `<button class="tk-chip${T.mood === t ? ' on' : ''}" data-st3="mood:${t}">${t}</button>`).join('')}</div>
+   <div class="st3-row"><span class="st3-k">Suggest</span><button class="btn-s ghost" data-st3="line:verse:Verse 1">+ verse line</button><button class="btn-s ghost" data-st3="line:chorus:Chorus">+ chorus line</button><button class="btn-s ghost" data-st3="line:bridge:Bridge">+ bridge line</button><button class="btn-s ghost" data-st3="hook">+ title in the chorus</button><button class="btn-s" data-st3="skel">✨ Build a whole skeleton</button>${X.lyrics ? '<button class="linkish" data-st3="clear">clear</button>' : ''}</div>
+   ${last ? `<div class="st3-row"><span class="st3-k">Rhymes for “${esc(last)}”</span>${rh.length ? rh.map(w => `<span class="st3-rh">${esc(w)}</span>`).join('') : '<span class="muted small">none in the book; try a simpler last word</span>'}</div>` : ''}
+   ${lines.some(l => l.trim()) ? `<details class="st3-syl"><summary>Syllables per line</summary><ol>${lines.filter(l => l.trim()).map(l => /^\[.*\]$/.test(l.trim()) ? `<li class="sec">${esc(l)}</li>` : `<li><b>${syl0(l)}</b> ${esc(l)}</li>`).join('')}</ol></details>` : ''}
+   <p class="small muted">Suggestions come from the game's library of lyric lines for your theme and mood. Use them as they are or rewrite them; your own lines score just the same.</p></div>`;
+}
+// ---- wiring ----
+{ const _sa = studioApp; studioApp = function () {
+  const h = _sa.apply(this, arguments), k = S.me && S.me.make; if (!k || !AUDIO_TYPES.includes(k.type) || k.type === 'podcast' || typeof h !== 'string') return h;
+  const t = UI.stt || 'compose', coach = `<p class="st3-coach"><b>Coach</b> ${esc(st3Coach(k))}</p>`;
+  let out = h.replace('<div class="np-tabs">', coach + '<div class="np-tabs">');
+  if (t === 'compose') out = out.replace('<h5>Drums</h5>', `<div class="st3-start"><b>Start from a song</b> <span class="muted small">fills drums, bass, chords and a tune in a style; different for every title</span><div>${Object.entries(ST3_STYLES).map(([kk, v]) => `<button class="btn-s ghost" data-st3="style:${kk}">${esc(v[0])}</button>`).join('')}<button class="btn-s ghost" data-st3="mel">🎲 New melody idea</button><button class="linkish" data-st3="clr:drums">clear drums</button> <button class="linkish" data-st3="clr:mel">clear melody</button> <button class="linkish" data-st3="clr:bass">clear bass</button></div></div><h5>Drums</h5>`);
+  if (t === 'lyrics') out = out.replace('<div class="ly">', st3LyricTools(k) + '<div class="ly">');
+  return out; }; }
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') document.addEventListener('click', e => {
+  const b = e.target && e.target.closest ? e.target.closest('[data-st3]') : null; if (!b) return; e.preventDefault(); e.stopPropagation();
+  const k = S.me && S.me.make; if (!k) return; const [a, v, w] = b.dataset.st3.split(':'), X = st2(), T = UI.st3 = UI.st3 || { theme: 'love', mood: 'bittersweet' };
+  const ta = document.getElementById('st-lyrics'); if (ta) X.lyrics = ta.value;
+  if (a === 'style') st3Apply(v);
+  else if (a === 'mel') X.mel = st3Melody(hashRand(((UI.st3m = (UI.st3m || 0) + 1) * 40503 + (k.title || '').length) >>> 0));
+  else if (a === 'clr') { if (v === 'drums') X.drums = { k: Array(N16).fill(0), s: Array(N16).fill(0), h: Array(N16).fill(0) }; else X[v] = Array(N16).fill(-1); }
+  else if (a === 'theme' || a === 'mood') T[a] = v;
+  else if (a === 'line') st3Insert(w, st3Pick(v, 1));
+  else if (a === 'hook') st3Insert('Chorus', [k.title || 'This song']);
+  else if (a === 'skel') st3Skeleton(k);
+  else if (a === 'clear') X.lyrics = '';
+  render(true);
+}, true);
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `
+.st3-coach{margin:8px 0;padding:8px 12px;border-radius:8px;background:color-mix(in srgb,var(--accent,#c84) 10%,transparent);font-size:13px}.st3-coach b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-right:6px;color:var(--accent,#c84)}
+.st3-start{margin:10px 0;padding:10px 12px;border:1px dashed var(--line,#ccc);border-radius:10px}.st3-start>div{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+.st3-ly{margin:6px 0 10px;display:flex;flex-direction:column;gap:6px}.st3-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.st3-k{font:600 11px var(--f-body,system-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted,#777);min-width:64px}
+.st3-ly .tk-chip.on{background:var(--accent,#c84);color:#fff;border-color:transparent}.st3-rh{font-size:12.5px;padding:2px 8px;border-radius:9px;background:color-mix(in srgb,var(--ink,#111) 7%,transparent)}
+.st3-syl summary{cursor:pointer;font-size:12.5px;font-weight:600}.st3-syl ol{list-style:none;padding:0;margin:4px 0;font-size:12.5px;columns:2}.st3-syl li b{display:inline-block;width:22px;text-align:right;margin-right:6px;color:var(--accent,#c84)}.st3-syl li.sec{font-weight:700;color:var(--muted,#777)}`; document.head.appendChild(st); })();
+// </studio3>
+// <paths2>
+// ================= Paths, readable (Round 27) =================
+// The Paths page borrowed a class name that another feature styles as a grid of 220px cards, so its sections were
+// squeezed into narrow columns on the left and the labs table broke its text into slivers. Now it has its own
+// layout: a summary strip (your field, where you are, the next step and what it takes), full-width ladder cards with
+// progress, your deals and income, and the labs and fellowships as cards sorted by when they open.
+function pathsApp2() {
+  const M = S.me; if (!M || !careerActive()) return '<p class="muted">Start a career to see your paths.</p>';
+  const d = typeof dreamOf === 'function' ? dreamOf() : null, my = M.field || 'film', fields = Object.keys(PATHS).sort((a, b) => (b === my) - (a === my) || (d && (b === d.field) - (a === d.field)) || pathRung(b) - pathRung(a));
+  const P0 = PATHS[my], i0 = pathRung(my), nx0 = P0.rungs[i0 + 1];
+  const strip = `<div class="pth-strip"><div><span>Your field</span><b>${esc(P0.label)}</b></div><div><span>Where you are</span><b>${esc(P0.rungs[i0][0])}</b><small>step ${i0 + 1} of ${P0.rungs.length}</small></div><div class="wide"><span>Next step</span><b>${nx0 ? esc(nx0[0]) : 'The top'}</b><small>${nx0 ? esc(nx0[2]) : 'You\'re at the top of this ladder.'}</small></div>${d ? `<div><span>Your dream</span><b>${esc(d.label)}</b></div>` : ''}</div>`;
+  const ladder = f => { const R = PATHS[f].rungs, i = pathRung(f), nx = R[i + 1], pct = Math.round(i / Math.max(1, R.length - 1) * 100);
+    return `<article class="pth-l${f === my ? ' mine' : ''}"><header><b>${esc(PATHS[f].label)}</b>${f === my ? '<span class="chip good">your field</span>' : ''}${d && d.field === f ? '<span class="chip">your dream</span>' : ''}<span class="pth-pct">${i + 1}/${R.length}</span></header>
+     <div class="pth-bar"><i style="width:${pct}%"></i></div>
+     <ol class="pth-rungs">${R.map((r, j) => `<li class="${j < i ? 'done' : j === i ? 'on' : ''}" title="${esc(r[2])}">${j < i ? '✓ ' : ''}${esc(r[0])}</li>`).join('')}</ol>
+     <p class="small">${nx ? `<b>Next: ${esc(nx[0])}.</b> <span class="muted">${esc(nx[2])}</span>` : '<span class="muted">You\'re at the top of this ladder.</span>'}</p></article>`; };
+  const deals = (M.pdeals || []).map(x => `<li>${esc(({ music_label: 'Record deal', music_pub: 'Publishing', creator_mcn: 'Creator network', pod_network: 'Podcast network', stage_transfer: 'Transfer' })[x.k] || x.k)}: <b>${esc(x.pick)}</b> <span class="muted">since ${fmtDate(x.w, true)}</span></li>`), streams = (M.streams || []).filter(s => S.week <= s.to);
+  const labs = LABS.filter(labFits), tried = M.labTried || {}, wy = S.week % 52;
+  const labCard = L => { const open = labOpen(L), wait = tried[L[0]] !== undefined && S.week - tried[L[0]] < 40, inW = (L[4] - wy + 52) % 52, mine = M.lab && M.lab.k === L[0];
+    const act = mine ? '<span class="chip good">you\'re in</span>' : wait ? '<span class="muted small">applied this year</span>' : open && !M.lab ? `<button class="btn-s" data-labapply="${L[0]}">Apply now</button>` : `<span class="pth-when">${open ? 'open now' : `opens in ${inW} wk`}</span>`;
+    return `<article class="pth-lab${open ? ' open' : ''}"><header><b>${esc(L[1])}</b><span class="chip">${esc(FIELDS[L[2]] || L[2])}</span></header><p class="small">${esc(L[8])}</p><dl><div><dt>Length</dt><dd>${L[5]} weeks</dd></div><div><dt>Selection</dt><dd>${esc(checkLabel(L[6], labDC(L)))}</dd></div></dl><footer>${act}</footer></article>`; };
+  labs.sort((a, b) => (labOpen(b) - labOpen(a)) || (((a[4] - wy + 52) % 52) - ((b[4] - wy + 52) % 52)));
+  return `<div class="pth">${strip}
+   <section class="pth-s"><h3>Your ladders</h3><p class="muted small">Every part of the business has its own steps up. Hover a step to see what it takes. Where your work takes you decides your field.</p><div class="pth-grid">${fields.map(ladder).join('')}</div></section>
+   ${deals.length || streams.length || M.deal ? `<section class="pth-s"><h3>Your deals and income</h3>${deals.length ? `<ul class="plain small">${deals.join('')}</ul>` : ''}${streams.length ? `<table class="grid small"><thead><tr><th>Income</th><th class="n">A week</th><th class="n">Until</th></tr></thead><tbody>${streams.map(s => `<tr><td>${esc(s.t)}</td><td class="n">${fmtCash(s.per)}</td><td class="n">${fmtDate(s.to, true)}</td></tr>`).join('')}</tbody></table>` : ''}${M.deal ? `<p class="small">Record deal with ${esc(M.deal.lab)}: advance ${fmtCash(M.deal.adv)}, ${fmtCash(M.deal.rec)} earned back so far${M.deal.rec >= M.deal.adv ? ' (recouped: royalties now reach you)' : ''}.</p>` : ''}</section>` : ''}
+   <section class="pth-s"><h3>Labs, fellowships and residencies</h3><p class="muted small">The schooling of working life. Each opens once a year for four weeks, and you can be on one at a time. Selection is a roll on the skill it cares about; a higher level and good paid work both help. Soonest first.</p>
+    ${M.lab ? `<p class="note">On ${esc(LAB_BY[M.lab.k][1])} until ${fmtDate(M.lab.to, true)}.</p>` : ''}<div class="pth-labs">${labs.map(labCard).join('') || '<p class="muted">None for your fields yet.</p>'}</div>
+    ${(M.labs || []).length ? `<p class="small">Alumni of: ${(M.labs || []).map(x => esc(LAB_BY[x.k][1])).join(', ')}.</p>` : ''}</section></div>`;
+}
+pathsApp = pathsApp2;
+OS_VIEWS.paths = () => pathsApp();
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `
+.pth{display:flex;flex-direction:column;gap:16px}
+.pth-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;border:1px solid var(--os-line,var(--line,#ddd));border-radius:10px;overflow:hidden;background:var(--os-line,var(--line,#ddd))}
+.pth-strip>div{background:var(--os-card,var(--panel,#fff));padding:10px 14px;display:flex;flex-direction:column;gap:2px}.pth-strip>div.wide{grid-column:span 2}
+.pth-strip span{font:600 10.5px var(--f-body,system-ui);letter-spacing:.1em;text-transform:uppercase;opacity:.65}.pth-strip b{font-size:16px}.pth-strip small{font-size:12px;opacity:.75}
+.pth-s h3{margin:0 0 4px}.pth-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:8px}
+.pth-l{border:1px solid var(--os-line,var(--line,#ddd));border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}.pth-l.mine{border-color:#c9a227;box-shadow:inset 3px 0 0 #c9a227}
+.pth-l header{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.pth-l header b{font-size:14px;letter-spacing:.04em;text-transform:uppercase}.pth-pct{margin-left:auto;font:600 12px var(--f-data,ui-monospace,monospace);opacity:.7}
+.pth-bar{height:5px;border-radius:3px;background:color-mix(in srgb,currentColor 12%,transparent);overflow:hidden}.pth-bar i{display:block;height:100%;background:#c9a227}
+.pth-rungs{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px}.pth-rungs li{font-size:12px;padding:2px 9px;border-radius:10px;border:1px solid color-mix(in srgb,currentColor 18%,transparent);opacity:.6;cursor:help}
+.pth-rungs li.done{opacity:.85}.pth-rungs li.on{opacity:1;background:#c9a227;color:#1a1408;border-color:transparent;font-weight:700}
+.pth-l p{margin:0}.pth-labs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-top:8px}
+.pth-lab{border:1px solid var(--os-line,var(--line,#ddd));border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}.pth-lab.open{border-color:var(--good,#2e7d32)}
+.pth-lab header{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.pth-lab header b{font-size:14.5px}.pth-lab p{margin:0}
+.pth-lab dl{display:flex;gap:18px;margin:0}.pth-lab dt{font:600 10px var(--f-body,system-ui);letter-spacing:.1em;text-transform:uppercase;opacity:.6}.pth-lab dd{margin:0;font-size:12.5px}
+.pth-lab footer{margin-top:auto;padding-top:4px}.pth-when{font-size:12px;opacity:.75}
+@media (max-width:640px){.pth-strip>div.wide{grid-column:auto}.pth-grid,.pth-labs{grid-template-columns:1fr}}`; document.head.appendChild(st); })();
+// </paths2>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

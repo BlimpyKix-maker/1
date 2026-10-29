@@ -333,6 +333,38 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 27: SlateOS scrolling, a market that reads the world, real-shaped agencies, and a dozen apps polished
+
+- **SlateOS** (`src/osfix.js`): fixed-height window; the sidebar and the app scroll on their own, keep their place across
+  renders (the sidebar no longer snaps to the top), clearer group headings and current-app marker. "How this works"
+  scrolls into view. Disabled buttons show `not-allowed`, not the loading cursor (the pet check-up looked stuck).
+- **Stock market** (`src/mktlink.js`): `eventsAt` now also reads the news of the week before: the studio's own
+  headlines (sequels, rights, first-look deals, set trouble, awards, lawsuits, cost cuts), scandals of people on its
+  unreleased slate, hits and flops of rivals in genres it is betting on, strikes and tax credits in its city. Monthly
+  feedback: +60% in a year → sells new shares (cash in, news); −45% → cost cuts (`c.cut`, a fifth off every greenlit
+  budget for a year). The stock page has "What moved it". Events lag a week so bars never change after the fact.
+- **Sequels** (`src/world2.js`): far fewer (gate by `hashRand`, half for real archive hits), subtitles instead of
+  numbers most of the time (`SEQ_SUB`), parsed titles (no more "2 2"), `dnaParent` uses `f.seq`.
+- **Bazaar** (`src/bzart2.js`): 45 new item kinds, five book covers, and every item its own background, pattern,
+  tint, angle and shelf label from its name.
+- **Representation** (`src/agencies2.js`): giant full-service agencies, mid-size, talent/literary/below-the-line
+  boutiques and management companies (15%); offices, departments, client counts and real clients via `agencyOf`;
+  signing gives a rank (junior agent … partner) that nudges booking odds, and the departments covering you.
+- **Roger That**: critic grades shift by temperament (`RV_TEMPER_ADJ`), bunch near the top, and sometimes dissent, so
+  scores no longer pile up at 98–100. "Gap" became a signed "Critics +N / Crowd +N".
+- **Shorts circuit**: ordered by prestige with tier headings. Every real festival and prize name in `contests2.js`
+  and `school2.js` was renamed (one prize named a real person); the blocklist now has those names.
+- **Film Desk** (`src/fdcuts.js`): the Cutting Rooms shows every budget band with filters, stage in post, tests,
+  tracking, sequel/original tags and a key, instead of the ten biggest films.
+- **Scrapbook** (`src/scrap2.js`): milestones, press clippings, achievements, jobs, gigs and famous people met, each
+  with a drawn photograph or a clipping/stamp, filters and year covers.
+- **Studio** (`src/studio3.js`): song starters, new-melody button, a coach line; lyrics get theme/mood, suggested
+  lines from the library, a skeleton builder, rhymes and syllable counts. The mix stays the player's job.
+- **Paths** (`src/paths2.js`): its own layout (it was borrowing `.paths`, a 220px card grid from another feature).
+- **Library**: `wlib-dialogue6.js` and `wlib-dialogue7.js` (2,466 exchanges), `wlib-screen-end4.js` (2,001
+  endings), `wgen2.js` (1,600 generator entries), `wsays.js` ("what people say about you"). At 100 works, repeated
+  dialogue fell from 12% to 6% and endings from 13% to 5%; at 300 works, 31% to 20% and 32% to 14%.
+
 ## Round 26: the library again, so lines repeat far less
 
 - Asked for: expand the writing library further so lines repeat far less.
