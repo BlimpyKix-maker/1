@@ -29583,6 +29583,7 @@ function npcFigure(p, L) {
 // knee halfway between hip and heel. Most people stand with their weight on one leg (contrapposto): that hip rises,
 // the shoulder on the same side drops, the other leg relaxes. Arms grow out of the shoulder, behind the torso's
 // edge; clothes sit a little away from the body and fold where it bends. Everything is shaded from the left.
+let FIG_POSE = null;   // set while drawing a pose other than standing (Round 28): walking frames, sitting
 const FIG = { sy: 57.9, wy: 98, hy: 116, cr: 125, kn: 170, an: 213, fy: 224 };
 // a smooth open or closed path through points (Catmull-Rom as cubic Béziers)
 function crPath(P, close) {
@@ -29634,6 +29635,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
     const A = [cx + s * (weight ? 2.4 : free ? hp * .5 + 3.4 : hp * .5 - .2), an - (free ? .6 : 0)], K = [lerp2([hx, hyy], A, .5)[0] + s * (free ? -1.2 : .4), kn + (free ? .8 : 0)];
     return { s, H: [hx, hyy], K, A, weight, free };
   });
+  if (FIG_POSE && FIG_POSE.legs) for (const g of legs) FIG_POSE.legs(g, { cx, hy, kn, an, fy, hp });
   const legJ = g => [[g.H[0], g.H[1] - 2], lerp2(g.H, g.K, .45), g.K, lerp2(g.K, g.A, .38), g.A];
   const legW = [hp * .5 + .6, 6.2 * lf, 4.3 * lf, 4.8 * lf, 2.7];
   for (const g of legs) o.push(`<path d="${limbPath(legJ(g), legW)}" fill="${SK}" stroke="${shade}" stroke-width=".35"/><path d="M${n1(g.K[0] - 1.4)} ${n1(g.K[1] - .5)} q1.4 1.4 2.8 0" stroke="${shade}" stroke-width=".4" fill="none" opacity=".45"/>`);
@@ -29655,23 +29657,10 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if ((bot === 4 || bot === 5) && top !== 10 && top !== 19) { const hem = bot === 4 ? hy + 22 : an - 18, wd = bot === 4 ? hp + 4 : hp + 9;
     o.push(`<path d="M${n1(cx - ww - .8)} ${wy - 1} L${n1(cx + ww + .8)} ${wy - 1} C${n1(cx + ww + 1)} ${wy + 8} ${n1(cx + hp + 1.5)} ${hy - 7} ${n1(cx + hp + 1.8)} ${hy} L${n1(cx + wd)} ${n1(hem)} Q${cx} ${n1(hem + 2.2)} ${n1(cx - wd)} ${n1(hem)} L${n1(cx - hp - 1.8)} ${hy} C${n1(cx - hp - 1.5)} ${hy - 7} ${n1(cx - ww - 1)} ${wy + 8} ${n1(cx - ww - .8)} ${wy - 1} Z" fill="${BT}" stroke="${dkb}" stroke-width=".45"/><path d="M${cx - 4} ${hy} L${n1(cx - 6.5)} ${n1(hem - 1)} M${cx + 5} ${hy} L${n1(cx + 8.5)} ${n1(hem - 1)}" stroke="${dkb}" stroke-width=".45" opacity=".45"/>`); }
   if (tat === 4) o.push(`<path d="M${n1(legs[0].A[0] - 2)} ${n1(an - 8)} l2 -2 l2 2 l-2 2 z" fill="#2B3A66" opacity=".7"/>`);
-  // shoes: from the ankle down to a toe that turns a little outwards
+  // shoes (Round 28): drawn at the size of a real foot, seen from the front and a little above, so the toe box comes
+  // toward us, wider than the ankle, on a sole; g.turn turns the toes (outward when standing, toward the way you walk)
   const SH = [['#F4F2EE', cloth], ['#C8102E', '#F4F2EE'], ['#5A3A22', '#3B2516'], ['#3B2516', '#2A1A10'], ['#151515', '#8C2E2E'], ['#B98A55', skin], ['#7A4A28', '#4E2E18'], ['#151515', '#333'], ['#B98A55', '#8C5A2E'], ['#F2C6D6', '#FFFFFF']][shoe];
-  for (const g of legs) { const s = g.s, x = g.A[0], ay = g.A[1], ty = fy - (g.free ? .5 : 0), out = s * (g.free ? 2.2 : 1.2), shaft = [0, 5, 15, 0, 0, 0, 0, 17, 16, 2][shoe], sole = shoe === 7 ? 2.4 : shoe === 4 ? .5 : 1.1, heel = shoe === 4 ? 3 : 0;
-    if (shoe === 5) { o.push(`<path d="M${n1(x - 2.8)} ${n1(ay)} L${n1(x + 2.8)} ${n1(ay)} L${n1(x + 3.8 + out)} ${n1(ty - 1)} L${n1(x - 3.6 + out * .4)} ${n1(ty - 1)} Z" fill="${SK}"/><path d="M${n1(x - 3.2)} ${n1(ay + 3)} L${n1(x + 3.4)} ${n1(ay + 5)} M${n1(x - 3.6 + out * .3)} ${n1(ty - 3.2)} L${n1(x + 4 + out)} ${n1(ty - 2.8)}" stroke="${SH[0]}" stroke-width="1.1"/><rect x="${n1(x - 4.2 + out * .4)}" y="${n1(ty - 1.1)}" width="${n1(8.6 + out * .6)}" height="1.3" rx=".6" fill="${mixHex(SH[0], '#000', .3)}"/>`); continue; }
-    if (shaft) o.push(`<path d="M${n1(x - 3.9)} ${n1(ay - shaft)} L${n1(x + 3.9)} ${n1(ay - shaft)} L${n1(x + 3.6)} ${n1(ay + 2)} L${n1(x - 3.6)} ${n1(ay + 2)} Z" fill="${SH[0]}" stroke="${mixHex(SH[0], '#000', .4)}" stroke-width=".4"/>`);
-    // Round 25: shoes in three-quarter view, so a foot has length: heel under the ankle, the instep, a toe that turns
-    // out and down toward us, and the sole as a darker band underneath
-    const d = s, col = SH[0], dk = mixHex(col, '#000', .42), soleC = shoe === 0 || shoe === 1 ? '#EDEAE4' : shoe === 9 ? '#F7DCE6' : mixHex(col, '#000', .55);
-    const tw = (shoe === 4 ? 3.2 : shoe === 9 ? 5 : 4.3) * Math.min(1.1, lf), toeX = x + d * (g.free ? 3.4 : 2.4), toeY = ty + .2, heelX = x - d * 2.2, hl = heel || 0;
-    // the toe box comes toward us and turns a little out; the heel sits behind the ankle, just visible
-    const up = `M${n1(x - d * 3.3)} ${n1(ay - .6)} L${n1(x + d * 3.1)} ${n1(ay - .4)} C${n1(x + d * 3.6)} ${n1(ay + 2.6)} ${n1(toeX + d * tw * 1.05)} ${n1(toeY - 5.4)} ${n1(toeX + d * tw * 1.08)} ${n1(toeY - 2.6 - sole)} C${n1(toeX + d * tw * 1.1)} ${n1(toeY - .2)} ${n1(toeX + d * tw * .4)} ${n1(toeY + .5)} ${n1(toeX - d * tw * .2)} ${n1(toeY + .4)} C${n1(toeX - d * tw * .95)} ${n1(toeY + .3)} ${n1(toeX - d * tw * 1.2)} ${n1(toeY - .4)} ${n1(heelX)} ${n1(ty - sole - hl - .6)} C${n1(heelX - d * .8)} ${n1(ty - sole - hl - 2.8)} ${n1(x - d * 3.6)} ${n1(ay + 2.2)} ${n1(x - d * 3.3)} ${n1(ay - .6)} Z`;
-    o.push(`<path d="${up}" fill="${col}" stroke="${dk}" stroke-width=".42" stroke-linejoin="round"/><path d="M${n1(heelX + d * .2)} ${n1(ty - sole * .5 - hl - .4)} C${n1(toeX - d * tw)} ${n1(toeY - sole * .4)} ${n1(toeX + d * tw * .6)} ${n1(toeY - sole * .4 + .3)} ${n1(toeX + d * tw * 1.02)} ${n1(toeY - sole - .8)}" stroke="${soleC}" stroke-width="${n1(sole + .3)}" fill="none" stroke-linecap="round"/><path d="M${n1(toeX - d * tw * .5)} ${n1(toeY - 4.4)} Q${n1(toeX + d * tw * .3)} ${n1(toeY - 5.4)} ${n1(toeX + d * tw * .85)} ${n1(toeY - 3.6)}" stroke="${mixHex(col, '#fff', .45)}" stroke-width=".55" fill="none" opacity=".6"/>`);
-    if (shoe === 0 || shoe === 1) o.push(`<path d="M${n1(x - 1.8)} ${n1(ay + 1.2)} L${n1(x + 1.8)} ${n1(ay + 1.6)} M${n1(x - 1.6)} ${n1(ay + 2.6)} L${n1(x + 2)} ${n1(ay + 3)} M${n1(x - 1.2)} ${n1(ay + 4)} L${n1(x + 2.2)} ${n1(ay + 4.4)}" stroke="${shoe === 1 ? '#F4F2EE' : dk}" stroke-width=".45" opacity=".75"/>`);
-    if (shoe === 4) o.push(`<path d="M${n1(heelX + d * .4)} ${n1(ty - hl - sole)} L${n1(heelX + d * .8)} ${n1(ty + .3)}" stroke="${dk}" stroke-width="1.3" stroke-linecap="round"/>`);
-    if (shoe === 6) o.push(`<path d="M${n1(toeX - d * tw * .7)} ${n1(toeY - 3.2)} Q${n1(toeX)} ${n1(toeY - 4.6)} ${n1(toeX + d * tw * .8)} ${n1(toeY - 3)}" stroke="${dk}" stroke-width=".4" fill="none" stroke-dasharray=".6 .5"/>`);
-    if (shoe === 9) o.push(`<ellipse cx="${n1(toeX)}" cy="${n1(ty - 3)}" rx="6.2" ry="3.6" fill="#FFFFFF" opacity=".5"/>`);
-    if (shoe === 1) o.push(`<circle cx="${n1(x - s * 2.4)}" cy="${n1(ay - 2)}" r="1.1" fill="#FFFFFF"/>`); }
+  for (const g of legs) o.push(figShoe(g, shoe, SH, skin, SK, g.ty !== undefined ? g.ty : fy - (g.free ? .5 : 0), lf));
   // arms: the shoulder joint sits inside the torso's edge so the sleeve grows out of the shoulder
   const puff = top === 17 ? 2 : 0, sW = sw + puff, wW = ww + puff * .8, shTilt = s => (s === w ? .9 : s === -w ? -.9 : 0);
   const short = [0, 10, 13, 16, 19].includes(top), sleeve = top === 19 ? '#F4F2EE' : cloth, sleeveD = mixHex(sleeve, '#000', .4), wide = top === 12 ? 2.4 : top === 17 ? 1.6 : 0;
@@ -29681,7 +29670,8 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (pose === 1) { A[1] = [Sj(1), [cx + sw + 10, sy + 26], [cx + ww + 3.4, wy - 1]]; hands[1] = 'fist'; }
   if (pose === 2) { A[1] = [Sj(1), [cx + sw + 8.5, sy + 19], [cx + sw + 10.5, sy - 7]]; hands[1] = 'wave'; }
   if (pose === 4) for (const s of [-1, 1]) { A[s] = [Sj(s), [cx + s * (ww + 8.5), sy + 39], [cx + s * (hp - 2.2), hy + 1]]; hands[s] = 'pocket'; }
-  const crossed = pose === 3;
+  if (FIG_POSE && FIG_POSE.arms) FIG_POSE.arms(A, hands, { cx, sy, wy, hy, cr, sw, ww, hp, Sj });
+  const crossed = pose === 3 && !(FIG_POSE && FIG_POSE.arms);
   const AW = [5 * af, 4.7 * af, 3.5 * af, 3.8 * af, 2.6 * af];
   const armJ = J => [J[0], lerp2(J[0], J[1], .38), J[1], lerp2(J[1], J[2], .3), J[2]];
   const upperArm = (s, J, whole) => { const J5 = armJ(J); J5[0] = lerp2(J5[0], J5[2], .16); J5[1] = lerp2(J5[0], J5[2], .45); const up = whole ? J5 : [J5[0], J5[1], J5[2]], out = [];
@@ -29695,7 +29685,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
     else { const cuff = lerp2(J5[2], J5[4], .93); out.push(`<path d="${limbPath([J5[2], J5[3], cuff], [AW[2] + 1, AW[3] + 1.1 + wide, AW[4] + 1.2 + wide * 1.3], true)}" fill="${CL}" stroke="${sleeveD}" stroke-width=".4"/><path d="M${n1(J5[2][0] - 1.6)} ${n1(J5[2][1] - 1.2)} q1.6 1.6 3.2 .4 M${n1(J5[2][0] - 1.2)} ${n1(J5[2][1] + 1.4)} q1.4 1 2.6 0" stroke="${sleeveD}" stroke-width=".4" fill="none" opacity=".6"/>`); }
     return out.join(''); };
   const handAt = (s, J, kind) => { const W = J[2], E = J[1], l = Math.hypot(W[0] - E[0], W[1] - E[1]) || 1; return figHand(W, [(W[0] - E[0]) / l, (W[1] - E[1]) / l], s, skin, af, kind, SK); };
-  const longTop = top === 10 || top === 18, bent = s => pose === 1 && s === 1 || pose === 2 && s === 1 || pose === 4;
+  const longTop = top === 10 || top === 18, bent = s => FIG_POSE && FIG_POSE.arms ? !!FIG_POSE.front : (pose === 1 && s === 1 || pose === 2 && s === 1 || pose === 4);
   if (!crossed) for (const s of [-1, 1]) o.push(upperArm(s, A[s], !bent(s)));
   // the torso, with its own small tilt: shoulders against the hips
   const hem = top === 10 ? kn - 4 : top === 18 ? kn - 8 : hy + 5, hW = top === 10 ? hp + 9 : top === 18 ? hp + 7 : hp + 1.6;
@@ -29756,6 +29746,39 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (bag === 7 && free) o.push(`<g transform="rotate(-8 ${n1(LH[0])} ${n1(LH[1] + 8)})"><rect x="${n1(LH[0] - 5)}" y="${n1(LH[1] + 3)}" width="10" height="13" fill="#FFFFFF" stroke="#BBB" stroke-width=".5"/><path d="M${n1(LH[0] - 3.5)} ${n1(LH[1] + 6)} h7 M${n1(LH[0] - 3.5)} ${n1(LH[1] + 8.5)} h5.5 M${n1(LH[0] - 3.5)} ${n1(LH[1] + 11)} h7" stroke="#999" stroke-width=".4"/></g>`);
   if (bag === 8 && free) o.push(`<path d="M${n1(RH[0] - 2.6)} ${n1(RH[1] + 3)} L${n1(RH[0] + 2.6)} ${n1(RH[1] + 3)} L${n1(RH[0] + 2.1)} ${n1(RH[1] + 11)} L${n1(RH[0] - 2.1)} ${n1(RH[1] + 11)} Z" fill="#F4F2EE"/><rect x="${n1(RH[0] - 2.4)}" y="${n1(RH[1] + 5.5)}" width="4.8" height="2.6" fill="#8A5A37"/><rect x="${n1(RH[0] - 3)}" y="${n1(RH[1] + 1.6)}" width="6" height="1.8" rx=".8" fill="#2B2B2B"/>`);
   if (bag === 9 && free) o.push(`<circle cx="${n1(RH[0])}" cy="${n1(RH[1] + 8)}" r="5.5" fill="#B9B5AE" stroke="#8A8680" stroke-width=".8"/><circle cx="${n1(RH[0])}" cy="${n1(RH[1] + 8)}" r="1.5" fill="#8A8680"/>`);
+}
+// One shoe, front three-quarter view. x/ay: the ankle; ty: the ground; turn: how far the toe box sits to the side.
+function figShoe(g, shoe, SH, skin, SK, ty, lf) {
+  const s = g.s, x = g.A[0], ay = g.A[1], turn = g.turn !== undefined ? g.turn : s * (g.free ? 1.8 : 1.1), col = SH[0], dk = mixHex(col, '#000', .42), k = Math.min(1.12, Math.max(.92, lf));
+  const sole = shoe === 7 ? 3.8 : shoe === 4 ? .7 : shoe === 3 || shoe === 6 ? 1.2 : shoe === 9 ? 1.8 : 1.9, tw = (shoe === 9 ? 7.6 : shoe === 4 ? 4.4 : shoe === 8 ? 5.6 : 6.5) * k, tx = x + turn, aw = 3.9 * k;
+  const soleC = shoe === 0 || shoe === 1 ? '#EFECE6' : shoe === 9 ? '#F7DCE6' : shoe === 7 ? '#2A2A2A' : mixHex(col, '#000', .58), o = [];
+  const shaft = [0, 6, 16, 0, 0, 0, 0, 18, 17, 2][shoe];
+  // the upper: from the ankle opening down and out to a rounded toe box resting on the sole
+  const body = (top, w0, w1, bottom) => `M${n1(x - w0)} ${n1(top)} L${n1(x + w0)} ${n1(top)} C${n1(x + w0 + .6)} ${n1(top + 3.5)} ${n1(tx + w1 + .4)} ${n1(bottom - 6.5)} ${n1(tx + w1)} ${n1(bottom - 2.6)} Q${n1(tx + w1 - .2)} ${n1(bottom)} ${n1(tx + w1 - 2.2)} ${n1(bottom)} L${n1(tx - w1 + 2.2)} ${n1(bottom)} Q${n1(tx - w1 + .2)} ${n1(bottom)} ${n1(tx - w1)} ${n1(bottom - 2.6)} C${n1(tx - w1 - .4)} ${n1(bottom - 6.5)} ${n1(x - w0 - .6)} ${n1(top + 3.5)} ${n1(x - w0)} ${n1(top)} Z`;
+  const bot = ty - sole;
+  if (shaft) o.push(`<path d="M${n1(x - aw - .9)} ${n1(ay - shaft)} L${n1(x + aw + .9)} ${n1(ay - shaft)} L${n1(x + aw + .6)} ${n1(ay + 2.5)} L${n1(x - aw - .6)} ${n1(ay + 2.5)} Z" fill="${col}" stroke="${dk}" stroke-width=".42"/>${shoe === 8 ? `<path d="M${n1(x - 2)} ${n1(ay - shaft + 4)} q2 4 0 8 M${n1(x + 2)} ${n1(ay - shaft + 4)} q-2 4 0 8" stroke="${SH[1]}" stroke-width=".6" fill="none"/>` : ''}`);
+  if (shoe === 4) {   // heels: the top of the foot shows; a pointed toe; the heel's stem just visible behind
+    o.push(`<rect x="${n1(x - turn * .3 - .7)}" y="${n1(bot - 4)}" width="1.4" height="${n1(sole + 4)}" fill="${dk}"/>`);
+    o.push(`<path d="${body(ay - .6, aw * .9, tw, bot)}" fill="${SK}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".35"/>`);
+    o.push(`<path d="M${n1(tx - tw - .2)} ${n1(bot - 3.6)} Q${n1(tx)} ${n1(bot - 5.4)} ${n1(tx + tw + .2)} ${n1(bot - 3.6)} L${n1(tx + tw * .5)} ${n1(bot + .2)} L${n1(tx - tw * .5)} ${n1(bot + .2)} Z" fill="${col}" stroke="${dk}" stroke-width=".4"/><path d="M${n1(x - aw)} ${n1(ay + 1)} L${n1(x + aw)} ${n1(ay + 1.4)}" stroke="${col}" stroke-width=".9"/>`);
+  } else if (shoe === 5) {   // sandals: a bare foot with toes, two straps and a thin sole
+    o.push(`<path d="${body(ay - .6, aw * .95, tw - .3, bot)}" fill="${SK}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".35"/>`);
+    o.push([-2, -.7, .6, 1.8, 3].map((d, i) => `<ellipse cx="${n1(tx + d * (tw / 3.4) * (turn >= 0 ? 1 : -1))}" cy="${n1(bot - .8)}" rx="${i === 0 ? 1.2 : .85}" ry="${i === 0 ? 1.1 : .8}" fill="${SK}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".25"/>`).join(''));
+    o.push(`<path d="M${n1(x - aw - .4)} ${n1(ay + 3)} L${n1(x + aw + .4)} ${n1(ay + 3.6)} M${n1(tx - tw + .4)} ${n1(bot - 4.2)} L${n1(tx + tw - .4)} ${n1(bot - 4)}" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/>`);
+  } else {
+    o.push(`<path d="${body(ay - .8, aw, tw, bot)}" fill="${col}" stroke="${dk}" stroke-width=".45" stroke-linejoin="round"/>`);
+    // the toe cap catches the light; a crease across the instep
+    o.push(`<path d="M${n1(tx - tw * .65)} ${n1(bot - 4)} Q${n1(tx - tw * .2)} ${n1(bot - 5.6)} ${n1(tx + tw * .25)} ${n1(bot - 5)}" stroke="#FFFFFF" stroke-width="1" fill="none" stroke-linecap="round" opacity="${shoe === 0 || shoe === 9 ? .5 : .28}"/><path d="M${n1(tx - tw * .7)} ${n1(bot - 5.2)} Q${n1(tx)} ${n1(bot - 6.4)} ${n1(tx + tw * .7)} ${n1(bot - 5.2)}" stroke="${dk}" stroke-width=".35" fill="none" opacity=".55"/>`);
+    if (shoe === 0 || shoe === 1 || shoe === 6) o.push(`<path d="M${n1(x - 1.6 + turn * .3)} ${n1(ay + 1.6)} L${n1(x + 1.6 + turn * .3)} ${n1(ay + 1.6)} M${n1(x - 1.9 + turn * .45)} ${n1(ay + 3.4)} L${n1(x + 1.9 + turn * .45)} ${n1(ay + 3.4)} M${n1(x - 2.2 + turn * .6)} ${n1(ay + 5.2)} L${n1(x + 2.2 + turn * .6)} ${n1(ay + 5.2)}" stroke="${shoe === 1 ? '#F4F2EE' : shoe === 6 ? '#2A1A10' : mixHex(SH[1], '#000', .15)}" stroke-width=".55" stroke-linecap="round"/>`);
+    if (shoe === 0) o.push(`<path d="M${n1(tx - tw + .8)} ${n1(bot - 2.4)} Q${n1(tx)} ${n1(bot - 4.6)} ${n1(tx + tw - .6)} ${n1(bot - 5.8)}" stroke="${SH[1]}" stroke-width="1.1" fill="none" stroke-linecap="round"/>`);
+    if (shoe === 1) o.push(`<path d="M${n1(tx - tw + .4)} ${n1(bot - 1.6)} Q${n1(tx)} ${n1(bot - 5)} ${n1(tx + tw - .4)} ${n1(bot - 1.6)} L${n1(tx + tw - 1)} ${n1(bot)} L${n1(tx - tw + 1)} ${n1(bot)} Z" fill="#F4F2EE"/><circle cx="${n1(x - g.s * 2.6)}" cy="${n1(ay - 2.5)}" r="1.1" fill="#FFFFFF"/>`);
+    if (shoe === 3) o.push(`<path d="M${n1(x - aw + .4 + turn * .4)} ${n1(ay + 4.2)} L${n1(x + aw - .4 + turn * .4)} ${n1(ay + 4.2)}" stroke="${SH[1]}" stroke-width="1.3"/>`);
+    if (shoe === 6) o.push(`<path d="M${n1(tx - tw * .8)} ${n1(bot - 3.4)} Q${n1(tx)} ${n1(bot - 5)} ${n1(tx + tw * .8)} ${n1(bot - 3.4)}" stroke="${dk}" stroke-width=".5" fill="none" stroke-dasharray=".5 .6"/>`);
+    if (shoe === 9) o.push(Array.from({ length: 7 }, (_, i) => `<circle cx="${n1(tx - tw + 1 + i * (tw * 2 - 2) / 6)}" cy="${n1(bot - 5.2 + (i % 2) * .8)}" r="1.5" fill="#FFFFFF" opacity=".7"/>`).join(''));
+  }
+  // the sole, a little wider than the shoe, with a darker edge at the ground
+  o.push(`<path d="M${n1(tx - tw - .5)} ${n1(bot - .3)} L${n1(tx + tw + .5)} ${n1(bot - .3)} L${n1(tx + tw + .2)} ${n1(ty)} Q${n1(tx)} ${n1(ty + .6)} ${n1(tx - tw - .2)} ${n1(ty)} Z" fill="${soleC}" stroke="${mixHex(soleC, '#000', .35)}" stroke-width=".35"/>`);
+  return o.join('');
 }
 // A hand drawn from life. Hanging at rest it is seen from the side: a narrow back of the hand, fingers that curl in
 // a little, the thumb in front. W: the wrist; d: the way the hand points; side: -1 left, 1 right.
@@ -44080,11 +44103,18 @@ function seqTitle(f) {
   const c = f && f.co !== null ? S.companies[f.co] : null;
   if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && hashRand((f.id * 131 + 7) >>> 0)() < [0, 0, .18, .11, .07, .04][Math.min(5, Math.max((f.seqN || 1), seqParse(f.title)[1]) + 1)] * (f.real ? .45 : 1)) {
     f.seqQueued = 1; (c.seqQ = c.seqQ || []).push({ parent: f.id, w: S.week + 52 + Math.floor(hashRand((f.id * 97) >>> 0)() * 52) }); }
+  // a hit that doesn't get a sequel still earns its makers another film: an original in the same genre, often with the same director
+  else if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && f.origOf === undefined && f.seq === undefined && hashRand((f.id * 173 + 11) >>> 0)() < .16) {
+    f.seqQueued = 1; (c.seqQ = c.seqQ || []).push({ parent: f.id, orig: 1, w: S.week + 40 + Math.floor(hashRand((f.id * 89) >>> 0)() * 52) }); }
   return out; }; }
 function sequelMonth() {
   for (const c of S.companies) { if (c.closed !== null || !c.seqQ || !c.seqQ.length) continue;
     for (const q of c.seqQ.filter(x => x.w <= S.week)) { c.seqQ = c.seqQ.filter(x => x !== q); const f = S.films[q.parent]; if (!f) continue;
       const free = id => id !== undefined && P(id) && !P(id).dead && !P(id).retired && available(id);
+      if (q.orig) { GL_KEY = 'orig:' + f.id; R = wstream('film', GL_KEY); let g; try { g = greenlight(c.hub, { co: c.id, genre: f.genre, budget: f.budget * (.8 + rnd() * .5) * econBudget(), dir: free(f.dir) && rnd() < .6 ? f.dir : undefined }); } finally { GL_KEY = null; }
+        if (g) g.origOf = f.id;
+        if (g) news('Company', `${c.name} greenlights ${g.title}, an original ${f.genre.toLowerCase()}${g.dir === f.dir && P(f.dir) ? ` from ${P(f.dir).name}, who made ${f.title}` : ` on the strength of ${f.title}`}.`, { company: c.id, film: g.id });
+        continue; }
       GL_KEY = 'seq:' + f.id; R = wstream('film', GL_KEY);
       let g; try { g = greenlight(c.hub, { co: c.id, genre: f.genre, title: seqTitle(f), budget: f.budget * 1.3 * econBudget(), dir: free(f.dir) ? f.dir : undefined, lead: free(f.cast[0]) ? f.cast[0] : undefined }); } finally { GL_KEY = null; }
       if (!g) continue; g.seq = f.id; g.seqN = Math.max(f.seqN || 1, seqParse(f.title)[1]) + 1; g.seqBase = f.seqBase || seqParse(f.title)[0];
@@ -80685,6 +80715,153 @@ OS_VIEWS.paths = () => pathsApp();
 .pth-lab footer{margin-top:auto;padding-top:4px}.pth-when{font-size:12px;opacity:.75}
 @media (max-width:640px){.pth-strip>div.wide{grid-column:auto}.pth-grid,.pth-labs{grid-template-columns:1fr}}`; document.head.appendChild(st); })();
 // </paths2>
+// <avatar3>
+// ================= The avatar moves through the room (Round 28) =================
+// Before, the figure slid left and right along one line in a single standing pose, and "reading in bed" meant
+// standing in front of the bed. Now:
+//  - it walks: six frames of a real stride (the swinging leg lifts and passes, the arms swing against the legs, the
+//    body rises at the passing step), stepped in time with the distance covered, facing the way it goes;
+//  - it goes to things: every activity has a place and a pose. It sits on a stool at the desk or the piano, lies on
+//    the bed to read or nap, sits on the couch, stands at the window, by the plant, at the shelf;
+//  - the room has depth: it walks forward and back across the floor, a little smaller further from you.
+// Purely visual, like the rest of the room; it never touches the game state.
+const AV3 = { x: 203, y: 172, mode: 'stand', frame: 'stand', face: 1, raf: 0, walk: null, j: 0, tg: null, dist: 0 };
+const AV3_WALK_N = 6;
+// ---- poses for the figure (FIG_POSE hooks in figure.js) ----
+function av3WalkPose(f, dir) {
+  const ph0 = f / AV3_WALK_N * Math.PI * 2;
+  return {
+    legs(g, F) { const ph = ph0 + (g.s === 1 ? 0 : Math.PI), fwd = Math.sin(ph), lift = Math.max(0, Math.cos(ph)) * 8, hx = F.cx + g.s * (F.hp * .5 - 1.2);
+      g.A = [hx + dir * 7.5 * fwd, F.an - lift]; g.K = [(g.H[0] + g.A[0]) / 2 + dir * (1.2 + lift * .5), F.kn - lift * .6]; g.ty = F.fy - lift; g.turn = dir * 3.4; g.free = false; g.weight = false; },
+    arms(A, hands, F) { for (const s of [-1, 1]) { const ph = ph0 + (s === 1 ? 0 : Math.PI), sw = -Math.sin(ph), J = A[s];
+      A[s] = [J[0], [J[1][0] + dir * sw * 2, J[1][1] - Math.abs(sw) * .7], [J[2][0] + dir * sw * 7.5, J[2][1] - Math.abs(sw) * 3.5]]; hands[s] = 'rest'; } }
+  };
+}
+const AV3_HOLD = { arms(A, hands, F) { for (const s of [-1, 1]) { A[s] = [F.Sj(s), [F.cx + s * (F.ww + 5.4), F.wy + 2], [F.cx + s * 6.5, F.cr + 12]]; hands[s] = 'rest'; } }, front: 1 };
+const AV3_SIT_LEGS = (g, F) => { g.K = [g.H[0] + g.s * 3.6, F.hy + 6]; g.A = [g.H[0] + g.s * 4, F.hy + 6 + (F.an - F.kn)]; g.ty = g.A[1] + (F.fy - F.an); g.turn = g.s * .8; g.free = false; };
+const AV3_SIT_DROP = 49;   // in figure units: how far the body comes down when it sits (thigh length, foreshortened)
+function av3Poses() {
+  return {
+    stand: null, hold: AV3_HOLD,
+    sit: { legs: AV3_SIT_LEGS, arms(A, hands, F) { for (const s of [-1, 1]) { A[s] = [F.Sj(s), [F.cx + s * (F.ww + 5.6), F.wy + 1], [F.cx + s * (F.hp - .5), F.hy + 6]]; hands[s] = 'rest'; } }, front: 1 },
+    sithold: { legs: AV3_SIT_LEGS, arms: AV3_HOLD.arms, front: 1 }
+  };
+}
+// all the frames of the player, drawn once per look (each about 16KB of SVG)
+const AV3_CACHE = { k: null, frames: null };
+function av3Frames(args, draw) {
+  const key = JSON.stringify(args[0]) + '|' + args[1] + '|' + (typeof LIVING_CTX !== 'undefined' && LIVING_CTX ? JSON.stringify(LIVING_CTX) : '');
+  if (AV3_CACHE.k === key) return AV3_CACHE.frames;
+  const out = {}, P = av3Poses(), was = FIG_POSE;
+  try { for (const k of Object.keys(P)) { FIG_POSE = P[k]; out[k] = draw(); } for (let f = 0; f < AV3_WALK_N; f++) { FIG_POSE = av3WalkPose(f, 1); out['w' + f] = draw(); } } finally { FIG_POSE = was; }
+  AV3_CACHE.k = key; AV3_CACHE.frames = out; return out;
+}
+// inside the room only: the player's full-length figure becomes a stack of frames, one shown at a time
+let AV3_CTX = 0;
+{ const _ps = portraitSVG; portraitSVG = function (L, age, h, toon, full) {
+  if (!AV3_CTX || h !== 122 || !full) return _ps.apply(this, arguments);
+  AV3_CTX = 0; const args = arguments, F = av3Frames(args, () => _ps.apply(this, args));
+  return Object.entries(F).map(([k, svg]) => `<g class="av3-fr" data-f="${k}"${k === AV3.frame ? '' : ' display="none"'}>${k.startsWith('w') ? `<g transform="translate(0 ${(-Math.abs(Math.cos(+k.slice(1) / AV3_WALK_N * Math.PI * 2)) * 1.4).toFixed(2)})">${svg}</g>` : svg}</g>`).join('');
+}; }
+// ---- where each activity happens ----
+function av3Targets(acts, life, lay, spots, wx, ww) {
+  const at = id => { const sp = lay[id] && spots.find(x => x.id === lay[id]); return sp ? sp.x : null; };
+  const bedX = at('bed'), bed = bedX !== null ? { x: bedX, w: 96, top: 168 - 26 } : life === 'couch' ? { x: 24, w: 140, top: 168 - 18, couch: 1 } : { x: life === 'shared' || life === 'studio' ? 18 : 12, w: 88, top: 168 - 12 };
+  const plantX = at('plant') !== null ? at('plant') + 8 : wx + 12;
+  return acts.map(([dx, k]) => {
+    const x0 = 203 + dx;
+    switch (k) {
+      case 'write': return at('desk') !== null ? { x: at('desk') + 46, y: 171, pose: 'sithold', stool: 1 } : { x: x0, y: 172, pose: 'hold' };
+      case 'music': return at('upright') !== null && Math.abs(x0 - at('upright') - 40) < 30 ? { x: at('upright') + 30, y: 171, pose: 'sit', stool: 1 } : { x: x0, y: 171, pose: 'stand' };
+      case 'read': return bed.couch ? { x: bed.x + 70, y: 172, pose: 'sithold' } : { lie: 1, bed, pose: 'hold' };
+      case 'nap': return bed.couch ? { lie: 1, bed, pose: 'stand' } : { lie: 1, bed, pose: 'stand' };
+      case 'dream': return { x: wx + ww / 2, y: 163, pose: 'stand' };
+      case 'water': return { x: plantX + (plantX > 300 ? -26 : 26), y: plantX > wx - 20 && plantX < wx + ww + 20 ? 164 : 170, pose: 'stand' };
+      case 'coffee': case 'camera': return { x: x0, y: 170, pose: 'stand' };
+      case 'script': case 'game': return { x: x0, y: 170, pose: 'hold' };
+      case 'stretch': return { x: 200, y: 177, pose: 'stand' };
+      case 'dance': return { x: x0, y: 175, pose: 'stand' };
+      case 'phone': case 'lines': return { x: x0, y: 174, pose: 'hold' };
+      case 'pet': return { x: 236, y: 176, pose: 'stand' };
+      default: return { x: x0, y: 172, pose: 'stand' };
+    }
+  }).map(t => (t.x !== undefined && (t.x = clamp(t.x, 34, 370)), t));
+}
+{ const _hs = homeSceneSVG; homeSceneSVG = function (day) {
+  const M = S.me; if (!M) return _hs.apply(this, arguments);
+  AV3_CTX = 1; let s; try { s = _hs.apply(this, arguments); } finally { AV3_CTX = 0; }
+  const m = s.match(/<g class="me-walk"[^>]*data-acts='([^']*)'/); if (!m) return s;
+  let acts = []; try { acts = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')); } catch (e) { return s; }
+  const life = M.life, lay = homeLayout(), spots = HOME_SPOTS[life] || [], wx = life === 'couch' ? 268 : 150, ww = !['couch', 'shared', 'studio'].includes(life) ? 124 : 90;
+  const T = av3Targets(acts, life, lay, spots, wx, ww);
+  // the body (frames and what's in the hands) in one group that sits, lies down and turns together
+  // regroup by position: [shadow] av3-body{ stool, av3-flip{ me-bob }, props }
+  const i0 = s.indexOf('<g class="me-bob">'), i1 = s.indexOf('<g class="act-prop"', i0), ip = s.indexOf('<g class="act-prop" data-k="pet">', i0);
+  if (i0 < 0 || i1 < 0 || ip < 0) return s;
+  const ip2 = s.indexOf('</g>', ip) + 4;
+  s = s.slice(0, i0) + '<g class="av3-body"><g class="av3-stool"></g><g class="av3-flip">' + s.slice(i0, i1) + '</g>' + s.slice(i1, ip2) + '</g>' + s.slice(ip2);
+  s = s.replace(/<g class="me-walk" /, `<g class="me-walk" data-tg='${esc(JSON.stringify(T))}' transform="${av3Xf()}" `).replace(/(<g class="me-walk"[^>]*?) style="transform:translateX\([^)]*\)"/, '$1');
+  return s;
+}; }
+// ---- drawing the state onto the DOM ----
+function av3Xf() { return AV3.mode === 'lie' ? '' : `translate(${AV3.x.toFixed(1)} ${AV3.y.toFixed(1)}) scale(${(.9 + (AV3.y - 160) / 18 * .12).toFixed(3)}) translate(-203 -170)`; }
+function av3Show(g, frame) { if (!g) return; AV3.frame = frame; for (const e of g.querySelectorAll('.av3-fr')) { const on = e.dataset.f === frame; if (on !== (e.getAttribute('display') !== 'none')) e.setAttribute('display', on ? 'inline' : 'none'); } }
+function av3Apply(g) {
+  if (!g) return; g.style.transform = ''; g.style.transition = ''; g.setAttribute('transform', av3Xf());
+  const body = g.querySelector('.av3-body'), flip = g.querySelector('.av3-flip'), stool = g.querySelector('.av3-stool'), sh = g.querySelector(':scope > ellipse'); if (!body) return;
+  if (flip) flip.setAttribute('transform', AV3.face < 0 && AV3.mode === 'walk' ? 'translate(406 0) scale(-1 1)' : '');
+  const t = AV3.tg || {}, drop = AV3_SIT_DROP * .508;
+  if (AV3.mode === 'sit') { body.setAttribute('transform', `translate(0 ${drop.toFixed(1)})`);
+    const seatY = 54 + (FIG.hy + 3) * .508, floorY = 170 - drop;   // in the body's own coordinates, which have come down by drop
+    stool.innerHTML = t.stool ? `<rect x="187" y="${seatY.toFixed(1)}" width="32" height="5" rx="2" fill="#6B4E3A"/><path d="M191 ${(seatY + 5).toFixed(1)} L188 ${floorY.toFixed(1)} M215 ${(seatY + 5).toFixed(1)} L218 ${floorY.toFixed(1)} M190 ${(seatY + 18).toFixed(1)} L216 ${(seatY + 18).toFixed(1)}" stroke="#4E3826" stroke-width="2.6"/>` : ''; }
+  else { stool.innerHTML = ''; body.setAttribute('transform', ''); }
+  if (AV3.mode === 'lie') { const B = t.bed || { x: 12, w: 88, top: 156 }, sc = Math.min(.8, (B.w - 12) / 118), fx = B.x + 10 + 118 * sc, fy = B.top - 7 * sc;
+    body.setAttribute('transform', `translate(${fx.toFixed(1)} ${fy.toFixed(1)}) rotate(-90) scale(${sc.toFixed(3)}) translate(-203 -170)`); }
+  if (sh) sh.setAttribute('opacity', AV3.mode === 'lie' ? '0' : '.22');
+}
+// ---- the walk ----
+function av3Go(g, j, dwell, what, k) {
+  let T; try { T = JSON.parse(g.dataset.tg || '[]'); } catch (e) { T = []; } const t = T[j] || { x: 203, y: 172, pose: 'stand' };
+  cancelAnimationFrame(AV3.raf); g.querySelectorAll('.act-prop').forEach(p => p.classList.remove('on')); g.dataset.act = '';
+  // get up first if sitting or lying, standing where you were
+  if (AV3.mode === 'lie') { const B = (AV3.tg && AV3.tg.bed) || { x: 60, w: 88 }; AV3.x = clamp(B.x + B.w + 14, 34, 370); AV3.y = 174; }
+  AV3.mode = 'walk'; AV3.tg = t; av3Show(g, 'stand');
+  const tx = t.lie ? clamp(t.bed.x + t.bed.w + 14, 34, 370) : t.x, ty = t.lie ? 174 : t.y, x0 = AV3.x, y0 = AV3.y, dist = Math.hypot(tx - x0, (ty - y0) * 2.2);
+  let N = {}; try { N = JSON.parse(g.dataset.needs || '{}'); } catch (e) {}
+  const speed = (N.energy ?? 60) >= 60 ? 46 : (N.energy ?? 60) >= 30 ? 34 : 24, dur = Math.max(.15, dist / speed) * 1000, stride = 7.5, t0 = performance.now();
+  AV3.face = tx < x0 - 1 ? -1 : tx > x0 + 1 ? 1 : AV3.face; if (typeof avCaption === 'function' && dist > 3) avCaption('Walking over');
+  const arrive = () => {
+    AV3.x = tx; AV3.y = ty; AV3.mode = t.lie ? 'lie' : t.pose.startsWith('sit') ? 'sit' : 'stand';
+    av3Show(g, t.pose === 'sithold' ? 'sithold' : t.pose === 'sit' ? 'sit' : t.pose === 'hold' ? 'hold' : 'stand'); av3Apply(g);
+    g.dataset.act = k; const p = g.querySelector(`.act-prop[data-k="${k}"]`); if (p) p.classList.add('on');
+    if (typeof avCaption === 'function') avCaption(what); const sv = g.closest('svg'); if (sv) sv.setAttribute('aria-label', 'Your place: ' + String(what).toLowerCase());
+  };
+  if (dist < 3) { arrive(); return dur; }
+  const step = now => {
+    if (!g.isConnected) return;
+    const u = Math.min(1, (now - t0) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+    AV3.x = x0 + (tx - x0) * e; AV3.y = y0 + (ty - y0) * e;
+    const walked = dist * e; av3Show(g, 'w' + (Math.floor(walked / stride) % AV3_WALK_N)); av3Apply(g);
+    if (u < 1) AV3.raf = requestAnimationFrame(step); else arrive();
+  };
+  AV3.raf = requestAnimationFrame(step); return dur;
+}
+// home2.js picks what to do and when; this takes over how the toon gets there
+if (typeof avGo === 'function') avGo = function (g, j, dwell) {
+  let A; try { A = JSON.parse(g.dataset.acts || '[]'); } catch (e) { return; } if (!A[j]) return;
+  const [, k, what] = A[j], dur = av3Go(g, j, dwell, what, k) || 0;
+  Object.assign(AV, { dx: 0, k, i: j, arrive: Date.now() + dur, until: Date.now() + dur + (dwell || (k === 'idle' ? 4000 : 7000 + Math.random() * 6000)) });
+  g.dataset.i = j;
+};
+// after every redraw, put the toon back where it was, in the pose it was in
+if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined' && document.body) {
+  const fix = () => { const g = document.querySelector('svg.home-scene .me-walk'); if (!g || g._av3) return; g._av3 = 1; av3Show(g, AV3.mode === 'walk' ? 'stand' : AV3.frame); if (AV3.mode === 'walk') AV3.mode = 'stand'; av3Apply(g); if (AV.k && AV.k !== 'idle') { g.dataset.act = AV.k; const p = g.querySelector(`.act-prop[data-k="${AV.k}"]`); if (p) p.classList.add('on'); } };
+  new MutationObserver(fix).observe(document.body, { childList: true, subtree: true });
+}
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `
+.home-scene .me-walk.walking .me-bob,.home-scene .me-walk.land .me-bob{animation:none}.home-scene .me-walk.face-l .me-bob{scale:none}
+.home-scene .me-walk{transition:none!important}`; document.head.appendChild(st); })();
+// </avatar3>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

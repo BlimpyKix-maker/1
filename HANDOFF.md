@@ -333,6 +333,20 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 28: originals instead of skipped sequels; the avatar walks, sits and lies down
+
+- **Originals** (`src/world2.js`): when a hit doesn't get a sequel, its studio sometimes greenlights an original in
+  the same genre (`q.orig` in `seqQ`, often with the same director; `g.origOf`). Originals can earn sequels but never
+  spawn further originals (that chain ran away). The rate (16%) puts film volume back where it was before sequels
+  were cut: about 300 American films in three years, 13% of them sequels.
+- **Shoes** (`figShoe` in `src/figure.js`): real foot size, front three-quarter view, toe box on a sole, ten styles.
+- **Poses** (`FIG_POSE` in `src/figure.js`): hooks for legs (H/K/A joints, ground line `ty`, toe `turn`) and arms
+  (`A`, `hands`, `front`). `src/avatar3.js` uses them for six walking frames, sitting and holding.
+- **Moving through the room** (`src/avatar3.js`): in the room only (`AV3_CTX`), the player's figure is a stack of
+  frames (cached per look). Each activity has a target (`av3Targets`): a stool at the desk or piano, lying on the bed
+  or mattress, the couch, the window, by the plant. `avGo` from home2.js is replaced: the toon walks there in 2D
+  with depth scaling, steps in time with distance, faces the way it goes, gets up before walking off.
+
 ## Round 27: SlateOS scrolling, a market that reads the world, real-shaped agencies, and a dozen apps polished
 
 - **SlateOS** (`src/osfix.js`): fixed-height window; the sidebar and the app scroll on their own, keep their place across

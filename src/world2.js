@@ -275,11 +275,18 @@ function seqTitle(f) {
   const c = f && f.co !== null ? S.companies[f.co] : null;
   if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && hashRand((f.id * 131 + 7) >>> 0)() < [0, 0, .18, .11, .07, .04][Math.min(5, Math.max((f.seqN || 1), seqParse(f.title)[1]) + 1)] * (f.real ? .45 : 1)) {
     f.seqQueued = 1; (c.seqQ = c.seqQ || []).push({ parent: f.id, w: S.week + 52 + Math.floor(hashRand((f.id * 97) >>> 0)() * 52) }); }
+  // a hit that doesn't get a sequel still earns its makers another film: an original in the same genre, often with the same director
+  else if (c && c.closed === null && c.owner === undefined && !(S.me && c.id === S.me.company) && SEQ_G.includes(f.genre) && f.hitRatio > 2.5 && (f.seqN || 1) < 5 && !f.seqQueued && f.origOf === undefined && f.seq === undefined && hashRand((f.id * 173 + 11) >>> 0)() < .16) {
+    f.seqQueued = 1; (c.seqQ = c.seqQ || []).push({ parent: f.id, orig: 1, w: S.week + 40 + Math.floor(hashRand((f.id * 89) >>> 0)() * 52) }); }
   return out; }; }
 function sequelMonth() {
   for (const c of S.companies) { if (c.closed !== null || !c.seqQ || !c.seqQ.length) continue;
     for (const q of c.seqQ.filter(x => x.w <= S.week)) { c.seqQ = c.seqQ.filter(x => x !== q); const f = S.films[q.parent]; if (!f) continue;
       const free = id => id !== undefined && P(id) && !P(id).dead && !P(id).retired && available(id);
+      if (q.orig) { GL_KEY = 'orig:' + f.id; R = wstream('film', GL_KEY); let g; try { g = greenlight(c.hub, { co: c.id, genre: f.genre, budget: f.budget * (.8 + rnd() * .5) * econBudget(), dir: free(f.dir) && rnd() < .6 ? f.dir : undefined }); } finally { GL_KEY = null; }
+        if (g) g.origOf = f.id;
+        if (g) news('Company', `${c.name} greenlights ${g.title}, an original ${f.genre.toLowerCase()}${g.dir === f.dir && P(f.dir) ? ` from ${P(f.dir).name}, who made ${f.title}` : ` on the strength of ${f.title}`}.`, { company: c.id, film: g.id });
+        continue; }
       GL_KEY = 'seq:' + f.id; R = wstream('film', GL_KEY);
       let g; try { g = greenlight(c.hub, { co: c.id, genre: f.genre, title: seqTitle(f), budget: f.budget * 1.3 * econBudget(), dir: free(f.dir) ? f.dir : undefined, lead: free(f.cast[0]) ? f.cast[0] : undefined }); } finally { GL_KEY = null; }
       if (!g) continue; g.seq = f.id; g.seqN = Math.max(f.seqN || 1, seqParse(f.title)[1]) + 1; g.seqBase = f.seqBase || seqParse(f.title)[0];
