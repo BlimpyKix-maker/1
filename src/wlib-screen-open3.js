@@ -171,7 +171,7 @@ WLIB.add('open', [
   ['*', '*', 'open', 3, '{H} reverses into the only free space at {PLACE}, perfectly, and nobody sees.'],
   ['*', 'tense', 'open', 3, 'Over the phone, {R} is very polite. {H} writes down every word {rhe} says on the back of {his} hand.'],
   ['*', 'dark', 'open', 3, 'Handwriting on the shopping list on the fridge belongs to someone who is not coming back. {H} buys everything on it.'],
-  ['*', '*', 'open', 3, 'INT. BANK – {TIME}\n{H} fills in the paying-in slip with great care, then tears it up and joins the back of the queue.'],
+  ['*', '*', 'open', 3, 'INT. BANK – {TIME}\n{H} fills in the paying-in slip with great care, then rips it up and joins the back of the queue.'],
   ['*', 'light', 'open', 3, 'Nobody at {PLACE} knows {H} can sing. {He} is in the stockroom, doing it now.'],
   ['*', 'bittersweet', 'open', 3, 'Taking down the cot, {H} keeps one of the little bolts and puts it in {his} wallet with the receipts.'],
   ['*', '*', 'open', 3, 'A man in the next car at the lights is singing his heart out. {H} looks away to give him privacy, then looks back.'],
