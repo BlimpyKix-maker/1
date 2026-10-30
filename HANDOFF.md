@@ -333,6 +333,25 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 30: Call Sheet characters and the room as a set
+
+The request: a fresh character design matching the tone of the game, with the room and accessories to match.
+- **Call Sheet figures** (`src/callsheet.js`). These are flat editorial-illustration people with no outlines, lit like a set: a warm key light from the left and a cool shadow on the right (`csSh`, `csDeep`, `csHi`). It is a single renderer for every view:
+  - `csFullSVG(look, age, size, {view: front|back|side, pose: stand|sit, arms, ph})`. `ph` is the walk phase for the side view.
+  - `csPortraitSVG` crops the figure to head and shoulders.
+  - It draws every option in `LOOK`: all 24 hair styles (`CS_HAIR`), 23 hats, 13 glasses, 9 facial hair, 20 outfits with their details, bottoms, 10 shoes in front/side/back, neck items, wrist items, bags and patterns. It also handles build and face sliders, ageing (grey, lines) and mood from the living-avatar conditions (tired, stressed, buzzing).
+- **Style list:** it is now Call Sheet (0, the default), Cartoon (1), Classic (2, the old realistic renderer). Old saves with style 0 get the new look; Cartoon saves keep theirs.
+  - The `portraitSVG` wrapper maps the styles.
+  - In the room it hands off to `av3Frames`, which is wrapped to build every room frame (stand, hold, sit, sithold, s0–s7 walk, bstand, bsit, breach) from `csFullSVG`.
+- **Walk cycle:** thigh swing 17°. The knee bend peaks early in the swing (`cos(p+.55)` cubed). Arms swing 15° with a bent elbow on the forward swing.
+- **The room is a set** (`src/soundstage.js`, the outermost `homeSceneSVG` wrapper).
+  - The viewBox widens to `-12 -18 424 200`. Room coordinates are unchanged, so walking, tap targets and pets still line up.
+  - Around the room it draws the dark stage, plywood flat edges with braces, and a box truss with four lamps (warm on the left, cool on the right).
+  - The light is a soft radial warm key from the upper left (screen blend) and a cool fill on the right (multiply).
+  - Coloured T tape marks sit on the floor at each spot from `data-tg`.
+- **Speed:** a Call Sheet portrait takes about 0.4ms (Classic about 0.75ms).
+- **Test scripts** (scratch, not in the repo): a grid of looks, a views grid (front/back/hold/sit/back-sit/walk/portrait), the room per home type, and an NPC portrait grid.
+
 ## Round 29: side and back views, new shoes, and loading in half the time
 
 - **Views** (`src/avatar4.js`): `figSideSVG(L, age, phase)` draws the avatar in profile (eight walking frames; the
