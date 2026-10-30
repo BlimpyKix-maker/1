@@ -35,7 +35,7 @@ function av3Frames(args, draw) {
   const key = JSON.stringify(args[0]) + '|' + args[1] + '|' + (typeof LIVING_CTX !== 'undefined' && LIVING_CTX ? JSON.stringify(LIVING_CTX) : '');
   if (AV3_CACHE.k === key) return AV3_CACHE.frames;
   const out = {}, P = av3Poses(), was = FIG_POSE;
-  try { for (const k of Object.keys(P)) { FIG_POSE = P[k]; out[k] = draw(); } for (let f = 0; f < AV3_WALK_N; f++) { FIG_POSE = av3WalkPose(f, 1); out['w' + f] = draw(); } } finally { FIG_POSE = was; }
+  try { for (const k of Object.keys(P)) { FIG_POSE = P[k]; out[k] = draw(); } if (typeof figSideSVG !== 'function') for (let f = 0; f < AV3_WALK_N; f++) { FIG_POSE = av3WalkPose(f, 1); out['w' + f] = draw(); } } finally { FIG_POSE = was; }   // the side view replaces the front walking frames when it's there
   AV3_CACHE.k = key; AV3_CACHE.frames = out; return out;
 }
 // inside the room only: the player's full-length figure becomes a stack of frames, one shown at a time
@@ -123,7 +123,7 @@ function av3Go(g, j, dwell, what, k) {
     if (!g.isConnected) return;
     const u = Math.min(1, (now - t0) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
     AV3.x = x0 + (tx - x0) * e; AV3.y = y0 + (ty - y0) * e;
-    const walked = dist * e; av3Show(g, 'w' + (Math.floor(walked / stride) % AV3_WALK_N)); av3Apply(g);
+    const walked = dist * e; av3Show(g, g.querySelector('.av3-fr[data-f="s0"]') ? 's' + (Math.floor(walked / 3.6) % 8) : 'w' + (Math.floor(walked / stride) % AV3_WALK_N)); av3Apply(g);
     if (u < 1) AV3.raf = requestAnimationFrame(step); else arrive();
   };
   AV3.raf = requestAnimationFrame(step); return dur;

@@ -29730,7 +29730,7 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
     o.push(upperArm(1, [Sj(1), E[1], Wr]) + upperArm(-1, [Sj(-1), E[-1], Wl]));
     o.push(foreArm(1, [Sj(1), E[1], Wr]) + figHand(Wr, [-1, -.3], 1, skin, af, 'fist', SK));
     A = { [-1]: [Sj(-1), E[-1], Wl], 1: [Sj(1), E[1], Wr] };
-  } else for (const s of [-1, 1]) { if (bent(s) || longTop) o.push(foreArm(s, A[s])); if (hands[s] !== 'pocket') o.push(handAt(s, A[s], hands[s])); else o.push(`<path d="M${n1(A[s][2][0] - 3.4)} ${n1(A[s][2][1] - 1)} Q${n1(A[s][2][0])} ${n1(A[s][2][1] + 1.2)} ${n1(A[s][2][0] + 3.4)} ${n1(A[s][2][1] - 1)}" stroke="${longLeg ? legD : dkb}" stroke-width=".7" fill="none"/>`); }
+  } else for (const s of [-1, 1]) { if (bent(s) || longTop) o.push(foreArm(s, A[s])); if (hands[s] === 'none') { /* reaching forward, out of sight */ } else if (hands[s] !== 'pocket') o.push(handAt(s, A[s], hands[s])); else o.push(`<path d="M${n1(A[s][2][0] - 3.4)} ${n1(A[s][2][1] - 1)} Q${n1(A[s][2][0])} ${n1(A[s][2][1] + 1.2)} ${n1(A[s][2][0] + 3.4)} ${n1(A[s][2][1] - 1)}" stroke="${longLeg ? legD : dkb}" stroke-width=".7" fill="none"/>`); }
   { const J = A[-1], W = J[2], E = J[1];
     if (tat === 1 && short) o.push(`<path d="M${n1(E[0] - 1)} ${n1(E[1] + 3)} q2 3 0 6 q-2 3 0 6" stroke="#2B3A66" stroke-width="1" fill="none" opacity=".7"/>`);
     if (tat === 2 && !crossed) o.push(`<circle cx="${n1(W[0])}" cy="${n1(W[1] - 3)}" r=".9" fill="#2B3A66" opacity=".75"/>`);
@@ -29747,38 +29747,50 @@ function figureBody(L, o, uid, cx, skin, cloth, pr) {
   if (bag === 8 && free) o.push(`<path d="M${n1(RH[0] - 2.6)} ${n1(RH[1] + 3)} L${n1(RH[0] + 2.6)} ${n1(RH[1] + 3)} L${n1(RH[0] + 2.1)} ${n1(RH[1] + 11)} L${n1(RH[0] - 2.1)} ${n1(RH[1] + 11)} Z" fill="#F4F2EE"/><rect x="${n1(RH[0] - 2.4)}" y="${n1(RH[1] + 5.5)}" width="4.8" height="2.6" fill="#8A5A37"/><rect x="${n1(RH[0] - 3)}" y="${n1(RH[1] + 1.6)}" width="6" height="1.8" rx=".8" fill="#2B2B2B"/>`);
   if (bag === 9 && free) o.push(`<circle cx="${n1(RH[0])}" cy="${n1(RH[1] + 8)}" r="5.5" fill="#B9B5AE" stroke="#8A8680" stroke-width=".8"/><circle cx="${n1(RH[0])}" cy="${n1(RH[1] + 8)}" r="1.5" fill="#8A8680"/>`);
 }
-// One shoe, front three-quarter view. x/ay: the ankle; ty: the ground; turn: how far the toe box sits to the side.
-function figShoe(g, shoe, SH, skin, SK, ty, lf) {
-  const s = g.s, x = g.A[0], ay = g.A[1], turn = g.turn !== undefined ? g.turn : s * (g.free ? 1.8 : 1.1), col = SH[0], dk = mixHex(col, '#000', .42), k = Math.min(1.12, Math.max(.92, lf));
-  const sole = shoe === 7 ? 3.8 : shoe === 4 ? .7 : shoe === 3 || shoe === 6 ? 1.2 : shoe === 9 ? 1.8 : 1.9, tw = (shoe === 9 ? 7.6 : shoe === 4 ? 4.4 : shoe === 8 ? 5.6 : 6.5) * k, tx = x + turn, aw = 3.9 * k;
-  const soleC = shoe === 0 || shoe === 1 ? '#EFECE6' : shoe === 9 ? '#F7DCE6' : shoe === 7 ? '#2A2A2A' : mixHex(col, '#000', .58), o = [];
-  const shaft = [0, 6, 16, 0, 0, 0, 0, 18, 17, 2][shoe];
-  // the upper: from the ankle opening down and out to a rounded toe box resting on the sole
-  const body = (top, w0, w1, bottom) => `M${n1(x - w0)} ${n1(top)} L${n1(x + w0)} ${n1(top)} C${n1(x + w0 + .6)} ${n1(top + 3.5)} ${n1(tx + w1 + .4)} ${n1(bottom - 6.5)} ${n1(tx + w1)} ${n1(bottom - 2.6)} Q${n1(tx + w1 - .2)} ${n1(bottom)} ${n1(tx + w1 - 2.2)} ${n1(bottom)} L${n1(tx - w1 + 2.2)} ${n1(bottom)} Q${n1(tx - w1 + .2)} ${n1(bottom)} ${n1(tx - w1)} ${n1(bottom - 2.6)} C${n1(tx - w1 - .4)} ${n1(bottom - 6.5)} ${n1(x - w0 - .6)} ${n1(top + 3.5)} ${n1(x - w0)} ${n1(top)} Z`;
-  const bot = ty - sole;
-  if (shaft) o.push(`<path d="M${n1(x - aw - .9)} ${n1(ay - shaft)} L${n1(x + aw + .9)} ${n1(ay - shaft)} L${n1(x + aw + .6)} ${n1(ay + 2.5)} L${n1(x - aw - .6)} ${n1(ay + 2.5)} Z" fill="${col}" stroke="${dk}" stroke-width=".42"/>${shoe === 8 ? `<path d="M${n1(x - 2)} ${n1(ay - shaft + 4)} q2 4 0 8 M${n1(x + 2)} ${n1(ay - shaft + 4)} q-2 4 0 8" stroke="${SH[1]}" stroke-width=".6" fill="none"/>` : ''}`);
-  if (shoe === 4) {   // heels: the top of the foot shows; a pointed toe; the heel's stem just visible behind
-    o.push(`<rect x="${n1(x - turn * .3 - .7)}" y="${n1(bot - 4)}" width="1.4" height="${n1(sole + 4)}" fill="${dk}"/>`);
-    o.push(`<path d="${body(ay - .6, aw * .9, tw, bot)}" fill="${SK}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".35"/>`);
-    o.push(`<path d="M${n1(tx - tw - .2)} ${n1(bot - 3.6)} Q${n1(tx)} ${n1(bot - 5.4)} ${n1(tx + tw + .2)} ${n1(bot - 3.6)} L${n1(tx + tw * .5)} ${n1(bot + .2)} L${n1(tx - tw * .5)} ${n1(bot + .2)} Z" fill="${col}" stroke="${dk}" stroke-width=".4"/><path d="M${n1(x - aw)} ${n1(ay + 1)} L${n1(x + aw)} ${n1(ay + 1.4)}" stroke="${col}" stroke-width=".9"/>`);
-  } else if (shoe === 5) {   // sandals: a bare foot with toes, two straps and a thin sole
-    o.push(`<path d="${body(ay - .6, aw * .95, tw - .3, bot)}" fill="${SK}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".35"/>`);
-    o.push([-2, -.7, .6, 1.8, 3].map((d, i) => `<ellipse cx="${n1(tx + d * (tw / 3.4) * (turn >= 0 ? 1 : -1))}" cy="${n1(bot - .8)}" rx="${i === 0 ? 1.2 : .85}" ry="${i === 0 ? 1.1 : .8}" fill="${SK}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".25"/>`).join(''));
-    o.push(`<path d="M${n1(x - aw - .4)} ${n1(ay + 3)} L${n1(x + aw + .4)} ${n1(ay + 3.6)} M${n1(tx - tw + .4)} ${n1(bot - 4.2)} L${n1(tx + tw - .4)} ${n1(bot - 4)}" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/>`);
-  } else {
-    o.push(`<path d="${body(ay - .8, aw, tw, bot)}" fill="${col}" stroke="${dk}" stroke-width=".45" stroke-linejoin="round"/>`);
-    // the toe cap catches the light; a crease across the instep
-    o.push(`<path d="M${n1(tx - tw * .65)} ${n1(bot - 4)} Q${n1(tx - tw * .2)} ${n1(bot - 5.6)} ${n1(tx + tw * .25)} ${n1(bot - 5)}" stroke="#FFFFFF" stroke-width="1" fill="none" stroke-linecap="round" opacity="${shoe === 0 || shoe === 9 ? .5 : .28}"/><path d="M${n1(tx - tw * .7)} ${n1(bot - 5.2)} Q${n1(tx)} ${n1(bot - 6.4)} ${n1(tx + tw * .7)} ${n1(bot - 5.2)}" stroke="${dk}" stroke-width=".35" fill="none" opacity=".55"/>`);
-    if (shoe === 0 || shoe === 1 || shoe === 6) o.push(`<path d="M${n1(x - 1.6 + turn * .3)} ${n1(ay + 1.6)} L${n1(x + 1.6 + turn * .3)} ${n1(ay + 1.6)} M${n1(x - 1.9 + turn * .45)} ${n1(ay + 3.4)} L${n1(x + 1.9 + turn * .45)} ${n1(ay + 3.4)} M${n1(x - 2.2 + turn * .6)} ${n1(ay + 5.2)} L${n1(x + 2.2 + turn * .6)} ${n1(ay + 5.2)}" stroke="${shoe === 1 ? '#F4F2EE' : shoe === 6 ? '#2A1A10' : mixHex(SH[1], '#000', .15)}" stroke-width=".55" stroke-linecap="round"/>`);
-    if (shoe === 0) o.push(`<path d="M${n1(tx - tw + .8)} ${n1(bot - 2.4)} Q${n1(tx)} ${n1(bot - 4.6)} ${n1(tx + tw - .6)} ${n1(bot - 5.8)}" stroke="${SH[1]}" stroke-width="1.1" fill="none" stroke-linecap="round"/>`);
-    if (shoe === 1) o.push(`<path d="M${n1(tx - tw + .4)} ${n1(bot - 1.6)} Q${n1(tx)} ${n1(bot - 5)} ${n1(tx + tw - .4)} ${n1(bot - 1.6)} L${n1(tx + tw - 1)} ${n1(bot)} L${n1(tx - tw + 1)} ${n1(bot)} Z" fill="#F4F2EE"/><circle cx="${n1(x - g.s * 2.6)}" cy="${n1(ay - 2.5)}" r="1.1" fill="#FFFFFF"/>`);
-    if (shoe === 3) o.push(`<path d="M${n1(x - aw + .4 + turn * .4)} ${n1(ay + 4.2)} L${n1(x + aw - .4 + turn * .4)} ${n1(ay + 4.2)}" stroke="${SH[1]}" stroke-width="1.3"/>`);
-    if (shoe === 6) o.push(`<path d="M${n1(tx - tw * .8)} ${n1(bot - 3.4)} Q${n1(tx)} ${n1(bot - 5)} ${n1(tx + tw * .8)} ${n1(bot - 3.4)}" stroke="${dk}" stroke-width=".5" fill="none" stroke-dasharray=".5 .6"/>`);
-    if (shoe === 9) o.push(Array.from({ length: 7 }, (_, i) => `<circle cx="${n1(tx - tw + 1 + i * (tw * 2 - 2) / 6)}" cy="${n1(bot - 5.2 + (i % 2) * .8)}" r="1.5" fill="#FFFFFF" opacity=".7"/>`).join(''));
+// Shoes (Round 29): drawn the way flat illustration draws them, in profile: a heel under the ankle, the instep, a
+// toe pointing away, a sole along the ground. Standing, each foot turns out a little and is foreshortened, so the pair
+// reads as feet seen from the front; the side view uses the same shoe at full length, the back view shows the heels.
+// shoeProfile draws one shoe pointing toward +x with the ankle at 0 and the ground at y = 0.
+function shoeProfile(shoe, SH, skin, lw, noShaft) {
+  const col = SH[0], dk = mixHex(col, '#000', .38), lt = mixHex(col, '#fff', .35), k = lw || 1, L = 22 * k, o = [];
+  const soleH = shoe === 7 ? 4.2 : shoe === 3 || shoe === 6 || shoe === 4 ? 1.2 : shoe === 9 ? 2 : 2.2, soleC = shoe === 0 || shoe === 1 ? '#F1EEE8' : shoe === 9 ? '#F7DCE6' : shoe === 7 ? '#262626' : mixHex(col, '#000', .55);
+  const shaft = [0, 7, 15, 0, 0, 0, 0, 17, 16, 2][shoe];
+  if (shoe === 4) {   // a heel: the foot arches up onto the heel, a pointed toe, the stem under the heel
+    o.push(`<path d="M${n1(-4.6)} ${n1(-4.2)} L${n1(-3.6)} 0" stroke="${dk}" stroke-width="1.6" stroke-linecap="round"/>`);
+    o.push(`<path d="M-5.2 -5 C-5.4 -8.6 -3.6 -11 -1 -11 L2.4 -10.6 C4.2 -7 8 -3.4 ${n1(L - 4)} -1.4 Q${n1(L)} -.6 ${n1(L - 1)} 0 L${n1(L * .45)} 0 C${n1(L * .3)} -1 4 -3.6 -1 -4.2 Z" fill="${skin}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".35"/>`);
+    o.push(`<path d="M-5.2 -5 C-5.4 -7.6 -4.2 -9 -2.8 -9.2 L-1.4 -4.6 Z M${n1(L * .42)} -3.2 C${n1(L * .6)} -3.6 ${n1(L - 4)} -2.4 ${n1(L - 1)} 0 L${n1(L * .45)} 0 Z" fill="${col}" stroke="${dk}" stroke-width=".35"/>`);
+    return o.join('');
   }
-  // the sole, a little wider than the shoe, with a darker edge at the ground
-  o.push(`<path d="M${n1(tx - tw - .5)} ${n1(bot - .3)} L${n1(tx + tw + .5)} ${n1(bot - .3)} L${n1(tx + tw + .2)} ${n1(ty)} Q${n1(tx)} ${n1(ty + .6)} ${n1(tx - tw - .2)} ${n1(ty)} Z" fill="${soleC}" stroke="${mixHex(soleC, '#000', .35)}" stroke-width=".35"/>`);
+  if (shaft && !noShaft) o.push(`<path d="M-5 ${-shaft - 9} L4 ${-shaft - 9} L4.4 -8 L-5.6 -6 Z" fill="${col}" stroke="${dk}" stroke-width=".4"/>${shoe === 8 ? `<path d="M-2.6 ${-shaft - 6} q2.6 4 0 8 M1.4 ${-shaft - 6} q-2.4 4 0 8" stroke="${SH[1]}" stroke-width=".6" fill="none"/>` : ''}`);
+  const topY = shoe === 3 || shoe === 6 ? -8.6 : -10;
+  const upper = shoe === 9
+    ? `M-6 -1 C-7 -8 -2 -11.5 3 -10.8 C9 -10 ${n1(L - 2)} -8 ${n1(L + 1)} -3.6 C${n1(L + 2)} -1.4 ${n1(L)} 0 ${n1(L - 2)} 0 L-5 0 Z`
+    : shoe === 8 ? `M-5.6 -1 C-6 -6 -5.4 ${topY} -2.6 ${topY} L3.8 ${topY} C6 -6.6 10 -5 ${n1(L - 3)} -3 L${n1(L + 2)} -.6 L${n1(L - 2)} 0 L-5 0 Z`
+    : `M-5.6 -1.2 C-6.2 -5.6 -5.2 ${topY} -2.4 ${topY} L3.6 ${topY} C5.6 -7 9.6 -5.6 ${n1(L - 5)} -4.6 C${n1(L - 1)} -4 ${n1(L + .6)} -2.4 ${n1(L + .4)} -1 L${n1(L)} 0 L-5 0 Z`;
+  o.push(`<path d="${upper}" fill="${col}" stroke="${dk}" stroke-width=".42" stroke-linejoin="round"/>`);
+  // the details that say what kind of shoe it is
+  if (shoe === 0 || shoe === 1) o.push(`<path d="M${n1(L * .52)} -4.3 Q${n1(L * .75)} -4.4 ${n1(L + .2)} -1.6 L${n1(L + .3)} -1 L${n1(L * .55)} -1 Z" fill="${shoe === 1 ? '#F4F2EE' : mixHex(col, '#000', .08)}"/><path d="M2.6 -9.4 L6.2 -6.6 M4.4 -9.2 L7.8 -6 M6.4 -8.4 L9.2 -5.4" stroke="${shoe === 1 ? '#F4F2EE' : mixHex(SH[1], '#000', .1)}" stroke-width=".7" stroke-linecap="round"/>`);
+  if (shoe === 0) o.push(`<path d="M-2.6 -3.4 Q4 -7.4 ${n1(L * .62)} -3" stroke="${SH[1]}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`);
+  if (shoe === 1) o.push(`<circle cx="-2.4" cy="${-shaft - 4}" r="1.6" fill="#F4F2EE" stroke="${dk}" stroke-width=".3"/>`);
+  if (shoe === 3) o.push(`<path d="M3.4 -7.6 Q7.4 -8.4 10.4 -5.6" stroke="${SH[1]}" stroke-width="1.4" fill="none"/>`);
+  if (shoe === 6) o.push(`<path d="M${n1(L * .55)} -4.4 Q${n1(L * .7)} -5.6 ${n1(L * .66)} -1" stroke="${dk}" stroke-width=".45" fill="none" stroke-dasharray=".6 .6"/><path d="M3 -8.6 L7.6 -6.2 M4.8 -8.4 L8.6 -5.6" stroke="#2A1A10" stroke-width=".55"/>`);
+  if (shoe === 5) o.push(`<path d="M-5 -2.4 C-4 -6 0 -7.4 4 -6.6 C9 -5.6 ${n1(L - 3)} -4 ${n1(L)} -1.4 L${n1(L - 1)} 0 L-5 0 Z" fill="${skin}" stroke="${mixHex(skin, '#2A140C', .3)}" stroke-width=".35"/><path d="M-1 -6.8 L1.6 -.8 M7 -5.6 L8.4 -.8 M${n1(L * .7)} -3.6 L${n1(L * .72)} -.8" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/>`);
+  if (shoe === 9) o.push(Array.from({ length: 6 }, (_, i) => `<circle cx="${n1(-3 + i * (L / 5.4))}" cy="${n1(-8.6 + Math.sin(i) * 1.2)}" r="1.9" fill="#FFFFFF" opacity=".75"/>`).join(''));
+  if (shoe !== 5 && shoe !== 9) o.push(`<path d="M0 ${topY + 1.4} Q6 ${topY + 2.4} ${n1(L * .7)} -4.6" stroke="${lt}" stroke-width=".7" fill="none" opacity=".55" stroke-linecap="round"/>`);
+  // the sole
+  o.push(`<path d="M-5.8 ${n1(-soleH)} L${n1(L + .6)} ${n1(-soleH * .8)} Q${n1(L + 1)} 0 ${n1(L - .4)} 0 L-5 0 Q-6.2 0 -5.8 ${n1(-soleH)} Z" fill="${soleC}" stroke="${mixHex(soleC, '#000', .35)}" stroke-width=".35"/>${[2, 8].includes(shoe) ? `<rect x="-5.6" y="${n1(-soleH - 1.6)}" width="6" height="${n1(soleH + 1.6)}" fill="${soleC}"/>` : ''}`);
   return o.join('');
+}
+// the shoe on a standing figure: its profile, turned out and foreshortened
+function figShoe(g, shoe, SH, skin, SK, ty, lf) {
+  const s = g.s, x = g.A[0], k = Math.min(1.1, Math.max(.94, lf)), back = FIG_POSE && FIG_POSE.back;
+  if (back) {   // from behind: the heel counter, the back of the shaft, the sole
+    const col = SH[0], dk = mixHex(col, '#000', .4), soleC = shoe === 0 || shoe === 1 ? '#F1EEE8' : mixHex(col, '#000', .55), shaft = [0, 7, 15, 0, 0, 0, 0, 17, 16, 2][shoe], w = shoe === 9 ? 6.6 : shoe === 4 ? 3.2 : 4.6;
+    return `${shaft ? `<rect x="${n1(x - 4.4)}" y="${n1(ty - 9 - shaft)}" width="8.8" height="${shaft + 2}" fill="${col}" stroke="${dk}" stroke-width=".4"/>` : ''}<path d="M${n1(x - w)} ${n1(ty - 1.6)} C${n1(x - w - .4)} ${n1(ty - 7)} ${n1(x - 3)} ${n1(ty - 10)} ${n1(x)} ${n1(ty - 10)} C${n1(x + 3)} ${n1(ty - 10)} ${n1(x + w + .4)} ${n1(ty - 7)} ${n1(x + w)} ${n1(ty - 1.6)} Z" fill="${shoe === 5 || shoe === 4 ? skin : col}" stroke="${dk}" stroke-width=".4"/>${shoe === 4 ? `<rect x="${n1(x - 1)}" y="${n1(ty - 4)}" width="2" height="4" fill="${dk}"/>` : `<rect x="${n1(x - w - .3)}" y="${n1(ty - 2)}" width="${n1(w * 2 + .6)}" height="2" rx=".8" fill="${soleC}"/>`}`;
+  }
+  const turn = g.turn !== undefined ? Math.sign(g.turn) || s : s, fx = .5 + (g.free ? .08 : 0), shaft = [0, 7, 15, 0, 0, 0, 0, 17, 16, 2][shoe], col = SH[0], dk = mixHex(col, '#000', .38);
+  const sh = shaft ? `<path d="M${n1(x - 4.6)} ${n1(ty - 9 - shaft)} L${n1(x + 4.6)} ${n1(ty - 9 - shaft)} L${n1(x + 4.8)} ${n1(ty - 7)} L${n1(x - 4.8)} ${n1(ty - 7)} Z" fill="${col}" stroke="${dk}" stroke-width=".4"/>${shoe === 8 ? `<path d="M${n1(x - 2)} ${n1(ty - 6 - shaft)} q2 4 0 8 M${n1(x + 2)} ${n1(ty - 6 - shaft)} q-2 4 0 8" stroke="${SH[1]}" stroke-width=".6" fill="none"/>` : ''}${shoe === 1 ? `<circle cx="${n1(x - s * 2.6)}" cy="${n1(ty - 5 - shaft)}" r="1.3" fill="#F4F2EE"/>` : ''}` : '';
+  return `${sh}<g transform="translate(${n1(x - turn * 1.2)} ${n1(ty)}) scale(${n1(turn * fx * k)} ${n1(k * .96)})">${shoeProfile(shoe, SH, skin, 1, true)}</g>`;
 }
 // A hand drawn from life. Hanging at rest it is seen from the side: a narrow back of the hand, fingers that curl in
 // a little, the thumb in front. W: the wrist; d: the way the hand points; side: -1 left, 1 right.
@@ -80753,7 +80765,7 @@ function av3Frames(args, draw) {
   const key = JSON.stringify(args[0]) + '|' + args[1] + '|' + (typeof LIVING_CTX !== 'undefined' && LIVING_CTX ? JSON.stringify(LIVING_CTX) : '');
   if (AV3_CACHE.k === key) return AV3_CACHE.frames;
   const out = {}, P = av3Poses(), was = FIG_POSE;
-  try { for (const k of Object.keys(P)) { FIG_POSE = P[k]; out[k] = draw(); } for (let f = 0; f < AV3_WALK_N; f++) { FIG_POSE = av3WalkPose(f, 1); out['w' + f] = draw(); } } finally { FIG_POSE = was; }
+  try { for (const k of Object.keys(P)) { FIG_POSE = P[k]; out[k] = draw(); } if (typeof figSideSVG !== 'function') for (let f = 0; f < AV3_WALK_N; f++) { FIG_POSE = av3WalkPose(f, 1); out['w' + f] = draw(); } } finally { FIG_POSE = was; }   // the side view replaces the front walking frames when it's there
   AV3_CACHE.k = key; AV3_CACHE.frames = out; return out;
 }
 // inside the room only: the player's full-length figure becomes a stack of frames, one shown at a time
@@ -80841,7 +80853,7 @@ function av3Go(g, j, dwell, what, k) {
     if (!g.isConnected) return;
     const u = Math.min(1, (now - t0) / dur), e = u < .5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
     AV3.x = x0 + (tx - x0) * e; AV3.y = y0 + (ty - y0) * e;
-    const walked = dist * e; av3Show(g, 'w' + (Math.floor(walked / stride) % AV3_WALK_N)); av3Apply(g);
+    const walked = dist * e; av3Show(g, g.querySelector('.av3-fr[data-f="s0"]') ? 's' + (Math.floor(walked / 3.6) % 8) : 'w' + (Math.floor(walked / stride) % AV3_WALK_N)); av3Apply(g);
     if (u < 1) AV3.raf = requestAnimationFrame(step); else arrive();
   };
   AV3.raf = requestAnimationFrame(step); return dur;
@@ -80862,6 +80874,147 @@ if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined' &
 .home-scene .me-walk.walking .me-bob,.home-scene .me-walk.land .me-bob{animation:none}.home-scene .me-walk.face-l .me-bob{scale:none}
 .home-scene .me-walk{transition:none!important}`; document.head.appendChild(st); })();
 // </avatar3>
+// <avatar4>
+// ================= Side and back views (Round 29) =================
+// The avatar was only ever drawn facing you, so walking was a front-on shuffle and "writing at the desk" meant sitting
+// in front of it. Now there are two more views:
+//  - in profile, for walking: the head in profile (brow, nose, lips, chin, ear, the hair from the side), one arm
+//    swinging against the legs, the legs in a true stride with the knee bending as the foot passes, and the shoes
+//    heel to toe. The far arm and leg are drawn darker, behind.
+//  - from behind, for facing things: the desk, the window, the shelf, the record player, the piano. The body is the
+//    same as from the front; the head is the back of the head and hair, long hair falls down the back, the shoes show
+//    their heels, and the arms reach forward out of sight.
+// Every view is drawn from the same look, so the clothes, colours, hair and build always agree.
+function figSideSVG(L0, age, ph, opts = {}) {
+  const L = Object.assign(defaultLook(), migrateLook(Object.assign({}, L0)));
+  const skin = LOOK.skin.opts[L.skin], grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), cloth = LOOK.colour.opts[L.colour];
+  const top = L.outfit, bot = L.bottoms || 0, shoe = L.shoes || 0, b = L.build || 0, bc = FIG_COLOURS[L.bottomColour || 0];
+  const m = [.9, .95, 1, 1.06, 1.12, 1.24, .86, .88, 1.14, 1][b] + (typeof lookD === 'function' ? lookD(L, 'bWeight') * .12 : 0), dH = typeof lookD === 'function' ? lookD(L, 'bHeight') * 10 : 0;
+  const line = mixHex(skin, '#1A0E0A', .5), shade = mixHex(skin, '#2A140C', .22), dkc = mixHex(cloth, '#000', .32), dkb = mixHex(bc, '#000', .32), far = c => mixHex(c, '#000', .22);
+  const short = [0, 10, 13, 16, 19].includes(top), dress = top === 10, tc = top === 19 ? '#F4F2EE' : cloth;
+  const SH = [['#F4F2EE', cloth], ['#C8102E', '#F4F2EE'], ['#5A3A22', '#3B2516'], ['#3B2516', '#2A1A10'], ['#151515', '#8C2E2E'], ['#B98A55', skin], ['#7A4A28', '#4E2E18'], ['#151515', '#333'], ['#B98A55', '#8C5A2E'], ['#F2C6D6', '#FFFFFF']][shoe];
+  const o = [], cx = 60, sy = 58, wy = 98, hy = 116, thigh = 54 + dH * .5, shin = 43 + dH * .5, foot = 11, fy = 224 + dH;
+  const rad = d => d * Math.PI / 180, P = (x, y) => `${n1(x)} ${n1(y)}`;
+  // the stride: ph in 0..1 (null = standing); each leg's angle from vertical, knee bend when it swings through
+  const leg = side => { if (ph === null || ph === undefined) return { a: side * 2, k: 3 }; const p = ph * Math.PI * 2 + (side > 0 ? 0 : Math.PI), sw = Math.sin(p), lift = Math.max(0, Math.cos(p)); return { a: 26 * sw, k: 4 + 46 * lift * lift, lift }; };
+  const joints = g => { const H = [cx + 1, hy], K = [H[0] + Math.sin(rad(g.a)) * thigh, H[1] + Math.cos(rad(g.a)) * thigh], sa = g.a - g.k, A = [K[0] + Math.sin(rad(sa)) * shin, K[1] + Math.cos(rad(sa)) * shin]; return { H, K, A }; };
+  const near = leg(1), farL = leg(-1), JN = joints(near), JF = joints(farL);
+  const lowest = Math.max(JN.A[1], JF.A[1]), lift = fy - foot - lowest;   // drop the body so the planted foot meets the floor
+  o.push(`<g transform="translate(0 ${n1(lift)})">`);
+  const legPath = (J, w) => limbPath([[J.H[0], J.H[1] - 3], lerp2(J.H, J.K, .45), J.K, lerp2(J.K, J.A, .4), J.A], w);
+  const LW = [11 * m, 7 * m, 4.6 * m, 4.6 * m, 3];
+  const longLeg = [0, 1, 2, 6, 7, 8, 9].includes(bot) || top === 19;
+  const drawLeg = (J, g, isFar) => {
+    const sk = isFar ? far(skin) : skin, cl = isFar ? far(top === 19 ? cloth : bc) : (top === 19 ? cloth : bc);
+    o.push(`<path d="${legPath(J, LW)}" fill="${sk}" stroke="${shade}" stroke-width=".4"/>`);
+    if (longLeg) o.push(`<path d="${limbPath([[J.H[0], J.H[1] - 3], lerp2(J.H, J.K, .45), J.K, lerp2(J.K, J.A, .4), [J.A[0], J.A[1] + 2]], LW.map((w, i) => w + (i < 2 ? 1.6 : 1.2) + (bot === 8 && i > 2 ? 1.5 : 0)), true)}" fill="${cl}" stroke="${isFar ? far(dkb) : dkb}" stroke-width=".45"/>`);
+    else if (bot === 3 && top !== 19) o.push(`<path d="${limbPath([[J.H[0], J.H[1] - 3], lerp2(J.H, J.K, .35), lerp2(J.H, J.K, .55)], [LW[0] + 1.6, LW[1] + 2.4, LW[1] + 2.4], true)}" fill="${cl}" stroke="${dkb}" stroke-width=".45"/>`);
+    // the shoe: flat on the floor when planted, toe down a little when it lifts
+    const tilt = g.lift ? -g.lift * 18 + (g.a > 10 ? 8 : 0) : 0;
+    o.push(`<g transform="translate(${P(J.A[0], J.A[1] + foot)}) rotate(${n1(tilt)} 0 -6)${isFar ? '' : ''}">${isFar ? `<g opacity=".86">${shoeProfile(shoe, SH, far(skin), m * .95)}</g>` : shoeProfile(shoe, SH, skin, m * .95)}</g>`);
+  };
+  // the far arm, behind everything
+  const arm = side => { const sw = ph === null || ph === undefined ? 0 : -Math.sin(ph * Math.PI * 2 + (side > 0 ? 0 : Math.PI)); const S0 = [cx - 1, sy + 6], ua = 4 + sw * 24, fa = ua + 10 + Math.max(0, sw) * 16, E = [S0[0] + Math.sin(rad(ua)) * 33, S0[1] + Math.cos(rad(ua)) * 33], W = [E[0] + Math.sin(rad(fa)) * 28, E[1] + Math.cos(rad(fa)) * 28]; return { S: S0, E, W, fa }; };
+  const drawArm = (A, isFar) => {
+    const sk = isFar ? far(skin) : skin, sl = isFar ? far(tc) : tc;
+    o.push(`<path d="${limbPath([A.S, lerp2(A.S, A.E, .5), A.E, lerp2(A.E, A.W, .5), A.W], [5.2 * m, 4.6 * m, 3.6 * m, 3.3 * m, 2.6 * m])}" fill="${short ? sk : sl}" stroke="${short ? shade : dkc}" stroke-width=".4"/>`);
+    if (short) o.push(`<path d="${limbPath([A.S, lerp2(A.S, A.E, .25), lerp2(A.S, A.E, .45)], [6 * m, 5.6 * m, 5.2 * m], true)}" fill="${sl}" stroke="${dkc}" stroke-width=".4"/>`);
+    const u = [Math.sin(rad(A.fa)), Math.cos(rad(A.fa))], H0 = A.W;
+    o.push(`<path d="M${P(H0[0] - u[1] * 2.6, H0[1] + u[0] * 2.6)} C${P(H0[0] + u[0] * 6, H0[1] + u[1] * 6)} ${P(H0[0] + u[0] * 9 - u[1] * 1, H0[1] + u[1] * 9)} ${P(H0[0] + u[0] * 9.5 + u[1] * 2.4, H0[1] + u[1] * 9.5 - u[0] * 2.4)} C${P(H0[0] + u[0] * 6 + u[1] * 3.2, H0[1] + u[1] * 6 - u[0] * 3)} ${P(H0[0] + u[1] * 2.8, H0[1] - u[0] * 2.8)} ${P(H0[0] + u[1] * 2.6, H0[1] - u[0] * 2.6)} Z" fill="${sk}" stroke="${shade}" stroke-width=".35"/>`);
+  };
+  const AF = arm(-1), AN = arm(1);
+  // long hair behind the shoulders
+  const longHair = [8, 9, 14, 23, 19].includes(L.hair), bob = L.hair === 7;
+  drawArm(AF, true); drawLeg(JF, farL, true);
+  // the torso in profile: chest forward, shoulder blades and seat behind
+  const ch = 11 * m, bk = 9.5 * m, wf = 8 * m, wbk = 8.5 * m, hf = 9 * m, hbk = 11 * m;
+  const hem = dress ? 170 : top === 18 ? 162 : hy + 4;
+  const torso = `M${P(cx - 4, sy - 2)} C${P(cx + 4, sy - 3)} ${P(cx + ch, sy + 6)} ${P(cx + ch, sy + 16)} C${P(cx + ch + .5, sy + 26)} ${P(cx + wf + 1, wy - 12)} ${P(cx + wf, wy)} C${P(cx + wf + .5, hy - 8)} ${P(cx + hf + (dress ? 4 : 0), hem - 6)} ${P(cx + hf + (dress ? 8 : 0), hem)} L${P(cx - hbk - (dress ? 8 : 0), hem)} C${P(cx - hbk - (dress ? 4 : 1), hem - 8)} ${P(cx - wbk - 1, wy + 6)} ${P(cx - wbk, wy)} C${P(cx - wbk + 1, wy - 14)} ${P(cx - bk - 1, sy + 20)} ${P(cx - bk, sy + 10)} C${P(cx - bk, sy + 2)} ${P(cx - 9, sy - 1)} ${P(cx - 4, sy - 2)} Z`;
+  // trousers' seat and the waist, under the top
+  if (!dress && top !== 18) o.push(`<path d="M${P(cx - wbk - .5, wy)} L${P(cx + wf + .5, wy)} C${P(cx + hf + 1, hy - 6)} ${P(cx + hf + 1, hy + 4)} ${P(cx + 6, hy + 10)} L${P(cx - 6, hy + 10)} C${P(cx - hbk - 2, hy + 6)} ${P(cx - hbk - 1, hy - 6)} ${P(cx - wbk - .5, wy)} Z" fill="${top === 19 ? cloth : (bot === 4 || bot === 5 ? bc : bc)}" stroke="${dkb}" stroke-width=".45"/>`);
+  if ((bot === 4 || bot === 5) && !dress && top !== 19) { const sk = bot === 4 ? hy + 24 : 196; o.push(`<path d="M${P(cx - wbk - .5, wy)} L${P(cx + wf + .5, wy)} L${P(cx + hf + (bot === 4 ? 5 : 9), sk)} L${P(cx - hbk - (bot === 4 ? 5 : 9), sk)} Z" fill="${bc}" stroke="${dkb}" stroke-width=".45"/>`); }
+  drawLeg(JN, near, false);
+  if (longHair) o.push(`<path d="M${P(cx - 6, 26)} C${P(cx - 16, 34)} ${P(cx - 15, 60)} ${P(cx - 12, L.hair === 9 || L.hair === 14 ? 92 : 80)} L${P(cx - 4, L.hair === 9 || L.hair === 14 ? 92 : 80)} C${P(cx - 6, 60)} ${P(cx - 2, 42)} ${P(cx - 2, 30)} Z" fill="${hc}" stroke="${mixHex(hc, '#000', .3)}" stroke-width=".4"/>`);
+  o.push(`<path d="${torso}" fill="${tc}" stroke="${dkc}" stroke-width=".5"/>`);
+  if (top === 19) o.push(`<path d="M${P(cx - 2, sy + 18)} L${P(cx + ch - 1, sy + 16)} L${P(cx + wf + .5, wy)} L${P(cx - wbk + 2, wy)} Z" fill="${cloth}"/>`);
+  o.push(`<path d="M${P(cx + 2, sy + 22)} q${n1(ch - 4)} 3 ${n1(ch - 3)} 9 M${P(cx - bk + 2, wy - 6)} q4 2 9 1" stroke="${dkc}" stroke-width=".45" fill="none" opacity=".45"/>`);
+  // neck and head in profile
+  o.push(`<path d="M${P(cx - 3.4, 44)} L${P(cx + 3.6, 44)} L${P(cx + 4.4, sy + 1)} L${P(cx - 4.6, sy + 1)} Z" fill="${skin}" stroke="${shade}" stroke-width=".4"/>`);
+  const hx = cx + 1, hyc = 31;
+  const face = `M${P(hx - 9, hyc - 10)} C${P(hx - 2, hyc - 16)} ${P(hx + 8, hyc - 14)} ${P(hx + 9.6, hyc - 6)} L${P(hx + 10, hyc - 1.4)} L${P(hx + 13.2, hyc + 3.4)} Q${P(hx + 13.4, hyc + 4.6)} ${P(hx + 11, hyc + 5)} L${P(hx + 11.2, hyc + 7.4)} Q${P(hx + 12, hyc + 8.6)} ${P(hx + 10.8, hyc + 9.6)} Q${P(hx + 11.2, hyc + 11)} ${P(hx + 10.2, hyc + 12.2)} C${P(hx + 9.8, hyc + 15.4)} ${P(hx + 6, hyc + 16.4)} ${P(hx + 2.6, hyc + 15)} L${P(hx - 2, hyc + 13.6)} C${P(hx - 9, hyc + 12)} ${P(hx - 12, hyc + 4)} ${P(hx - 11.6, hyc - 3)} C${P(hx - 11.4, hyc - 7)} ${P(hx - 10.4, hyc - 9)} ${P(hx - 9, hyc - 10)} Z`;
+  o.push(`<path d="${face}" fill="${skin}" stroke="${line}" stroke-width=".5"/>`);
+  // ear, eye, brow, mouth
+  o.push(`<ellipse cx="${n1(hx - 2.6)}" cy="${n1(hyc + 2)}" rx="2.4" ry="3.4" fill="${mixHex(skin, '#2A140C', .12)}" stroke="${line}" stroke-width=".4"/><path d="M${P(hx + 6.2, hyc - 1)} q1.8 -1.2 3.2 .2" stroke="${mixHex(skin, '#140A08', .7)}" stroke-width=".9" fill="none" stroke-linecap="round"/><path d="M${P(hx + 6.6, hyc + 1.2)} q1.2 -.9 2.4 .1 q-1.1 .9 -2.4 -.1 Z" fill="#2B1D16"/><path d="M${P(hx + 6, hyc - 3.4)} q2.4 -1.6 4.4 -.4" stroke="${mixHex(hc, '#000', .2)}" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M${P(hx + 9.6, hyc + 8.4)} l1.4 .1" stroke="${mixHex(skin, '#5A1E1E', .45)}" stroke-width=".8" stroke-linecap="round"/>`);
+  if (L.facial && L.facial > 0 && L.facial < 6) o.push(`<path d="M${P(hx + 1, hyc + 6)} C${P(hx + 6, hyc + 8)} ${P(hx + 10, hyc + 10)} ${P(hx + 10.4, hyc + 12)} C${P(hx + 9.8, hyc + 15.4)} ${P(hx + 6, hyc + 16.4)} ${P(hx + 2.6, hyc + 15)} L${P(hx - 2, hyc + 13.6)} Z" fill="${hc}" opacity=".7"/>`);
+  // hair from the side, by style
+  const H = L.hair, hs = mixHex(hc, '#000', .3);
+  const cap = (fr, bkY) => `M${P(hx - 12, hyc + 2)} C${P(hx - 13, hyc - 12)} ${P(hx - 2, hyc - 17.5)} ${P(hx + 6, hyc - 15)} C${P(hx + 10, hyc - 13)} ${P(hx + 11, hyc - 8)} ${P(hx + fr, hyc - 5.5)} C${P(hx + 4, hyc - 9)} ${P(hx - 2, hyc - 8)} ${P(hx - 5, hyc - 3)} L${P(hx - 6, bkY)} C${P(hx - 10, bkY)} ${P(hx - 12, hyc + 6)} ${P(hx - 12, hyc + 2)} Z`;
+  if (H === 0) o.push(`<path d="${cap(9, hyc + 4)}" fill="${hc}" opacity=".25"/>`);
+  else if (H === 6 || H === 19 || H === 5) { const r = H === 6 ? 16 : H === 19 ? 14 : 12.5; o.push(`<path d="${bumpy ? bumpy(hx - 2, hyc - 4, r, r * .95, 12, 1.4) : ''}" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`); }
+  else {
+    o.push(`<path d="${cap(H === 4 || H === 12 ? 11 : 9.4, H === 1 ? hyc + 4 : hyc + 9)}" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+    if (H === 4) o.push(`<path d="M${P(hx - 4, hyc - 15)} C${P(hx + 6, hyc - 22)} ${P(hx + 14, hyc - 16)} ${P(hx + 11, hyc - 9)} C${P(hx + 6, hyc - 12)} ${P(hx, hyc - 13)} ${P(hx - 4, hyc - 15)} Z" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+    if (H === 12) o.push(`<path d="M${P(hx - 9, hyc - 10)} L${P(hx - 6, hyc - 22)} L${P(hx - 2, hyc - 15)} L${P(hx + 1, hyc - 24)} L${P(hx + 4, hyc - 15)} L${P(hx + 7, hyc - 21)} L${P(hx + 8, hyc - 12)} Z" fill="${hc}"/>`);
+    if (H === 10 || H === 18) o.push(`<path d="M${P(hx - 11, hyc - 6)} C${P(hx - 20, hyc - 4)} ${P(hx - 20, hyc + 14)} ${P(hx - 15, hyc + (H === 18 ? 16 : 24))} C${P(hx - 13, hyc + 12)} ${P(hx - 12, hyc + 2)} ${P(hx - 9, hyc - 2)} Z" fill="${hc}" stroke="${hs}" stroke-width=".4"/><circle cx="${n1(hx - 11.4)}" cy="${n1(hyc - 4.6)}" r="1.4" fill="${cloth}"/>`);
+    if (H === 11 || H === 16 || H === 22) o.push(`<circle cx="${n1(hx - 7)}" cy="${n1(hyc - (H === 22 ? 20 : 16))}" r="${H === 22 ? 9 : 5.5}" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+    if (bob || longHair || H === 15) o.push(`<path d="M${P(hx - 12, hyc - 2)} C${P(hx - 14, hyc + 10)} ${P(hx - 12, hyc + (bob ? 16 : 22))} ${P(hx - 7, hyc + (bob ? 17 : 24))} L${P(hx - 4, hyc + 6)} Z" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+    if (bob || longHair) o.push(`<path d="M${P(hx - 4, hyc - 12)} C${P(hx + 4, hyc - 14)} ${P(hx + 10, hyc - 10)} ${P(hx + 10, hyc - 5)} C${P(hx + 6, hyc - 8)} ${P(hx + 2, hyc - 9)} ${P(hx - 3, hyc - 8)} Z" fill="${hc}"/>`);
+  }
+  // the near arm, in front of the body
+  drawArm(AN, false);
+  o.push('</g>');
+  return `<svg class="portrait figure side" viewBox="0 0 120 240" width="61" height="122" role="img" aria-label="Walking">${o.join('')}</svg>`;
+}
+// ---- the back view: the front body, with the back of the head and long hair over it ----
+function figBackOverlay(L0, age) {
+  const L = Object.assign(defaultLook(), migrateLook(Object.assign({}, L0))), skin = LOOK.skin.opts[L.skin], grey = clamp((age - 44) / 26, 0, .85), hc = mixHex(LOOK.hairColor.opts[L.hairColor], '#D9D6D0', grey), hs = mixHex(hc, '#000', .3), H = L.hair, line = mixHex(skin, '#1A0E0A', .5);
+  const cx = 60, cy = 33.4, rx = 11.4, ry = 15, o = [];
+  // the head from behind, with ears and the nape
+  o.push(`<ellipse cx="${n1(cx - rx)}" cy="${n1(cy + 1)}" rx="2.2" ry="3.4" fill="${skin}" stroke="${line}" stroke-width=".4"/><ellipse cx="${n1(cx + rx)}" cy="${n1(cy + 1)}" rx="2.2" ry="3.4" fill="${skin}" stroke="${line}" stroke-width=".4"/>`);
+  o.push(`<path d="M${n1(cx - rx)} ${n1(cy)} C${n1(cx - rx)} ${n1(cy - ry - 1)} ${n1(cx + rx)} ${n1(cy - ry - 1)} ${n1(cx + rx)} ${n1(cy)} C${n1(cx + rx)} ${n1(cy + 10)} ${n1(cx + 6)} ${n1(cy + ry)} ${cx} ${n1(cy + ry)} C${n1(cx - 6)} ${n1(cy + ry)} ${n1(cx - rx)} ${n1(cy + 10)} ${n1(cx - rx)} ${n1(cy)} Z" fill="${skin}" stroke="${line}" stroke-width=".45"/>`);
+  if (H === 0) return o.join('') + `<path d="M${n1(cx - rx + .5)} ${n1(cy + 4)} C${n1(cx - rx)} ${n1(cy - ry)} ${n1(cx + rx)} ${n1(cy - ry)} ${n1(cx + rx - .5)} ${n1(cy + 4)}" fill="${hc}" opacity=".22"/>`;
+  const big = H === 6 ? 17 : H === 19 ? 15 : H === 5 ? 13.5 : 0;
+  if (big) return o.join('') + `<path d="${bumpy(cx, cy - 3, big, big * .96, 14, 1.5)}" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`;
+  const nape = H === 1 ? cy + 6 : [2, 3, 4, 13, 17, 20, 21, 12].includes(H) ? cy + 9 : cy + 11;
+  o.push(`<path d="M${n1(cx - rx - .6)} ${n1(cy + 4)} C${n1(cx - rx - 1)} ${n1(cy - ry - 2)} ${n1(cx + rx + 1)} ${n1(cy - ry - 2)} ${n1(cx + rx + .6)} ${n1(cy + 4)} C${n1(cx + rx)} ${n1(nape - 2)} ${n1(cx + 5)} ${n1(nape)} ${cx} ${n1(nape)} C${n1(cx - 5)} ${n1(nape)} ${n1(cx - rx)} ${n1(nape - 2)} ${n1(cx - rx - .6)} ${n1(cy + 4)} Z" fill="${hc}" stroke="${hs}" stroke-width=".45"/><path d="M${cx} ${n1(cy - ry)} Q${n1(cx + 1)} ${n1(cy - 4)} ${cx} ${n1(nape - 1)}" stroke="${hs}" stroke-width=".5" fill="none" opacity=".45"/>`);
+  if (H === 12) o.push(`<path d="M${n1(cx - 3)} ${n1(cy - ry - 1)} L${cx} ${n1(cy - ry - 9)} L${n1(cx + 3)} ${n1(cy - ry - 1)} Z" fill="${hc}"/>`);
+  if (H === 10) o.push(`<path d="M${n1(cx - 3)} ${n1(cy + 4)} C${n1(cx - 5)} ${n1(cy + 18)} ${n1(cx - 2)} ${n1(cy + 30)} ${cx} ${n1(cy + 36)} C${n1(cx + 2)} ${n1(cy + 30)} ${n1(cx + 5)} ${n1(cy + 18)} ${n1(cx + 3)} ${n1(cy + 4)} Z" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+  if (H === 11 || H === 22) o.push(`<circle cx="${cx}" cy="${n1(cy - ry + (H === 22 ? -4 : 2))}" r="${H === 22 ? 10 : 6}" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+  if (H === 16 || H === 18) for (const s of [-1, 1]) o.push(H === 16 ? `<circle cx="${n1(cx + s * 9)}" cy="${n1(cy - ry + 2)}" r="5" fill="${hc}" stroke="${hs}" stroke-width=".4"/>` : `<path d="M${n1(cx + s * 9)} ${n1(cy + 2)} q${s * 6} 12 ${s * 2} 24 l${-s * 3} 0 q${s * 2} -12 ${-s * 3} -22 Z" fill="${hc}" stroke="${hs}" stroke-width=".4"/>`);
+  if ([7, 8, 9, 14, 15, 23].includes(H)) { const ln = H === 7 ? cy + 22 : H === 15 ? cy + 28 : H === 9 || H === 14 ? cy + 62 : cy + 50, w = H === 7 ? rx + 2 : rx + 3;
+    o.push(`<path d="M${n1(cx - w)} ${n1(cy)} C${n1(cx - w - 1)} ${n1(cy + 16)} ${n1(cx - w + 1)} ${n1(ln - 6)} ${n1(cx - w + 3)} ${n1(ln)} Q${cx} ${n1(ln + 3)} ${n1(cx + w - 3)} ${n1(ln)} C${n1(cx + w - 1)} ${n1(ln - 6)} ${n1(cx + w + 1)} ${n1(cy + 16)} ${n1(cx + w)} ${n1(cy)} Z" fill="${hc}" stroke="${hs}" stroke-width=".45"/>${H === 9 || H === 14 ? Array.from({ length: 6 }, (_, i) => `<path d="M${n1(cx - w + 3 + i * (w * 2 - 6) / 5)} ${n1(cy + 6)} L${n1(cx - w + 3 + i * (w * 2 - 6) / 5)} ${n1(ln - 1)}" stroke="${hs}" stroke-width=".5" opacity=".5"/>`).join('') : ''}`); }
+  return o.join('');
+}
+// ---- wiring into the room's frame stack ----
+{ const _fr = av3Frames; av3Frames = function (args, draw) {
+  const F = _fr(args, draw); if (F.s0) return F;
+  const [L, age] = args, P = av3Poses(), was = FIG_POSE;
+  for (let f = 0; f < 8; f++) F['s' + f] = figSideSVG(L, age, f / 8);
+  try {
+    const back = (pose, extra) => { FIG_POSE = Object.assign({}, pose || {}, { back: 1 }, extra || {}); const s = draw(); return s.replace(/<\/svg>$/, `${figBackOverlay(L, age)}</svg>`); };
+    const reach = { arms(A, hands, F2) { for (const s of [-1, 1]) { A[s] = [F2.Sj(s), [F2.cx + s * (F2.ww + 3.4), F2.wy - 8], [F2.cx + s * (F2.ww - 2), F2.wy - 14]]; hands[s] = 'none'; } }, front: 0 };
+    F.bstand = back(null); F.bsit = back({ legs: P.sit.legs }, reach); F.breach = back(null, reach);
+  } finally { FIG_POSE = was; }
+  return F;
+}; }
+// walking uses the side view; facing furniture uses the back view
+{ const _sh = av3Show; av3Show = function (g, frame) {
+  const t = AV3.tg || {}; if (t.back && AV3.mode !== 'walk' && !/^s\d$/.test(frame)) frame = AV3.mode === 'sit' ? 'bsit' : t.reach ? 'breach' : 'bstand';
+  return _sh.call(this, g, frame); }; }
+{ const _tg = av3Targets; av3Targets = function () {
+  const T = _tg.apply(this, arguments), acts = arguments[0];
+  return T.map((t, i) => { const k = acts[i] && acts[i][1];
+    if (k === 'write' && t.stool) return Object.assign(t, { y: 166, back: 1 });
+    if (k === 'dream') return Object.assign(t, { back: 1 });
+    if (k === 'script') return Object.assign(t, { back: 1, reach: 1, pose: 'stand', y: 168 });
+    if (k === 'music' && t.stool) return Object.assign(t, { back: 1, y: 166 });
+    if (k === 'music' || k === 'game' || k === 'coffee') return Object.assign(t, { back: 1, reach: 1, pose: 'stand', y: 168 });
+    return t; }); }; }
+// props held in the hands make no sense from behind; floating notes and thought bubbles still show
+(function () { if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.head) return; const st = document.createElement('style'); st.textContent = `
+.home-scene .me-walk.av3-back .act-prop[data-k="write"],.home-scene .me-walk.av3-back .act-prop[data-k="script"],.home-scene .me-walk.av3-back .act-prop[data-k="coffee"],.home-scene .me-walk.av3-back .act-prop[data-k="game"],.home-scene .me-walk.av3-back .act-prop[data-k="music"] path,.home-scene .me-walk.av3-back .act-prop[data-k="music"] rect{display:none}`; document.head.appendChild(st); })();
+{ const _ap = av3Apply; av3Apply = function (g) { const r = _ap.apply(this, arguments); if (g) g.classList.toggle('av3-back', !!(AV3.tg && AV3.tg.back && AV3.mode !== 'walk')); return r; }; }
+// </avatar4>
 // ================= Apple Box — World Core UI =================
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
