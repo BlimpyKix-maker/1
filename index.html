@@ -8950,13 +8950,14 @@ const SINCE = { hollywood: 1911, newyork: 1896, toronto: 1917, mexico: 1931, lon
 
 function recalc(p) { p.c = {}; for (const c in CRAFTS) { let s = 0, n = 0; for (const k in CRAFTS[c].subs) { s += p.sk[k]; n++; } p.c[c] = s / n; } }
 const GCRAFT_W = {};   // the per-skill weights for a craft in a genre never change: work them out once
+const GCRAFT_W2 = {};   // craft → genre → [skill, weight, …] and the weights' total (no string keys in the hot path)
 function gcraft(p, c, genre) {
-  const key = c + '|' + genre;
-  let L = GCRAFT_W[key];
-  if (!L) { const W = GENRE_W[genre] || {}; L = GCRAFT_W[key] = []; for (const k in CRAFTS[c].subs) L.push(k, W[k] || 1); }
-  let s = 0, n = 0;
-  for (let i = 0; i < L.length; i += 2) { const w = L[i + 1]; s += p.sk[L[i]] * w; n += w; }
-  return s / n;
+  const C = GCRAFT_W2[c] || (GCRAFT_W2[c] = {});
+  let L = C[genre];
+  if (!L) { const W = GENRE_W[genre] || {}; L = C[genre] = []; let n = 0; for (const k in CRAFTS[c].subs) { L.push(k, W[k] || 1); n += W[k] || 1; } L.n = n; GCRAFT_W[c + '|' + genre] = L; }
+  const sk = p.sk; let s = 0;
+  for (let i = 0; i < L.length; i += 2) s += sk[L[i]] * L[i + 1];
+  return s / L.n;
 }
 
 function femaleShare(role, y) {
@@ -9115,8 +9116,11 @@ function priorStep() {
 
 // Forty years of history, made quickly, one year per call: films are cast from the people
 // alive at the time, released through the same model, and earn through the windows of their era.
-function archiveStep() {
-  if (S.priorY < S.priorEnd) return priorStep();
+// One year of history, as a generator that pauses after each city, so the page can keep drawing while it runs (the
+// build loop gives it about 12 ms at a time). archiveStep() runs a whole year in one go, exactly as before.
+function archiveStep() { for (const _ of archiveStepG()); }
+function* archiveStepG() {
+  if (S.priorY < S.priorEnd) { priorStep(); return; }
   const Y = S.archY++;
   S.year = Y;
   const w0 = weekOfYear(Y);
@@ -9126,8 +9130,9 @@ function archiveStep() {
     if (Y < SINCE[h]) continue;
     const ros = {};
     for (const r of ROLES) {
-      S.hist[h][r] = S.hist[h][r].filter(id => P(id).born + 72 >= Y);
-      const list = S.pool[h][r].concat(S.hist[h][r]).filter(id => aliveIn(P(id), Y));
+      const HL = S.hist[h][r], PP = S.people, list = [];
+      let k2 = 0; for (let i = 0; i < HL.length; i++) { const id = HL[i]; if (PP[id].born + 72 >= Y) HL[k2++] = id; } HL.length = k2;   // in place, no new arrays
+      for (const L0 of [S.pool[h][r], HL]) for (let i = 0; i < L0.length; i++) { const id = L0[i]; if (aliveIn(PP[id], Y)) list.push(id); }
       const target = Math.max(4, Math.round(hubProd(h, Y) * density * 9 * ROLE_SHARE[r]));
       while (list.length < target) list.push(makeHistorical(h, r, Y).id);
       ros[r] = list;
@@ -9137,6 +9142,7 @@ function archiveStep() {
     for (const cf of real) made.push(catalogueFilm(cf, Y, w0 + ri(0, 51), ros));
     const n = Math.max(0, Math.round(hubProd(h, Y) * density * (.8 + rnd() * .4)) - real.length);
     for (let i = 0; i < n; i++) made.push(archiveFilm(h, Y, w0 + ri(0, 51), ros, cos));
+    yield;   // let the page draw a frame
   }
   S.year = Y + 1;
   // invented prizes only where no real equivalent existed yet or the catalogue has not reached
@@ -10813,11 +10819,15 @@ function release(f) {
     p.heat = Math.max(p.heat * .5, clamp(22 * Math.log2(1 + homeRatio + forRatio * .5), 0, 100));
     p.credits.push(f.id); p.lastWork = S.week;
   }
-  for (const [a, b, w] of tiePairs(f)) {
-    // repeat collaborators bond faster: a warm tie compounds, a sour one keeps souring
-    const prior = tie(a, b), carry = 1 + Math.abs(prior) / 150;
-    addTie(a, b, (5 + gauss() * 6 + traitSum(a, 'tie') + traitSum(b, 'tie') + (a.mind.col + b.mind.col - 20) * .3) * w * carry);
-  }
+  // Everyone who worked together gets closer. While history is being written (before you arrive), only the ties that
+  // will matter are kept: people in the same corner of the production, and only people who will still be alive.
+  // That is most of the start-up time saved, and most of the world's weight (Round 29).
+  { const E = [...slotsOf(f)], n = E.length, PS = E.map(x => P(x[0])), TT = PS.map(p => traitSum(p, 'tie') + p.mind.col * .3), arch = archiving(), gone = S.startYear - 84;
+    for (let i = 0; i < n; i++) { const a = PS[i]; if (arch && a.born < gone) continue;
+      for (let j = i + 1; j < n; j++) { const b = PS[j], w = closeness(E[i][1], E[j][1]); if (arch && (w < .5 || b.born < gone)) continue;
+        // repeat collaborators bond faster: a warm tie compounds, a sour one keeps souring
+        const prior = a.ties[b.id] || 0, carry = 1 + Math.abs(prior) / 150;
+        addTie(a, b, (5 + gauss() * 6 + TT[i] + TT[j] - 6) * w * carry); } } }
   if (co) { co.favors[f.dir] = (co.favors[f.dir] || 0) + (q > 55 ? 1 : .3); co.favors[f.prod] = (co.favors[f.prod] || 0) + 1; }
   const ratio = f.total / Math.max(.001, f.cost);
   // several ways to say the same thing, picked by the film so a replay reads the same
@@ -30303,7 +30313,7 @@ function finClick(t) { if (t.dataset.coinv) { const [f, p] = t.dataset.coinv.spl
 // on a newer one. Saves live in this browser (IndexedDB), compressed. Autosaves come on a schedule you choose and
 // the five most recent are kept; up to fifty manual saves sit beside them. Between saves, a short journal of what
 // you did since is kept too, so closing the tab loses nothing.
-const SNAP_V = 2, BUILD_ID = 'b70', MAX_MANUAL = 50, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
+const SNAP_V = 2, BUILD_ID = 'b71', MAX_MANUAL = 50, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
 const AUTO_EVERY = { week: 'Every week', month: 'Every month', half: 'Every six months', year: 'Every year', five: 'Every five years', off: 'Never' };
 let BASE = null;
 const PRIM_NO = Symbol('object');   // marks a baseline field that was an object (compared by hash, not value)   // what the world looked like as it was built, before you arrived: hashes, field by field
@@ -30316,13 +30326,21 @@ const SNAP_SETS = ['people', 'films', 'companies'];
 const KEYIDX = new Map(), KEYS = [];
 function keyId(k) { let i = KEYIDX.get(k); if (i === undefined) { i = KEYS.length; KEYS.push(k); KEYIDX.set(k, i); } return i; }
 // called once the world is built (new game or before a load)
-function snapBaseline() {
+function snapBaseline() { const g = snapBaselineG(); let r; do { r = g.next(); } while (!r.done); return r.value; }
+// the same, a few thousand entities at a time, so the page can draw while it runs at the end of a build
+function* snapBaselineG() {
   const b = { n: {}, h: {}, fk: {}, fh: {}, fv: {}, fs: {}, tk: [], tv: [], sk: [], sig: 0 };
   for (const set of SNAP_SETS) {
     const L = S[set], n = L.length, H = new Uint32Array(n), FK = new Array(n), FH = new Array(n), FV = new Array(n), FS = new Array(n), SO = SK_ORDER();
     for (let i = 0; i < n; i++) {
+      if (i % 1500 === 1499) yield;
       const e = L[i], ks = Object.keys(e), fk = new Uint16Array(ks.length), fh = new Uint32Array(ks.length), fv = new Array(ks.length), fs = new Array(ks.length); let h = 0;
-      for (let j = 0; j < ks.length; j++) { const k = ks[j], v = e[k]; fk[j] = keyId(k); const js = JSON.stringify(v); fh[j] = fnv(js || 'u'); if (v === null || typeof v !== 'object') fv[j] = v; else { fv[j] = PRIM_NO; if (!(set === 'people' && (k === 'ties' || k === 'sk'))) fs[j] = js; } h = (Math.imul(h, 31) + fh[j] + fk[j]) >>> 0; }
+      for (let j = 0; j < ks.length; j++) { const k = ks[j], v = e[k]; fk[j] = keyId(k);
+        // Round 29: plain values are compared by value when saving and a person's ties by their typed arrays, so neither needs
+        // the text-and-hash pass (that was most of the 4 seconds this took); objects keep their exact text for comparison
+        if (v === null || typeof v !== 'object') { fv[j] = v; fh[j] = typeof v === 'number' ? (v * 997 | 0) >>> 0 : typeof v === 'string' ? fnv(v) : v ? 1 : 0; }
+        else { fv[j] = PRIM_NO; if (set === 'people' && k === 'ties') fh[j] = 0; else { const js = JSON.stringify(v) || 'u'; if (set === 'people' && k === 'sk') fh[j] = fnv(js); else { fs[j] = js; fh[j] = (Math.imul(js.length, 2654435761) + js.charCodeAt(js.length >> 1) * 31 + js.charCodeAt(js.length - 1)) >>> 0; } } }
+        h = (Math.imul(h, 31) + fh[j] + fk[j]) >>> 0; }
       H[i] = h; FK[i] = fk; FH[i] = fh; FV[i] = fv; FS[i] = fs; b.sig = (b.sig + h) >>> 0;
       if (set === 'people') { const t = e.ties || {}, tk = Object.keys(t); b.tk[i] = Int32Array.from(tk, Number); b.tv[i] = Float32Array.from(tk, x => t[x]); if (e.sk) b.sk[i] = Float64Array.from(SO, x => e.sk[x] ?? NaN); }
     }
@@ -43923,6 +43941,7 @@ function coFail(c, y, scale) {
 const BOX_MONTH = [.84, .9, 1.02, .84, 1.14, 1.26, 1.32, .96, .66, .84, 1.02, 1.2];   // US monthly shares of the year, ×12
 function demandMul(w) { const x = BOX_MONTH[dateOf(w).getUTCMonth()]; return 1 + (x - 1) * .5; }
 function relCount(m, w) { const D = S.relWk = S.relWk || {}; return D[m + ':' + w] || [0, 0]; }
+const BOXCAL_SWEPT = { S: null, w: null };
 function boxCalendar(f) {
   const D = S.relWk = S.relWk || {};
   const A = S.relAvg = S.relAvg || {};
@@ -43931,7 +43950,10 @@ function boxCalendar(f) {
     if (m === f.m) f.why = { month: +demandMul(f.rel).toFixed(2), rivals: +rival.toFixed(1), usual: +avgR.toFixed(1), k: +k.toFixed(2), econ: +econDemand(m).toFixed(2), state: (S.econ || {}).state || 'normal' };
     A[m] = avgR * .98 + rival * .02; }
   for (const m in f.gross) { const key = m + ':' + f.rel, v = D[key] || [0, 0]; v[1]++; if (f.tier === 1) v[0]++; D[key] = v; }
-  if (S.week % 52 === 0) for (const k in D) if (+k.split(':')[1] < S.week - 8) delete D[k];   // keep only recent weeks
+  // keep only recent weeks. The full sweep runs once per week it applies to; after that, only the keys this film just
+  // touched can be stale (history is written at one fixed week, so the old version swept everything for every film)
+  if (S.week % 52 === 0) { if (BOXCAL_SWEPT.S !== S || BOXCAL_SWEPT.w !== S.week) { BOXCAL_SWEPT.S = S; BOXCAL_SWEPT.w = S.week; for (const k in D) if (+k.split(':')[1] < S.week - 8) delete D[k]; }
+    else if (f.rel < S.week - 8) for (const m in f.gross) delete D[m + ':' + f.rel]; }
 }
 // studios date their films: tentpoles to summer or the holidays, prestige pictures to the autumn awards run, and
 // everyone avoids a weekend already crowded with big films
@@ -81258,7 +81280,7 @@ function viewWorld() {
    <p class="muted">History is written up to the year before your start date, then that final year is simulated so films are mid-production when you arrive. The present day is the main campaign; 1968 and 1995 are historical starts for film buffs. Full history goes back to 1888 and takes longest to build.</p>
    <div class="filters">${sel('nw-year', [[2027, '2027 · Present day (main campaign)'], [1968, '1968 · New Hollywood'], [1995, '1995 · Indie boom'], ['custom', 'Another year…']], UI.nwYear || 2027)}
    <input id="nw-custom" type="number" min="1950" max="2040" value="${UI.nwCustom || 1980}" ${UI.nwYear === 'custom' ? '' : 'hidden'} aria-label="Start year">
-   ${sel('nw-depth', [['full', 'Full history, from 1888 (slowest)'], ['standard', 'Standard, last 40 years'], ['quick', 'Quick, last 20 years (fastest)']], UI.nwDepth || S.depth)}
+   ${sel('nw-depth', [['standard', 'Standard: the last 40 years, plus every real classic (recommended)'], ['full', 'Full: invented films back to 1888 too (about twice as long to build)'], ['quick', 'Quick: the last 20 years (fastest)']], UI.nwDepth || S.depth)}
    <label class="seedl">Seed <input id="nw-seed" type="number" value="${S.seed}"></label>
    <button class="btn primary" id="nw-go">Build world</button></div></details>`;
 }
@@ -82309,7 +82331,12 @@ function advanceWeeks(n) {
   setTimeout(step, 0);
 }
 
+// hand control back to the browser for a moment: a message-channel tick has none of setTimeout's 4 ms minimum
+const BUILD_MC = typeof MessageChannel !== 'undefined' ? new MessageChannel() : null; let BUILD_NEXT = null;
+if (BUILD_MC) BUILD_MC.port1.onmessage = () => { const f = BUILD_NEXT; BUILD_NEXT = null; if (f) f(); };
+function buildYield(f) { if (BUILD_MC && !document.hidden) { BUILD_NEXT = f; BUILD_MC.port2.postMessage(0); } else setTimeout(f, 0); }
 function build(year, seed, depth) {
+  UI.archG = null;
   UI.stack = [];
   newWorld(year, seed, depth);
   setBusy(true, 'Building the world');
@@ -82321,20 +82348,28 @@ function build(year, seed, depth) {
   const bar = (pct, txt) => { if (UI.earlyCC) { const f = $('#buildfill'), t = $('#buildtxt'); if (f) f.style.width = pct.toFixed(1) + '%'; if (t) t.textContent = txt; } else { const f = $('#prog'), t = $('#progtxt'); if (f) f.style.width = pct.toFixed(1) + '%'; if (t) t.textContent = txt; } UI.buildPct = pct; UI.buildTxt = txt; };
   const step = () => {
     if (firstStep && !replay) { firstStep = false; UI.earlyCC = true; UI.tab = 'you'; render(); }
-    if (archiving()) {
-      const prior = S.priorY < S.priorEnd;
-      archiveStep();
-      const pN = a0 - 1888;
+    // work in slices of about 12 ms so the character creator stays smooth while the world is written (Round 29)
+    const t0 = performance.now();
+    do {
+      if (UI.archG) { if (UI.archG.next().done) UI.archG = null; }
+      else if (archiving()) { if (S.priorY < S.priorEnd) archiveStep(); else UI.archG = archiveStepG(); }
+      else if (warming()) tick();
+    } while ((UI.archG || archiving() || warming()) && performance.now() - t0 < 12);
+    if (archiving() || UI.archG) {
+      const prior = S.priorY < S.priorEnd, pN = a0 - 1888;
       bar((S.priorY - 1888 + S.archY - a0) / (pN + aN) * 60, prior ? `Recording the real works of ${S.priorY - 1} and earlier` : `${S.archY - 1} · ${typeof worldTally === 'function' ? worldTally() : S.films.length.toLocaleString() + ' films'} so far`);
-    } else {
-      for (let i = 0; i < 6 && warming(); i++) tick();
-      bar(60 + S.week / total * 40, `Simulating ${S.year} week by week · ${typeof worldTally === 'function' ? worldTally() : S.films.length.toLocaleString() + ' films'}`);
-    }
-    if (archiving() || warming()) setTimeout(step, 0);
+    } else bar(60 + S.week / total * 40, `Simulating ${S.year} week by week · ${typeof worldTally === 'function' ? worldTally() : S.films.length.toLocaleString() + ' films'}`);
+    if (UI.archG || archiving() || warming()) buildYield(step);
     else {
       finishWarm();
       S.log = []; S.me = null; UI.apps = new Set();
-      if (typeof snapBaseline === 'function') snapBaseline();   // what the world looked like before you: saves are the difference
+      // what the world looked like before you (saves are the difference), worked out in slices too
+      if (typeof snapBaselineG === 'function') { const g = snapBaselineG(); const run = () => { const t0 = performance.now(); let r; do { r = g.next(); } while (!r.done && performance.now() - t0 < 12); bar(99.5, 'Taking a picture of the world as you find it'); if (r.done) { BASE = r.value; done(); } else buildYield(run); }; run(); }
+      else done();
+    }
+  };
+  const done = () => {
+    {
       UI.building = false;
       const T = UI.boot, queued = UI.ccQueued, early = UI.earlyCC; UI.boot = null; UI.ccQueued = null; UI.earlyCC = false;
       if (!early) UI.cc = null;
@@ -82444,7 +82479,7 @@ document.addEventListener('input', e => {
   qTimer = setTimeout(() => { const pos = e.target.selectionStart; render(true); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(pos, pos); } }, 180);
 });
 
-{ const sv = loadSave(); bootTarget(sv).catch(() => null).then(t => { UI.boot = t; if (t) build(t.year, t.seed, t.depth); else build(2027, 2027, 'full'); }); }
+{ const sv = loadSave(); bootTarget(sv).catch(() => null).then(t => { UI.boot = t; if (t) build(t.year, t.seed, t.depth); else build(2027, 2027, 'standard'); }); }   // Standard by default since Round 29: about half the wait; Full is in the new-world settings
 
 </script>
 

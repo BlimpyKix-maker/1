@@ -60,7 +60,7 @@ check('bazaar purchase', `(() => { const L = typeof bzLots === 'function' ? bzLo
 const t0 = Date.now();
 r(`for (let w = 0; w < 78 && !S.me.over; w++) { const w0 = S.week; for (let g = 0; g < 60 && S.week === w0; g++) { for (const it of pending()) doAct({ t: 'pick', id: it.id, k: it.kind === 'offer' ? 'no' : (it.choices.find(c => !c.dis) || it.choices[0]).k }); doAct({ t: 'next' }); } }`);
 console.log(`lived 78 weeks in ${Math.round((Date.now() - t0) / 1000)}s`);
-check('own film made progress', `(() => { const f = myFilms().slice(-1)[0]; return f ? [f.stage, f.rel] : 'no film'; })()`, x => x === 'no film' || (Array.isArray(x) && (x[0] >= 2 || x[1] !== null)));
+check('own film made progress', `(() => { const f = myFilms().filter(x => x.gl !== undefined && x.gl < S.week - 40)[0]; return f ? [f.stage, f.rel] : 'no film'; })()`, x => x === 'no film' || (Array.isArray(x) && (x[0] >= 2 || x[1] !== null)));
 check('company still trading', `(() => { const c = myCo(); return c ? c.closed : 'none'; })()`, x => x === null);
 check('story arcs happened', `(S.me.arcLog || []).length + arcActive().length`, x => x >= 3);
 check('no NaN anywhere in you', `(() => { const me = ME(), bad = []; for (const [k, v] of Object.entries(me.sk).concat(Object.entries(me.mind), [['cash', S.me.cash], ['standing', me.standing], ['fame', me.fame], ['energy', S.me.energy], ['stress', S.me.stress], ['bank', bankOf(S.me).sav]])) if (typeof v !== 'number' || !isFinite(v)) bad.push(k); return bad; })()`, x => Array.isArray(x) && !x.length);

@@ -83,6 +83,7 @@ function coFail(c, y, scale) {
 const BOX_MONTH = [.84, .9, 1.02, .84, 1.14, 1.26, 1.32, .96, .66, .84, 1.02, 1.2];   // US monthly shares of the year, ×12
 function demandMul(w) { const x = BOX_MONTH[dateOf(w).getUTCMonth()]; return 1 + (x - 1) * .5; }
 function relCount(m, w) { const D = S.relWk = S.relWk || {}; return D[m + ':' + w] || [0, 0]; }
+const BOXCAL_SWEPT = { S: null, w: null };
 function boxCalendar(f) {
   const D = S.relWk = S.relWk || {};
   const A = S.relAvg = S.relAvg || {};
@@ -91,7 +92,10 @@ function boxCalendar(f) {
     if (m === f.m) f.why = { month: +demandMul(f.rel).toFixed(2), rivals: +rival.toFixed(1), usual: +avgR.toFixed(1), k: +k.toFixed(2), econ: +econDemand(m).toFixed(2), state: (S.econ || {}).state || 'normal' };
     A[m] = avgR * .98 + rival * .02; }
   for (const m in f.gross) { const key = m + ':' + f.rel, v = D[key] || [0, 0]; v[1]++; if (f.tier === 1) v[0]++; D[key] = v; }
-  if (S.week % 52 === 0) for (const k in D) if (+k.split(':')[1] < S.week - 8) delete D[k];   // keep only recent weeks
+  // keep only recent weeks. The full sweep runs once per week it applies to; after that, only the keys this film just
+  // touched can be stale (history is written at one fixed week, so the old version swept everything for every film)
+  if (S.week % 52 === 0) { if (BOXCAL_SWEPT.S !== S || BOXCAL_SWEPT.w !== S.week) { BOXCAL_SWEPT.S = S; BOXCAL_SWEPT.w = S.week; for (const k in D) if (+k.split(':')[1] < S.week - 8) delete D[k]; }
+    else if (f.rel < S.week - 8) for (const m in f.gross) delete D[m + ':' + f.rel]; }
 }
 // studios date their films: tentpoles to summer or the holidays, prestige pictures to the autumn awards run, and
 // everyone avoids a weekend already crowded with big films

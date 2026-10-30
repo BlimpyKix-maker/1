@@ -333,6 +333,27 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 29: side and back views, new shoes, and loading in half the time
+
+- **Views** (`src/avatar4.js`): `figSideSVG(L, age, phase)` draws the avatar in profile (eight walking frames; the
+  planted foot meets the floor); the back view is the front body with `FIG_POSE.back` (heels instead of toes) and
+  `figBackOverlay` (back of the head, long hair down the back). In the room, walking uses the side frames; the desk,
+  window, shelf, records and piano use the back view (`t.back` in `av3Targets`); held props are hidden from behind.
+- **Shoes** (`shoeProfile` / `figShoe` in `src/figure.js`): drawn in profile, turned out and foreshortened when
+  standing; the same shoe at full length in the side view.
+- **Loading** (measured in Chromium, the default new world): 34.5 s → 16 s to a ready world, and the character
+  creator stays smooth while it builds (frames drawn during the build up from 284 to about 1,000).
+  - The build runs in ~12 ms slices (`archiveStepG` yields after each city; `snapBaselineG` after 1,500 entities;
+    `buildYield` uses a MessageChannel, not setTimeout's 4 ms minimum).
+  - While history is written, ties are only kept between people in the same corner of a production and who will be
+    alive at the start (`release` in index.html): the O(n²) crew pairs were the biggest single cost.
+  - `boxCalendar` swept its whole calendar for every historical film (history runs at one week); it now sweeps once
+    per week, with the same result. `gcraft` has a string-free cache; the yearly pool filter works in place.
+  - `snapBaseline` no longer stringifies and hashes plain values and ties (saves compare those by value).
+  - The default new world is **Standard** (the last 40 years plus every real classic); Full is in the new-world
+    settings. Full builds in about 23 s. Saves keep their own depth. `BUILD_ID` is now b71 (the world changed).
+  - Shipping a prebuilt world was measured and ruled out: the full world serializes to 325 MB (127 MB gzipped).
+
 ## Round 28: originals instead of skipped sequels; the avatar walks, sits and lies down
 
 - **Originals** (`src/world2.js`): when a hit doesn't get a sequel, its studio sometimes greenlights an original in

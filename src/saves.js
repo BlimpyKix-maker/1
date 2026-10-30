@@ -5,7 +5,7 @@
 // on a newer one. Saves live in this browser (IndexedDB), compressed. Autosaves come on a schedule you choose and
 // the five most recent are kept; up to fifty manual saves sit beside them. Between saves, a short journal of what
 // you did since is kept too, so closing the tab loses nothing.
-const SNAP_V = 2, BUILD_ID = 'b70', MAX_MANUAL = 50, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
+const SNAP_V = 2, BUILD_ID = 'b71', MAX_MANUAL = 50, MAX_AUTO = 3, JOURNAL_KEY = 'applebox-journal-v1', AUTO_PREF = 'applebox-autosave';
 const AUTO_EVERY = { week: 'Every week', month: 'Every month', half: 'Every six months', year: 'Every year', five: 'Every five years', off: 'Never' };
 let BASE = null;
 const PRIM_NO = Symbol('object');   // marks a baseline field that was an object (compared by hash, not value)   // what the world looked like as it was built, before you arrived: hashes, field by field
@@ -18,13 +18,21 @@ const SNAP_SETS = ['people', 'films', 'companies'];
 const KEYIDX = new Map(), KEYS = [];
 function keyId(k) { let i = KEYIDX.get(k); if (i === undefined) { i = KEYS.length; KEYS.push(k); KEYIDX.set(k, i); } return i; }
 // called once the world is built (new game or before a load)
-function snapBaseline() {
+function snapBaseline() { const g = snapBaselineG(); let r; do { r = g.next(); } while (!r.done); return r.value; }
+// the same, a few thousand entities at a time, so the page can draw while it runs at the end of a build
+function* snapBaselineG() {
   const b = { n: {}, h: {}, fk: {}, fh: {}, fv: {}, fs: {}, tk: [], tv: [], sk: [], sig: 0 };
   for (const set of SNAP_SETS) {
     const L = S[set], n = L.length, H = new Uint32Array(n), FK = new Array(n), FH = new Array(n), FV = new Array(n), FS = new Array(n), SO = SK_ORDER();
     for (let i = 0; i < n; i++) {
+      if (i % 1500 === 1499) yield;
       const e = L[i], ks = Object.keys(e), fk = new Uint16Array(ks.length), fh = new Uint32Array(ks.length), fv = new Array(ks.length), fs = new Array(ks.length); let h = 0;
-      for (let j = 0; j < ks.length; j++) { const k = ks[j], v = e[k]; fk[j] = keyId(k); const js = JSON.stringify(v); fh[j] = fnv(js || 'u'); if (v === null || typeof v !== 'object') fv[j] = v; else { fv[j] = PRIM_NO; if (!(set === 'people' && (k === 'ties' || k === 'sk'))) fs[j] = js; } h = (Math.imul(h, 31) + fh[j] + fk[j]) >>> 0; }
+      for (let j = 0; j < ks.length; j++) { const k = ks[j], v = e[k]; fk[j] = keyId(k);
+        // Round 29: plain values are compared by value when saving and a person's ties by their typed arrays, so neither needs
+        // the text-and-hash pass (that was most of the 4 seconds this took); objects keep their exact text for comparison
+        if (v === null || typeof v !== 'object') { fv[j] = v; fh[j] = typeof v === 'number' ? (v * 997 | 0) >>> 0 : typeof v === 'string' ? fnv(v) : v ? 1 : 0; }
+        else { fv[j] = PRIM_NO; if (set === 'people' && k === 'ties') fh[j] = 0; else { const js = JSON.stringify(v) || 'u'; if (set === 'people' && k === 'sk') fh[j] = fnv(js); else { fs[j] = js; fh[j] = (Math.imul(js.length, 2654435761) + js.charCodeAt(js.length >> 1) * 31 + js.charCodeAt(js.length - 1)) >>> 0; } } }
+        h = (Math.imul(h, 31) + fh[j] + fk[j]) >>> 0; }
       H[i] = h; FK[i] = fk; FH[i] = fh; FV[i] = fv; FS[i] = fs; b.sig = (b.sig + h) >>> 0;
       if (set === 'people') { const t = e.ties || {}, tk = Object.keys(t); b.tk[i] = Int32Array.from(tk, Number); b.tv[i] = Float32Array.from(tk, x => t[x]); if (e.sk) b.sk[i] = Float64Array.from(SO, x => e.sk[x] ?? NaN); }
     }
