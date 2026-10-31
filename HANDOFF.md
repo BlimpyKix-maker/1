@@ -333,6 +333,29 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 31: a still, close-up character instead of the room
+
+The request: drop the walking room and set dressing, and put the focus on a sleek avatar whose face, features and accessories are clear and thoughtfully designed.
+- **Headshot** (`src/headshot.js`): a detailed head-and-shoulders portrait.
+  - It is drawn in a 200 × 200 space, with the eyes on y = 86, and shown through `viewBox="16 18 168 168"`.
+  - Look: soft flat colour, gradient light from the upper left, and fine line work only on lids, lashes, brows, nostrils and the lip line.
+  - `hsBuild` takes the face geometry from `csLook` and the sliders.
+  - Every option has its own drawing:
+    - 24 haircuts (`HS_HAIR`: fringe, sides, back mass, texture, extras), with sheen and strands;
+    - 9 facial hair styles, 13 glasses (lens tints and glints), 23 hats (`HS_HAT` colours), 4 earrings, 7 neck items;
+    - 20 tops with their own collars, lapels, zips, pockets and ties, in all 10 patterns (`hsPattern`);
+    - moods (tired lids, worried brows, a grin), age lines, freckles and piercings.
+  - A hat that covers the crown flattens the hair volume.
+- **`csPortraitSVG` is now `hsBustSVG`**, so every head-and-shoulders portrait in the game uses the headshot. The Cartoon and Classic styles are unchanged.
+- **Home card:** `homeSceneSVG` now returns a static card (`hsHomeCard`), with no room, no walking and no furniture.
+  - Left: the large headshot, plus the first pet.
+  - Right: "The look", a sheet with an icon and name for each item worn (top, bottoms, shoes, then any hat, glasses, ears, neck, wrist, bag, face mark, ink), the mood and the colour swatches.
+  - `heroSceneBar` shows the day, the weather and a line from `toonSays`.
+  - The room modules (home, avatar3/4, home2) still load but find no `.me-walk` and stay idle.
+  - `src/soundstage.js` was removed.
+- **Creator:** with the default style, the preview is the 220px headshot with the full figure below it.
+- **Full-figure fix:** in the front view, the hair behind the head is now drawn before the body, so long hair falls behind the shoulders instead of over the chest.
+
 ## Round 30: Call Sheet characters and the room as a set
 
 The request: a fresh character design matching the tone of the game, with the room and accessories to match.

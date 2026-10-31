@@ -54,7 +54,7 @@ function csHeadFront(o, K, uid, hx, hy) {
   const { L, C, G, d, age, mood } = K, rx = G.rx, ry = G.ry, jw = rx * G.jaw, H = CS_HAIR[L.hair] || CS_HAIR[2];
   const face = `M${n2(hx - rx)} ${n2(hy - 1)}C${n2(hx - rx)} ${n2(hy - ry * 1.08)} ${n2(hx + rx)} ${n2(hy - ry * 1.08)} ${n2(hx + rx)} ${n2(hy - 1)}C${n2(hx + rx)} ${n2(hy + ry * .5)} ${n2(hx + jw)} ${n2(hy + ry * .86)} ${n2(hx)} ${n2(hy + ry + G.chin * .8)}C${n2(hx - jw)} ${n2(hy + ry * .86)} ${n2(hx - rx)} ${n2(hy + ry * .5)} ${n2(hx - rx)} ${n2(hy - 1)}Z`;
   // hair that falls behind the head and shoulders
-  csHairBack(o, K, hx, hy, 'front');
+  if (!K._hb) csHairBack(o, K, hx, hy, 'front');
   // ears
   const es = 1 + d('fEar') * .2;
   for (const s of [-1, 1]) o.push(`<ellipse cx="${n2(hx + s * (rx + .4))}" cy="${n2(hy + 1.4)}" rx="${n2(2.2 * es)}" ry="${n2(3.3 * es)}" fill="${s > 0 ? C.skinS : C.skin}"/>`);
@@ -295,6 +295,7 @@ function csFigure(o, K, uid, opts = {}) {
   const puff = top === 17 ? 2.4 : 0, hem = CS_LONGTOP.has(top) ? (top === 10 ? 168 : 160) - (sit ? 30 : 0) : hipY + 5, flare = top === 10 ? (sit ? 8 : 12) : top === 18 ? 7 : 0;
   // the floor shadow
   o.push(`<ellipse cx="${cx}" cy="${sit ? 176 : 225}" rx="${n2(G.hp + 13)}" ry="3" fill="#120E22" opacity=".18"/>`);
+  if (view !== 'back') { csHairBack(o, K, cx, 31, 'front'); K._hb = 1; }   // long hair falls behind the shoulders, not over the chest
   const arms = csArms(o, K, cx, view, opts.arms || null);
   if (L.bag === 6 && view !== 'back') o.push(`<g transform="rotate(14 ${cx + 8} 110)"><path d="M${cx + 2} 52Q${cx + 13} 48 ${cx + 15} 62L${cx + 19} 132Q${cx + 25} 154 ${cx + 9} 160Q${cx - 7} 154 ${cx} 132Z" fill="#2B2B2B"/></g>`);
   if (view === 'back') csHairBack(o, K, cx, 31, 'never');
