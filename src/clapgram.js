@@ -49,7 +49,7 @@ function cgFill(t, id, r) {
   const M = S.me, mates = aliveKnown().filter(x => x !== id), mate = mates.length ? '@' + cgHandle(P(mates[Math.floor(r() * mates.length)])).slice(1) : '@everyone';
   return t.replace('{city}', hubName(M.hub)).replace('{mate}', mate).replace('{day}', DAYS7[Math.floor(r() * 7)]).replace('{n}', 2 + Math.floor(r() * 30)).replace('{m}', 30 + Math.floor(r() * 30)).replace('{genre}', (Object.keys(AMB)[Math.floor(r() * Object.keys(AMB).length)] || 'drama').toLowerCase()).replace('{place}', CG_PLACES[Math.floor(r() * CG_PLACES.length)]).replace('{y}', S.year - 5 - Math.floor(r() * 20));
 }
-function cgHandle(p) { return '@' + p.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, '').slice(0, 16); }
+function cgHandle(p) { return '@' + String((p && p.name) || 'someone').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, '').slice(0, 16); }
 function cgFollowers(p) { const f = p.fame || 0; return Math.round(120 + f * f * 40 + p.standing * 25 + (hashRand(p.id * 13)() * 300)); }
 function cgFmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : String(n); }
 // what everyone posted, built from their lives and their work
@@ -88,10 +88,13 @@ function cgPhoto(x, size = 'big') {
   return `<div class="cg-ph ${size} st-${K[4] || 'clean'}" style="background:linear-gradient(${ang}deg,${g[0]},${g[1]})">${size === 'big' ? bits : ''}<span class="cg-em">${K[0]}</span><span class="cg-cap">${esc(cap)}</span></div>`;
 }
 function cgPost(x) {
+  try { return cgPost1(x); } catch (e) { return ''; }   // one odd post never takes the whole feed down
+}
+function cgPost1(x) {
   const M = S.me;
   if (x.ad) return `<article class="cg-post"><header><span class="cg-av">🛍️</span><div><b>${esc(x.ad)}</b> <span class="muted small">Sponsored</span></div></header>${cgPhoto(x)}<p>${esc(x.t)}</p><p class="small muted">${cgComment('ad', hashRand(x.w * 3), '')}</p></article>`;
-  const who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? S.companies[x.co].name : who.name;
-  const handle = x.co !== undefined ? '@' + S.companies[x.co].name.toLowerCase().replace(/[^a-z]+/g, '') : cgHandle(who);
+  const who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? String((S.companies[x.co] || {}).name || 'A studio') : String((who && who.name) || 'Someone');
+  const handle = x.co !== undefined ? '@' + String((S.companies[x.co] || {}).name || 'studio').toLowerCase().replace(/[^a-z]+/g, '') : cgHandle(who);
   const likes = cgLikes(x) + ((M.liked || {})[x.id] ? 1 : 0), r = hashRand(x.id.length * 131 + (x.who || 0) + x.w);
   const com = x.mine ? (x.comments || []) : aliveKnown().filter(id => id !== x.who).slice(0, 12).filter(() => r() < .25).slice(0, 3).map(id => [id, cgComment(x.k, r, cgHandle(P(x.who || id)).slice(1))]);
   return `<article class="cg-post">

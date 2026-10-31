@@ -212,6 +212,7 @@ function labWeek() {
   if (q) { meet(q.id, `Your mentor at ${L[1]}`, 14); trust(q.id, 8); }
   const out = [];
   if (x.k === 'tvfellow' || x.k === 'scrlab') out.push('Two agents have asked for your script.');
+  M.fol = M.fol || {};
   if (['accel'].includes(x.k)) { for (const k of ['vidwire', 'blip']) M.fol[k] = (M.fol[k] || 0) * 1.3 + 2000; out.push('The platform puts you on its front page for a week.'); }
   if (x.k === 'podfellow') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.25 + 800; out.push('The broadcaster airs your pilot.'); }
   if (x.k === 'showcase' || x.k === 'songcamp') { M.fol.spinly = (M.fol.spinly || 0) * 1.2 + 500; out.push('A song from the week starts doing numbers.'); }
@@ -299,3 +300,6 @@ function pathsApp() {
 OS_EXTRA.paths = ['🧭', 'Paths', 'Your ladders in every field, the big deals on the way up, and labs and fellowships to apply to'];
 OS_VIEWS.paths = () => pathsApp();
 { const g = OS_GROUPS.find(x => x[0] === 'You'); if (g && !g[1].includes('paths')) g[1].unshift('paths'); }
+// Every career has a follower record, even one that has never posted: a dozen places add to it and assume it's there
+// (finishing a lab used to freeze the week when it wasn't).
+{ const _da = doAct; doAct = function (a) { if (typeof S !== 'undefined' && S.me && (!S.me.fol || typeof S.me.fol !== 'object')) S.me.fol = {}; return _da.apply(this, arguments); }; }

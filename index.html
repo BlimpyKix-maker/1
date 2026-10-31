@@ -31098,7 +31098,7 @@ function cgFill(t, id, r) {
   const M = S.me, mates = aliveKnown().filter(x => x !== id), mate = mates.length ? '@' + cgHandle(P(mates[Math.floor(r() * mates.length)])).slice(1) : '@everyone';
   return t.replace('{city}', hubName(M.hub)).replace('{mate}', mate).replace('{day}', DAYS7[Math.floor(r() * 7)]).replace('{n}', 2 + Math.floor(r() * 30)).replace('{m}', 30 + Math.floor(r() * 30)).replace('{genre}', (Object.keys(AMB)[Math.floor(r() * Object.keys(AMB).length)] || 'drama').toLowerCase()).replace('{place}', CG_PLACES[Math.floor(r() * CG_PLACES.length)]).replace('{y}', S.year - 5 - Math.floor(r() * 20));
 }
-function cgHandle(p) { return '@' + p.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, '').slice(0, 16); }
+function cgHandle(p) { return '@' + String((p && p.name) || 'someone').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z]+/g, '').slice(0, 16); }
 function cgFollowers(p) { const f = p.fame || 0; return Math.round(120 + f * f * 40 + p.standing * 25 + (hashRand(p.id * 13)() * 300)); }
 function cgFmt(n) { return n >= 1e6 ? (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M' : n >= 1e4 ? Math.round(n / 1e3) + 'K' : n >= 1e3 ? (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K' : String(n); }
 // what everyone posted, built from their lives and their work
@@ -31137,10 +31137,13 @@ function cgPhoto(x, size = 'big') {
   return `<div class="cg-ph ${size} st-${K[4] || 'clean'}" style="background:linear-gradient(${ang}deg,${g[0]},${g[1]})">${size === 'big' ? bits : ''}<span class="cg-em">${K[0]}</span><span class="cg-cap">${esc(cap)}</span></div>`;
 }
 function cgPost(x) {
+  try { return cgPost1(x); } catch (e) { return ''; }   // one odd post never takes the whole feed down
+}
+function cgPost1(x) {
   const M = S.me;
   if (x.ad) return `<article class="cg-post"><header><span class="cg-av">🛍️</span><div><b>${esc(x.ad)}</b> <span class="muted small">Sponsored</span></div></header>${cgPhoto(x)}<p>${esc(x.t)}</p><p class="small muted">${cgComment('ad', hashRand(x.w * 3), '')}</p></article>`;
-  const who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? S.companies[x.co].name : who.name;
-  const handle = x.co !== undefined ? '@' + S.companies[x.co].name.toLowerCase().replace(/[^a-z]+/g, '') : cgHandle(who);
+  const who = x.mine ? ME() : x.co !== undefined ? null : P(x.who), name = x.co !== undefined ? String((S.companies[x.co] || {}).name || 'A studio') : String((who && who.name) || 'Someone');
+  const handle = x.co !== undefined ? '@' + String((S.companies[x.co] || {}).name || 'studio').toLowerCase().replace(/[^a-z]+/g, '') : cgHandle(who);
   const likes = cgLikes(x) + ((M.liked || {})[x.id] ? 1 : 0), r = hashRand(x.id.length * 131 + (x.who || 0) + x.w);
   const com = x.mine ? (x.comments || []) : aliveKnown().filter(id => id !== x.who).slice(0, 12).filter(() => r() < .25).slice(0, 3).map(id => [id, cgComment(x.k, r, cgHandle(P(x.who || id)).slice(1))]);
   return `<article class="cg-post">
@@ -34939,6 +34942,7 @@ function labWeek() {
   if (q) { meet(q.id, `Your mentor at ${L[1]}`, 14); trust(q.id, 8); }
   const out = [];
   if (x.k === 'tvfellow' || x.k === 'scrlab') out.push('Two agents have asked for your script.');
+  M.fol = M.fol || {};
   if (['accel'].includes(x.k)) { for (const k of ['vidwire', 'blip']) M.fol[k] = (M.fol[k] || 0) * 1.3 + 2000; out.push('The platform puts you on its front page for a week.'); }
   if (x.k === 'podfellow') { M.fol.podhaus = (M.fol.podhaus || 0) * 1.25 + 800; out.push('The broadcaster airs your pilot.'); }
   if (x.k === 'showcase' || x.k === 'songcamp') { M.fol.spinly = (M.fol.spinly || 0) * 1.2 + 500; out.push('A song from the week starts doing numbers.'); }
@@ -35026,6 +35030,9 @@ function pathsApp() {
 OS_EXTRA.paths = ['🧭', 'Paths', 'Your ladders in every field, the big deals on the way up, and labs and fellowships to apply to'];
 OS_VIEWS.paths = () => pathsApp();
 { const g = OS_GROUPS.find(x => x[0] === 'You'); if (g && !g[1].includes('paths')) g[1].unshift('paths'); }
+// Every career has a follower record, even one that has never posted: a dozen places add to it and assume it's there
+// (finishing a lab used to freeze the week when it wasn't).
+{ const _da = doAct; doAct = function (a) { if (typeof S !== 'undefined' && S.me && (!S.me.fol || typeof S.me.fol !== 'object')) S.me.fol = {}; return _da.apply(this, arguments); }; }
 // </paths>
 // <art>
 // ---------------- Pictures: Clapgram photos, Bazaar product shots, the sky over your city ----------------
