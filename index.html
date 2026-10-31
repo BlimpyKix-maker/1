@@ -42390,13 +42390,13 @@ const APP_GUIDE = {
 };
 function primerHTML(k) {
   const G = APP_GUIDE[k], M = S.me; if (!G || !M) return '';
-  let auto = false; try { auto = !!G[4](M); } catch (e) {}
+  let auto = false; try { auto = typeof G[4] === 'function' && !!G[4](M); } catch (e) {}
   const open = (UI.primer && UI.primer[k] !== undefined) ? UI.primer[k] : auto, A = osApp(k);
   if (!open) return `<div class="pr-fold"><button class="pr-btn" data-primer="${k}">? How ${esc(A ? A[2] : 'this')} works</button></div>`;
-  return `<div class="pr"><div class="pr-h"><b>How ${esc(A ? A[2] : 'this')} works</b><button class="pr-x" data-primer="${k}" aria-label="Hide">Hide ✕</button></div><div class="pr-g"><div><span>What it's for</span><p>${esc(G[0])}</p></div><div><span>How to use it</span><p>${esc(G[1])}</p></div><div><span>Why it matters</span><p>${esc(G[2])}</p></div></div>${G[3].length ? `<p class="pr-s">${G[3].map(([l, go]) => `<button class="os-btn" data-jump="${go}">${l}</button>`).join(' ')}</p>` : ''}</div>`;
+  return `<div class="pr"><div class="pr-h"><b>How ${esc(A ? A[2] : 'this')} works</b><button class="pr-x" data-primer="${k}" aria-label="Hide">Hide ✕</button></div><div class="pr-g"><div><span>What it's for</span><p>${esc(G[0])}</p></div><div><span>How to use it</span><p>${esc(G[1])}</p></div><div><span>Why it matters</span><p>${esc(G[2])}</p></div></div>${Array.isArray(G[3]) && G[3].length ? `<p class="pr-s">${G[3].map(([l, go]) => `<button class="os-btn" data-jump="${go}">${l}</button>`).join(' ')}</p>` : typeof G[3] === 'string' && G[3] ? `<p class="pr-s"><b>First step:</b> ${esc(G[3])}</p>` : ''}</div>`;
 }
 function primerClick(t) {
-  const k = t.dataset && t.dataset.primer; if (!k) return false; const G = APP_GUIDE[k]; let auto = false; try { auto = !!G[4](S.me); } catch (e) {}
+  const k = t.dataset && t.dataset.primer; if (!k) return false; const G = APP_GUIDE[k]; if (!G) return false; let auto = false; try { auto = typeof G[4] === 'function' && !!G[4](S.me); } catch (e) {}
   const P0 = UI.primer = UI.primer || {}, cur = P0[k] !== undefined ? P0[k] : auto; P0[k] = !cur; render(true); return true;
 }
 { const _op = osPanel; osPanel = function () {
