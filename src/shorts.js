@@ -5,7 +5,7 @@
 // the short festivals select and crown the work of young filmmakers, many of whom go on to direct the features you
 // know, so every director's page can show where they started.
 PLATFORMS.circuit = { name: 'The festival circuit', icon: '🎞️', unit: 'screenings', from: 1900, pay: 0, gate: 0, d: 'Short-film festivals: fees to apply, no money to speak of, and the people who hire directors in the audience.' };
-WORK_TYPES.short = { label: 'Short film', icon: '🎬', subs: ['vstory', 'dact', 'comp'], need: 14, plat: 'circuit', field: 'film', base: 0, eng: 0, conv: 0, cost: 1800, d: 'Write, shoot and cut a film under twenty minutes, on favours and pizza. A year on the festival circuit, then online.' };
+WORK_TYPES.short = { label: 'Short film', icon: '🎬', subs: ['vstory', 'dact', 'comp'], need: 36, plat: 'circuit', field: 'film', base: 0, eng: 0, conv: 0, cost: 1800, d: 'Write, shoot and cut a film under twenty minutes, on favours and pizza. A year on the festival circuit, then online.' };
 DECAY.short = .6;
 // [key, name, hub, founded, tier, kind, month (0-11), Oswald-qualifying, top prize]
 const SHORT_FESTS = [

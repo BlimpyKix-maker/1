@@ -125,7 +125,8 @@ function stageWeek() {
   for (const w of (M.works || []).filter(x => x.run && x.run.open)) {
     const R0 = w.run; R0.wk++;
     w.fill = clamp((w.fill || .5) + (w.q - 62) / 300 - R0.wk * .004 + pgauss() * .05, .05, 1);
-    const sold = Math.round(R0.seats * 8 * w.fill), gross = sold * R0.price, cost = R0.seats * 8 * R0.price * .42, net = Math.round((gross - cost) * .6);
+    // the writer's cut: a royalty on the box office and a share of any profit; a losing week costs them a little of their stake
+    const sold = Math.round(R0.seats * 8 * w.fill), gross = sold * R0.price, cost = R0.seats * 8 * R0.price * .42, prof = gross - cost, net = Math.round(gross * .08 + (prof > 0 ? prof * .15 : prof * .25));
     M.cash += net > 0 ? net - taxOn(net) : net; w.earned = (w.earned || 0) + net; w.units = (w.units || 0) + sold;
     R0.low = w.fill < .7 ? R0.low + 1 : 0; R0.high = w.fill >= .9 ? R0.high + 1 : 0;
     if (R0.high >= 3 && !R0.ext && !pending().some(x => x.kind === 'stageext')) { R0.ext = 1;

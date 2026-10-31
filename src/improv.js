@@ -167,4 +167,6 @@ if (typeof DREAMS !== 'undefined') for (const d of [
   { k: 'warmup', label: 'Studio warm-up comic', role: 'actor', field: 'stage', grp: 'Stage', core: [/^(Theatre|Theater\/Live Events|Television)/, /\b(warm-?up|audience|comed\w*|host)\b/i] },
   { k: 'caster', label: 'Esports caster', role: 'actor', field: 'creator', grp: 'Online', core: [/^(Video Game|Online video|Content Creator)/, /\b(cast\w*|host|commentat\w*|stream\w*|esports?)\b/i] }
 ]) if (!DREAMS.some(x => x.k === d.k)) DREAMS.push(d);
+// the lookup table was built before these were added: register them too, or choosing one of these dreams silently fails
+if (typeof DREAM_BY !== 'undefined') for (const d of DREAMS) if (!DREAM_BY[d.k]) DREAM_BY[d.k] = d;
 if (typeof DREAM_GIGS !== 'undefined') Object.assign(DREAM_GIGS, { drag: ['club', 'special', 'residency', 'webser'], promoter: ['club', 'festset', 'concert'], themepark: ['club', 'spot', 'stage'], warmup: ['taping', 'multicam', 'club'], caster: ['webser', 'audio', 'spot'] });

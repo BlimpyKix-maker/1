@@ -1,0 +1,266 @@
+106 players
+
+== BUGS
+1 players, 3x: throw Cannot read properties of undefined (reading 'spinly') [step]
+      if (x.k === 'showcase' || x.k === 'songcamp') { M.fol.spinly = (M.fol.spinly || 0) * 1.2 + 500; out.push('A song from the week starts doing numbers.'); } |                                           
+1 players, 3x: stuck []
+
+== ACTIONS (tries, success rate, players)
+selffund               51    0%  14
+festival             2851    6%  106
+found                  78   14%  14
+contest               349   16%  15
+labapply             5094   32%  106
+newscript             570   42%  36
+school:filmba          16   50%  1
+drift                 256   51%  9
+school:music           15   53%  1
+school:drama           13   54%  1
+school:games            7   57%  1
+trade                  96   57%  14
+school:animation        5   60%  1
+school:film             6   67%  1
+school:business         6   67%  1
+dream                  10   80%  5
+text                 6476   81%  106
+school:journalism       6   83%  1
+shortsubmit          3362   86%  106
+gigpitch             3915   87%  106
+compete              4173   92%  106
+query                 367   93%  101
+make                10416   97%  106
+mail                 8728   99%  106
+reply               10968  100%  106
+focus                 366  100%  106
+enrol:short           121  100%  16
+enrol:cc                1  100%  1
+enrol:ba                1  100%  1
+enrol:mfa               1  100%  1
+enrol:union             1  100%  1
+school:musicma          2  100%  1
+
+== PLAYERS (dream/style: level by year | credits | cash | rung | works | quiet | dec/wk | broke)
+#  0 director/grinder               L 2>3>5>5    cr   1 $   434633 rung 1>3>4>4  w   4 q   0% d 5.23 b 0%
+#  1 actor/social                   L 1>2>4>4    cr   2 $   228955 rung 1>2>3>3  w   1 q   0% d 4.68 b 0%
+#  2 writer/maker                   L 1>3>5>6    cr   4 $  1776518 rung 1>3>4>5  w  40 q   0% d 4.73 b 0%
+#  3 producer/scholar               L 2>5>5>6    cr   7 $  1132932 rung 1>4>4>5  w   0 q   0% d 5.83 b 5%
+#  4 dp/festival                    L 1>3>5>6    cr  12 $   400034 rung 2>3>4>5  w  47 q   0% d 4.97 b 5%
+#  5 editor/contester               L 1>4>5>6    cr  11 $  1185751 rung 2>3>4>5  w   9 q   0% d 5.40 b 5%
+#  6 designer/mogul                 L 0>2>4>5    cr  10 $   123673 rung 1>2>3>4  w   2 q   0% d 5.11 b 0%
+#  7 costume/drifter                L 1>3>4>5    cr   5 $    74569 rung 2>3>3>4  w   3 q   0% d 5.30 b 3%
+#  8 composer/cautious              L 1>3>5>5    cr   2 $   147993 rung 2>3>4>4  w   3 q   0% d 4.75 b 0%
+#  9 casting/switcher               L 2>3>4>5    cr   4 $   181620 rung 2>3>3>4  w  13 q   0% d 5.16 b 4%
+# 10 sound/grinder                  L 3>3>3>4    cr   1 $   141164 rung 3>3>3>3  w   2 q   0% d 4.88 b 0%
+# 11 vfx/social                     L 3>4>5>5    cr   5 $   259580 rung 3>3>4>4  w   2 q   0% d 4.92 b 0%
+# 12 makeup/maker                   L 2>3>5>5    cr   4 $   641489 rung 2>3>4>1  w  38 q   0% d 4.50 b 0%
+# 13 stunts/scholar                 L 3>4>5>5    cr   4 $   346353 rung 3>3>4>4  w   3 q   0% d 4.86 b 4%
+# 14 ad/festival                    L 0>3>5>5    cr   2 $   130879 rung 1>3>4>4  w  53 q   0% d 4.46 b 4%
+# 15 animator/contester             L 2>2>5>5    cr   7 $   508313 rung 2>2>4>4  w  17 q   0% d 5.26 b 0%
+# 16 doc/mogul                      L 1>2>4>5    cr   9 $   365221 rung 1>2>3>4  w   3 q   0% d 5.15 b 0%
+# 17 showrunner/drifter             L 1>4>5>5    cr   4 $    71499 rung 1>3>4>4  w   0 q   0% d 5.52 b 5%
+# 18 host/cautious                  L 1>2>5>5    cr   4 $   302483 rung 2>2>4>4  w   0 q   0% d 5.46 b 0%
+# 19 voice/switcher                 L 2>4>5>5    cr   3 $  1143898 rung 2>3>4>4  w  15 q   0% d 5.25 b 0%
+# 20 exec/grinder                   L 1>3>5>6    cr   4 $   175894 rung 2>3>4>5  w   0 q   0% d 4.93 b 0%
+# 21 agent/social                   L 1>3>4>5    cr   1 $   144154 rung 2>3>3>4  w   5 q   0% d 4.80 b 0%
+# 22 critic/maker                   L 2>3>4>5    cr   2 $   514837 rung 2>3>3>4  w  42 q   0% d 4.26 b 0%
+# 23 programmer/scholar             L 2>4>4>5    cr   0 $   151541 rung 2>3>3>4  w   3 q   0% d 5.35 b 4%
+# 24 distributor/festival           L 2>3>3>4    cr   0 $    54235 rung 2>3>3>3  w  42 q   0% d 4.31 b 4%
+# 25 publicist/contester            L 3>5>5>5    cr   4 $   712488 rung 1>1>1>1  w  26 q   0% d 4.88 b 5%
+# 26 lawyer/mogul                   L 1>4>5>5    cr   4 $    79327 rung 1>3>4>4  w   0 q   0% d 4.26 b 4%
+# 27 locations/drifter              L 1>2>3>4    cr   1 $    23594 rung 1>2>3>3  w   4 q   0% d 5.11 b 16%
+# 28 mogul/cautious                 L 2>5>5>6    cr   8 $   121962 rung 2>4>4>5  w   4 q   0% d 5.39 b 0%
+# 29 singer/switcher                L 3>5>5>5    cr   0 $   697675 rung 3>4>4>4  w  21 q   0% d 4.55 b 0%
+# 30 rapper/grinder                 L 1>3>3>3    cr   1 $    69215 rung 1>3>3>3  w   3 q   0% d 5.40 b 0%
+# 31 beatmaker/social               L 2>3>3>4    cr   2 $    64418 rung 1>3>3>3  w   3 q   0% d 5.00 b 0%
+# 32 dj/maker                       L 1>3>2>2    cr   0 $   936985 rung 1>3>2>2  w  40 q   0% d 4.19 b 0%
+# 33 musician/scholar               L 2>4>5>5    cr   1 $   428524 rung 2>3>4>4  w   3 q   0% d 4.93 b 8%
+# 34 mvdir/festival                 L 1>3>5>5    cr   0 $   221908 rung 2>3>4>4  w  38 q   0% d 4.21 b 3%
+# 35 aandr/contester                L 3>3>3>4    cr   0 $   890054 rung 3>3>3>3  w  12 q   0% d 4.62 b 0%
+# 36 youtuber/mogul                 L 2>3>4>5    cr   3 $   257773 rung 2>3>3>4  w   5 q   0% d 5.25 b 0%
+# 37 shortform/drifter              L 1>3>4>5    cr   3 $    86911 rung 2>3>3>4  w   1 q   0% d 4.74 b 4%
+# 38 streamer/cautious              L 2>3>4>5    cr   1 $    31247 rung 2>3>3>4  w   3 q   0% d 4.49 b 0%
+# 39 podcaster/switcher             L 2>4>4>5    cr   2 $   640815 rung 1>3>3>4  w  13 q   0% d 4.91 b 0%
+# 40 radio/grinder                  L 2>4>4>5    cr   2 $    84870 rung 2>3>3>4  w   3 q   0% d 5.10 b 0%
+# 41 audiodrama/social              L 1>2>3>4    cr   0 $    13027 rung 2>2>3>3  w   3 q   0% d 4.94 b 0%
+# 42 stagedir/maker                 L 2>3>3>4    cr   4 $   153167 rung 2>3>3>3  w  36 q   0% d 4.50 b 0%
+# 43 playwright/scholar             L 2>4>4>5    cr   3 $   141622 rung 2>3>3>4  w   0 q   0% d 4.86 b 3%
+# 44 stageactor/festival            L 2>3>3>4    cr   0 $    48764 rung 2>3>3>3  w  44 q   0% d 4.51 b 0%
+# 45 musicaltheatre/contester       L 2>3>3>3    cr   0 $   423572 rung 2>3>3>3  w  11 q   0% d 5.01 b 4%
+# 46 choreographer/mogul            L 0>0>1>2    cr   0 $    81764 rung 2>2>2>2  w   1 q   0% d 4.12 b 3%
+# 47 standup/drifter                L 2>3>4>5    cr   1 $   125568 rung 2>3>3>4  w   0 q   0% d 4.70 b 0%
+# 48 stagetech/cautious             L 1>1>2>4    cr   4 $    80302 rung 1>1>2>3  w   1 q   0% d 5.07 b 0%
+# 49 magician/switcher              L 2>3>4>4    cr   0 $  1330967 rung 2>3>3>3  w  13 q   0% d 4.81 b 0%
+# 50 circus/grinder                 L 1>4>4>5    cr   2 $   165765 rung 2>3>3>4  w   0 q   0% d 4.56 b 0%
+# 51 gamedev/social                 L 1>2>3>3    cr   1 $    93112 rung 2>2>3>3  w   2 q   0% d 4.56 b 0%
+# 52 stylist/maker                  L 2>3>3>5    cr   3 $   686382 rung 2>3>3>4  w  23 q   0% d 4.79 b 0%
+# 53 photographer/scholar           L 1>3>4>5    cr   4 $   182997 rung 1>3>3>4  w   3 q   0% d 5.32 b 8%
+# 54 puppeteer/festival             L 1>3>4>5    cr   1 $    99458 rung 1>3>3>4  w  48 q   0% d 4.10 b 3%
+# 62 director/scholar/short         L 3>5>5>5    cr   8 $   362775 rung 3>4>4>4  w   0 q   0% d 5.31 b 0%
+# 63 director/scholar/cc            L 2>4>5>5    cr  13 $   275686 rung 2>3>4>4  w   1 q   0% d 5.76 b 4%
+# 64 director/scholar/ba            L 3>5>5>6    cr  12 $   597159 rung 3>4>4>5  w   6 q   0% d 5.74 b 7%
+# 65 director/scholar/mfa           L 2>4>5>5    cr   2 $   751719 rung 2>3>4>4  w   4 q   0% d 5.49 b 7%
+# 66 ad/scholar/union               L 1>2>3>3    cr   0 $    30588 rung 1>1>1>3  w   0 q   0% d 4.82 b 0%
+# 67 director/scholar/film          L 2>3>4>5    cr   3 $   411605 rung 2>3>3>4  w   4 q   0% d 5.50 b 0%
+# 68 writer/scholar/filmba          L 2>3>4>5    cr   2 $   202518 rung 2>3>3>4  w   3 q   0% d 4.92 b 0%
+# 69 musician/scholar/music         L 2>3>5>5    cr   1 $   390928 rung 1>3>4>4  w   6 q   0% d 4.73 b 0%
+# 70 composer/scholar/musicma       L 2>5>5>6    cr  12 $   944977 rung 2>4>4>5  w   6 q   0% d 5.12 b 13%
+# 71 stageactor/scholar/drama       L 2>3>3>3    cr   2 $   179646 rung 1>3>3>3  w   2 q   0% d 4.92 b 0%
+# 72 animator/scholar/animation     L 1>1>1>2    cr   2 $     3712 rung 2>2>2>2  w   6 q   0% d 5.46 b 6%
+# 73 gamedev/scholar/games          L 2>3>5>5    cr   2 $   368740 rung 2>3>4>4  w   4 q   0% d 4.87 b 0%
+# 74 critic/scholar/journalism      L 1>4>5>6    cr   2 $  2339871 rung 2>3>4>5  w   2 q   0% d 5.02 b 13%
+# 75 producer/scholar/business      L 2>3>5>6    cr   4 $   896845 rung 2>3>4>5  w   7 q   0% d 6.00 b 0%
+# 76 director/festival              L 2>5>5>5    cr  13 $   266231 rung 2>4>4>4  w  21 q   0% d 5.09 b 4%
+# 77 doc/festival                   L 2>3>5>5    cr   6 $    44607 rung 2>3>4>4  w  23 q   0% d 4.53 b 0%
+# 78 animator/festival              L 2>3>5>5    cr   3 $    87624 rung 2>3>4>4  w  30 q   0% d 4.35 b 0%
+# 79 writer/festival                L 3>5>5>6    cr  10 $   212590 rung 3>4>4>5  w  23 q   0% d 4.66 b 0%
+# 80 dp/festival                    L 2>5>5>6    cr  12 $  1145766 rung 2>4>4>5  w  30 q   0% d 4.79 b 0%
+# 81 editor/festival                L 3>5>5>6    cr  17 $   326111 rung 3>4>4>5  w  24 q   0% d 4.63 b 0%
+# 82 mvdir/festival                 L 1>3>3>4    cr   0 $   302470 rung 1>3>3>3  w  21 q   0% d 4.21 b 0%
+# 83 producer/festival              L 2>5>5>5    cr   5 $   373935 rung 2>4>4>4  w  24 q   0% d 5.00 b 2%
+# 84 writer/contester               L 2>5>5>6    cr  11 $  2497296 rung 1>4>4>5  w  14 q   0% d 5.07 b 0%
+# 85 showrunner/contester           L 2>4>5>6    cr   2 $   806370 rung 2>3>4>5  w  14 q   0% d 5.32 b 0%
+# 86 playwright/contester           L 2>2>3>3    cr   1 $   376516 rung 2>2>3>3  w  10 q   0% d 4.88 b 3%
+# 87 singer/contester               L 0>1>3>3    cr   1 $   209799 rung 2>2>3>3  w  18 q   0% d 5.15 b 0%
+# 88 podcaster/contester            L 1>3>3>5    cr   2 $   268904 rung 2>3>3>4  w  18 q   0% d 4.94 b 0%
+# 89 youtuber/contester             L 2>3>4>5    cr   2 $    35844 rung 1>1>3>4  w  12 q   0% d 5.12 b 0%
+# 90 standup/contester              L 1>2>2>3    cr   1 $   156548 rung 2>2>2>3  w  13 q   0% d 4.38 b 0%
+# 91 actor/contester                L 1>3>5>5    cr   3 $   280432 rung 1>3>4>4  w  22 q   0% d 5.23 b 0%
+# 92 composer/contester             L 2>2>4>5    cr   4 $   187966 rung 2>2>3>4  w  17 q   0% d 5.09 b 0%
+# 93 dp/contester                   L 1>4>5>5    cr   3 $   653868 rung 2>3>4>4  w  20 q   0% d 4.94 b 4%
+# 94 writer/scholar/labs            L 3>5>5>6    cr   6 $  1089399 rung 3>4>4>5  w   2 q   0% d 5.25 b 1%
+# 95 director/scholar/labs          L 1>4>5>5    cr   8 $   194811 rung 1>3>4>4  w   5 q   0% d 5.48 b 4%
+# 96 actor/scholar/labs             L 3>5>5>5    cr   8 $  1005510 rung 3>4>4>4  w   6 q   0% d 5.63 b 0%
+# 97 singer/scholar/labs            L 2>4>4>6    cr   1 $   704032 rung 2>3>3>5  w   3 q   0% d 4.82 b 0%
+# 98 composer/scholar/labs          L 3>5>5>6    cr  14 $   922697 rung 3>4>4>5  w   1 q   0% d 5.10 b 0%
+# 99 youtuber/scholar/labs          L 1>5>6>6    cr   4 $   448657 rung 2>4>5>5  w   3 q   0% d 5.40 b 0%
+#100 podcaster/scholar/labs         L 2>4>5>5    cr   0 $   407513 rung 1>3>4>4  w   1 q   0% d 5.38 b 0%
+#101 playwright/scholar/labs        L 2>4>5>5    cr   3 $   483715 rung 2>3>4>4  w   1 q   0% d 5.05 b 7%
+#102 producer/scholar/labs          L 2>3>3>5    cr   1 $    44615 rung 1>3>3>4  w   1 q   0% d 5.11 b 0%
+#103 actor/grinder                  L 3>4>5>5    cr   7 $   232852 rung 3>3>4>4  w   2 q   0% d 5.36 b 0%
+#104 producer/grinder               L 1>3>5>5    cr   8 $   352687 rung 2>3>4>4  w   4 q   0% d 5.09 b 0%
+#105 rapper/grinder                 L 2>3>4>4    cr   0 $    30587 rung 2>3>3>3  w   1 q   0% d 5.02 b 0%
+#106 actor/mogul                    L 0>2>4>4    cr   6 $    69178 rung 1>2>3>3  w   0 q   0% d 4.92 b 0%
+#107 producer/mogul                 L 0>3>5>5    cr  11 $   322027 rung 1>3>4>4  w   1 q   0% d 5.03 b 0%
+#108 rapper/mogul                   L 1>1>2>4    cr   1 $    28565 rung 2>2>2>3  w   1 q   0% d 4.34 b 0%
+#109 director/drifter               L 1>2>3>4    cr   0 $   142552 rung 2>2>3>3  w   1 q   0% d 4.28 b 0%
+#110 singer/drifter                 L 2>3>5>5    cr   3 $    75134 rung 2>3>4>4  w   7 q   0% d 4.75 b 5%
+#111 streamer/drifter               L 2>3>3>3    cr   2 $    71481 rung 2>3>3>3  w   2 q   0% d 4.99 b 0%
+#112 magician/drifter               L 2>2>3>3    cr   1 $    55173 rung 2>2>3>3  w   0 q   0% d 4.75 b 4%
+
+== PATHS
+school players 14: still enrolled 6, graduated 10, applied 9
+   short      school=null apps=0 {"n":1,"ok":1} | Graduated: short course in directing
+   cc         school=null apps=0 {"n":1,"ok":1} | Graduated: community college certificate in directing
+   ba         school=null apps=0 {"n":1,"ok":1} | Graduated: degree, part-time in directing
+   mfa        school=null apps=0 {"n":1,"ok":1} | Graduated: film school (mfa) in directing; Selected for The Cinematographers Masterclass
+   union      school=null apps=0 {"n":1,"ok":1} | Graduated: union training programme in producing
+   film       school=film apps=1 {"n":6,"ok":4} | Accepted to Southern Cal School of Cinematic Arts; Graduated: MFA in Film, Southern Cal School of Cinematic Arts in directing; Accepted to Southern Cal School of Cinematic Arts
+   filmba     school=null apps=1 {"n":16,"ok":8} | Acquired A bucket from a high-school prom (1976)
+   music      school=music apps=1 {"n":15,"ok":8} | Went home when your oldest friend from school was ill; Moved from Toronto to Hollywood school
+   musicma    school=null apps=1 {"n":2,"ok":2} | Moved from Mumbai to Hollywood school; Graduated: Master of Music (Composition & Scoring), California Arts Institute in music; Graduated: Master of Music (Composition & Scoring), California Arts Institute in music
+   drama      school=drama apps=1 {"n":13,"ok":7} | Moved from Seoul to Hollywood school; Accepted to Westwood School of Theater, Film & Television on a scholarship
+   animation  school=null apps=1 {"n":5,"ok":3} | Moved from Tokyo to Hollywood school; Accepted to Southern Cal School of Cinematic Arts; Graduated: BA in Character Animation, Southern Cal School of Cinematic Arts in effects & sound
+   games      school=games apps=1 {"n":7,"ok":4} | Moved from Lagos to Hollywood school; Accepted to Southern Cal School of Cinematic Arts on a scholarship
+   journalism school=journalism apps=1 {"n":6,"ok":5} | Moved from Rio and São Paulo to New York school; Accepted to Lakeshore School of Journalism; Graduated: MA in Journalism & Audio, Lakeshore School of Journalism in writing
+   business   school=business apps=1 {"n":6,"ok":4} | Moved from Sydney to Hollywood school; Accepted to Southern Cal School of Cinematic Arts on a scholarship; Graduated: MBA (Media & Entertainment), Southern Cal School of Cinematic Arts in producing
+labs: 106 players tried, 101 got in; avg tries 5.5
+festival players 14: shorts made 47,53,42,37,43,48,21,23,30,23,30,24,20,24; short subs 495,503,454,415,448,474,325,344,387,346,366,349,317,343; selected 118,111,43,101,54,69,117,87,95,121,136,73,92,123; feature fests 9/0,2/0,0/0,0/0,0/0,1/0,7/1,6/2,4/1,12/2,8/0,9/1,0/0,6/0
+competitions: 106 players entered 3847; results {"out":2447,"final":451,"runner":188,"mention":569,"win":192}
+works made: {"short":541,"podcast":88,"review":72,"play":47,"song":91,"blip":91,"mv":40,"musical":58,"score":58,"video":72}
+
+== STYLES (quiet weeks, decisions/wk, broke weeks, final level)
+grinder    n=9 quiet 0% dec 5.06 broke 0% level 4.7 over 0
+social     n=6 quiet 0% dec 4.82 broke 0% level 4.2 over 0
+maker      n=6 quiet 0% dec 4.50 broke 0% level 4.5 over 0
+scholar    n=29 quiet 0% dec 5.24 broke 3% level 5.1 over 0
+festival   n=14 quiet 0% dec 4.56 broke 2% level 5.1 over 0
+contester  n=15 quiet 0% dec 5.02 broke 2% level 4.6 over 0
+mogul      n=8 quiet 0% dec 4.77 broke 1% level 4.4 over 0
+drifter    n=9 quiet 0% dec 4.90 broke 4% level 4.3 over 0
+cautious   n=5 quiet 0% dec 5.03 broke 0% level 5.0 over 0
+switcher   n=5 quiet 0% dec 4.94 broke 1% level 4.8 over 0
+
+== OPINIONS (how many players said it)
+ 55  Saw "@ monthly statement | @: # @ you for banking with us#" # times.
+ 53  Saw "@'s birthday | @'s @'s birthday this week# @'re in your inner circle: they'll no" # times.
+ 51  Saw "@ statement: up # | @: # @ over the last four weeks: # @: # a good month#" # times.
+ 45  Kept trying "festival" (#x) and it almost never went through (#).
+ 26  Kept trying "shortsubmit" (#x) and it almost never went through (#).
+ 16  Saw "@ statement: down # | @: # @ over the last four weeks: # @: # @#" # times.
+ 14  Kept trying "labapply" (#x) and it almost never went through (#).
+ 14  Sent shorts to # festivals, never selected.
+ 13  Kept trying "newscript" (#x) and it almost never went through (#).
+ 12  Saw "@: not placed | @ didn't place# @ had a great night anyway#" # times.
+ 10  Saw "@ spot on our podcast? | @ love your show and think our listeners would too# @ h" # times.
+  8  Saw "@ request | @# a production office just asked me for a reference on you# i'm hap" # times.
+  8  Saw "@? | @ fan# @ to make something together? i'll bring my audience# you bring your" # times.
+  7  Saw "@: bond # @ | @ and then they pass you work they hear about# before it's posted#" # times.
+  7  Saw "@ you play a show? | @ have a slot on a @# # guarantee# you keep your merch mone" # times.
+  7  Saw "@: @ request | @ them you were fine# hope that's ok#" # times.
+  6  Saw "@# obviously" # times.
+  5  Saw "@ | a cheque for # in residuals from your television work#" # times.
+  5  Kept trying "found" (#x) and it almost never went through (#).
+  5  Kept trying "selffund" (#x) and it almost never went through (#).
+  5  Saw "@ wins at @ | @ and # @ phone has a lot of new numbers in it by morning#" # times.
+  5  Kept trying "contest" (#x) and it almost never went through (#).
+  5  Saw "@: @ it's posted | @# you snooze you lose#" # times.
+  5  Saw "@ hit the wall | @# @ body has stopped negotiating: # weeks of rest# whatever yo" # times.
+  5  Saw "@: keep or drop? | @ has earned back # of a # advance and last released somethin" # times.
+  4  Never climbed a step on the film ladder.
+  4  Saw "@'s getting to you | @ weeks are blurring together and your jaw aches from clenc" # times.
+  4  Saw "@ at @ | @ screens at @ in @# @ programmers want you there for the q&a#" # times.
+  4  Saw "@: longlisted | @'re on the longlist: # of # entries# @ shortlist comes out # @ " # times.
+  4  Saw "go on…" # times.
+  3  Saw "@ season: @ | @ opens in a few weeks# @ is eligible for @# @ labels are already " # times.
+  3  Saw "@ cost-plus offer | a creator with two hits wants to make their next show with y" # times.
+  3  Saw "@: not longlisted | # of # entries made the longlist# @ wasn't one of them# @ re" # times.
+  3  Saw "i need the full story# now" # times.
+  3  Saw "@: not longlisted | # of # entries made the longlist# @ wasn't one of them# @ ye" # times.
+  3  Saw "@: not longlisted | # of # entries made the longlist# @ wasn't one of them# @ en" # times.
+  2  Saw "wait# tell me everything" # times.
+  2  Saw "@ about @ | @ release "@"; it is everywhere within a week#" # times.
+  2  Saw "@: honourable mention | @ honourable mention# a small line in a long list# but a" # times.
+  1  Saw "@ finale | @ season finale needs a cliffhanger that brings the audience back in " # times.
+  1  Saw "i wish# working# tell me everything after" # times.
+  1  Saw "@' birthday | @'s @'s birthday this week# @'re in your inner circle: they'll not" # times.
+  1  Never climbed a step on the music ladder.
+  1  Saw "not this time# but please ask me again" # times.
+  1  Saw "@: @ engineer | @ engineer: they can take you on# # days a week for about # week" # times.
+  1  Kept trying "trade" (#x) and it almost never went through (#).
+  1  Saw "@ the credit | @# @ one# @ above us is claiming your work on the last job as the" # times.
+  1  Tried to go to school and have nothing to show for it.
+  1  Saw "@ down | @ months of work with hardly a day off# @'re short with people and it s" # times.
+  1  Saw "@ news | @ rates go up # from @# a reminder that turnaround is ten hours# not "t" # times.
+  1  Saw "@: keep or drop? | @ (@) has earned back # of a # advance and last released some" # times.
+  1  Saw "a rough morning | @ night got away from you# @ you are useless# and everybody ca" # times.
+  1  Saw "a mistake | @ tired to think# you forget the call sheet changes# @ notices#" # times.
+  1  Saw "@ statement: down # | @: # @ over the last four weeks: # @: # @ this rate the ac" # times.
+  1  Saw "@: @ manager | @ manager: they can take you on# # days a week for about # weeks#" # times.
+
+== PRAISE
+106  Went from level # to #.
+100  Got into # lab(s).
+ 41  Shorts selected or laurelled: #.
+ 22  Festival selections: #.
+
+== APPS AT THE END (players, still empty, errors, avg text)
+notes            27  100% 0 823
+write            27   56% 0 8112
+studio           27   37% 0 757
+mail             27    0% 0 5633
+jobs             27    0% 0 2499
+trades           27    0% 0 1163
+gea              27    0% 0 4373
+bank             27    0% 0 2012
+flick            27    0% 0 6240
+sweep            27    0% 0 72
+weather          27    0% 0 1869
+ticker           27    0% 0 9093
+cutroom          27    0% 0 315
+store            27    0% 0 3384
+match            27    0% 0 68
+cue              27    0% 0 67
+scramble         27    0% 0 80
+bazaar           27    0% 0 3583
+hilo             27    0% 0 87
+yearq            27    0% 0 74

@@ -354,13 +354,16 @@ function pendingStakes() { return (S.me.phone || []).filter(m => m.topic === 'st
 // email has reply buttons; leave one unanswered for a fortnight and the sender draws their own conclusions.
 const MAIL_STAKES = {
   collab: ['Your next job?', 'Hi {me},\n\nI\'m putting a team together for {film} and I want you on it. Before I go to the agencies: are you in?\n\n{them}'],
-  reference: ['Reference request', 'Hi {me},\n\nA production office just asked me for a reference on you. I\'m happy to give one. How hard do you want me to sell you?\n\n{them}'],
+  reference: ['Reference request', ['Hi {me},\n\nA production office just asked me for a reference on you. I\'m happy to give one. How hard do you want me to sell you?\n\n{them}',
+    'Hi {me},\n\nGot a call about you today, someone checking references before an offer. What do you want me to tell them?\n\n{them}',
+    '{me},\n\nA line producer rang asking what you\'re like to work with. I said I\'d call back. Glowing, honest, or somewhere in between?\n\n{them}',
+    'Hi {me},\n\nYour name came up: a production wants a reference before they hire you. Happy to help. Tell me what to lean on.\n\n{them}']],
   credit: ['About the credit', 'Hi {me},\n\nAwkward one. Someone above us is claiming your work on the last job as theirs. I thought you\'d want to know before it gets into the trades.\n\n{them}'],
   scoop: ['Before it\'s posted', 'Hi {me},\n\n{film} is about to post a job that suits you. If you want it, say so today and I\'ll put your name in first.\n\n{them}']
 };
 function sigOf(q) { return `${q.name}${q.role ? ' (' + (ROLE_LABEL[q.role] || '').toLowerCase() + ')' : ''}`; }
 function stakeMail(id, k) {
-  const M = S.me, q = P(id), f = theirActive(id), [subj, body] = MAIL_STAKES[k];
+  const M = S.me, q = P(id), f = theirActive(id), [subj, body0] = MAIL_STAKES[k], body = Array.isArray(body0) ? pickLine(body0, id + S.week) : body0;
   mail('offers', sigOf(q), subj, body.replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]).replace('{film}', f ? f.title : 'my next film'), { k: 'opt', kind: 'stake', stake: k, id, opts: Object.entries(STAKES[k].opts) });
   return true;
 }

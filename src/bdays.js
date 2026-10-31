@@ -8,7 +8,7 @@ function bdayWeek() {
   // last week's birthdays: did you remember?
   for (const id of Object.keys(M.bdayDue || {}).map(Number)) { const d = M.bdayDue[id]; if (S.week - d.w >= 1) { if (!d.done && IC.has(id) && P(id)) { addTie(me, P(id), -3); if (typeof remember === 'function') remember(id, -2, 'Forgot their birthday'); } delete M.bdayDue[id]; } }
   for (const id of bdayPeople()) if (bday(id) === k && !(M.bdayDue || {})[id]) { (M.bdayDue = M.bdayDue || {})[id] = { w: S.week };
-    inbox('bday', `${P(id).name.split(' ')[0]}'s birthday`, `It's ${P(id).name}'s birthday this week.${IC.has(id) ? ' They\'re in your inner circle: they\'ll notice either way.' : ''}${(M.bz || []).some(x => !x.sold && !x.used && (BZ_BY[x.k] || {}).gift) ? ' You have a gift you could give (Bazaar → Yours): this week it counts double.' : ''}`, { person: id, choices: [{ k: 'bd_text', label: 'Send a birthday text' }, { k: 'bd_call', label: 'Call them' }, { k: 'bd_skip', label: 'Let it pass' }] }); }
+    inbox('bday', `${P(id).name.split(' ')[0]}'s birthday`, `${bdayLine(id)}${IC.has(id) ? ' ' + pickLine(['They\'re in your inner circle: they\'ll notice either way.', 'You\'re close enough that silence would say something.', 'They\'d never ask, but they\'ll remember who remembered.', 'Close friends keep score on days like this, whether they mean to or not.'], id * 3 + S.year) : ''}${(M.bz || []).some(x => !x.sold && !x.used && (BZ_BY[x.k] || {}).gift) ? ' You have a gift you could give (Bazaar → Yours): this week it counts double.' : ''}`, { person: id, choices: [{ k: 'bd_text', label: 'Send a birthday text' }, { k: 'bd_call', label: 'Call them' }, { k: 'bd_skip', label: 'Let it pass' }] }); }
 }
 function bdayPick(it, k) {
   if (it.kind !== 'bday') return false; it.done = true; const M = S.me, me = ME(), id = it.person, q = P(id); if (!q) return true; const d = (M.bdayDue || {})[id];
@@ -21,3 +21,15 @@ function bdayPick(it, k) {
 { const _ga = giftAct; giftAct = function (a) { const M = S.me, me = ME(), q = P(a.to), before = q ? (me.ties[a.to] || 0) : 0, ok = _ga(a); if (ok && q && (M.bdayDue || {})[a.to] && S.week - M.bdayDue[a.to].w < 1) { const gain = (me.ties[a.to] || 0) - before; if (gain > 0) addTie(me, q, gain); M.bdayDue[a.to].done = 1; diary(`On ${q.name.split(' ')[0]}'s birthday, too.`); } return ok; }; }
 // birthdays coming up go in the strip under your name
 { const _hn = typeof hpNext === 'function' ? hpNext : null; if (_hn) hpNext = function () { const L = _hn(), k = woy(); const b = bdayPeople().map(id => [id, (bday(id) - k + 52) % 52]).filter(x => x[1] <= 1).sort((a, b) => a[1] - b[1])[0]; if (b && L.length < 5) L.splice(Math.min(2, L.length), 0, { i: '🎂', t: `${P(b[0]).name.split(' ')[0]}'s birthday ${b[1] ? 'next week' : 'this week'}`, go: 'computer:bazaar' }); return L.slice(0, 4); }; }
+
+// a birthday told a few different ways: their age, how long you've known them, what they're up to
+function bdayLine(id) {
+  const p = P(id), first = p.name.split(' ')[0], age = typeof ageOf === 'function' ? ageOf(p) : null, k = S.me.known[id], yrs = k ? Math.floor((S.week - (k.met || S.week)) / 52) : 0;
+  const busy = p.busy >= S.week ? pickLine(['They\'re working through it.', 'They\'re on a job all week, so it\'ll be a late celebration.', 'They\'re stuck on set for it.'], id + S.year) : '';
+  return pickLine([
+    `It's ${p.name}'s birthday this week.`,
+    age ? `${first} turns ${age} this week.` : `${first} has a birthday this week.`,
+    yrs >= 1 ? `${first}'s birthday is this week: the ${yrs === 1 ? 'first' : yrs === 2 ? 'second' : 'next'} one since you met.` : `${first}'s birthday is this week, your first since you met.`,
+    `${first} is having a birthday this week${age && age % 10 === 0 ? ', a big one' : ''}.`
+  ], id * 7 + S.year) + (busy ? ' ' + busy : '');
+}

@@ -17729,15 +17729,17 @@ function mailWeek() {
     const L = MEDIA_COS.filter((c, i) => c.type === 'label' && c.f <= S.year && (typeof mhOpen !== 'function' || mhOpen(i))), lab = L[Math.floor(r() * L.length)], adv = Math.round(usd(streams > 200000 ? 60000 : streams > 60000 ? 20000 : 6000) / 500) * 500;
     mail('offers', `A&R, ${lab.n}`, 'We\'d like to sign you', `We've been listening. We'd like to offer a record deal: an advance of ${fmtCash(adv)}, recoupable against your royalties, and our promotion behind your next releases. Your share per stream drops, but far more people will hear you. Think about it.`, { k: 'label', lab: lab.n, adv });
   }
-  if (fol('spinly') >= 500 && r() < .3) { const fee = Math.round(usd(clamp(fol('spinly') / 20, 120, 4000)) / 10) * 10; mail('offers', 'Bookings, The Velvet Room', 'Can you play a show?', `We have a slot on a Friday. ${fmtCash(fee)} guarantee, you keep your merch money.`, { k: 'gig', fee }); }
-  if (fol('podhaus') >= 300 && r() < .25) mail('offers', 'Producer, a bigger show', 'Guest spot on our podcast?', 'We love your show and think our listeners would too. An hour, remote is fine.', { k: 'guest' });
+  if (fol('spinly') >= 500 && r() < .3) { const fee = Math.round(usd(clamp(fol('spinly') / 20, 120, 4000)) / 10) * 10; { const v = pickLine(['The Velvet Room', 'The Lantern', 'Basement 9', 'The Old Ballroom', 'Halfway House', 'The Mill', 'Club Sundial'], S.week), day = pickLine(['Friday', 'Thursday', 'Saturday', 'Wednesday'], S.week + 3);
+    mail('offers', `Bookings, ${v}`, pickLine(['Can you play a show?', `A ${day} slot at ${v}?`, 'Gig offer', `Supporting slot, ${day}`], S.week + 1), pickLine([`We have a slot on a ${day}. ${fmtCash(fee)} guarantee, you keep your merch money.`, `Our ${day} opener dropped out. ${fmtCash(fee)} and a rider that is mostly crisps.`, `We'd love you for a ${day} night. ${fmtCash(fee)} flat, doors at eight, you keep the merch.`], S.week + 2), { k: 'gig', fee }); } }
+  if (fol('podhaus') >= 300 && r() < .25) { const sh = pickLine(['Night Shift Talk', 'The Long Table', 'Overheard', 'Second Draft', 'Small Hours', 'The Green Room Pod', 'Off Book'], S.week + 5); mail('offers', `Producer, ${sh}`, pickLine([`Guest spot on ${sh}?`, 'Come on our podcast?', `${sh} would love an hour of you`], S.week + 6), pickLine(['We love your show and think our listeners would too. An hour, remote is fine.', 'Our listeners keep asking about you. One conversation, no prep, we edit out the ums.', 'We do one long interview a week. Yours would be the one everyone shares.'], S.week + 7), { k: 'guest' }); }
   if (fol('vidwire') + fol('blip') >= 2000 && r() < .25) { const N = NAMES[HUBS[M.hub].lang] || NAMES.en; mail('offers', `${N.F[Math.floor(r() * N.F.length)]} ${N.L[Math.floor(r() * N.L.length)]} (creator)`, 'Collab?', 'Big fan. Want to make something together? I\'ll bring my audience, you bring yours.', { k: 'collab' }); }
   const play = (M.works || []).find(w => w.plat === 'stage' && w.q >= 70 && S.week - w.rel === 3);
   if (play) mail('offers', 'Literary department, a regional theatre', `About ${play.title}`, 'Someone from our team saw your play. We\'d love to read whatever you write next, and we have a small commissioning fund.', { k: 'commission', fee: Math.round(usd(2500) / 10) * 10 });
   { const ids = Object.keys(M.known).map(Number).filter(id => !P(id).dead && opinion(id) > 5 && !P(id).player); if (ids.length && r() < .22) { const id = ids[Math.floor(r() * ids.length)], q = P(id), F = FAVOURS[Math.floor(r() * FAVOURS.length)]; mail('inbox', `${q.name} (${ROLE_LABEL[q.role].toLowerCase()})`, F[0], F[1].replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]), { k: 'favour', id }); } }
   if (typeof endorseWeek === 'function') endorseWeek();
   if (typeof chatterMailWeek === 'function') chatterMailWeek(r);
-  if (S.week % 4 === 2) mail('news', 'Your bank', 'Your monthly statement', `Balance: ${fmtCash(M.cash)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : 'Thank you for banking with us.'}`);
+  if (S.week % 4 === 2) { const L = (M.ledger || []).slice(-4), ins = L.filter(x => x.d > 0).reduce((t, x) => t + x.d, 0), outs = L.filter(x => x.d < 0).reduce((t, x) => t - x.d, 0), net = ins - outs;
+    mail('news', 'Your bank', `${MON[Math.floor((S.week % 52) / 4.34) % 12]} statement: ${net >= 0 ? 'up' : 'down'} ${fmtCash(Math.abs(net))}`, `Balance: ${fmtCash(M.cash)}. In over the last four weeks: ${fmtCash(ins)}. Out: ${fmtCash(outs)}. ${M.cash < 0 ? 'You are overdrawn. Fees apply.' : net < 0 && M.cash < outs * 2 ? 'At this rate the account runs dry in about ' + Math.max(1, Math.round(M.cash / Math.max(1, outs) * 4)) + ' weeks.' : net > 0 ? 'A good month.' : 'Steady.'}`); }
 }
 const FAVOURS = [
   ['Could you read something?', 'Hi {me}, I\'ve finished a draft and I trust your eye more than anyone\'s. Would you read it and tell me the truth? Twenty pages. {them}'],
@@ -20584,13 +20586,16 @@ function pendingStakes() { return (S.me.phone || []).filter(m => m.topic === 'st
 // email has reply buttons; leave one unanswered for a fortnight and the sender draws their own conclusions.
 const MAIL_STAKES = {
   collab: ['Your next job?', 'Hi {me},\n\nI\'m putting a team together for {film} and I want you on it. Before I go to the agencies: are you in?\n\n{them}'],
-  reference: ['Reference request', 'Hi {me},\n\nA production office just asked me for a reference on you. I\'m happy to give one. How hard do you want me to sell you?\n\n{them}'],
+  reference: ['Reference request', ['Hi {me},\n\nA production office just asked me for a reference on you. I\'m happy to give one. How hard do you want me to sell you?\n\n{them}',
+    'Hi {me},\n\nGot a call about you today, someone checking references before an offer. What do you want me to tell them?\n\n{them}',
+    '{me},\n\nA line producer rang asking what you\'re like to work with. I said I\'d call back. Glowing, honest, or somewhere in between?\n\n{them}',
+    'Hi {me},\n\nYour name came up: a production wants a reference before they hire you. Happy to help. Tell me what to lean on.\n\n{them}']],
   credit: ['About the credit', 'Hi {me},\n\nAwkward one. Someone above us is claiming your work on the last job as theirs. I thought you\'d want to know before it gets into the trades.\n\n{them}'],
   scoop: ['Before it\'s posted', 'Hi {me},\n\n{film} is about to post a job that suits you. If you want it, say so today and I\'ll put your name in first.\n\n{them}']
 };
 function sigOf(q) { return `${q.name}${q.role ? ' (' + (ROLE_LABEL[q.role] || '').toLowerCase() + ')' : ''}`; }
 function stakeMail(id, k) {
-  const M = S.me, q = P(id), f = theirActive(id), [subj, body] = MAIL_STAKES[k];
+  const M = S.me, q = P(id), f = theirActive(id), [subj, body0] = MAIL_STAKES[k], body = Array.isArray(body0) ? pickLine(body0, id + S.week) : body0;
   mail('offers', sigOf(q), subj, body.replace('{me}', ME().name.split(' ')[0]).replace('{them}', q.name.split(' ')[0]).replace('{film}', f ? f.title : 'my next film'), { k: 'opt', kind: 'stake', stake: k, id, opts: Object.entries(STAKES[k].opts) });
   return true;
 }
@@ -25584,7 +25589,7 @@ function extraPersonTrivia(p) {
 // the short festivals select and crown the work of young filmmakers, many of whom go on to direct the features you
 // know, so every director's page can show where they started.
 PLATFORMS.circuit = { name: 'The festival circuit', icon: '🎞️', unit: 'screenings', from: 1900, pay: 0, gate: 0, d: 'Short-film festivals: fees to apply, no money to speak of, and the people who hire directors in the audience.' };
-WORK_TYPES.short = { label: 'Short film', icon: '🎬', subs: ['vstory', 'dact', 'comp'], need: 14, plat: 'circuit', field: 'film', base: 0, eng: 0, conv: 0, cost: 1800, d: 'Write, shoot and cut a film under twenty minutes, on favours and pizza. A year on the festival circuit, then online.' };
+WORK_TYPES.short = { label: 'Short film', icon: '🎬', subs: ['vstory', 'dact', 'comp'], need: 36, plat: 'circuit', field: 'film', base: 0, eng: 0, conv: 0, cost: 1800, d: 'Write, shoot and cut a film under twenty minutes, on favours and pizza. A year on the festival circuit, then online.' };
 DECAY.short = .6;
 // [key, name, hub, founded, tier, kind, month (0-11), Oswald-qualifying, top prize]
 const SHORT_FESTS = [
@@ -34917,8 +34922,10 @@ const LABS = [
 ];
 const LAB_BY = {}; for (const L of LABS) LAB_BY[L[0]] = L;
 function labOpen(L) { const wy = S.week % 52; return wy >= L[4] && wy < L[4] + 4; }
-function labFits(L) { const me = ME(); return !L[3] || L[3].includes(me.role); }
-function labDC(L) { return clamp(L[7] - Math.floor(careerLevel() / 2) - ((S.me.gigs || []).filter(g => g.q >= 70).length >= 2 ? 1 : 0), 6, 20); }
+// a lab takes you once: alumni don't apply again
+function labFits(L) { const me = ME(); return (!L[3] || L[3].includes(me.role)) && !(S.me.labs || []).some(x => x.k === L[0]); }
+// Labs are selective: a newcomer rarely gets in, a working professional with good recent work about two times in five.
+function labDC(L) { return clamp(L[7] + 5 - Math.floor(careerLevel() / 3) - ((S.me.gigs || []).filter(g => g.q >= 70).length >= 2 ? 1 : 0), 8, 22); }
 function labApply(k) {
   const M = S.me, L = LAB_BY[k]; if (!L || !labOpen(L) || !labFits(L) || M.lab) return false;
   const tried = M.labTried = M.labTried || {}; if (tried[k] !== undefined && S.week - tried[k] < 40) return false;
@@ -43207,7 +43214,7 @@ function bdayWeek() {
   // last week's birthdays: did you remember?
   for (const id of Object.keys(M.bdayDue || {}).map(Number)) { const d = M.bdayDue[id]; if (S.week - d.w >= 1) { if (!d.done && IC.has(id) && P(id)) { addTie(me, P(id), -3); if (typeof remember === 'function') remember(id, -2, 'Forgot their birthday'); } delete M.bdayDue[id]; } }
   for (const id of bdayPeople()) if (bday(id) === k && !(M.bdayDue || {})[id]) { (M.bdayDue = M.bdayDue || {})[id] = { w: S.week };
-    inbox('bday', `${P(id).name.split(' ')[0]}'s birthday`, `It's ${P(id).name}'s birthday this week.${IC.has(id) ? ' They\'re in your inner circle: they\'ll notice either way.' : ''}${(M.bz || []).some(x => !x.sold && !x.used && (BZ_BY[x.k] || {}).gift) ? ' You have a gift you could give (Bazaar → Yours): this week it counts double.' : ''}`, { person: id, choices: [{ k: 'bd_text', label: 'Send a birthday text' }, { k: 'bd_call', label: 'Call them' }, { k: 'bd_skip', label: 'Let it pass' }] }); }
+    inbox('bday', `${P(id).name.split(' ')[0]}'s birthday`, `${bdayLine(id)}${IC.has(id) ? ' ' + pickLine(['They\'re in your inner circle: they\'ll notice either way.', 'You\'re close enough that silence would say something.', 'They\'d never ask, but they\'ll remember who remembered.', 'Close friends keep score on days like this, whether they mean to or not.'], id * 3 + S.year) : ''}${(M.bz || []).some(x => !x.sold && !x.used && (BZ_BY[x.k] || {}).gift) ? ' You have a gift you could give (Bazaar → Yours): this week it counts double.' : ''}`, { person: id, choices: [{ k: 'bd_text', label: 'Send a birthday text' }, { k: 'bd_call', label: 'Call them' }, { k: 'bd_skip', label: 'Let it pass' }] }); }
 }
 function bdayPick(it, k) {
   if (it.kind !== 'bday') return false; it.done = true; const M = S.me, me = ME(), id = it.person, q = P(id); if (!q) return true; const d = (M.bdayDue || {})[id];
@@ -43220,6 +43227,18 @@ function bdayPick(it, k) {
 { const _ga = giftAct; giftAct = function (a) { const M = S.me, me = ME(), q = P(a.to), before = q ? (me.ties[a.to] || 0) : 0, ok = _ga(a); if (ok && q && (M.bdayDue || {})[a.to] && S.week - M.bdayDue[a.to].w < 1) { const gain = (me.ties[a.to] || 0) - before; if (gain > 0) addTie(me, q, gain); M.bdayDue[a.to].done = 1; diary(`On ${q.name.split(' ')[0]}'s birthday, too.`); } return ok; }; }
 // birthdays coming up go in the strip under your name
 { const _hn = typeof hpNext === 'function' ? hpNext : null; if (_hn) hpNext = function () { const L = _hn(), k = woy(); const b = bdayPeople().map(id => [id, (bday(id) - k + 52) % 52]).filter(x => x[1] <= 1).sort((a, b) => a[1] - b[1])[0]; if (b && L.length < 5) L.splice(Math.min(2, L.length), 0, { i: '🎂', t: `${P(b[0]).name.split(' ')[0]}'s birthday ${b[1] ? 'next week' : 'this week'}`, go: 'computer:bazaar' }); return L.slice(0, 4); }; }
+
+// a birthday told a few different ways: their age, how long you've known them, what they're up to
+function bdayLine(id) {
+  const p = P(id), first = p.name.split(' ')[0], age = typeof ageOf === 'function' ? ageOf(p) : null, k = S.me.known[id], yrs = k ? Math.floor((S.week - (k.met || S.week)) / 52) : 0;
+  const busy = p.busy >= S.week ? pickLine(['They\'re working through it.', 'They\'re on a job all week, so it\'ll be a late celebration.', 'They\'re stuck on set for it.'], id + S.year) : '';
+  return pickLine([
+    `It's ${p.name}'s birthday this week.`,
+    age ? `${first} turns ${age} this week.` : `${first} has a birthday this week.`,
+    yrs >= 1 ? `${first}'s birthday is this week: the ${yrs === 1 ? 'first' : yrs === 2 ? 'second' : 'next'} one since you met.` : `${first}'s birthday is this week, your first since you met.`,
+    `${first} is having a birthday this week${age && age % 10 === 0 ? ', a big one' : ''}.`
+  ], id * 7 + S.year) + (busy ? ' ' + busy : '');
+}
 // </bdays>
 // <depth3>
 // ---------------- Convictions, junkets, post-mortems and a scrapbook ----------------
@@ -44438,7 +44457,8 @@ function stageWeek() {
   for (const w of (M.works || []).filter(x => x.run && x.run.open)) {
     const R0 = w.run; R0.wk++;
     w.fill = clamp((w.fill || .5) + (w.q - 62) / 300 - R0.wk * .004 + pgauss() * .05, .05, 1);
-    const sold = Math.round(R0.seats * 8 * w.fill), gross = sold * R0.price, cost = R0.seats * 8 * R0.price * .42, net = Math.round((gross - cost) * .6);
+    // the writer's cut: a royalty on the box office and a share of any profit; a losing week costs them a little of their stake
+    const sold = Math.round(R0.seats * 8 * w.fill), gross = sold * R0.price, cost = R0.seats * 8 * R0.price * .42, prof = gross - cost, net = Math.round(gross * .08 + (prof > 0 ? prof * .15 : prof * .25));
     M.cash += net > 0 ? net - taxOn(net) : net; w.earned = (w.earned || 0) + net; w.units = (w.units || 0) + sold;
     R0.low = w.fill < .7 ? R0.low + 1 : 0; R0.high = w.fill >= .9 ? R0.high + 1 : 0;
     if (R0.high >= 3 && !R0.ext && !pending().some(x => x.kind === 'stageext')) { R0.ext = 1;
@@ -45198,6 +45218,8 @@ if (typeof DREAMS !== 'undefined') for (const d of [
   { k: 'warmup', label: 'Studio warm-up comic', role: 'actor', field: 'stage', grp: 'Stage', core: [/^(Theatre|Theater\/Live Events|Television)/, /\b(warm-?up|audience|comed\w*|host)\b/i] },
   { k: 'caster', label: 'Esports caster', role: 'actor', field: 'creator', grp: 'Online', core: [/^(Video Game|Online video|Content Creator)/, /\b(cast\w*|host|commentat\w*|stream\w*|esports?)\b/i] }
 ]) if (!DREAMS.some(x => x.k === d.k)) DREAMS.push(d);
+// the lookup table was built before these were added: register them too, or choosing one of these dreams silently fails
+if (typeof DREAM_BY !== 'undefined') for (const d of DREAMS) if (!DREAM_BY[d.k]) DREAM_BY[d.k] = d;
 if (typeof DREAM_GIGS !== 'undefined') Object.assign(DREAM_GIGS, { drag: ['club', 'special', 'residency', 'webser'], promoter: ['club', 'festset', 'concert'], themepark: ['club', 'spot', 'stage'], warmup: ['taping', 'multicam', 'club'], caster: ['webser', 'audio', 'spot'] });
 // </improv>
 // <houses>

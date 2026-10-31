@@ -39,3 +39,6 @@ console.log('\n== OPINIONS (how many players said it)');
 const O = {}; for (const r of R) for (const o of r.opinions) { const k = o.replace(/\d+/g, '#'); (O[k] = O[k] || []).push(r.idx); }
 for (const [k, L] of Object.entries(O).sort((a, b) => b[1].length - a[1].length).slice(0, 60)) console.log(`${String(L.length).padStart(3)}  ${k}`);
 console.log('\n== PRAISE'); const G = {}; for (const r of R) for (const o of r.praise) { const k = o.replace(/\d+/g, '#'); G[k] = (G[k] || 0) + 1; } for (const [k, n] of Object.entries(G).sort((a, b) => b[1] - a[1])) console.log(`${String(n).padStart(3)}  ${k}`);
+// apps: how often each app was still only an empty state (or broken) at the end of a career
+const AE = {}; for (const r of R) for (const [k, v] of Object.entries(r.appsEnd || {})) { const x = AE[k] = AE[k] || { n: 0, empty: 0, err: 0, len: 0 }; x.n++; if (v.empty) x.empty++; if (v.err) x.err++; x.len += v.len || 0; }
+if (Object.keys(AE).length) { console.log('\n== APPS AT THE END (players, still empty, errors, avg text)'); for (const [k, x] of Object.entries(AE).sort((a, b) => b[1].empty / b[1].n - a[1].empty / a[1].n)) console.log(`${k.padEnd(14)} ${String(x.n).padStart(4)} ${pct(x.empty / x.n).padStart(5)} ${x.err} ${Math.round(x.len / x.n)}`); }

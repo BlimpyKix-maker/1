@@ -187,8 +187,10 @@ const LABS = [
 ];
 const LAB_BY = {}; for (const L of LABS) LAB_BY[L[0]] = L;
 function labOpen(L) { const wy = S.week % 52; return wy >= L[4] && wy < L[4] + 4; }
-function labFits(L) { const me = ME(); return !L[3] || L[3].includes(me.role); }
-function labDC(L) { return clamp(L[7] - Math.floor(careerLevel() / 2) - ((S.me.gigs || []).filter(g => g.q >= 70).length >= 2 ? 1 : 0), 6, 20); }
+// a lab takes you once: alumni don't apply again
+function labFits(L) { const me = ME(); return (!L[3] || L[3].includes(me.role)) && !(S.me.labs || []).some(x => x.k === L[0]); }
+// Labs are selective: a newcomer rarely gets in, a working professional with good recent work about two times in five.
+function labDC(L) { return clamp(L[7] + 5 - Math.floor(careerLevel() / 3) - ((S.me.gigs || []).filter(g => g.q >= 70).length >= 2 ? 1 : 0), 8, 22); }
 function labApply(k) {
   const M = S.me, L = LAB_BY[k]; if (!L || !labOpen(L) || !labFits(L) || M.lab) return false;
   const tried = M.labTried = M.labTried || {}; if (tried[k] !== undefined && S.week - tried[k] < 40) return false;

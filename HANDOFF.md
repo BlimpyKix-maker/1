@@ -333,6 +333,54 @@ The player should feel like an executive with a trading desk: a lot of informati
 - **Information is an edge, not an answer.** Tracking is noisy (±15%) and blind to quality, legs and weather. The market is beatable by reading it, not by clicking it: in testing, random trading lost about $280k over two years and trading the tracking gap averaged about +$180k, with large swings.
 - **Determinism.** World `rnd()`, player `prnd()`, rendering and forecasts `hashRand`. New forecasts must never draw from `rnd()` (futures and `whyPanel` read only).
 
+## Round 32: the playtest troupe
+
+The request: a large playtest group of many player types, exploring every career, creative, school and festival path, finding bugs and saying what could be better.
+
+**The troupe** (`tools/troupe.js`, report `tools/troupe-report.js`) has 114 players.
+- **Who plays:**
+  - one per dream (all 62);
+  - each school route (5 programmes and 9 university programmes);
+  - 8 festival and short-circuit players;
+  - 10 competition players;
+  - 9 lab players;
+  - broke and trust-fund players;
+  - drifters who click anything.
+- **Play styles:** grinder, social, maker, scholar, festival, contester, mogul, drifter, cautious, switcher.
+- **How they play:** every move goes through `doAct`, as clicks do. They live four years each.
+- **What they record:**
+  - every action and how often the game said no ("nothing to do" isn't counted);
+  - thrown errors, crashed apps and pages, stuck weeks, NaN stats;
+  - level, credits, cash and ladder rung per year;
+  - festival, short, competition, lab and school results;
+  - quiet weeks, decisions per week and repeated messages;
+  - which apps are still only an empty state at the end.
+- **Opinions:** each player turns all this into complaints and praise.
+- **Money trace:** `MONEY=1` credits every change to cash to the function that made it.
+
+Run it with:
+`seq 0 113 | xargs -P 4 -I{} node tools/troupe.js {} 4 <dir>`, then `node tools/troupe-report.js <dir>`.
+
+What it found, and what changed:
+- **Freeze:** finishing the Creator Accelerator, Song Camp, Showcase or the podcast fellowship without ever having followers threw inside the week and froze it. `M.fol` is now always an object (a `doAct` guard, and in `labWeek`).
+- **Seven dreams were broken:** improv, sketch, drag, promoter, theme park, warm-up and caster were added to `DREAMS` after `DREAM_BY` was built, so choosing them silently failed. `src/improv.js` now registers them.
+- **Labs were nearly automatic** (70 of 71 players got in, some to the same lab three times). The DC is now `L[7] + 5 − level/3` (8–22), and alumni can't reapply to a lab they finished.
+- **Stage plays paid the writer like a producer** (60% of profit); one writer made $180k in three years from plays alone. It is now an 8% royalty plus 15% of profit, and a quarter of any loss.
+- **Shorts took three or four weeks**; festival players made about 45 in four years. `need` went from 14 to 36 (two or three months).
+- **Repetition:**
+  - The monthly statement now names the month and says how much came in and went out.
+  - Birthdays have several phrasings (age, how long you've known them, busy on set).
+  - Gig offers have venues and days, and podcast-guest offers have shows.
+  - Reference-request emails have four versions.
+- **Earlier the same round:** the Clapgram crash (a nameless author) and the Streamboard guide crash.
+
+What held up:
+- No quiet weeks for any style, with about five real decisions a week.
+- Every school route graduates people.
+- Feature festivals select about 14% of submissions; competitions give about 6% wins.
+- Every field's ladder moves.
+- Nobody went broke for long, and nobody's game ended.
+
 ## Round 31: a still, close-up character instead of the room
 
 The request: drop the walking room and set dressing, and put the focus on a sleek avatar whose face, features and accessories are clear and thoughtfully designed.

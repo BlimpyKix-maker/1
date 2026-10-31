@@ -53,9 +53,11 @@ r(`globalThis.REC = [];
 const D = J(`JSON.stringify(DREAM_BY['${T.dream}'])`);
 r(`doAct({ t: 'create', c: Object.assign(ccDefaults(), { name: 'Troupe ${idx}', dream: '${T.dream}', role: '${D.role}', field: '${D.field}', wealth: '${T.wealth}', edu: '${T.edu}', hub: '${T.hub}', traits: ${JSON.stringify(TRAITS[idx % TRAITS.length])}, love: ['Drama', 'Comedy'] }) })`);
 r(`partyAuto()`);
+// MONEY=1: credit every change to the player's cash to the function that made it
+if (process.env.MONEY) r(`(() => { globalThis.MONEYLOG = {}; const M = S.me; let v = M.cash; Object.defineProperty(M, 'cash', { configurable: true, enumerable: true, get() { return v; }, set(n) { const d = n - v; if (d) { const st = String(new Error().stack).split(String.fromCharCode(10)).slice(2, 5).map(l => (l.match(/at ([\\w.$]+)/) || [])[1] || '?').join('<'); const k = (d > 0 ? '+ ' : '- ') + st; MONEYLOG[k] = (MONEYLOG[k] || 0) + d; } v = n; } }); })()`);
 const bugs = [], acts = {};
 // try an action: count the tries and the times the game said no
-const act = (label, code) => { const a = acts[label] = acts[label] || { n: 0, ok: 0 }; a.n++; try { const v = r(code); if (v !== false && v !== 'false' && v !== undefined && v !== 'undefined' && v !== null) a.ok++; return v; } catch (e) { bugs.push({ w: weekNow(), kind: 'throw', where: label, msg: e.message, stack: String(e.stack || '').split('\n').slice(1, 4).join(' | ') }); return false; } };
+const act = (label, code) => { const a = acts[label] = acts[label] || { n: 0, ok: 0 }; a.n++; try { const v = r(code); if (v === null || v === 'null') { a.n--; a.skip = (a.skip || 0) + 1; return v; } if (v !== false && v !== 'false' && v !== undefined && v !== 'undefined' && v !== null) a.ok++; return v; } catch (e) { bugs.push({ w: weekNow(), kind: 'throw', where: label, msg: e.message, stack: String(e.stack || '').split('\n').slice(1, 4).join(' | ') }); return false; } };
 const weekNow = () => { try { return +r('S.week'); } catch (e) { return -1; } };
 const pickChoice = it => { const L = (it.choices || []).filter(c => !c.dis); if (!L.length) return null;
   if (it.kind === 'offer') return (T.style === 'cautious' && rnd() < .3 ? L.find(c => c.k === 'no') : L.find(c => c.k === 'yes')) ?.k || L[0].k;
@@ -90,7 +92,7 @@ for (let w = 0; w < WEEKS; w++) {
   if (T.uni && w % 13 === 3 && !r('!!S.me.school')) act('school:' + T.uni, `(() => { S.me.cash = Math.max(S.me.cash, 0); const L = SCHOOLS.filter(s => progsAt(s).includes('${T.uni}') && s[5] <= S.year); const s = L.find(s => s[1] === S.me.hub) || L[0]; if (!s) return false; return doAct({ t: 'school', school: s[0], prog: '${T.uni}', craft: SCHOOL_PROGS['${T.uni}'].crafts[0] }); })()`);
   if (style === 'scholar' && !T.prog && !T.uni && w % 26 === 5 && !r('!!S.me.school')) act('enrol:short', `doAct({ t: 'enrol', prog: 'short', craft: MAIN[ME().role] })`);
   // labs: anyone may try when one opens; scholars and lab players always do
-  if ((T.labs || style === 'scholar' || style === 'festival' || rnd() < .25)) act('labapply', `(() => { const L = LABS.filter(l => labOpen(l) && labFits(l)); if (!L.length || S.me.lab) return null; return doAct({ t: 'labapply', k: L[0][0] }); })()`);
+  if ((T.labs || style === 'scholar' || style === 'festival' || rnd() < .25)) act('labapply', `(() => { const tr = S.me.labTried || {}; const L = LABS.filter(l => labOpen(l) && labFits(l) && !(tr[l[0]] !== undefined && S.week - tr[l[0]] < 40)); if (!L.length || S.me.lab) return null; return doAct({ t: 'labapply', k: L[0][0] }); })()`);
   // making work
   if (['maker', 'festival', 'contester', 'switcher'].includes(style) || rnd() < .15) {
     const pref = style === 'festival' ? ['short'] : workTypes;
@@ -148,6 +150,8 @@ const final = J(`JSON.stringify((() => { const M = S.me, me = ME(); const shorts
     school: M.school ? M.school.prog || M.school.at : null, schoolApps: Object.keys(M.schoolApp || {}).length,
     works: (M.works || []).map(w => w.type + (w.rel !== undefined ? '' : '(unreleased)')), fol: Math.round(M.fol || 0), company: M.company,
     milestones: (M.milestones || []).map(m => m.t || m.title || m), agent: !!M.agent, pdeals: (M.pdeals || []).map(d => d.k), dreamLog: (M.dreamLog || []).map(d => d.k) }; })())`);
+// what each app looks like at the end of the run: how much is in it, and whether it's only an empty state
+const appsEnd = J(`JSON.stringify((() => { const o = {}; for (const [k] of APPS) { try { UI.app = k; UI.osStack = []; UI.primer = {}; const s = computerPanel(), i = s.indexOf('os-body'), body = (i >= 0 ? s.slice(i) : s).replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' '); o[k] = { len: body.length, empty: /(nothing (here|yet)|no [a-z ]{0,30} yet|you haven't|none yet|start (a|your) career)/i.test(body) && body.length < 1500 }; } catch (e) { o[k] = { err: e.message }; } } UI.app = null; return o; })())`);
 const rec = J('JSON.stringify(REC.map(x => x.t))');
 // opinions: what this player would say, worked out from what happened to them
 const shape = t => String(t).replace(/\$?[\d,.]+[kKmM%]?/g, '#').replace(/\b[A-Z][a-z]+( [A-Z][a-z]+)*/g, '@').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -176,5 +180,6 @@ if (final.labs.done) good.push(`Got into ${final.labs.done} lab(s).`);
 if (final.shorts.sel || final.shorts.laurels) good.push(`Shorts selected or laurelled: ${final.shorts.sel + final.shorts.laurels}.`);
 if (final.fests.sel) good.push(`Festival selections: ${final.fests.sel}.`);
 const out = path.join(OUTDIR, `troupe-${idx}.json`);
-fs.writeFileSync(out, JSON.stringify({ idx, T, ms: Date.now() - t0, bugs, acts, snaps, final, quiet, decPW, broke, repeats, opinions: op, praise: good }, null, 1));
+const money = process.env.MONEY ? J('JSON.stringify(Object.entries(MONEYLOG).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).slice(0, 25))') : null;
+fs.writeFileSync(out, JSON.stringify({ idx, T, money, appsEnd, ms: Date.now() - t0, bugs, acts, snaps, final, quiet, decPW, broke, repeats, opinions: op, praise: good }, null, 1));
 console.log(`#${idx} ${T.dream}/${T.style}${T.prog ? '/' + T.prog : ''}${T.uni ? '/' + T.uni : ''}: ${bugs.length} bugs, level ${final.level}, ${Math.round((Date.now() - t0) / 1000)}s | ${op.slice(0, 3).join(' ')}`);
